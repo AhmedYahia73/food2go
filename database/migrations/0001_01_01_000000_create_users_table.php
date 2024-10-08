@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('phone')->unique();
             $table->string('image')->nullable();
             $table->string('password');
-            $table->float('wallet');
+            $table->float('wallet')->default(0);
             $table->boolean('status')->default(1);
             $table->timestamp('email_verified_at')->nullable(); 
             $table->rememberToken();

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('delivery_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained()->nullable()->onUpdate('cascade')->onDelete('set null');
-            $table->foreignId('deliveryman_id')->constrained('deliveries')->nullable()->onUpdate('cascade')->onDelete('set null');
+            $table->foreignId('order_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
+            $table->foreignId('deliveryman_id')->nullable()->constrained('deliveries')->onUpdate('cascade')->onDelete('set null');
             $table->datetime('time');
             $table->string('longitude');
             $table->string('latitude');

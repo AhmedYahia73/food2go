@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Branch extends Model
+class Branch extends Authenticatable
 { 
-    use HasFactory;
+    use HasFactory, HasApiTokens;
 
     protected $fillable = [
         'name',
@@ -34,4 +36,16 @@ class Branch extends Model
         'password',
         'remember_token',
     ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
 }
