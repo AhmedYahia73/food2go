@@ -24,6 +24,11 @@ class Admin extends Authenticatable
         'status',
         'email_verified_at',
     ];
+    protected $appends = ['role'];
+
+    public function getRoleAttribute(){
+        return 'admin';
+    }
 
     /**
      * The attributes that should be hidden for serialization.

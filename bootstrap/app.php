@@ -5,6 +5,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Middleware\AdminMiddleware;
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -19,8 +21,22 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'IsAdmin' => AdminMiddleware::class,
+        ]);
+         $middleware->redirectGuestsTo(function (Request $request) {
+            if (!$request->is('api/*')) {
+                return route('unauthorized');
+            } 
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ], 401);
+            }
+        });
     })->create();

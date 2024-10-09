@@ -28,6 +28,11 @@ class User extends Authenticatable
         'status',
         'email_verified_at',
     ];
+    protected $appends = ['role'];
+
+    public function getRoleAttribute(){
+        return 'customer';
+    }
 
     /**
      * The attributes that should be hidden for serialization.

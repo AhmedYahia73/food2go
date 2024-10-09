@@ -25,6 +25,11 @@ class Delivery extends Authenticatable
         'status',
         'email_verified_at',
     ];
+    protected $appends = ['role'];
+
+    public function getRoleAttribute(){
+        return 'delivery';
+    }
 
     /**
      * The attributes that should be hidden for serialization.
