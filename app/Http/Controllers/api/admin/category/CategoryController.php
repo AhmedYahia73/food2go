@@ -8,18 +8,22 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Category;
+use App\Models\Addon;
 
 class CategoryController extends Controller
 {
-    public function __construct(private Category $categories){}
+    public function __construct(private Category $categories, private Addon $addons){}
 
     public function view(){
         $categories = $this->categories
+        ->with('addons')
         ->orderBy('priority')
         ->get();
+        $addons = $this->addons->get();
 
         return response()->json([
             'categories' => $categories,
+            'addons' => $addons,
         ]);
     }
 

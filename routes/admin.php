@@ -7,6 +7,8 @@ use App\Http\Controllers\api\admin\order\OrderController;
 use App\Http\Controllers\api\admin\category\CategoryController;
 use App\Http\Controllers\api\admin\category\CreateCategoryController;
 
+use App\Http\Controllers\api\admin\addon\AddonController;
+
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/categories', 'categories');
@@ -23,6 +25,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::put('/update/{id}', 'modify'); 
             Route::delete('/delete/{id}', 'delete'); 
         });
+    });
+
+    Route::controller(AddonController::class)->prefix('addons')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/add', 'create');
+        Route::put('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 });
 

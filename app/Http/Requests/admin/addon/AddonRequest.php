@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\admin\category;
+namespace App\Http\Requests\admin\addon;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CategoryRequest extends FormRequest
+class AddonRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,10 +25,8 @@ class CategoryRequest extends FormRequest
     {
         return [
             'name' => ['required'],
-            'category_id' => ['exists:categories,id', 'nullable'],
-            'status' => ['required', 'boolean'],
-            'priority' => ['required', 'integer'],
-            'addons_id.*' => ['exists:addons,id']
+            'price' => ['required', 'numeric'],
+            'tax_id' => ['exists:taxes,id', 'nullable'],
         ];
     }
 
