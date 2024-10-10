@@ -18,6 +18,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::put('/status/{id}', 'status');
             Route::put('/priority/{id}', 'priority');
         });
+        Route::controller(CreateCategoryController::class)->group(function(){
+            Route::post('/add', 'create'); 
+            Route::put('/update/{id}', 'modify'); 
+            Route::delete('/delete/{id}', 'delete'); 
+        });
     });
 });
 
