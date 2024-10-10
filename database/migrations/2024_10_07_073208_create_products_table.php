@@ -27,7 +27,6 @@ return new class extends Migration
             $table->time('to')->nullable();
             $table->foreignId('discount_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
             $table->foreignId('tax_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
-            $table->string('tags')->nullable();
             $table->boolean('status')->default(1);
             $table->boolean('recommended')->default(1);
             $table->timestamps();

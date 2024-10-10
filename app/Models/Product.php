@@ -26,7 +26,6 @@ class Product extends Model
         'to',
         'discount_id',
         'tax_id',
-        'tags',
         'status',
         'recommended',
     ];
