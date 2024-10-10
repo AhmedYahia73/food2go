@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Addon;
+
 class Product extends Model
 {
     use HasFactory;
@@ -28,4 +30,8 @@ class Product extends Model
         'status',
         'recommended',
     ];
+
+    public function addons(){
+        return $this->belongsToMany(Addon::class, 'product_addon', 'product_id', 'addon_id');
+    }
 }

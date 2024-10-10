@@ -21,6 +21,7 @@ class Order extends Model
         'total_tax',
         'total_discount',
         'address',
+        'paid_by',
         // address {phone, floor, road, address, latitude, longitude}
     ];
 }
