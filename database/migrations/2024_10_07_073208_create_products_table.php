@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
-            $table->string('image');
+            $table->text('description')->nullable();
+            $table->string('image')->nullable();
             $table->foreignId('category_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
             $table->foreignId('sub_category_id')->nullable()->constrained('categories')->onUpdate('cascade')->onDelete('set null');
             $table->enum('item_type', ['online', 'offline', 'all']);
             $table->enum('stock_type', ['daily', 'unlimited', 'fixed']);
-            $table->integer('number'); // when stock_type => [daily, fixed]
+            $table->integer('number')->nullable(); // when stock_type => [daily, fixed]
             $table->float('price');
             $table->boolean('product_time_status');
             $table->time('from')->nullable();
