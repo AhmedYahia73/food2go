@@ -5,8 +5,9 @@ namespace App\Http\Requests\admin\customer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
-class CustomerRequest extends FormRequest
+class UpdateCustomerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,12 +24,14 @@ class CustomerRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->route('id');
         return [
             'f_name' => ['required'],
             'l_name' => ['required'],
-            'email' => ['email', 'required', 'unique:users,email'],
-            'phone' => ['required', 'unique:users,phone'],
+            'email' => ['email', 'required', Rule::unique('users')->ignore($userId)],
+            'phone' => ['required', Rule::unique('users')->ignore($userId)],
             'password' => ['required'],
+            'status' => ['required', 'boolean'],
         ];
     }
 
