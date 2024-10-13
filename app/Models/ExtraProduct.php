@@ -16,4 +16,8 @@ class ExtraProduct extends Model
         'variation_id',
         'extra_id',
     ];
+
+    public function parent_extra(){
+        return $this->belongsTo(ExtraProduct::class, 'extra_id');
+    }
 }

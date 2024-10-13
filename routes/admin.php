@@ -25,10 +25,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::prefix('product')->group(function(){
         Route::controller(ProductController::class)->group(function(){
             Route::get('/', 'view');
+            Route::get('/reviews', 'reviews');
         });
         Route::controller(CreateProductController::class)->group(function(){
             Route::post('/add', 'create'); 
-            Route::put('/update/{id}', 'modify'); 
+            Route::post('/update/{id}', 'modify'); 
             Route::delete('/delete/{id}', 'delete'); 
         });
     });
