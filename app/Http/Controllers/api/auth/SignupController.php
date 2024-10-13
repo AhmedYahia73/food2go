@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\api\auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 use App\Http\Requests\auth\SignupRequest;
 use App\Http\trait\image;
 

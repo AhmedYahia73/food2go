@@ -28,10 +28,14 @@ class User extends Authenticatable
         'status',
         'email_verified_at',
     ];
-    protected $appends = ['role'];
+    protected $appends = ['role', 'image_link'];
 
     public function getRoleAttribute(){
         return 'customer';
+    }
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
     }
 
     /**

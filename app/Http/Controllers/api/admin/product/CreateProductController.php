@@ -33,19 +33,20 @@ class CreateProductController extends Controller
         'tax_id',
         'status',
         'recommended',
+        'points',
     ];
     use image;
 
     public function create(ProductRequest $request){
         // Keys
         // name, description, category_id, sub_category_id, item_type, stock_type, number, price
-        // product_time_status, from, to, discount_id, tax_id, status, recommended, image
+        // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
         // excludes[][exclude_name]
         // extra[][extra_name], extra[][extra_price]
         // variations[][extra][][extra_name], variations[][extra][][extra_price], variations[][extra][][extra_id]
         // variations[][name] ,variations[][type] ,variations[][min] ,variations[][max]
-        // variations[][required]
+        // variations[][required], variations[][points]
         // variations[][options][][name], variations[][options][][price]
         $productRequest = $request->only($this->productRequest);
         if (is_file($request->image)) {
@@ -83,6 +84,7 @@ class CreateProductController extends Controller
                     'type' => $item['type'],
                     'min' => $item['min'] ?? null,
                     'max' => $item['max'] ?? null,
+                    'points' => $item['points'],
                     'required' => $item['required'],
                     'product_id' => $product->id,
                 ]); // add variation
@@ -116,13 +118,13 @@ class CreateProductController extends Controller
     public function modify(ProductRequest $request, $id){
         // Keys
         // name, description, category_id, sub_category_id, item_type, stock_type, number, price
-        // product_time_status, from, to, discount_id, tax_id, status, recommended, image
+        // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
         // excludes[][exclude_name]
         // extra[][extra_name], extra[][extra_price]
         // variations[][extra][][extra_name], variations[][extra][][extra_price], variations[][extra][][extra_id]
         // variations[][name] ,variations[][type] ,variations[][min] ,variations[][max]
-        // variations[][required]
+        // variations[][required], variations[][points]
         // variations[][options][][name], variations[][options][][price]
         $productRequest = $request->only($this->productRequest);
         $product = $this->products->
@@ -171,6 +173,7 @@ class CreateProductController extends Controller
                 ->create([
                     'name' => $item['name'],
                     'type' => $item['type'],
+                    'points' => $item['points'],
                     'min' => $item['min'] ?? null,
                     'max' => $item['max'] ?? null,
                     'required' => $item['required'],

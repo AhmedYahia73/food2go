@@ -31,6 +31,7 @@ class Product extends Model
         'tax_id',
         'status',
         'recommended',
+        'points',
     ];
 
     public function addons(){

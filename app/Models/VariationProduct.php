@@ -18,7 +18,8 @@ class VariationProduct extends Model
         'min',
         'max',
         'required',
-        'product_id'
+        'product_id',
+        'points',
     ];
 
     public function extra(){
