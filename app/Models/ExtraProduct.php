@@ -13,6 +13,7 @@ class ExtraProduct extends Model
         'name',
         'price',
         'product_id',
-        'variation_id'
+        'variation_id',
+        'extra_id',
     ];
 }

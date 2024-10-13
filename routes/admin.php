@@ -9,6 +9,9 @@ use App\Http\Controllers\api\admin\category\CreateCategoryController;
 
 use App\Http\Controllers\api\admin\addon\AddonController;
 
+use App\Http\Controllers\api\admin\product\ProductController;
+use App\Http\Controllers\api\admin\product\CreateProductController;
+
 use App\Http\Controllers\api\admin\settings\ExtraController;
 use App\Http\Controllers\api\admin\settings\ExcludeController;
 use App\Http\Controllers\api\admin\settings\TaxController;
@@ -17,6 +20,17 @@ use App\Http\Controllers\api\admin\settings\DiscountController;
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/categories', 'categories');
+    });
+    
+    Route::prefix('product')->group(function(){
+        Route::controller(ProductController::class)->group(function(){
+            Route::get('/', 'view');
+        });
+        Route::controller(CreateProductController::class)->group(function(){
+            Route::post('/add', 'create'); 
+            Route::put('/update/{id}', 'modify'); 
+            Route::delete('/delete/{id}', 'delete'); 
+        });
     });
     
     Route::prefix('category')->group(function(){
