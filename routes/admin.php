@@ -10,6 +10,8 @@ use App\Http\Controllers\api\admin\category\CreateCategoryController;
 use App\Http\Controllers\api\admin\addon\AddonController;
 
 use App\Http\Controllers\api\admin\customer\CustomerController;
+use App\Http\Controllers\api\admin\delivery\DeliveryController;
+use App\Http\Controllers\api\admin\branch\BranchController;
 
 use App\Http\Controllers\api\admin\product\ProductController;
 use App\Http\Controllers\api\admin\product\CreateProductController;
@@ -22,6 +24,20 @@ use App\Http\Controllers\api\admin\settings\DiscountController;
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/categories', 'categories');
+    });
+
+    Route::controller(BranchController::class)->prefix('branch')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(DeliveryController::class)->prefix('delivery')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(CustomerController::class)->prefix('customer')->group(function(){

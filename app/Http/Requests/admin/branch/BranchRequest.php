@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Requests\admin\delivery;
+namespace App\Http\Requests\admin\branch;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Rule;
 
-class UpdateDeliveryRequest extends FormRequest
+class BranchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,16 +23,17 @@ class UpdateDeliveryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route('id');
         return [
-            'f_name' => ['required'],
-            'l_name' => ['required'],
-            'identity_type' => ['required'],
-            'identity_number' => ['required'],
-            'email' => ['email', 'required', Rule::unique('deliveries')->ignore($userId)],
-            'phone' => ['required', Rule::unique('deliveries')->ignore($userId)],
+            'name' => ['required'],
+            'address' => ['required'],
+            'email' => ['required', 'email', 'unique:branches'],
+            'phone' => ['required', 'unique:branches'],
             'password' => ['required'],
-            'branch_id' => ['nullable', 'exists:branches,id'],
+            'food_preparion_time' => ['required'],
+            'status' => ['required'],
+            'latitude' => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
+            'coverage' => ['required'],
         ];
     }
 
