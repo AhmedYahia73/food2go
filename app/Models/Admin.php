@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+use App\Models\UserPosition;
+
 class Admin extends Authenticatable
 {
     use HasApiTokens, HasFactory;
@@ -50,5 +52,9 @@ class Admin extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function user_positions(){
+        return $this->belongsTo(UserPosition::class, 'user_position_id');
     }
 }
