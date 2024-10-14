@@ -28,8 +28,8 @@ class DeliveryRequest extends FormRequest
             'l_name' => ['required'],
             'identity_type' => ['required'],
             'identity_number' => ['required'],
-            'email' => ['required', 'email', 'exists:deliveries'],
-            'phone' => ['required', 'exists:deliveries'],
+            'email' => ['required', 'email', 'unique:deliveries'],
+            'phone' => ['required', 'unique:deliveries'],
             'password' => ['required'],
             'branch_id' => ['nullable', 'exists:branches,id'],
         ];

@@ -5,6 +5,7 @@ namespace App\Http\Requests\admin\delivery;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class UpdateDeliveryRequest extends FormRequest
 {
@@ -23,8 +24,16 @@ class UpdateDeliveryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->route('id');
         return [
-            //
+            'f_name' => ['required'],
+            'l_name' => ['required'],
+            'identity_type' => ['required'],
+            'identity_number' => ['required'],
+            'email' => ['email', 'required', Rule::unique('users')->ignore($userId)],
+            'phone' => ['required', Rule::unique('users')->ignore($userId)],
+            'password' => ['required'],
+            'branch_id' => ['nullable', 'exists:branches,id'],
         ];
     }
 
