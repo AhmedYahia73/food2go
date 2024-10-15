@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Branch;
+use App\Models\Customer;
+use App\Models\User;
+
 class Order extends Model
 {
     use HasFactory;
@@ -24,4 +28,16 @@ class Order extends Model
         'paid_by',
         // address {phone, floor, road, address, latitude, longitude}
     ];
+
+    public function customer(){
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
 }
