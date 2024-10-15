@@ -31,7 +31,15 @@ class User extends Authenticatable
         'email_verified_at',
         'points',
     ];
-    protected $appends = ['role', 'image_link'];
+    protected $appends = ['role', 'image_link', 'name', 'type'];
+
+    public function getNameAttribute(){
+        return $this->attributes['f_name'] . ' ' . $this->attributes['l_name'];
+    }
+
+    public function getTypeAttribute(){
+        return 'user';
+    }
 
     public function getRoleAttribute(){
         return 'customer';

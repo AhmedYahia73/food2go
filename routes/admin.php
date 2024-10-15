@@ -17,6 +17,9 @@ use App\Http\Controllers\api\admin\admin\AdminController;
 use App\Http\Controllers\api\admin\product\ProductController;
 use App\Http\Controllers\api\admin\product\CreateProductController;
 
+use App\Http\Controllers\api\admin\pos\PosOrderController;
+use App\Http\Controllers\api\admin\pos\PosSaleController;
+
 use App\Http\Controllers\api\admin\settings\ExtraController;
 use App\Http\Controllers\api\admin\settings\ExcludeController;
 use App\Http\Controllers\api\admin\settings\TaxController;
@@ -24,8 +27,7 @@ use App\Http\Controllers\api\admin\settings\DiscountController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
-        Route::get('/orders', 'orders');
-        Route::get('/categories', 'categories');
+        Route::get('/', 'orders');
     });
 
     Route::controller(AdminController::class)->prefix('admin')->group(function(){
@@ -54,6 +56,17 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::prefix('pos')->group(function(){
+        Route::controller(PosSaleController::class)->group(function(){
+            Route::get('/sale', 'sale');
+        });
+        Route::controller(PosOrderController::class)->group(function(){
+            Route::post('/add', 'create'); 
+            Route::post('/update/{id}', 'modify'); 
+            Route::delete('/delete/{id}', 'delete'); 
+        });
     });
     
     Route::prefix('product')->group(function(){

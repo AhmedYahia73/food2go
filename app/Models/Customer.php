@@ -13,4 +13,17 @@ class Customer extends Model
         'name',
         'phone',
     ];
+    protected $appends = ['type'];
+
+    public function getTypeAttribute(){
+        return 'customer';
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'id' => 'string',
+        ];
+    }
+
 }
