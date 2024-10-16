@@ -32,6 +32,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(AdminController::class)->prefix('admin')->group(function(){
         Route::get('/', 'view');
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
@@ -39,6 +40,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(BranchController::class)->prefix('branch')->group(function(){
         Route::get('/', 'view');
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
@@ -46,6 +48,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(DeliveryController::class)->prefix('delivery')->group(function(){
         Route::get('/', 'view');
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
@@ -54,6 +57,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(CustomerController::class)->prefix('customer')->group(function(){
         Route::get('/', 'view');
         Route::post('/add', 'create');
+        Route::put('/status/{id}', 'status');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
     });

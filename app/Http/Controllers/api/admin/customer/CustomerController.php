@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\customer\CustomerRequest;
 use App\Http\Requests\admin\customer\UpdateCustomerRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 use App\trait\image;
 
 use App\Models\User;
@@ -32,6 +34,34 @@ class CustomerController extends Controller
         return response()->json([
             'customers' => $customers,
         ]);
+    }
+
+    public function status(Request $request, $id){
+        // Keys
+        // status
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
+        $this->customers->where('id', $id)
+        ->update([
+            'status' => $request->status
+        ]);
+
+        if ($request->status == 0) {
+            return response()->json([
+                'success' => 'banned'
+            ]);
+        } else {
+            return response()->json([
+                'success' => 'active'
+            ]);
+        }
     }
 
     public function create(CustomerRequest $request)

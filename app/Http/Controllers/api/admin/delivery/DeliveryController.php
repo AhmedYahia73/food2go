@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\admin\delivery\DeliveryRequest;
 use App\Http\Requests\admin\delivery\UpdateDeliveryRequest;
 use App\trait\image;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Delivery;
 use App\Models\Branch;
@@ -36,6 +38,34 @@ class DeliveryController extends Controller
             'deliveries' => $deliveries,
             'branches' => $branches,
         ]);
+    }
+
+    public function status(Request $request, $id){
+        // Keys
+        // status
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
+        $this->deliveries->where('id', $id)
+        ->update([
+            'status' => $request->status
+        ]);
+
+        if ($request->status == 0) {
+            return response()->json([
+                'success' => 'banned'
+            ]);
+        } else {
+            return response()->json([
+                'success' => 'active'
+            ]);
+        }
     }
 
     public function create(DeliveryRequest $request){
