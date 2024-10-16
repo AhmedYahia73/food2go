@@ -12,5 +12,11 @@ class Offer extends Model
     protected $fillable = [
         'product',
         'points',
+        'image',
     ];
+    protected $appends = ['image_link'];
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
+    }
 }
