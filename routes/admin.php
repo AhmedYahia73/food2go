@@ -9,6 +9,8 @@ use App\Http\Controllers\api\admin\category\CreateCategoryController;
 
 use App\Http\Controllers\api\admin\addon\AddonController;
 
+use App\Http\Controllers\api\admin\point_offers\PointOffersController;
+
 use App\Http\Controllers\api\admin\customer\CustomerController;
 use App\Http\Controllers\api\admin\delivery\DeliveryController;
 use App\Http\Controllers\api\admin\branch\BranchController;
@@ -28,6 +30,13 @@ use App\Http\Controllers\api\admin\settings\DiscountController;
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/', 'orders');
+    });
+
+    Route::controller(PointOffersController::class)->prefix('offer')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(AdminController::class)->prefix('admin')->group(function(){
