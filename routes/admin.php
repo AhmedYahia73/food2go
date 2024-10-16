@@ -61,11 +61,10 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::prefix('pos')->group(function(){
         Route::controller(PosSaleController::class)->group(function(){
             Route::get('/sale', 'sale');
+            Route::post('/order_user/add', 'add_order_user');
         });
         Route::controller(PosOrderController::class)->group(function(){
-            Route::post('/add', 'create'); 
-            Route::post('/update/{id}', 'modify'); 
-            Route::delete('/delete/{id}', 'delete'); 
+            Route::get('/order', 'pos_orders');
         });
     });
     

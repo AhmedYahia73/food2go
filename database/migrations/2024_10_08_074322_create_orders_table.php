@@ -16,7 +16,6 @@ return new class extends Migration
             $table->datetime('date');
             $table->foreignId('user_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
             $table->foreignId('branch_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
-            $table->foreignId('customer_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null'); 
             $table->float('amount');
             $table->enum('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 
             'delivered', 'returned', 'faild_to_deliver', 'canceled', 'scheduled']);

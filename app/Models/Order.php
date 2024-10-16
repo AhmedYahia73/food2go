@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\User;
+use App\Models\Product;
+use App\Models\Addon;
 
 class Order extends Model
 {
@@ -15,7 +17,7 @@ class Order extends Model
 
     protected $fillable = [
         'date',
-        'customer_id',
+        'pos',
         'user_id',
         'branch_id',
         'amount',
@@ -39,5 +41,13 @@ class Order extends Model
 
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function products(){
+        return $this->belongsToMany(Product::class, 'order_product', 'order_id', 'product_id');
+    }
+
+    public function addons(){
+        return $this->belongsToMany(Addon::class, 'order_product', 'order_id', 'addon_id');
     }
 }
