@@ -33,6 +33,7 @@ use App\Http\Controllers\api\admin\settings\DiscountController;
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/', 'orders');
+        Route::put('/status/{id}', 'status');
     });
 
     Route::controller(PointOffersController::class)->prefix('offer')->group(function(){
