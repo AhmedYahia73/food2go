@@ -39,7 +39,8 @@ class CouponRequest extends FormRequest
             'number_usage_user' => ['numeric'],
             'discount_type' => ['required', 'in:value,percentage'],
             'discount' => ['required', 'numeric'],
-            'status' => ['required', 'boolean']
+            'status' => ['required', 'boolean'],
+            'products_id.*' => ['exists:products,id'],
         ];
     }
 

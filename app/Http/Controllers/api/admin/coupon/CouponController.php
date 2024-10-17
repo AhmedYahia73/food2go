@@ -15,6 +15,7 @@ class CouponController extends Controller
 
     public function view(){
         $coupons = $this->coupons
+        ->with('products')
         ->get();
 
         return response()->json([

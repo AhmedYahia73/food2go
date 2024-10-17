@@ -22,7 +22,7 @@ class SignupController extends Controller
     use image;
 
     public function signup(SignupRequest $request){
-        // backend.food2go.pro/api/user/auth/signup
+        // https://backend.food2go.pro/api/user/auth/signup
         // Keys
         // f_name, l_name, email, phone, password
         $data = $request->only($this->userRequest);

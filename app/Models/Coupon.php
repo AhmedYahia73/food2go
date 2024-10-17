@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Product;
+
 class Coupon extends Model
 {
     use HasFactory;
@@ -27,4 +29,8 @@ class Coupon extends Model
         'discount',
         'status',
     ];
+
+    public function products(){
+        return $this->belongsToMany(Product::class, 'product_coupon');
+    }
 }
