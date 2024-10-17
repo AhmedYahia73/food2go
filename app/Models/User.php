@@ -46,7 +46,7 @@ class User extends Authenticatable
     }
 
     public function getImageLinkAttribute(){
-        return url('storage/' . $this->attributes['image'] ?? null);
+        return  $this->attributes;
     }
 
     /**
