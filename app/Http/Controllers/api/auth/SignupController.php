@@ -27,6 +27,7 @@ class SignupController extends Controller
         // f_name, l_name, email, phone, password
         $data = $request->only($this->userRequest);
         $user = $this->user->create($data);
+        $user->image = null;
         $user->role = 'customer';
         $user->token = $user->createToken('customer')->plainTextToken;
 
