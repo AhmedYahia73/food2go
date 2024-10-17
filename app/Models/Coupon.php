@@ -26,6 +26,5 @@ class Coupon extends Model
         'discount_type',
         'discount',
         'status',
-        'limit',
     ];
 }

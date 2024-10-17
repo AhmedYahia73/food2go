@@ -29,7 +29,6 @@ return new class extends Migration
             $table->enum('discount_type', ['value', 'percentage']);
             $table->float('discount');
             $table->boolean('status')->default(1);
-            $table->integer('limit');
             $table->timestamps();
         });
     }
