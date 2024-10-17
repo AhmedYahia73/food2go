@@ -18,6 +18,9 @@ class LoginController extends Controller
     private Branch $branch){}
 
     public function admin_login(LoginRequest $request){
+        // backend.food2go.pro/api/admin/auth/login
+        // Keys
+        // email, password
         $user = $this->admin
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
@@ -46,6 +49,9 @@ class LoginController extends Controller
     }
     
     public function login(LoginRequest $request){
+        // backend.food2go.pro/api/user/auth/login
+        // Keys
+        // email, password
         $user = $this->delivery
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)

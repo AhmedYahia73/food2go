@@ -22,6 +22,9 @@ use App\Http\Controllers\api\admin\product\CreateProductController;
 use App\Http\Controllers\api\admin\pos\PosOrderController;
 use App\Http\Controllers\api\admin\pos\PosSaleController;
 
+use App\Http\Controllers\api\admin\coupon\CouponController;
+use App\Http\Controllers\api\admin\coupon\CreateCouponController;
+
 use App\Http\Controllers\api\admin\settings\ExtraController;
 use App\Http\Controllers\api\admin\settings\ExcludeController;
 use App\Http\Controllers\api\admin\settings\TaxController;
@@ -69,6 +72,18 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::put('/status/{id}', 'status');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::prefix('coupon')->group(function(){
+        Route::controller(CouponController::class)->group(function(){
+            Route::get('/', 'view');
+            Route::put('/status/{id}', 'status');
+        });
+        Route::controller(CreateCouponController::class)->group(function(){
+            Route::post('/add', 'create');
+            Route::post('/update/{id}', 'modify');
+            Route::delete('/delete/{id}', 'delete');
+        });
     });
     
     Route::prefix('pos')->group(function(){
