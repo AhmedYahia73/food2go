@@ -17,52 +17,52 @@ class OrderController extends Controller
         $orders = $this->orders
         ->where('pos', 0)
         ->where('order_type', 'delivery')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $pending = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'pending')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $confirmed = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'confirmed')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $processing = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'processing')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $out_for_delivery = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'out_for_delivery')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $delivered = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'delivered')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $returned = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'returned')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $faild_to_deliver = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'faild_to_deliver')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $canceled = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'canceled')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
         $scheduled = $this->orders
         ->where('pos', 0)
         ->where('order_status', 'scheduled')
-        ->with(['customer', 'user', 'branch'])
+        ->with(['customer', 'user', 'branch', 'delivery'])
         ->get();
 
         return response()->json([
@@ -99,6 +99,29 @@ class OrderController extends Controller
 
         return response()->json([
             'order_status' => $request->order_status
+        ]);
+    }
+
+    public function delivery(Request $request){        
+        // Keys
+        // delivery_id, order_id
+        $validator = Validator::make($request->all(), [
+            'delivery_id' => 'required|exists:deliveries,id',
+            'order_id' => 'required|exists:orders,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $order = $this->orders
+        ->where('id', $request->order_id)
+        ->update([
+            'delivery_id' => $request->delivery_id
+        ]);
+
+        return response()->json([
+            'success' => 'You select delivery success'
         ]);
     }
 }

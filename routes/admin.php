@@ -34,6 +34,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/', 'orders');
         Route::put('/status/{id}', 'status');
+        Route::put('/delivery', 'delivery');
     });
 
     Route::controller(PointOffersController::class)->prefix('offer')->group(function(){

@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Addon;
+use App\Models\Delivery;
 
 class Order extends Model
 {
@@ -28,11 +29,16 @@ class Order extends Model
         'total_discount',
         'address',
         'paid_by',
+        'delivery_id',
         // address {phone, floor, road, address, latitude, longitude}
     ];
 
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function delivery(){
+        return $this->belongsTo(Delivery::class, 'delivery_id');
     }
 
     public function user(){
