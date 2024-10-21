@@ -36,6 +36,7 @@ class HomeController extends Controller
     }
 
     public function favourite(Request $request, $id){
+        // https://backend.food2go.pro/customer/home/favourite/{id}
         // Keys
         // favourite
         $validator = Validator::make($request->all(), [
