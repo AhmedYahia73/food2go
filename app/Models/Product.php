@@ -49,4 +49,9 @@ class Product extends Model
     public function variations(){
         return $this->hasMany(VariationProduct::class, 'product_id');
     }
+
+    public function favourite_product(){
+        return $this->belongsToMany(User::class, 'favourit_product')
+        ->where('users.id', auth()->user()->id);
+    }
 }
