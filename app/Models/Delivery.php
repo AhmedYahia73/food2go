@@ -25,10 +25,14 @@ class Delivery extends Authenticatable
         'status',
         'email_verified_at',
     ];
-    protected $appends = ['role'];
+    protected $appends = ['role', 'image_link'];
 
     public function getRoleAttribute(){
         return 'delivery';
+    }
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
     }
 
     /**
