@@ -19,7 +19,7 @@ class HomeController extends Controller
         $categories = $this->categories
         ->with(['products' => function($query){
             $query->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations']);
-        }])
+        }, 'addons'])
         ->get();
         foreach ($categories as $category) {
             foreach ($category->products as $product) {
