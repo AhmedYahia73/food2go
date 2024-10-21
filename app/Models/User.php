@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 use App\Models\Order;
+use App\Models\Product;
 
 class User extends Authenticatable
 {
@@ -74,5 +75,9 @@ class User extends Authenticatable
 
     public function orders(){
         return $this->hasMany(Order::class, 'user_id');
+    }
+
+    public function favourite_product(){
+        return $this->belongsToMany(Product::class, 'favourit_product');
     }
 }
