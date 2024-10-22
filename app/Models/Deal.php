@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\DealTimes;
+
 class Deal extends Model
 {
     use HasFactory;
@@ -15,4 +17,8 @@ class Deal extends Model
         'description', 
         'price', 
     ];
+
+    public function times(){
+        return $this->hasMany(DealTimes::class, 'deal_id');
+    }
 }

@@ -9,6 +9,8 @@ use App\Http\Controllers\api\admin\category\CreateCategoryController;
 
 use App\Http\Controllers\api\admin\addon\AddonController;
 
+use App\Http\Controllers\api\admin\deal\DealController;
+
 use App\Http\Controllers\api\admin\point_offers\PointOffersController;
 
 use App\Http\Controllers\api\admin\customer\CustomerController;
@@ -39,6 +41,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(PointOffersController::class)->prefix('offer')->group(function(){
         Route::get('/', 'view');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    // Make Deal Module
+    Route::controller(DealController::class)->prefix('deal')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
