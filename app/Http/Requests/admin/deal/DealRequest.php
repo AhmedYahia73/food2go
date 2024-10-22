@@ -23,8 +23,13 @@ class DealRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            ''
+        return [ 
+            'title' => ['required'],
+            'price' => ['required', 'numeric'],
+            'status' => ['required', 'boolean'],
+            'times.*.day' => ['required'],
+            'times.*.from' => ['required'],
+            'times.*.to' => ['required'],
         ];
     }
 

@@ -7,12 +7,21 @@ use Illuminate\Http\Request;
 use App\Http\Requests\admin\deal\DealRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use App\trait\image;
 
 use App\Models\Deal;
+use App\Models\DealTimes;
 
 class DealController extends Controller
 {
-    public function __construct(private Deal $deals){}
+    public function __construct(private Deal $deals, private DealTimes $deal_times){}
+    protected $dealRequest = [
+        'title',
+        'description',
+        'price',
+        'status',
+    ];
+    use image;
 
     public function view(){
         $deals = $this->deals
@@ -52,14 +61,71 @@ class DealController extends Controller
     }
 
     public function create(DealRequest $request){
-        
+        // Keys
+        // title, description, price, status, image
+        // times[0][day], times[0][from], times[0][to]
+        $dealRequest = $request->only($this->dealRequest);
+        if (is_file($request->image)) {
+            $imag_path = $this->upload($request, 'image', 'admin/deals/image');
+            $dealRequest['image'] = $imag_path;
+        }
+        $deal = $this->deals
+        ->create($dealRequest);
+        if ($request->times) {
+            foreach ($request->times as $item) {
+                $this->deal_times->create([
+                    'deal_id' => $deal->id,
+                    'day' => $item['day'],
+                    'from' => $item['from'],
+                    'to' => $item['to'],
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => 'You add data success'
+        ]);
     }
 
     public function modify(DealRequest $request, $id){
-        
+        // Keys
+        // title, description, price, status, image
+        // times[0][day], times[0][from], times[0][to]
+        $deal = $this->deals
+        ->where('id', $id)
+        ->first();
+        $dealRequest = $request->only($this->dealRequest);
+        if (is_file($request->image)) {
+            $imag_path = $this->upload($request, 'image', 'admin/deals/image');
+            $dealRequest['image'] = $imag_path;
+            $this->deleteImage($deal->image);
+        }
+        $deal->update($dealRequest);
+        $deal->times()->delete();
+        if ($request->times) {
+            foreach ($request->times as $item) {
+                $deal->times()->create([
+                    'day' => $item['day'],
+                    'from' => $item['from'],
+                    'to' => $item['to'],
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => 'You update data success'
+        ]);
     }
 
     public function delete($id){
-        
+        $deal = $this->deals
+        ->where('id', $id)
+        ->first();
+        $this->deleteImage($deal->image);
+        $deal->delete();
+
+        return response()->json([
+            'success' => 'You delete data success'
+        ]);
     }
 }
