@@ -64,6 +64,7 @@ class DealController extends Controller
         // Keys
         // title, description, price, status, image
         // times[0][day], times[0][from], times[0][to]
+        // Days [Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
         $dealRequest = $request->only($this->dealRequest);
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/deals/image');
@@ -91,6 +92,7 @@ class DealController extends Controller
         // Keys
         // title, description, price, status, image
         // times[0][day], times[0][from], times[0][to]
+        // Days [Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
         $deal = $this->deals
         ->where('id', $id)
         ->first();

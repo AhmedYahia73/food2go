@@ -27,7 +27,7 @@ class DealRequest extends FormRequest
             'title' => ['required'],
             'price' => ['required', 'numeric'],
             'status' => ['required', 'boolean'],
-            'times.*.day' => ['required'],
+            'times.*.day' => ['required', 'in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'],
             'times.*.from' => ['required'],
             'times.*.to' => ['required'],
         ];
