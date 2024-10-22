@@ -27,8 +27,9 @@ class CategoryRequest extends FormRequest
             'name' => ['required'],
             'category_id' => ['exists:categories,id', 'nullable'],
             'status' => ['required', 'boolean'],
+            'active' => ['required', 'boolean'],
             'priority' => ['required', 'integer'],
-            'addons_id.*' => ['exists:addons,id']
+            'addons_id.*' => ['exists:addons,id'],
         ];
     }
 

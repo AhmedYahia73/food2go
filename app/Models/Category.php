@@ -19,6 +19,7 @@ class Category extends Model
         'category_id',
         'status',
         'priority',
+        'active',
     ];
     protected $appends = ['image_link', 'banner_link'];
 

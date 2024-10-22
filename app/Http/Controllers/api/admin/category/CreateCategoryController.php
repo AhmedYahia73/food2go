@@ -18,6 +18,7 @@ class CreateCategoryController extends Controller
         'category_id',
         'status',
         'priority',
+        'active',
     ];
     use image;
 
