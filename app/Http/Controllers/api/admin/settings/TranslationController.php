@@ -22,6 +22,16 @@ class TranslationController extends Controller
         ]);
     }
 
+    public function link(){
+        $link = base_path('lang\\');
+        $filename = 'messages.php';
+
+        return response()->json([
+            'link' => $link,
+            'filename' => $filename,
+        ]);
+    }
+
     public function create(Request $request){
         
         $validator = Validator::make($request->all(), [

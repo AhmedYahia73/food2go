@@ -44,6 +44,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(TranslationController::class)->prefix('translation')->group(function(){
         Route::get('/', 'view');
+        Route::get('/link', 'link');
         Route::post('/add', 'create');
         Route::delete('/delete/{id}', 'delete');
     });
