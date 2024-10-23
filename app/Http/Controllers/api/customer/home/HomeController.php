@@ -8,17 +8,19 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\User;
 
 class HomeController extends Controller
 {
-    public function __construct(private Category $categories, private User $user){}
+    public function __construct(private Category $categories, private User $user,
+    private Product $product){}
 
     public function products(){
         // https://backend.food2go.pro/customer/home
         $categories = $this->categories
         ->with(['products' => function($query){
-            $query->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations']);
+            $query->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations', 'discount']);
         }, 'addons'])
         ->get();
         foreach ($categories as $category) {
@@ -31,9 +33,14 @@ class HomeController extends Controller
                 }
             }
         }
+        $discounts = $this->product
+        ->with('discount')
+        ->whereHas('discount')
+        ->get();
 
         return response()->json([
-            'categories' => $categories
+            'categories' => $categories,
+            'discounts' => $discounts
         ]);
     }
 
@@ -61,6 +68,32 @@ class HomeController extends Controller
 
         return response()->json([
             'success' => 'You change status success'
+        ]);
+    }
+
+    public function filter_product(Request $request){
+        // Keys
+        // category_id, min_price, max_price
+        $validator = Validator::make($request->all(), [
+            'category_id' => 'required|exists:categories,id',
+            'min_price' => 'required|numeric',
+            'max_price' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
+        $products = $this->product
+        ->where('category_id', $request->category_id)
+        ->where('price', '>=', $request->min_price)
+        ->where('price', '<=', $request->max_price)
+        ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations'])
+        ->get();
+
+        return response()->json([
+            'products' => $products
         ]);
     }
 }

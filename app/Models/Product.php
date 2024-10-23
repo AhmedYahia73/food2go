@@ -9,6 +9,7 @@ use App\Models\Addon;
 use App\Models\ExcludeProduct;
 use App\Models\ExtraProduct;
 use App\Models\VariationProduct;
+use App\Models\Discount;
 
 class Product extends Model
 {
@@ -33,6 +34,10 @@ class Product extends Model
         'recommended',
         'points',
     ];
+
+    public function discount(){
+        return $this->belongsTo(Discount::class, 'discount_id');
+    }
 
     public function addons(){
         return $this->belongsToMany(Addon::class, 'product_addon', 'product_id', 'addon_id');

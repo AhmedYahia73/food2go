@@ -11,6 +11,7 @@ use App\Http\Controllers\api\customer\deal\DealController;
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::get('/', 'products');
+        Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
     });
 
