@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\category\CategoryRequest;
 use App\trait\image;
+use App\trait\translaion;
 
 use App\Models\Category;
 use App\Models\Addon;
@@ -21,7 +22,8 @@ class CreateCategoryController extends Controller
         'active',
     ];
     use image;
-
+    use translaion;
+    
     public function create(CategoryRequest $request){
         // https://backend.food2go.pro/admin/category/add
         // Keys
