@@ -23,6 +23,10 @@ class CreateCategoryController extends Controller
     use image;
 
     public function create(CategoryRequest $request){
+        // https://backend.food2go.pro/admin/category/add
+        // Keys
+        // name, category_id, status, priority, active, image, banner_image
+        // addons_id[]
         $categoryRequest = $request->only($this->categoryRequest);
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/category/image');
@@ -45,6 +49,10 @@ class CreateCategoryController extends Controller
     }
 
     public function modify(CategoryRequest $request, $id){
+        // https://backend.food2go.pro/admin/category/update/{id}
+        // Keys
+        // name, category_id, status, priority, active, image, banner_image
+        // addons_id[]
         $categoryRequest = $request->only($this->categoryRequest);
         $category = $this->categories
         ->where('id', $id)
@@ -70,6 +78,7 @@ class CreateCategoryController extends Controller
     }
 
     public function delete($id){
+        // https://backend.food2go.pro/admin/category/delete/{id}
         $category = $this->categories
         ->where('id', $id)
         ->first(); // get category

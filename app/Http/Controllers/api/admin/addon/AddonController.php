@@ -19,6 +19,7 @@ class AddonController extends Controller
     ];
 
     public function view(){
+        // https://backend.food2go.pro/admin/addons
         $addons = $this->addons
         ->get();
         $taxes = $this->taxes
@@ -31,6 +32,9 @@ class AddonController extends Controller
     }
 
     public function create(AddonRequest $request){
+        // https://backend.food2go.pro/admin/addons/add
+        // Keys
+        // name, price, tax_id
         $addonRequest = $request->only($this->addonRequest);
         $this->addons
         ->create($addonRequest);
@@ -41,6 +45,9 @@ class AddonController extends Controller
     }
 
     public function modify(AddonRequest $request, $id){
+        // https://backend.food2go.pro/admin/addons/update/{id}
+        // Keys
+        // name, price, tax_id
         $addonRequest = $request->only($this->addonRequest);
         $this->addons
         ->where('id', $id)
@@ -52,6 +59,7 @@ class AddonController extends Controller
     }
 
     public function delete($id){
+        // https://backend.food2go.pro/admin/addons/delete/{id}
         $this->addons
         ->where('id', $id)
         ->delete();

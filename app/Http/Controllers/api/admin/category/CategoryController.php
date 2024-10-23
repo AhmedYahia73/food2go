@@ -15,6 +15,7 @@ class CategoryController extends Controller
     public function __construct(private Category $categories, private Addon $addons){}
 
     public function view(){
+        // https://backend.food2go.pro/admin/category
         $categories = $this->categories
         ->with('addons')
         ->orderBy('priority')
@@ -28,6 +29,7 @@ class CategoryController extends Controller
     }
 
     public function status(Request $request, $id){
+        // https://backend.food2go.pro/admin/category/status/{id}
         $validator = Validator::make($request->all(), [
         'status' => 'required|boolean',
         ]);
@@ -46,6 +48,7 @@ class CategoryController extends Controller
     }
 
     public function priority(Request $request, $id){
+        // https://backend.food2go.pro/admin/category/priority/{id}
         $validator = Validator::make($request->all(), [
         'priority' => 'required|integer',
         ]);

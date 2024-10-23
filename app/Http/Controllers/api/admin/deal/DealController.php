@@ -24,6 +24,7 @@ class DealController extends Controller
     use image;
 
     public function view(){
+        // https://backend.food2go.pro/admin/deal
         $deals = $this->deals
         ->with('times')
         ->get();
@@ -34,6 +35,7 @@ class DealController extends Controller
     }
 
     public function status(Request $request ,$id){
+        // https://backend.food2go.pro/admin/deal/status/{id}
          // Keys
         // status
         $validator = Validator::make($request->all(), [
@@ -61,6 +63,7 @@ class DealController extends Controller
     }
 
     public function create(DealRequest $request){
+        // https://backend.food2go.pro/admin/deal/add
         // Keys
         // title, description, price, status, image
         // times[0][day], times[0][from], times[0][to]
@@ -89,6 +92,7 @@ class DealController extends Controller
     }
 
     public function modify(DealRequest $request, $id){
+        // https://backend.food2go.pro/admin/deal/update/{id}
         // Keys
         // title, description, price, status, image
         // times[0][day], times[0][from], times[0][to]
@@ -120,6 +124,7 @@ class DealController extends Controller
     }
 
     public function delete($id){
+        // https://backend.food2go.pro/admin/deal/delete/{id}
         $deal = $this->deals
         ->where('id', $id)
         ->first();

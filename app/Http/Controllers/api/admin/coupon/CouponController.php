@@ -14,6 +14,7 @@ class CouponController extends Controller
     public function __construct(private Coupon $coupons){}
 
     public function view(){
+        // https://backend.food2go.pro/admin/coupon
         $coupons = $this->coupons
         ->with('products')
         ->get();
@@ -24,6 +25,7 @@ class CouponController extends Controller
     }
 
     public function status(Request $request, $id){
+        // https://backend.food2go.pro/admin/coupon/status/{id}
         // Keys
         // status
         $validator = Validator::make($request->all(), [

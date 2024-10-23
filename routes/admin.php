@@ -137,7 +137,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
         Route::controller(CreateCategoryController::class)->group(function(){
             Route::post('/add', 'create'); 
-            Route::put('/update/{id}', 'modify'); 
+            Route::post('/update/{id}', 'modify'); 
             Route::delete('/delete/{id}', 'delete'); 
         });
     });
@@ -145,7 +145,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(AddonController::class)->prefix('addons')->group(function(){
         Route::get('/', 'view');
         Route::post('/add', 'create');
-        Route::put('/update/{id}', 'modify');
+        Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
     });
 
@@ -153,35 +153,28 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(ExtraController::class)->prefix('extra')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
-            Route::put('/update/{id}', 'modify');
+            Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
         
         Route::controller(ExcludeController::class)->prefix('exclude')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
-            Route::put('/update/{id}', 'modify');
+            Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
         
         Route::controller(TaxController::class)->prefix('tax')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
-            Route::put('/update/{id}', 'modify');
-            Route::delete('/delete/{id}', 'delete');
-        });
-        
-        Route::controller(TaxController::class)->prefix('tax')->group(function(){
-            Route::get('/', 'view');
-            Route::post('/add', 'create');
-            Route::put('/update/{id}', 'modify');
+            Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
         
         Route::controller(DiscountController::class)->prefix('discount')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
-            Route::put('/update/{id}', 'modify');
+            Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
     });
