@@ -33,12 +33,19 @@ use App\Http\Controllers\api\admin\settings\ExtraController;
 use App\Http\Controllers\api\admin\settings\ExcludeController;
 use App\Http\Controllers\api\admin\settings\TaxController;
 use App\Http\Controllers\api\admin\settings\DiscountController;
+use App\Http\Controllers\api\admin\settings\TranslationController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/', 'orders');
         Route::put('/status/{id}', 'status');
         Route::post('/delivery', 'delivery');
+    });
+
+    Route::controller(TranslationController::class)->prefix('translation')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/add', 'create');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(PointOffersController::class)->prefix('offer')->group(function(){
