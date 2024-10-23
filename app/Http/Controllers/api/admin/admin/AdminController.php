@@ -29,6 +29,7 @@ class AdminController extends Controller
     use image;
 
     public function view(){
+        // https://backend.food2go.pro/admin/admin
         $admins = $this->admins
         ->with('user_positions')->get();
         $user_positions = $this->user_positions->get();
@@ -40,6 +41,7 @@ class AdminController extends Controller
     }
 
     public function status(Request $request, $id){
+        // https://backend.food2go.pro/admin/admin/status/{id}
         // Keys
         // status
         $validator = Validator::make($request->all(), [
@@ -69,6 +71,7 @@ class AdminController extends Controller
     }
     
     public function create(AdminRequest $request){
+        // https://backend.food2go.pro/admin/admin/add
         // Keys
         // name, identity_type, identity_number, email, phone, password, user_position_id
         // status, image, identity_image
@@ -89,6 +92,7 @@ class AdminController extends Controller
     }
     
     public function modify(UpdateAdminRequest $request, $id){
+        // https://backend.food2go.pro/admin/admin/update/{id}
         // Keys
         // name, identity_type, identity_number, email, phone, password, user_position_id
         // status, image, identity_image
@@ -113,6 +117,7 @@ class AdminController extends Controller
     }
     
     public function delete($id){
+        // https://backend.food2go.pro/admin/admin/delete/{id}
         $admin = $this->admins->where('id', $id)
         ->first();
         $this->deleteImage($admin->image);

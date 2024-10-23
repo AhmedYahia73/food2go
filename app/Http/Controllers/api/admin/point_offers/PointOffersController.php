@@ -19,6 +19,7 @@ class PointOffersController extends Controller
     use image;
 
     public function view(){
+        // https://backend.food2go.pro/admin/offer
         $offers = $this->offers
         ->get();
 
@@ -28,6 +29,7 @@ class PointOffersController extends Controller
     }
 
     public function create(PointOfferRequest $request){
+        // https://backend.food2go.pro/admin/offer/add
         $offerRequest = $request->only($this->offerRequest);
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/point_offers/image');
@@ -42,6 +44,7 @@ class PointOffersController extends Controller
     }
 
     public function modify(PointOfferRequest $request, $id){
+        // https://backend.food2go.pro/admin/offer/update/{id}
         $offerRequest = $request->only($this->offerRequest);
         $offer = $this->offers
         ->where('id', $id)
@@ -59,6 +62,7 @@ class PointOffersController extends Controller
     }
 
     public function delete($id){
+        // https://backend.food2go.pro/admin/offer/delete/{id}
         $offer = $this->offers
         ->where('id', $id)
         ->first();

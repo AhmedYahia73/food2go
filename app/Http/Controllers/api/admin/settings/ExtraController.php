@@ -22,6 +22,7 @@ class ExtraController extends Controller
     ];
 
     public function view(){
+        // https://backend.food2go.pro/admin/settings/extra
         $products = $this->products
         ->get();
         $variations = $this->variations
@@ -37,6 +38,9 @@ class ExtraController extends Controller
     }
 
     public function create(ExtraRequest $request){
+        // https://backend.food2go.pro/admin/settings/extra/add
+        // Keys
+        // name, price, product_id, variation_id
         $extraRequest = $request->only($this->extraRequest);
         $this->extra->create($extraRequest);
 
@@ -46,6 +50,9 @@ class ExtraController extends Controller
     }
 
     public function modify(ExtraRequest $request, $id){
+        // https://backend.food2go.pro/admin/settings/extra/update/{id}
+        // Keys
+        // name, price, product_id, variation_id
         $extraRequest = $request->only($this->extraRequest);
         $extra = $this->extra
         ->where('id', $id)
@@ -58,6 +65,7 @@ class ExtraController extends Controller
     }
 
     public function delete($id){
+        // https://backend.food2go.pro/admin/settings/extra/delete/{id}
         $extra = $this->extra
         ->where('id', $id)
         ->delete();

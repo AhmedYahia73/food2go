@@ -18,6 +18,7 @@ class TaxController extends Controller
     ];
 
     public function view(){
+        // https://backend.food2go.pro/admin/settings/tax
         $taxes = $this->tax->get();
 
         return response()->json([
@@ -26,6 +27,9 @@ class TaxController extends Controller
     }
 
     public function create(TaxRequest $request){
+        // https://backend.food2go.pro/admin/settings/tax/add
+        // Keys
+        // name, type, amount
         $taxRequest = $request->only($this->taxRequest);
         $this->tax->create($taxRequest);
 
@@ -35,6 +39,9 @@ class TaxController extends Controller
     }
 
     public function modify(TaxRequest $request, $id){
+        // https://backend.food2go.pro/admin/settings/tax/update/{id}
+        // Keys
+        // name, type, amount
         $taxRequest = $request->only($this->taxRequest);
         $this->tax
         ->where('id', $id)
@@ -46,6 +53,7 @@ class TaxController extends Controller
     }
 
     public function delete($id){
+        // https://backend.food2go.pro/admin/settings/tax/delete/{id}
         $this->tax
         ->where('id', $id)
         ->delete();

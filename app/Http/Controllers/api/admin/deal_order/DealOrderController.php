@@ -15,6 +15,7 @@ class DealOrderController extends Controller
     public function __construct(private Deal $deals, private DealUser $deal_user){}
 
     public function deal_order(){
+        // https://backend.food2go.pro/admin/dealOrder
         $deals = $this->deals
         ->with('deal_customer')
         ->whereHas('deal_customer')
@@ -26,6 +27,7 @@ class DealOrderController extends Controller
     }
  
     public function status(Request $request){
+        // https://backend.food2go.pro/admin/dealOrder/status
         // Keys
         // pivot_id
         $validator = Validator::make($request->all(), [

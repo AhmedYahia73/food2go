@@ -38,7 +38,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/', 'orders');
         Route::put('/status/{id}', 'status');
-        Route::put('/delivery', 'delivery');
+        Route::post('/delivery', 'delivery');
     });
 
     Route::controller(PointOffersController::class)->prefix('offer')->group(function(){
@@ -51,7 +51,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // Make Deal Module
     Route::controller(DealOrderController::class)->prefix('dealOrder')->group(function(){
         Route::get('/', 'deal_order');
-        Route::post('/status', 'status');
+        Route::put('/status', 'status');
     });
 
     // Make Deal Module

@@ -30,6 +30,7 @@ class BranchController extends Controller
     use image;
 
     public function view(){
+        // https://backend.food2go.pro/admin/branch
         $branches = $this->branches->get();
 
         return response()->json([
@@ -38,6 +39,7 @@ class BranchController extends Controller
     }
 
     public function status(Request $request, $id){
+        // https://backend.food2go.pro/admin/branch/status/{id}
         // Keys
         // status
         $validator = Validator::make($request->all(), [
@@ -66,6 +68,7 @@ class BranchController extends Controller
     }
     
     public function create(BranchRequest $request){
+        // https://backend.food2go.pro/admin/branch/add
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
         // coverage, status, image, cover_image
@@ -87,6 +90,7 @@ class BranchController extends Controller
     }
     
     public function modify(UpdateBranchRequest $request, $id){
+        // https://backend.food2go.pro/admin/branch/update/{id}
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
         // coverage, status, image, cover_image
@@ -113,6 +117,7 @@ class BranchController extends Controller
     }
     
     public function delete($id){
+        // https://backend.food2go.pro/admin/branch/delete/{id}
         $branch = $this->branches
         ->where('id', $id)
         ->first();

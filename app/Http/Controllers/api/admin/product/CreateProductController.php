@@ -38,6 +38,7 @@ class CreateProductController extends Controller
     use image;
 
     public function create(ProductRequest $request){
+        // https://backend.food2go.pro/admin/product/add
         // Keys
         // name, description, category_id, sub_category_id, item_type, stock_type, number, price
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
@@ -116,6 +117,7 @@ class CreateProductController extends Controller
     }
 
     public function modify(ProductRequest $request, $id){
+        // https://backend.food2go.pro/admin/product/update/{id}
         // Keys
         // name, description, category_id, sub_category_id, item_type, stock_type, number, price
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
@@ -207,6 +209,7 @@ class CreateProductController extends Controller
     }
 
     public function delete($id){
+        // https://backend.food2go.pro/admin/product/delete/{id}
         $product = $this->products
         ->where('id', $id)
         ->first();
