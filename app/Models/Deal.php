@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\DealTimes;
+use App\Models\User;
 
 class Deal extends Model
 {
@@ -21,5 +22,10 @@ class Deal extends Model
 
     public function times(){
         return $this->hasMany(DealTimes::class, 'deal_id');
+    }
+
+    public function deal_customer(){
+        return $this->belongsToMany(User::class, 'deal_user')
+        ->withPivot(['ref_number', 'status', 'id']);;
     }
 }

@@ -21,5 +21,6 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
 
     Route::controller(DealController::class)->prefix('deal')->group(function(){
         Route::get('/', 'index');
+        Route::post('/order', 'order');
     });
 });

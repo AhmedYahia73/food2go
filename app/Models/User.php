@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Deal;
 
 class User extends Authenticatable
 {
@@ -80,5 +81,10 @@ class User extends Authenticatable
 
     public function favourite_product(){
         return $this->belongsToMany(Product::class, 'favourit_product');
+    }
+
+    public function deals(){
+        return $this->belongsToMany(Deal::class, 'deal_user')
+        ->withPivot('ref_number');;
     }
 }
