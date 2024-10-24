@@ -24,7 +24,6 @@ class ExtraRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required'],
             'price' => ['required', 'numeric'],
             'product_id' => ['required', 'exists:products,id'],
             'variation_id' => ['nullable', 'exists:variation_products,id'],

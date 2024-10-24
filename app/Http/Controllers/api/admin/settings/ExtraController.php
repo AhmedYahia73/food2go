@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\settings;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\settings\ExtraRequest;
+use App\trait\translaion;
 
 use App\Models\Product;
 use App\Models\VariationProduct;
@@ -20,6 +21,7 @@ class ExtraController extends Controller
         'product_id',
         'variation_id',
     ];
+    use translaion;
 
     public function view(){
         // https://backend.food2go.pro/admin/settings/extra
@@ -41,7 +43,14 @@ class ExtraController extends Controller
         // https://backend.food2go.pro/admin/settings/extra/add
         // Keys
         // name, price, product_id, variation_id
+        // extra_names[{extra_name, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->extra_names[0];
+        foreach ($request->extra_names as $item) {
+            $this->translate($item['tranlation_name'], $default['extra_name'], $item['extra_name']); 
+        }
         $extraRequest = $request->only($this->extraRequest);
+        $extraRequest['name'] = $default['extra_name'];
         $this->extra->create($extraRequest);
 
         return response()->json([
@@ -53,7 +62,14 @@ class ExtraController extends Controller
         // https://backend.food2go.pro/admin/settings/extra/update/{id}
         // Keys
         // name, price, product_id, variation_id
+        // extra_names[{extra_name, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->extra_names[0];
+        foreach ($request->extra_names as $item) {
+            $this->translate($item['tranlation_name'], $default['extra_name'], $item['extra_name']); 
+        }
         $extraRequest = $request->only($this->extraRequest);
+        $extraRequest['name'] = $default['extra_name'];
         $extra = $this->extra
         ->where('id', $id)
         ->first();

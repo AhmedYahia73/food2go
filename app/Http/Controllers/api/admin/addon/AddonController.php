@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\addon;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\addon\AddonRequest;
+use App\trait\translaion;
 
 use App\Models\Addon;
 use App\Models\Tax;
@@ -17,6 +18,7 @@ class AddonController extends Controller
         'price',
         'tax_id',
     ];
+    use translaion;
 
     public function view(){
         // https://backend.food2go.pro/admin/addons
@@ -35,7 +37,15 @@ class AddonController extends Controller
         // https://backend.food2go.pro/admin/addons/add
         // Keys
         // name, price, tax_id
+        // addon_names[{addon_name, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->addon_names[0];
+        foreach ($request->addon_names as $item) {
+            $this->translate($item['tranlation_name'], $default['addon_name'], $item['addon_name']); 
+        }
         $addonRequest = $request->only($this->addonRequest);
+        $addonRequest['name'] = $default['addon_name'];
+        
         $this->addons
         ->create($addonRequest);
 
@@ -48,7 +58,15 @@ class AddonController extends Controller
         // https://backend.food2go.pro/admin/addons/update/{id}
         // Keys
         // name, price, tax_id
+        // addon_names[{addon_name, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->addon_names[0];
+        foreach ($request->addon_names as $item) {
+            $this->translate($item['tranlation_name'], $default['addon_name'], $item['addon_name']); 
+        }
         $addonRequest = $request->only($this->addonRequest);
+        $addonRequest['name'] = $default['addon_name'];
+        
         $this->addons
         ->where('id', $id)
         ->update($addonRequest);

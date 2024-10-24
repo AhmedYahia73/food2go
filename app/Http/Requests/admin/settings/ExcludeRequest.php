@@ -23,8 +23,7 @@ class ExcludeRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => ['required'],
+        return [ 
             'product_id' => ['required', 'exists:products,id']
         ];
     }

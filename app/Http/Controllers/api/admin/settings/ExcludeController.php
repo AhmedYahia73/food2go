@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\settings;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\settings\ExcludeRequest;
+use App\trait\translaion;
 
 use App\Models\Product;
 use App\Models\ExcludeProduct;
@@ -16,6 +17,7 @@ class ExcludeController extends Controller
         'name',
         'product_id',
     ];
+    use translaion;
 
     public function view(){
         // https://backend.food2go.pro/admin/settings/exclude
@@ -34,7 +36,14 @@ class ExcludeController extends Controller
         // https://backend.food2go.pro/admin/settings/exclude/add
         // Keys
         // name, product_id
+        // exclude_names[{exclude_name, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->exclude_names[0];
+        foreach ($request->exclude_names as $item) {
+            $this->translate($item['tranlation_name'], $default['exclude_name'], $item['exclude_name']); 
+        }
         $excludeRequest = $request->only($this->excludeRequest);
+        $excludeRequest['name'] = $default['exclude_name'];
         $this->excludes
         ->create($excludeRequest);
 
@@ -47,7 +56,14 @@ class ExcludeController extends Controller
         // https://backend.food2go.pro/admin/settings/exclude/update/{id}
         // Keys
         // name, product_id
+        // exclude_names[{exclude_name, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->exclude_names[0];
+        foreach ($request->exclude_names as $item) {
+            $this->translate($item['tranlation_name'], $default['exclude_name'], $item['exclude_name']); 
+        }
         $excludeRequest = $request->only($this->excludeRequest);
+        $excludeRequest['name'] = $default['exclude_name'];
         $this->excludes
         ->where('id', $id)
         ->update($excludeRequest);

@@ -24,7 +24,6 @@ class PointOfferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product' => ['required'],
             'points' => ['required', 'numeric'],
         ];
     }

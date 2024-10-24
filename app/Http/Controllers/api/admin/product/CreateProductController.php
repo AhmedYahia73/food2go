@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\product\ProductRequest;
 use App\trait\image;
+use App\trait\translaion;
 
 use App\Models\Product;
 use App\Models\VariationProduct;
@@ -36,11 +37,12 @@ class CreateProductController extends Controller
         'points',
     ];
     use image;
+    use translaion;
 
     public function create(ProductRequest $request){
         // https://backend.food2go.pro/admin/product/add
         // Keys
-        // name, description, category_id, sub_category_id, item_type, stock_type, number, price
+        // category_id, sub_category_id, item_type, stock_type, number, price
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
         // excludes[][exclude_name]
@@ -49,7 +51,17 @@ class CreateProductController extends Controller
         // variations[][name] ,variations[][type] ,variations[][min] ,variations[][max]
         // variations[][required], variations[][points]
         // variations[][options][][name], variations[][options][][price]
+        // product_names[{product_name, product_description, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->product_names[0];
+        foreach ($request->product_names as $item) {
+            $this->translate($item['tranlation_name'], $default['product_name'], $item['product_name']); 
+            $this->translate($item['tranlation_name'], $default['product_description'], $item['product_description']); 
+        }
         $productRequest = $request->only($this->productRequest);
+        $productRequest['name'] = $default['product_name'];
+        $productRequest['description'] = $default['product_description'];
+
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/product/image');
             $productRequest['image'] = $imag_path;
@@ -128,7 +140,17 @@ class CreateProductController extends Controller
         // variations[][name] ,variations[][type] ,variations[][min] ,variations[][max]
         // variations[][required], variations[][points]
         // variations[][options][][name], variations[][options][][price]
+        // product_names[{product_name, product_description, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->product_names[0];
+        foreach ($request->product_names as $item) {
+            $this->translate($item['tranlation_name'], $default['product_name'], $item['product_name']); 
+            $this->translate($item['tranlation_name'], $default['product_description'], $item['product_description']); 
+        }
         $productRequest = $request->only($this->productRequest);
+        $productRequest['name'] = $default['product_name'];
+        $productRequest['description'] = $default['product_description'];
+        
         $product = $this->products->
         where('id', $id)
         ->first(); // get product

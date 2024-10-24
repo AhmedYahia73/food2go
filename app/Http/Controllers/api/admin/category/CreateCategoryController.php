@@ -23,13 +23,20 @@ class CreateCategoryController extends Controller
     ];
     use image;
     use translaion;
-    
+
     public function create(CategoryRequest $request){
         // https://backend.food2go.pro/admin/category/add
         // Keys
-        // name, category_id, status, priority, active, image, banner_image
+        // category_id, status, priority, active, image, banner_image
         // addons_id[]
+        // category_names[{category_name, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->category_names[0];
+        foreach ($request->category_names as $item) {
+            $this->translate($item['tranlation_name'], $default['category_name'], $item['category_name']); 
+        }
         $categoryRequest = $request->only($this->categoryRequest);
+        $categoryRequest['name'] = $default['category_name'];
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/category/image');
             $categoryRequest['image'] = $imag_path;
@@ -55,7 +62,15 @@ class CreateCategoryController extends Controller
         // Keys
         // name, category_id, status, priority, active, image, banner_image
         // addons_id[]
+        // category_names[{category_name, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->category_names[0];
+        foreach ($request->category_names as $item) {
+            $this->translate($item['tranlation_name'], $default['category_name'], $item['category_name']); 
+        }
         $categoryRequest = $request->only($this->categoryRequest);
+        $categoryRequest['name'] = $default['category_name'];
+        
         $category = $this->categories
         ->where('id', $id)
         ->first(); // get category

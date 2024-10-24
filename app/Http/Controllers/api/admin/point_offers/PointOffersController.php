@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\point_offers\PointOfferRequest;
 use App\trait\image;
+use App\trait\translaion;
 
 use App\Models\Offer;
 
@@ -17,6 +18,7 @@ class PointOffersController extends Controller
         'points',
     ];
     use image;
+    use translaion;
 
     public function view(){
         // https://backend.food2go.pro/admin/offer
@@ -30,7 +32,17 @@ class PointOffersController extends Controller
 
     public function create(PointOfferRequest $request){
         // https://backend.food2go.pro/admin/offer/add
+        // Keys
+        // points
+        // offer_names[{offer_product, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->offer_names[0];
+        foreach ($request->offer_names as $item) {
+            $this->translate($item['tranlation_name'], $default['offer_product'], $item['offer_product']); 
+        }
         $offerRequest = $request->only($this->offerRequest);
+        $offerRequest['product'] = $default['offer_product'];
+
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/point_offers/image');
             $offerRequest['image'] = $imag_path;
@@ -45,7 +57,17 @@ class PointOffersController extends Controller
 
     public function modify(PointOfferRequest $request, $id){
         // https://backend.food2go.pro/admin/offer/update/{id}
+        // Keys
+        // points
+        // offer_names[{offer_product, tranlation_id, tranlation_name}]
+        //  أول عنصر هو default language
+        $default = $request->offer_names[0];
+        foreach ($request->offer_names as $item) {
+            $this->translate($item['tranlation_name'], $default['offer_product'], $item['offer_product']); 
+        }
         $offerRequest = $request->only($this->offerRequest);
+        $offerRequest['product'] = $default['offer_product'];
+
         $offer = $this->offers
         ->where('id', $id)
         ->first();
