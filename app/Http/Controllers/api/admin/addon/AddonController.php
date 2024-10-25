@@ -14,9 +14,9 @@ class AddonController extends Controller
 {
     public function __construct(private Addon $addons, private Tax $taxes){}
     protected $addonRequest = [
-        'name',
         'price',
         'tax_id',
+        'quantity_add',
     ];
     use translaion;
 
@@ -36,7 +36,7 @@ class AddonController extends Controller
     public function create(AddonRequest $request){
         // https://backend.food2go.pro/admin/addons/add
         // Keys
-        // name, price, tax_id
+        // price, tax_id, quantity_add
         // addon_names[{addon_name, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->addon_names[0];
@@ -57,7 +57,7 @@ class AddonController extends Controller
     public function modify(AddonRequest $request, $id){
         // https://backend.food2go.pro/admin/addons/update/{id}
         // Keys
-        // name, price, tax_id
+        // price, tax_id, quantity_add
         // addon_names[{addon_name, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->addon_names[0];

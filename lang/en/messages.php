@@ -20,4 +20,5 @@ return array (
   'Deal Desc' => 'Deal Desc',
   'Deal 11' => 'Deal 11',
   'Deal Desc11' => 'Deal Desc11',
+  'Salad' => 'Salad',
 );

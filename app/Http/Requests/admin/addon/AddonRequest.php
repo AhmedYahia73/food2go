@@ -24,6 +24,7 @@ class AddonRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'quantity_add' => ['required', 'boolean'],
             'price' => ['required', 'numeric'],
             'tax_id' => ['exists:taxes,id', 'nullable'],
         ];

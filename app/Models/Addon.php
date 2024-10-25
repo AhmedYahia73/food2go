@@ -13,5 +13,6 @@ class Addon extends Model
         'name',
         'price',
         'tax_id',
+        'quantity_add',
     ];
 }
