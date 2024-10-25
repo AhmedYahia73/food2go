@@ -17,6 +17,7 @@ class OffersController extends Controller
     public function __construct(private Offer $offers, private User $user, private Order $orders){}
 
     public function offers(){
+        // https://backend.food2go.pro/customer/offers
         $offers = $this->offers->get();
 
         return response()->json([
@@ -25,6 +26,7 @@ class OffersController extends Controller
     }
 
     public function buy_offer(Request $request){
+        // https://backend.food2go.pro/customer/offers/buy_offer
         // Keys
         // address, offer_id, date, order_type
         $validator = Validator::make($request->all(), [

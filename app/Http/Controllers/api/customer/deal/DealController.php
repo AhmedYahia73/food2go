@@ -33,6 +33,7 @@ class DealController extends Controller
     }
  
     public function order(Request $request){
+        // https://backend.food2go.pro/customer/deal/order
         // Keys
         // deal_id
         $validator = Validator::make($request->all(), [

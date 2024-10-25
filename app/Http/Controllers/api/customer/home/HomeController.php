@@ -72,6 +72,7 @@ class HomeController extends Controller
     }
 
     public function filter_product(Request $request){
+        // https://backend.food2go.pro/customer/home/filter_product
         // Keys
         // category_id, min_price, max_price
         $validator = Validator::make($request->all(), [
