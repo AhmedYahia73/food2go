@@ -34,6 +34,7 @@ class User extends Authenticatable
         'points',
         'address',
         'bio',
+        'code',
     ];
     protected $appends = ['role', 'image_link', 'name', 'type'];
 

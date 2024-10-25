@@ -20,7 +20,9 @@ class HomeController extends Controller
         // https://backend.food2go.pro/customer/home
         $categories = $this->categories
         ->with(['products' => function($query){
-            $query->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations', 'discount']);
+            $query
+            ->where('item_type', '!=', 'offline')
+            ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations', 'discount']);
         }, 'addons'])
         ->get();
         foreach ($categories as $category) {
