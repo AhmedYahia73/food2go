@@ -14,6 +14,7 @@ class OtpController extends Controller
     public function __construct(private User $user){}
 
     public function create_code(Request $request){
+        // https://backend.food2go.pro/customer/otp/create_code
         $code = rand(10000, 99999);
         $user_codes = $this->user->get()->pluck('code')->toArray();
         while (in_array($code, $user_codes)) {
@@ -29,6 +30,7 @@ class OtpController extends Controller
     }
 
     public function change_password(Request $request){
+        // https://backend.food2go.pro/customer/otp/change_password
         $validator = Validator::make($request->all(), [
             'code' => 'required',
             'password' => 'required',
