@@ -3,6 +3,9 @@
 namespace App\Http\Requests\customer\profile;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class ProfileRequest extends FormRequest
 {
@@ -29,4 +32,11 @@ class ProfileRequest extends FormRequest
             'phone' => ['required', Rule::unique('users')->ignore($userId)],
         ];
     }
+
+    public function failedValidation(Validator $validator){
+       throw new HttpResponseException(response()->json([
+               'message'=>'validation error',
+               'errors'=>$validator->errors(),
+       ],400));
+   }
 }

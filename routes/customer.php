@@ -8,11 +8,17 @@ use App\Http\Controllers\api\customer\offer\OffersController;
 
 use App\Http\Controllers\api\customer\deal\DealController;
 
+use App\Http\Controllers\api\customer\profile\ProfileController;
+
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::get('/', 'products');
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
+    });
+
+    Route::controller(ProfileController::class)->prefix('profile')->group(function(){
+        Route::post('/update', 'update_profile');
     });
 
     Route::controller(OffersController::class)->prefix('offers')->group(function(){

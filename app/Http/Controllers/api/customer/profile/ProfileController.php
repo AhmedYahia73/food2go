@@ -4,14 +4,35 @@ namespace App\Http\Controllers\api\customer\profile;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
-use App\Models\User;
+use App\Http\Requests\customer\profile\ProfileRequest;
+use App\trait\image;
 
 class ProfileController extends Controller
 {
-    public function __construct(private User $user){}
+    public function __construct(){}
+    use image;
 
-    public function update_profile(){
-        
+    public function update_profile(ProfileRequest $request){
+        $customer = $request->user();
+        $customer->f_name = $request->f_name ?? null;
+        $customer->l_name = $request->l_name ?? null;
+        $customer->email = $request->email ?? null;
+        $customer->phone = $request->phone ?? null;
+        $customer->bio = $request->bio ?? null;
+        $customer->address = $request->address && is_string($request->address) 
+        ? $request->address : json_encode($request->address);
+        if ($request->password && !empty($request->password)) {
+            $customer->password = $request->password;
+        }
+        if (is_file($request->image)) {
+            $this->deleteImage($customer->image);
+            $imag_path = $this->upload($request, 'image', 'users/customers/image');
+            $customer->image = $imag_path;
+        }
+        $customer->save();
+
+        return response()->json([
+            'success' => 'You update customer success'
+        ]);
     }
 }

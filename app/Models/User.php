@@ -32,6 +32,7 @@ class User extends Authenticatable
         'status',
         'email_verified_at',
         'points',
+        'address',
         'bio',
     ];
     protected $appends = ['role', 'image_link', 'name', 'type'];
@@ -42,6 +43,10 @@ class User extends Authenticatable
 
     public function getTypeAttribute(){
         return 'user';
+    }
+
+    public function getaddressAttribute($data){
+        return json_decode($data) ?? [];
     }
 
     public function getRoleAttribute(){
