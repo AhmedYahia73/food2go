@@ -13,6 +13,10 @@ class ProfileController extends Controller
     use image;
 
     public function update_profile(ProfileRequest $request){
+        // https://backend.food2go.pro/customer/profile/update
+        // Keys
+        // f_name, l_name, email, phone, bio, address => key = value
+        // password, image
         $customer = $request->user();
         $customer->f_name = $request->f_name ?? null;
         $customer->l_name = $request->l_name ?? null;
