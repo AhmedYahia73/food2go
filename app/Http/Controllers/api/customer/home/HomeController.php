@@ -44,6 +44,18 @@ class HomeController extends Controller
                 }
             }
         }
+        foreach ($sub_categories as $categories) {
+            foreach ($categories->sub_categories as $category) {
+                foreach ($category->products as $product) {
+                    if (count($product->favourite_product) > 0) {
+                        $product->favourite = true;
+                    }
+                    else {
+                        $product->favourite = false;
+                    }
+                }
+            }
+        }
         $discounts = $this->product
         ->with('discount')
         ->whereHas('discount')
