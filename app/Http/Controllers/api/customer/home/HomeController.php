@@ -46,14 +46,12 @@ class HomeController extends Controller
                 if ($product->stock_type == 'fixed') {
                     $product->count = $product->sales_count->sum('count');
                     $product->in_stock = $product->number > $product->count ? true : false;
-                    return $product->in_stock;
                 }
                 elseif ($product->stock_type == 'daily') {
                     $product->count = $product->sales_count
                     ->where('date', date('Y-m-d'))
                     ->sum('count');
                     $product->in_stock = $product->number > $product->count ? true : false;
-                    return $product->in_stock;
                 }
             }
         }
