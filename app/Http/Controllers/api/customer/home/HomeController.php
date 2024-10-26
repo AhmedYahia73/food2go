@@ -22,7 +22,7 @@ class HomeController extends Controller
         ->with(['category_products' => function($query){
             $query
             ->where('item_type', '!=', 'offline')
-            ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations', 'discount']);
+            ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations.options', 'discount']);
         }, 'addons'])
         ->where('category_id', null)
         ->get();
@@ -30,7 +30,7 @@ class HomeController extends Controller
         ->with(['sub_categories.products' => function($query){
             $query
             ->where('item_type', '!=', 'offline')
-            ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations', 'discount']);
+            ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations.options', 'discount']);
         }, 'addons'])
         ->where('category_id', null)
         ->get();
