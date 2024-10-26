@@ -14,21 +14,19 @@ return [
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
     */
+    'paths' => ['*', ''], // You might want to specify exact paths for security
 
-    'paths' => ['*', ''], //sanctum/csrf-cookie
+    'allowed_methods' => ['*'], // Allows all methods, consider limiting to GET, POST, etc.
 
-    'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['*'], // Accepts requests from any origin, restrict this in production
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => ['*'], // Allows all headers, can be limited
 
-    'exposed_headers' => [],
+    'exposed_headers' => [], // Specify headers that can be exposed to the browser
 
-    'max_age' => 0,
+    'max_age' => 0, // Sets how long the results of a preflight request can be cached
 
-    'supports_credentials' => true,
-
+    'supports_credentials' => true, // Allows cookies and HTTP authentication
 ];
