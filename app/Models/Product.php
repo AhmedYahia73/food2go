@@ -10,6 +10,7 @@ use App\Models\ExcludeProduct;
 use App\Models\ExtraProduct;
 use App\Models\VariationProduct;
 use App\Models\Discount;
+use App\Models\ProductSale;
 
 class Product extends Model
 {
@@ -58,5 +59,9 @@ class Product extends Model
     public function favourite_product(){
         return $this->belongsToMany(User::class, 'favourit_product')
         ->where('users.id', auth()->user()->id);
+    }
+
+    public function sales_count(){
+        return $this->hasMany(ProductSale::class, 'product_id');
     }
 }
