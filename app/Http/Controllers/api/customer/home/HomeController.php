@@ -51,6 +51,7 @@ class HomeController extends Controller
 
         return response()->json([
             'categories' => $categories,
+            'sub_categories' => $sub_categories,
             'discounts' => $discounts
         ]);
     }
