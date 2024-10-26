@@ -12,11 +12,17 @@ use App\Http\Controllers\api\customer\profile\ProfileController;
 
 use App\Http\Controllers\api\customer\otp\OtpController;
 
+use App\Http\Controllers\api\customer\make_order\MakeOrderController;
+
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::get('/', 'products');
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
+    });
+
+    Route::controller(MakeOrderController::class)->prefix('make_order')->group(function(){
+        Route::get('/', 'order'); 
     });
 
     Route::controller(OtpController::class)->prefix('otp')->group(function(){
