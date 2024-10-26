@@ -14,19 +14,21 @@ return [
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
     */
-    'paths' => ['*', ''], // You might want to specify exact paths for security
 
-    'allowed_methods' => ['*'], // Allows all methods, consider limiting to GET, POST, etc.
+    'paths' => ['api/*'],
 
-    'allowed_origins' => ['*'], // Accepts requests from any origin, restrict this in production
+    'allowed_methods' => ['*'],
+
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'], // Allows all headers, can be limited
+    'allowed_headers' => ['*'],
 
-    'exposed_headers' => [], // Specify headers that can be exposed to the browser
+    'exposed_headers' => [],
 
-    'max_age' => 0, // Sets how long the results of a preflight request can be cached
+    'max_age' => 0,
 
-    'supports_credentials' => true, // Allows cookies and HTTP authentication
+    'supports_credentials' => true,
+
 ];
