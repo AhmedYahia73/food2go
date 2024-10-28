@@ -23,8 +23,8 @@ class HomeController extends Controller
         ->where('category_id', null)
         ->get();
         $products = $this->product
-        ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations.options', 
-            'discount', 'sales_count', 'tax'])
+        ->with(['favourite_product', 'addons', 'excludes', 'extra', 'discount', 
+        'variations.options.extra.parent_extra', 'sales_count', 'tax'])
         ->where('item_type', '!=', 'offline')
         ->get();
         foreach ($products as $product) {

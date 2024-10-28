@@ -47,10 +47,11 @@ class CreateProductController extends Controller
         // addons[]
         // excludes[][exclude_name]
         // extra[][extra_name], extra[][extra_price]
-        // variations[][extra][][extra_name], variations[][extra][][extra_price], variations[][extra][][extra_id]
         // variations[][name] ,variations[][type] ,variations[][min] ,variations[][max]
         // variations[][required], variations[][points]
-        // variations[][options][][name], variations[][options][][price]
+        // variations[][options][][name], variations[][options][][price], 
+        // variations[][options][][extra_name], variations[][options][][extra_price],
+        //  variations[][options][][extra_number] ترتيبها 0, 1, 2
         // product_names[{product_name, product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->product_names[0];
@@ -61,6 +62,7 @@ class CreateProductController extends Controller
         $productRequest = $request->only($this->productRequest);
         $productRequest['name'] = $default['product_name'];
         $productRequest['description'] = $default['product_description'];
+        $extra_num = [];
 
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/product/image');
@@ -81,7 +83,7 @@ class CreateProductController extends Controller
         }// add excludes
         if ($request->extra) {
             foreach ($request->extra as $item) {
-                $this->extra
+                $extra_num[] = $this->extra
                 ->create([
                     'name' => $item['extra_name'],
                     'price' => $item['extra_price'],
@@ -101,25 +103,26 @@ class CreateProductController extends Controller
                     'required' => $item['required'],
                     'product_id' => $product->id,
                 ]); // add variation
-                foreach ($item['extra'] as $element) {
-                    $this->extra
-                    ->create([
-                        'name' => $element['extra_name'],
-                        'price' => $element['extra_price'],
-                        'product_id' => $product->id,
-                        'variation_id' => $variation->id,
-                        'extra_id' => $element['extra_id'],
-                    ]);
-                }
                 foreach ($item['options'] as $element) {
-                    $this->option_product
+                    $option = $this->option_product
                     ->create([
                         'name' => $element['name'],
                         'price' => $element['price'],
                         'product_id' => $product->id,
                         'variation_id' => $variation->id,
-                    ]);
-                } // add options
+                    ]);// add options
+                    if ($element['extra_name']) {
+                        $this->extra
+                        ->create([
+                            'name' => $element['extra_name'],
+                            'price' => $element['extra_price'],
+                            'product_id' => $product->id,
+                            'variation_id' => $variation->id,
+                            'extra_id' => $extra_num[$element['extra_number']]->id,
+                            'option_id' => $option->id
+                        ]);// add extra for option
+                    }
+                } 
             }
         }
 
@@ -131,18 +134,20 @@ class CreateProductController extends Controller
     public function modify(ProductRequest $request, $id){
         // https://backend.food2go.pro/admin/product/update/{id}
         // Keys
-        // name, description, category_id, sub_category_id, item_type, stock_type, number, price
+        // category_id, sub_category_id, item_type, stock_type, number, price
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
         // excludes[][exclude_name]
         // extra[][extra_name], extra[][extra_price]
-        // variations[][extra][][extra_name], variations[][extra][][extra_price], variations[][extra][][extra_id]
         // variations[][name] ,variations[][type] ,variations[][min] ,variations[][max]
         // variations[][required], variations[][points]
-        // variations[][options][][name], variations[][options][][price]
+        // variations[][options][][name], variations[][options][][price],
+        // variations[][options][][extra_name], variations[][options][][extra_price],
+        //  variations[][options][][extra_number] ترتيبها
         // product_names[{product_name, product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->product_names[0];
+        $extra_num = [];
         foreach ($request->product_names as $item) {
             $this->translate($item['tranlation_name'], $default['product_name'], $item['product_name']); 
             $this->translate($item['tranlation_name'], $default['product_description'], $item['product_description']); 
@@ -180,7 +185,7 @@ class CreateProductController extends Controller
         ->delete(); // delete old extra
         if ($request->extra) {
             foreach ($request->extra as $item) {
-                $this->extra
+                $extra_num[] = $this->extra
                 ->create([
                     'name' => $item['extra_name'],
                     'price' => $item['extra_price'],
@@ -203,25 +208,28 @@ class CreateProductController extends Controller
                     'required' => $item['required'],
                     'product_id' => $product->id,
                 ]); // add variation
-                foreach ($item['extra'] as $element) {
-                    $this->extra
-                    ->create([
-                        'name' => $element['extra_name'],
-                        'price' => $element['extra_price'],
-                        'product_id' => $product->id,
-                        'variation_id' => $variation->id,
-                        'extra_id' => $element['extra_id'],
-                    ]);
+                if ($item['options']) {
+                    foreach ($item['options'] as $element) {
+                        $option = $this->option_product
+                        ->create([
+                            'name' => $element['name'],
+                            'price' => $element['price'],
+                            'product_id' => $product->id,
+                            'variation_id' => $variation->id,
+                        ]);
+                        if ($element['extra_name']) {
+                            $this->extra
+                            ->create([
+                                'name' => $element['extra_name'],
+                                'price' => $element['extra_price'],
+                                'product_id' => $product->id,
+                                'variation_id' => $variation->id,
+                                'extra_id' => $extra_num[$element['extra_number']]->id,
+                                'option_id' => $option->id
+                            ]);// add extra for option
+                        }
+                    } // add options
                 }
-                foreach ($item['options'] as $element) {
-                    $this->option_product
-                    ->create([
-                        'name' => $element['name'],
-                        'price' => $element['price'],
-                        'product_id' => $product->id,
-                        'variation_id' => $variation->id,
-                    ]);
-                } // add options
             }
         }
 

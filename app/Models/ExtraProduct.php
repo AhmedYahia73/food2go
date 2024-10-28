@@ -15,6 +15,7 @@ class ExtraProduct extends Model
         'product_id',
         'variation_id',
         'extra_id',
+        'option_id'
     ];
 
     public function parent_extra(){

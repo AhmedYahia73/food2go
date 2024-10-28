@@ -19,9 +19,7 @@ class ProductController extends Controller
     public function view(){
         // https://backend.food2go.pro/admin/product
         $products = $this->products
-        ->with(['addons', 'excludes', 'extra', 'variations' => function($query){
-            return $query->with(['extra.parent_extra', 'options']);
-        }])
+        ->with(['addons', 'excludes', 'extra', 'variations.options.extra.parent_extra'])
         ->get();//extra_id
         $categories = $this->categories
         ->get();

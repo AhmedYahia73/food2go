@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\ExtraProduct;
+
 class OptionProduct extends Model
 {
     use HasFactory;
@@ -15,4 +17,8 @@ class OptionProduct extends Model
         'product_id',
         'variation_id',
     ];
+
+    public function extra(){
+        return $this->hasMany(ExtraProduct::class, 'option_id');
+    }
 }
