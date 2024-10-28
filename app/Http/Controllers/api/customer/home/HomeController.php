@@ -24,7 +24,7 @@ class HomeController extends Controller
         ->get();
         $products = $this->product
         ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations.options', 
-            'discount', 'sales_count'])
+            'discount', 'sales_count', 'tax'])
         ->where('item_type', '!=', 'offline')
         ->get();
         foreach ($products as $product) {

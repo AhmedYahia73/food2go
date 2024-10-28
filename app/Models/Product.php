@@ -11,6 +11,7 @@ use App\Models\ExtraProduct;
 use App\Models\VariationProduct;
 use App\Models\Discount;
 use App\Models\ProductSale;
+use App\Models\Tax;
 
 class Product extends Model
 {
@@ -38,6 +39,10 @@ class Product extends Model
 
     public function discount(){
         return $this->belongsTo(Discount::class, 'discount_id');
+    }
+
+    public function tax(){
+        return $this->belongsTo(Tax::class, 'tax_id');
     }
 
     public function addons(){
