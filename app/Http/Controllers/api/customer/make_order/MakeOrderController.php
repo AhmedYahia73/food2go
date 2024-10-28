@@ -25,6 +25,9 @@ class MakeOrderController extends Controller
     ];
 
     public function order(OrderRequest $request){
+        // Keys
+        // date, branch_id, amount, payment_status, total_tax, total_discount, address
+        // order_type, paid_by
         $orderRequest = $request->only($this->orderRequest);
         $user = $request->user();
         $orderRequest['user_id'] = $user->id;
