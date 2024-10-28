@@ -12,6 +12,12 @@ class ProfileController extends Controller
     public function __construct(){}
     use image;
 
+    public function profile_data(Request $request){
+        return response()->json([
+            'data' => $request->user()
+        ]);
+    }
+
     public function update_profile(ProfileRequest $request){
         // https://backend.food2go.pro/customer/profile/update
         // Keys

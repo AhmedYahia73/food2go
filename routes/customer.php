@@ -22,7 +22,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(MakeOrderController::class)->prefix('make_order')->group(function(){
-        Route::get('/', 'order'); 
+        Route::post('/', 'order'); 
     });
 
     Route::controller(OtpController::class)->prefix('otp')->group(function(){
@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(ProfileController::class)->prefix('profile')->group(function(){
+        Route::post('/profile_data', 'profile_data');
         Route::post('/update', 'update_profile');
     });
 

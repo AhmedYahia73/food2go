@@ -32,7 +32,13 @@ class OrderRequest extends FormRequest
             'total_discount' => ['required', 'numeric'],
             'address' => ['required'],
             'order_type' => ['required', 'in:take_away,dine_in,delivery'],
-            'paid_by' => ['required', 'in:cash,card']
+            'paid_by' => ['required', 'in:cash,card'],
+            'products.*.product_id' => ['exists:products,id', 'required'],
+            'products.*.exclude_id.*' => ['exists:exclude_products,id'],
+            'products.*.extra_id.*' => ['exists:extra_products,id'],
+            'products.*.variation.*.variation_id' => ['exists:variation_products,id'],
+            'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
+            'products.*.count' => ['numeric', 'required'],
         ];
     }
 
