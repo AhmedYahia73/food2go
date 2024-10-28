@@ -19,63 +19,31 @@ class HomeController extends Controller
     public function products(){
         // https://backend.food2go.pro/customer/home
         $categories = $this->categories
-        ->with(['category_products' => function($query){
-            $query
-            ->where('item_type', '!=', 'offline')
-            ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations.options', 'discount', 'sales_count']);
-        }, 'addons'])
+        ->with(['sub_categories', 'addons'])
         ->where('category_id', null)
         ->get();
-        $sub_categories = $this->categories
-        ->with(['sub_categories.products' => function($query){
-            $query
-            ->where('item_type', '!=', 'offline')
-            ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations.options', 'discount', 'sales_count']);
-        }, 'addons'])
-        ->where('category_id', null)
+        $products = $this->product
+        ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations.options', 
+            'discount', 'sales_count'])
+        ->where('item_type', '!=', 'offline')
         ->get();
-        foreach ($categories as $category) {
-            foreach ($category->products as $product) {
-                if (count($product->favourite_product) > 0) {
-                    $product->favourite = true;
-                }
-                else {
-                    $product->favourite = false;
-                }
-                //get count of sales of product to detemine stock
-                if ($product->stock_type == 'fixed') {
-                    $product->count = $product->sales_count->sum('count');
-                    $product->in_stock = $product->number > $product->count ? true : false;
-                }
-                elseif ($product->stock_type == 'daily') {
-                    $product->count = $product->sales_count
-                    ->where('date', date('Y-m-d'))
-                    ->sum('count');
-                    $product->in_stock = $product->number > $product->count ? true : false;
-                }
+        foreach ($products as $product) {
+            if (count($product->favourite_product) > 0) {
+                $product->favourite = true;
             }
-        }
-        foreach ($sub_categories as $categories) {
-            foreach ($categories->sub_categories as $category) {
-                foreach ($category->products as $product) {
-                    if (count($product->favourite_product) > 0) {
-                        $product->favourite = true;
-                    }
-                    else {
-                        $product->favourite = false;
-                    }
-                    //get count of sales of product to detemine stock
-                    if ($product->stock_type == 'fixed') {
-                        $product->count = $product->sales_count->sum('count');
-                        $product->in_stock = $product->number > $product->count ? true : false;
-                    }
-                    elseif ($product->stock_type == 'daily') {
-                        $product->count = $product->sales_count
-                        ->where('date', date('Y-m-d'))
-                        ->sum('count');
-                        $product->in_stock = $product->number > $product->count ? true : false;
-                    }
-                }
+            else {
+                $product->favourite = false;
+            }
+            //get count of sales of product to detemine stock
+            if ($product->stock_type == 'fixed') {
+                $product->count = $product->sales_count->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            elseif ($product->stock_type == 'daily') {
+                $product->count = $product->sales_count
+                ->where('date', date('Y-m-d'))
+                ->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
             }
         }
         $discounts = $this->product
@@ -85,7 +53,7 @@ class HomeController extends Controller
 
         return response()->json([
             'categories' => $categories,
-            'sub_categories' => $sub_categories,
+            'products' => $products,
             'discounts' => $discounts
         ]);
     }
