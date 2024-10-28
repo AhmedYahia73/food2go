@@ -13,6 +13,7 @@ class ProfileController extends Controller
     use image;
 
     public function profile_data(Request $request){
+        // https://backend.food2go.pro/customer/profile/profile_data
         return response()->json([
             'data' => $request->user()
         ]);

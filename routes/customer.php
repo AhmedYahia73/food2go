@@ -31,7 +31,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(ProfileController::class)->prefix('profile')->group(function(){
-        Route::post('/profile_data', 'profile_data');
+        Route::get('/profile_data', 'profile_data');
         Route::post('/update', 'update_profile');
     });
 
