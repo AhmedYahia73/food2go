@@ -17,19 +17,33 @@ class OtpController extends Controller
 
     public function create_code(Request $request){
         // https://backend.food2go.pro/customer/otp/create_code
+        // Keys
+        // email
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
         $code = rand(10000, 99999);
         $user_codes = $this->user->get()->pluck('code')->toArray();
         while (in_array($code, $user_codes)) {
             $code = rand(10000, 99999);
         }
-        $user = $request->user();
+        $user = $this->user
+        ->where('email', $request->email)
+        ->orWhere('phone', $request->email)
+        ->first();
         $user->code = $code;
         $user->save();
         $data = [
             'code' => $code,
             'name' => $user->f_name . ' ' . $user->l_name
         ];
-        Mail::to('fk413691@gmail.com')->send(new OTPMail($data));
+        Mail::to($user->email)->send(new OTPMail($data));
     
 
         return response()->json([
@@ -39,8 +53,11 @@ class OtpController extends Controller
 
     public function change_password(Request $request){
         // https://backend.food2go.pro/customer/otp/change_password
+        // Keys
+        // code, email, password
         $validator = Validator::make($request->all(), [
             'code' => 'required',
+            'email' => 'required',
             'password' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -48,8 +65,13 @@ class OtpController extends Controller
                 'error' => $validator->errors(),
             ],400);
         }
-        $user = $request->user();
-        if ($request->code != $user->code || empty($user->code)) {
+        $user = $this->user
+        ->where('email', $request->email)
+        ->where('code', $request->code)
+        ->orWhere('phone', $request->email)
+        ->where('code', $request->code)
+        ->first();
+        if (empty($user)) {
             return response()->json([
                 'faild' => 'Code is wrong'
             ], 400);

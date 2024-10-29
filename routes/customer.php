@@ -14,6 +14,12 @@ use App\Http\Controllers\api\customer\otp\OtpController;
 
 use App\Http\Controllers\api\customer\make_order\MakeOrderController;
 
+
+Route::controller(OtpController::class)->prefix('otp')->group(function(){
+    Route::post('/create_code', 'create_code');
+    Route::post('/change_password', 'change_password');
+});
+
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::get('/', 'products');
@@ -23,11 +29,6 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
 
     Route::controller(MakeOrderController::class)->prefix('make_order')->group(function(){
         Route::post('/', 'order'); 
-    });
-
-    Route::controller(OtpController::class)->prefix('otp')->group(function(){
-        Route::get('/create_code', 'create_code');
-        Route::post('/change_password', 'change_password');
     });
 
     Route::controller(ProfileController::class)->prefix('profile')->group(function(){
