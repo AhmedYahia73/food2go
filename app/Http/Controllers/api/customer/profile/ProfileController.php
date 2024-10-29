@@ -30,8 +30,10 @@ class ProfileController extends Controller
         $customer->email = $request->email ?? $customer->email;
         $customer->phone = $request->phone ?? $customer->phone;
         $customer->bio = $request->bio ?? $customer->bio;
-        $customer->address = $request->address && is_string($request->address) 
-        ? $request->address : json_encode($request->address);
+        if ($request->address) {
+            $customer->address = $request->address && is_string($request->address) 
+            ? $request->address : json_encode($request->address);
+        }
         if ($request->password && !empty($request->password)) {
             $customer->password = $request->password;
         }
