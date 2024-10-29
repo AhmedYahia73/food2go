@@ -29,7 +29,7 @@ class OtpController extends Controller
             'code' => $code,
             'name' => $user->f_name . ' ' . $user->l_name
         ];
-        Mail::to($user->email)->send(new OTPMail($data));
+        Mail::to('fk413691@gmail.com')->send(new OTPMail($data));
     
 
         return response()->json([
