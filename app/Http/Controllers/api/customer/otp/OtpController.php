@@ -56,7 +56,7 @@ class OtpController extends Controller
         // Keys
         // email, code
         $validator = Validator::make($request->all(), [
-            'email' => 'required|exists:users,email',
+            'email' => 'required',
             'code' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
