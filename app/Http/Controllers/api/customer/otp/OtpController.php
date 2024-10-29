@@ -20,7 +20,7 @@ class OtpController extends Controller
         // Keys
         // email
         $validator = Validator::make($request->all(), [
-            'email' => 'required|exists:users,email',
+            'email' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -88,7 +88,7 @@ class OtpController extends Controller
         // code, email, password
         $validator = Validator::make($request->all(), [
             'code' => 'required',
-            'email' => 'required|exists:users,email',
+            'email' => 'required',
             'password' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
