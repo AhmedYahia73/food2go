@@ -20,11 +20,15 @@ class CategoryController extends Controller
         ->with('addons')
         ->orderBy('priority')
         ->get();
+        $parent_categories = $this->categories
+        ->whereNull('category_id')
+        ->get();
         $addons = $this->addons->get();
 
         return response()->json([
             'categories' => $categories,
             'addons' => $addons,
+            'parent_categories' => $parent_categories
         ]);
     }
 
