@@ -25,11 +25,11 @@ class ProfileController extends Controller
         // f_name, l_name, email, phone, bio, address => key = value
         // password, image
         $customer = $request->user();
-        $customer->f_name = $request->f_name ?? null;
-        $customer->l_name = $request->l_name ?? null;
-        $customer->email = $request->email ?? null;
-        $customer->phone = $request->phone ?? null;
-        $customer->bio = $request->bio ?? null;
+        $customer->f_name = $request->f_name ?? $customer->f_name;
+        $customer->l_name = $request->l_name ?? $customer->l_name;
+        $customer->email = $request->email ?? $customer->email;
+        $customer->phone = $request->phone ?? $customer->phone;
+        $customer->bio = $request->bio ?? $customer->bio;
         $customer->address = $request->address && is_string($request->address) 
         ? $request->address : json_encode($request->address);
         if ($request->password && !empty($request->password)) {

@@ -26,10 +26,8 @@ class ProfileRequest extends FormRequest
     {
         $userId = auth()->user()->id;
         return [
-            'f_name' => ['required'],
-            'l_name' => ['required'],
-            'email' => ['required', 'email', Rule::unique('users')->ignore($userId)],
-            'phone' => ['required', Rule::unique('users')->ignore($userId)],
+            'email' => ['email', Rule::unique('users')->ignore($userId)],
+            'phone' => [Rule::unique('users')->ignore($userId)],
         ];
     }
 
