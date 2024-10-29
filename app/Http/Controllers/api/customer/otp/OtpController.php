@@ -5,7 +5,9 @@ namespace App\Http\Controllers\api\customer\otp;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Validator;use 
+App\Mail\OTPMail;
+use Illuminate\Support\Facades\Mail;
 
 use App\Models\User;
 
@@ -23,6 +25,12 @@ class OtpController extends Controller
         $user = $request->user();
         $user->code = $code;
         $user->save();
+        $data = [
+            'code' => $code,
+            'name' => $user->f_name . ' ' . $user->l_name
+        ];
+        Mail::to($user->email)->send(new OTPMail($data));
+    
 
         return response()->json([
             'code' => $code,
