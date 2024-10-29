@@ -27,6 +27,7 @@ class MakeOrderController extends Controller
     ];
 
     public function order(OrderRequest $request){
+        // https://backend.food2go.pro/customer/make_order
         // Keys
         // date, branch_id, amount, payment_status [paid, unpaid], total_tax, total_discount, address
         // order_type, paid_by
@@ -48,6 +49,7 @@ class MakeOrderController extends Controller
         $adress = json_encode($adress);
         $user->address = $adress;
         $user->save();
+        $request->products = !is_string($request->products) ?? json_decode($request->products);
         if ($request->products) {
             foreach ($request->products as $key => $product) {
                 for ($i=0, $end = $product['count']; $i < $end; $i++) { 
