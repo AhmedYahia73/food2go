@@ -8,10 +8,12 @@ use App\Http\Requests\customer\order\OrderRequest;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\ProductSale;
 
 class MakeOrderController extends Controller
 {
-    public function __construct(private Order $order, private OrderDetail $order_details){}
+    public function __construct(private Order $order, private OrderDetail $order_details,
+    private ProductSale $product_sales){}
     protected $orderRequest = [
         'date',
         'branch_id',
@@ -35,63 +37,68 @@ class MakeOrderController extends Controller
         $orderRequest['order_status'] = 'pending';
         $order = $this->order
         ->create($orderRequest);
-        $adress = json_decode("{}");
-        if (!empty($user->address) && json_decode(($user->address))) {
-            $adress = json_decode(($user->address)); 
+        $adress = $user->address;
+        if (!empty($user->address) && is_string(($user->address))) {
+            $adress = json_decode(($user->address));
+        }
+        elseif (empty($user->address)) {
+            $adress = json_decode('{}');
         }
         $adress->{$request->address} = $request->address;
-        $adress =$adress;
+        $adress = json_encode($adress);
         $user->address = $adress;
         $user->save();
         if ($request->products) {
             foreach ($request->products as $key => $product) {
-                for ($i=0, $end = count($product->count); $i < $end; $i++) { 
-                    $order->products()->attach($product->product_id);
+                for ($i=0, $end = $product['count']; $i < $end; $i++) { 
+                    $order->products()->attach($product['product_id']);
+                    $this->product_sales->create([
+                        'product_id' => $product['product_id'],
+                        'count' => $product['count'],
+                        'date' => date('Y-m-d')
+                    ]);
                 }
-                $order->sales_count()->attach($product->product_id, [
-                    'count' => $product->count
-                ]);
                 $this->order_details
                 ->create([
                     'order_id' => $order->id,
-                    'product_id' => $product->product_id,
-                    'count' => $product->count,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
                     'product_num' => $key,
                 ]); // Add product with count
-                if ($product->exclude_id) {
-                    foreach ($product->exclude_id as $exclude) {
+                if (isset($product['exclude_id'])) {
+                    foreach ($product['exclude_id'] as $exclude) {
                         $this->order_details
                         ->create([
                             'order_id' => $order->id,
-                            'product_id' => $product->product_id,
+                            'product_id' => $product['product_id'],
                             'exclude_id' => $exclude,
-                            'count' => $product->count,
+                            'count' => $product['count'],
                             'product_num' => $key,
                         ]); // Add excludes
                     }
                 }
-                if ($product->extra_id) {
-                    foreach ($product->extra_id as $extra) {
+                if (isset($product['extra_id'])) {
+                    foreach ($product['extra_id'] as $extra) {
                         $this->order_details
                         ->create([
                             'order_id' => $order->id,
-                            'product_id' => $product->product_id,
+                            'product_id' => $product['product_id'],
                             'extra_id' => $extra,
-                            'count' => $product->count,
+                            'count' => $product['count'],
                             'product_num' => $key,
                         ]); // Add extra
                     }
                 }
-                if ($product->variation) {
-                    foreach ($product->variation as $variation) {
-                        foreach ($variation->option_id as $option_id) {
+                if (isset($product['variation'])) {
+                    foreach ($product['variation'] as $variation) {
+                        foreach ($variation['option_id'] as $option_id) {
                             $this->order_details
                             ->create([
                                 'order_id' => $order->id,
-                                'product_id' => $product->product_id,
-                                'variation_id' => $variation->variation_id,
+                                'product_id' => $product['product_id'],
+                                'variation_id' => $variation['variation_id'],
                                 'option_id' => $option_id,
-                                'count' => $product->count,
+                                'count' => $product['count'],
                                 'product_num' => $key,
                             ]); // Add variations & options
                         }
