@@ -47,7 +47,7 @@ class User extends Authenticatable
     }
 
     public function getaddressAttribute($data){
-        return json_decode($data) ?? [];
+        return array_values((array) json_decode($data)) ?? [];
     }
 
     public function getRoleAttribute(){
