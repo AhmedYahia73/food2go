@@ -5,8 +5,8 @@ namespace App\Http\Controllers\api\customer\otp;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Validator;use 
-App\Mail\OTPMail;
+use Illuminate\Support\Facades\Validator;
+use App\Mail\OTPMail;
 use Illuminate\Support\Facades\Mail;
 
 use App\Models\User;
