@@ -20,7 +20,7 @@ class OtpController extends Controller
         // Keys
         // email
         $validator = Validator::make($request->all(), [
-            'email' => 'required',
+            'email' => 'required|exists:users,email',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -43,12 +43,43 @@ class OtpController extends Controller
             'code' => $code,
             'name' => $user->f_name . ' ' . $user->l_name
         ];
-        Mail::to($user->email)->send(new OTPMail($data));
+        Mail::to($request->email)->send(new OTPMail($data));
     
 
         return response()->json([
             'code' => $code,
         ]);
+    }
+
+    public function check_code(Request $request){
+        // https://backend.food2go.pro/customer/otp/check_code
+        // Keys
+        // email, code
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|exists:users,email',
+            'code' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        
+        $user = $this->user
+        ->where('email', $request->email)
+        ->where('code', $request->code)
+        ->orWhere('phone', $request->email)
+        ->where('code', $request->code)
+        ->first();
+        if (!empty($user)) {
+            return response()->json([
+                'success' => 'code is true',
+            ], 200);
+        } else {
+            return response()->json([
+                'faild' => 'code is false',
+            ], 400);
+        }
     }
 
     public function change_password(Request $request){
@@ -57,7 +88,7 @@ class OtpController extends Controller
         // code, email, password
         $validator = Validator::make($request->all(), [
             'code' => 'required',
-            'email' => 'required',
+            'email' => 'required|exists:users,email',
             'password' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
