@@ -20,6 +20,13 @@ class DealController extends Controller
         $today = Carbon::now()->format('l');
         $deals = $this->deals
         ->with('times')
+        ->where('daily', 1)
+        ->where('status', 1)
+        ->where('start_date', '<=', date('Y-m-d'))
+        ->where('end_date', '>=', date('Y-m-d'))
+        ->orWhere('status', 1)
+        ->where('start_date', '<=', date('Y-m-d'))
+        ->where('end_date', '>=', date('Y-m-d'))
         ->whereHas('times', function($query) use($today) {
             $query->where('day', $today)
             ->where('from', '<=', now()->format('H:i:s'))

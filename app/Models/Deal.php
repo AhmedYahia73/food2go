@@ -17,7 +17,10 @@ class Deal extends Model
         'image', 
         'description', 
         'price', 
-        'status', 
+        'status',
+        'daily',
+        'start_date',
+        'end_date',
     ];
 
     public function times(){
