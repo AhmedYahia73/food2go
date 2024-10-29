@@ -31,8 +31,9 @@ class CreateCategoryController extends Controller
         // addons_id[]
         // category_names[{category_name, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
-        $default = $request->category_names[0];
+        $default = json_decode($request->category_names[0]);
         foreach ($request->category_names as $item) {
+            $item = json_decode($item);
             $this->translate($item['tranlation_name'], $default['category_name'], $item['category_name']); 
         }
         $categoryRequest = $request->only($this->categoryRequest);
