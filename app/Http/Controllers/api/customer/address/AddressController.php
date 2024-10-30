@@ -64,6 +64,7 @@ class AddressController extends Controller
         $address->apartment = $address_request->apartment ?? $address->apartment;
         $address->additional_data = $address_request->additional_data ?? $address->additional_data;
         $address->type = $address_request->type ?? $address->type;
+        $address->save();
 
         return response()->json([
             'success' => 'You update data success'
