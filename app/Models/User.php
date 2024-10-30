@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Deal;
+use App\Models\Address;
 
 class User extends Authenticatable
 {
@@ -32,7 +33,6 @@ class User extends Authenticatable
         'status',
         'email_verified_at',
         'points',
-        'address',
         'bio',
         'code',
     ];
@@ -46,8 +46,8 @@ class User extends Authenticatable
         return 'user';
     }
 
-    public function getaddressAttribute($data){
-        return array_values((array) json_decode($data)) ?? [];
+    public function address(){
+        return $this->belongsToMany(Address::class ,'user_address');
     }
 
     public function getRoleAttribute(){

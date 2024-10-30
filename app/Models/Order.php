@@ -28,10 +28,9 @@ class Order extends Model
         'payment_status',
         'total_tax',
         'total_discount',
-        'address',
+        'address_id',
         'paid_by',
         'delivery_id',
-        // address {phone, floor, road, address, latitude, longitude}
     ];
 
     public function customer(){

@@ -21,7 +21,7 @@ class MakeOrderController extends Controller
         'payment_status',
         'total_tax',
         'total_discount',
-        'address',
+        'address_id',
         'order_type',
         'paid_by',
     ];
@@ -29,7 +29,7 @@ class MakeOrderController extends Controller
     public function order(OrderRequest $request){
         // https://backend.food2go.pro/customer/make_order
         // Keys
-        // date, branch_id, amount, payment_status [paid, unpaid], total_tax, total_discount, address
+        // date, branch_id, amount, payment_status [paid, unpaid], total_tax, total_discount, address_id
         // order_type, paid_by
         // products[{product_id, exclude_id[], extra_id[], variation[{variation_id, option_id[]}], count}]
         $orderRequest = $request->only($this->orderRequest);
@@ -38,16 +38,7 @@ class MakeOrderController extends Controller
         $orderRequest['order_status'] = 'pending';
         $order = $this->order
         ->create($orderRequest);
-        $adress = $user->address;
-        if (!empty($user->address) && is_string(($user->address))) {
-            $adress = json_decode(($user->address));
-        }
-        elseif (empty($user->address)) {
-            $adress = json_decode('{}');
-        }
-        $adress->{$request->address} = $request->address;
-        $adress = json_encode($adress);
-        $user->address = $adress;
+        $user->address()->attach($request->address_id);
         $user->save();
         $request->products = !is_string($request->products) ?? json_decode($request->products);
         if ($request->products) {
