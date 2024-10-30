@@ -10,7 +10,7 @@ use App\Models\Address;
 
 class AddressController extends Controller
 {
-    public function __construct(private Address $address){}
+    public function __construct(private Address $address, private Zone $zones){}
     protected $AddressRequest = [
         'zone_id',
         'address',
@@ -27,15 +27,18 @@ class AddressController extends Controller
         $addresses = $this->address
         ->with('zone')
         ->get();
+        $zones = $this->zones->get();
 
         return response()->json([
-            'addresses' => $addresses
+            'addresses' => $addresses,
+            'zones' => $zones,
         ]);
     }
 
     public function add(AddressRequest $request){
         // https://backend.food2go.pro/customer/address/add
         // Keys
+        // zone_id, address, street, building_num, floor_num, apartment, additional_data, type
         $address_request = $request->only($this->AddressRequest);
         $this->address
         ->create($address_request);
