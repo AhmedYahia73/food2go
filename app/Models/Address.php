@@ -11,8 +11,7 @@ class Address extends Model
     
     protected $fillable = [
         'zone_id',
-        'longitude',
-        'latitude',
+        'address',
         'street',
         'building_num',
         'floor_num',

@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('zone_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
-            $table->string('longitude')->nullable();
-            $table->string('latitude')->nullable();
+            $table->string('address')->nullable();
             $table->string('street')->nullable();
             $table->string('building_num')->nullable();
             $table->string('floor_num')->nullable();
