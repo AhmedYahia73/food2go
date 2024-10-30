@@ -17,5 +17,6 @@ class Address extends Model
         'floor_num',
         'apartment',
         'additional_data',
+        'type',
     ];
 }

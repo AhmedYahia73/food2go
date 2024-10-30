@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('floor_num')->nullable();
             $table->string('apartment')->nullable();
             $table->string('additional_data')->nullable();
+            $table->string('type')->nullable();
             $table->timestamps();
         });
     }
