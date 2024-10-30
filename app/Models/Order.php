@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\Addon;
 use App\Models\Delivery;
 use App\Models\Offer;
+use App\Models\Deal;
 
 class Order extends Model
 {
@@ -60,5 +61,9 @@ class Order extends Model
 
     public function offers(){
         return $this->belongsToMany(Offer::class, 'order_product', 'order_id', 'offer_id');
+    }
+
+    public function deal(){
+        return $this->belongsToMany(Deal::class, 'order_product', 'order_id', 'deal_id');
     }
 }

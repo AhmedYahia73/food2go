@@ -31,7 +31,7 @@ class MakeOrderController extends Controller
         // Keys
         // date, branch_id, amount, payment_status [paid, unpaid], total_tax, total_discount, address_id
         // order_type, paid_by
-        // deal_id[]
+        // deal[{deal_id, count}]
         // products[{product_id, exclude_id[], extra_id[], variation[{variation_id, option_id[]}], count}]
         $orderRequest = $request->only($this->orderRequest);
         $user = $request->user();
@@ -42,7 +42,7 @@ class MakeOrderController extends Controller
         $user->address()->attach($request->address_id);
         $user->save();
         if (isset($request->products)) {
-            $request->products = !is_string($request->products) ?? json_decode($request->products);
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
                 for ($i=0, $end = $product['count']; $i < $end; $i++) { 
                     $order->products()->attach($product['product_id']);
@@ -100,8 +100,17 @@ class MakeOrderController extends Controller
                 }
             }
         }
-        if ($request->deal_id) {
-            
+        if ($request->deal) {
+            $request->deal = is_string($request->deal) ? json_decode($request->deal) : $request->deal;
+            foreach ($request->deal as $item) {
+                $order->deal()->attach($item['deal_id']);
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'deal_id' => $item['deal_id'],
+                    'count' => $item['count'],
+                ]); // Add excludes
+            }
         }
 
         return response()->json([
