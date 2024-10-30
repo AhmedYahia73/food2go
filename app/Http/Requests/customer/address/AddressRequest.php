@@ -3,6 +3,8 @@
 namespace App\Http\Requests\customer\address;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class AddressRequest extends FormRequest
 {
@@ -11,7 +13,7 @@ class AddressRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +24,15 @@ class AddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'zone_id' => ['required', 'exists:zones,id'],
+            'address' => ['required'],
         ];
     }
+
+    public function failedValidation(Validator $validator){
+       throw new HttpResponseException(response()->json([
+               'message'=>'validation error',
+               'errors'=>$validator->errors(),
+       ],400));
+   }
 }

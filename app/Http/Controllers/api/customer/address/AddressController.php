@@ -7,10 +7,11 @@ use Illuminate\Http\Request;
 use App\Http\Requests\customer\address\AddressRequest;
 
 use App\Models\Address;
+use App\Models\Zone;
 
 class AddressController extends Controller
 {
-    public function __construct(private Address $address, private Zone $zones){}
+    public function __construct(private Address $address){}
     protected $AddressRequest = [
         'zone_id',
         'address',
@@ -27,7 +28,6 @@ class AddressController extends Controller
         $addresses = $this->address
         ->with('zone')
         ->get();
-        $zones = $this->zones->get();
 
         return response()->json([
             'addresses' => $addresses,
