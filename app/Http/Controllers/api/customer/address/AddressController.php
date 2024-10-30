@@ -56,14 +56,19 @@ class AddressController extends Controller
         $address = $this->address
         ->where('id', $id)
         ->first();
-        $address->zone_id = $address_request->zone_id ?? $address->zone_id;
-        $address->address = $address_request->address ?? $address->address;
-        $address->street = $address_request->street ?? $address->street;
-        $address->building_num = $address_request->building_num ?? $address->building_num;
-        $address->floor_num = $address_request->floor_num ?? $address->floor_num;
-        $address->apartment = $address_request->apartment ?? $address->apartment;
-        $address->additional_data = $address_request->additional_data ?? $address->additional_data;
-        $address->type = $address_request->type ?? $address->type;
+        if (empty($address)) {
+            return response()->json([
+                'faild' => 'Address is not fount'
+            ], 400);
+        } 
+        $address->zone_id = $request->zone_id ?? $address->zone_id;
+        $address->address = $request->address ?? $address->address;
+        $address->street = $request->street ?? $address->street;
+        $address->building_num = $request->building_num ?? $address->building_num;
+        $address->floor_num = $request->floor_num ?? $address->floor_num;
+        $address->apartment = $request->apartment ?? $address->apartment;
+        $address->additional_data = $request->additional_data ?? $address->additional_data;
+        $address->type = $request->type ?? $address->type;
         $address->save();
 
         return response()->json([
