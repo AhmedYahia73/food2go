@@ -8,10 +8,11 @@ use App\Http\Requests\customer\address\AddressRequest;
 
 use App\Models\Address;
 use App\Models\Zone;
+use App\Models\User;
 
 class AddressController extends Controller
 {
-    public function __construct(private Address $address, private Zone $zones){}
+    public function __construct(private Address $address, private Zone $zones, private User $user){}
     protected $AddressRequest = [
         'zone_id',
         'address',
@@ -23,11 +24,12 @@ class AddressController extends Controller
         'type',
     ];
 
-    public function view(){
+    public function view(Request $request){
         // https://backend.food2go.pro/customer/address
-        $addresses = $this->address
-        ->with('zone')
-        ->get();
+        $addresses = $this->user
+        ->where('id', $request->user()->id)
+        ->with('address.zone')
+        ->first()->address; 
         $zones = $this->zones->get();
 
         return response()->json([
