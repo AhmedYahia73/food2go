@@ -48,4 +48,18 @@ class AddressController extends Controller
             'success' => 'You add data success'
         ]);
     }
+
+    public function modify(AddressRequest $request, $id){
+        // https://backend.food2go.pro/customer/address/update/{id}
+        // Keys
+        // zone_id, address, street, building_num, floor_num, apartment, additional_data, type
+        $address_request = $request->only($this->AddressRequest);
+        $this->address
+        ->where('id', $id)
+        ->update($address_request);
+
+        return response()->json([
+            'success' => 'You update data success'
+        ]);
+    }
 }
