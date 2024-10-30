@@ -75,4 +75,15 @@ class AddressController extends Controller
             'success' => 'You update data success'
         ]);
     }
+
+    public function delete($id){
+        // https://backend.food2go.pro/customer/address/delete/{id}
+        $address = $this->address
+        ->where('id', $id)
+        ->delete();
+
+        return response()->json([
+            'success' => 'You delete data success'
+        ]);
+    }
 }
