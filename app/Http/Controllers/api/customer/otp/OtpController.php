@@ -37,13 +37,18 @@ class OtpController extends Controller
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
         ->first();
+        if (empty($user)) {
+            return response()->json([
+                'faild' => 'Email is wrong'
+            ], 400);
+        }
         $user->code = $code;
         $user->save();
         $data = [
             'code' => $code,
             'name' => $user->f_name . ' ' . $user->l_name
         ];
-        Mail::to($request->email)->send(new OTPMail($data));
+        Mail::to($user->email)->send(new OTPMail($data));
     
 
         return response()->json([
