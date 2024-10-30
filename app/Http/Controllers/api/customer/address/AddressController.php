@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Controllers\api\customer\address;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Http\Requests\customer\address\AddressRequest;
+
+use App\Models\Address;
+
+class AddressController extends Controller
+{
+    public function __construct(private Address $address){}
+    protected $AddressRequest = [
+        'zone_id',
+        'address',
+        'street',
+        'building_num',
+        'floor_num',
+        'apartment',
+        'additional_data',
+        'type',
+    ];
+
+    public function view(){
+        // https://backend.food2go.pro/customer/address
+        $addresses = $this->address
+        ->with('zone')
+        ->get();
+
+        return response()->json([
+            'addresses' => $addresses
+        ]);
+    }
+
+    public function add(AddressRequest $request){
+        // https://backend.food2go.pro/customer/address/add
+        // Keys
+        $address_request = $request->only($this->AddressRequest);
+        $this->address
+        ->create($address_request);
+
+        return response()->json([
+            'success' => 'You add data success'
+        ]);
+    }
+}

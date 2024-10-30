@@ -14,6 +14,8 @@ use App\Http\Controllers\api\customer\otp\OtpController;
 
 use App\Http\Controllers\api\customer\make_order\MakeOrderController;
 
+use App\Http\Controllers\api\customer\address\AddressController;
+
 
 Route::controller(OtpController::class)->prefix('otp')->group(function(){
     Route::post('/create_code', 'create_code');
@@ -26,6 +28,13 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/', 'products');
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
+    });
+
+    Route::controller(AddressController::class)->prefix('address')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/add', 'add');
+        Route::put('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(MakeOrderController::class)->prefix('make_order')->group(function(){

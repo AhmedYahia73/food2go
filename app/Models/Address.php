@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Zone;
+
 class Address extends Model
 {
     use HasFactory;
@@ -19,4 +21,8 @@ class Address extends Model
         'additional_data',
         'type',
     ];
+
+    public function zone(){
+        return $this->belongsTo(Zone::class, 'zone_id');
+    }
 }
