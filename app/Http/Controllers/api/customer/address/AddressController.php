@@ -54,9 +54,17 @@ class AddressController extends Controller
         // Keys
         // zone_id, address, street, building_num, floor_num, apartment, additional_data, type
         $address_request = $request->only($this->AddressRequest);
-        $this->address
+        $address = $this->address
         ->where('id', $id)
-        ->update($address_request);
+        ->first();
+        $address->zone_id = $address_request->zone_id ?? $address->zone_id;
+        $address->address = $address_request->address ?? $address->address;
+        $address->street = $address_request->street ?? $address->street;
+        $address->building_num = $address_request->building_num ?? $address->building_num;
+        $address->floor_num = $address_request->floor_num ?? $address->floor_num;
+        $address->apartment = $address_request->apartment ?? $address->apartment;
+        $address->additional_data = $address_request->additional_data ?? $address->additional_data;
+        $address->type = $address_request->type ?? $address->type;
 
         return response()->json([
             'success' => 'You update data success'
