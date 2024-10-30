@@ -11,7 +11,7 @@ use App\Models\Zone;
 
 class AddressController extends Controller
 {
-    public function __construct(private Address $address){}
+    public function __construct(private Address $address, private Zone $zones){}
     protected $AddressRequest = [
         'zone_id',
         'address',
@@ -28,6 +28,7 @@ class AddressController extends Controller
         $addresses = $this->address
         ->with('zone')
         ->get();
+        $zones = $this->zones->get();
 
         return response()->json([
             'addresses' => $addresses,
