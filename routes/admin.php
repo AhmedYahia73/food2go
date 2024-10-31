@@ -203,7 +203,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::delete('/delete/{id}', 'delete');
         });
         
-        Route::controller(SettingController::class)->prefix('discount')->group(function(){
+        Route::controller(SettingController::class)->group(function(){
             Route::get('/view_time_cancel', 'view_time_cancel_order');
             Route::post('/update_time_cancel', 'update_time_cancel_order');
         });
