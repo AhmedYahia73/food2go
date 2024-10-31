@@ -93,4 +93,20 @@ class LoginController extends Controller
             return response()->json(['faield'=>'creational not Valid'],403);
         }
     }
+
+    public function logout(Request $request){
+        // https://backend.food2go.pro/api/logout
+        $user =auth()->user();
+        $deletToken = $user->tokens()->delete();
+        if ($deletToken) {
+            return response()->json([
+                'success' => 'You logout success'
+            ]);
+        } else {
+            return response()->json([
+                'faild' => 'You faild to logout'
+            ], 400);
+        }
+        
+    }
 }
