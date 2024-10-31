@@ -16,6 +16,8 @@ use App\Http\Controllers\api\customer\make_order\MakeOrderController;
 
 use App\Http\Controllers\api\customer\address\AddressController;
 
+use App\Http\Controllers\api\customer\order\OrderController;
+
 
 Route::controller(OtpController::class)->prefix('otp')->group(function(){
     Route::post('/create_code', 'create_code');
@@ -49,6 +51,12 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(OffersController::class)->prefix('offers')->group(function(){
         Route::get('/', 'offers');
         Route::post('/buy_offer', 'buy_offer');
+    });
+
+    Route::controller(OrderController::class)->prefix('orders')->group(function(){
+        Route::get('/', 'order_history');
+        Route::get('/order_status/{id}', 'order_track');
+        Route::put('/cancel/{id}', 'cancel');
     });
 
     Route::controller(DealController::class)->prefix('deal')->group(function(){
