@@ -13,5 +13,6 @@ class Zone extends Model
         'city_id',
         'branch_id',
         'price',
+        'zone',
     ];
 }
