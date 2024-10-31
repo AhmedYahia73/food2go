@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Order;
+use App\Models\Setting;
 
 class OrderController extends Controller
 {
-    public function __construct(private Order $orders){}
+    public function __construct(private Order $orders, private Setting $settings){}
 
     public function upcomming(Request $request){
         // https://backend.food2go.pro/customer/orders
@@ -56,6 +57,18 @@ class OrderController extends Controller
 
         return response()->json([
             'success' => 'You cancel order success'
+        ]);
+    }
+
+    public function cancel_time(){
+        $cancel_time = $this->settings
+        ->where('name', 'time_cancel')
+        ->orderByDesc('id')
+        ->first();
+        $cancel_time = $cancel_time->setting ?? '00:00:00';
+
+        return response()->json([
+            'cancel_time' => $cancel_time
         ]);
     }
 }
