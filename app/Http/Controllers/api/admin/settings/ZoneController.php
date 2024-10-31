@@ -39,6 +39,8 @@ class ZoneController extends Controller
 
     public function create(ZoneRequest $request){
         // https://backend.food2go.pro/admin/settings/zone/add
+        // Keys
+        // city_id, branch_id, price, zone
         $zone_request = $request->only($this->zoneRequest);
         $zone = $this->zones
         ->create($zone_request);
@@ -50,6 +52,8 @@ class ZoneController extends Controller
 
     public function modify(ZoneRequest $request, $id){
         // https://backend.food2go.pro/admin/settings/zone/update/{id}
+        // Keys
+        // city_id, branch_id, price, zone
         $zone_request = $request->only($this->zoneRequest);
         $this->zones
         ->where('id', $id)
