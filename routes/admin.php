@@ -34,6 +34,7 @@ use App\Http\Controllers\api\admin\settings\ExcludeController;
 use App\Http\Controllers\api\admin\settings\TaxController;
 use App\Http\Controllers\api\admin\settings\DiscountController;
 use App\Http\Controllers\api\admin\settings\TranslationController;
+use App\Http\Controllers\api\admin\settings\CityController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
@@ -162,6 +163,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
+            Route::delete('/delete/{id}', 'delete');
+        });
+
+        Route::controller(CityController::class)->prefix('city')->group(function(){
+            Route::get('/', 'view');
+            Route::post('/add', 'create');
+            Route::put('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
         
