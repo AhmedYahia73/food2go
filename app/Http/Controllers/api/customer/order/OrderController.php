@@ -61,6 +61,7 @@ class OrderController extends Controller
     }
 
     public function cancel_time(){
+        // https://backend.food2go.pro/customer/orders/cancel_time
         $cancel_time = $this->settings
         ->where('name', 'time_cancel')
         ->orderByDesc('id')
