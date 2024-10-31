@@ -43,8 +43,9 @@ class AddressController extends Controller
         // Keys
         // zone_id, address, street, building_num, floor_num, apartment, additional_data, type
         $address_request = $request->only($this->AddressRequest);
-        $this->address
+        $address = $this->address
         ->create($address_request);
+        $request->user()->address()->attach($address->id);
 
         return response()->json([
             'success' => 'You add data success'
