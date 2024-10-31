@@ -54,7 +54,8 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(OrderController::class)->prefix('orders')->group(function(){
-        Route::get('/', 'order_history');
+        Route::get('/', 'upcomming');
+        Route::get('/history', 'order_history');
         Route::get('/order_status/{id}', 'order_track');
         Route::put('/cancel/{id}', 'cancel');
     });
