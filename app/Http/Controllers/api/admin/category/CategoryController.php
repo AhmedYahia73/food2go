@@ -6,13 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
 
 use App\Models\Category;
 use App\Models\Addon;
+use App\Models\Translation;
 
 class CategoryController extends Controller
 {
-    public function __construct(private Category $categories, private Addon $addons){}
+    public function __construct(private Category $categories, private Addon $addons,
+    private Translation $translations){}
 
     public function view(){
         // https://backend.food2go.pro/admin/category
@@ -29,6 +32,27 @@ class CategoryController extends Controller
             'categories' => $categories,
             'addons' => $addons,
             'parent_categories' => $parent_categories
+        ]);
+    }
+
+    public function category($id){
+        $category = $this->categories
+        ->where('id', $id)
+        ->first();
+        $translations = $this->translations
+        ->get();
+        $category_names = [];
+        foreach ($translations as $item) {
+            $filePath = base_path("lang/{$item->name}/messages.php");
+            if (File::exists($filePath)) {
+                $translation_file = require $filePath;
+                $category_names[$item->id] = $translation_file[$category->name] ?? null;
+            }
+        }
+
+        return response()->json([
+            'category' => $category,
+            'category_names' => $category_names
         ]);
     }
 

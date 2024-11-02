@@ -143,6 +143,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::prefix('category')->group(function(){
         Route::controller(CategoryController::class)->group(function(){
             Route::get('/', 'view');
+            Route::get('/item/{id}', 'category');
             Route::put('/status/{id}', 'status');
             Route::put('/priority/{id}', 'priority');
         });
