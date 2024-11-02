@@ -36,6 +36,7 @@ class CategoryController extends Controller
     }
 
     public function category($id){
+        // https://backend.food2go.pro/admin/category/item/{id}
         $category = $this->categories
         ->where('id', $id)
         ->first();
