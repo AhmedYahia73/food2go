@@ -9,14 +9,20 @@ use App\Http\Requests\admin\banner\BannerRequest;
 
 use App\Models\Banner;
 use App\Models\Translation;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Deal;
 
 class BannerController extends Controller
 {
-    public function __construct(private Banner $banner, private Translation $translations){}
+    public function __construct(private Banner $banner, private Translation $translations,
+    private Category $categories, private Product $products, private Deal $deals){}
     protected $bannerRequest = [
         'order',
         'translation_id',
-        'link'
+        'category_id',
+        'product_id',
+        'deal_id',
     ];
     use image;
 
@@ -24,13 +30,23 @@ class BannerController extends Controller
         // https://backend.food2go.pro/admin/banner
         $banners = $this->banner
         ->orderBy('order')
+        ->with('category', 'product', 'deal')
         ->get();
         $translations = $this->translations
+        ->get();
+        $categories = $this->categories
+        ->get();
+        $products = $this->products
+        ->get();
+        $deals = $this->deals
         ->get();
 
         return response()->json([
             'banners' => $banners,
             'translations' => $translations,
+            'categories' => $categories,
+            'products' => $products,
+            'deals' => $deals,
         ]);
     }
     

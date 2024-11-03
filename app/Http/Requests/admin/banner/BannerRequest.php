@@ -26,7 +26,10 @@ class BannerRequest extends FormRequest
         return [
             'image' => ['required'],
             'order' => ['required', 'numeric'],
-            'translation_id' => ['required', 'exists:translations,id']
+            'translation_id' => ['required', 'exists:translations,id'],
+            'category_id' => ['exists:categories,id', 'nullable'],
+            'product_id' => ['exists:products,id', 'nullable'],
+            'deal_id' => ['exists:deals,id', 'nullable'],
         ];
     }
 
