@@ -59,7 +59,8 @@ class HomeController extends Controller
         ]);
     }
 
-    public function slider(){   
+    public function slider(){
+        // https://backend.food2go.pro/customer/home/slider
         $banners = $this->banner
         ->orderBy('order')
         ->get();
