@@ -56,8 +56,8 @@ class CreateProductController extends Controller
         //  أول عنصر هو default language
         $default = $request->product_names[0];
         foreach ($request->product_names as $item) {
-            $this->translate($item['tranlation_name'], $default['product_name'], $item['product_name']); 
-            $this->translate($item['tranlation_name'], $default['product_description'], $item['product_description']); 
+            $this->translate($item['tranlation_name'], $default['product_name'], $item['product_name']);
+            $this->translate($item['tranlation_name'], $default['product_description'], $item['product_description']);
         }
         $productRequest = $request->only($this->productRequest);
         $productRequest['name'] = $default['product_name'];

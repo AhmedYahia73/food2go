@@ -16,6 +16,7 @@ class OptionProduct extends Model
         'price',
         'product_id',
         'variation_id',
+        'status',
     ];
 
     public function extra(){
