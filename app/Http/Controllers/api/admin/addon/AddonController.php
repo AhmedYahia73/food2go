@@ -50,7 +50,10 @@ class AddonController extends Controller
             $filePath = base_path("lang/{$item->name}/messages.php");
             if (File::exists($filePath)) {
                 $translation_file = require $filePath;
-                $addons_names[$item->id] = $translation_file[$addon->name] ?? null;
+                $addons_names[] = [
+                    'id' => $item->id,
+                    'name' => $translation_file[$addon->name] ?? null,
+                ];
             }
         }
 
