@@ -13,6 +13,8 @@ use App\Http\Controllers\api\admin\deal\DealController;
 
 use App\Http\Controllers\api\admin\deal_order\DealOrderController;
 
+use App\Http\Controllers\api\admin\banner\BannerController;
+
 use App\Http\Controllers\api\admin\point_offers\PointOffersController;
 
 use App\Http\Controllers\api\admin\customer\CustomerController;
@@ -49,6 +51,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/', 'view');
         Route::get('/link', 'link');
         Route::post('/add', 'create');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(BannerController::class)->prefix('banner')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
     });
 

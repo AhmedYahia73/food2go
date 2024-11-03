@@ -9,10 +9,15 @@ class Banner extends Model
 {
     use HasFactory;
 
-    protected $table = [
+    protected $fillable = [
         'image',
         'order',
         'link',
         'translation_id',
     ];
+    protected $appends = ['image_link'];
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
+    }
 }
