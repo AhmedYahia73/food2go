@@ -6,13 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\addon\AddonRequest;
 use App\trait\translaion;
+use Illuminate\Support\Facades\File;
 
 use App\Models\Addon;
 use App\Models\Tax;
+use App\Models\Translation;
 
 class AddonController extends Controller
 {
-    public function __construct(private Addon $addons, private Tax $taxes){}
+    public function __construct(private Addon $addons, private Tax $taxes,
+    private Translation $translations){}
     protected $addonRequest = [
         'price',
         'tax_id',
@@ -32,6 +35,29 @@ class AddonController extends Controller
             'addons' => $addons,
             'taxes' => $taxes,
         ], 200);
+    }
+
+    public function addon($id){
+        // https://backend.food2go.pro/admin/addons/item/{id}
+        $addon = $this->addons
+        ->with('tax')
+        ->where('id', $id)
+        ->get();
+        $translations = $this->translations
+        ->get();
+        $addons_names = [];
+        foreach ($translations as $item) {
+            $filePath = base_path("lang/{$item->name}/messages.php");
+            if (File::exists($filePath)) {
+                $translation_file = require $filePath;
+                $addons_names[$item->id] = $translation_file[$addon->name] ?? null;
+            }
+        }
+
+        return response()->json([
+            'addon' => $addon,
+            'addons_names' => $addons_names
+        ]);
     }
 
     public function create(AddonRequest $request){

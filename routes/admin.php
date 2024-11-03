@@ -165,6 +165,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(AddonController::class)->prefix('addons')->group(function(){
         Route::get('/', 'view');
+        Route::get('/item/{id}', 'addon');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
