@@ -49,6 +49,7 @@ class CategoryController extends Controller
                 $translation_file = require $filePath;
                 $category_names[] = [
                     'id' => $item->id,
+                    'lang' => $item->name,
                     'name' => $translation_file[$category->name] ?? null
                 ];
             }

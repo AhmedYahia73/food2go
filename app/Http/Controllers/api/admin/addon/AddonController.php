@@ -52,6 +52,7 @@ class AddonController extends Controller
                 $translation_file = require $filePath;
                 $addons_names[] = [
                     'id' => $item->id,
+                    'lang' => $item->name,
                     'name' => $translation_file[$addon->name] ?? null,
                 ];
             }
