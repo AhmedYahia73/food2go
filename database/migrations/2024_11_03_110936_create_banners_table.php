@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('image');
             $table->integer('order');
-            $table->string('link')->nullable();
+            $table->foreignId('category_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('product_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('deal_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('translation_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
