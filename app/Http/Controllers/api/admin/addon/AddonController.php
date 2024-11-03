@@ -23,6 +23,7 @@ class AddonController extends Controller
     public function view(){
         // https://backend.food2go.pro/admin/addons
         $addons = $this->addons
+        ->with('tax')
         ->get();
         $taxes = $this->taxes
         ->get();

@@ -23,6 +23,7 @@ class BannerController extends Controller
     public function view(){
         // https://backend.food2go.pro/admin/banner
         $banners = $this->banner
+        ->orderBy('order')
         ->get();
         $translations = $this->translations
         ->get();

@@ -28,6 +28,7 @@ Route::controller(OtpController::class)->prefix('otp')->group(function(){
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::get('/', 'products');
+        Route::post('/slider', 'slider');
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
     });

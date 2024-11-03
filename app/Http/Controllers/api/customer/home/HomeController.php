@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Banner;
 
 class HomeController extends Controller
 {
     public function __construct(private Category $categories, private User $user,
-    private Product $product){}
+    private Product $product, private Banner $banner){}
 
     public function products(){
         // https://backend.food2go.pro/customer/home
@@ -55,6 +56,16 @@ class HomeController extends Controller
             'categories' => $categories,
             'products' => $products,
             'discounts' => $discounts
+        ]);
+    }
+
+    public function slider(){   
+        $banners = $this->banner
+        ->orderBy('order')
+        ->get();
+
+        return response()->json([
+            'banners' => $banners
         ]);
     }
 
