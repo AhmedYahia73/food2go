@@ -47,7 +47,10 @@ class CategoryController extends Controller
             $filePath = base_path("lang/{$item->name}/messages.php");
             if (File::exists($filePath)) {
                 $translation_file = require $filePath;
-                $category_names[$item->id] = $translation_file[$category->name] ?? null;
+                $category_names[] = [
+                    'id' => $item->id,
+                    'name' => $translation_file[$category->name] ?? null
+                ];
             }
         }
 
