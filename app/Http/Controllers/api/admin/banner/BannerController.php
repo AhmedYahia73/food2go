@@ -21,7 +21,7 @@ class BannerController extends Controller
     use image;
 
     public function view(){
-        // 
+        // https://backend.food2go.pro/admin/banner
         $banners = $this->banner
         ->get();
         $translations = $this->translations
@@ -34,6 +34,7 @@ class BannerController extends Controller
     }
     
     public function create(BannerRequest $request){
+        // https://backend.food2go.pro/admin/banner/add
         $bannerRequest = $request->only($this->bannerRequest);
         if (is_file($request->image)) {
             $image_path = $this->upload($request, 'image', 'admin/banner/image');
@@ -48,6 +49,7 @@ class BannerController extends Controller
     }
     
     public function modify(BannerRequest $request, $id){
+        // https://backend.food2go.pro/admin/banner/update/{id}
         $bannerRequest = $request->only($this->bannerRequest);
         $banner = $this->banner
         ->where('id', $id)
@@ -65,6 +67,7 @@ class BannerController extends Controller
     }
     
     public function delete($id){
+        // https://backend.food2go.pro/admin/banner/delete/{id}
         $banner = $this->banner
         ->where('id', $id)
         ->first();
