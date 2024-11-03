@@ -42,7 +42,7 @@ class AddonController extends Controller
         $addon = $this->addons
         ->with('tax')
         ->where('id', $id)
-        ->get();
+        ->first();
         $translations = $this->translations
         ->get();
         $addons_names = [];
