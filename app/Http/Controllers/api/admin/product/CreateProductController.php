@@ -40,9 +40,12 @@ class CreateProductController extends Controller
     use translaion;
 
     public function create(ProductRequest $request){
+        // http://localhost/food2go/public/admin/product/add?category_id=4&sub_category_id=5&item_type=all&stock_type=unlimited&price=100&product_time_status=0&status=1&recommended=1&points=100&excludes[0][0][exclude_name]=Tomatoa&excludes[0][0][tranlation_id]=1&excludes[0][0][tranlation_name]=en&excludes[0][1][exclude_name]=طماطم&excludes[0][1][tranlation_id]=5&excludes[0][1][tranlation_name]=ar&variations[0][names][0][name]=Size&variations[0][names][0][tranlation_id]=1&variations[0][names][0][tranlation_name]=en&variations[0][names][1][name]=المقاس&variations[0][names][1][tranlation_id]=5&variations[0][names][1][tranlation_name]=ar&variations[0][type]=single&variations[0][required]=1&variations[0][points]=100&variations[0][options][0][names][0][name]=Small&variations[0][options][0][names][0][tranlation_id]=1&variations[0][options][0][names][0][tranlation_name]=en&variations[0][options][0][names][1][name]=صغير&variations[0][options][0][names][1][tranlation_id]=5&variations[0][options][0][names][1][tranlation_name]=ar&variations[0][options][0][price]=100&variations[0][options][0][status]=1&variations[0][options][0][extra_names][0][extra_name]=Exatra 00&variations[0][options][0][extra_names][0][tranlation_id]=1&variations[0][options][0][extra_names][0][tranlation_name]=en&variations[0][options][0][extra_names][1][extra_name]=زيادة 00&variations[0][options][0][extra_names][1][tranlation_id]=5&variations[0][options][0][extra_names][1][tranlation_name]=ar&variations[0][options][0][extra_price]=1000&product_names[0][product_name]=Pizza1&product_names[0][product_description]=Pizza description&product_names[0][tranlation_id]=1&product_names[0][tranlation_name]=en&product_names[1][product_name]=بيتزا 1&product_names[1][product_description]=وصف بيتزا&product_names[1][tranlation_id]=5&product_names[1][tranlation_name]=ar
+        
         // https://backend.food2go.pro/admin/product/add
         // Keys
-        // category_id, sub_category_id, item_type, stock_type, number, price
+        // category_id, sub_category_id, item_type[online, offline, all], 
+        // stock_type[daily, unlimited, fixed], number, price
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
         // excludes[][{exclude_name, tranlation_id, tranlation_name}]
@@ -193,9 +196,12 @@ class CreateProductController extends Controller
             foreach ($request->excludes as $item) {
                 $this->excludes
                 ->create([
-                    'name' => $item['exclude_name'],
+                    'name' => $item[0]['exclude_name'],
                     'product_id' => $product->id
                 ]);
+                foreach ($item as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item[0]['exclude_name'], $element['exclude_name']);
+                }
             }
         }// add new excludes
         $this->extra
@@ -205,10 +211,13 @@ class CreateProductController extends Controller
             foreach ($request->extra as $item) {
                 $extra_num[] = $this->extra
                 ->create([
-                    'name' => $item['extra_name'],
-                    'price' => $item['extra_price'],
+                    'name' => $item[0]['extra_name'],
+                    'price' => $item[0]['extra_price'],
                     'product_id' => $product->id
                 ]);
+                foreach ($item as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item[0]['extra_name'], $element['extra_name']);
+                }
             }
         }// add new extra
         $this->variations
@@ -218,7 +227,7 @@ class CreateProductController extends Controller
             foreach ($request->variations as $item) {
                 $variation = $this->variations
                 ->create([
-                    'name' => $item['name'],
+                    'name' => $item['names'][0]['name'],
                     'type' => $item['type'],
                     'points' => $item['points'],
                     'min' => $item['min'] ?? null,
@@ -226,25 +235,35 @@ class CreateProductController extends Controller
                     'required' => $item['required'],
                     'product_id' => $product->id,
                 ]); // add variation
+                foreach ($item['names'] as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item['names'][0]['name'], $element['name']);
+                }
                 if ($item['options']) {
                     foreach ($item['options'] as $element) {
                         $option = $this->option_product
                         ->create([
-                            'name' => $element['name'],
+                            'name' => $element['names'][0]['name'],
                             'price' => $element['price'],
                             'status' => $element['status'],
                             'product_id' => $product->id,
                             'variation_id' => $variation->id,
                         ]);
-                        if ($element['extra_name']) {
+                        foreach ($element['names'] as $key => $value) {
+                            $this->translate($value['tranlation_name'], $element['names'][0]['name'], $value['name']);
+                        }
+                        if ($element['extra_names']) {
                             $this->extra
                             ->create([
-                                'name' => $element['extra_name'],
+                                'name' => $element['extra_names'][0]['extra_name'],
                                 'price' => $element['extra_price'],
                                 'product_id' => $product->id,
                                 'variation_id' => $variation->id,
                                 'option_id' => $option->id
                             ]);// add extra for option
+
+                            foreach ($element['extra_names'] as $key => $value) {
+                                $this->translate($value['tranlation_name'], $element['extra_names'][0]['extra_name'], $value['extra_name']);
+                            }
                         }
                     } // add options
                 }

@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\Branch;
-use App\Models\Customer;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Addon;
@@ -33,10 +32,6 @@ class Order extends Model
         'paid_by',
         'delivery_id',
     ];
-
-    public function customer(){
-        return $this->belongsTo(Customer::class, 'customer_id');
-    }
 
     public function delivery(){
         return $this->belongsTo(Delivery::class, 'delivery_id');

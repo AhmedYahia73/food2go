@@ -21,4 +21,10 @@ return array (
   'Deal Desc' => 'وصف',
   'Deal 11' => 'وجبة11',
   'Deal Desc11' => 'وصف11',
+  'Pizza1' => 'بيتزا 1',
+  'Pizza description' => 'وصف بيتزا',
+  'Tomatoa' => 'طماطم',
+  'Size' => 'المقاس',
+  'Small' => 'صغير',
+  'Exatra 00' => 'زيادة 00',
 );

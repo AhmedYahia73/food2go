@@ -36,13 +36,13 @@ class ProductRequest extends FormRequest
             'recommended' => ['required', 'boolean'],
             'points' => ['required', 'numeric'],
             'addons.*' => ['exists:addons,id'],
-            'variations.*.name' => ['required'],
+            'variations.*.names.*.name' => ['required'],
             'variations.*.type' => ['required', 'in:multiple,single'],
             'variations.*.min' => ['numeric'],
             'variations.*.points' => ['numeric', 'required'],
             'variations.*.max' => ['numeric'],
             'variations.*.required' => ['required', 'boolean'],
-            'variations.*.options.*.name' => ['required'],
+            'variations.*.options.*.names.*.name' => ['required'],
             'variations.*.options.*.price' => ['required', 'numeric'],
         ];
     }

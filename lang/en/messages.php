@@ -21,4 +21,10 @@ return array (
   'Deal 11' => 'Deal 11',
   'Deal Desc11' => 'Deal Desc11',
   'Salad' => 'Salad',
+  'Pizza1' => 'Pizza1',
+  'Pizza description' => 'Pizza description',
+  'Tomatoa' => 'Tomatoa',
+  'Size' => 'Size',
+  'Small' => 'Small',
+  'Exatra 00' => 'Exatra 00',
 );
