@@ -45,13 +45,15 @@ class CreateProductController extends Controller
         // category_id, sub_category_id, item_type, stock_type, number, price
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
-        // excludes[][exclude_name]
-        // extra[][extra_name], extra[][extra_price]
-        // variations[][name] ,variations[][type] ,variations[][min] ,variations[][max]
+        // excludes[][{exclude_name, tranlation_id, tranlation_name}]
+        // extra[][{extra_name, extra_price, tranlation_id, tranlation_name}]
+        // variations[][names][{name, tranlation_id, tranlation_name}] ,variations[][type],
+        // variations[][min] ,variations[][max]
         // variations[][required], variations[][points]
-        // variations[][options][][name], variations[][options][][price], 
-        // variations[][options][][extra_name], variations[][options][][extra_price],
-        //  variations[][options][][extra_number] ترتيبها 0, 1, 2
+        // variations[][options][][names][{name, tranlation_id, tranlation_name}], 
+        // variations[][options][][price], variations[][options][][status], 
+        // variations[][options][][extra_names][{extra_name, tranlation_id, tranlation_name}], 
+        // variations[][options][][extra_price], 
         // product_names[{product_name, product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->product_names[0];
@@ -76,26 +78,32 @@ class CreateProductController extends Controller
             foreach ($request->excludes as $item) {
                 $this->excludes
                 ->create([
-                    'name' => $item['exclude_name'],
+                    'name' => $item[0]['exclude_name'],
                     'product_id' => $product->id
                 ]);
+                foreach ($item as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item[0]['exclude_name'], $element['exclude_name']);
+                }
             }
         }// add excludes
         if ($request->extra) {
             foreach ($request->extra as $item) {
                 $extra_num[] = $this->extra
                 ->create([
-                    'name' => $item['extra_name'],
-                    'price' => $item['extra_price'],
+                    'name' => $item[0]['extra_name'],
+                    'price' => $item[0]['extra_price'],
                     'product_id' => $product->id
                 ]);
+                foreach ($item as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item[0]['extra_name'], $element['extra_name']);
+                }
             }
         }// add extra
         if ($request->variations) {
             foreach ($request->variations as $item) {
                 $variation = $this->variations
                 ->create([
-                    'name' => $item['name'],
+                    'name' => $item['names'][0]['name'],
                     'type' => $item['type'],
                     'min' => $item['min'] ?? null,
                     'max' => $item['max'] ?? null,
@@ -103,24 +111,34 @@ class CreateProductController extends Controller
                     'required' => $item['required'],
                     'product_id' => $product->id,
                 ]); // add variation
+                foreach ($item['names'] as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item['names'][0]['name'], $element['name']);
+                }
                 foreach ($item['options'] as $element) {
                     $option = $this->option_product
                     ->create([
-                        'name' => $element['name'],
+                        'name' => $element['names'][0]['name'],
                         'price' => $element['price'],
+                        'status' => $element['status'],
                         'product_id' => $product->id,
                         'variation_id' => $variation->id,
                     ]);// add options
-                    if ($element['extra_name']) {
+                    foreach ($element['names'] as $key => $value) {
+                        $this->translate($value['tranlation_name'], $element['names'][0]['name'], $value['name']);
+                    }
+                    if ($element['extra_names']) {
                         $this->extra
                         ->create([
-                            'name' => $element['extra_name'],
+                            'name' => $element['extra_names'][0]['extra_name'],
                             'price' => $element['extra_price'],
                             'product_id' => $product->id,
                             'variation_id' => $variation->id,
-                            'extra_id' => $extra_num[$element['extra_number']]->id,
                             'option_id' => $option->id
                         ]);// add extra for option
+
+                        foreach ($element['extra_names'] as $key => $value) {
+                            $this->translate($value['tranlation_name'], $element['extra_names'][0]['extra_name'], $value['extra_name']);
+                        }
                     }
                 } 
             }
@@ -214,6 +232,7 @@ class CreateProductController extends Controller
                         ->create([
                             'name' => $element['name'],
                             'price' => $element['price'],
+                            'status' => $element['status'],
                             'product_id' => $product->id,
                             'variation_id' => $variation->id,
                         ]);
@@ -224,7 +243,6 @@ class CreateProductController extends Controller
                                 'price' => $element['extra_price'],
                                 'product_id' => $product->id,
                                 'variation_id' => $variation->id,
-                                'extra_id' => $extra_num[$element['extra_number']]->id,
                                 'option_id' => $option->id
                             ]);// add extra for option
                         }

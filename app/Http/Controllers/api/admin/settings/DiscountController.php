@@ -28,6 +28,8 @@ class DiscountController extends Controller
 
     public function create(DiscountRequest $request){
         // https://backend.food2go.pro/admin/settings/discount/add
+        // Keys
+        // name, type, amount
         $discountRequest = $request->only($this->discountRequest);
         $this->discount->create($discountRequest);
 
@@ -38,6 +40,8 @@ class DiscountController extends Controller
 
     public function modify(DiscountRequest $request, $id){
         // https://backend.food2go.pro/admin/settings/discount/update/{id}
+        // Keys
+        // name, type, amount
         $discountRequest = $request->only($this->discountRequest);
         $this->discount
         ->where('id', $id)
