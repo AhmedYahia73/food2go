@@ -31,6 +31,7 @@ class Order extends Model
         'address_id',
         'paid_by',
         'delivery_id',
+        'notes',
     ];
 
     public function delivery(){
