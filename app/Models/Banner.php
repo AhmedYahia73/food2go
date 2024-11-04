@@ -27,7 +27,7 @@ class Banner extends Model
         return url('storage/' . $this->attributes['image']);
     }
 
-    public function category(){
+    public function category_banner(){
         return $this->belongsTo(Category::class, 'category_id');
     }
 

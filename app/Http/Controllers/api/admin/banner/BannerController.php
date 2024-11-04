@@ -30,7 +30,7 @@ class BannerController extends Controller
         // https://backend.food2go.pro/admin/banner
         $banners = $this->banner
         ->orderBy('order')
-        ->with('category', 'product', 'deal')
+        ->with('category_banner', 'product', 'deal')
         ->get();
         $translations = $this->translations
         ->get();

@@ -62,7 +62,7 @@ class HomeController extends Controller
     public function slider(){
         // https://backend.food2go.pro/customer/home/slider
         $banners = $this->banner
-        ->with('category')
+        ->with('category_banner')
         ->orderBy('order')
         ->get();
 
