@@ -31,10 +31,10 @@ class CreateCategoryController extends Controller
         // addons_id[]
         // category_names[{category_name, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
-        // $request->addons_id = is_string($request->addons_id) ? json_decode($request->addons_id)
-        // : $request->addons_id;
-        // $request->category_names = is_string($request->category_names) ? json_decode($request->category_names)
-        // : $request->category_names;
+        $request->addons_id = is_string($request->addons_id) ? json_decode($request->addons_id)
+        : $request->addons_id;
+        $request->category_names = is_string($request->category_names) ? json_decode($request->category_names)
+        : $request->category_names;
         $default = $request->category_names[0];
         foreach ($request->category_names as $item) {
             $this->translate($item['tranlation_name'], $default['category_name'], $item['category_name']); 
