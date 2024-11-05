@@ -6,14 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Product;
-use App\Models\Category;
 use App\Models\Discount;
 use App\Models\Tax;
 use App\Models\ProductReview;
 
 class ProductController extends Controller
 {
-    public function __construct(private Product $products, private Category $categories,
+    public function __construct(private Product $products,
     private Discount $discounts, private Tax $taxes, private ProductReview $reviews){}
 
     public function view(){
@@ -21,8 +20,6 @@ class ProductController extends Controller
         $products = $this->products
         ->with(['addons', 'excludes', 'extra', 'variations.options.extra.parent_extra'])
         ->get();//extra_id
-        $categories = $this->categories
-        ->get();
         $discounts = $this->discounts
         ->get();
         $taxes = $this->taxes
@@ -30,7 +27,6 @@ class ProductController extends Controller
 
         return response()->json([
             'products' => $products,
-            'categories' => $categories,
             'discounts' => $discounts,
             'taxes' => $taxes,
         ]);

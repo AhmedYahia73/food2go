@@ -25,12 +25,12 @@ class OrderRequest extends FormRequest
     {
         return [
             'date' => ['required', 'date'],
-            'branch_id' => ['exists:branches,id'],
+            'branch_id' => ['exists:branches,id', 'nullable'],
             'amount' => ['required', 'numeric'],
             'payment_status' => ['required'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
-            'address_id' => ['exists:addresses,id'],
+            'address_id' => ['exists:addresses,id', 'nullable'],
             'order_type' => ['required', 'in:take_away,dine_in,delivery'],
             'paid_by' => ['required', 'in:cash,card'],
             'products.*.product_id' => ['exists:products,id', 'required'],
