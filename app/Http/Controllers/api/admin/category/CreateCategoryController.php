@@ -41,11 +41,11 @@ class CreateCategoryController extends Controller
         }
         $categoryRequest = $request->only($this->categoryRequest);
         $categoryRequest['name'] = $default['category_name'];
-        if (is_file($request->image)) {
+        if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/category/image');
             $categoryRequest['image'] = $imag_path;
         } // if send image upload it
-        if (is_file($request->banner_image)) {
+        if ($request->banner_image) {
             $imag_path = $this->upload($request, 'banner_image', 'admin/category/banner_image');
             $categoryRequest['banner_image'] = $imag_path;
         } // if send image upload it
