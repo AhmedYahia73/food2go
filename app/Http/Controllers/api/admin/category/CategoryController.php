@@ -26,12 +26,16 @@ class CategoryController extends Controller
         $parent_categories = $this->categories
         ->whereNull('category_id')
         ->get();
+        $sub_categories = $this->categories
+        ->whereNotNull('category_id')
+        ->get();
         $addons = $this->addons->get();
 
         return response()->json([
             'categories' => $categories,
             'addons' => $addons,
-            'parent_categories' => $parent_categories
+            'parent_categories' => $parent_categories,
+            'sub_categories' => $sub_categories,
         ]);
     }
 
