@@ -42,14 +42,8 @@ class OffersController extends Controller
         $offer = $this->offers
         ->where('id', $request->offer_id)
         ->first();
-        $user = $request->user();
         $user->points = $user->points - $offer->points;
-        if ($request->address) {
-            $address = json_decode($user->address) ?? new stdClass();
-            $address->{$request->address} = $request->address;
-            $user->address = json_encode($address);
-        }
-        $user->save();
+
         $order = $this->orders
         ->create([
             'date' => $request->date,

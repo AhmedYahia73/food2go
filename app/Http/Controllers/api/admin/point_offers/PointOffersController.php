@@ -36,6 +36,8 @@ class PointOffersController extends Controller
         // points, image
         // offer_names[{offer_product, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
+        $request->offer_names = is_string($request->offer_names) ? json_decode($request->offer_names): 
+        $request->offer_names;
         $default = $request->offer_names[0];
         foreach ($request->offer_names as $item) {
             $this->translate($item['tranlation_name'], $default['offer_product'], $item['offer_product']); 
