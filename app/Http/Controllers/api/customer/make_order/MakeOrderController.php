@@ -59,7 +59,6 @@ class MakeOrderController extends Controller
                     'product_id' => $product['product_id'],
                     'count' => $product['count'],
                     'product_index' => $key,
-                    'product_index' => $product->id,
                 ]); // Add product with count
                 if (isset($product['exclude_id'])) {
                     foreach ($product['exclude_id'] as $exclude) {
