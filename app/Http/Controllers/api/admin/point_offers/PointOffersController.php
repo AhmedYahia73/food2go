@@ -43,10 +43,11 @@ class PointOffersController extends Controller
         $offerRequest = $request->only($this->offerRequest);
         $offerRequest['product'] = $default['offer_product'];
 
-        if (is_file($request->image)) {
+        if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/point_offers/image');
             $offerRequest['image'] = $imag_path;
         }
+        
         $offer = $this->offers
         ->create($offerRequest);
 
