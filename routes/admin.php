@@ -28,6 +28,8 @@ use App\Http\Controllers\api\admin\product\CreateProductController;
 use App\Http\Controllers\api\admin\pos\PosOrderController;
 use App\Http\Controllers\api\admin\pos\PosSaleController;
 
+use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
+
 use App\Http\Controllers\api\admin\coupon\CouponController;
 use App\Http\Controllers\api\admin\coupon\CreateCouponController;
 
@@ -72,6 +74,10 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(DealOrderController::class)->prefix('dealOrder')->group(function(){
         Route::get('/', 'deal_order');
         Route::put('/status', 'status');
+    });
+
+    Route::controller(OfferOrderController::class)->prefix('offerOrder')->group(function(){
+        Route::post('/', 'check_order');
     });
 
     // Make Deal Module

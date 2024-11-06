@@ -14,5 +14,10 @@ class OfferOrder extends Model
         'user_id',
         'code',
         'date',
+        'status',
     ];
+
+    public function offer(){
+        return $this->belongsTo(Offer::class, 'offer_id');
+    }
 }
