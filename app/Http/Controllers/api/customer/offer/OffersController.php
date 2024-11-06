@@ -30,7 +30,7 @@ class OffersController extends Controller
     public function buy_offer(Request $request){
         // https://backend.food2go.pro/customer/offers/buy_offer
         // Keys
-        // address, offer_id, date, order_type
+        // offer_id
         $validator = Validator::make($request->all(), [
             'offer_id' => 'required|exists:offers,id',
         ]);
@@ -54,7 +54,7 @@ class OffersController extends Controller
         ->create([
             'date' => now(),
             'user_id' => $request->user()->id,
-            'code' => $code,
+            'code' => $ref_number,
             'offer_id' => $request->offer_id,
         ]);
         // $order->offers()->attach($request->offer_id);
