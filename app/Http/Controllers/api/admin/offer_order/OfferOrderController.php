@@ -24,7 +24,7 @@ class OfferOrderController extends Controller
             ],400);
         }
 
-        $nowPlusThreeMinutes = Carbon::now()->addMinutes(3);
+        $nowPlusThreeMinutes = Carbon::now()->subMinutes(3);
         $offer_order = $this->offer_order
         ->where('date', '>=', $nowPlusThreeMinutes)
         ->where('code', $request->code)
