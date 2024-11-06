@@ -70,16 +70,20 @@ class DealController extends Controller
         // price, status, image
         // times[0][day], times[0][from], times[0][to]
         // Days [Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
-        // deal_names[{deal_title, deal_description, tranlation_id, tranlation_name}]
+        // deal_names[{deal_title, tranlation_id, tranlation_name}]
+        // deal_descriptions[{deal_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->deal_names[0];
+        $default_description = $request->deal_descriptions[0];
         foreach ($request->deal_names as $item) {
-            $this->translate($item['tranlation_name'], $default['deal_title'], $item['deal_title']); 
-            $this->translate($item['tranlation_name'], $default['deal_description'], $item['deal_description']); 
+            $this->translate($item['tranlation_name'], $default['deal_title'], $item['deal_title']);
+        }
+        foreach ($request->deal_descriptions as $item) {
+            $this->translate($item['tranlation_name'], $default_description['deal_description'], $item['deal_description']); 
         }
         $dealRequest = $request->only($this->dealRequest);
         $dealRequest['title'] = $default['deal_title'];
-        $dealRequest['description'] = $default['deal_description'];
+        $dealRequest['description'] = $default_description['deal_description'];
 
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/deals/image');
@@ -106,19 +110,23 @@ class DealController extends Controller
     public function modify(DealRequest $request, $id){
         // https://backend.food2go.pro/admin/deal/update/{id}
         // Keys
-        // title, description, price, status, image
+        // price, status, image
         // times[0][day], times[0][from], times[0][to]
         // Days [Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
-        // deal_names[{deal_title, deal_description, tranlation_id, tranlation_name}]
+        // deal_names[{deal_title, tranlation_id, tranlation_name}]
+        // deal_descriptions[{deal_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->deal_names[0];
+        $default_description = $request->deal_descriptions[0];
         foreach ($request->deal_names as $item) {
-            $this->translate($item['tranlation_name'], $default['deal_title'], $item['deal_title']); 
-            $this->translate($item['tranlation_name'], $default['deal_description'], $item['deal_description']); 
+            $this->translate($item['tranlation_name'], $default['deal_title'], $item['deal_title']);
+        }
+        foreach ($request->deal_descriptions as $item) {
+            $this->translate($item['tranlation_name'], $default_description['deal_description'], $item['deal_description']); 
         }
         $dealRequest = $request->only($this->dealRequest);
         $dealRequest['title'] = $default['deal_title'];
-        $dealRequest['description'] = $default['deal_description'];
+        $dealRequest['description'] = $default_description['deal_description'];
         $deal = $this->deals
         ->where('id', $id)
         ->first();
