@@ -11,10 +11,12 @@ use stdClass;
 use App\Models\Offer;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\OfferOrder;
 
 class OffersController extends Controller
 {
-    public function __construct(private Offer $offers, private User $user, private Order $orders){}
+    public function __construct(private Offer $offers, private User $user, private Order $orders,
+    private OfferOrder $offer_order){}
 
     public function offers(){
         // https://backend.food2go.pro/customer/offers
@@ -31,32 +33,34 @@ class OffersController extends Controller
         // address, offer_id, date, order_type
         $validator = Validator::make($request->all(), [
             'offer_id' => 'required|exists:offers,id',
-            'date' => 'date',
-            'order_type' => 'in:delivery,take_away,dine_in'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'error' => $validator->errors(),
             ],400);
-        }
-        $offer = $this->offers
-        ->where('id', $request->offer_id)
+        } 
+        $ref_number = rand(100000 , 999999);
+        $data = $this->offer_order
+        ->where('code', $ref_number)
         ->first();
-        $user->points = $user->points - $offer->points;
+        while (!empty($data)) {
+            $ref_number = rand(100000 , 999999);
+            $data = $this->offer_order
+            ->where('code', $ref_number)
+            ->first();
+        }
 
-        $order = $this->orders
+        $order = $this->offer_order
         ->create([
-            'date' => $request->date,
-            'user_id' => $user->id,
-            'amount' => 0,
-            'order_status' => 'pending',
-            'order_type' => $request->order_type,
-            'paid_by' => 'points'
+            'date' => now(),
+            'user_id' => $request->user()->id,
+            'code' => $code,
+            'offer_id' => $request->offer_id,
         ]);
-        $order->offers()->attach($request->offer_id);
+        // $order->offers()->attach($request->offer_id);
 
         return response()->json([
-            'success' => 'You buy offer success'
+            'ref_number' => $ref_number
         ]);
     }
 }
