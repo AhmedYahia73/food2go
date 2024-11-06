@@ -33,7 +33,7 @@ class PointOffersController extends Controller
     public function create(PointOfferRequest $request){
         // https://backend.food2go.pro/admin/offer/add
         // Keys
-        // points
+        // points, image
         // offer_names[{offer_product, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->offer_names[0];
@@ -58,7 +58,7 @@ class PointOffersController extends Controller
     public function modify(PointOfferRequest $request, $id){
         // https://backend.food2go.pro/admin/offer/update/{id}
         // Keys
-        // points
+        // points, image
         // offer_names[{offer_product, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->offer_names[0];

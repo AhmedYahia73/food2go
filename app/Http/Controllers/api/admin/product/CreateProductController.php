@@ -49,7 +49,8 @@ class CreateProductController extends Controller
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
         // excludes[][{exclude_name, tranlation_id, tranlation_name}]
-        // extra[][{extra_name, extra_price, tranlation_id, tranlation_name}]
+        // extra[][names][{extra_name, tranlation_id, tranlation_name}]
+        // extra[][extra_price]
         // variations[][names][{name, tranlation_id, tranlation_name}] ,variations[][type],
         // variations[][min] ,variations[][max]
         // variations[][required], variations[][points]
@@ -57,16 +58,20 @@ class CreateProductController extends Controller
         // variations[][options][][price], variations[][options][][status], 
         // variations[][options][][extra_names][{extra_name, tranlation_id, tranlation_name}], 
         // variations[][options][][extra_price], 
-        // product_names[{product_name, product_description, tranlation_id, tranlation_name}]
+        // product_names[{product_name, tranlation_id, tranlation_name}]
+        // product_descriptions[{product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->product_names[0];
+        $default_description = $request->product_descriptions[0];
         foreach ($request->product_names as $item) {
             $this->translate($item['tranlation_name'], $default['product_name'], $item['product_name']);
-            $this->translate($item['tranlation_name'], $default['product_description'], $item['product_description']);
+        }
+        foreach ($request->product_descriptions as $item) {
+            $this->translate($item['tranlation_name'], $default_description['product_description'], $item['product_description']);
         }
         $productRequest = $request->only($this->productRequest);
         $productRequest['name'] = $default['product_name'];
-        $productRequest['description'] = $default['product_description'];
+        $productRequest['description'] = $default_description['product_description'];
         $extra_num = [];
 
         if (is_file($request->image)) {
@@ -93,12 +98,12 @@ class CreateProductController extends Controller
             foreach ($request->extra as $item) {
                 $extra_num[] = $this->extra
                 ->create([
-                    'name' => $item[0]['extra_name'],
-                    'price' => $item[0]['extra_price'],
+                    'name' => $item['names'][0]['extra_name'],
+                    'price' => $item['extra_price'],
                     'product_id' => $product->id
                 ]);
-                foreach ($item as $key => $element) {
-                    $this->translate($element['tranlation_name'], $item[0]['extra_name'], $element['extra_name']);
+                foreach ($item['names'] as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item['names'][0]['extra_name'], $element['extra_name']);
                 }
             }
         }// add extra
@@ -148,34 +153,43 @@ class CreateProductController extends Controller
         }
 
         return response()->json([
-            'success' => 'You add product success'
+            'success' => 'You add data success'
         ]);
     }
 
     public function modify(ProductRequest $request, $id){
         // https://backend.food2go.pro/admin/product/update/{id}
         // Keys
-        // category_id, sub_category_id, item_type, stock_type, number, price
+        // Keys
+        // category_id, sub_category_id, item_type[online, offline, all], 
+        // stock_type[daily, unlimited, fixed], number, price
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
-        // excludes[][exclude_name]
-        // extra[][extra_name], extra[][extra_price]
-        // variations[][name] ,variations[][type] ,variations[][min] ,variations[][max]
+        // excludes[][{exclude_name, tranlation_id, tranlation_name}]
+        // extra[][names][{extra_name, tranlation_id, tranlation_name}]
+        // extra[][extra_price]
+        // variations[][names][{name, tranlation_id, tranlation_name}] ,variations[][type],
+        // variations[][min] ,variations[][max]
         // variations[][required], variations[][points]
-        // variations[][options][][name], variations[][options][][price],
-        // variations[][options][][extra_name], variations[][options][][extra_price],
-        //  variations[][options][][extra_number] ترتيبها
-        // product_names[{product_name, product_description, tranlation_id, tranlation_name}]
+        // variations[][options][][names][{name, tranlation_id, tranlation_name}], 
+        // variations[][options][][price], variations[][options][][status], 
+        // variations[][options][][extra_names][{extra_name, tranlation_id, tranlation_name}], 
+        // variations[][options][][extra_price], 
+        // product_names[{product_name, tranlation_id, tranlation_name}]
+        // product_descriptions[{product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
-        $default = $request->product_names[0];
         $extra_num = [];
+        $default = $request->product_names[0];
+        $default_description = $request->product_descriptions[0];
         foreach ($request->product_names as $item) {
-            $this->translate($item['tranlation_name'], $default['product_name'], $item['product_name']); 
-            $this->translate($item['tranlation_name'], $default['product_description'], $item['product_description']); 
+            $this->translate($item['tranlation_name'], $default['product_name'], $item['product_name']);
+        }
+        foreach ($request->product_descriptions as $item) {
+            $this->translate($item['tranlation_name'], $default_description['product_description'], $item['product_description']);
         }
         $productRequest = $request->only($this->productRequest);
         $productRequest['name'] = $default['product_name'];
-        $productRequest['description'] = $default['product_description'];
+        $productRequest['description'] = $default_description['product_description'];
         
         $product = $this->products->
         where('id', $id)
@@ -211,12 +225,12 @@ class CreateProductController extends Controller
             foreach ($request->extra as $item) {
                 $extra_num[] = $this->extra
                 ->create([
-                    'name' => $item[0]['extra_name'],
-                    'price' => $item[0]['extra_price'],
+                    'name' => $item['names'][0]['extra_name'],
+                    'price' => $item['extra_price'],
                     'product_id' => $product->id
                 ]);
-                foreach ($item as $key => $element) {
-                    $this->translate($element['tranlation_name'], $item[0]['extra_name'], $element['extra_name']);
+                foreach ($item['names'] as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item['names'][0]['extra_name'], $element['extra_name']);
                 }
             }
         }// add new extra

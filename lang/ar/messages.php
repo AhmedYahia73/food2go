@@ -22,7 +22,7 @@ return array (
   'Deal 11' => 'وجبة11',
   'Deal Desc11' => 'وصف11',
   'Pizza1' => 'بيتزا 1',
-  'Pizza description' => 'وصف بيتزا',
+  'Pizza description' => 'وصف البيتزا',
   'Tomatoa' => 'طماطم',
   'Size' => 'المقاس',
   'Small' => 'صغير',
