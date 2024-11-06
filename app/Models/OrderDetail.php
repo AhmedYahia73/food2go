@@ -18,5 +18,6 @@ class OrderDetail extends Model
         'order_id',
         'count',
         'deal_id',
+        'product_index',
     ];
 }

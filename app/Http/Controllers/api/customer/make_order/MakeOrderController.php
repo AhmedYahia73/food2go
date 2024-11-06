@@ -58,7 +58,8 @@ class MakeOrderController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $product['product_id'],
                     'count' => $product['count'],
-                    'product_num' => $key,
+                    'product_index' => $key,
+                    'product_index' => $product->id,
                 ]); // Add product with count
                 if (isset($product['exclude_id'])) {
                     foreach ($product['exclude_id'] as $exclude) {
@@ -68,7 +69,7 @@ class MakeOrderController extends Controller
                             'product_id' => $product['product_id'],
                             'exclude_id' => $exclude,
                             'count' => $product['count'],
-                            'product_num' => $key,
+                            'product_index' => $key,
                         ]); // Add excludes
                     }
                 }
@@ -80,7 +81,7 @@ class MakeOrderController extends Controller
                             'product_id' => $product['product_id'],
                             'extra_id' => $extra,
                             'count' => $product['count'],
-                            'product_num' => $key,
+                            'product_index' => $key,
                         ]); // Add extra
                     }
                 }
@@ -94,7 +95,7 @@ class MakeOrderController extends Controller
                                 'variation_id' => $variation['variation_id'],
                                 'option_id' => $option_id,
                                 'count' => $product['count'],
-                                'product_num' => $key,
+                                'product_index' => $key,
                             ]); // Add variations & options
                         }
                     }
