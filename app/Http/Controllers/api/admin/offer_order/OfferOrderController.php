@@ -12,6 +12,7 @@ use App\Models\OfferOrder;
 use App\Models\Offer;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\OrderDetail;
 
 class OfferOrderController extends Controller
 {
