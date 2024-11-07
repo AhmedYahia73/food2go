@@ -30,9 +30,9 @@ class OfferOrderController extends Controller
             ],400);
         }
 
-        $nowPlusThreeMinutes = Carbon::now()->subMinutes(3);
+        $nowSubThreeMinutes = Carbon::now()->subMinutes(3);
         $offer_order = $this->offer_order
-        ->where('date', '>=', $nowPlusThreeMinutes)
+        ->where('date', '>=', $nowSubThreeMinutes)
         ->where('code', $request->code)
         ->first();
 

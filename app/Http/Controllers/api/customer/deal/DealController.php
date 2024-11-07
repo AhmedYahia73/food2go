@@ -58,7 +58,8 @@ class DealController extends Controller
             $ref_number = rand(100000 , 999999);
             $data = $user->deals->where('pivot.ref_number', $ref_number);
         }
-        $user->deals()->attach($request->deal_id, ['ref_number' => $ref_number]);
+        $user->deals()->attach($request->deal_id, ['ref_number' => $ref_number,
+        'created_at' => now()]);
 
         return response()->json([
             'ref_number' => $ref_number,

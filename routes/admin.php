@@ -72,8 +72,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     // Make Deal Module
     Route::controller(DealOrderController::class)->prefix('dealOrder')->group(function(){
-        Route::get('/', 'deal_order');
-        Route::put('/status', 'status');
+        Route::post('/', 'deal_order');
+        Route::post('/add', 'add');
     });
 
     Route::controller(OfferOrderController::class)->prefix('offerOrder')->group(function(){

@@ -91,6 +91,6 @@ class User extends Authenticatable
 
     public function deals(){
         return $this->belongsToMany(Deal::class, 'deal_user')
-        ->withPivot('ref_number');;
+        ->withPivot(['ref_number', 'created_at']);;
     }
 }
