@@ -78,6 +78,7 @@ class OfferOrderController extends Controller
             'user_id' => $user->id,
             'amount' => 0,
             'order_status' => 'delivered',
+            'order_type' => 'application',
             'paid_by' => 'points'
         ]);
         $order->offers()->attach($offer_order->offer->id);
