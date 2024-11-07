@@ -60,7 +60,7 @@ class OfferOrderController extends Controller
             ],400);
         }
         $offer_order = $this->offer_order
-        ->where('id', $offer_order_id)
+        ->where('id', $request->offer_order_id)
         ->first();
 
         $user = $this->user
