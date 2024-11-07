@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Models\OfferOrder;
 use App\Models\Offer;
 use App\Models\Order;
+use App\Models\User;
 
 class OfferOrderController extends Controller
 {
