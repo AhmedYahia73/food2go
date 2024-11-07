@@ -32,6 +32,7 @@ class OrderController extends Controller
             }
             foreach ($product as $key => $item) {
                 $item['addons'] = $addon[$key] ?? null;
+                $item['count'] = $detail->count;
                 $items[] = $item;
             }
             $order->items = $items;
@@ -44,7 +45,7 @@ class OrderController extends Controller
 
     public function status(Request $request){
         // Keys
-        // order_id, order_status
+        // order_id, order_status[out_for_delivery, delivered]
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
             'order_status' => 'required|in:out_for_delivery,delivered',
