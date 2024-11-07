@@ -78,6 +78,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(OfferOrderController::class)->prefix('offerOrder')->group(function(){
         Route::post('/', 'check_order');
+        Route::post('/approve_offer', 'approve_offer');
     });
 
     // Make Deal Module

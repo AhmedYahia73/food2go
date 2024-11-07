@@ -9,12 +9,16 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 use App\Models\OfferOrder;
+use App\Models\Offer;
+use App\Models\Order;
 
 class OfferOrderController extends Controller
 {
-    public function __construct(private OfferOrder $offer_order){}
+    public function __construct(private OfferOrder $offer_order, private Offer $offer,
+    private Order $order, private User $user){}
 
     public function check_order(Request $request){
+        // https://backend.food2go.pro/admin/offerOrder
         $validator = Validator::make($request->all(), [
             'code' => 'required',
         ]);
@@ -42,5 +46,43 @@ class OfferOrderController extends Controller
         }
     }
 
-    
+    public function approve_offer(Request $request){
+        // https://backend.food2go.pro/admin/offerOrder/approve_offer
+        // Keys
+        // offer_order_id 
+        $validator = Validator::make($request->all(), [
+            'offer_order_id' => 'required|exists:offer_orders,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $offer_order = $this->offer_order
+        ->where('id', $offer_order_id)
+        ->first();
+
+        $user = $this->user
+        ->where('id', $offer_order->user_id )
+        ->first();
+        if ($user->points < $offer_order->offer->points) {
+            return response()->json([
+                'faild' => 'Your points is not enough'
+            ], 400);
+        }
+        $user->points = $user->points - $offer_order->offer->points; //
+        $order = $this->order
+        ->create([
+            'date' => now(),
+            'user_id' => $user->id,
+            'amount' => 0,
+            'order_status' => 'delivered',
+            'paid_by' => 'points'
+        ]);
+        $order->offers()->attach($offer_order->offer->id);
+
+        return response()->json([
+            'success' => 'You confirm offer success'
+        ]);
+    }
 }
