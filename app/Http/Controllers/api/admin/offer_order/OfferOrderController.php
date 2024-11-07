@@ -71,7 +71,8 @@ class OfferOrderController extends Controller
                 'faild' => 'Your points is not enough'
             ], 400);
         }
-        $user->points = $user->points - $offer_order->offer->points; //
+        $user->points = $user->points - $offer_order->offer->points; 
+        $user->save();
         $order = $this->order
         ->create([
             'date' => now(),
