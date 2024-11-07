@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CustomerMiddleware;
+use App\Http\Middleware\DeliveryMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -23,12 +24,17 @@ return Application::configure(basePath: dirname(__DIR__))
             ->prefix('customer')
             ->name('customer.')
             ->group(base_path('routes/customer.php'));
+            Route::middleware('api')
+            ->prefix('delivery')
+            ->name('delivery.')
+            ->group(base_path('routes/delivery.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'IsAdmin' => AdminMiddleware::class,
             'IsCustomer' => CustomerMiddleware::class,
+            'IsDelivery' => DeliveryMiddleware::class,
         ]);
          $middleware->redirectGuestsTo(function (Request $request) {
             if (!$request->is('api/*')) {

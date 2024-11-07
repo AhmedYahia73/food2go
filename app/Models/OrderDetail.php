@@ -12,6 +12,7 @@ class OrderDetail extends Model
     protected $fillable = [
         'product_id',
         'exclude_id',
+        'addon_id',
         'offer_id',
         'extra_id',
         'variation_id',
@@ -21,4 +22,28 @@ class OrderDetail extends Model
         'deal_id',
         'product_index',
     ];
+
+    public function addon(){
+        return $this->belongsTo(Addon::class);
+    }
+
+    public function product(){
+        return $this->belongsTo(Product::class);
+    }
+
+    public function exclude(){
+        return $this->belongsTo(ExcludeProduct::class, 'exclude_id');
+    }
+
+    public function extra(){
+        return $this->belongsTo(ExtraProduct::class, 'extra_id');
+    }
+
+    public function variation(){
+        return $this->belongsTo(VariationProduct::class, 'variation_id');
+    }
+
+    public function option(){
+        return $this->belongsTo(OptionProduct::class, 'option_id');
+    }
 }

@@ -15,4 +15,8 @@ class Zone extends Model
         'price',
         'zone',
     ];
+
+    public function city(){
+        return $this->belongsTo(City::class, 'city_id');
+    }
 }
