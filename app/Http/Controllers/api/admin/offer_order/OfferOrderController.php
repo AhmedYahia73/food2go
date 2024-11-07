@@ -16,7 +16,7 @@ use App\Models\User;
 class OfferOrderController extends Controller
 {
     public function __construct(private OfferOrder $offer_order, private Offer $offer,
-    private Order $order, private User $user){}
+    private Order $order, private User $user, private OrderDetail $order_details){}
 
     public function check_order(Request $request){
         // https://backend.food2go.pro/admin/offerOrder
@@ -83,6 +83,12 @@ class OfferOrderController extends Controller
             'paid_by' => 'points'
         ]);
         $order->offers()->attach($offer_order->offer->id);
+        $this->order_details
+        ->create([
+            'order_id' => $order->id,
+            'count' => 1,
+            'offer_id' => $offer_order->offer->id
+        ]);
 
         return response()->json([
             'success' => 'You confirm offer success'
