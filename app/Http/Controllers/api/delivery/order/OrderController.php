@@ -46,6 +46,21 @@ class OrderController extends Controller
         ]);
     }
 
+    public function orders_history(Request $request){
+        // https://backend.food2go.pro/delivery/orders/history
+        $orders = $this->orders
+        ->where('delivery_id', $request->user()->id)
+        ->whereIn('order_status', ['delivery', 'confirmed', 'delivered', 'returned', 'faild_to_deliver', 'canceled'])
+        ->with(['address.zone' => function($query){
+            $query->with(['city', 'branch']);
+        }])
+        ->get();
+
+        return response()->json([
+            'orders' => $orders
+        ]);
+    }
+
     public function status(Request $request){
         // https://backend.food2go.pro/delivery/orders/status
         // Keys
