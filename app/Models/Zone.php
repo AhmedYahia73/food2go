@@ -19,4 +19,8 @@ class Zone extends Model
     public function city(){
         return $this->belongsTo(City::class, 'city_id');
     }
+
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
 }

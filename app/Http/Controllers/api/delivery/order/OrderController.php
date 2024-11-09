@@ -18,7 +18,9 @@ class OrderController extends Controller
         $orders = $this->orders
         ->where('delivery_id', $request->user()->id)
         ->whereIn('order_status', ['out_for_delivery', 'processing'])
-        ->with(['address.zone.city', 'details', 'branch'])
+        ->with(['address.zone' => function($query){
+            $query->with(['city', 'branch']);
+        }, 'details'])
         ->get();
 
         foreach ($orders as $order) {
