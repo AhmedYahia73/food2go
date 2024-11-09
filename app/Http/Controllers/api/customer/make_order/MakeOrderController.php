@@ -79,7 +79,8 @@ class MakeOrderController extends Controller
                             'order_id' => $order->id,
                             'product_id' => $product['product_id'],
                             'addon_id' => $addon['addon_id'],
-                            'count' => $addon['count'],
+                            'count' => $product['count'],
+                            'addon_count' => $addon['count'],
                             'product_index' => $key,
                         ]); // Add excludes
                     }
