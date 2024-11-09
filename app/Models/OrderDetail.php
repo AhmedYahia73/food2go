@@ -21,6 +21,7 @@ class OrderDetail extends Model
         'count',
         'deal_id',
         'product_index',
+        'addon_count',
     ];
 
     public function addon(){

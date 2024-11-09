@@ -31,7 +31,7 @@ class OrderController extends Controller
             foreach ($order->details as $detail) {
                 $product[$detail->product_index] = $detail->product;
                 if (!empty($detail->addon)) {
-                    $detail->addon->count = $detail->count;
+                    $detail->addon->count = $detail->addon_count;
                     $addon[$detail->product_index][] = $detail->addon;
                 }
             }
