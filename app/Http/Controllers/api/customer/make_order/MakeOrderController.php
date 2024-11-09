@@ -33,7 +33,7 @@ class MakeOrderController extends Controller
         // date, branch_id, amount, payment_status [paid, unpaid], total_tax, total_discount, address_id
         // order_type, paid_by, notes
         // deal[{deal_id, count}]
-        // products[{product_id, exclude_id[], extra_id[], variation[{variation_id, option_id[]}], count}]
+        // products[{product_id, addons[], exclude_id[], extra_id[], variation[{variation_id, option_id[]}], count}]
         $orderRequest = $request->only($this->orderRequest);
         $user = $request->user();
         $orderRequest['user_id'] = $user->id;
@@ -67,6 +67,18 @@ class MakeOrderController extends Controller
                             'order_id' => $order->id,
                             'product_id' => $product['product_id'],
                             'exclude_id' => $exclude,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                    }
+                }
+                if (isset($product['addons'])) {
+                    foreach ($product['addons'] as $addon) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'addon_id' => $addon,
                             'count' => $product['count'],
                             'product_index' => $key,
                         ]); // Add excludes
