@@ -32,6 +32,7 @@ class Order extends Model
         'paid_by',
         'delivery_id',
         'notes',
+        'coupon_discount',
     ];
 
     public function delivery(){
