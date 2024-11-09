@@ -20,7 +20,8 @@ class OrderController extends Controller
         ->whereIn('order_status', ['out_for_delivery', 'processing'])
         ->with(['address.zone' => function($query){
             $query->with(['city', 'branch']);
-        }, 'details'])
+        },
+        'user', 'details'])
         ->get();
 
         foreach ($orders as $order) {
