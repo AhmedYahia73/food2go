@@ -36,7 +36,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(CouponController::class)->prefix('coupon')->group(function(){
-        Route::get('/', 'coupon');
+        Route::post('/', 'coupon');
     });
 
     Route::controller(AddressController::class)->prefix('address')->group(function(){
