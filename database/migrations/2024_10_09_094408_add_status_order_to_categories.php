@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->boolean('status');
+            $table->boolean('status')->default(1);
             $table->integer('priority')->default(0);
         });
     }
