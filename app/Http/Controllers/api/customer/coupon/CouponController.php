@@ -13,6 +13,7 @@ class CouponController extends Controller
     public function __construct(private Coupon $coupon){}
 
     public function coupon(CouponRequest $request){
+        // https://bcknd.food2go.online/customer/coupon
         // Keys
         // coupon, 
         // product[{product_id, total}]
