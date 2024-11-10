@@ -8,10 +8,11 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Order;
+use App\Models\Delivery;
 
 class OrderController extends Controller
 {
-    public function __construct(private Order $orders){}
+    public function __construct(private Order $orders, private Delivery $deliveries){}
 
     public function orders(){
         // https://backend.food2go.pro/admin/order
@@ -65,6 +66,8 @@ class OrderController extends Controller
         ->where('order_status', 'scheduled')
         ->with(['user', 'branch', 'delivery'])
         ->get();
+        $deliveries = $this->deliveries
+        ->get();
 
         return response()->json([
             'orders' => $orders,
@@ -77,6 +80,7 @@ class OrderController extends Controller
             'faild_to_deliver' => $faild_to_deliver,
             'canceled' => $canceled,
             'scheduled' => $scheduled,
+            'deliveries' => $deliveries
         ]);
     }
 
