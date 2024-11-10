@@ -52,7 +52,7 @@ class OrderController extends Controller
         // https://backend.food2go.pro/delivery/orders/history
         $orders = $this->orders
         ->where('delivery_id', $request->user()->id)
-        ->whereIn('order_status', ['delivery', 'confirmed', 'delivered', 'returned', 'faild_to_deliver', 'canceled'])
+        ->whereIn('order_status', ['confirmed', 'delivered', 'returned', 'faild_to_deliver', 'canceled'])
         ->with(['address.zone' => function($query){
             $query->with(['city', 'branch']);
         }])

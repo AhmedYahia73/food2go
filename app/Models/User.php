@@ -93,4 +93,8 @@ class User extends Authenticatable
         return $this->belongsToMany(Deal::class, 'deal_user')
         ->withPivot(['ref_number', 'created_at']);;
     }
+
+    public function coupons(){
+        return $this->belongsToMany(Coupon::class, 'coupon_user');
+    }
 }

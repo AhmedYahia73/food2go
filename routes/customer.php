@@ -18,6 +18,8 @@ use App\Http\Controllers\api\customer\address\AddressController;
 
 use App\Http\Controllers\api\customer\order\OrderController;
 
+use App\Http\Controllers\api\customer\coupon\CouponController;
+
 
 Route::controller(OtpController::class)->prefix('otp')->group(function(){
     Route::post('/create_code', 'create_code');
@@ -31,6 +33,10 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/slider', 'slider');
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
+    });
+
+    Route::controller(CouponController::class)->prefix('coupon')->group(function(){
+        Route::get('/', 'coupon');
     });
 
     Route::controller(AddressController::class)->prefix('address')->group(function(){
