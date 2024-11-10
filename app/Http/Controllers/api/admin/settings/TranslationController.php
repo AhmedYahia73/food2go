@@ -14,7 +14,7 @@ class TranslationController extends Controller
     public function __construct(private Translation $translation){}
 
     public function view(){
-        // https://backend.food2go.pro/admin/translation
+        // https://bcknd.food2go.online/admin/translation
         $translation = $this->translation
         ->get();
 
@@ -24,7 +24,7 @@ class TranslationController extends Controller
     }
 
     public function link(){
-        // https://backend.food2go.pro/admin/translation/link
+        // https://bcknd.food2go.online/admin/translation/link
         $link = base_path('lang\\');
         $filename = 'messages.php';
 
@@ -35,7 +35,7 @@ class TranslationController extends Controller
     }
 
     public function create(Request $request){
-        // https://backend.food2go.pro/admin/translation/add
+        // https://bcknd.food2go.online/admin/translation/add
         // Keys
         // name
         $validator = Validator::make($request->all(), [

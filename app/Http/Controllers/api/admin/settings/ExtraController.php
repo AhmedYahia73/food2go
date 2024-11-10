@@ -24,7 +24,7 @@ class ExtraController extends Controller
     use translaion;
 
     public function view(){
-        // https://backend.food2go.pro/admin/settings/extra
+        // https://bcknd.food2go.online/admin/settings/extra
         $products = $this->products
         ->get();
         $variations = $this->variations
@@ -40,7 +40,7 @@ class ExtraController extends Controller
     }
 
     public function create(ExtraRequest $request){
-        // https://backend.food2go.pro/admin/settings/extra/add
+        // https://bcknd.food2go.online/admin/settings/extra/add
         // Keys
         // name, price, product_id, variation_id
         // extra_names[{extra_name, tranlation_id, tranlation_name}]
@@ -59,7 +59,7 @@ class ExtraController extends Controller
     }
 
     public function modify(ExtraRequest $request, $id){
-        // https://backend.food2go.pro/admin/settings/extra/update/{id}
+        // https://bcknd.food2go.online/admin/settings/extra/update/{id}
         // Keys
         // name, price, product_id, variation_id
         // extra_names[{extra_name, tranlation_id, tranlation_name}]
@@ -81,7 +81,7 @@ class ExtraController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/settings/extra/delete/{id}
+        // https://bcknd.food2go.online/admin/settings/extra/delete/{id}
         $extra = $this->extra
         ->where('id', $id)
         ->delete();

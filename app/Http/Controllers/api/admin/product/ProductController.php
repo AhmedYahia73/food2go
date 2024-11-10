@@ -16,7 +16,7 @@ class ProductController extends Controller
     private Discount $discounts, private Tax $taxes, private ProductReview $reviews){}
 
     public function view(){
-        // https://backend.food2go.pro/admin/product
+        // https://bcknd.food2go.online/admin/product
         $products = $this->products
         ->with(['addons', 'excludes', 'extra', 'variations.options.extra.parent_extra'])
         ->get();//extra_id
@@ -33,7 +33,7 @@ class ProductController extends Controller
     }
 
     public function reviews(){
-        // https://backend.food2go.pro/admin/product/reviews
+        // https://bcknd.food2go.online/admin/product/reviews
         $reviews = $this->reviews
         ->with(['product', 'customer'])
         ->get();

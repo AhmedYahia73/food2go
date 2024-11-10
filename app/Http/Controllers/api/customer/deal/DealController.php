@@ -16,7 +16,7 @@ class DealController extends Controller
     public function __construct(private Deal $deals, private DealTimes $deal_times){}
 
     public function index(){
-        // https://backend.food2go.pro/customer/deal
+        // https://bcknd.food2go.online/customer/deal
         $today = Carbon::now()->format('l');
         $deals = $this->deals
         ->with('times')
@@ -40,7 +40,7 @@ class DealController extends Controller
     }
  
     public function order(Request $request){
-        // https://backend.food2go.pro/customer/deal/order
+        // https://bcknd.food2go.online/customer/deal/order
         // Keys
         // deal_id
         $validator = Validator::make($request->all(), [

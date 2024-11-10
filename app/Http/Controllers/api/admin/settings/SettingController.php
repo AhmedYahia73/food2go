@@ -14,7 +14,7 @@ class SettingController extends Controller
     public function __construct(private Setting $settings){}
 
     public function view_time_cancel_order(){
-        // https://backend.food2go.pro/admin/settings/view_time_cancel
+        // https://bcknd.food2go.online/admin/settings/view_time_cancel
         $time = $this->settings
         ->where('name', 'time_cancel')
         ->orderByDesc('id')
@@ -26,7 +26,7 @@ class SettingController extends Controller
     }
 
     public function update_time_cancel_order(Request $request){
-        // https://backend.food2go.pro/admin/settings/update_time_cancel
+        // https://bcknd.food2go.online/admin/settings/update_time_cancel
         // Key
         // time
         $validator = Validator::make($request->all(), [

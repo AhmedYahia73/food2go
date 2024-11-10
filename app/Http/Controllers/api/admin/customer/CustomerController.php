@@ -26,7 +26,7 @@ class CustomerController extends Controller
     use image;
 
     public function view(){
-        // https://backend.food2go.pro/admin/customer
+        // https://bcknd.food2go.online/admin/customer
         $customers = $this->customers
         ->withSum('orders', 'amount')
         ->withCount('orders')
@@ -38,7 +38,7 @@ class CustomerController extends Controller
     }
 
     public function status(Request $request, $id){
-        // https://backend.food2go.pro/admin/customer/status/{id}
+        // https://bcknd.food2go.online/admin/customer/status/{id}
         // Keys
         // status
         $validator = Validator::make($request->all(), [
@@ -67,7 +67,7 @@ class CustomerController extends Controller
     }
 
     public function create(CustomerRequest $request) {
-        // https://backend.food2go.pro/admin/customer/add
+        // https://bcknd.food2go.online/admin/customer/add
         // Keys
         // f_name, l_name, email, phone, password, status, image
         $data = $request->only($this->customerRequest);
@@ -83,7 +83,7 @@ class CustomerController extends Controller
     }
 
     public function modify(UpdateCustomerRequest $request, $id){
-        // https://backend.food2go.pro/admin/customer/update/2
+        // https://bcknd.food2go.online/admin/customer/update/2
         // Keys
         // f_name, l_name, email, phone, password, status, image
         $data = $request->only($this->customerRequest);
@@ -103,7 +103,7 @@ class CustomerController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/customer/delete/{id}
+        // https://bcknd.food2go.online/admin/customer/delete/{id}
         $user = $this->customers
         ->where('id', $id)
         ->first(); 

@@ -19,7 +19,7 @@ class DealOrderController extends Controller
     private Order $orders, private OrderDetail $order_details){}
 
     public function deal_order(Request $request){
-        // https://backend.food2go.pro/admin/dealOrder
+        // https://bcknd.food2go.online/admin/dealOrder
         // code
         $validator = Validator::make($request->all(), [
             'code' => 'required',
@@ -52,7 +52,7 @@ class DealOrderController extends Controller
     }
  
     public function add(Request $request){
-        // https://backend.food2go.pro/admin/dealOrder/add
+        // https://bcknd.food2go.online/admin/dealOrder/add
         // Keys
         // deal_id, user_id, paid_by[card, cash]
         $validator = Validator::make($request->all(), [

@@ -31,7 +31,7 @@ class CreateCouponController extends Controller
     ];
 
     public function create(CouponRequest $request){
-        // https://backend.food2go.pro/admin/coupon/add
+        // https://bcknd.food2go.online/admin/coupon/add
         // Keys
         // type ['first_order', 'normal'], title, code, start_date, expire_date, min_purchase
         // max_discount_status, max_discount, product['all', 'selected'], 
@@ -51,7 +51,7 @@ class CreateCouponController extends Controller
     }
 
     public function modify(CouponRequest $request, $id){
-        // https://backend.food2go.pro/admin/coupon/update/{id}
+        // https://bcknd.food2go.online/admin/coupon/update/{id}
         // Keys
         // type ['first_order', 'normal'], title, code, start_date, expire_date, min_purchase
         // max_discount_status, max_discount, product['all', 'selected'], 
@@ -88,7 +88,7 @@ class CreateCouponController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/coupon/delete/{id}
+        // https://bcknd.food2go.online/admin/coupon/delete/{id}
         $coupon = $this->coupons
         ->where('id', $id)
         ->delete();

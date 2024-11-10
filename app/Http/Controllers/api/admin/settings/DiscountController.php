@@ -18,7 +18,7 @@ class DiscountController extends Controller
     ];
 
     public function view(){
-        // https://backend.food2go.pro/admin/settings/discount
+        // https://bcknd.food2go.online/admin/settings/discount
         $discount = $this->discount->get();
 
         return response()->json([
@@ -27,7 +27,7 @@ class DiscountController extends Controller
     }
 
     public function create(DiscountRequest $request){
-        // https://backend.food2go.pro/admin/settings/discount/add
+        // https://bcknd.food2go.online/admin/settings/discount/add
         // Keys
         // name, type, amount
         $discountRequest = $request->only($this->discountRequest);
@@ -39,7 +39,7 @@ class DiscountController extends Controller
     }
 
     public function modify(DiscountRequest $request, $id){
-        // https://backend.food2go.pro/admin/settings/discount/update/{id}
+        // https://bcknd.food2go.online/admin/settings/discount/update/{id}
         // Keys
         // name, type, amount
         $discountRequest = $request->only($this->discountRequest);
@@ -53,7 +53,7 @@ class DiscountController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/settings/discount/delete/{id}
+        // https://bcknd.food2go.online/admin/settings/discount/delete/{id}
         $this->discount
         ->where('id', $id)
         ->delete();

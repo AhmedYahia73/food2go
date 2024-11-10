@@ -22,7 +22,7 @@ class ZoneController extends Controller
     ];
 
     public function view(){
-        // https://backend.food2go.pro/admin/settings/zone
+        // https://bcknd.food2go.online/admin/settings/zone
         $branches = $this->branches
         ->get();
         $cities = $this->cities
@@ -38,7 +38,7 @@ class ZoneController extends Controller
     }
 
     public function create(ZoneRequest $request){
-        // https://backend.food2go.pro/admin/settings/zone/add
+        // https://bcknd.food2go.online/admin/settings/zone/add
         // Keys
         // city_id, branch_id, price, zone
         $zone_request = $request->only($this->zoneRequest);
@@ -51,7 +51,7 @@ class ZoneController extends Controller
     }
 
     public function modify(ZoneRequest $request, $id){
-        // https://backend.food2go.pro/admin/settings/zone/update/{id}
+        // https://bcknd.food2go.online/admin/settings/zone/update/{id}
         // Keys
         // city_id, branch_id, price, zone
         $zone_request = $request->only($this->zoneRequest);
@@ -65,7 +65,7 @@ class ZoneController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/settings/zone/delete/{id}
+        // https://bcknd.food2go.online/admin/settings/zone/delete/{id}
         $this->zones
         ->where('id', $id)
         ->delete();

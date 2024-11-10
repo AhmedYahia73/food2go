@@ -16,7 +16,7 @@ class OtpController extends Controller
     public function __construct(private User $user){}
 
     public function create_code(Request $request){
-        // https://backend.food2go.pro/customer/otp/create_code
+        // https://bcknd.food2go.online/customer/otp/create_code
         // Keys
         // email
         $validator = Validator::make($request->all(), [
@@ -57,7 +57,7 @@ class OtpController extends Controller
     }
 
     public function check_code(Request $request){
-        // https://backend.food2go.pro/customer/otp/check_code
+        // https://bcknd.food2go.online/customer/otp/check_code
         // Keys
         // email, code
         $validator = Validator::make($request->all(), [
@@ -88,7 +88,7 @@ class OtpController extends Controller
     }
 
     public function change_password(Request $request){
-        // https://backend.food2go.pro/customer/otp/change_password
+        // https://bcknd.food2go.online/customer/otp/change_password
         // Keys
         // code, email, password
         $validator = Validator::make($request->all(), [

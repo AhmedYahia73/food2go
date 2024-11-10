@@ -20,7 +20,7 @@ class OfferOrderController extends Controller
     private Order $order, private User $user, private OrderDetail $order_details){}
 
     public function check_order(Request $request){
-        // https://backend.food2go.pro/admin/offerOrder
+        // https://bcknd.food2go.online/admin/offerOrder
         $validator = Validator::make($request->all(), [
             'code' => 'required',
         ]);
@@ -49,7 +49,7 @@ class OfferOrderController extends Controller
     }
 
     public function approve_offer(Request $request){
-        // https://backend.food2go.pro/admin/offerOrder/approve_offer
+        // https://bcknd.food2go.online/admin/offerOrder/approve_offer
         // Keys
         // offer_order_id 
         $validator = Validator::make($request->all(), [

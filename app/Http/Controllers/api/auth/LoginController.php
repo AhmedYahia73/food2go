@@ -18,7 +18,7 @@ class LoginController extends Controller
     private Branch $branch){}
 
     public function admin_login(LoginRequest $request){
-        // https://backend.food2go.pro/api/admin/auth/login
+        // https://bcknd.food2go.online/api/admin/auth/login
         // Keys
         // email, password
         $user = $this->admin
@@ -49,7 +49,7 @@ class LoginController extends Controller
     }
     
     public function login(LoginRequest $request){
-        // https://backend.food2go.pro/api/user/auth/login
+        // https://bcknd.food2go.online/api/user/auth/login
         // Keys
         // email, password
         $user = $this->delivery
@@ -95,7 +95,7 @@ class LoginController extends Controller
     }
 
     public function logout(Request $request){
-        // https://backend.food2go.pro/api/logout
+        // https://bcknd.food2go.online/api/logout
         $user =auth()->user();
         $deletToken = $user->tokens()->delete();
         if ($deletToken) {

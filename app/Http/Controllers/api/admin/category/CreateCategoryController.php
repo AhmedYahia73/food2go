@@ -25,7 +25,7 @@ class CreateCategoryController extends Controller
     use translaion;
 
     public function create(CategoryRequest $request){
-        // https://backend.food2go.pro/admin/category/add
+        // https://bcknd.food2go.online/admin/category/add
         // Keys
         // category_id, status, priority, active, image, banner_image
         // addons_id[]
@@ -62,7 +62,7 @@ class CreateCategoryController extends Controller
     }
 
     public function modify(CategoryRequest $request, $id){
-        // https://backend.food2go.pro/admin/category/update/{id}
+        // https://bcknd.food2go.online/admin/category/update/{id}
         // Keys
         // name, category_id, status, priority, active, image, banner_image
         // addons_id[]
@@ -99,7 +99,7 @@ class CreateCategoryController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/category/delete/{id}
+        // https://bcknd.food2go.online/admin/category/delete/{id}
         $category = $this->categories
         ->where('id', $id)
         ->first(); // get category

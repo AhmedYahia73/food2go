@@ -15,7 +15,7 @@ class OrderController extends Controller
     public function __construct(private Order $orders, private Delivery $deliveries){}
 
     public function orders(){
-        // https://backend.food2go.pro/admin/order
+        // https://bcknd.food2go.online/admin/order
         $orders = $this->orders
         ->where('pos', 0)
         ->where('order_type', 'delivery')
@@ -85,7 +85,7 @@ class OrderController extends Controller
     }
 
     public function status($id, Request $request){
-        // https://backend.food2go.pro/admin/order/status/{id}
+        // https://bcknd.food2go.online/admin/order/status/{id}
         // Keys
         // order_status
         $validator = Validator::make($request->all(), [
@@ -109,7 +109,7 @@ class OrderController extends Controller
     }
 
     public function delivery(Request $request){
-        // https://backend.food2go.pro/admin/order/delivery
+        // https://bcknd.food2go.online/admin/order/delivery
         // Keys
         // delivery_id, order_id
         $validator = Validator::make($request->all(), [

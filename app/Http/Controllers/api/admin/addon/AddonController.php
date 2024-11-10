@@ -24,7 +24,7 @@ class AddonController extends Controller
     use translaion;
 
     public function view(){
-        // https://backend.food2go.pro/admin/addons
+        // https://bcknd.food2go.online/admin/addons
         $addons = $this->addons
         ->with('tax')
         ->get();
@@ -38,7 +38,7 @@ class AddonController extends Controller
     }
 
     public function addon($id){
-        // https://backend.food2go.pro/admin/addons/item/{id}
+        // https://bcknd.food2go.online/admin/addons/item/{id}
         $addon = $this->addons
         ->with('tax')
         ->where('id', $id)
@@ -65,7 +65,7 @@ class AddonController extends Controller
     }
 
     public function create(AddonRequest $request){
-        // https://backend.food2go.pro/admin/addons/add
+        // https://bcknd.food2go.online/admin/addons/add
         // Keys
         // price, tax_id, quantity_add
         // addon_names[{addon_name, tranlation_id, tranlation_name}]
@@ -86,7 +86,7 @@ class AddonController extends Controller
     }
 
     public function modify(AddonRequest $request, $id){
-        // https://backend.food2go.pro/admin/addons/update/{id}
+        // https://bcknd.food2go.online/admin/addons/update/{id}
         // Keys
         // price, tax_id, quantity_add
         // addon_names[{addon_name, tranlation_id, tranlation_name}]
@@ -108,7 +108,7 @@ class AddonController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/addons/delete/{id}
+        // https://bcknd.food2go.online/admin/addons/delete/{id}
         $this->addons
         ->where('id', $id)
         ->delete();

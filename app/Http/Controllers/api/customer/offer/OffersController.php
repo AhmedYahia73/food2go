@@ -19,7 +19,7 @@ class OffersController extends Controller
     private OfferOrder $offer_order){}
 
     public function offers(){
-        // https://backend.food2go.pro/customer/offers
+        // https://bcknd.food2go.online/customer/offers
         $offers = $this->offers->get();
 
         return response()->json([
@@ -28,7 +28,7 @@ class OffersController extends Controller
     }
 
     public function buy_offer(Request $request){
-        // https://backend.food2go.pro/customer/offers/buy_offer
+        // https://bcknd.food2go.online/customer/offers/buy_offer
         // Keys
         // offer_id
         $validator = Validator::make($request->all(), [

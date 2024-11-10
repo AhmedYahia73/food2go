@@ -14,7 +14,7 @@ class CityController extends Controller
     public function __construct(private City $cities){}
 
     public function view(){
-        // https://backend.food2go.pro/admin/settings/city
+        // https://bcknd.food2go.online/admin/settings/city
         $cities = $this->cities
         ->get();
 
@@ -24,7 +24,7 @@ class CityController extends Controller
     }
 
     public function create(Request $request){
-        // https://backend.food2go.pro/admin/settings/city/add
+        // https://bcknd.food2go.online/admin/settings/city/add
         //Key
         // name
         $validator = Validator::make($request->all(), [
@@ -47,7 +47,7 @@ class CityController extends Controller
     }
 
     public function modify(Request $request, $id){
-        // https://backend.food2go.pro/admin/settings/city/update/{id}
+        // https://bcknd.food2go.online/admin/settings/city/update/{id}
         //Key
         // name
         $validator = Validator::make($request->all(), [
@@ -71,7 +71,7 @@ class CityController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/settings/city/delete/{id}
+        // https://bcknd.food2go.online/admin/settings/city/delete/{id}
         $this->cities
         ->where('id', $id)
         ->delete();

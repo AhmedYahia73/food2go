@@ -25,7 +25,7 @@ class AddressController extends Controller
     ];
 
     public function view(Request $request){
-        // https://backend.food2go.pro/customer/address
+        // https://bcknd.food2go.online/customer/address
         $addresses = $this->user
         ->where('id', $request->user()->id)
         ->with('address.zone')
@@ -39,7 +39,7 @@ class AddressController extends Controller
     }
 
     public function add(AddressRequest $request){
-        // https://backend.food2go.pro/customer/address/add
+        // https://bcknd.food2go.online/customer/address/add
         // Keys
         // zone_id, address, street, building_num, floor_num, apartment, additional_data, type
         $address_request = $request->only($this->AddressRequest);
@@ -53,7 +53,7 @@ class AddressController extends Controller
     }
 
     public function modify(Request $request, $id){
-        // https://backend.food2go.pro/customer/address/update/{id}
+        // https://bcknd.food2go.online/customer/address/update/{id}
         // Keys
         // zone_id, address, street, building_num, floor_num, apartment, additional_data, type
         $address = $this->address
@@ -80,7 +80,7 @@ class AddressController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/customer/address/delete/{id}
+        // https://bcknd.food2go.online/customer/address/delete/{id}
         $address = $this->address
         ->where('id', $id)
         ->delete();

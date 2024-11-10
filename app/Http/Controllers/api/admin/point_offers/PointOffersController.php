@@ -21,7 +21,7 @@ class PointOffersController extends Controller
     use translaion;
 
     public function view(){
-        // https://backend.food2go.pro/admin/offer
+        // https://bcknd.food2go.online/admin/offer
         $offers = $this->offers
         ->get();
 
@@ -31,7 +31,7 @@ class PointOffersController extends Controller
     }
 
     public function create(PointOfferRequest $request){
-        // https://backend.food2go.pro/admin/offer/add
+        // https://bcknd.food2go.online/admin/offer/add
         // Keys
         // points, image
         // offer_names[{offer_product, tranlation_id, tranlation_name}]
@@ -59,7 +59,7 @@ class PointOffersController extends Controller
     }
 
     public function modify(PointOfferRequest $request, $id){
-        // https://backend.food2go.pro/admin/offer/update/{id}
+        // https://bcknd.food2go.online/admin/offer/update/{id}
         // Keys
         // points, image
         // offer_names[{offer_product, tranlation_id, tranlation_name}]
@@ -87,7 +87,7 @@ class PointOffersController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/offer/delete/{id}
+        // https://bcknd.food2go.online/admin/offer/delete/{id}
         $offer = $this->offers
         ->where('id', $id)
         ->first();

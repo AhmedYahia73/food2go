@@ -20,7 +20,7 @@ class ExcludeController extends Controller
     use translaion;
 
     public function view(){
-        // https://backend.food2go.pro/admin/settings/exclude
+        // https://bcknd.food2go.online/admin/settings/exclude
         $excludes = $this->excludes
         ->get();
         $products = $this->products
@@ -33,7 +33,7 @@ class ExcludeController extends Controller
     }
 
     public function create(ExcludeRequest $request){
-        // https://backend.food2go.pro/admin/settings/exclude/add
+        // https://bcknd.food2go.online/admin/settings/exclude/add
         // Keys
         // name, product_id
         // exclude_names[{exclude_name, tranlation_id, tranlation_name}]
@@ -53,7 +53,7 @@ class ExcludeController extends Controller
     }
 
     public function modify(ExcludeRequest $request, $id){
-        // https://backend.food2go.pro/admin/settings/exclude/update/{id}
+        // https://bcknd.food2go.online/admin/settings/exclude/update/{id}
         // Keys
         // name, product_id
         // exclude_names[{exclude_name, tranlation_id, tranlation_name}]
@@ -74,7 +74,7 @@ class ExcludeController extends Controller
     }
 
     public function delete($id){ 
-        // https://backend.food2go.pro/admin/settings/exclude/delete/{id}
+        // https://bcknd.food2go.online/admin/settings/exclude/delete/{id}
         $this->excludes
         ->where('id', $id)
         ->delete();

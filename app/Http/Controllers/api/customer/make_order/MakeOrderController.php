@@ -29,7 +29,7 @@ class MakeOrderController extends Controller
     ];
 
     public function order(OrderRequest $request){
-        // https://backend.food2go.pro/customer/make_order
+        // https://bcknd.food2go.online/customer/make_order
         // Keys
         // date, branch_id, amount, coupon_discount, payment_status [paid, unpaid], total_tax, total_discount, address_id
         // order_type, paid_by, notes

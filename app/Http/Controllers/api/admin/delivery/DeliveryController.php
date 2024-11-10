@@ -30,7 +30,7 @@ class DeliveryController extends Controller
     use image;
 
     public function view(){
-        // https://backend.food2go.pro/admin/delivery
+        // https://bcknd.food2go.online/admin/delivery
         $deliveries = $this->deliveries
         ->get();
         $branches = $this->branches->get();
@@ -42,7 +42,7 @@ class DeliveryController extends Controller
     }
 
     public function status(Request $request, $id){
-        // https://backend.food2go.pro/admin/delivery/status/{id}
+        // https://bcknd.food2go.online/admin/delivery/status/{id}
         // Keys
         // status
         $validator = Validator::make($request->all(), [
@@ -71,7 +71,7 @@ class DeliveryController extends Controller
     }
 
     public function create(DeliveryRequest $request){
-        // https://backend.food2go.pro/admin/delivery/add
+        // https://bcknd.food2go.online/admin/delivery/add
         // Keys
         // f_name, l_name, identity_type, identity_number, email, phone
         // password, branch_id, status, image, identity_image
@@ -92,7 +92,7 @@ class DeliveryController extends Controller
     }
 
     public function modify(UpdateDeliveryRequest $request, $id){
-        // https://backend.food2go.pro/admin/delivery/update/{id}
+        // https://bcknd.food2go.online/admin/delivery/update/{id}
         // Keys
         // f_name, l_name, identity_type, identity_number, email, phone
         // password, branch_id, status, image, identity_image
@@ -118,7 +118,7 @@ class DeliveryController extends Controller
     }
 
     public function delete($id){
-        // https://backend.food2go.pro/admin/delivery/delete/{id}
+        // https://bcknd.food2go.online/admin/delivery/delete/{id}
         $delivery = $this->deliveries
         ->where('id', $id)
         ->first();

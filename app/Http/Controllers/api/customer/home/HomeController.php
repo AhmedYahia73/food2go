@@ -18,7 +18,7 @@ class HomeController extends Controller
     private Product $product, private Banner $banner){}
 
     public function products(){
-        // https://backend.food2go.pro/customer/home
+        // https://bcknd.food2go.online/customer/home
         $categories = $this->categories
         ->with(['sub_categories', 'addons'])
         ->where('category_id', null)
@@ -60,7 +60,7 @@ class HomeController extends Controller
     }
 
     public function slider(){
-        // https://backend.food2go.pro/customer/home/slider
+        // https://bcknd.food2go.online/customer/home/slider
         $banners = $this->banner
         ->with('category_banner')
         ->orderBy('order')
@@ -72,7 +72,7 @@ class HomeController extends Controller
     }
 
     public function favourite(Request $request, $id){
-        // https://backend.food2go.pro/customer/home/favourite/{id}
+        // https://bcknd.food2go.online/customer/home/favourite/{id}
         // Keys
         // favourite
         $validator = Validator::make($request->all(), [
@@ -99,7 +99,7 @@ class HomeController extends Controller
     }
 
     public function filter_product(Request $request){
-        // https://backend.food2go.pro/customer/home/filter_product
+        // https://bcknd.food2go.online/customer/home/filter_product
         // Keys
         // category_id, min_price, max_price
         $validator = Validator::make($request->all(), [

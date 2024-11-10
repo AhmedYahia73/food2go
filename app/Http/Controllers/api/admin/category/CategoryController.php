@@ -18,7 +18,7 @@ class CategoryController extends Controller
     private Translation $translations){}
 
     public function view(){
-        // https://backend.food2go.pro/admin/category
+        // https://bcknd.food2go.online/admin/category
         $categories = $this->categories
         ->with('addons')
         ->orderBy('priority')
@@ -40,7 +40,7 @@ class CategoryController extends Controller
     }
 
     public function category($id){
-        // https://backend.food2go.pro/admin/category/item/{id}
+        // https://bcknd.food2go.online/admin/category/item/{id}
         $category = $this->categories
         ->where('id', $id)
         ->first();
@@ -66,7 +66,7 @@ class CategoryController extends Controller
     }
 
     public function status(Request $request, $id){
-        // https://backend.food2go.pro/admin/category/status/{id}
+        // https://bcknd.food2go.online/admin/category/status/{id}
         $validator = Validator::make($request->all(), [
         'status' => 'required|boolean',
         ]);
@@ -85,7 +85,7 @@ class CategoryController extends Controller
     }
 
     public function priority(Request $request, $id){
-        // https://backend.food2go.pro/admin/category/priority/{id}
+        // https://bcknd.food2go.online/admin/category/priority/{id}
         $validator = Validator::make($request->all(), [
         'priority' => 'required|integer',
         ]);

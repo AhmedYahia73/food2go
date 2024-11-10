@@ -13,14 +13,14 @@ class ProfileController extends Controller
     use image;
 
     public function profile_data(Request $request){
-        // https://backend.food2go.pro/delivery/profile/profile_data
+        // https://bcknd.food2go.online/delivery/profile/profile_data
         return response()->json([
             'data' => $request->user()
         ]);
     }
 
     public function update_profile(ProfileRequest $request){
-        // https://backend.food2go.pro/delivery/profile/update
+        // https://bcknd.food2go.online/delivery/profile/update
         // Keys
         // f_name, l_name, email, phone
         // password, image
