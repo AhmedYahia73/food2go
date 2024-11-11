@@ -69,7 +69,7 @@ class OrderController extends Controller
         // order_id, order_status[out_for_delivery, delivered]
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
-            'order_status' => 'required|in:out_for_delivery,delivered',
+            'order_status' => 'required|in:out_for_delivery,delivered,returned,faild_to_deliver',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
