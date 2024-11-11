@@ -87,7 +87,7 @@ class OrderController extends Controller
     public function status($id, Request $request){
         // https://bcknd.food2go.online/admin/order/status/{id}
         // Keys
-        // order_status
+        // order_status, order_number
         $validator = Validator::make($request->all(), [
             'order_status' => 'required|in:delivery,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled',
         ]);
@@ -97,11 +97,21 @@ class OrderController extends Controller
             ],400);
         }
 
-        $orders = $this->orders
-        ->where('id', $id)
-        ->update([
-            'order_status' => $request->order_status
-        ]);
+        if ($request->order_status == 'confirmed') { 
+            $orders = $this->orders
+            ->where('id', $id)
+            ->update([
+                'order_status' => $request->order_status,
+                'order_number' => $request->order_number,
+            ]);
+        } else {
+        
+            $orders = $this->orders
+            ->where('id', $id)
+            ->update([
+                'order_status' => $request->order_status, 
+            ]);
+        }
 
         return response()->json([
             'order_status' => $request->order_status
@@ -111,10 +121,11 @@ class OrderController extends Controller
     public function delivery(Request $request){
         // https://bcknd.food2go.online/admin/order/delivery
         // Keys
-        // delivery_id, order_id
+        // delivery_id, order_id, order_number
         $validator = Validator::make($request->all(), [
             'delivery_id' => 'required|exists:deliveries,id',
             'order_id' => 'required|exists:orders,id',
+            'order_number' => 'required|numeric'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -124,7 +135,8 @@ class OrderController extends Controller
         $order = $this->orders
         ->where('id', $request->order_id)
         ->update([
-            'delivery_id' => $request->delivery_id
+            'delivery_id' => $request->delivery_id,
+            'order_number' => $request->order_number
         ]);
 
         return response()->json([

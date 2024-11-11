@@ -33,6 +33,7 @@ class Order extends Model
         'delivery_id',
         'notes',
         'coupon_discount',
+        'order_number',
     ];
 
     public function delivery(){
