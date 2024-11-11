@@ -14,6 +14,7 @@ class OrderTypeController extends Controller
     public function __construct(private Setting $settings){}
 
     public function view(){
+        // https://bcknd.food2go.online/admin/settings/order_type
         $order_types = $this->settings
         ->where('name', 'order_type')
         ->first();
@@ -46,6 +47,7 @@ class OrderTypeController extends Controller
     }
 
     public function modify(Request $request){
+        // https://bcknd.food2go.online/admin/settings/order_type/update
         // Keys 
         //"order_type": [
         //    {

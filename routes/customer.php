@@ -20,6 +20,8 @@ use App\Http\Controllers\api\customer\order\OrderController;
 
 use App\Http\Controllers\api\customer\coupon\CouponController;
 
+use App\Http\Controllers\api\customer\order_type\OrderTypeController;
+
 
 Route::controller(OtpController::class)->prefix('otp')->group(function(){
     Route::post('/create_code', 'create_code');
@@ -71,5 +73,9 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(DealController::class)->prefix('deal')->group(function(){
         Route::get('/', 'index');
         Route::post('/order', 'order');
+    });
+
+    Route::controller(OrderTypeController::class)->prefix('order_type')->group(function(){
+        Route::get('/', 'view');
     });
 });
