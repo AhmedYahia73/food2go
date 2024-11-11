@@ -12,6 +12,7 @@ class OrderTypeController extends Controller
     public function __construct(private Setting $settings){}
 
     public function view(){
+        // https://bcknd.food2go.online/customer/order_type
         $settings = $this->settings
         ->where('name', 'order_type')
         ->first();
