@@ -78,6 +78,8 @@ class SettingController extends Controller
 
     public function resturant_time_update(Request $request){
         // https://bcknd.food2go.online/admin/settings/resturant_time_update
+        // Keys
+        // from, to
         $validator = Validator::make($request->all(), [
             'from' => 'required',
             'to' => 'required',

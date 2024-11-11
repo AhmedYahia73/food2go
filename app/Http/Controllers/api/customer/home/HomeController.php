@@ -11,11 +11,12 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Banner;
+use App\Models\Setting;
 
 class HomeController extends Controller
 {
     public function __construct(private Category $categories, private User $user,
-    private Product $product, private Banner $banner){}
+    private Product $product, private Banner $banner, private Setting $settings){}
 
     public function products(){
         // https://bcknd.food2go.online/customer/home
@@ -51,11 +52,20 @@ class HomeController extends Controller
         ->with('discount')
         ->whereHas('discount')
         ->get();
+        $resturant_time = $this->settings
+        ->where('name', 'resturant_time')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($resturant_time)) {
+            $resturant_time = $resturant_time->setting;
+            $resturant_time = json_decode($resturant_time) ?? $resturant_time;
+        }
 
         return response()->json([
             'categories' => $categories,
             'products' => $products,
-            'discounts' => $discounts
+            'discounts' => $discounts,
+            'resturant_time' => $resturant_time,
         ]);
     }
 
