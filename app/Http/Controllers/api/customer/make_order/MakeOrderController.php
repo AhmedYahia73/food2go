@@ -32,7 +32,7 @@ class MakeOrderController extends Controller
         // https://bcknd.food2go.online/customer/make_order
         // Keys
         // date, branch_id, amount, coupon_discount, payment_status [paid, unpaid], total_tax, total_discount, address_id
-        // order_type, paid_by, notes
+        // order_type[take_away,dine_in,delivery], paid_by, notes
         // deal[{deal_id, count}]
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], variation[{variation_id, option_id[]}], count}]
         $orderRequest = $request->only($this->orderRequest);

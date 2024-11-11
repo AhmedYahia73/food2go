@@ -8,19 +8,23 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Coupon;
+use App\Models\Product;
 
 class CouponController extends Controller
 {
-    public function __construct(private Coupon $coupons){}
+    public function __construct(private Coupon $coupons, private Product $products){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/coupon
         $coupons = $this->coupons
         ->with('products')
         ->get();
+        $products = $this->products
+        ->get();
 
         return response()->json([
-            'coupons' => $coupons
+            'coupons' => $coupons,
+            'products' => $products,
         ]);
     }
 
