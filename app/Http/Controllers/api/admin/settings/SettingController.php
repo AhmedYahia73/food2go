@@ -59,4 +59,59 @@ class SettingController extends Controller
             'success' => 'You add time of cancel order success'
         ]);
     }
+
+    public function resturant_time(){
+        // https://bcknd.food2go.online/admin/settings/resturant_time
+        $time = $this->settings
+        ->where('name', 'resturant_time')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($time)) {
+            $time = $time->setting;
+            $time = json_decode($time) ?? $time;
+        }
+
+        return response()->json([
+            'restuarant_time' => $time
+        ]);
+    }
+
+    public function resturant_time_update(Request $request){
+        // https://bcknd.food2go.online/admin/settings/resturant_time_update
+        $validator = Validator::make($request->all(), [
+            'from' => 'required',
+            'to' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
+        $time = $this->settings
+        ->where('name', 'resturant_time')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($time)) {
+            $time->update([
+                'setting' => json_encode([
+                    'from' => $request->from,
+                    'to' => $request->to,
+                ]),
+            ]);
+        }
+        else{
+            $this->settings->create([
+                'name' => 'resturant_time',
+                'setting' => json_encode([
+                    'from' => $request->from,
+                    'to' => $request->to,
+                ]),
+            ]);
+        }
+
+        return response()->json([
+            'success' => 'You change times success'
+        ]);
+    }
 }
