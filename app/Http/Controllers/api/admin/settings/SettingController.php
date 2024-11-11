@@ -116,4 +116,61 @@ class SettingController extends Controller
             'success' => 'You change times success'
         ]);
     }
+
+    public function tax(){
+        // https://bcknd.food2go.online/admin/settings/tax
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+
+        return response()->json([
+            'tax' => $tax
+        ]);
+    }
+
+    public function tax_update(Request $request){
+        // https://bcknd.food2go.online/admin/settings/tax_update
+        // Keys
+        // tax[included, excluded]
+        $validator = Validator::make($request->all(), [
+            'tax' => 'required|in:included,excluded', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax->update([
+                'setting' => $request->tax
+            ]);
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => $request->tax,
+            ]);
+        }
+
+        return response()->json([
+            'success' => 'You change data success'
+        ]);
+    }
 }

@@ -60,12 +60,28 @@ class HomeController extends Controller
             $resturant_time = $resturant_time->setting;
             $resturant_time = json_decode($resturant_time) ?? $resturant_time;
         }
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        } 
 
         return response()->json([
             'categories' => $categories,
             'products' => $products,
             'discounts' => $discounts,
             'resturant_time' => $resturant_time,
+            'tax' => $tax,
         ]);
     }
 
