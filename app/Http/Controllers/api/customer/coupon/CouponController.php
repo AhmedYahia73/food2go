@@ -4,13 +4,14 @@ namespace App\Http\Controllers\api\customer\coupon;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Coupon;
-
 use App\Http\Requests\customer\coupon\CouponRequest;
+
+use App\Models\Coupon;
+use App\Models\Order;
 
 class CouponController extends Controller
 {
-    public function __construct(private Coupon $coupon){}
+    public function __construct(private Coupon $coupon, private Order $orders){}
 
     public function coupon(CouponRequest $request){
         // https://bcknd.food2go.online/customer/coupon
@@ -27,6 +28,18 @@ class CouponController extends Controller
                 'faild' => 'Coupon is expired'
             ], 400);
         }
+
+        if ($coupon->type == 'first_order') {
+            $orders = $this->orders
+            ->where('user_id', $request->user()->id)
+            ->first();
+            if (!empty($orders)) {
+                return response()->json([
+                    'faild' => 'Order must be first'
+                ],400);
+            }
+        }
+        
         $total = 0;
         $products = is_string($request->product) ? json_decode($request->product) : $request->product;
         $products = collect($products);
