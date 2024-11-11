@@ -13,7 +13,7 @@ class OrderTypeController extends Controller
 
     public function view(){
         // https://bcknd.food2go.online/customer/order_type
-        $settings = $this->settings
+        $order_types = $this->settings
         ->where('name', 'order_type')
         ->first();
         if (empty($order_types)) {
