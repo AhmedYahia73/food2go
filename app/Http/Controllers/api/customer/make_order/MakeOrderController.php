@@ -41,7 +41,7 @@ class MakeOrderController extends Controller
         $user = $request->user();
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
-        if (!$request->receipt) {
+        if ($request->receipt) {
             $image_path = $this->upload($request, 'receipt', 'customer/payments/receipts');
             $orderRequest['receipt'] = $image_path;
         }
