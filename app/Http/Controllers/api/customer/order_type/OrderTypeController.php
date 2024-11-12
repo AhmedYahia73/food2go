@@ -7,16 +7,20 @@ use Illuminate\Http\Request;
 
 use App\Models\Setting;
 use App\Models\PaymentMethod;
+use App\Models\Branch;
 
 class OrderTypeController extends Controller
 {
-    public function __construct(private Setting $settings, private PaymentMethod $payment_methods){}
+    public function __construct(private Setting $settings, private PaymentMethod $payment_methods,
+    private Branch $branches){}
 
     public function view(){
         // https://bcknd.food2go.online/customer/order_type
         $order_types = $this->settings
         ->where('name', 'order_type')
         ->first();
+        $branches = $this->branches
+        ->get();
         if (empty($order_types)) {
             $order_types = $this->settings
             ->create([
@@ -46,6 +50,7 @@ class OrderTypeController extends Controller
         return response()->json([
             'order_types' => $order_types,
             'payment_methods' => $payment_methods,
+            'branches' => $branches
         ]);
     }
 }
