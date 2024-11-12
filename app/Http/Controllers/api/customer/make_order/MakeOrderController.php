@@ -46,10 +46,10 @@ class MakeOrderController extends Controller
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $product) {
                 $item = $this->products
-                ->where('id', $product->product_id)
+                ->where('id', $product['product_id'])
                 ->first();
                 if (!empty($item)) {
-                    $points += $item->points;
+                    $points += $item->points * $product['count'];
                 }
             }
         }
