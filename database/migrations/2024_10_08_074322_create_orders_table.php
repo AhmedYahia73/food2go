@@ -24,7 +24,6 @@ return new class extends Migration
             $table->float('total_tax')->default(0);
             $table->float('total_discount')->default(0);
             $table->string('address')->nullable();
-            $table->string('paid_by');
             $table->timestamps();
         });
     }

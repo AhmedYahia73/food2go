@@ -28,12 +28,14 @@ class Order extends Model
         'payment_status',
         'total_tax',
         'total_discount',
-        'address_id',
-        'paid_by',
+        'address_id', 
         'delivery_id',
         'notes',
         'coupon_discount',
         'order_number',
+        'payment_method_id',
+        'receipt',
+        'status',
     ];
 
     public function delivery(){

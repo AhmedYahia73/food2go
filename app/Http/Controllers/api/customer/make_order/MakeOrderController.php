@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\customer\make_order;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\customer\order\OrderRequest;
+use App\trait\image;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -14,6 +15,7 @@ class MakeOrderController extends Controller
 {
     public function __construct(private Order $order, private OrderDetail $order_details,
     private ProductSale $product_sales){}
+    use image;
     protected $orderRequest = [
         'date',
         'branch_id',
@@ -23,7 +25,7 @@ class MakeOrderController extends Controller
         'total_discount',
         'address_id',
         'order_type',
-        'paid_by',
+        'payment_method_id',
         'notes',
         'coupon_discount',
     ];
@@ -32,13 +34,20 @@ class MakeOrderController extends Controller
         // https://bcknd.food2go.online/customer/make_order
         // Keys
         // date, branch_id, amount, coupon_discount, payment_status [paid, unpaid], total_tax, total_discount, address_id
-        // order_type[take_away,dine_in,delivery], paid_by, notes
-        // deal[{deal_id, count}]
+        // order_type[take_away,dine_in,delivery], notes
+        // deal[{deal_id, count}], payment_method_id, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], variation[{variation_id, option_id[]}], count}]
         $orderRequest = $request->only($this->orderRequest);
         $user = $request->user();
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
+        if (!$request->receipt) {
+            $image_path = $this->upload($request, 'receipt', 'customer/payments/receipts');
+            $orderRequest['receipt'] = $image_path;
+        }
+        else {
+            $orderRequest['status'] = 1;
+        }
         $order = $this->order
         ->create($orderRequest);
         $user->address()->attach($request->address_id);

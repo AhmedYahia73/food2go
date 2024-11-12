@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            
+            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->onUpdate('cascade')->onDelete('set null');
+            $table->string('receipt')->nullable();
+            $table->boolean('status')->nullable();
         });
     }
 
