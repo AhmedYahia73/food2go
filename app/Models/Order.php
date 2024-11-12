@@ -36,6 +36,7 @@ class Order extends Model
         'payment_method_id',
         'receipt',
         'status',
+        'points',
     ];
 
     public function delivery(){

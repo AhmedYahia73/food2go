@@ -10,17 +10,17 @@ use App\trait\image;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\ProductSale;
+use App\Models\Product;
 
 class MakeOrderController extends Controller
 {
     public function __construct(private Order $order, private OrderDetail $order_details,
-    private ProductSale $product_sales){}
+    private ProductSale $product_sales, private Product $products){}
     use image;
     protected $orderRequest = [
         'date',
         'branch_id',
         'amount',
-        'payment_status',
         'total_tax',
         'total_discount',
         'address_id',
@@ -33,7 +33,7 @@ class MakeOrderController extends Controller
     public function order(OrderRequest $request){
         // https://bcknd.food2go.online/customer/make_order
         // Keys
-        // date, branch_id, amount, coupon_discount, payment_status [paid, unpaid], total_tax, total_discount, address_id
+        // date, branch_id, amount, coupon_discount, total_tax, total_discount, address_id
         // order_type[take_away,dine_in,delivery], notes
         // deal[{deal_id, count}], payment_method_id, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], variation[{variation_id, option_id[]}], count}]
@@ -41,13 +41,28 @@ class MakeOrderController extends Controller
         $user = $request->user();
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
+        $points = 0;
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $product) {
+                $item = $this->products
+                ->where('id', $product->product_id)
+                ->first();
+                if (!empty($item)) {
+                    $points += $item->points;
+                }
+            }
+        }
         if ($request->receipt) {
-            $image_path = $this->upload($request, 'receipt', 'customer/payments/receipts');
-            $orderRequest['receipt'] = $image_path;
+            $orderRequest['receipt'] = $request->receipt;
         }
         else {
             $orderRequest['status'] = 1;
+
+            $user->points += $points;
+            $user->save();
         }
+        $orderRequest['points'] = $points;
         $order = $this->order
         ->create($orderRequest);
         $user->address()->attach($request->address_id);

@@ -22,6 +22,7 @@ class PaymentMethodController extends Controller
     use image;
 
     public function view(){
+        // https://bcknd.food2go.online/admin/settings/payment_methods
         $payment_methods = $this->payment_methods
         ->get();
 
@@ -31,7 +32,7 @@ class PaymentMethodController extends Controller
     }
 
     public function status($id){
-          // https://bcknd.food2go.online/admin/payment_methods/status/{id}
+          // https://bcknd.food2go.online/admin/settings/payment_methods/status/{id}
         $validator = Validator::make($request->all(), [
             'status' => 'required|boolean',
         ]);
@@ -50,6 +51,7 @@ class PaymentMethodController extends Controller
     }
 
     public function create(PaymentMethodRequest $request){
+        // https://bcknd.food2go.online/admin/settings/payment_methods/add
         $paymentMethodRequest = $request->only($this->paymentMethodRequest);
         if ($request->logo) {
             $image_path = $this->upload($request, 'logo', 'admin/settings/payment_methods');
@@ -64,6 +66,7 @@ class PaymentMethodController extends Controller
     }
 
     public function modify(PaymentMethodRequest $request, $id){
+        // https://bcknd.food2go.online/admin/settings/payment_methods/update/{id}
         $paymentMethodRequest = $request->only($this->paymentMethodRequest);
         $payment_method = $this->payment_methods
         ->where('id', $id)
@@ -82,6 +85,7 @@ class PaymentMethodController extends Controller
     }
 
     public function delete($id){
+        // https://bcknd.food2go.online/admin/settings/payment_methods/delete/{id}
         $payment_method = $this->payment_methods
         ->where('id', $id)
         ->first();

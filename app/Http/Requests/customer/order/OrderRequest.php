@@ -27,7 +27,6 @@ class OrderRequest extends FormRequest
             'date' => ['required', 'date'],
             'branch_id' => ['exists:branches,id', 'nullable'],
             'amount' => ['required', 'numeric'],
-            'payment_status' => ['required'],
             'payment_method_id' => ['exists:payment_methods,id', 'required'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
