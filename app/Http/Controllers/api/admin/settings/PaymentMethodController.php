@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\settings\PaymentMethodRequest;
 use App\trait\image;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\PaymentMethod;
 
@@ -25,6 +27,25 @@ class PaymentMethodController extends Controller
 
         return response()->json([
             'payment_methods' => $payment_methods
+        ]);
+    }
+
+    public function status($id){
+          // https://bcknd.food2go.online/admin/payment_methods/status/{id}
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
+        $this->payment_methods->where('id', $id)
+        ->update(['status' => $request->status]);
+
+        return response()->json([
+            'success' => 'You update status success'
         ]);
     }
 

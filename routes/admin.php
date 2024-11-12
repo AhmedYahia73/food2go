@@ -231,6 +231,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(PaymentMethodController::class)->prefix('payment_methods')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
+            Route::post('/status/{id}', 'status');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
