@@ -21,6 +21,9 @@ class DealController extends Controller
         'description',
         'price',
         'status',
+        'daily',
+        'start_date',
+        'end_date',
     ];
     use image;
     use translaion;
@@ -69,6 +72,7 @@ class DealController extends Controller
         // Keys
         // price, status, image
         // times[0][day], times[0][from], times[0][to]
+        // daily, start_date, end_date
         // Days [Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
         // deal_names[{deal_title, tranlation_id, tranlation_name}]
         // deal_descriptions[{deal_description, tranlation_id, tranlation_name}]
@@ -112,6 +116,7 @@ class DealController extends Controller
         // Keys
         // price, status, image
         // times[0][day], times[0][from], times[0][to]
+        // daily, start_date, end_date
         // Days [Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
         // deal_names[{deal_title, tranlation_id, tranlation_name}]
         // deal_descriptions[{deal_description, tranlation_id, tranlation_name}]

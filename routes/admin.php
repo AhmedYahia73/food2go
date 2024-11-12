@@ -42,6 +42,7 @@ use App\Http\Controllers\api\admin\settings\CityController;
 use App\Http\Controllers\api\admin\settings\ZoneController;
 use App\Http\Controllers\api\admin\settings\SettingController;
 use App\Http\Controllers\api\admin\settings\OrderTypeController;
+use App\Http\Controllers\api\admin\settings\PaymentMethodController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
@@ -221,6 +222,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
         
         Route::controller(DiscountController::class)->prefix('discount')->group(function(){
+            Route::get('/', 'view');
+            Route::post('/add', 'create');
+            Route::post('/update/{id}', 'modify');
+            Route::delete('/delete/{id}', 'delete');
+        });
+        
+        Route::controller(PaymentMethodController::class)->prefix('payment_methods')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
