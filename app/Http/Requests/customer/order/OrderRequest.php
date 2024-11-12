@@ -33,7 +33,6 @@ class OrderRequest extends FormRequest
             'total_discount' => ['required', 'numeric'],
             'address_id' => ['exists:addresses,id', 'nullable'],
             'order_type' => ['required', 'in:take_away,dine_in,delivery'],
-            'paid_by' => ['required', 'in:cash,card'],
             'products.*.product_id' => ['exists:products,id', 'required'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],
