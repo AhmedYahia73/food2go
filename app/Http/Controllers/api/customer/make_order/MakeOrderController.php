@@ -179,7 +179,7 @@ class MakeOrderController extends Controller
         $order->save();
 
         return response()->json([
-            'success' => $order_details
+            'success' => $order
         ]);
     }
 }
