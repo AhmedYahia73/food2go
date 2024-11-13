@@ -27,4 +27,5 @@ return array (
   'Size' => 'Size',
   'Small' => 'Small',
   'Exatra 00' => 'Exatra 00',
+  'Exatra 21' => 'Exatra 21',
 );

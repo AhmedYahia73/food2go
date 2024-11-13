@@ -40,8 +40,8 @@ class CreateProductController extends Controller
     use translaion;
 
     public function create(ProductRequest $request){
-        // http://localhost/food2go/public/admin/product/update/2?category_id=4&sub_category_id=5&item_type=all&stock_type=unlimited&price=100&product_time_status=0&status=1&recommended=1&points=100&excludes[0][0][exclude_name]=Tomatoa&excludes[0][0][tranlation_id]=1&excludes[0][0][tranlation_name]=en&excludes[0][1][exclude_name]=طماطم&excludes[0][1][tranlation_id]=5&excludes[0][1][tranlation_name]=ar&variations[0][names][0][name]=Size&variations[0][names][0][tranlation_id]=1&variations[0][names][0][tranlation_name]=en&variations[0][names][1][name]=المقاس&variations[0][names][1][tranlation_id]=5&variations[0][names][1][tranlation_name]=ar&variations[0][type]=single&variations[0][required]=1&variations[0][points]=100&variations[0][options][0][names][0][name]=Small&variations[0][options][0][names][0][tranlation_id]=1&variations[0][options][0][names][0][tranlation_name]=en&variations[0][options][0][names][1][name]=صغير&variations[0][options][0][names][1][tranlation_id]=5&variations[0][options][0][names][1][tranlation_name]=ar&variations[0][options][0][price]=100&variations[0][options][0][status]=1&variations[0][options][0][extra_names][0][extra_name]=Exatra 00&variations[0][options][0][extra_names][0][tranlation_id]=1&variations[0][options][0][extra_names][0][tranlation_name]=en&variations[0][options][0][extra_names][1][extra_name]=زيادة 00&variations[0][options][0][extra_names][1][tranlation_id]=5&variations[0][options][0][extra_names][1][tranlation_name]=ar&variations[0][options][0][extra_price]=1000&product_names[0][product_name]=Pizza1&product_names[0][tranlation_id]=1&product_names[0][tranlation_name]=en&product_names[1][product_name]=بيتزا 1&product_names[1][tranlation_id]=5&product_names[1][tranlation_name]=ar&product_descriptions[0][product_description]=Pizza description&product_descriptions[0][tranlation_id]=1&product_descriptions[0][tranlation_name]=en&product_descriptions[1][product_description]=وصف البيتزا&product_descriptions[1][tranlation_id]=5&product_descriptions[1][tranlation_name]=ar&extra[0][names][0][extra_name]=Extra 1&extra[0][names][0][tranlation_id]=1&extra[0][names][0][tranlation_name]=en&extra[0][names][1][extra_name]=زيادة 1&extra[0][names][1][tranlation_id]=5&extra[0][names][1][tranlation_name]=ar&extra[0][extra_price]=100
-        
+        // 
+        http://localhost/food2go/public/admin/product/update/2?category_id=4&sub_category_id=5&item_type=all&stock_type=unlimited&price=100&product_time_status=0&status=1&recommended=1&points=100&excludes[0][0][exclude_name]=Tomatoa&excludes[0][0][tranlation_id]=1&excludes[0][0][tranlation_name]=en&excludes[0][1][exclude_name]=طماطم&excludes[0][1][tranlation_id]=5&excludes[0][1][tranlation_name]=ar&variations[0][names][0][name]=Size&variations[0][names][0][tranlation_id]=1&variations[0][names][0][tranlation_name]=en&variations[0][names][1][name]=المقاس&variations[0][names][1][tranlation_id]=5&variations[0][names][1][tranlation_name]=ar&variations[0][type]=single&variations[0][required]=1&variations[0][points]=100&variations[0][options][0][names][0][name]=Small&variations[0][options][0][names][0][tranlation_id]=1&variations[0][options][0][names][0][tranlation_name]=en&variations[0][options][0][names][1][name]=صغير&variations[0][options][0][names][1][tranlation_id]=5&variations[0][options][0][names][1][tranlation_name]=ar&variations[0][options][0][price]=100&variations[0][options][0][status]=1&variations[0][options][0][extra_names][0][extra_name]=Exatra 00&variations[0][options][0][extra_names][0][tranlation_id]=1&variations[0][options][0][extra_names][0][tranlation_name]=en&variations[0][options][0][extra_names][1][extra_name]=زيادة 00&variations[0][options][0][extra_names][1][tranlation_id]=5&variations[0][options][0][extra_names][1][tranlation_name]=ar&variations[0][options][0][extra_price]=1000&product_names[0][product_name]=Pizza1&product_names[0][tranlation_id]=1&product_names[0][tranlation_name]=en&product_names[1][product_name]=بيتزا 1&product_names[1][tranlation_id]=5&product_names[1][tranlation_name]=ar&product_descriptions[0][product_description]=Pizza description&product_descriptions[0][tranlation_id]=1&product_descriptions[0][tranlation_name]=en&product_descriptions[1][product_description]=وصف البيتزا&product_descriptions[1][tranlation_id]=5&product_descriptions[1][tranlation_name]=ar&extra[0][names][0][extra_name]=Extra 1&extra[0][names][0][tranlation_id]=1&extra[0][names][0][tranlation_name]=en&extra[0][names][1][extra_name]=زيادة 1&extra[0][names][1][tranlation_id]=5&extra[0][names][1][tranlation_name]=ar&extra[0][extra_price]=100
         // https://bcknd.food2go.online/admin/product/add
         // Keys
         // category_id, sub_category_id, item_type[online, offline, all], 
@@ -56,8 +56,8 @@ class CreateProductController extends Controller
         // variations[][required], variations[][points]
         // variations[][options][][names][{name, tranlation_id, tranlation_name}], 
         // variations[][options][][price], variations[][options][][status], 
-        // variations[][options][][extra_names][{extra_name, tranlation_id, tranlation_name}], 
-        // variations[][options][][extra_price], 
+        // variations[][options][][extra][][extra_names][{extra_name, tranlation_id, tranlation_name}], 
+        // variations[][options][][extra][][extra_price], 
         // product_names[{product_name, tranlation_id, tranlation_name}]
         // product_descriptions[{product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
@@ -134,18 +134,24 @@ class CreateProductController extends Controller
                     foreach ($element['names'] as $key => $value) {
                         $this->translate($value['tranlation_name'], $element['names'][0]['name'], $value['name']);
                     }
-                    if ($element['extra_names']) {
-                        $this->extra
-                        ->create([
-                            'name' => $element['extra_names'][0]['extra_name'],
-                            'price' => $element['extra_price'],
-                            'product_id' => $product->id,
-                            'variation_id' => $variation->id,
-                            'option_id' => $option->id
-                        ]);// add extra for option
-
-                        foreach ($element['extra_names'] as $key => $value) {
-                            $this->translate($value['tranlation_name'], $element['extra_names'][0]['extra_name'], $value['extra_name']);
+                    if ($element['extra']) {
+                        foreach ($element['extra'] as $key => $extra) {
+                            // ['extra_names']
+                            $this->extra
+                            ->create([
+                                'name' => $extra['extra_names'][0]['extra_name'],
+                                'price' => $extra['extra_price'],
+                                'product_id' => $product->id,
+                                'variation_id' => $variation->id,
+                                'option_id' => $option->id
+                            ]);// add extra for option
+    
+                            foreach ($extra['extra_names'] as $key => $value) {
+                                $this->translate($value['tranlation_name'], $extra['extra_names'][0]['extra_name'], $value['extra_name']);
+                            }
+                            foreach ($extra_num as $extra_num_item) {
+                                $extra_num_item->delete();
+                            }
                         }
                     }
                 } 
@@ -153,7 +159,7 @@ class CreateProductController extends Controller
         }
 
         return response()->json([
-            'success' => 'You add data success'
+            'success' => $request->all()
         ]);
     }
 
@@ -265,21 +271,27 @@ class CreateProductController extends Controller
                         foreach ($element['names'] as $key => $value) {
                             $this->translate($value['tranlation_name'], $element['names'][0]['name'], $value['name']);
                         }
-                        if ($element['extra_names']) {
-                            $this->extra
-                            ->create([
-                                'name' => $element['extra_names'][0]['extra_name'],
-                                'price' => $element['extra_price'],
-                                'product_id' => $product->id,
-                                'variation_id' => $variation->id,
-                                'option_id' => $option->id
-                            ]);// add extra for option
-
-                            foreach ($element['extra_names'] as $key => $value) {
-                                $this->translate($value['tranlation_name'], $element['extra_names'][0]['extra_name'], $value['extra_name']);
+                        if ($element['extra']) {
+                            foreach ($element['extra'] as $key => $extra) {
+                                // ['extra_names']
+                                $this->extra
+                                ->create([
+                                    'name' => $extra['extra_names'][0]['extra_name'],
+                                    'price' => $extra['extra_price'],
+                                    'product_id' => $product->id,
+                                    'variation_id' => $variation->id,
+                                    'option_id' => $option->id
+                                ]);// add extra for option
+        
+                                foreach ($extra['extra_names'] as $key => $value) {
+                                    $this->translate($value['tranlation_name'], $extra['extra_names'][0]['extra_name'], $value['extra_name']);
+                                }
+                                foreach ($extra_num as $extra_num_item) {
+                                    $extra_num_item->delete();
+                                }
                             }
                         }
-                    } // add options
+                    }
                 }
             }
         }
