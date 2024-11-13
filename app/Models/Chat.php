@@ -13,6 +13,19 @@ class Chat extends Model
         'delivery_id',
         'user_id',
         'message',
+        'order_id',
         'user_sender',
     ];
+
+    public function delivery(){
+        return $this->belongsTo(Delivery::class, 'delivery_id');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function order(){
+        return $this->belongsTo(Order::class, 'delivery_id');
+    }
 }

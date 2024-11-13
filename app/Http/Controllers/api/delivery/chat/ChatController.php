@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\customer\chat;
+namespace App\Http\Controllers\api\delivery\chat;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -14,14 +14,14 @@ class ChatController extends Controller
     public function __construct(private Chat $chat){}
     protected $chatRequest = [
         'order_id',
-        'delivery_id',
+        'user_id',
         'message',
     ];
 
     public function chat(Request $request){
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
-            'delivery_id' => 'required|exists:deliveries,id',
+            'user_id' => 'required|exists:users,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -30,9 +30,9 @@ class ChatController extends Controller
         }
 
         $chat = $this->chat
-        ->where('user_id', $request->user()->id)
+        ->where('delivery_id', $request->user()->id)
         ->where('order_id', $request->order_id)
-        ->where('delivery_id', $request->delivery_id)
+        ->where('user_id', $request->user_id)
         ->orderBy('id')
         ->get();
 
@@ -44,7 +44,7 @@ class ChatController extends Controller
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
-            'delivery_id' => 'required|exists:deliveries,id',
+            'user_id' => 'required|exists:users,id',
             'message' => 'required'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -54,8 +54,8 @@ class ChatController extends Controller
         }
 
         $chatRequest = $request->only($this->chatRequest);
-        $chatRequest['user_id'] = $request->user()->id;
-        $chatRequest['user_sender'] = true;
+        $chatRequest['delivery_id'] = $request->user()->id;
+        $chatRequest['user_sender'] = false;
         $message = $this->chat
         ->create($chatRequest);
 

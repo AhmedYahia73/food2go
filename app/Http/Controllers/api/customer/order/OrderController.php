@@ -17,6 +17,7 @@ class OrderController extends Controller
         $orders = $this->orders
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'scheduled'])
+        ->with('delivery')
         ->get();
 
         return response()->json([

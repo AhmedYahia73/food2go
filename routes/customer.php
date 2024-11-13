@@ -14,6 +14,8 @@ use App\Http\Controllers\api\customer\otp\OtpController;
 
 use App\Http\Controllers\api\customer\make_order\MakeOrderController;
 
+use App\Http\Controllers\api\customer\chat\ChatController;
+
 use App\Http\Controllers\api\customer\address\AddressController;
 
 use App\Http\Controllers\api\customer\order\OrderController;
@@ -35,6 +37,11 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/slider', 'slider');
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
+    });
+
+    Route::controller(ChatController::class)->prefix('chat')->group(function(){
+        Route::get('/', 'chat');
+        Route::post('/send', 'store');
     });
 
     Route::controller(CouponController::class)->prefix('coupon')->group(function(){
