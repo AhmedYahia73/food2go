@@ -30,6 +30,8 @@ use App\Http\Controllers\api\admin\pos\PosSaleController;
 
 use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
 
+use App\Http\Controllers\api\admin\payments\PaymentController;
+
 use App\Http\Controllers\api\admin\coupon\CouponController;
 use App\Http\Controllers\api\admin\coupon\CreateCouponController;
 
@@ -63,6 +65,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(PaymentController::class)->prefix('payment')->group(function(){
+        Route::get('/pending', 'pending');
+        Route::get('/history', 'history');
     });
 
     Route::controller(PointOffersController::class)->prefix('offer')->group(function(){

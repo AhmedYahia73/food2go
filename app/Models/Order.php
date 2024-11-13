@@ -40,6 +40,10 @@ class Order extends Model
         'order_details',
     ];
 
+    public function getorderDetailsAttribute($data){
+        return json_decode($data);
+    }
+
     public function delivery(){
         return $this->belongsTo(Delivery::class, 'delivery_id');
     }
