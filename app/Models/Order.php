@@ -37,6 +37,7 @@ class Order extends Model
         'receipt',
         'status',
         'points',
+        'order_details',
     ];
 
     public function delivery(){

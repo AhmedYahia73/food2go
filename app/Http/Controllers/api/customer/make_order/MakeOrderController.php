@@ -11,11 +11,18 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\ProductSale;
 use App\Models\Product;
+use App\Models\ExcludeProduct;
+use App\Models\ExtraProduct;
+use App\Models\VariationProduct;
+use App\Models\OptionProduct;
+use App\Models\Addon;
 
 class MakeOrderController extends Controller
 {
     public function __construct(private Order $order, private OrderDetail $order_details,
-    private ProductSale $product_sales, private Product $products){}
+    private ProductSale $product_sales, private Product $products, private ExcludeProduct $excludes,
+    private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
+    private OptionProduct $options){}
     use image;
     protected $orderRequest = [
         'date',
@@ -42,6 +49,7 @@ class MakeOrderController extends Controller
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
         $points = 0;
+        $order_details = [];
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $product) {
@@ -70,14 +78,19 @@ class MakeOrderController extends Controller
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
-                for ($i=0, $end = $product['count']; $i < $end; $i++) { 
-                    $order->products()->attach($product['product_id']);
-                    $this->product_sales->create([
-                        'product_id' => $product['product_id'],
-                        'count' => $product['count'],
-                        'date' => date('Y-m-d')
-                    ]);
-                }
+                $order_details[$key]['extras'] = [];
+                $order_details[$key]['addons'] = [];
+                $order_details[$key]['excludes'] = [];
+                $order_details[$key]['product'] = [];
+                $order_details[$key]['variations'] = [];
+
+                $order_details[$key]['product'][] = [
+                    'product' => $this->products
+                    ->where('id', $product['product_id'])
+                    ->first(),
+                    'count' => $product['count']
+                ];
+
                 $this->order_details
                 ->create([
                     'order_id' => $order->id,
@@ -95,6 +108,10 @@ class MakeOrderController extends Controller
                             'count' => $product['count'],
                             'product_index' => $key,
                         ]); // Add excludes
+                        
+                        $order_details[$key]['excludes'][] = $this->excludes
+                        ->where('id', $exclude)
+                        ->first();
                     }
                 }
                 if (isset($product['addons'])) {
@@ -108,6 +125,13 @@ class MakeOrderController extends Controller
                             'addon_count' => $addon['count'],
                             'product_index' => $key,
                         ]); // Add excludes
+                        
+                        $order_details[$key]['addons'][] = [
+                            'addon' => $this->addons
+                            ->where('id', $addon['addon_id'])
+                            ->first(),
+                            'count' => $addon['count']
+                        ];
                     }
                 }
                 if (isset($product['extra_id'])) {
@@ -120,6 +144,10 @@ class MakeOrderController extends Controller
                             'count' => $product['count'],
                             'product_index' => $key,
                         ]); // Add extra
+                        
+                        $order_details[$key]['extras'][] = $this->extras
+                        ->where('id', $extra)
+                        ->first();
                     }
                 }
                 if (isset($product['variation'])) {
@@ -135,25 +163,21 @@ class MakeOrderController extends Controller
                                 'product_index' => $key,
                             ]); // Add variations & options
                         }
+                        $order_details[$key]['variations'][] = [
+                            'variation' => $this->variation
+                            ->where('id', $variation['variation_id'])
+                            ->first(),
+                            'options' => $this->options
+                            ->whereIn('id', $variation['option_id'])
+                            ->get()
+                        ];
                     }
                 }
             }
         }
-        if ($request->deal) {
-            $request->deal = is_string($request->deal) ? json_decode($request->deal) : $request->deal;
-            foreach ($request->deal as $item) {
-                $order->deal()->attach($item['deal_id']);
-                $this->order_details
-                ->create([
-                    'order_id' => $order->id,
-                    'deal_id' => $item['deal_id'],
-                    'count' => $item['count'],
-                ]); // Add excludes
-            }
-        }
 
         return response()->json([
-            'success' => 'You make order success'
+            'success' => $order_details
         ]);
     }
 }
