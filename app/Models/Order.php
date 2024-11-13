@@ -38,6 +38,7 @@ class Order extends Model
         'status',
         'points',
         'order_details',
+        'rejected_reason',
     ];
 
     public function getorderDetailsAttribute($data){
