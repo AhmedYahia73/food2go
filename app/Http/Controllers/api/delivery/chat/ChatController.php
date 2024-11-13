@@ -19,6 +19,7 @@ class ChatController extends Controller
     ];
 
     public function chat(Request $request){
+        // https://bcknd.food2go.online/delivery/chat
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
             'user_id' => 'required|exists:users,id',
@@ -42,6 +43,7 @@ class ChatController extends Controller
     }
 
     public function store(Request $request){
+        // https://bcknd.food2go.online/delivery/chat/send
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
             'user_id' => 'required|exists:users,id',
