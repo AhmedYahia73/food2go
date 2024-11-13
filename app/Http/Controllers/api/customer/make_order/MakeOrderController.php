@@ -175,6 +175,8 @@ class MakeOrderController extends Controller
                 }
             }
         }
+        $order->order_details = json_encode($order_details);
+        $order->save();
 
         return response()->json([
             'success' => $order_details
