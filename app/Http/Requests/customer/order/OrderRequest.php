@@ -24,7 +24,7 @@ class OrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'date' => ['required', 'date'],
+            'date' => ['required'],
             'branch_id' => ['exists:branches,id', 'nullable'],
             'amount' => ['required', 'numeric'],
             'payment_method_id' => ['exists:payment_methods,id', 'required'],
