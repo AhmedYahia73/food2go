@@ -19,9 +19,7 @@ class ChatController extends Controller
     ];
 
     public function chat(Request $request, $order_id, $delivery_id){
-        // https://bcknd.food2go.online/customer/chat
-        // Keys
-        // order_id, delivery_id 
+        // https://bcknd.food2go.online/customer/chat/{order_id}/{delivery_id}
 
         $chat = $this->chat
         ->where('user_id', $request->user()->id)
