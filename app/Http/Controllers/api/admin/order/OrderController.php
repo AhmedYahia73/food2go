@@ -118,13 +118,15 @@ class OrderController extends Controller
         
             $orders = $this->orders
             ->where('id', $id)
-            ->update([
+            ->first();
+            $orders->update([
                 'order_status' => $request->order_status, 
             ]);
         }
 
         return response()->json([
-            'order_status' => $request->order_status
+            'order_status' => $request->order_status,
+            'delivery_id' => $orders->delivery_id,
         ]);
     }
 
