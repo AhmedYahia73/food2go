@@ -106,19 +106,16 @@ class OrderController extends Controller
                 'error' => $validator->errors(),
             ],400);
         }
+        $orders = $this->orders
+        ->where('id', $id)
+        ->first();
 
-        if ($request->order_status == 'confirmed') { 
-            $orders = $this->orders
-            ->where('id', $id)
-            ->update([
+        if ($request->order_status == 'confirmed') {
+            $orders->update([
                 'order_status' => $request->order_status,
                 'order_number' => $request->order_number,
             ]);
         } else {
-        
-            $orders = $this->orders
-            ->where('id', $id)
-            ->first();
             $orders->update([
                 'order_status' => $request->order_status, 
             ]);
