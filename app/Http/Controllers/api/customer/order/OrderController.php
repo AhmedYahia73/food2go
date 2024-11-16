@@ -41,10 +41,11 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/customer/orders/order_status/{id}
         $order = $this->orders
         ->where('id', $id)
-        ->first()->order_status;
+        ->first();
 
         return response()->json([
-            'status' => $order
+            'status' => $order->order_status,
+            'delivery_id' => $order->delivery_id,
         ]);
     }
 
