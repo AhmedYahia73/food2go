@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use App\Events\ChatEvent;
 
 use App\Models\Chat;
 
@@ -23,6 +24,7 @@ class ChatController extends Controller
         // Keys
         // order_id, user_id
 
+        event(new ChatEvent);
         $chat = $this->chat
         ->where('delivery_id', $request->user()->id)
         ->where('order_id', $order_id)
