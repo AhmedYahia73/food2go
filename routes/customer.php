@@ -40,7 +40,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(ChatController::class)->prefix('chat')->group(function(){
-        Route::get('/', 'chat');
+        Route::get('/{order_id}/{delivery_id}', 'chat');
         Route::post('/send', 'store');
     });
 

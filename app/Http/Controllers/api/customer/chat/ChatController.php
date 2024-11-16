@@ -18,24 +18,15 @@ class ChatController extends Controller
         'message',
     ];
 
-    public function chat(Request $request){
+    public function chat(Request $request, $order_id, $delivery_id){
         // https://bcknd.food2go.online/customer/chat
         // Keys
-        // order_id, delivery_id
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required|exists:orders,id',
-            'delivery_id' => 'required|exists:deliveries,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'error' => $validator->errors(),
-            ],400);
-        }
+        // order_id, delivery_id 
 
         $chat = $this->chat
         ->where('user_id', $request->user()->id)
-        ->where('order_id', $request->order_id)
-        ->where('delivery_id', $request->delivery_id)
+        ->where('order_id', $order_id)
+        ->where('delivery_id', $delivery_id)
         ->orderBy('id')
         ->get();
 
