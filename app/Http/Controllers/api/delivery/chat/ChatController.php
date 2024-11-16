@@ -24,13 +24,13 @@ class ChatController extends Controller
         // Keys
         // order_id, user_id
 
-        event(new ChatEvent);
         $chat = $this->chat
         ->where('delivery_id', $request->user()->id)
         ->where('order_id', $order_id)
         ->where('user_id', $user_id)
         ->orderBy('id')
         ->get();
+        event(new ChatEvent($chat));
 
         return response()->json([
             'chat' => $chat

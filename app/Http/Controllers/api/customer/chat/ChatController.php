@@ -22,13 +22,13 @@ class ChatController extends Controller
     public function chat(Request $request, $order_id, $delivery_id){
         // https://bcknd.food2go.online/customer/chat/{order_id}/{delivery_id}
 
-        event(new ChatEvent);
         $chat = $this->chat
         ->where('user_id', $request->user()->id)
         ->where('order_id', $order_id)
         ->where('delivery_id', $delivery_id)
         ->orderBy('id')
         ->get();
+        event(new ChatEvent($chat));
 
         return response()->json([
             'chat' => $chat

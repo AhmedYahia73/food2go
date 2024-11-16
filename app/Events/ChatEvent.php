@@ -17,9 +17,10 @@ class ChatEvent implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public $chat;
+    public function __construct($chat)
     {
-        //
+        $this->chat = $chat;
     }
 
     /**
