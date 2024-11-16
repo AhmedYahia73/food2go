@@ -86,11 +86,11 @@ class CreateProductController extends Controller
             foreach ($request->excludes as $item) {
                 $this->excludes
                 ->create([
-                    'name' => $item[0]['exclude_name'],
+                    'name' => $item['names'][0]['exclude_name'],
                     'product_id' => $product->id
                 ]);
-                foreach ($item as $key => $element) {
-                    $this->translate($element['tranlation_name'], $item[0]['exclude_name'], $element['exclude_name']);
+                foreach ($item['names'] as $key => $element) {
+                    $this->translate($element['tranlation_name'], $item['names'][0]['exclude_name'], $element['exclude_name']);
                 }
             }
         }// add excludes
