@@ -158,6 +158,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::prefix('product')->group(function(){
         Route::controller(ProductController::class)->group(function(){
             Route::get('/', 'view');
+            Route::get('/item/{id}', 'product');
             Route::get('/reviews', 'reviews');
         });
         Route::controller(CreateProductController::class)->group(function(){
