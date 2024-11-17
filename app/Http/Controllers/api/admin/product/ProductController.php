@@ -65,7 +65,7 @@ class ProductController extends Controller
                     'product_description' => $translation_file[$product->description] ?? null
                 ];
                 foreach ($product->excludes as $exclude) {
-                    $excludes[$exclude->id][] = [
+                    $excludes[$exclude->id]['names'][] = [
                         'tranlation_id' => $item->id,
                         'tranlation_name' => $item->name,
                         'exclude_name' => $translation_file[$exclude->name] ?? null
