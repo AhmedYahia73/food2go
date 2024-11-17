@@ -15,4 +15,9 @@ class PaymentMethod extends Model
         'logo',
         'status',
     ];
+    protected $appends = ['logo_link'];
+
+    public function getLogoLinkAttribute(){
+        return url('storage/' . $this->attributes['logo']);
+    }
 }
