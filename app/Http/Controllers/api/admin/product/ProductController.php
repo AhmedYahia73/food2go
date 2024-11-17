@@ -37,6 +37,7 @@ class ProductController extends Controller
     }
 
     public function product($id){
+        // https://bcknd.food2go.online/admin/product/item/{id}
         $product = $this->products
         ->with(['addons', 'excludes', 'extra', 'variations.options.extra'])
         ->first();//extra_id
