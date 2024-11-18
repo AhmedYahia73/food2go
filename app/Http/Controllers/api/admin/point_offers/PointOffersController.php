@@ -5,14 +5,16 @@ namespace App\Http\Controllers\api\admin\point_offers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\point_offers\PointOfferRequest;
+use Illuminate\Support\Facades\File;
 use App\trait\image;
 use App\trait\translaion;
 
 use App\Models\Offer;
+use App\Models\Translation;
 
 class PointOffersController extends Controller
 {
-    public function __construct(private Offer $offers){}
+    public function __construct(private Offer $offers, private Translation $translations){}
     protected $offerRequest = [
         'product',
         'points',
@@ -27,6 +29,33 @@ class PointOffersController extends Controller
 
         return response()->json([
             'offers' => $offers
+        ]);
+    }
+
+
+    public function offer($id){
+        // https://bcknd.food2go.online/admin/offer/item/{id}
+        $offer = $this->offers
+        ->where('id', $id)
+        ->first();
+        $translations = $this->translations
+        ->get();
+        $offer_names = [];
+        foreach ($translations as $item) {
+            $filePath = base_path("lang/{$item->name}/messages.php");
+            if (File::exists($filePath)) {
+                $translation_file = require $filePath;
+                $offer_names[] = [
+                    'tranlation_id' => $item->id,
+                    'tranlation_name' => $item->name,
+                    'offer_product' => $translation_file[$offer->title] ?? null
+                ];
+            }
+        }
+        $offer->offer_names = $offer_names;
+
+        return response()->json([
+            'offer' => $offer
         ]);
     }
 

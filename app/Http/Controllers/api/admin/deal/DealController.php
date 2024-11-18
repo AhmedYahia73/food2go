@@ -7,15 +7,18 @@ use Illuminate\Http\Request;
 use App\Http\Requests\admin\deal\DealRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
 use App\trait\image;
 use App\trait\translaion;
 
 use App\Models\Deal;
 use App\Models\DealTimes;
+use App\Models\Translation;
 
 class DealController extends Controller
 {
-    public function __construct(private Deal $deals, private DealTimes $deal_times){}
+    public function __construct(private Deal $deals, private DealTimes $deal_times,
+    private Translation $translations){}
     protected $dealRequest = [
         'title',
         'description',
@@ -36,6 +39,40 @@ class DealController extends Controller
 
         return response()->json([
             'deals' => $deals
+        ]);
+    }
+
+    public function deal($id){
+        // https://bcknd.food2go.online/admin/deal/item/{id}
+        $deal = $this->deals
+        ->with('times')
+        ->where('id', $id)
+        ->first();
+        $translations = $this->translations
+        ->get();
+        $deal_names = [];
+        $deal_descriptions = [];
+        foreach ($translations as $item) {
+            $filePath = base_path("lang/{$item->name}/messages.php");
+            if (File::exists($filePath)) {
+                $translation_file = require $filePath;
+                $deal_names[] = [
+                    'id' => $item->id,
+                    'lang' => $item->name,
+                    'deal_title' => $translation_file[$deal->title] ?? null
+                ];
+                $deal_descriptions[] = [
+                    'id' => $item->id,
+                    'lang' => $item->name,
+                    'deal_description' => $translation_file[$deal->description] ?? null
+                ];
+            }
+        }
+        $deal->deal_names = $deal_names;
+        $deal->deal_descriptions = $deal_descriptions;
+
+        return response()->json([
+            'deal' => $deal
         ]);
     }
 

@@ -76,6 +76,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(PointOffersController::class)->prefix('offer')->group(function(){
         Route::get('/', 'view');
+        Route::get('/item/{id}', 'offer');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
@@ -95,6 +96,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // Make Deal Module
     Route::controller(DealController::class)->prefix('deal')->group(function(){
         Route::get('/', 'view');
+        Route::get('/item/{id}', 'deal');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
