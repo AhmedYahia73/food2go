@@ -94,6 +94,28 @@ class OrderController extends Controller
         ]);
     }
 
+    public function order($id){
+        // https://bcknd.food2go.online/admin/order/invoice/{id}
+        $order = $this->orders
+        ->with(['user', 'branch', 'delivery'])
+        ->find($id);
+
+        return response()->json([
+            'order' => $order
+        ]);
+    }
+
+    public function invoice($id){
+        // https://bcknd.food2go.online/admin/order/order/{id}
+        $order = $this->orders
+        ->with(['user', 'address.zone.city'])
+        ->find($id);
+
+        return response()->json([
+            'order' => $order
+        ]);
+    }
+
     public function status($id, Request $request){
         // https://bcknd.food2go.online/admin/order/status/{id}
         // Keys

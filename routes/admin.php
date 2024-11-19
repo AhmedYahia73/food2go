@@ -49,6 +49,8 @@ use App\Http\Controllers\api\admin\settings\PaymentMethodController;
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/', 'orders');
+        Route::get('/order/{id}', 'order');
+        Route::get('/invoice/{id}', 'invoice');
         Route::put('/status/{id}', 'status');
         Route::post('/delivery', 'delivery');
     });
