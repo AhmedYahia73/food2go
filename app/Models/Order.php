@@ -12,6 +12,7 @@ use App\Models\Addon;
 use App\Models\Delivery;
 use App\Models\Offer;
 use App\Models\Deal;
+use Carbon\Carbon;
 
 class Order extends Model
 {
@@ -40,6 +41,11 @@ class Order extends Model
         'order_details',
         'rejected_reason',
     ];
+    protected $appends = ['order_date'];
+
+    public function getOrderDateAttribute(){
+        return Carbon::parse($this->attributes['created_at'])->format('Y-m-d');
+    }
 
     public function getorderDetailsAttribute($data){
         return json_decode($data);

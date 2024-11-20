@@ -94,6 +94,44 @@ class OrderController extends Controller
         ]);
     }
 
+    public function order_filter(Request $request){
+        // https://bcknd.food2go.online/admin/order/filter
+        // Key
+        // from, to, branch_id
+        $validator = Validator::make($request->all(), [
+            'from' => 'date',
+            'to' => 'date',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
+        $orders = $this->orders
+        ->where('pos', 0)
+        ->where('status', 1)
+        ->with(['user', 'branch', 'delivery'])
+        ->orderBy('created_at')
+        ->get();
+        if ($request->branch_id && $request->branch_id != 0) {
+            $orders = $orders
+            ->where('branch_id', $request->branch_id);
+        }
+        if ($request->from) {
+            $orders = $orders
+            ->where('order_date', '>=', $request->from);
+        }
+        if ($request->to) {
+            $orders = $orders
+            ->where('order_date', '<=', $request->to);
+        }
+
+        return response()->json([
+            'orders' => array_values($orders->toArray())
+        ]);
+    }
+
     public function order($id){
         // https://bcknd.food2go.online/admin/order/invoice/{id}
         $order = $this->orders
