@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\customer\order;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 use App\Models\Order;
 use App\Models\Setting;
@@ -54,10 +55,32 @@ class OrderController extends Controller
             ]);
         }
 
+        // Assuming $order->created_at is a valid date-time string in 'Y-m-d H:i:s' format
+        $time = Carbon::createFromFormat('Y-m-d H:i:s', $order->created_at);
+        
+        // Get the time to add (e.g., '02:30:45')
+        $time_to_add = $delivery_time->setting;  // Assuming this is something like '02:30:45'
+        
+        // Split the time string into hours, minutes, and seconds
+        list($hours, $minutes, $seconds) = explode(':', $time_to_add);
+        
+        // Ensure that $hours, $minutes, and $seconds are integers
+        $hours = (int)$hours;
+        $minutes = (int)$minutes;
+        $seconds = (int)$seconds;
+        
+        // Add the time to the original Carbon instance
+        $time = $time->addHours($hours)->addMinutes($minutes)->addSeconds($seconds);
+        
+        // If you want to format the final time as 'H:i:s'
+        $formattedTime = $time->format('H:i:s');
+        
+        
         return response()->json([
             'status' => $order->order_status,
             'delivery_id' => $order->delivery_id,
-            'delivery_time' =>$delivery_time
+            'delivery_time' =>$delivery_time,
+            'time_delivered' => $formattedTime
         ]);
     }
 
