@@ -50,6 +50,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->prefix('order')->group(function(){
         Route::get('/', 'orders');
         Route::get('/filter', 'order_filter');
+        Route::get('/branches', 'branches');
         Route::get('/order/{id}', 'order');
         Route::get('/invoice/{id}', 'invoice');
         Route::put('/status/{id}', 'status');

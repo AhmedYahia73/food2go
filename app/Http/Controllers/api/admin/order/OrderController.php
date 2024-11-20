@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Order;
 use App\Models\Delivery;
+use App\Models\Branch;
 
 class OrderController extends Controller
 {
-    public function __construct(private Order $orders, private Delivery $deliveries){}
+    public function __construct(private Order $orders, private Delivery $deliveries, 
+    private Branch $branches){}
 
     public function orders(){
         // https://bcknd.food2go.online/admin/order
@@ -91,6 +93,20 @@ class OrderController extends Controller
             'canceled' => $canceled,
             'scheduled' => $scheduled,
             'deliveries' => $deliveries
+        ]);
+    }
+
+    public function branches(){
+        // https://bcknd.food2go.online/admin/order/branches
+        $branches = $this->branches
+        ->get();
+        $branches->push([
+            'id' => 0,
+            'name' => 'All'
+        ]);
+
+        return response()->json([
+            'branches' => $branches
         ]);
     }
 
