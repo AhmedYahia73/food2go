@@ -113,10 +113,11 @@ class OrderController extends Controller
     public function order_filter(Request $request){
         // https://bcknd.food2go.online/admin/order/filter
         // Key
-        // from, to, branch_id
+        // from, to, branch_id, type
         $validator = Validator::make($request->all(), [
             'from' => 'date',
             'to' => 'date',
+            'type' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -124,12 +125,23 @@ class OrderController extends Controller
             ],400);
         }
 
-        $orders = $this->orders
-        ->where('pos', 0)
-        ->where('status', 1)
-        ->with(['user', 'branch', 'delivery'])
-        ->orderBy('created_at')
-        ->get();
+        if ($request->type == 'all') {
+            $orders = $this->orders
+            ->where('pos', 0)
+            ->where('status', 1)
+            ->with(['user', 'branch', 'delivery'])
+            ->orderBy('created_at')
+            ->get();
+        } else {
+            $orders = $this->orders
+            ->where('pos', 0)
+            ->where('status', 1)
+            ->where('order_status', $request->type)
+            ->with(['user', 'branch', 'delivery'])
+            ->orderBy('created_at')
+            ->get();
+        }
+        
         if ($request->branch_id && $request->branch_id != 0) {
             $orders = $orders
             ->where('branch_id', $request->branch_id);

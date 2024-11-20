@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use App\trait\image;
 
 use App\Models\Setting;
 
 class SettingController extends Controller
 {
     public function __construct(private Setting $settings){}
+    use image;
 
     public function view_time_cancel_order(){
         // https://bcknd.food2go.online/admin/settings/view_time_cancel
@@ -224,6 +226,63 @@ class SettingController extends Controller
 
         return response()->json([
             'delivery_time' => $delivery_time
+        ]);
+    }
+
+    public function notification_sound(){
+        // https://bcknd.food2go.online/admin/settings/notification_sound
+        $notification_sound = $this->settings
+        ->where('name', 'notification_sound')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($notification_sound)) {
+            $notification_sound = null;
+        }
+        else{
+            $notification_sound = storage('storage/' . $notification_sound->setting);
+        }
+
+        return response()->json([
+            'notification_sound' => $notification_sound
+        ]);
+    }
+
+    public function notification_sound_update(Request $request){
+        // https://bcknd.food2go.online/admin/settings/notification_sound_update
+        // Keys
+        // notification_sound
+        $validator = Validator::make($request->all(), [
+            'notification_sound' => 'required', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $notification_sound = $this->settings
+        ->where('name', 'notification_sound')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($notification_sound)) {
+            $sound = $this->upload($request, 'notification_sound', 'admin/settings/notificatins/sound');
+            $notification_sound = $this->settings
+            ->create([
+                'name' => 'notification_sound',
+                'setting' => $sound
+            ]);
+        }
+        else{
+            $sound = $this->upload($request, 'notification_sound', 'admin/settings/notificatins/sound');
+            $this->deleteImage($notification_sound->setting);
+            $notification_sound
+            ->update([
+                'setting' => $sound
+            ]);
+        }
+        $notification_sound = url('storage/' . $notification_sound->setting);
+
+        return response()->json([
+            'notification_sound' => $notification_sound
         ]);
     }
 }
