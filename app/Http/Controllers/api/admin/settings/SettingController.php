@@ -239,7 +239,7 @@ class SettingController extends Controller
             $notification_sound = null;
         }
         else{
-            $notification_sound = storage('storage/' . $notification_sound->setting);
+            $notification_sound = url('storage/' . $notification_sound->setting);
         }
 
         return response()->json([

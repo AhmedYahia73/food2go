@@ -71,6 +71,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
 
     Route::controller(OrderController::class)->prefix('orders')->group(function(){
         Route::get('/', 'upcomming');
+        Route::get('/notification_sound', 'notification_sound');
         Route::get('/history', 'order_history');
         Route::get('/order_status/{id}', 'order_track');
         Route::get('/cancel_time', 'cancel_time');

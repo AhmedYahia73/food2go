@@ -84,6 +84,24 @@ class OrderController extends Controller
         ]);
     }
 
+    public function notification_sound(){
+        // https://bcknd.food2go.online/customer/orders/notification_sound
+        $notification_sound = $this->settings
+        ->where('name', 'notification_sound')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($notification_sound)) {
+            $notification_sound = null;
+        }
+        else{
+            $notification_sound = url('storage/' . $notification_sound->setting);
+        }
+
+        return response()->json([
+            'notification_sound' => $notification_sound
+        ]);
+    }
+
     public function cancel($id){
         // https://bcknd.food2go.online/customer/orders/cancel/{id}
         $order = $this->orders
