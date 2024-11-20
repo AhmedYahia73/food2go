@@ -173,4 +173,57 @@ class SettingController extends Controller
             'success' => 'You change data success'
         ]);
     }
+
+    public function delivery_time(){
+        // https://bcknd.food2go.online/admin/settings/delivery_time
+        $delivery_time = $this->settings
+        ->where('name', 'delivery_time')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($delivery_time)) {
+            $delivery_time = $this->settings
+            ->create([
+                'name' => 'delivery_time',
+                'setting' => '00:30:00',
+            ]);
+        }
+
+        return response()->json([
+            'delivery_time' => $delivery_time
+        ]);
+    }
+
+    public function delivery_time_update(Request $request){
+        // https://bcknd.food2go.online/admin/settings/delivery_time_update
+        // Keys
+        // delivery_time
+        $validator = Validator::make($request->all(), [
+            'delivery_time' => 'required', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $delivery_time = $this->settings
+        ->where('name', 'delivery_time')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($delivery_time)) {
+            $delivery_time = $this->settings
+            ->create([
+                'name' => 'delivery_time',
+                'setting' => '00:30:00',
+            ]);
+        }
+        else{
+            $delivery_time->update([
+                'setting' => $request->delivery_time
+            ]);
+        }
+
+        return response()->json([
+            'delivery_time' => $delivery_time
+        ]);
+    }
 }

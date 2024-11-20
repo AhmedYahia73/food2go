@@ -260,6 +260,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             
             Route::get('/tax', 'tax');
             Route::post('/tax_update', 'tax_update');
+            
+            Route::get('/delivery_time', 'delivery_time');
+            Route::post('/delivery_time_update', 'delivery_time_update');
         });
     });
 });
