@@ -42,10 +42,22 @@ class OrderController extends Controller
         $order = $this->orders
         ->where('id', $id)
         ->first();
+        $delivery_time = $this->settings
+        ->where('name', 'delivery_time')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($delivery_time)) {
+            $delivery_time = $this->settings
+            ->create([
+                'name' => 'delivery_time',
+                'setting' => '00:30:00',
+            ]);
+        }
 
         return response()->json([
             'status' => $order->order_status,
             'delivery_id' => $order->delivery_id,
+            'delivery_time' =>$delivery_time
         ]);
     }
 
