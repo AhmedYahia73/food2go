@@ -21,7 +21,6 @@ class OrderController extends Controller
         $orders = $this->orders
         ->where('pos', 0)
         ->where('status', 1)
-        ->where('order_type', 'delivery')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $pending = $this->orders
