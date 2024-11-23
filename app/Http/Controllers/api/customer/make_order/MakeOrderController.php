@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\customer\order\OrderRequest;
 use App\trait\image;
+use App\Events\OrderNotification;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -177,6 +178,7 @@ class MakeOrderController extends Controller
         }
         $order->order_details = json_encode($order_details);
         $order->save();
+        event(new OrderNotification($order));
 
         return response()->json([
             'success' => $order
