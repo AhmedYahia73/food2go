@@ -95,6 +95,25 @@ class OrderController extends Controller
         ]);
     }
 
+    public function notification(Request $request){
+        // https://bcknd.food2go.online/admin/order/notification
+        // Key
+        // orders
+        $total = 0;
+        if ($request->orders) {
+            $old_orders = $request->orders;
+            $new_orders = $this->orders
+            ->where('pos', 0)
+            ->where('status', 1)
+            ->count();
+            $total = $new_orders - $old_orders;
+        }
+
+        return response()->json([
+            'new_orders' => $total
+        ]);
+    }
+
     public function branches(){
         // https://bcknd.food2go.online/admin/order/branches
         $branches = $this->branches
