@@ -20,60 +20,60 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/admin/order
         $orders = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $pending = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'pending')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $confirmed = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'confirmed')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $processing = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'processing')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $out_for_delivery = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'out_for_delivery')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $delivered = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'delivered')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $returned = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'returned')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $faild_to_deliver = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'faild_to_deliver')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $canceled = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'canceled')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $scheduled = $this->orders
         ->where('pos', 0)
-        ->where('status', 1)
+        ->where('status', '!=', 0)
         ->where('order_status', 'scheduled')
         ->with(['user', 'branch', 'delivery'])
         ->get();
