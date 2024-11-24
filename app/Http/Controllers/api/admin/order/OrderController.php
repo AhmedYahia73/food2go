@@ -192,7 +192,7 @@ class OrderController extends Controller
     public function invoice($id){
         // https://bcknd.food2go.online/admin/order/order/{id}
         $order = $this->orders
-        ->with(['user', 'address.zone.city'])
+        ->with(['user', 'address.zone.city', 'branch', 'delivery'])
         ->find($id);
 
         return response()->json([
