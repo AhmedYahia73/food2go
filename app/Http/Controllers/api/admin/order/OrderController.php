@@ -179,7 +179,7 @@ class OrderController extends Controller
     }
 
     public function order($id){
-        // https://bcknd.food2go.online/admin/order/invoice/{id}
+        // https://bcknd.food2go.online/admin/order/order/{id}
         $order = $this->orders
         ->with(['user', 'branch', 'delivery'])
         ->find($id);
@@ -190,7 +190,7 @@ class OrderController extends Controller
     }
 
     public function invoice($id){
-        // https://bcknd.food2go.online/admin/order/order/{id}
+        // https://bcknd.food2go.online/admin/order/invoice/{id}
         $order = $this->orders
         ->with(['user', 'address.zone.city', 'branch', 'delivery'])
         ->find($id);
