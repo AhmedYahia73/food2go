@@ -29,7 +29,7 @@ class PaymentController extends Controller
         // https://bcknd.food2go.online/admin/payment/history
         $orders_details = $this->orders
         ->whereNotNull('status')
-        ->with('user')
+        ->with(['user'])
         ->get();
 
         return response()->json([

@@ -41,8 +41,13 @@ class Order extends Model
         'order_details',
         'rejected_reason',
     ];
-    protected $appends = ['order_date'];
+    protected $appends = ['order_date', 'receipt_link'];
 
+
+    public function getReceiptLinkAttribute(){
+        return url('storage/' . $this->attributes['receipt']);
+    }
+    
     public function getOrderDateAttribute(){
         return Carbon::parse($this->attributes['created_at'])->format('Y-m-d');
     }
