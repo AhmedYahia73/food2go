@@ -49,7 +49,8 @@ use App\Http\Controllers\api\admin\settings\OrderTypeController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
-    Route::controller(OrderController::class)->prefix('order')->group(function(){
+    Route::controller(OrderController::class)->middleware('can:isOrder')
+    ->prefix('order')->group(function(){
         Route::get('/', 'orders');
         Route::post('/notification', 'notification');
         Route::post('/filter', 'order_filter');
@@ -60,7 +61,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/delivery', 'delivery');
     });
 
-    Route::controller(AdminRolesController::class)->prefix('admin_roles')->group(function(){
+    Route::controller(AdminRolesController::class)->middleware('can:isAdminRoles')
+    ->prefix('admin_roles')->group(function(){
         Route::get('/', 'view');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
@@ -68,28 +70,32 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
 
-    Route::controller(TranslationController::class)->prefix('translation')->group(function(){
+    Route::controller(TranslationController::class)->middleware('can:isSettings')
+    ->prefix('translation')->group(function(){
         Route::get('/', 'view');
         Route::get('/link', 'link');
         Route::post('/add', 'create');
         Route::delete('/delete/{id}', 'delete');
     });
 
-    Route::controller(BannerController::class)->prefix('banner')->group(function(){
+    Route::controller(BannerController::class)->middleware('can:isBanner')
+    ->prefix('banner')->group(function(){
         Route::get('/', 'view');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
     });
 
-    Route::controller(PaymentController::class)->prefix('payment')->group(function(){
+    Route::controller(PaymentController::class)->middleware('can:isPayments')
+    ->prefix('payment')->group(function(){
         Route::get('/pending', 'pending');
         Route::get('/history', 'history');
         Route::put('/approve/{id}', 'approve');
         Route::put('/rejected/{id}', 'rejected');
     });
 
-    Route::controller(PointOffersController::class)->prefix('offer')->group(function(){
+    Route::controller(PointOffersController::class)->middleware('can:isPointOffers')
+    ->prefix('offer')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'offer');
         Route::post('/add', 'create');
@@ -98,18 +104,21 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // Make Deal Module
-    Route::controller(DealOrderController::class)->prefix('dealOrder')->group(function(){
+    Route::controller(DealOrderController::class)->middleware('can:isDealOrder')
+    ->prefix('dealOrder')->group(function(){
         Route::post('/', 'deal_order');
         Route::post('/add', 'add');
     });
 
-    Route::controller(OfferOrderController::class)->prefix('offerOrder')->group(function(){
+    Route::controller(OfferOrderController::class)->middleware('can:isOfferOrder')
+    ->prefix('offerOrder')->group(function(){
         Route::post('/', 'check_order');
         Route::post('/approve_offer', 'approve_offer');
     });
 
     // Make Deal Module
-    Route::controller(DealController::class)->prefix('deal')->group(function(){
+    Route::controller(DealController::class)->middleware('can:isDeal')
+    ->prefix('deal')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'deal');
         Route::put('/status/{id}', 'status');
@@ -118,7 +127,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
 
-    Route::controller(AdminController::class)->prefix('admin')->group(function(){
+    Route::controller(AdminController::class)->middleware('can:isAdmin')
+    ->prefix('admin')->group(function(){
         Route::get('/', 'view');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
@@ -126,7 +136,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
 
-    Route::controller(BranchController::class)->prefix('branch')->group(function(){
+    Route::controller(BranchController::class)->middleware('can:isBranch')
+    ->prefix('branch')->group(function(){
         Route::get('/', 'view');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
@@ -134,7 +145,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
 
-    Route::controller(DeliveryController::class)->prefix('delivery')->group(function(){
+    Route::controller(DeliveryController::class)->middleware('can:isDelivery')
+    ->prefix('delivery')->group(function(){
         Route::get('/', 'view');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
@@ -142,7 +154,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
 
-    Route::controller(CustomerController::class)->prefix('customer')->group(function(){
+    Route::controller(CustomerController::class)->middleware('can:isCustomer')
+    ->prefix('customer')->group(function(){
         Route::get('/', 'view');
         Route::post('/add', 'create');
         Route::put('/status/{id}', 'status');
@@ -150,7 +163,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
     
-    Route::prefix('coupon')->group(function(){
+    Route::prefix('coupon')->middleware('can:isCoupon')->group(function(){
         Route::controller(CouponController::class)->group(function(){
             Route::get('/', 'view');
             Route::put('/status/{id}', 'status');
@@ -172,7 +185,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
     });
     
-    Route::prefix('product')->group(function(){
+    Route::prefix('product')->middleware('can:isProduct')->group(function(){
         Route::controller(ProductController::class)->group(function(){
             Route::get('/', 'view');
             Route::get('/item/{id}', 'product');
@@ -185,7 +198,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
     });
     
-    Route::prefix('category')->group(function(){
+    Route::prefix('category')->middleware('can:isCategory')->group(function(){
         Route::controller(CategoryController::class)->group(function(){
             Route::get('/', 'view');
             Route::get('/item/{id}', 'category');
@@ -199,7 +212,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
     });
 
-    Route::controller(AddonController::class)->prefix('addons')->group(function(){
+    Route::controller(AddonController::class)->middleware('can:isAddons')
+    ->prefix('addons')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'addon');
         Route::post('/add', 'create');
@@ -207,55 +221,63 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
 
-    Route::prefix('settings')->group(function(){
-        Route::controller(ExtraController::class)->prefix('extra')->group(function(){
+    Route::prefix('settings')->middleware('can:isSettings')->group(function(){
+        Route::controller(ExtraController::class)
+        ->prefix('extra')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
 
-        Route::controller(OrderTypeController::class)->prefix('order_type')->group(function(){
+        Route::controller(OrderTypeController::class)
+        ->prefix('order_type')->group(function(){
             Route::get('/', 'view');
             Route::post('/update', 'modify');
         });
 
-        Route::controller(ZoneController::class)->prefix('zone')->group(function(){
+        Route::controller(ZoneController::class)
+        ->prefix('zone')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
 
-        Route::controller(CityController::class)->prefix('city')->group(function(){
+        Route::controller(CityController::class)
+        ->prefix('city')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
         
-        Route::controller(ExcludeController::class)->prefix('exclude')->group(function(){
+        Route::controller(ExcludeController::class)
+        ->prefix('exclude')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
         
-        Route::controller(TaxController::class)->prefix('tax')->group(function(){
+        Route::controller(TaxController::class)
+        ->prefix('tax')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
         
-        Route::controller(DiscountController::class)->prefix('discount')->group(function(){
+        Route::controller(DiscountController::class)
+        ->prefix('discount')->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
         });
         
-        Route::controller(PaymentMethodController::class)->prefix('payment_methods')->group(function(){
+        Route::controller(PaymentMethodController::class)
+        ->prefix('payment_methods')->group(function(){
             Route::get('/', 'view');
             Route::put('/status/{id}', 'status');
             Route::post('/add', 'create');
@@ -263,7 +285,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::delete('/delete/{id}', 'delete');
         });
         
-        Route::controller(SettingController::class)->group(function(){
+        Route::controller(SettingController::class)
+        ->group(function(){
             Route::get('/view_time_cancel', 'view_time_cancel_order');
             Route::post('/update_time_cancel', 'update_time_cancel_order');
             
