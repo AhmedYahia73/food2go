@@ -5,6 +5,8 @@ namespace App\Http\Controllers\api\admin\admin_roles;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\admin_roles\AdminRoleRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\UserPosition;
 use App\Models\UserRole;
@@ -30,6 +32,28 @@ class AdminRolesController extends Controller
         return response()->json([
             'user_positions' => $user_positions,
             'roles' => $roles,
+        ]);
+    }
+
+    public function status(Request $request, $id){
+        // Keys
+        // status
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $this->user_positions
+        ->where('id', $id)
+        ->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'success' =>  $request->status ? 'active' : 'banned'
         ]);
     }
 

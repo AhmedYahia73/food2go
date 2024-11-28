@@ -62,6 +62,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(AdminRolesController::class)->prefix('admin_roles')->group(function(){
         Route::get('/', 'view');
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
