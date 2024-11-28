@@ -24,6 +24,7 @@ class LoginController extends Controller
         $user = $this->admin
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
+        ->with('user_positions.roles')
         ->first();
         if (empty($user)) {
             return response()->json([
