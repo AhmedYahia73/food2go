@@ -22,6 +22,8 @@ use App\Http\Controllers\api\admin\delivery\DeliveryController;
 use App\Http\Controllers\api\admin\branch\BranchController;
 use App\Http\Controllers\api\admin\admin\AdminController;
 
+use App\Http\Controllers\api\admin\admin_roles\AdminRolesController;
+
 use App\Http\Controllers\api\admin\product\ProductController;
 use App\Http\Controllers\api\admin\product\CreateProductController;
 
@@ -56,6 +58,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/invoice/{id}', 'invoice');
         Route::put('/status/{id}', 'status');
         Route::post('/delivery', 'delivery');
+    });
+
+    Route::controller(AdminRolesController::class)->prefix('admin_roles')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(TranslationController::class)->prefix('translation')->group(function(){

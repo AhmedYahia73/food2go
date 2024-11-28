@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Http;
 trait PaymentPaymob
 {
     // This Trait About Srvic Payment Paymob
-protected $paymentRequest = ['user_id', 'plan_id','payment_method_id', 'transaction_id', 'description', 'invoice_image', 'status'];
+protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
+'transaction_id', 'description', 'invoice_image', 'status'];
  
     use placeOrder;
      public function getToken() {

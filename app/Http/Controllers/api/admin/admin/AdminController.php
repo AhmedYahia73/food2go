@@ -32,7 +32,9 @@ class AdminController extends Controller
         // https://bcknd.food2go.online/admin/admin
         $admins = $this->admins
         ->with('user_positions')->get();
-        $user_positions = $this->user_positions->get();
+        $user_positions = $this->user_positions
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'admins' => $admins,

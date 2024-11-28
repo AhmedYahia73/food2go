@@ -44,7 +44,8 @@ class MakeOrderController extends Controller
         // date, branch_id, amount, coupon_discount, total_tax, total_discount, address_id
         // order_type[take_away,dine_in,delivery], notes
         // deal[{deal_id, count}], payment_method_id, receipt
-        // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], variation[{variation_id, option_id[]}], count}]
+        // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
+        // variation[{variation_id, option_id[]}], count}]
         $orderRequest = $request->only($this->orderRequest);
         $user = $request->user();
         $orderRequest['user_id'] = $user->id;
@@ -178,7 +179,6 @@ class MakeOrderController extends Controller
         }
         $order->order_details = json_encode($order_details);
         $order->save();
-        event(new OrderNotification($order));
 
         return response()->json([
             'success' => $order
