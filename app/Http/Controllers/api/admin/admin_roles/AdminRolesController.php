@@ -21,6 +21,7 @@ class AdminRolesController extends Controller
     ];
 
     public function view(){
+        // https://bcknd.food2go.online/admin/admin_roles
         $user_positions = $this->user_positions
         ->with('roles')
         ->get();
@@ -36,6 +37,7 @@ class AdminRolesController extends Controller
     }
 
     public function status(Request $request, $id){
+        // https://bcknd.food2go.online/admin/admin_roles/status/{id}
         // Keys
         // status
         $validator = Validator::make($request->all(), [
@@ -58,6 +60,7 @@ class AdminRolesController extends Controller
     }
 
     public function create(AdminRoleRequest $request){
+        // https://bcknd.food2go.online/admin/admin_roles/add
         // Keys
         // name, status, roles[]
         $roleRequest = $request->only($this->roleRequest);
@@ -79,6 +82,7 @@ class AdminRolesController extends Controller
     }
 
     public function modify(AdminRoleRequest $request, $id){
+        // https://bcknd.food2go.online/admin/admin_roles/update/{id}
         // Keys
         // name, status, roles[]
         $roleRequest = $request->only($this->roleRequest);
@@ -104,6 +108,7 @@ class AdminRolesController extends Controller
     }
 
     public function delete($id){
+        // https://bcknd.food2go.online/admin/admin_roles/update/{id}
         $user_positions = $this->user_positions
         ->where('id', $id)
         ->delete();
