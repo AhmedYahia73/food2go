@@ -211,11 +211,17 @@ class OrderController extends Controller
     public function order($id){
         // https://bcknd.food2go.online/admin/order/order/{id}
         $order = $this->orders
-        ->with(['user', 'branch', 'delivery'])
-        ->find($id);
+        ->with(['user', 'branch', 'delivery', 'pament_method'])
+        ->find($id); 
+        $deliveries = $this->deliveries
+        ->get();
+        $order_status = ['pending', 'confirmed', 'processing', 'out_for_delivery',
+        'delivered' ,'returned' ,'faild_to_deliver' ,'canceled' ,'scheduled'];
 
         return response()->json([
-            'order' => $order
+            'order' => $order,
+            'deliveries' => $deliveries,
+            'order_status' => $order_status
         ]);
     }
 
