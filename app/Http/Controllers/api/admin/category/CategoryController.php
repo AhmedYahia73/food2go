@@ -30,12 +30,17 @@ class CategoryController extends Controller
         ->whereNotNull('category_id')
         ->get();
         $addons = $this->addons->get();
+        $counter = [];
+        for ($i=1; $i <= count($categories) + 1; $i++) { 
+            $counter[] = $i;
+        }
 
         return response()->json([
             'categories' => $categories,
             'addons' => $addons,
             'parent_categories' => $parent_categories,
             'sub_categories' => $sub_categories,
+            'counter' => $counter
         ]);
     }
 
