@@ -21,62 +21,168 @@ trait PlaceOrder
    
 
     public function placeOrder(Request $request ){
-        
-        $user = $request->user();
-        $newOrder = $request->only($this->orderPlaceReqeust);
-        $items = $newOrder['chargeItems'];
-        // $user_id = $request->user()->id;
-        $new_item = [];
-        $service = $newOrder['chargeItems'][0]['description'];
-        $amount = $newOrder['amount'];
-         $paymentData = [
-               "merchantRefNum"=> $newOrder['merchantRefNum'],
-               "student_id"=> $newOrder['customerProfileId'],
-               "amount"=> $newOrder['amount'],
-               "service"=> $service,
-               "purchase_date"=>now(),
-        ];
-         $paymentMethod = $this->paymenty_method->where('title','fawry')->first();
-     
-            if(empty($paymentMethod)){
-                    return abort(404);
-            }
-                   $createPayment = $this->payment->create($paymentData);
-        foreach ($items as $item) {
-            $itemId = $item['itemId'];
-            $item_type = $service == 'Bundle' ? 'bundle' : 'subject'; // iF Changed By Sevice Name Get Price One Of Them
-            
-            try {
-             $payment_number = $createPayment->id;
-            if($service == 'Bundle'){
-                $newbundle = $createPayment->bundle()->sync($itemId);
-              }elseif($service == 'Subject'){
+        // Keys
+        // date, branch_id, amount, coupon_discount, total_tax, total_discount, address_id
+        // order_type[take_away,dine_in,delivery], notes
+        // deal[{deal_id, count}], payment_method_id, receipt
+        // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
+        // variation[{variation_id, option_id[]}], count}]
+        $user = $request->user(); 
+        $newOrder = $request->only($this->orderPlaceReqeust); 
+        $items = $newOrder['chargeItems']; 
+        $new_item = []; 
+        $service = $newOrder['chargeItems'][0]['description']; 
+        $amount = $newOrder['amount']; 
+        $paymentData = [ 
+            "merchantRefNum"=> $newOrder['merchantRefNum'], 
+            "student_id"=> $newOrder['customerProfileId'], 
+            "amount"=> $newOrder['amount'], 
+            "service"=> $service, 
+            "purchase_date"=>now(), 
+        ];  
 
-                  $subject_id = $item['itemId'];
-                  $bundleSubject = $user->bundles;
-                  if(is_array($bundleSubject) && count($bundleSubject) > 0){
-                            $studentSubject = $bundleSubject[0]->subjects->whereIn('id',$subject_id);
-                            $studentSubjectID = $studentSubject->pluck('id')->toArray();
-                            $subject_id = array_diff($subject_id,$studentSubjectID);
-                  }
-                $newSubjects = $createPayment->subject()->attach($subject_id);
-              }
-              } catch (\Throwable $th) {
-               return abort(code: 500);
-              }
-            $data = [
-                
-                'paymentProcess' => $payment_number,
-                    'chargeItems'=>[
-                        'itemId'=>$itemId,
-                        'description'=>$item_type,
-                        'price'=>$amount,
-                        'quantity'=>'1',
-                    ]
-            ];
-              
+
+        $orderRequest = $request->only($this->orderRequest);
+        $user = $request->user();
+        $orderRequest['user_id'] = $user->id;
+        $orderRequest['order_status'] = 'pending';
+        $points = 0;
+        $order_details = [];
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $product) {
+                $item = $this->products
+                ->where('id', $product['product_id'])
+                ->first();
+                if (!empty($item)) {
+                    $points += $item->points * $product['count'];
+                }
             }
-                  return $data ;
+        }
+        if ($request->receipt) {
+            $orderRequest['receipt'] = $request->receipt;
+        }
+        else {
+        }
+        $orderRequest['points'] = $points;
+        $order = $this->order
+        ->create($orderRequest);
+        $user->address()->attach($request->address_id);
+        $user->save();
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $key => $product) {
+                $order_details[$key]['extras'] = [];
+                $order_details[$key]['addons'] = [];
+                $order_details[$key]['excludes'] = [];
+                $order_details[$key]['product'] = [];
+                $order_details[$key]['variations'] = [];
+
+                $order_details[$key]['product'][] = [
+                    'product' => $this->products
+                    ->where('id', $product['product_id'])
+                    ->first(),
+                    'count' => $product['count']
+                ];
+
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]); // Add product with count
+                if (isset($product['exclude_id'])) {
+                    foreach ($product['exclude_id'] as $exclude) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'exclude_id' => $exclude,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $order_details[$key]['excludes'][] = $this->excludes
+                        ->where('id', $exclude)
+                        ->first();
+                    }
+                }
+                if (isset($product['addons'])) {
+                    foreach ($product['addons'] as $addon) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'addon_id' => $addon['addon_id'],
+                            'count' => $product['count'],
+                            'addon_count' => $addon['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $order_details[$key]['addons'][] = [
+                            'addon' => $this->addons
+                            ->where('id', $addon['addon_id'])
+                            ->first(),
+                            'count' => $addon['count']
+                        ];
+                    }
+                }
+                if (isset($product['extra_id'])) {
+                    foreach ($product['extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        
+                        $order_details[$key]['extras'][] = $this->extras
+                        ->where('id', $extra)
+                        ->first();
+                    }
+                }
+                if (isset($product['variation'])) {
+                    foreach ($product['variation'] as $variation) {
+                        foreach ($variation['option_id'] as $option_id) {
+                            $this->order_details
+                            ->create([
+                                'order_id' => $order->id,
+                                'product_id' => $product['product_id'],
+                                'variation_id' => $variation['variation_id'],
+                                'option_id' => $option_id,
+                                'count' => $product['count'],
+                                'product_index' => $key,
+                            ]); // Add variations & options
+                        }
+                        $order_details[$key]['variations'][] = [
+                            'variation' => $this->variation
+                            ->where('id', $variation['variation_id'])
+                            ->first(),
+                            'options' => $this->options
+                            ->whereIn('id', $variation['option_id'])
+                            ->get()
+                        ];
+                    }
+                }
+            }
+        }
+        $order->order_details = json_encode($order_details);
+        $order->save();
+
+        $data = [
+            
+            'paymentProcess' => $payment_number,
+                'chargeItems'=>[
+                    'itemId'=>$itemId,
+                    'description'=>$item_type,
+                    'price'=>$amount,
+                    'quantity'=>'1',
+                ]
+        ];
+              return $data ;
     }
 
     public function confirmOrder($response){
@@ -93,23 +199,10 @@ trait PlaceOrder
   
             if($orderStatus == 'PAID'){
             $payment =
-                $this->payment->where('merchantRefNum', $merchantRefNum)->with('bundle', function ($query):void {
-                    $query->with('users');
-                }, 'subject', function ($query):void {
-                    $query->with('users');
-           })->first();
-            $order = $payment->service == 'Bundle' ? 'bundle' : 'subject';
-            if($order == 'bundle'){
-                $orderBundle = $payment->bundle;
-                foreach($orderBundle as $student_bundle){
-                     $student_bundle->users()->attach([$student_bundle->id=>['user_id'=>$customerMerchantId]] );
-                }
-            }elseif($order == 'subject'){
-                $orderSubject= $payment->subject;
-                 foreach($orderSubject as $student_subject){
-                  $student_subject->users()->attach([$student_subject->id=>['user_id'=>$customerMerchantId]] );
-                 }
-            }
+            $orderRequest['status'] = 1;
+
+            $user->points += $points;
+            $user->save();
 
         }
         return response()->json($response);

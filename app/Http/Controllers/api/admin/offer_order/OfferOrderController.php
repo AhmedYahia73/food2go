@@ -21,6 +21,8 @@ class OfferOrderController extends Controller
 
     public function check_order(Request $request){
         // https://bcknd.food2go.online/admin/offerOrder
+        // Keys
+        // code
         $validator = Validator::make($request->all(), [
             'code' => 'required',
         ]);

@@ -24,6 +24,8 @@ class Delivery extends Authenticatable
         'branch_id',
         'status',
         'email_verified_at',
+        'phone_status',
+        'chat_status',
     ];
     protected $appends = ['role', 'image_link'];
 

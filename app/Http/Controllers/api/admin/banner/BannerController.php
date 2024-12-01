@@ -52,6 +52,8 @@ class BannerController extends Controller
     
     public function create(BannerRequest $request){
         // https://bcknd.food2go.online/admin/banner/add
+        // Keys
+        // order, translation_id, category_id, product_id, deal_id, image
         $bannerRequest = $request->only($this->bannerRequest);
         if (is_file($request->image)) {
             $image_path = $this->upload($request, 'image', 'admin/banner/image');
@@ -67,6 +69,8 @@ class BannerController extends Controller
     
     public function modify(BannerRequest $request, $id){
         // https://bcknd.food2go.online/admin/banner/update/{id}
+        // Keys
+        // order, translation_id, category_id, product_id, deal_id, image
         $bannerRequest = $request->only($this->bannerRequest);
         $banner = $this->banner
         ->where('id', $id)

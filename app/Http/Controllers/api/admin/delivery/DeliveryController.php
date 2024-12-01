@@ -26,6 +26,8 @@ class DeliveryController extends Controller
         'password',
         'branch_id',
         'status',
+        'phone_status',
+        'chat_status',
     ];
     use image;
 
