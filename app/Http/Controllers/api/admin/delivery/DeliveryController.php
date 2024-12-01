@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Delivery;
 use App\Models\Branch;
+use App\Models\Order;
 
 class DeliveryController extends Controller
 {
