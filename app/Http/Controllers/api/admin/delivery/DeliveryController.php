@@ -77,7 +77,7 @@ class DeliveryController extends Controller
         ->where('delivery_id', $id)
         ->whereIn('order_status', ['confirmed', 'delivered', 'returned', 'faild_to_deliver', 'canceled'])
         ->where('updated_at', '>=', $request->from)
-        ->where('updated_at', '>=', $request->to)
+        ->where('updated_at', '<=', $request->to)
         ->with(['address.zone' => function($query){
             $query->with(['city', 'branch']);
         }])
