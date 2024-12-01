@@ -15,7 +15,8 @@ use App\Models\Branch;
 
 class DeliveryController extends Controller
 {
-    public function __construct(private Delivery $deliveries, private Branch $branches){}
+    public function __construct(private Delivery $deliveries, private Branch $branches,
+    private Order $orders){}
     protected $deliveryRequest = [
         'f_name',
         'l_name',
@@ -40,6 +41,49 @@ class DeliveryController extends Controller
         return response()->json([
             'deliveries' => $deliveries,
             'branches' => $branches,
+        ]);
+    }
+
+    public function history($id){
+        // https://bcknd.food2go.online/admin/delivery/history/{id}
+        $orders = $this->orders
+        ->where('delivery_id', $id)
+        ->whereIn('order_status', ['confirmed', 'delivered', 'returned', 'faild_to_deliver', 'canceled'])
+        ->with(['address.zone' => function($query){
+            $query->with(['city', 'branch']);
+        }])
+        ->get();
+
+        return response()->json([
+            'orders' => $orders
+        ]);
+    }
+
+    public function filter_history(Request $request, $id){
+        // https://bcknd.food2go.online/admin/delivery/history_filter/{id}
+        // Keys
+        // from, to
+        $validator = Validator::make($request->all(), [
+            'from' => 'required',
+            'to' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $orders = $this->orders
+        ->where('delivery_id', $id)
+        ->whereIn('order_status', ['confirmed', 'delivered', 'returned', 'faild_to_deliver', 'canceled'])
+        ->where('updated_at', '>=', $request->from)
+        ->where('updated_at', '>=', $request->to)
+        ->with(['address.zone' => function($query){
+            $query->with(['city', 'branch']);
+        }])
+        ->get();
+
+        return response()->json([
+            'orders' => $orders
         ]);
     }
 
