@@ -219,9 +219,6 @@ class OrderController extends Controller
         if (!empty($order->delivery_id)) {
             $order->delivery->count_orders = count($order->delivery->orders_items);
         }
-        else{ 
-            $order->delivery->count_orders = 0;
-        }
         $deliveries = $this->deliveries
         ->get();
         $order_status = ['pending', 'confirmed', 'processing', 'out_for_delivery',
