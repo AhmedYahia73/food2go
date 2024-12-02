@@ -60,12 +60,16 @@ class MakeOrderController extends Controller
                 ->first();
                 if (!empty($item)) {
                     $points += $item->points * $product['count'];
-                    foreach ($product['variation'] as $variation) {
-                        foreach ($variation['option_id'] as $option_id) {
-                            $option_points = $this->options
-                            ->where('id', $option_id)
-                            ->first()->points;
-                            $points += $option_points * $product['count'];
+                    if (isset($product['variation'])) {
+                        foreach ($product['variation'] as $variation) {
+                            if ($variation['option_id']) {
+                                foreach ($variation['option_id'] as $option_id) {
+                                    $option_points = $this->options
+                                    ->where('id', $option_id)
+                                    ->first()->points;
+                                    $points += $option_points * $product['count'];
+                                }
+                            }
                         }
                     }
                 }
