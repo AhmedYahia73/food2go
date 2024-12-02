@@ -311,7 +311,13 @@ class OrderController extends Controller
         }
         $order = $this->orders
         ->where('id', $request->order_id)
-        ->update([
+        ->first();
+        if ($order->order_status != 'processing') {
+            return response()->json([
+                'faild' => 'Status must be processing'
+            ], 400);
+        }
+        $order->update([
             'delivery_id' => $request->delivery_id,
             'order_number' => $request->order_number
         ]);
