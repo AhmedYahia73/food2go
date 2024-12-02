@@ -213,8 +213,8 @@ class OrderController extends Controller
         $order = $this->orders
         ->with(['user', 'branch', 'delivery', 'pament_method', 'address'])
         ->find($id);
-        $order->user->count_orders = $order->user->orders;
-        $order->branch->count_orders = $order->branch->orders;
+        $order->user->count_orders = count($order->user->orders);
+        $order->branch->count_orders = count($order->branch->orders);
         $deliveries = $this->deliveries
         ->get();
         $order_status = ['pending', 'confirmed', 'processing', 'out_for_delivery',
