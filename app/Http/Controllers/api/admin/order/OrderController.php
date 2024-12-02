@@ -237,6 +237,7 @@ class OrderController extends Controller
                 'setting' => json_encode($preparing_arr),
             ]);
         }
+        $preparing_time = json_decode($preparing_time->setting);
 
         return response()->json([
             'order' => $order,
