@@ -29,6 +29,10 @@ class Delivery extends Authenticatable
     ];
     protected $appends = ['role', 'image_link'];
 
+    public function orders(){
+        return $this->hasMany(Order::class, 'delivery_id');
+    }
+
     public function getRoleAttribute(){
         return 'delivery';
     }
