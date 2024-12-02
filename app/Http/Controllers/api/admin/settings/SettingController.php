@@ -229,6 +229,80 @@ class SettingController extends Controller
         ]);
     }
 
+    public function preparing_time(){
+        // https://bcknd.food2go.online/admin/settings/preparing_time
+        $preparing_time = $this->settings
+        ->where('name', 'preparing_time')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($preparing_time)) {
+            $preparing_arr = [
+                'days' => 0,
+                'hours' => 0,
+                'minutes' => 30,
+                'seconds' => 0
+            ];
+            $preparing_time = $this->settings
+            ->create([
+                'name' => 'preparing_time',
+                'setting' => json_encode($preparing_arr),
+            ]);
+        }
+
+        return response()->json([
+            'preparing_time' => $preparing_time
+        ]);
+    }
+
+    public function preparing_time_update(Request $request){
+        // https://bcknd.food2go.online/admin/settings/preparing_time_update
+        // Keys
+        // days, hours, minutes, seconds
+        $validator = Validator::make($request->all(), [
+            'days' => 'required', 
+            'hours' => 'required', 
+            'minutes' => 'required', 
+            'seconds' => 'required', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $preparing_time = $this->settings
+        ->where('name', 'preparing_time')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($preparing_time)) {
+            $preparing_arr = [
+                'days' => 0,
+                'hours' => 0,
+                'minutes' => 30,
+                'seconds' => 0
+            ];
+            $preparing_time = $this->settings
+            ->create([
+                'name' => 'preparing_time',
+                'setting' => json_encode($preparing_arr),
+            ]);
+        }
+        else{
+            $preparing_arr = [
+                'days' => $request->days,
+                'hours' => $request->hours,
+                'minutes' => $request->minutes,
+                'seconds' => $request->seconds,
+            ];
+            $preparing_time->update([
+                'setting' => json_encode($preparing_arr)
+            ]);
+        }
+
+        return response()->json([
+            'preparing_time' => $preparing_time
+        ]);
+    }
+
     public function notification_sound(){
         // https://bcknd.food2go.online/admin/settings/notification_sound
         $notification_sound = $this->settings

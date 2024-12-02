@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
 use App\Models\Delivery;
 use App\Models\Branch;
+use App\Models\Setting;
 
 class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Delivery $deliveries, 
-    private Branch $branches){}
+    private Branch $branches, private Setting $settings){}
 
     public function orders(){
         // https://bcknd.food2go.online/admin/order
@@ -219,11 +220,29 @@ class OrderController extends Controller
         ->get();
         $order_status = ['pending', 'confirmed', 'processing', 'out_for_delivery',
         'delivered' ,'returned' ,'faild_to_deliver' ,'canceled' ,'scheduled'];
+        $preparing_time = $this->settings
+        ->where('name', 'preparing_time')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($preparing_time)) {
+            $preparing_arr = [
+                'days' => 0,
+                'hours' => 0,
+                'minutes' => 30,
+                'seconds' => 0
+            ];
+            $preparing_time = $this->settings
+            ->create([
+                'name' => 'preparing_time',
+                'setting' => json_encode($preparing_arr),
+            ]);
+        }
 
         return response()->json([
             'order' => $order,
             'deliveries' => $deliveries,
-            'order_status' => $order_status
+            'order_status' => $order_status,
+            'preparing_time' => $preparing_time
         ]);
     }
 

@@ -301,6 +301,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/delivery_time', 'delivery_time');
             Route::post('/delivery_time_update', 'delivery_time_update');
             
+            Route::get('/preparing_time', 'preparing_time');
+            Route::post('/preparing_time_update', 'preparing_time_update');
+            
             Route::get('/notification_sound', 'notification_sound');
             Route::post('/notification_sound_update', 'notification_sound_update');
         });
