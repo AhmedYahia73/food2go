@@ -17,6 +17,7 @@ class OptionProduct extends Model
         'product_id',
         'variation_id',
         'status',
+        'points',
     ];
 
     public function extra(){

@@ -52,9 +52,10 @@ class CreateProductController extends Controller
         // extra[][extra_price]
         // variations[][names][{name, tranlation_id, tranlation_name}] ,variations[][type],
         // variations[][min] ,variations[][max]
-        // variations[][required], variations[][points]
+        // variations[][required]
         // variations[][options][][names][{name, tranlation_id, tranlation_name}], 
         // variations[][options][][price], variations[][options][][status],
+        // variations[][options][][points],
 
         // variations[][options][][extra][][extra_names][{extra_name, tranlation_id, tranlation_name}], 
         // variations[][options][][extra][][extra_price],
@@ -116,7 +117,6 @@ class CreateProductController extends Controller
                     'type' => $item['type'],
                     'min' => $item['min'] ?? null,
                     'max' => $item['max'] ?? null,
-                    'points' => $item['points'],
                     'required' => $item['required'],
                     'product_id' => $product->id,
                 ]); // add variation
@@ -131,6 +131,7 @@ class CreateProductController extends Controller
                         'status' => $element['status'],
                         'product_id' => $product->id,
                         'variation_id' => $variation->id,
+                        'points' => $element['points'],
                     ]);// add options
                     foreach ($element['names'] as $key => $value) {
                         $this->translate($value['tranlation_name'], $element['names'][0]['name'], $value['name']);
@@ -177,9 +178,10 @@ class CreateProductController extends Controller
         // extra[][extra_price]
         // variations[][names][{name, tranlation_id, tranlation_name}] ,variations[][type],
         // variations[][min] ,variations[][max]
-        // variations[][required], variations[][points]
+        // variations[][required]
         // variations[][options][][names][{name, tranlation_id, tranlation_name}], 
         // variations[][options][][price], variations[][options][][status], 
+        // variations[][options][][points],
         // variations[][options][][extra_names][{extra_name, tranlation_id, tranlation_name}], 
         // variations[][options][][extra_price], 
         // product_names[{product_name, tranlation_id, tranlation_name}]
@@ -250,7 +252,6 @@ class CreateProductController extends Controller
                 ->create([
                     'name' => $item['names'][0]['name'],
                     'type' => $item['type'],
-                    'points' => $item['points'],
                     'min' => $item['min'] ?? null,
                     'max' => $item['max'] ?? null,
                     'required' => $item['required'],
@@ -268,6 +269,7 @@ class CreateProductController extends Controller
                             'status' => $element['status'],
                             'product_id' => $product->id,
                             'variation_id' => $variation->id,
+                            'points' => $element['points'],
                         ]);
                         foreach ($element['names'] as $key => $value) {
                             $this->translate($value['tranlation_name'], $element['names'][0]['name'], $value['name']);

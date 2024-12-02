@@ -48,7 +48,6 @@ class ProductRequest extends FormRequest
             'variations.*.names.*.tranlation_name' => ['required'],
             'variations.*.type' => ['required', 'in:multiple,single'],
             'variations.*.min' => ['numeric', 'nullable'],
-            'variations.*.points' => ['numeric', 'required'],
             'variations.*.max' => ['numeric', 'nullable'],
             'variations.*.required' => ['required', 'boolean'],
             'variations.*.options.*.names.*.name' => ['required'],
@@ -58,6 +57,7 @@ class ProductRequest extends FormRequest
             'variations.*.options.*.status' => ['required', 'boolean'],
             'variations.*.options.*.names.*.name' => ['required'],
             'variations.*.options.*.names.*.name' => ['required'],
+            'variations.*.options.*.points' => ['numeric', 'required'],
         ];
     }
 
