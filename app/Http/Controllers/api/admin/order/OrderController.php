@@ -211,7 +211,7 @@ class OrderController extends Controller
     public function order($id){
         // https://bcknd.food2go.online/admin/order/order/{id}
         $order = $this->orders
-        ->with(['user', 'branch', 'delivery', 'pament_method', 'address.'])
+        ->with(['user', 'branch', 'delivery', 'pament_method', 'address'])
         ->find($id); 
         $deliveries = $this->deliveries
         ->get();
