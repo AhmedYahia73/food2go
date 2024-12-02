@@ -212,7 +212,9 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/admin/order/order/{id}
         $order = $this->orders
         ->with(['user', 'branch', 'delivery', 'pament_method', 'address'])
-        ->find($id); 
+        ->find($id);
+        $order->user->count_orders = $order->user->orders;
+        $order->branch->count_orders = $order->branch->orders;
         $deliveries = $this->deliveries
         ->get();
         $order_status = ['pending', 'confirmed', 'processing', 'out_for_delivery',

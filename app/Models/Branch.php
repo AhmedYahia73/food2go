@@ -32,6 +32,10 @@ class Branch extends Authenticatable
         return 'branch';
     }
 
+    public function orders(){
+        return $this->hasMany(Order::class, 'branch_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
