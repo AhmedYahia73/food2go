@@ -49,6 +49,14 @@ class CreateCategoryController extends Controller
             $imag_path = $this->upload($request, 'banner_image', 'admin/category/banner_image');
             $categoryRequest['banner_image'] = $imag_path;
         } // if send image upload it
+        $category = $this->categories
+        ->where('priority', $request->priority)
+        ->first();
+        if (!empty($category)) {
+            $this->categories
+            ->where('priority', '>=', $request->priority)
+            ->increment('priority');
+        }
         $categories = $this->categories
         ->create($categoryRequest); // create category
 

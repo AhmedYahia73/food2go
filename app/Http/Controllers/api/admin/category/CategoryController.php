@@ -24,6 +24,7 @@ class CategoryController extends Controller
         ->orderBy('priority')
         ->get();
         $parent_categories = $this->categories
+        ->with('sub_categories')
         ->whereNull('category_id')
         ->get();
         $sub_categories = $this->categories
@@ -99,7 +100,15 @@ class CategoryController extends Controller
                     'error' => $validator->errors(),
             ],400);
         }
-
+        
+        $category = $this->categories
+        ->where('priority', $request->priority)
+        ->first();
+        if (!empty($category)) {
+            $this->categories
+            ->where('priority', '>=', $request->priority)
+            ->increment('priority');
+        }
         $this->categories->where('id', $id)
         ->update(['priority' => $request->priority]);
 
