@@ -216,7 +216,7 @@ class OrderController extends Controller
         ->find($id);
         $order->user->count_orders = count($order->user->orders);
         $order->branch->count_orders = count($order->branch->orders);
-        $order->delivery->count_orders = count($order->delivery->orders);
+        $order->delivery->count_orders = count($order->delivery->orders ?? []);
         $deliveries = $this->deliveries
         ->get();
         $order_status = ['pending', 'confirmed', 'processing', 'out_for_delivery',
