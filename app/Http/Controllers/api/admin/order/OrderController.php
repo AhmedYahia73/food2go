@@ -217,7 +217,8 @@ class OrderController extends Controller
         $order->user->count_orders = count($order->user->orders);
         $order->branch->count_orders = count($order->branch->orders);
         if (!empty($order->delivery_id)) {
-            $order->delivery->count_orders = $order->delivery->orders->count();
+            $order->delivery->count_orders = $order->delivery->orders;
+            return $order->delivery->orders;
         }
         else{ 
             $order->delivery->count_orders = 0;
