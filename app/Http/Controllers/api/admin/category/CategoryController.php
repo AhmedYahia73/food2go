@@ -90,6 +90,25 @@ class CategoryController extends Controller
         ]);
     }
 
+    public function active(Request $request, $id){
+        // https://bcknd.food2go.online/admin/category/active/{id}
+        $validator = Validator::make($request->all(), [
+        'active' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                    'error' => $validator->errors(),
+            ],400);
+        }
+
+        $this->categories->where('id', $id)
+        ->update(['active' => $request->active]);
+
+        return response()->json([
+            'success' => 'You update active success'
+        ]);
+    }
+
     public function priority(Request $request, $id){
         // https://bcknd.food2go.online/admin/category/priority/{id}
         $validator = Validator::make($request->all(), [

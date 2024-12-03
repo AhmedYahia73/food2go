@@ -204,6 +204,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(CategoryController::class)->group(function(){
             Route::get('/', 'view');
             Route::get('/item/{id}', 'category');
+            Route::put('/active/{id}', 'active');
             Route::put('/status/{id}', 'status');
             Route::put('/priority/{id}', 'priority');
         });
