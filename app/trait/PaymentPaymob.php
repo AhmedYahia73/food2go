@@ -13,11 +13,11 @@ protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
  
     use placeOrder;
      public function getToken() {
-     //this function takes api key from env.file and get token from paymob accept
-     $response = Http::post('https://accept.paymob.com/api/auth/tokens', [
-     'api_key' => env('PAYMOB_API_KEY')
-     ]);
-     return $response->object()->token;
+        //this function takes api key from env.file and get token from paymob accept
+        $response = Http::post('https://accept.paymob.com/api/auth/tokens', [
+            'api_key' => env('PAYMOB_API_KEY')
+        ]);
+        return $response->object()->token;
      }
 
       public function createOrder( $request,$tokens,$user,$order) {

@@ -26,9 +26,11 @@ class CategoryController extends Controller
         $parent_categories = $this->categories
         ->with('sub_categories')
         ->whereNull('category_id')
+        ->orderBy('priority')
         ->get();
         $sub_categories = $this->categories
         ->whereNotNull('category_id')
+        ->orderBy('priority')
         ->get();
         $addons = $this->addons->get();
         $counter = [];
@@ -92,6 +94,8 @@ class CategoryController extends Controller
 
     public function active(Request $request, $id){
         // https://bcknd.food2go.online/admin/category/active/{id}
+        // key
+        // active
         $validator = Validator::make($request->all(), [
         'active' => 'required|boolean',
         ]);

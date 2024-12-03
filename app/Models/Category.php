@@ -32,11 +32,13 @@ class Category extends Model
     }
 
     public function sub_categories(){
-        return $this->hasMany(Category::class, 'category_id');
+        return $this->hasMany(Category::class, 'category_id')
+        ->orderBy('priority');
     }
 
     public function parent_categories(){
-        return $this->belongsTo(Category::class, 'category_id');
+        return $this->belongsTo(Category::class, 'category_id')
+        ->orderBy('priority');
     }
 
     public function products(){
