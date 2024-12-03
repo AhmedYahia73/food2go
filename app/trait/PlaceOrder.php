@@ -39,66 +39,15 @@ trait placeOrder
                     'paymentMethod.message' => 'This Payment Method Unavailable ',
                 ], 404);
             }
-            $user_id = $user->id;
-            $paymentRequest['user_id'] = $user_id;
-            $paymentRequest['status'] = "rejected";
-            $payment = $this->payment->create($paymentRequest); // Start Create Payment 
+    
         } catch (\Throwable $th) {
             throw new HttpResponseException(response()->json(['error' => 'Payment processing failed'], 500));
         }
         // End Make Payment
 
-        try {
-
-            // Start Make Order For Payment
-            $orderItems = $request->only($this->orderRequest); // Get Reqeust Of Order
-            $cart = $orderItems['cart'] ?? null; // Check Cart
-
-            if (!$cart) {
-                return response()->json(['error' => 'Cart data is missing'], 422);
-            }
-            $data = [
-                'user_id' => $user_id,
-                'payment_id' => $payment->id ?? null, // Ensure payment ID is available or defaulet to null
-            ];
-            // Array to store created orders for response
-            $createdOrders = [];
-
-
-            $createdOrders = [];
-            if ($orderType == 'plan') {
-                if (!empty($cart['plan'])) {
-
-                    $createdOrders = array_merge($createdOrders, $this->createOrdersForItems($cart['plan'], 'plan_id', $data));
-                }
-            } else {
-                if (!empty($cart['plan'])) {
-
-                    $createdOrders = array_merge(
-                        $createdOrders,
-                        $this->createOrdersForItems($cart['plan'], 'plan_id', $data)
-                    );
-                }
-                // Step 2: Handle creating orders for each extra_id
-                if (!empty($cart['extra'])) {
-                    $createdOrders = array_merge($createdOrders, $this->createOrdersForItems($cart['extra'], 'extra_id', $data));
-                }
-                // Step 3: Handle creating orders for each domain_id
-                if (!empty($cart['domain'])) {
-                    $createdOrders = array_merge($createdOrders, $this->createOrdersForItems(
-                        $cart['domain'],
-                        'domain_id',
-                        $data
-                    ));
-                }
-            }
-        } catch (\Throwable $th) {
-            throw new HttpResponseException(response()->json(['error' => 'Order processing failed'], 500));
-        }
-
         return [
-            'payment' => $payment,
-            'orderItems' => $createdOrders,
+            'payment' => $order,
+            'orderItems' => $order_details,
         ];
     }
 
@@ -222,5 +171,148 @@ trait placeOrder
         });
 
         return $orders;
+    }
+
+    public function make_order($paymentRequest){
+        $user = auth()->user();
+        $paymentRequest['user_id'] = $user->id;
+        $paymentRequest['order_status'] = 'pending';
+        $points = 0;
+        $order_details = [];
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $product) {
+                $item = $this->products
+                ->where('id', $product['product_id'])
+                ->first();
+                if (!empty($item)) {
+                    $points += $item->points * $product['count'];
+                    if (isset($product['variation'])) {
+                        foreach ($product['variation'] as $variation) {
+                            if ($variation['option_id']) {
+                                foreach ($variation['option_id'] as $option_id) {
+                                    $option_points = $this->options
+                                    ->where('id', $option_id)
+                                    ->first()->points;
+                                    $points += $option_points * $product['count'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if ($request->receipt) {
+            $orderRequest['receipt'] = $request->receipt;
+        }
+        $orderRequest['points'] = $points;
+        $order = $this->order
+        ->create($orderRequest);
+        $user->address()->attach($request->address_id);
+        $user->save();
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $key => $product) {
+                $order_details[$key]['extras'] = [];
+                $order_details[$key]['addons'] = [];
+                $order_details[$key]['excludes'] = [];
+                $order_details[$key]['product'] = [];
+                $order_details[$key]['variations'] = [];
+
+                $order_details[$key]['product'][] = [
+                    'product' => $this->products
+                    ->where('id', $product['product_id'])
+                    ->first(),
+                    'count' => $product['count']
+                ];
+
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]); // Add product with count
+                if (isset($product['exclude_id'])) {
+                    foreach ($product['exclude_id'] as $exclude) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'exclude_id' => $exclude,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $order_details[$key]['excludes'][] = $this->excludes
+                        ->where('id', $exclude)
+                        ->first();
+                    }
+                }
+                if (isset($product['addons'])) {
+                    foreach ($product['addons'] as $addon) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'addon_id' => $addon['addon_id'],
+                            'count' => $product['count'],
+                            'addon_count' => $addon['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $order_details[$key]['addons'][] = [
+                            'addon' => $this->addons
+                            ->where('id', $addon['addon_id'])
+                            ->first(),
+                            'count' => $addon['count']
+                        ];
+                    }
+                }
+                if (isset($product['extra_id'])) {
+                    foreach ($product['extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        
+                        $order_details[$key]['extras'][] = $this->extras
+                        ->where('id', $extra)
+                        ->first();
+                    }
+                }
+                if (isset($product['variation'])) {
+                    foreach ($product['variation'] as $variation) {
+                        foreach ($variation['option_id'] as $option_id) {
+                            $this->order_details
+                            ->create([
+                                'order_id' => $order->id,
+                                'product_id' => $product['product_id'],
+                                'variation_id' => $variation['variation_id'],
+                                'option_id' => $option_id,
+                                'count' => $product['count'],
+                                'product_index' => $key,
+                            ]); // Add variations & options
+                        }
+                        $order_details[$key]['variations'][] = [
+                            'variation' => $this->variation
+                            ->where('id', $variation['variation_id'])
+                            ->first(),
+                            'options' => $this->options
+                            ->whereIn('id', $variation['option_id'])
+                            ->get()
+                        ];
+                    }
+                }
+            }
+        }
+        $order->order_details = json_encode($order_details);
+        $order->save();
+
+        return $order;
     }
 }

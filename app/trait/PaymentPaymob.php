@@ -43,14 +43,14 @@ protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
         //     ]
         // ];
         // $data = $items;
-         $totalAmountCents = collect($items['orderItems'])->sum('amount_cents');
+         $totalAmountCents = $items['payment']->amount;
 ; 
             $data = [
-            "auth_token" =>   $tokens,
-            "delivery_needed" =>"false",
-            "amount_cents"=> $totalAmountCents,
-            "currency"=> "EGP",
-            "items"=> $items['orderItems'],
+                "auth_token" =>   $tokens,
+                "delivery_needed" =>"false",
+                "amount_cents"=> $totalAmountCents * 100,
+                "currency"=> "EGP",
+                "items"=> $items['orderItems'],
         ];
         $response = Http::post('https://accept.paymob.com/api/ecommerce/orders', $data);
         
@@ -105,7 +105,7 @@ protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
     
     private function generateUniqueTransactionId($payment_id,$order_id)
     {
-            $payment = $this->payment->find($payment_id);
+            $payment = $this->order->find($payment_id);
         $updatePayment = $payment->update(['transaction_id' => $order_id]);
         return $payment;
     }
