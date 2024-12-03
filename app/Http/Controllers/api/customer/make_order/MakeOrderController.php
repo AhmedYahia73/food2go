@@ -17,6 +17,7 @@ use App\Models\ExcludeProduct;
 use App\Models\ExtraProduct;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
+use App\Models\PaymentMethod;
 use App\Models\Addon;
 
 class MakeOrderController extends Controller
@@ -24,20 +25,9 @@ class MakeOrderController extends Controller
     public function __construct(private Order $order, private OrderDetail $order_details,
     private ProductSale $product_sales, private Product $products, private ExcludeProduct $excludes,
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
-    private OptionProduct $options){}
+    private OptionProduct $options, private PaymentMethod $paymentMethod){}
     use image;
-    protected $orderRequest = [
-        'date',
-        'branch_id',
-        'amount',
-        'total_tax',
-        'total_discount',
-        'address_id',
-        'order_type',
-        'payment_method_id',
-        'notes',
-        'coupon_discount',
-    ];
+    use PlaceOrder;
 
     public function order(OrderRequest $request){
         // https://bcknd.food2go.online/customer/make_order
@@ -47,11 +37,10 @@ class MakeOrderController extends Controller
         // deal[{deal_id, count}], payment_method_id, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-        $orderRequest = $request->only($this->orderRequest);
-        $order = $this->make_order($orderRequest);
+        $order = $this->make_order($request);
 
         return response()->json([
-            'success' => $order
+            'success' => $order['payment']
         ]);
     }
 }

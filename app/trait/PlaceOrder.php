@@ -1,17 +1,15 @@
 <?php
 
-namespace App\service\order;
+namespace App\trait;
 
-use App\Models\Payment;
-use App\service\ExpireDate;
+use App\Models\Payment; 
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-trait placeOrder
-{
-    use ExpireDate;
+trait PlaceOrder
+{ 
     // This Traite About Place Order
     protected $paymentRequest = [
         'date',
@@ -173,10 +171,11 @@ trait placeOrder
         return $orders;
     }
 
-    public function make_order($paymentRequest){
+    public function make_order($request){
+        $orderRequest = $request->only($this->paymentRequest); 
         $user = auth()->user();
-        $paymentRequest['user_id'] = $user->id;
-        $paymentRequest['order_status'] = 'pending';
+        $orderRequest['user_id'] = $user->id;
+        $orderRequest['order_status'] = 'pending';
         $points = 0;
         $order_details = [];
         if (isset($request->products)) {
@@ -313,6 +312,9 @@ trait placeOrder
         $order->order_details = json_encode($order_details);
         $order->save();
 
-        return $order;
+        return [
+            'payment' => $order,
+            'orderItems' => $order_details,
+        ];
     }
 }

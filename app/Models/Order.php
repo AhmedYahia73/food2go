@@ -46,7 +46,9 @@ class Order extends Model
 
 
     public function getReceiptLinkAttribute(){
-        return url('storage/' . $this->attributes['receipt']);
+        if (!empty($this->attributes['receipt'])) {
+            return url('storage/' . $this->attributes['receipt']);
+        }
     }
     
     public function getOrderDateAttribute(){
