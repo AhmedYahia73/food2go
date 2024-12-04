@@ -25,6 +25,7 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $pending = $this->orders
@@ -34,6 +35,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'pending')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $confirmed = $this->orders
@@ -43,6 +45,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'confirmed')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $processing = $this->orders
@@ -52,6 +55,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'processing')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $out_for_delivery = $this->orders
@@ -61,6 +65,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'out_for_delivery')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $delivered = $this->orders
@@ -70,6 +75,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'delivered')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $returned = $this->orders
@@ -79,6 +85,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'returned')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $faild_to_deliver = $this->orders
@@ -88,6 +95,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'faild_to_deliver')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $canceled = $this->orders
@@ -97,6 +105,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'canceled')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $scheduled = $this->orders
@@ -106,6 +115,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'scheduled')
+        ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $deliveries = $this->deliveries
