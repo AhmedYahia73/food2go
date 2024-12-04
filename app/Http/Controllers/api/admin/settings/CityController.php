@@ -23,7 +23,7 @@ class CityController extends Controller
         ]);
     }
 
-    public function status(){
+    public function status($id, Request $request){
         // https://bcknd.food2go.online/admin/settings/city/status/{id}
         // Key
         // status
