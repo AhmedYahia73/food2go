@@ -2,14 +2,12 @@
 
 namespace App\service;
 
-use App\service\order\placeOrder;
+namespace App\trait;
 use Illuminate\Support\Facades\Http;
 
 trait PaymentPaymob
 {
     // This Trait About Srvic Payment Paymob
-protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
-'transaction_id', 'description', 'invoice_image', 'status'];
  
     use placeOrder;
      public function getToken() {
@@ -20,14 +18,16 @@ protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
         return $response->object()->token;
      }
 
-      public function createOrder( $request,$tokens,$user,$order) {
+      public function createOrder( $request,$tokens,$user) {
         //This function takes last step token and send new order to paymob dashboard
         // in This Function We Make Order For Returned Token 
         // $amount = new Checkoutshow; here you add your checkout controller
         // $total = $amount->totalProductAmount(); total amount function from checkout controller
         //here we add example for test only
-        $items = $this->placeOrder($request,$user,$order);
+        $items = $this->placeOrder($request,$user);
 
+        $totalAmountCents = $items['payment']->amount;
+        
         //  $total = 100;
         // $items = [
         //     [ "name"=> "ASC1515",
@@ -43,19 +43,18 @@ protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
         //     ]
         // ];
         // $data = $items;
-         $totalAmountCents = $items['payment']->amount;
-; 
-            $data = [
-                "auth_token" =>   $tokens,
-                "delivery_needed" =>"false",
-                "amount_cents"=> $totalAmountCents * 100,
-                "currency"=> "EGP",
-                "items"=> $items['orderItems'],
+
+        $data = [
+            "auth_token" =>   $tokens,
+            "delivery_needed" =>"false",
+            "amount_cents"=> $totalAmountCents,
+            "currency"=> "EGP",
+            "items"=> $items['items'],
         ];
         $response = Http::post('https://accept.paymob.com/api/ecommerce/orders', $data);
         
         // Update Transaction order For Payment 
-        $payment = $items['payment']->id ;
+        $payment = $items['payment']->id;
         $order_id = $response['id'];
          $payment = $this->generateUniqueTransactionId($payment,$order_id);
         // Update Transaction order For Payment 
@@ -78,7 +77,7 @@ protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
             "apartment" => '45', //example $dataa->appartment
             "email" => $user->email, //example $dataa->email
             "floor" => '7',
-            "first_name" => $user->name,
+            "first_name" => $user->f_name,
             "street" => "NA",
             "building" => "NA",
             "phone_number" => $user->phone,
@@ -86,7 +85,7 @@ protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
             "postal_code" => "NA",
             "city" => "Alexandria",
             "country" => "Egypt",
-            "last_name" => "mohamed",
+            "last_name" => $user->l_name,
             "state" => "0"
         ];
         
@@ -99,7 +98,7 @@ protected $paymentRequest = ['user_id', 'plan_id','payment_method_id',
             "currency" => "EGP",
             "integration_id" => env('PAYMOB_INTEGRATION_ID')
         ];
-         $response = Http::post('https://accept.paymob.com/api/acceptance/payment_keys', $data);
+        $response = Http::post('https://accept.paymob.com/api/acceptance/payment_keys', $data);
         return $response->object()->token;
     }
     

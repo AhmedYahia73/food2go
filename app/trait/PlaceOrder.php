@@ -25,7 +25,7 @@ trait PlaceOrder
     ];
     protected $orderRequest = ['user_id', 'cart'];
     protected $priceCycle;
-    public function placeOrder($request, $user, $orderType)
+    public function placeOrder($request, $user)
     {
 
         // Start Make Payment
@@ -37,15 +37,16 @@ trait PlaceOrder
                     'paymentMethod.message' => 'This Payment Method Unavailable ',
                 ], 404);
             }
-    
+            $order = $this->make_order($request);
         } catch (\Throwable $th) {
             throw new HttpResponseException(response()->json(['error' => 'Payment processing failed'], 500));
         }
         // End Make Payment
 
         return [
-            'payment' => $order,
-            'orderItems' => $order_details,
+            'payment' => $order['payment'],
+            'orderItems' => $order['orderItems'],
+            'items' => $order['items']
         ];
     }
 
@@ -107,68 +108,13 @@ trait PlaceOrder
     public function payment_approve($payment)
     {
         if ($payment) {
-            $payment->update(['status' => 'approved']);
+            $payment->update(['status' => 1]);
             return true;
         }
         return false;
     }
     public function order_success($payment)
     {
-        $payment_approved = $this->payment_approve($payment);
-        // Retrieve orders related to the payment
-        $orders = $payment->orders;
-        $user = $payment->user;
-        // Collect unique IDs for batch fetching
-        $domainIds = $orders->whereNotNull('domain_id')->pluck('domain_id', 'price_cycle')->unique();
-        $extraIds = $orders->whereNotNull('extra_id')->pluck('extra_id', 'price_cycle')->unique();
-        $planIds = $orders->whereNotNull('plan_id')->pluck('plan_id')->unique();
-        $plan_price_cycle = $orders->whereNotNull('price_cycle')->pluck('price_cycle')->unique();
-        // Approved Domains
-        if ($domainIds->isNotEmpty()) {
-            $this->domain->whereIn('id', $domainIds)->update(['price_status' => true]);
-        }
-        if ($planIds->isNotEmpty()) {
-            $expireDate = $this->getExpireDateTime($plan_price_cycle, now());
-            $packate_cycle = $this->package_cycle($plan_price_cycle, now());
-           foreach ($planIds as $key => $plan_id) {
-                 $user->update([
-                 'plan_id' => $plan_id,
-                 'expire_date' => $expireDate,
-                 'package' => $packate_cycle,
-                 ]);
-           }
-        }
-        // Update Order And Put Expire Date
-    foreach($orders as $order){
-            $priceCycle = $order->price_cycle ;
-            $expireDate = $this->getOrderDateExpire($priceCycle,now());
-            $order->update(['expire_date'=>$expireDate]);
-    }
-
-    
-        // End Approved Domains   
-        // Fetch all required services in batch only if IDs are present
-        $domains = $domainIds->isNotEmpty() ? $this->domain->whereIn('id', $domainIds)->get()->keyBy('id') : collect();
-        $extras = $extraIds->isNotEmpty() ? $this->extra->whereIn('id', $extraIds)->get()->keyBy('id') : collect();
-        $plans = $planIds->isNotEmpty() ? $this->plan->whereIn('id', $planIds)->get()->keyBy('id') :
-            collect();
-        $createdOrders = $orders->map(function ($order) use ($domains, $extras, $plans) {
-            $newService = [];
-
-            if ($order->domain_id !== null) {
-                $newService['domain'] = $domains->find($order->domain_id);
-            }
-            if ($order->extra_id !== null) {
-                $newService['extra'] = $extras->find($order->extra_id);
-            }
-            if ($order->plan_id !== null) {
-                $newService['plan'] = $plans->find($order->plan_id);
-            }
-
-            return $newService;
-        });
-
-        return $orders;
     }
 
     public function make_order($request){
@@ -177,6 +123,7 @@ trait PlaceOrder
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
         $points = 0;
+        $items = [];
         $order_details = [];
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
@@ -185,6 +132,11 @@ trait PlaceOrder
                 ->where('id', $product['product_id'])
                 ->first();
                 if (!empty($item)) {
+                    $items[] = [ "name"=> $item->name,
+                            "amount_cents"=> $item->price,
+                            "description"=> $item->description,
+                            "quantity"=> $product['count']
+                        ];
                     $points += $item->points * $product['count'];
                     if (isset($product['variation'])) {
                         foreach ($product['variation'] as $variation) {
@@ -315,6 +267,7 @@ trait PlaceOrder
         return [
             'payment' => $order,
             'orderItems' => $order_details,
+            'items' => $items
         ];
     }
 }

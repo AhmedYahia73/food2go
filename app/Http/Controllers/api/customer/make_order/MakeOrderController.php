@@ -8,6 +8,7 @@ use App\Http\Requests\customer\order\OrderRequest;
 use App\trait\image;
 use App\Events\OrderNotification;
 use App\trait\PlaceOrder;
+use App\trait\PaymentPaymob;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -28,6 +29,7 @@ class MakeOrderController extends Controller
     private OptionProduct $options, private PaymentMethod $paymentMethod){}
     use image;
     use PlaceOrder;
+    use PaymentPaymob;
 
     public function order(OrderRequest $request){
         // https://bcknd.food2go.online/customer/make_order
@@ -37,10 +39,23 @@ class MakeOrderController extends Controller
         // deal[{deal_id, count}], payment_method_id, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-        $order = $this->make_order($request);
+        if ($request->payment_method_id == 1) {
+            $tokens = $this->getToken();
+            $user = $request->user();
+            $amount_cents = $request->amount * 100;
+            $order = $this->createOrder($request, $tokens, $user);
+            // $order = $this->make_order($request);
+            // $order = $order['payment']; 
+            $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens);
+            $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . env('PAYMOB_IFRAME_ID') . '?payment_token=' . $paymentToken;
+        } 
+        else {
+            $order = $this->make_order($request);
+        }
+        
 
         return response()->json([
-            'success' => $order['payment']
+            'success' => $paymentLink
         ]);
     }
 }
