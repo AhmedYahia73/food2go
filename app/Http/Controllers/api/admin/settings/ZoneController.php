@@ -37,6 +37,17 @@ class ZoneController extends Controller
         ]);
     }
 
+    public function zone($id){
+        // https://bcknd.food2go.online/admin/settings/zone/item/{id}
+        $zones = $this->zones
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'zones' => $zones,
+        ]);
+    }
+
     public function create(ZoneRequest $request){
         // https://bcknd.food2go.online/admin/settings/zone/add
         // Keys

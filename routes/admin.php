@@ -242,6 +242,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(ZoneController::class)
         ->prefix('zone')->group(function(){
             Route::get('/', 'view');
+            Route::get('/item/{id}', 'zone');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
