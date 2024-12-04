@@ -143,6 +143,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
+        Route::put('/status/{id}', 'status');
         Route::delete('/delete/{id}', 'delete');
     });
 
@@ -246,6 +247,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/item/{id}', 'zone');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
+            Route::put('/status/{id}', 'status');
             Route::delete('/delete/{id}', 'delete');
         });
 

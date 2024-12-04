@@ -48,6 +48,30 @@ class ZoneController extends Controller
         ]);
     }
 
+    public function status($id, Request $request){
+        // https://bcknd.food2go.online/admin/settings/zone/status/{id}
+        // Key
+        // status
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
+        $this->zones
+        ->where('id', $id)
+        ->update([
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            'status' => $request->status ? 'approve' : 'banned'
+        ]);
+    }
+
     public function create(ZoneRequest $request){
         // https://bcknd.food2go.online/admin/settings/zone/add
         // Keys
