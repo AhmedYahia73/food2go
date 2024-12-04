@@ -32,7 +32,9 @@ class BranchController extends Controller
 
     public function view(){
         // https://bcknd.food2go.online/admin/branch
-        $branches = $this->branches->get();
+        $branches = $this->branches
+        ->with('city')
+        ->get();
 
         return response()->json([
             'branches' => $branches,

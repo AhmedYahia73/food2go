@@ -39,9 +39,11 @@ class PaymentController extends Controller
 
     public function approve($id){
         // https://bcknd.food2go.online/admin/payment/approve/{id}
-        $this->orders
+        $order = $this->orders
         ->where('id', $id)
-        ->update([
+        ->first();
+        
+        $order->update([
             'status' => 1
         ]);
 

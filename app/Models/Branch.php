@@ -27,10 +27,22 @@ class Branch extends Authenticatable
         'status',
         'email_verified_at',
     ];
-    protected $appends = ['role'];
+    protected $appends = ['role', 'image_link', 'cover_image_link'];
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
+    }
+
+    public function getCoverImageAttribute(){
+        return url('storage/' . $this->attributes['cover_image']);
+    }
 
     public function getRoleAttribute(){
         return 'branch';
+    }
+
+    public function city(){
+        return $this->belongsTo(City::class, 'city_id');
     }
 
     public function orders(){

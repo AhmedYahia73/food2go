@@ -58,4 +58,88 @@ class MakeOrderController extends Controller
             'success' => $paymentLink
         ]);
     }
+
+    public function callback(Request $request){
+        
+        //this call back function its return the data from paymob and we show the full response and we checked if hmac is correct means successfull payment
+        $data = $request->all();
+        ksort($data);
+        $hmac = $data['hmac'];
+        $array = [
+            'amount_cents',
+            'created_at',
+            'currency',
+            'error_occured',
+            'has_parent_transaction',
+            'id',
+            'integration_id',
+            'is_3d_secure',
+            'is_auth',
+            'is_capture',
+            'is_refunded',
+            'is_standalone_payment',
+            'is_voided',
+            'order',
+            'owner',
+            'pending',
+            'source_data_pan',
+            'source_data_sub_type',
+            'source_data_type',
+            'success',
+        ];
+        $connectedString = '';
+        foreach ($data as $key => $element) {
+            if (in_array($key, $array)) {
+                $connectedString .= $element;
+            }
+        }
+        $secret = env('PAYMOB_HMAC');
+        $hased = hash_hmac('sha512', $connectedString, $secret);
+        if ($hased == $hmac) {
+            //this below data used to get the last order created by the customer and check if its exists to 
+            // $todayDate = Carbon::now();
+            // $datas = Order::where('user_id',Auth::user()->id)->whereDate('created_at',$todayDate)->orderBy('created_at','desc')->first();
+            $status = $data['success'];
+            // $pending = $data['pending'];
+
+            if ($status == "true") {
+                
+                //here we checked that the success payment is true and we updated the data base and empty the cart and redirct the customer to thankyou page
+                $this->order
+                ->where('transaction_id', $data->id)
+                ->update([
+                    'status' => 1
+                ]);
+                return $request->all();
+                 $approvedOrder =  $this->order_success($payment);
+                $approvedOrder;
+                   $redirectUrl = 'https://web.wegostores.com/dashboard_user/cart';
+                   $message = 'Your payment is being processed. Please wait...';
+                   $timer = 3; // 3  seconds
+                $totalAmount = $data['amount_cents'];
+              return  view('paymob.checkout', compact('payment','totalAmount','message','redirectUrl','timer'));
+            //    return redirect()->away($redirectUrl . '?' . http_build_query([
+            //    'success' => true,
+            //    'payment_id' => $payment_id,
+            //    'total_amount' => $totalAmount,
+            //    "alert('payment Success')"
+            //    ]));
+               
+            } else {
+                $payment_id = $data['order'];
+                $payment =  $this->payment->with('orders','orders.plans','orders.extra','orders.domain')->where('transaction_id', $payment_id)->first();
+
+                $payment->update([
+                    'payment_id' => $data['id'],
+                    'payment_status' => "Failed"
+                ]);
+
+
+                return response()->json(['message' => 'Something Went Wrong Please Try Again']);
+            }
+        } else {
+            return response()->json(['message' => 'Something Went Wrong Please Try Again']);
+        }
+    
+    }
 }
