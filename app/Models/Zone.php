@@ -14,6 +14,7 @@ class Zone extends Model
         'branch_id',
         'price',
         'zone',
+        'status',
     ];
 
     public function city(){

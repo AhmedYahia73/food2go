@@ -19,6 +19,7 @@ class ZoneController extends Controller
         'branch_id',
         'price',
         'zone',
+        'status',
     ];
 
     public function view(){
