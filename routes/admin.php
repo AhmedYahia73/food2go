@@ -252,6 +252,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
+            Route::put('/status/{id}', 'status');
             Route::delete('/delete/{id}', 'delete');
         });
         
