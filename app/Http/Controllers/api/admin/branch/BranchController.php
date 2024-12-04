@@ -24,6 +24,7 @@ class BranchController extends Controller
         'food_preparion_time',
         'latitude',
         'longitude',
+        'city_id',
         'coverage',
         'status',
     ];
@@ -82,7 +83,7 @@ class BranchController extends Controller
         // https://bcknd.food2go.online/admin/branch/add
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
-        // coverage, status, image, cover_image
+        // coverage, status, image, cover_image, city_id
   
         $branchRequest = $request->only($this->branchRequest);
         if (is_file($request->image)) {
@@ -104,7 +105,7 @@ class BranchController extends Controller
         // https://bcknd.food2go.online/admin/branch/update/{id}
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
-        // coverage, status, image, cover_image
+        // coverage, status, image, cover_image, city_id
 
         $branchRequest = $request->only($this->branchRequest);
         $branch = $this->branches

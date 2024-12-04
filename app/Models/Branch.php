@@ -18,6 +18,7 @@ class Branch extends Authenticatable
         'phone',
         'image',
         'cover_image',
+        'city_id',
         'password',
         'food_preparion_time',
         'latitude',
