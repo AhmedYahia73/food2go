@@ -26,7 +26,7 @@ class CityController extends Controller
     public function status(){
         // https://bcknd.food2go.online/admin/settings/city/status/{id}
         // Key
-        // name, status
+        // status
         $validator = Validator::make($request->all(), [
             'status' => 'required|boolean',
         ]);
@@ -35,6 +35,16 @@ class CityController extends Controller
                 'error' => $validator->errors(),
             ],400);
         }
+
+        $this->cities
+        ->where('id', $id)
+        ->update([
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            'status' => $request->status ? 'approve' : 'banned'
+        ]);
     }
 
     public function create(Request $request){
