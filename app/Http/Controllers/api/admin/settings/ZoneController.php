@@ -29,6 +29,7 @@ class ZoneController extends Controller
         $cities = $this->cities
         ->get();
         $zones = $this->zones
+        ->with(['city', 'branch'])
         ->get();
 
         return response()->json([
