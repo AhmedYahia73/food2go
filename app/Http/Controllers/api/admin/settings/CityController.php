@@ -23,12 +23,27 @@ class CityController extends Controller
         ]);
     }
 
+    public function status(){
+        // https://bcknd.food2go.online/admin/settings/city/status/{id}
+        // Key
+        // name, status
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+    }
+
     public function create(Request $request){
         // https://bcknd.food2go.online/admin/settings/city/add
         //Key
-        // name
+        // name, status
         $validator = Validator::make($request->all(), [
             'name' => 'required',
+            'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -38,7 +53,8 @@ class CityController extends Controller
 
         $this->cities
         ->create([
-            'name' => $request->name
+            'name' => $request->name,
+            'status' => $request->status,
         ]);
 
         return response()->json([
@@ -49,9 +65,10 @@ class CityController extends Controller
     public function modify(Request $request, $id){
         // https://bcknd.food2go.online/admin/settings/city/update/{id}
         //Key
-        // name
+        // name, status
         $validator = Validator::make($request->all(), [
             'name' => 'required',
+            'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -62,7 +79,8 @@ class CityController extends Controller
         $this->cities
         ->where('id', $id)
         ->update([
-            'name' => $request->name
+            'name' => $request->name,
+            'status' => $request->status,
         ]);
 
         return response()->json([
