@@ -43,6 +43,7 @@ class PaymentController extends Controller
         ->where('id', $id)
         ->first();
         $user = auth()->user();
+        $user->points += $order->points;
         $order->update([
             'status' => 1
         ]);

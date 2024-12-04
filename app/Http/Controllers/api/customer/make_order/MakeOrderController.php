@@ -19,6 +19,7 @@ use App\Models\ExtraProduct;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
 use App\Models\PaymentMethod;
+use App\Models\User;
 use App\Models\Addon;
 
 class MakeOrderController extends Controller
@@ -26,7 +27,7 @@ class MakeOrderController extends Controller
     public function __construct(private Order $order, private OrderDetail $order_details,
     private ProductSale $product_sales, private Product $products, private ExcludeProduct $excludes,
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
-    private OptionProduct $options, private PaymentMethod $paymentMethod){}
+    private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -105,19 +106,19 @@ class MakeOrderController extends Controller
             if ($status == "true") {
                 
                 //here we checked that the success payment is true and we updated the data base and empty the cart and redirct the customer to thankyou page
-                $this->order
-                ->where('transaction_id', $data->id)
-                ->update([
+                $order = $this->order
+                ->where('transaction_id', $data['order'])
+                ->first();
+                $order->update([
                     'status' => 1
                 ]);
-                return $request->all();
-                 $approvedOrder =  $this->order_success($payment);
-                $approvedOrder;
-                   $redirectUrl = 'https://web.wegostores.com/dashboard_user/cart';
-                   $message = 'Your payment is being processed. Please wait...';
-                   $timer = 3; // 3  seconds
-                $totalAmount = $data['amount_cents'];
-              return  view('paymob.checkout', compact('payment','totalAmount','message','redirectUrl','timer'));
+                $user = $this->user
+                ->where('id', $order->user_id)
+                ->first();
+                $user->points += $order->points;
+                $user->save();
+                
+                return response()->json(['success' => 'You make proccess success']);
             //    return redirect()->away($redirectUrl . '?' . http_build_query([
             //    'success' => true,
             //    'payment_id' => $payment_id,
