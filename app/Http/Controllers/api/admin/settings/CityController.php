@@ -23,6 +23,17 @@ class CityController extends Controller
         ]);
     }
 
+    public function city($id){
+        // https://bcknd.food2go.online/admin/settings/city/item/{id}
+        $city = $this->cities
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'city' => $city
+        ]);
+    }
+
     public function status($id, Request $request){
         // https://bcknd.food2go.online/admin/settings/city/status/{id}
         // Key

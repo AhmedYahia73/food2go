@@ -250,6 +250,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(CityController::class)
         ->prefix('city')->group(function(){
             Route::get('/', 'view');
+            Route::get('/item/{id}', 'city');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::put('/status/{id}', 'status');
