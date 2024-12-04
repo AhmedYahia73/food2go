@@ -5,6 +5,8 @@ namespace App\Http\Controllers\api\admin\settings;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\settings\ZoneRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Branch;
 use App\Models\City;
