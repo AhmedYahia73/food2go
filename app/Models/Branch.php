@@ -33,7 +33,7 @@ class Branch extends Authenticatable
         return url('storage/' . $this->attributes['image']);
     }
 
-    public function getCoverImageAttribute(){
+    public function getCoverImageLinkAttribute(){
         return url('storage/' . $this->attributes['cover_image']);
     }
 

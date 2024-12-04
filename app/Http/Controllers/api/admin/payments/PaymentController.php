@@ -42,7 +42,7 @@ class PaymentController extends Controller
         $order = $this->orders
         ->where('id', $id)
         ->first();
-        
+        $user = auth()->user();
         $order->update([
             'status' => 1
         ]);
