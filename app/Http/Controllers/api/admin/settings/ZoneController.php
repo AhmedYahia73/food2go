@@ -43,6 +43,7 @@ class ZoneController extends Controller
         // https://bcknd.food2go.online/admin/settings/zone/item/{id}
         $zones = $this->zones
         ->where('id', $id)
+        ->with(['city', 'branch'])
         ->first();
 
         return response()->json([
