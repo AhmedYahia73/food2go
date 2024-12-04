@@ -38,6 +38,17 @@ class BranchController extends Controller
         ]);
     }
 
+    public function branch($id){
+        // https://bcknd.food2go.online/admin/branch/item/{id}
+        $branch = $this->branches
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'branch' => $branch,
+        ]);
+    }
+
     public function status(Request $request, $id){
         // https://bcknd.food2go.online/admin/branch/status/{id}
         // Keys

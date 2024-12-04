@@ -139,6 +139,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(BranchController::class)->middleware('can:isBranch')
     ->prefix('branch')->group(function(){
         Route::get('/', 'view');
+        Route::get('/item/{id}', 'branch');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
