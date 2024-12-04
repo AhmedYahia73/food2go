@@ -45,6 +45,7 @@ class BranchController extends Controller
         // https://bcknd.food2go.online/admin/branch/item/{id}
         $branch = $this->branches
         ->where('id', $id)
+        ->with('city')
         ->first();
 
         return response()->json([
