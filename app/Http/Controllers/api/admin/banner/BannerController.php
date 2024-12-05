@@ -73,17 +73,21 @@ class BannerController extends Controller
     public function modify(BannerRequest $request, $id){
         // https://bcknd.food2go.online/admin/banner/update/{id}
         // Keys
-        // order, translation_id, category_id, product_id, deal_id, image
+        // order, category_id, product_id, deal_id
+        // images [{translation_id, tranlation_name, image}]
         $bannerRequest = $request->only($this->bannerRequest);
         $banner = $this->banner
         ->where('id', $id)
         ->first();
-        if (is_file($request->image)) {
-            $image_path = $this->upload($request, 'image', 'admin/banner/image');
-            $bannerRequest['image'] = $image_path;
-            $this->deleteImage($banner->image);
+        foreach ($request->images as $item) {
+            if (!is_string($item['image'])) {
+                $image_path = $this->uploadFile($item['image'], 'admin/banner/image');
+                $bannerRequest['image'] = $image_path;
+                $this->deleteImage($banner->image);
+            }
+            $bannerRequest['translation_id'] = $item['translation_id'];
+            $banner->update($bannerRequest);
         }
-        $banner->update($bannerRequest);
 
         return response()->json([
             'success' => 'You update data success'
