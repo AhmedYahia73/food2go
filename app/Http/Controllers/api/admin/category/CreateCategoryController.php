@@ -52,9 +52,16 @@ class CreateCategoryController extends Controller
         $category = $this->categories
         ->where('priority', $request->priority)
         ->first();
-        if (!empty($category)) {
+        if (!empty($category) && empty($category->category_id)) {
             $this->categories
             ->where('priority', '>=', $request->priority)
+            ->whereNull('category_id')
+            ->increment('priority');
+        }
+        elseif (!empty($category)) {
+            $this->categories
+            ->where('priority', '>=', $request->priority)
+            ->whereNotNull('category_id')
             ->increment('priority');
         }
         $categories = $this->categories
