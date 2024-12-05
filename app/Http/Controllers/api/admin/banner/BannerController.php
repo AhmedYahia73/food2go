@@ -19,7 +19,6 @@ class BannerController extends Controller
     private Category $categories, private Product $products, private Deal $deals){}
     protected $bannerRequest = [
         'order',
-        'translation_id',
         'category_id',
         'product_id',
         'deal_id',
@@ -53,17 +52,21 @@ class BannerController extends Controller
     public function create(BannerRequest $request){
         // https://bcknd.food2go.online/admin/banner/add
         // Keys
-        // order, translation_id, category_id, product_id, deal_id, image
+        // order, category_id, product_id, deal_id
+        // images [{translation_id, tranlation_name, image}]
         $bannerRequest = $request->only($this->bannerRequest);
-        if (is_file($request->image)) {
-            $image_path = $this->upload($request, 'image', 'admin/banner/image');
-            $bannerRequest['image'] = $image_path;
+        foreach ($request->images as $item) {
+            if (!is_string($item['image'])) {
+                $image_path = $this->uploadFile($item['image'], 'admin/banner/image');
+                $bannerRequest['image'] = $image_path;
+            }
+            $bannerRequest['translation_id'] = $item['translation_id'];
+            $this->banner
+            ->create($bannerRequest);
         }
-        $this->banner
-        ->create($bannerRequest);
 
         return response()->json([
-            'success' => 'You add banner success'
+            'success' => $request->all()
         ]);
     }
     

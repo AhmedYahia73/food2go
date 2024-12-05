@@ -24,9 +24,9 @@ class BannerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'image' => ['required'],
             'order' => ['required', 'numeric'],
-            'translation_id' => ['required', 'exists:translations,id'],
+            'images.*.translation_id' => ['required', 'exists:translations,id'],
+            'images.*.image' => ['required'],
             'category_id' => ['exists:categories,id', 'nullable'],
             'product_id' => ['exists:products,id', 'nullable'],
             'deal_id' => ['exists:deals,id', 'nullable'],
