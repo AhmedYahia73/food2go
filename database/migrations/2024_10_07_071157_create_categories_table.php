@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('image')->nullable();
             $table->string('banner_image')->nullable();
-            $table->foreignId('category_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
+            $table->foreignId('category_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }
