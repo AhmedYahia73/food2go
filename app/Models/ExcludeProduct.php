@@ -13,4 +13,9 @@ class ExcludeProduct extends Model
         'name',
         'product_id'
     ];
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }

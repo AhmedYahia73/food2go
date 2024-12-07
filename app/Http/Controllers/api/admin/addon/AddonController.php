@@ -44,9 +44,11 @@ class AddonController extends Controller
         ->where('id', $id)
         ->first();
         $translations = $this->translations
+        ->where('status', 1)
         ->get();
         $addons_names = [];
         foreach ($translations as $item) {
+            $createNewPlan->translations()->create($translation);
             $filePath = base_path("lang/{$item->name}/messages.php");
             if (File::exists($filePath)) {
                 $translation_file = require $filePath;

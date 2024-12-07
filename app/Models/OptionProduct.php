@@ -23,4 +23,9 @@ class OptionProduct extends Model
     public function extra(){
         return $this->hasMany(ExtraProduct::class, 'option_id');
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }

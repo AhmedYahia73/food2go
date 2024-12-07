@@ -19,4 +19,9 @@ class Offer extends Model
     public function getImageLinkAttribute(){
         return url('storage/' . $this->attributes['image']);
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }

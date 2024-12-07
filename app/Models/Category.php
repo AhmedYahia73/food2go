@@ -52,4 +52,9 @@ class Category extends Model
     public function addons(){
         return $this->belongsToMany(Addon::class, 'category_addon', 'category_id', 'addon_id');
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }

@@ -31,4 +31,9 @@ class Deal extends Model
         return $this->belongsToMany(User::class, 'deal_user')
         ->withPivot(['ref_number', 'status', 'id']);;
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }

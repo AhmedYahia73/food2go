@@ -21,4 +21,9 @@ class ExtraProduct extends Model
     public function parent_extra(){
         return $this->belongsTo(ExtraProduct::class, 'extra_id');
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }

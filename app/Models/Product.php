@@ -82,4 +82,9 @@ class Product extends Model
     public function sales_count(){
         return $this->hasMany(ProductSale::class, 'product_id');
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }

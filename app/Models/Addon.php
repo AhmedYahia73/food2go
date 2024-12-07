@@ -21,4 +21,9 @@ class Addon extends Model
     public function tax(){
         return $this->belongsTo(Tax::class, 'tax_id');
     }
+
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }
