@@ -14,11 +14,12 @@ use App\trait\translaion;
 use App\Models\Deal;
 use App\Models\DealTimes;
 use App\Models\Translation;
+use App\Models\TranslationTbl;
 
 class DealController extends Controller
 {
     public function __construct(private Deal $deals, private DealTimes $deal_times,
-    private Translation $translations){}
+    private Translation $translations, private TranslationTbl $translation_tbl){}
     protected $dealRequest = [
         'title',
         'description',
@@ -53,20 +54,20 @@ class DealController extends Controller
         $deal_names = [];
         $deal_descriptions = [];
         foreach ($translations as $item) {
-            $filePath = base_path("lang/{$item->name}/messages.php");
-            if (File::exists($filePath)) {
-                $translation_file = require $filePath;
-                $deal_names[] = [
-                    'id' => $item->id,
-                    'lang' => $item->name,
-                    'deal_title' => $translation_file[$deal->title] ?? null
-                ];
-                $deal_descriptions[] = [
-                    'id' => $item->id,
-                    'lang' => $item->name,
-                    'deal_description' => $translation_file[$deal->description] ?? null
-                ];
-            }
+            $deal_name = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->where('key', $deal->title)
+            ->first();
+           $deal_names[] = [
+               'id' => $item->id,
+               'lang' => $item->name,
+               'name' => $deal_name->value ?? null,
+           ];
+           $deal_descriptions[] = [
+                'id' => $item->id,
+                'lang' => $item->name,
+                'name' => $deal_name->value ?? null,
+           ];
         }
         $deal->deal_names = $deal_names;
         $deal->deal_descriptions = $deal_descriptions;
@@ -116,12 +117,6 @@ class DealController extends Controller
         //  أول عنصر هو default language
         $default = $request->deal_names[0];
         $default_description = $request->deal_descriptions[0];
-        foreach ($request->deal_names as $item) {
-            $this->translate($item['tranlation_name'], $default['deal_title'], $item['deal_title']);
-        }
-        foreach ($request->deal_descriptions as $item) {
-            $this->translate($item['tranlation_name'], $default_description['deal_description'], $item['deal_description']); 
-        }
         $dealRequest = $request->only($this->dealRequest);
         $dealRequest['title'] = $default['deal_title'];
         $dealRequest['description'] = $default_description['deal_description'];
@@ -132,6 +127,20 @@ class DealController extends Controller
         }
         $deal = $this->deals
         ->create($dealRequest);
+        foreach ($request->deal_names as $item) {
+            $deal->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $default['deal_title'],
+                'value' => $item['deal_title']
+            ]); 
+        }
+        foreach ($request->deal_descriptions as $item) {
+            $deal->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $default_description['deal_description'],
+                'value' => $item['deal_description']
+            ]);  
+        }
         if ($request->times) {
             foreach ($request->times as $item) {
                 $this->deal_times->create([
@@ -160,18 +169,26 @@ class DealController extends Controller
         //  أول عنصر هو default language
         $default = $request->deal_names[0];
         $default_description = $request->deal_descriptions[0];
-        foreach ($request->deal_names as $item) {
-            $this->translate($item['tranlation_name'], $default['deal_title'], $item['deal_title']);
-        }
-        foreach ($request->deal_descriptions as $item) {
-            $this->translate($item['tranlation_name'], $default_description['deal_description'], $item['deal_description']); 
-        }
         $dealRequest = $request->only($this->dealRequest);
         $dealRequest['title'] = $default['deal_title'];
         $dealRequest['description'] = $default_description['deal_description'];
         $deal = $this->deals
         ->where('id', $id)
         ->first();
+        foreach ($request->deal_names as $item) {
+            $deal->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $default['deal_title'],
+                'value' => $item['deal_title']
+            ]); 
+        }
+        foreach ($request->deal_descriptions as $item) {
+            $deal->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $default_description['deal_description'],
+                'value' => $item['deal_description']
+            ]);  
+        }
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/deals/image');
             $dealRequest['image'] = $imag_path;
