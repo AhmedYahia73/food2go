@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\File;
 use App\Models\Category;
 use App\Models\Addon;
 use App\Models\Translation;
+use App\Models\TranslationTbl;
 
 class CategoryController extends Controller
 {
     public function __construct(private Category $categories, private Addon $addons,
-    private Translation $translations){}
+    private Translation $translations, private TranslationTbl $translation_tbl){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/category
@@ -56,15 +57,24 @@ class CategoryController extends Controller
         ->get();
         $category_names = [];
         foreach ($translations as $item) {
-            $filePath = base_path("lang/{$item->name}/messages.php");
-            if (File::exists($filePath)) {
-                $translation_file = require $filePath;
-                $category_names[] = [
-                    'id' => $item->id,
-                    'lang' => $item->name,
-                    'name' => $translation_file[$category->name] ?? null
-                ];
-            }
+            $category_name = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->where('key', $category->name)
+            ->first();
+           $category_names[] = [
+               'id' => $item->id,
+               'lang' => $item->name,
+               'name' => $category_name->value ?? null,
+           ];
+            // $filePath = base_path("lang/{$item->name}/messages.php");
+            // if (File::exists($filePath)) {
+            //     $translation_file = require $filePath;
+            //     $category_names[] = [
+            //         'id' => $item->id,
+            //         'lang' => $item->name,
+            //         'name' => $translation_file[$category->name] ?? null
+            //     ];
+            // }
         }
 
         return response()->json([

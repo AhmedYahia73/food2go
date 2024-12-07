@@ -36,9 +36,6 @@ class CreateCategoryController extends Controller
         $request->category_names = is_string($request->category_names) ? json_decode($request->category_names)
         : $request->category_names;
         $default = $request->category_names[0];
-        foreach ($request->category_names as $item) {
-            $this->translate($item['tranlation_name'], $default['category_name'], $item['category_name']); 
-        }
         $categoryRequest = $request->only($this->categoryRequest);
         $categoryRequest['name'] = $default['category_name'];
         if ($request->image) {
@@ -66,7 +63,13 @@ class CreateCategoryController extends Controller
         }
         $categories = $this->categories
         ->create($categoryRequest); // create category
-
+        foreach ($request->category_names as $item) {
+            $categories->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $default['category_name'],
+                'value' => $item['category_name']
+            ]);
+        }
         if ($request->addons_id) { 
             $categories->addons()->attach($request->addons_id);
         } // if send addons add it
@@ -84,9 +87,6 @@ class CreateCategoryController extends Controller
         // category_names[{category_name, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->category_names[0];
-        foreach ($request->category_names as $item) {
-            $this->translate($item['tranlation_name'], $default['category_name'], $item['category_name']); 
-        }
         $categoryRequest = $request->only($this->categoryRequest);
         $categoryRequest['name'] = $default['category_name'];
         
@@ -104,6 +104,13 @@ class CreateCategoryController extends Controller
             $categoryRequest['banner_image'] = $imag_path;
         } // if send new image delete old image and add new image
         $category->update($categoryRequest); // update category
+        foreach ($request->category_names as $item) {
+            $category->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $default['category_name'],
+                'value' => $item['category_name']
+            ]); 
+        }
 
         $category->addons()->sync($request->addons_id);
         // update addons

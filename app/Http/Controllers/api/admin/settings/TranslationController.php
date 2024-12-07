@@ -40,6 +40,7 @@ class TranslationController extends Controller
         // name
         $validator = Validator::make($request->all(), [
             'name' => 'required',
+            'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -48,19 +49,20 @@ class TranslationController extends Controller
         }
         $this->translation
         ->create([
-            'name' => $request->name
+            'name' => $request->name,
+            'status' => $request->status,
         ]);
-        $directory = base_path('lang\\' . $request->name);
+        // $directory = base_path('lang\\' . $request->name);
         
-        if (!file_exists($directory)) {
-            mkdir($directory, 0755, true); // Create the directory if it doesn't exist
-        }
+        // if (!file_exists($directory)) {
+        //     mkdir($directory, 0755, true); // Create the directory if it doesn't exist
+        // }
         
-        $filename = 'messages.php';
-        $content = '<?php
-        return [];
-        ';
-        file_put_contents($directory . DIRECTORY_SEPARATOR . $filename, $content);
+        // $filename = 'messages.php';
+        // $content = '<?php
+        // return [];
+        // ';
+        // file_put_contents($directory . DIRECTORY_SEPARATOR . $filename, $content);
 
         return response()->json([
             'success' => 'You add translation file success'
@@ -71,24 +73,24 @@ class TranslationController extends Controller
         $translation = $this->translation
         ->where('id', $id)
         ->first();
-        $directory = base_path('lang\\' . $translation->name);
-        if (is_dir($directory)) {
-            // Scan the directory and get all files and folders
-            $files = array_diff(scandir($directory), ['.', '..']);
+        // $directory = base_path('lang\\' . $translation->name);
+        // if (is_dir($directory)) {
+        //     // Scan the directory and get all files and folders
+        //     $files = array_diff(scandir($directory), ['.', '..']);
         
-            foreach ($files as $file) {
-                $path = $directory . DIRECTORY_SEPARATOR . $file;
-                // Recursively delete if it's a directory
-                if (is_dir($path)) {
-                    deleteDirectory($path);
-                } else {
-                    // Delete the file
-                    unlink($path);
-                }
-            }
-            rmdir($directory);
-        }
-        $translation->delete();
+        //     foreach ($files as $file) {
+        //         $path = $directory . DIRECTORY_SEPARATOR . $file;
+        //         // Recursively delete if it's a directory
+        //         if (is_dir($path)) {
+        //             deleteDirectory($path);
+        //         } else {
+        //             // Delete the file
+        //             unlink($path);
+        //         }
+        //     }
+        //     rmdir($directory);
+        // }
+        // $translation->delete();
 
         return response()->json([
             'success' => 'You delete data success'
