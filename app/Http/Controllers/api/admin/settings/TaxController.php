@@ -26,6 +26,17 @@ class TaxController extends Controller
         ]);
     }
 
+    public function tax($id){
+        // https://bcknd.food2go.online/admin/settings/tax/item/{id}
+        $tax = $this->tax
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'tax' => $tax
+        ]);
+    }
+
     public function create(TaxRequest $request){
         // https://bcknd.food2go.online/admin/settings/tax/add
         // Keys
