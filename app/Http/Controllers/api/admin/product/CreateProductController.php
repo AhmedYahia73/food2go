@@ -255,13 +255,17 @@ class CreateProductController extends Controller
         ->delete(); // delete old excludes
         if ($request->excludes) {
             foreach ($request->excludes as $item) {
-                $this->excludes
+                $exclude = $this->excludes
                 ->create([
                     'name' => $item[0]['exclude_name'],
                     'product_id' => $product->id
                 ]);
                 foreach ($item as $key => $element) {
-                    $this->translate($element['tranlation_name'], $item[0]['exclude_name'], $element['exclude_name']);
+                    $exclude->translations()->create([
+                        'locale' => $element['tranlation_name'],
+                        'key' => $item['names'][0]['exclude_name'],
+                        'value' => $element['exclude_name'],
+                    ]); 
                 }
             }
         }// add new excludes

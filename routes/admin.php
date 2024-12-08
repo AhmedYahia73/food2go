@@ -302,7 +302,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/resturant_time', 'resturant_time');
             Route::post('/resturant_time_update', 'resturant_time_update');
             
-            Route::get('/tax', 'tax');
+            Route::get('/tax_type', 'tax');
             Route::post('/tax_update', 'tax_update');
             
             Route::get('/delivery_time', 'delivery_time');

@@ -120,7 +120,7 @@ class SettingController extends Controller
     }
 
     public function tax(){
-        // https://bcknd.food2go.online/admin/settings/tax
+        // https://bcknd.food2go.online/admin/settings/tax_type
         $tax = $this->settings
         ->where('name', 'tax')
         ->orderByDesc('id')
