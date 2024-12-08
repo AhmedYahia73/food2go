@@ -26,6 +26,17 @@ class DiscountController extends Controller
         ]);
     }
 
+    public function discount($id){
+        // https://bcknd.food2go.online/admin/settings/discount/item/{id}
+        $discount = $this->discount
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'discount' => $discount
+        ]);
+    }
+
     public function create(DiscountRequest $request){
         // https://bcknd.food2go.online/admin/settings/discount/add
         // Keys

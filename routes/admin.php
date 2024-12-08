@@ -279,6 +279,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(DiscountController::class)
         ->prefix('discount')->group(function(){
             Route::get('/', 'view');
+            Route::get('/item/{id}', 'discount');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
