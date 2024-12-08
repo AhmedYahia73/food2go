@@ -28,4 +28,9 @@ class VariationProduct extends Model
     public function options(){
         return $this->hasMany(OptionProduct::class, 'variation_id');
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }
