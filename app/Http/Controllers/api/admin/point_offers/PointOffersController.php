@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\File;
 use App\trait\image;
 use App\trait\translaion;
 
+use App\Models\TranslationTbl;
 use App\Models\Offer;
 use App\Models\Translation;
 
 class PointOffersController extends Controller
 {
-    public function __construct(private Offer $offers, private Translation $translations){}
+    public function __construct(private Offer $offers, private Translation $translations, 
+    private TranslationTbl $translation_tbl){}
     protected $offerRequest = [
         'product',
         'points',
@@ -42,15 +44,25 @@ class PointOffersController extends Controller
         ->get();
         $offer_names = [];
         foreach ($translations as $item) {
-            $filePath = base_path("lang/{$item->name}/messages.php");
-            if (File::exists($filePath)) {
-                $translation_file = require $filePath;
-                $offer_names[] = [
-                    'tranlation_id' => $item->id,
-                    'tranlation_name' => $item->name,
-                    'offer_product' => $translation_file[$offer->title] ?? null
-                ];
-            }
+            $offer_name = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->where('key', $offer->product)
+            ->first();
+           $offer_names[] = [
+               'id' => $item->id,
+               'lang' => $item->name,
+               'name' => $offer_name->value ?? null,
+           ];
+
+            // $filePath = base_path("lang/{$item->name}/messages.php");
+            // if (File::exists($filePath)) {
+            //     $translation_file = require $filePath;
+            //     $offer_names[] = [
+            //         'tranlation_id' => $item->id,
+            //         'tranlation_name' => $item->name,
+            //         'offer_product' => $translation_file[$offer->title] ?? null
+            //     ];
+            // }
         }
         $offer->offer_names = $offer_names;
 
@@ -68,19 +80,22 @@ class PointOffersController extends Controller
         $request->offer_names = is_string($request->offer_names) ? json_decode($request->offer_names): 
         $request->offer_names;
         $default = $request->offer_names[0];
-        foreach ($request->offer_names as $item) {
-            $this->translate($item['tranlation_name'], $default['offer_product'], $item['offer_product']); 
-        }
         $offerRequest = $request->only($this->offerRequest);
         $offerRequest['product'] = $default['offer_product'];
 
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/point_offers/image');
             $offerRequest['image'] = $imag_path;
-        }
-        
+        } 
         $offer = $this->offers
         ->create($offerRequest);
+        foreach ($request->offer_names as $item) {
+            $offer->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $default['offer_product'],
+                'value' => $item['offer_product']
+            ]); 
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -93,10 +108,7 @@ class PointOffersController extends Controller
         // points, image
         // offer_names[{offer_product, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
-        $default = $request->offer_names[0];
-        foreach ($request->offer_names as $item) {
-            $this->translate($item['tranlation_name'], $default['offer_product'], $item['offer_product']); 
-        }
+        $default = $request->offer_names[0]; 
         $offerRequest = $request->only($this->offerRequest);
         $offerRequest['product'] = $default['offer_product'];
 
@@ -109,6 +121,13 @@ class PointOffersController extends Controller
             $this->deleteImage($offer->image);
         }
         $offer->update($offerRequest);
+        foreach ($request->offer_names as $item) {
+            $offer->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $default['offer_product'],
+                'value' => $item['offer_product']
+            ]); 
+        }
 
         return response()->json([
             'success' => 'You update data success'

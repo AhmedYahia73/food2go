@@ -37,7 +37,7 @@ class TranslationController extends Controller
     public function create(Request $request){
         // https://bcknd.food2go.online/admin/translation/add
         // Keys
-        // name
+        // name, status
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'status' => 'required|boolean',
@@ -70,9 +70,10 @@ class TranslationController extends Controller
     }
 
     public function delete($id){
+        // https://bcknd.food2go.online/admin/translation/delete/{id}
         $translation = $this->translation
         ->where('id', $id)
-        ->first();
+        ->delete();
         // $directory = base_path('lang\\' . $translation->name);
         // if (is_dir($directory)) {
         //     // Scan the directory and get all files and folders
