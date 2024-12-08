@@ -101,7 +101,7 @@ class CreateProductController extends Controller
                 ]);
                 foreach ($item['names'] as $key => $element) {
                     $exclude->translations()->create([
-                        'locale' => $item['tranlation_name'],
+                        'locale' => $element['tranlation_name'],
                         'key' => $item['names'][0]['exclude_name'],
                         'value' => $element['exclude_name'],
                     ]); 
@@ -119,7 +119,7 @@ class CreateProductController extends Controller
                 $extra_num[] = $new_extra;
                 foreach ($item['names'] as $key => $element) {
                     $new_extra->translations()->create([
-                        'locale' => $item['tranlation_name'],
+                        'locale' => $element['tranlation_name'],
                         'key' => $item['names'][0]['extra_name'],
                         'value' => $element['extra_name'],
                     ]); 
@@ -140,7 +140,7 @@ class CreateProductController extends Controller
                 ]); // add variation
                 foreach ($item['names'] as $key => $element) {
                     $variation->translations()->create([
-                        'locale' => $item['tranlation_name'],
+                        'locale' => $element['tranlation_name'],
                         'key' => $item['names'][0]['name'],
                         'value' => $element['name'],
                     ]);  
