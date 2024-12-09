@@ -48,12 +48,12 @@ class CreateCategoryController extends Controller
         } // if send image upload it
         $category = $this->categories
         ->where('priority', $request->priority)
-        ->first();
+        ->first(); 
             $this->categories
             ->where('priority', '>=', $request->priority)
-            ->whereNull('category_id')
+            ->whereNotNull('category_id')
             ->increment('priority');
- 
+        
         $categories = $this->categories
         ->create($categoryRequest); // create category
         foreach ($request->category_names as $item) {
