@@ -38,4 +38,8 @@ class Banner extends Model
     public function deal(){
         return $this->belongsTo(Deal::class, 'deal_id');
     }
+    
+    public function translations(){
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }

@@ -16,21 +16,49 @@ class TranslationController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/translation
         $translation = $this->translation
+        ->where('status', 1)
+        ->get();
+        $translation_list = $this->translation
         ->get();
 
         return response()->json([
-            'translation' => $translation
+            'translation_list' => $translation_list,
+            'translation' => $translation,
         ]);
     }
 
-    public function link(){
-        // https://bcknd.food2go.online/admin/translation/link
-        $link = base_path('lang\\');
-        $filename = 'messages.php';
+    // public function link(){
+    //     // https://bcknd.food2go.online/admin/translation/link
+    //     $link = base_path('lang\\');
+    //     $filename = 'messages.php';
+
+    //     return response()->json([
+    //         'link' => $link,
+    //         'filename' => $filename,
+    //     ]);
+    // }
+
+    public function status(Request $request, $id){
+        // https://bcknd.food2go.online/admin/translation/status/{id}
+        // Keys
+        // status
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+
+        $translation = $this->translation
+        ->where('id', $id)
+        ->update([
+            'status' => $request->status
+        ]);
 
         return response()->json([
-            'link' => $link,
-            'filename' => $filename,
+            'success' => $request->status ? 'active' : 'banned'
         ]);
     }
 
