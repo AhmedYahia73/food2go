@@ -133,11 +133,13 @@ class CategoryController extends Controller
                     'error' => $validator->errors(),
             ],400);
         }
-        
+        $current_category = $this->categories
+        ->where('id', $id)
+        ->first();
         $category = $this->categories
         ->where('priority', $request->priority)
         ->first();
-        if (!empty($category) && empty($category->category_id)) {
+        if (!empty($category) && empty($current_category->category_id)) {
             $this->categories
             ->where('priority', '>=', $request->priority)
             ->whereNull('category_id')
@@ -149,8 +151,7 @@ class CategoryController extends Controller
             ->whereNotNull('category_id')
             ->increment('priority');
         }
-        $this->categories->where('id', $id)
-        ->update(['priority' => $request->priority]);
+        $current_category->update(['priority' => $request->priority]);
 
         return response()->json([
             'success' => 'You update priority success'
