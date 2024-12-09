@@ -24,14 +24,17 @@ class OrderTypeController extends Controller
                 'name' => 'order_type',
                 'setting' => json_encode([
                     [
+                        'id' => 1,
                         'type' => 'take_away',
                         'status' => 1
                     ],
                     [
+                        'id' => 2,
                         'type' => 'dine_in',
                         'status' => 1
                     ],
                     [
+                        'id' => 3,
                         'type' => 'delivery',
                         'status' => 1
                     ]
@@ -51,22 +54,24 @@ class OrderTypeController extends Controller
         // Keys 
         //"order_type": [
         //    {
+        //        "id" => 1,
         //        "type": "take_away",
         //        "status": "1"
         //    },
         //    {
+        //        "id" => 2,
         //        "type": "dine_in",
         //        "status": "0"
         //    },
         //    {
+        //        "id" => 3,
         //        "type": "delivery",
         //        "status": "0"
         //    }
         //]
         $validator = Validator::make($request->all(), [
-            'order_type' => 'required',
-            'order_type.*.type' => 'required|in:take_away,dine_in,delivery',
-            'order_type.*.status' => 'required|boolean',
+            'id' => 'required',
+            'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -78,6 +83,23 @@ class OrderTypeController extends Controller
         ->where('name', 'order_type')
         ->first();
         if (empty($order_types)) {
+            $order_type = collect([
+               [
+                   "id" => 1,
+                   "type" => "take_away",
+                   "status" => "1",
+               ],
+               [
+                   "id" => 2,
+                   "type" => "dine_in",
+                   "status" => "0",
+               ],
+               [
+                   "id" => 3,
+                   "type" => "delivery",
+                   "status" => "0",
+               ]
+            ]);
             $order_types = $this->settings
             ->create([
                 'name' => 'order_type',
@@ -87,8 +109,15 @@ class OrderTypeController extends Controller
         else {
             $order_types = $this->settings
             ->where('name', 'order_type')
-            ->update([
-                'setting' => json_encode($request->order_type),
+            ->first();
+            $setting = $order_types->setting;
+            $setting = json_decode($setting);
+            $setting = collect($setting);
+            $setting->where('id', $request->id)
+            ->first()
+            ->status =  $request->status;
+            $order_types->update([
+                'setting' => json_encode($setting),
             ]);
         }
 

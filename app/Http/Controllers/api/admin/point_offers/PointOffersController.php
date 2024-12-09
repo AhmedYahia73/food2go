@@ -51,7 +51,7 @@ class PointOffersController extends Controller
            $offer_names[] = [
                'id' => $item->id,
                'lang' => $item->name,
-               'name' => $offer_name->value ?? null,
+               'offer_product' => $offer_name->value ?? null,
            ];
 
             // $filePath = base_path("lang/{$item->name}/messages.php");
