@@ -52,23 +52,7 @@ class OrderTypeController extends Controller
     public function modify(Request $request){
         // https://bcknd.food2go.online/admin/settings/order_type/update
         // Keys 
-        //"order_type": [
-        //    {
-        //        "id" => 1,
-        //        "type": "take_away",
-        //        "status": "1"
-        //    },
-        //    {
-        //        "id" => 2,
-        //        "type": "dine_in",
-        //        "status": "0"
-        //    },
-        //    {
-        //        "id" => 3,
-        //        "type": "delivery",
-        //        "status": "0"
-        //    }
-        //]
+        // id, status
         $validator = Validator::make($request->all(), [
             'id' => 'required',
             'status' => 'required|boolean',
@@ -83,28 +67,9 @@ class OrderTypeController extends Controller
         ->where('name', 'order_type')
         ->first();
         if (empty($order_types)) {
-            $order_type = collect([
-               [
-                   "id" => 1,
-                   "type" => "take_away",
-                   "status" => "1",
-               ],
-               [
-                   "id" => 2,
-                   "type" => "dine_in",
-                   "status" => "0",
-               ],
-               [
-                   "id" => 3,
-                   "type" => "delivery",
-                   "status" => "0",
-               ]
-            ]);
-            $order_types = $this->settings
-            ->create([
-                'name' => 'order_type',
-                'setting' => json_encode($request->order_type),
-            ]);
+            return response()->json([
+                'faild' => 'Order type does not found'
+            ], 400);
         }
         else {
             $order_types = $this->settings
