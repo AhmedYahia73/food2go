@@ -49,8 +49,8 @@ class PointOffersController extends Controller
             ->where('key', $offer->product)
             ->first();
            $offer_names[] = [
-               'id' => $item->id,
-               'lang' => $item->name,
+               'tranlation_id' => $item->id,
+               'tranlation_name' => $item->name,
                'offer_product' => $offer_name->value ?? null,
            ];
 
