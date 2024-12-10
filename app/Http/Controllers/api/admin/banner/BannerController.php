@@ -48,6 +48,7 @@ class BannerController extends Controller
                 $image = $this->translation_tbl
                 ->where('locale', $element->name)
                 ->where('translatable_id', $item->id)
+                ->where('key', $item->image)
                 ->first();
                 if ($key == 0) {
                     $arr[] = [
