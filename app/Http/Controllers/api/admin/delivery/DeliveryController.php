@@ -48,6 +48,7 @@ class DeliveryController extends Controller
     public function delivery($id){
         // https://bcknd.food2go.online/admin/delivery/item/{id}
         $delivery = $this->deliveries
+        ->with('branch')
         ->where('id', $id)
         ->first(); 
 

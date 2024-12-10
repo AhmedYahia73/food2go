@@ -27,7 +27,7 @@ class Delivery extends Authenticatable
         'phone_status',
         'chat_status',
     ];
-    protected $appends = ['role', 'image_link'];
+    protected $appends = ['role', 'image_link', 'identity_image_link'];
 
     public function orders_items(){
         return $this->hasMany(Order::class, 'delivery_id');
@@ -35,6 +35,14 @@ class Delivery extends Authenticatable
 
     public function getRoleAttribute(){
         return 'delivery';
+    }
+
+    public function getIdentityImageLinkAttribute(){
+        return url('storage/' . $this->attributes['identity_image']);
+    }
+
+    public function branch(){
+        return $this->belongsTo(Branch::class);
     }
 
     public function getImageLinkAttribute(){
