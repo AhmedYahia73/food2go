@@ -62,9 +62,9 @@ class CategoryController extends Controller
             ->where('key', $category->name)
             ->first();
            $category_names[] = [
-               'id' => $item->id,
-               'lang' => $item->name,
-               'name' => $category_name->value ?? null,
+               'tranlation_id' => $item->id,
+               'tranlation_name' => $item->name,
+               'category_name' => $category_name->value ?? null,
            ];
             // $filePath = base_path("lang/{$item->name}/messages.php");
             // if (File::exists($filePath)) {
