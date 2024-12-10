@@ -34,6 +34,7 @@ class BannerController extends Controller
         ->with('category_banner', 'product', 'deal')
         ->get();
         $translations = $this->translations
+        ->where('status', 1)
         ->get();
         $categories = $this->categories
         ->get();
@@ -41,6 +42,38 @@ class BannerController extends Controller
         ->get();
         $deals = $this->deals
         ->get();
+        foreach ($banners as $item) {
+            $arr = [];
+            foreach ($translations as $key => $element) {
+                $image = $this->translation_tbl
+                ->where('locale', $element->name)
+                ->where('translatable_id', $item->id)
+                ->first();
+                if ($key == 0) {
+                    $arr[] = [
+                        'image' => $item->image_link,
+                        'tranlation_id' => $element->id,
+                        'tranlation_name' => $element->name
+                    ];
+                }
+                elseif (!empty($image)) {
+                    $image = url('storage/' . $image->value);
+                    $arr[] = [
+                        'image' => $image,
+                        'tranlation_id' => $element->id,
+                        'tranlation_name' => $element->name
+                    ];
+                }
+                else {
+                    $arr[] = [
+                        'image' => null,
+                        'tranlation_id' => $element->id,
+                        'tranlation_name' => $element->name
+                    ];
+                }
+            }
+            $item->images = $arr;
+        }
 
         return response()->json([
             'banners' => $banners,
