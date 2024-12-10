@@ -54,9 +54,9 @@ class AddonController extends Controller
              ->where('key', $addon->name)
              ->first();
             $addons_names[] = [
-                'id' => $item->id,
-                'lang' => $item->name,
-                'name' => $addon_name->value ?? null,
+                'tranlation_id' => $item->id,
+                'tranlation_name' => $item->name,
+                'addon_name' => $addon_name->value ?? null,
             ];
             // $filePath = base_path("lang/{$item->name}/messages.php");
             // if (File::exists($filePath)) {
