@@ -51,6 +51,7 @@ class CategoryController extends Controller
     public function category($id){
         // https://bcknd.food2go.online/admin/category/item/{id}
         $category = $this->categories
+        ->with('addons')
         ->where('id', $id)
         ->first();
         $translations = $this->translations
