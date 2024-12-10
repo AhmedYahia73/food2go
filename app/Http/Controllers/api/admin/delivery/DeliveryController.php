@@ -25,7 +25,6 @@ class DeliveryController extends Controller
         'identity_number',
         'email',
         'phone',
-        'password',
         'branch_id',
         'status',
         'phone_status',
@@ -135,6 +134,7 @@ class DeliveryController extends Controller
         // f_name, l_name, identity_type, identity_number, email, phone
         // password, branch_id, status, image, identity_image
         $deliveryRequest = $request->only($this->deliveryRequest);
+        $deliveryRequest['password'] = $request->password;
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/delivery/image');
             $deliveryRequest['image'] = $imag_path;
@@ -168,6 +168,9 @@ class DeliveryController extends Controller
             $imag_path = $this->upload($request, 'identity_image', 'users/delivery/identity_image');
             $deliveryRequest['identity_image'] = $imag_path;
             $this->deleteImage($delivery->identity_image);
+        }
+        if (!empty($request->password)) { 
+            $deliveryRequest['password'] = $request->password;
         }
         $delivery->update($deliveryRequest);
 
