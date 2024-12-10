@@ -45,6 +45,17 @@ class DeliveryController extends Controller
         ]);
     }
 
+    public function delivery($id){
+        // https://bcknd.food2go.online/admin/delivery/item/{id}
+        $delivery = $this->deliveries
+        ->where('id', $id)
+        ->first(); 
+
+        return response()->json([
+            'delivery' => $delivery, 
+        ]);
+    }
+
     public function history($id){
         // https://bcknd.food2go.online/admin/delivery/history/{id}
         $orders = $this->orders

@@ -148,7 +148,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(DeliveryController::class)->middleware('can:isDelivery')
     ->prefix('delivery')->group(function(){
-        Route::get('/', 'view');
+    Route::get('/', 'view');
+    Route::get('/item/{id}', 'delivery');
         Route::get('/history/{id}', 'history');
         Route::post('/history_filter/{id}', 'filter_history');
         Route::put('/status/{id}', 'status');
