@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-
+use Illuminate\Database\QueryException;
 use App\Models\Deal;
 use App\Models\DealUser;
 use App\Models\Order;
@@ -53,7 +53,7 @@ class DealOrderController extends Controller
                     'faild' => 'Code is expired'
                 ], 400);
             }
-        } catch (\Throwable $th) {
+        } catch (QueryException $q) {
             return response()->json([
                 'faild' => 'Code is expired'
             ], 400);
