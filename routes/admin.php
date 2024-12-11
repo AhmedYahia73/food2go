@@ -238,7 +238,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(OrderTypeController::class)
         ->prefix('order_type')->group(function(){
             Route::get('/', 'view');
-            Route::post('/update', 'modify');
+            Route::put('/update', 'modify');
         });
 
         Route::controller(ZoneController::class)
