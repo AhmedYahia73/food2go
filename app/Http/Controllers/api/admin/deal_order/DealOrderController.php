@@ -38,6 +38,7 @@ class DealOrderController extends Controller
                 $query->where('deal_user.ref_number', $code)
                 ->where('deal_user.created_at', '>=', $nowSubThreeMinutes);
             })
+            ->with('deal_customer')
             ->first();
             if (!empty($deals)) { 
                 return response()->json([
