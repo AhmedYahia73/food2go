@@ -33,7 +33,7 @@ class CouponController extends Controller
         $coupons = $this->coupons
         ->where('id', $id)
         ->with('products')
-        ->get();
+        ->first();
 
         return response()->json([
             'coupons' => $coupons,
