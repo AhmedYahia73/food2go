@@ -29,7 +29,7 @@ class Deal extends Model
 
     public function deal_customer(){
         return $this->belongsToMany(User::class, 'deal_user')
-        ->withPivot(['ref_number', 'status', 'id']);;
+        ->withPivot(['ref_number', 'status', 'id', 'created_at']);;
     }
     
     public function translations()
