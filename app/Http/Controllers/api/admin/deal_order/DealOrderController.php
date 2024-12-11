@@ -34,8 +34,7 @@ class DealOrderController extends Controller
         $code = $request->code;
         $deals = $this->deals
         ->whereHas('deal_customer', function($query) use ($nowSubThreeMinutes, $code){
-            $query->where('deal_user.ref_number', $code)
-            ->where('deal_user.created_at', '>=', $nowSubThreeMinutes);
+            $query->where('deal_user.ref_number', $code);
         })
         ->first();
 
