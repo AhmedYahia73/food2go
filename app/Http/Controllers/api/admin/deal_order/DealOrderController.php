@@ -32,22 +32,22 @@ class DealOrderController extends Controller
 
         $nowSubThreeMinutes = Carbon::now()->subMinutes(3);
         $code = $request->code;
-        $deals = $this->deals
-        ->whereHas('deal_customer', function($query) use ($nowSubThreeMinutes, $code){
-            $query->where('deal_user.ref_number', $code);
-        })
-        ->first();
-
-        if (count($deals->deal_customer) == 0) {
+        try {
+            $deals = $this->deals
+            ->whereHas('deal_customer', function($query) use ($nowSubThreeMinutes, $code){
+                $query->where('deal_user.ref_number', $code)
+                ->where('deal_user.created_at', '>=', $nowSubThreeMinutes);
+            })
+            ->first();
+            return response()->json([
+                'deal' => $deals
+            ]);
+        } catch (\Throwable $th) {
             return response()->json([
                 'faild' => 'Code is expired'
             ], 400);
         }
-        else {
-            return response()->json([
-                'deal' => $deals
-            ]);
-        }
+ 
     }
  
     public function add(Request $request){
