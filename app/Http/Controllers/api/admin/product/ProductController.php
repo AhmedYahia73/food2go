@@ -117,6 +117,7 @@ class ProductController extends Controller
                             'extra_name' => $translation_file->where('key', $extra_item->name)
                             ->first()->value ?? null
                         ];
+                        $extra_option[$extra_item->id]['price'] = $extra_item->price;
                     }
                     $extra_option = array_values($extra_option);
                     $options[$option->id]['extra'] = $extra_option;
