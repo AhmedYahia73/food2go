@@ -97,7 +97,6 @@ class ProductController extends Controller
                 $variation[$variation_item->id]['min'] = $variation_item->min;
                 $variation[$variation_item->id]['max'] = $variation_item->max;
                 $variation[$variation_item->id]['required'] = $variation_item->required;
-                $variation[$variation_item->id]['points'] = $variation_item->points;
                 $options = [];
                 foreach ($variation_item->options as $key => $option) {
                     $options[$option->id]['names'][] = [
@@ -109,6 +108,7 @@ class ProductController extends Controller
                     $options[$option->id]['price'] = $option->price;
                     $options[$option->id]['status'] = $option->status;
                     $options[$option->id]['price'] = $option->price;
+                    $options[$option->id]['points'] = $option->points;
                     $extra_option = [];
                     foreach ($option->extra as $key => $extra_item) {
                         $extra_option[$extra_item->id]['extra_names'][] = [
