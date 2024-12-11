@@ -39,9 +39,15 @@ class DealOrderController extends Controller
                 ->where('deal_user.created_at', '>=', $nowSubThreeMinutes);
             })
             ->first();
-            return response()->json([
-                'deal' => $deals
-            ]);
+            if (!empty($deals)) { 
+                return response()->json([
+                    'deal' => $deals
+                ]);
+            } else {
+                return response()->json([
+                    'faild' => 'Code is expired'
+                ], 400);
+            }
         } catch (\Throwable $th) {
             return response()->json([
                 'faild' => 'Code is expired'
