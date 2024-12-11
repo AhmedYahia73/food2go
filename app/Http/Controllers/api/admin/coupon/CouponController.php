@@ -27,6 +27,18 @@ class CouponController extends Controller
             'products' => $products,
         ]);
     }
+    
+    public function coupon($id){
+        // https://bcknd.food2go.online/admin/coupon/item/{id}
+        $coupons = $this->coupons
+        ->where('id', $id)
+        ->with('products')
+        ->get();
+
+        return response()->json([
+            'coupons' => $coupons,
+        ]);
+    }
 
     public function status(Request $request, $id){
         // https://bcknd.food2go.online/admin/coupon/status/{id}

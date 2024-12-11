@@ -170,6 +170,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::prefix('coupon')->middleware('can:isCoupon')->group(function(){
         Route::controller(CouponController::class)->group(function(){
             Route::get('/', 'view');
+            Route::get('/item/{id}', 'coupon');
             Route::put('/status/{id}', 'status');
         });
         Route::controller(CreateCouponController::class)->group(function(){
