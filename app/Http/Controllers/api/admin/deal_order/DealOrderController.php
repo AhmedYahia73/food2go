@@ -33,10 +33,10 @@ class DealOrderController extends Controller
         $nowSubThreeMinutes = Carbon::now()->subMinutes(3);
         $code = $request->code;
         $deals = $this->deals
-        ->whereHas(['deal_customer', function($query) use ($nowSubThreeMinutes, $code){
-            $query->where('deal_user.created_at', '>=', $nowSubThreeMinutes)
+        ->whereHas('deal_customer', function($query) use ($nowSubThreeMinutes, $code){
+            $query
             ->where('deal_user.ref_number', $code);
-        }])
+        })
         ->first();
 
         if (count($deals->deal_customer) == 0) {
