@@ -84,7 +84,7 @@ class ProductController extends Controller
                     'extra_name' =>$translation_file->where('key', $extra->name)
                     ->first()->value ?? null
                 ];
-                $extras[$extra->id]['extra_price'] = $extra->name;
+                $extras[$extra->id]['extra_price'] = $extra->price;
             }
             foreach ($product->variations as $key => $variation_item) {
                 $variation[$variation_item->id]['names'][] = [
