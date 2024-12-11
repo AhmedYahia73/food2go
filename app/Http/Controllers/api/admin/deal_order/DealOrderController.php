@@ -46,7 +46,8 @@ class DealOrderController extends Controller
             ->first();
             if (!empty($deals)) { 
                 return response()->json([
-                    'deal' => $deals
+                    'deal' => $deals,
+                    'user' => $deals->deal_customer[0],
                 ]);
             } else {
                 return response()->json([
