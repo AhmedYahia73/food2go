@@ -80,7 +80,9 @@ class DealOrderController extends Controller
 
         $deals = $this->deals
         ->where('id', $request->deal_id)
+        ->with('deal_customer')
         ->first();
+        return $deals;
         $deals->updateExistingPivot($request->user_id, [
             'status' => 1,
         ]);
