@@ -46,7 +46,8 @@ class PaymentMethodAutoController extends Controller
         ->first();
         if (empty($payment_method_auto)) {
             $paymentMethodRequest['payment_method_id'] = $id;
-            $payment_method_auto->create($paymentMethodRequest);    
+            $this->payment_method_auto
+            ->create($paymentMethodRequest);    
         } 
         else {
             $payment_method_auto->update($paymentMethodRequest);
