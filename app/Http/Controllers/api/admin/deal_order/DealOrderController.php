@@ -83,9 +83,8 @@ class DealOrderController extends Controller
         ->with('deal_customer')
         ->orderByDesc('id')
         ->first();
-        $pivot = $deals->pluck('pivot');
-        $pivot->status = 1;
-        $pivot->save();
+        $deals->pivot->status = 1; 
+        $deals->save();
         return $deals;
         $deals->updateExistingPivot($request->user_id, [
             'status' => 1,
