@@ -69,7 +69,6 @@ class DealOrderController extends Controller
         $validator = Validator::make($request->all(), [
             'deal_id' => 'required|exists:deals,id',
             'user_id' => 'required|exists:users,id',
-            'paid_by' => 'required'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -88,7 +87,6 @@ class DealOrderController extends Controller
             'order_status' => 'delivered',
             'order_type' => 'application',
             'payment_status' => 'paid',
-            'paid_by' => $request->paid_by,
         ]);
         $order_detail = $this->order_details
         ->create([
