@@ -22,6 +22,11 @@ class Deal extends Model
         'start_date',
         'end_date',
     ];
+    protected $appends = ['image_link'];
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
+    }
 
     public function times(){
         return $this->hasMany(DealTimes::class, 'deal_id');
