@@ -14,10 +14,15 @@ class PaymentMethod extends Model
         'description',
         'logo',
         'status',
+        'type',
     ];
     protected $appends = ['logo_link'];
 
     public function getLogoLinkAttribute(){
         return url('storage/' . $this->attributes['logo']);
+    }
+
+    public function payment_method_data(){
+        return $this->hasOne(PaymentMethodAuto::class);
     }
 }

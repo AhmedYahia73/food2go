@@ -24,6 +24,7 @@ class PaymentMethodController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/settings/payment_methods
         $payment_methods = $this->payment_methods
+        ->where('type', 'manuel')
         ->get();
 
         return response()->json([

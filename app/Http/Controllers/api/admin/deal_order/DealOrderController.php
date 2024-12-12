@@ -30,7 +30,7 @@ class DealOrderController extends Controller
             ],400);
         }
 
-        $nowSubThreeMinutes = Carbon::now()->subMinutes(3);
+        $nowSubThreeMinutes = Carbon::now()->subMinutes(30);
         $code = $request->code;
         try {
             $deals = $this->deals
