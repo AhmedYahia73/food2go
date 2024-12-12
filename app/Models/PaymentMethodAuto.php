@@ -16,7 +16,7 @@ class PaymentMethodAuto extends Model
         'api_key',
         'iframe_id',
         'integration_id', 
-        'Hmac', 
+        'Hmac',
         'payment_method_id', 
     ];
 }

@@ -47,6 +47,7 @@ use App\Http\Controllers\api\admin\settings\ZoneController;
 use App\Http\Controllers\api\admin\settings\SettingController;
 use App\Http\Controllers\api\admin\settings\OrderTypeController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodController;
+use App\Http\Controllers\api\admin\settings\PaymentMethodAutoController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->middleware('can:isOrder')
@@ -290,6 +291,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         
         Route::controller(PaymentMethodController::class)
         ->prefix('payment_methods')->group(function(){
+            Route::get('/', 'view');
+            Route::put('/status/{id}', 'status');
+            Route::post('/add', 'create');
+            Route::post('/update/{id}', 'modify');
+            Route::delete('/delete/{id}', 'delete');
+        });
+        
+        Route::controller(PaymentMethodAutoController::class)
+        ->prefix('payment_methods_auto')->group(function(){
             Route::get('/', 'view');
             Route::put('/status/{id}', 'status');
             Route::post('/add', 'create');
