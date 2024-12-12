@@ -83,8 +83,10 @@ class DealOrderController extends Controller
         ->with('deal_customer')
         ->orderByDesc('id')
         ->first();
-        return $deals;
-        $deals->updateExistingPivot($request->user_id, [
+        // $deals->deal_customer[0]->pivot->status = 1; 
+        // $deals->save();
+        // return $deals;
+        $deals->deal_customer()->updateExistingPivot($request->user_id, [
             'status' => 1,
         ]);
         $order = $this->orders
