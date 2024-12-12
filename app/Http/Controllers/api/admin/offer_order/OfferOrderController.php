@@ -41,7 +41,7 @@ class OfferOrderController extends Controller
         if (empty($offer_order)) {
             return response()->json([
                 'faild' => 'Code is expired'
-            ], 400);
+            ]);
         } 
         else {
             return response()->json([
