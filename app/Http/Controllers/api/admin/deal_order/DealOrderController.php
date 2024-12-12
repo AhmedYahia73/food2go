@@ -36,11 +36,13 @@ class DealOrderController extends Controller
             $deals = $this->deals
             ->whereHas('deal_customer', function($query) use ($nowSubThreeMinutes, $code){
                 $query->where('deal_user.ref_number', $code)
-                ->where('deal_user.created_at', '>=', $nowSubThreeMinutes);
+                ->where('deal_user.created_at', '>=', $nowSubThreeMinutes)
+                ->where('deal_user.status', 0);
             })
             ->with(['deal_customer' => function($query) use ($nowSubThreeMinutes, $code){
                 $query->where('deal_user.ref_number', $code)
                 ->where('deal_user.created_at', '>=', $nowSubThreeMinutes)
+                ->where('deal_user.status', 0)
                 ->first();
             }])
             ->first();
@@ -79,6 +81,9 @@ class DealOrderController extends Controller
         $deals = $this->deals
         ->where('id', $request->deal_id)
         ->first();
+        $deals->updateExistingPivot($request->user_id, [
+            'status' => 1,
+        ]);
         $order = $this->orders
         ->create([
             'date' => now(),
