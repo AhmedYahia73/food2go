@@ -53,6 +53,7 @@ class ProductController extends Controller
         $variation_options = [];
         $variation_options_extra = [];
         $options = [];
+        $extra_option = [];
         foreach ($translations as $key => $item) {
             $translation_file = $this->translation_tbl
             ->where('locale', $item->name)
@@ -108,7 +109,6 @@ class ProductController extends Controller
                     $options[$option->id]['price'] = $option->price;
                     $options[$option->id]['status'] = $option->status;
                     $options[$option->id]['points'] = $option->points;
-                    $extra_option = [];
                     foreach ($option->extra as $key => $extra_item) {
                         $extra_option[$extra_item->id]['extra_names'][] = [
                             'tranlation_id' => $item->id,
