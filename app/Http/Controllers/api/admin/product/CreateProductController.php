@@ -274,14 +274,19 @@ class CreateProductController extends Controller
         ->delete(); // delete old extra
         if ($request->extra) {
             foreach ($request->extra as $item) {
-                $extra_num[] = $this->extra
+                $new_extra = $this->extra
                 ->create([
                     'name' => $item['names'][0]['extra_name'],
                     'price' => $item['extra_price'],
                     'product_id' => $product->id
                 ]);
+                $extra_num[] = $new_extra;
                 foreach ($item['names'] as $key => $element) {
-                    $this->translate($element['tranlation_name'], $item['names'][0]['extra_name'], $element['extra_name']);
+                    $new_extra->translations()->create([
+                        'locale' => $element['tranlation_name'],
+                        'key' => $item['names'][0]['extra_name'],
+                        'value' => $element['extra_name'],
+                    ]);
                 }
             }
         }// add new extra
@@ -300,7 +305,11 @@ class CreateProductController extends Controller
                     'product_id' => $product->id,
                 ]); // add variation
                 foreach ($item['names'] as $key => $element) {
-                    $this->translate($element['tranlation_name'], $item['names'][0]['name'], $element['name']);
+                    $variation->translations()->create([
+                        'locale' => $element['tranlation_name'],
+                        'key' => $item['names'][0]['name'],
+                        'value' => $element['name'],
+                    ]);
                 }
                 if ($item['options']) {
                     foreach ($item['options'] as $element) {
@@ -314,7 +323,11 @@ class CreateProductController extends Controller
                             'points' => $element['points'],
                         ]);
                         foreach ($element['names'] as $key => $value) {
-                            $this->translate($value['tranlation_name'], $element['names'][0]['name'], $value['name']);
+                            $option->translations()->create([
+                                'locale' => $value['tranlation_name'],
+                                'key' => $element['names'][0]['name'],
+                                'value' => $value['name'],
+                            ]);   
                         }
                         if ($element['extra']) {
                             foreach ($element['extra'] as $key => $extra) {
@@ -329,7 +342,11 @@ class CreateProductController extends Controller
                                 ]);// add extra for option
         
                                 foreach ($extra['extra_names'] as $key => $value) {
-                                    $this->translate($value['tranlation_name'], $extra['extra_names'][0]['extra_name'], $value['extra_name']);
+                                    $extra_item->translations()->create([
+                                        'locale' => $value['tranlation_name'],
+                                        'key' => $extra['extra_names'][0]['extra_name'],
+                                        'value' => $value['extra_name'],
+                                    ]);
                                 }
                                 foreach ($extra_num as $extra_num_item) {
                                     $extra_num_item->delete();
