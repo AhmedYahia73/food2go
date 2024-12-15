@@ -23,6 +23,13 @@ class CustomerController extends Controller
         'password',
         'status',
     ];
+    protected $customerUpdateRequest = [
+        'f_name',
+        'l_name',
+        'email',
+        'phone', 
+        'status',
+    ];
     use image;
 
     public function view(){
@@ -100,14 +107,17 @@ class CustomerController extends Controller
         // https://bcknd.food2go.online/admin/customer/update/2
         // Keys
         // f_name, l_name, email, phone, password, status, image
-        $data = $request->only($this->customerRequest);
+        $data = $request->only($this->customerUpdateRequest);
         $user = $this->customers
         ->where('id', $id)
         ->first();
-        if ($request->image) {
+        if (!is_string($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/customers/image');
             $data['image'] = $imag_path;
             $this->deleteImage($user->image);
+        }
+        if (!empty($request->password)) {
+            $data['password'] = $request->password;
         }
         $user->update($data);
 
