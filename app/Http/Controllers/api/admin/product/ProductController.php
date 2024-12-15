@@ -120,9 +120,8 @@ class ProductController extends Controller
                     }
                     $extra_option = array_values($extra_option);
                     $options[$option->id]['extra'] = $extra_option;
+                    $variation[$variation_item->id]['options'] = array_values($options);
                 }
-                $variation[$variation_item->id]['options'] = array_values($options);
-
             }
         }
         $product->product_names = $product_names;
