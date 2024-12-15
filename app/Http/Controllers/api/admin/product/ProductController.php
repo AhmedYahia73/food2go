@@ -79,7 +79,7 @@ class ProductController extends Controller
                     ->first()->value ?? null
                 ];
             }
-            foreach ($product->extra as $key => $extra) {
+            foreach ($product->extra->whereNull('variation_id') as $key => $extra) {
                 $extras[$extra->id]['names'][] = [
                     'tranlation_id' => $item->id,
                     'tranlation_name' => $item->name,
