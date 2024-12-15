@@ -82,6 +82,20 @@ class CustomerController extends Controller
         ]);
     }
 
+
+    public function customer($id){
+        // https://bcknd.food2go.online/admin/customer/item/{id}
+        $customer = $this->customers
+        ->where('id', $id)
+        ->withSum('orders', 'amount')
+        ->withCount('orders')
+        ->first();
+
+        return response()->json([
+            'customer' => $customer,
+        ]);
+    }
+
     public function modify(UpdateCustomerRequest $request, $id){
         // https://bcknd.food2go.online/admin/customer/update/2
         // Keys

@@ -162,6 +162,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(CustomerController::class)->middleware('can:isCustomer')
     ->prefix('customer')->group(function(){
         Route::get('/', 'view');
+        Route::get('/item/{id}', 'customer');
         Route::post('/add', 'create');
         Route::put('/status/{id}', 'status');
         Route::post('/update/{id}', 'modify');
