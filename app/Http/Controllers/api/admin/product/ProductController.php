@@ -52,6 +52,7 @@ class ProductController extends Controller
         $variation = [];
         $variation_options = [];
         $variation_options_extra = [];
+        $options = [];
         foreach ($translations as $key => $item) {
             $translation_file = $this->translation_tbl
             ->where('locale', $item->name)
@@ -97,7 +98,6 @@ class ProductController extends Controller
                 $variation[$variation_item->id]['min'] = $variation_item->min;
                 $variation[$variation_item->id]['max'] = $variation_item->max;
                 $variation[$variation_item->id]['required'] = $variation_item->required;
-                $options = [];
                 foreach ($variation_item->options as $key => $option) {
                     $options[$option->id]['names'][] = [
                         'tranlation_id' => $item->id,
