@@ -21,15 +21,6 @@ class PaymentMethodAutoController extends Controller
     
     public function view(){
         // https://bcknd.food2go.online/admin/settings/payment_methods_auto
-        
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|boolean',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'error' => $validator->errors(),
-            ],400);
-        }
         $payment_methods = $this->payment_methods
         ->where('type', 'automatic')
         ->with('payment_method_data')
