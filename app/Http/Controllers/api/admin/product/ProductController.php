@@ -100,15 +100,15 @@ class ProductController extends Controller
                 $variation[$variation_item->id]['max'] = $variation_item->max;
                 $variation[$variation_item->id]['required'] = $variation_item->required;
                 foreach ($variation_item->options as $key => $option) {
-                    $options[$option->id]['names'][] = [
+                    $options[$variation_item->id][$option->id]['names'][] = [
                         'tranlation_id' => $item->id,
                         'tranlation_name' => $item->name,
                         'name' => $translation_file->where('key', $option->name)
                         ->first()->value ?? null
                     ];
-                    $options[$option->id]['price'] = $option->price;
-                    $options[$option->id]['status'] = $option->status;
-                    $options[$option->id]['points'] = $option->points;
+                    $options[$variation_item->id][$option->id]['price'] = $option->price;
+                    $options[$variation_item->id][$option->id]['status'] = $option->status;
+                    $options[$variation_item->id][$option->id]['points'] = $option->points;
                     foreach ($option->extra as $key => $extra_item) {
                         $extra_option[$extra_item->id]['extra_names'][] = [
                             'tranlation_id' => $item->id,
@@ -119,9 +119,9 @@ class ProductController extends Controller
                         $extra_option[$extra_item->id]['extra_price'] = $extra_item->price;
                     }
                     $extra_option = array_values($extra_option);
-                    $options[$option->id]['extra'] = $extra_option;
-                    $variation[$variation_item->id]['options'] = array_values($options);
+                    $options[$variation_item->id][$option->id]['extra'] = $extra_option;
                 }
+                $variation[$variation_item->id]['options'] = array_values($options[$variation_item->id]);
             }
         }
         $product->product_names = $product_names;
