@@ -301,6 +301,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(PaymentMethodAutoController::class)
         ->prefix('payment_methods_auto')->group(function(){
             Route::get('/', 'view');
+            Route::put('/status/{id}', 'status');
             Route::post('/update/{id}', 'modify');
         });
         

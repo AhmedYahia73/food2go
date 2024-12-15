@@ -36,6 +36,7 @@ class OfferOrderController extends Controller
         $offer_order = $this->offer_order
         ->where('date', '>=', $nowSubThreeMinutes)
         ->where('code', $request->code)
+        ->with('offer')
         ->first();
 
         if (empty($offer_order)) {
@@ -45,7 +46,7 @@ class OfferOrderController extends Controller
         } 
         else {
             return response()->json([
-                'offer' => $offer_order->offer
+                'offer' => $offer_order
             ]);
         }
     }

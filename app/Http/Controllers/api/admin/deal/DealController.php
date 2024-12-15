@@ -59,14 +59,14 @@ class DealController extends Controller
             ->where('key', $deal->title)
             ->first();
            $deal_names[] = [
-               'id' => $item->id,
-               'lang' => $item->name,
-               'name' => $deal_name->value ?? null,
+               'tranlation_id' => $item->id,
+               'tranlation_name' => $item->name,
+               'deal_title' => $deal_name->value ?? null,
            ];
            $deal_descriptions[] = [
-                'id' => $item->id,
-                'lang' => $item->name,
-                'name' => $deal_name->value ?? null,
+                'tranlation_id' => $item->id,
+                'tranlation_name' => $item->name,
+                'deal_description' => $deal_name->value ?? null,
            ];
         }
         $deal->deal_names = $deal_names;

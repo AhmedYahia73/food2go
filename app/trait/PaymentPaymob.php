@@ -1,6 +1,5 @@
 <?php
-
-namespace App\service;
+ 
 
 namespace App\trait;
 use Illuminate\Support\Facades\Http;

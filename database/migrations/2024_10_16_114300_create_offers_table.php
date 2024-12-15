@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('offers', function (Blueprint $table) {
             $table->id();
             $table->string('product');
-            $table->integer('points');
+            $table->integer('points')->default(0);
             $table->timestamps();
         });
     }
