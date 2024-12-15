@@ -36,6 +36,7 @@ class OfferOrderController extends Controller
         $offer_order = $this->offer_order
         ->where('date', '>=', $nowSubThreeMinutes)
         ->where('code', $request->code)
+        ->where('status', 0)
         ->with('offer')
         ->first();
 
@@ -66,6 +67,8 @@ class OfferOrderController extends Controller
         $offer_order = $this->offer_order
         ->where('id', $request->offer_order_id)
         ->first();
+        $offer_order->status = 1;
+        $offer_order->save();
 
         $user = $this->user
         ->where('id', $offer_order->user_id )
