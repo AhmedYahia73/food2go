@@ -107,7 +107,6 @@ class ProductController extends Controller
                     ];
                     $options[$option->id]['price'] = $option->price;
                     $options[$option->id]['status'] = $option->status;
-                    $options[$option->id]['price'] = $option->price;
                     $options[$option->id]['points'] = $option->points;
                     $extra_option = [];
                     foreach ($option->extra as $key => $extra_item) {
@@ -122,7 +121,7 @@ class ProductController extends Controller
                     $extra_option = array_values($extra_option);
                     $options[$option->id]['extra'] = $extra_option;
                 }
-                $variation[$variation_item->id]['options'] = $options;
+                $variation[$variation_item->id]['options'] = array_values($options);
 
             }
         }
