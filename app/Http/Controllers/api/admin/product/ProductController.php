@@ -110,15 +110,15 @@ class ProductController extends Controller
                     $options[$variation_item->id][$option->id]['status'] = $option->status;
                     $options[$variation_item->id][$option->id]['points'] = $option->points;
                     foreach ($option->extra as $key => $extra_item) {
-                        $extra_option[$extra_item->id]['extra_names'][] = [
+                        $extra_options[$option->id][$extra_item->id]['extra_names'][] = [
                             'tranlation_id' => $item->id,
                             'tranlation_name' => $item->name,
                             'extra_name' => $translation_file->where('key', $extra_item->name)
                             ->first()->value ?? null
                         ];
-                        $extra_option[$extra_item->id]['extra_price'] = $extra_item->price;
+                        $extra_options[$option->id][$extra_item->id]['extra_price'] = $extra_item->price;
                     }
-                    $extra_option = array_values($extra_option);
+                    $extra_option = array_values($extra_options[$option->id]);
                     $options[$variation_item->id][$option->id]['extra'] = $extra_option;
                 }
                 $variation[$variation_item->id]['options'] = array_values($options[$variation_item->id]);
