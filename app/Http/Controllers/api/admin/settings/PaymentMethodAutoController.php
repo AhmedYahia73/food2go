@@ -63,9 +63,9 @@ class PaymentMethodAutoController extends Controller
         ->first();
         if (!is_string($request->logo)) {
             $image_path = $this->upload($request, 'logo', 'admin/settings/payment_methods');
+            $this->deleteImage($payment_method->logo);
             $payment_method->logo = $image_path;
             $payment_method->save();
-            $this->deleteImage($payment_method->logo);
         }
         $payment_method_auto = $this->payment_method_auto
         ->where('payment_method_id', $id)
