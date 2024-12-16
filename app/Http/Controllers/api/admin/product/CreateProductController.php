@@ -332,7 +332,7 @@ class CreateProductController extends Controller
                         if ($element['extra']) {
                             foreach ($element['extra'] as $key => $extra) {
                                 // ['extra_names']
-                                $this->extra
+                                $extra_item = $this->extra
                                 ->create([
                                     'name' => $extra['extra_names'][0]['extra_name'],
                                     'price' => $extra['extra_price'],
