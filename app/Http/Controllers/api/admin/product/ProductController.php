@@ -96,8 +96,8 @@ class ProductController extends Controller
                     ->first()->value ?? null
                 ];
                 $variation[$variation_item->id]['type'] = $variation_item->type;
-                $variation[$variation_item->id]['min'] = $variation_item->min;
-                $variation[$variation_item->id]['max'] = $variation_item->max;
+                $variation[$variation_item->id]['min'] = $variation_item->min ?? 0;
+                $variation[$variation_item->id]['max'] = $variation_item->max ?? 0;
                 $variation[$variation_item->id]['required'] = $variation_item->required;
                 foreach ($variation_item->options as $key => $option) {
                     $options[$variation_item->id][$option->id]['names'][] = [
