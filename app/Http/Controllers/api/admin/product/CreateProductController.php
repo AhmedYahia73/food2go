@@ -85,7 +85,7 @@ class CreateProductController extends Controller
         foreach ($request->product_descriptions as $item) {
             $product->translations()->create([
                 'locale' => $item['tranlation_name'],
-                'key' => $productRequest['product_description'],
+                'key' => $default_description['product_description'],
                 'value' => $item['product_description']
             ]); 
         }
@@ -237,7 +237,7 @@ class CreateProductController extends Controller
         foreach ($request->product_descriptions as $item) {
             $product->translations()->create([
                 'locale' => $item['tranlation_name'],
-                'key' => $productRequest['product_description'],
+                'key' => $default_description['product_description'],
                 'value' => $item['product_description']
             ]); 
         }
