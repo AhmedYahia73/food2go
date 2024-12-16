@@ -260,7 +260,7 @@ class CreateProductController extends Controller
                     'name' => $item['names'][0]['exclude_name'],
                     'product_id' => $product->id
                 ]);
-                foreach ($item as $key => $element) {
+                foreach ($item['names'] as $key => $element) {
                     $exclude->translations()->create([
                         'locale' => $element['tranlation_name'],
                         'key' => $item['names'][0]['exclude_name'],
