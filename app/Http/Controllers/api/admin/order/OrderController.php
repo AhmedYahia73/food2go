@@ -252,6 +252,45 @@ class OrderController extends Controller
         ]);
     }
 
+    public function orders_data(Request $request){
+        // https://bcknd.food2go.online/admin/order/data
+        $validator = Validator::make($request->all(), [
+            'order_status' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        if ($request->order_status == 'all') {
+            $orders = $this->orders
+            ->where('pos', 0)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            })
+            ->orderByDesc('id')
+            ->with(['user', 'branch', 'delivery'])
+            ->get();
+        } 
+        else {
+            $orders = $this->orders
+            ->where('pos', 0)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            })
+            ->where('order_status', $request->order_status)
+            ->orderByDesc('id')
+            ->with(['user', 'branch', 'delivery'])
+            ->get();
+        }
+
+        return response()->json([
+            'orders' => $orders
+        ]);
+    }
+
     public function notification(Request $request){
         // https://bcknd.food2go.online/admin/order/notification
         // Key
