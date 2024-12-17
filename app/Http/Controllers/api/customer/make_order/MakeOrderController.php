@@ -44,7 +44,7 @@ class MakeOrderController extends Controller
             $tokens = $this->getToken();
             $user = $request->user();
             $amount_cents = $request->amount * 100;
-            $order = $this->createOrder($request, $tokens, $user);
+            return $order = $this->createOrder($request, $tokens, $user);
             // $order = $this->make_order($request);
             // $order = $order['payment']; 
             $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens);
@@ -57,7 +57,7 @@ class MakeOrderController extends Controller
         else {
             $order = $this->make_order($request);
             return response()->json([
-                'success' => $order,
+                'success' => $order['payment']->id,
             ]);
         }
         
