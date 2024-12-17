@@ -32,6 +32,18 @@ class PaymentMethodController extends Controller
         ]);
     }
 
+    public function payment_method($id){
+        // https://bcknd.food2go.online/admin/settings/payment_methods/item/{id}
+        $payment_method = $this->payment_methods
+        ->where('type', 'manuel')
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'payment_method' => $payment_method
+        ]);
+    }
+
     public function status(Request $request, $id){
           // https://bcknd.food2go.online/admin/settings/payment_methods/status/{id}
         $validator = Validator::make($request->all(), [
