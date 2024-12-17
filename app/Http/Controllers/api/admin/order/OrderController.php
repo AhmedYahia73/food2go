@@ -145,7 +145,6 @@ class OrderController extends Controller
             $old_orders = $request->orders;
             $new_orders = $this->orders
             ->where('pos', 0)
-            ->where('status', 1)
             ->count();
             $total = $new_orders - $old_orders;
         }

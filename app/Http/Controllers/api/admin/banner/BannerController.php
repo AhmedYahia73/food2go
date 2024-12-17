@@ -120,6 +120,13 @@ class BannerController extends Controller
             'success' => $request->all()
         ]);
     }
+
+    public function banner($id){
+        $banner = $this->banner
+        ->where('id', $id)
+        ->first();
+        $banner_image = $banner->image;
+    }
     
     public function modify(BannerRequest $request, $id){
         // https://bcknd.food2go.online/admin/banner/update/{id}
@@ -153,6 +160,8 @@ class BannerController extends Controller
                     if (!empty($translation_tbl)) {
                         $translation_tbl->delete();
                     }
+                    $image_path = $this->uploadFile($item['image'], 'admin/banner/image');
+                    $bannerRequest['image'] = $image_path;
                     $banner->translations()->create([
                         'locale' => $item['tranlation_name'],
                         'key' => $banner->image,
