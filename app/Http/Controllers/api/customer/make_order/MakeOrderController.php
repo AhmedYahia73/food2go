@@ -21,13 +21,15 @@ use App\Models\OptionProduct;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Models\Addon;
+use App\Models\PaymentMethodAuto;
 
 class MakeOrderController extends Controller
 {
     public function __construct(private Order $order, private OrderDetail $order_details,
     private ProductSale $product_sales, private Product $products, private ExcludeProduct $excludes,
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
-    private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user){}
+    private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
+    private PaymentMethodAuto $payment_method_auto){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -41,7 +43,10 @@ class MakeOrderController extends Controller
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
         if ($request->payment_method_id == 1) {
-            $tokens = $this->getToken();
+            $payment_method_auto = $this->payment_method_auto
+            ->where('payment_method_id', 1)
+            ->first();
+            $tokens = $this->getToken($payment_method_auto);
             $user = $request->user();
             $amount_cents = $request->amount * 100;
             $order = $this->createOrder($request, $tokens, $user);
@@ -50,8 +55,8 @@ class MakeOrderController extends Controller
             ->first();
             // $order = $this->make_order($request);
             // $order = $order['payment']; 
-            $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens);
-             $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . env('PAYMOB_IFRAME_ID') . '?payment_token=' . $paymentToken;
+            $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens, $payment_method_auto);
+             $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
             return response()->json([
                 'success' => $order_id->id,
                 'paymentLink' => $paymentLink,
@@ -67,7 +72,9 @@ class MakeOrderController extends Controller
     }
 
     public function callback(Request $request){
-        
+        $payment_method_auto = $this->payment_method_auto
+        ->where('payment_method_id', 1)
+        ->first();
         //this call back function its return the data from paymob and we show the full response and we checked if hmac is correct means successfull payment
         $data = $request->all();
         ksort($data);
@@ -100,7 +107,7 @@ class MakeOrderController extends Controller
                 $connectedString .= $element;
             }
         }
-        $secret = env('PAYMOB_HMAC');
+        $secret = $payment_method_auto->Hmac;
         $hased = hash_hmac('sha512', $connectedString, $secret);
         if ($hased == $hmac) {
             //this below data used to get the last order created by the customer and check if its exists to 
