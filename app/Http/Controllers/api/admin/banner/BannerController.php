@@ -102,6 +102,11 @@ class BannerController extends Controller
                 $bannerRequest['translation_id'] = $item['translation_id'];
                 $banner = $this->banner
                 ->create($bannerRequest);
+                $banner->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $image_path,
+                    'value' => $image_path
+                ]);
             }
             else{
                 if (!is_string($item['image'])) {
