@@ -383,7 +383,9 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery', 'pament_method', 'address'])
         ->find($id);
         $order->user->count_orders = count($order->user->orders);
-        $order->branch->count_orders = count($order->branch->orders);
+        if (!empty($order->branch)) {
+            $order->branch->count_orders = count($order->branch->orders);
+        }
         if (!empty($order->delivery_id)) {
             $order->delivery->count_orders = count($order->delivery->orders_items);
         }
