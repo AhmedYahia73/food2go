@@ -136,6 +136,122 @@ class OrderController extends Controller
         ]);
     }
 
+    public function count_orders(){
+        // https://bcknd.food2go.online/admin/order/count
+        $orders = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $pending = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'pending')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $confirmed = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'confirmed')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $processing = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'processing')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $out_for_delivery = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'out_for_delivery')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $delivered = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'delivered')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $returned = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'returned')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $faild_to_deliver = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'faild_to_deliver')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $canceled = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'canceled')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+        $scheduled = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'scheduled')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'delivery'])
+        ->count();
+
+        return response()->json([
+            'orders' => $orders,
+            'pending' => $pending,
+            'confirmed' => $confirmed,
+            'processing' => $processing,
+            'out_for_delivery' => $out_for_delivery,
+            'delivered' => $delivered,
+            'returned' => $returned,
+            'faild_to_deliver' => $faild_to_deliver,
+            'canceled' => $canceled,
+            'scheduled' => $scheduled,
+        ]);
+    }
+
     public function notification(Request $request){
         // https://bcknd.food2go.online/admin/order/notification
         // Key

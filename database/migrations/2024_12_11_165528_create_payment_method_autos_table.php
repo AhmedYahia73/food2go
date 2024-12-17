@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->enum('type', ['live', 'test']);
             $table->string('callback');
-            $table->string('api_key');
+            $table->string('api_key', 1000);
             $table->string('iframe_id');
             $table->string('integration_id');
             $table->string('Hmac');

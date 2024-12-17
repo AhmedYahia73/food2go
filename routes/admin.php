@@ -53,6 +53,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->middleware('can:isOrder')
     ->prefix('order')->group(function(){
         Route::get('/', 'orders');
+        Route::get('/count', 'count_orders');
         Route::post('/notification', 'notification');
         Route::post('/filter', 'order_filter');
         Route::get('/branches', 'branches');
