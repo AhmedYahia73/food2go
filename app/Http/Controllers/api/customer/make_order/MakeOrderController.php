@@ -44,13 +44,16 @@ class MakeOrderController extends Controller
             $tokens = $this->getToken();
             $user = $request->user();
             $amount_cents = $request->amount * 100;
-            return $order = $this->createOrder($request, $tokens, $user);
+            $order = $this->createOrder($request, $tokens, $user);
+            $order_id = $this->order
+            ->where('transaction_id', $order->id)
+            ->first();
             // $order = $this->make_order($request);
             // $order = $order['payment']; 
             $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens);
              $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . env('PAYMOB_IFRAME_ID') . '?payment_token=' . $paymentToken;
             return response()->json([
-                'success' => $order,
+                'success' => $order_id->id,
                 'paymentLink' => $paymentLink,
             ]);
         } 
