@@ -122,10 +122,33 @@ class BannerController extends Controller
     }
 
     public function banner($id){
+        // https://bcknd.food2go.online/admin/banner/item/{id}
         $banner = $this->banner
         ->where('id', $id)
         ->first();
         $banner_image = $banner->image;
+        $translation_tbl = $this->translation_tbl
+        ->where('key', $banner_image)
+        ->where('translatable_id', $id)
+        ->get();
+        $images = [];
+        foreach ($translation_tbl as $item) {
+            $translation_id = $this->translations
+            ->where('name', $item->locale)
+            ->first();
+            if (!empty($translation_id)) {
+                $images[] = [
+                    'translation_id' => $translation_id->id,
+                    'tranlation_name' => $item->locale,
+                    'image' => url('storage/' . $item->value),
+                ];
+            }
+        }
+        $banner->images = $images;
+
+        return response()->json([
+            'banner' => $banner
+        ]);
     }
     
     public function modify(BannerRequest $request, $id){
@@ -160,12 +183,11 @@ class BannerController extends Controller
                     if (!empty($translation_tbl)) {
                         $translation_tbl->delete();
                     }
-                    $image_path = $this->uploadFile($item['image'], 'admin/banner/image');
-                    $bannerRequest['image'] = $image_path;
+                    $image_path = $this->uploadFile($item['image'], 'admin/banner/image'); 
                     $banner->translations()->create([
                         'locale' => $item['tranlation_name'],
                         'key' => $banner->image,
-                        'value' => $item['image']
+                        'value' => $image_path
                     ]);
                 }
             }

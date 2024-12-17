@@ -82,6 +82,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(BannerController::class)->middleware('can:isBanner')
     ->prefix('banner')->group(function(){
         Route::get('/', 'view');
+        Route::get('/item/{id}', 'banner');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
