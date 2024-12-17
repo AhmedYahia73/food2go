@@ -12,7 +12,7 @@ trait PaymentPaymob
      public function getToken() {
         //this function takes api key from env.file and get token from paymob accept
         $response = Http::post('https://accept.paymob.com/api/auth/tokens', [
-            'api_key' => env('PAYMOB_API_KEY')
+            'api_key' => "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBd09EVXhOU3dpYm1GdFpTSTZJakUzTXpJMU5ERTRNakF1TnpFNU56Z3hJbjAucGpwRkc1cy1Ic1N5Q3B2WWVOWWpnVkI4blBUcHlLZzVpNTd3R2hiNWpQR21HY2g5WkJFNzFMeDU3MkEzVWFoUlFHX0lmbUtha2puRThJdV91RDR4UlE="
         ]);
         return $response->object()->token;
      }
@@ -95,7 +95,7 @@ trait PaymentPaymob
             "order_id" => $order->id, // this order id created by paymob
             "billing_data" => $billingData,
             "currency" => "EGP",
-            "integration_id" => env('PAYMOB_INTEGRATION_ID')
+            "integration_id" => "4885878"
         ];
         $response = Http::post('https://accept.paymob.com/api/acceptance/payment_keys', $data);
         return $response->object()->token;
