@@ -466,7 +466,13 @@ class OrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id')
-        ->with(['user', 'branch', 'delivery', 'pament_method', 'address'])
+        ->with(['user.orders' => function($query){
+            $query->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
+        'status', 'points', 'rejected_reason', 'transaction_id');
+        }, 'branch', 'delivery', 'pament_method', 'address'])
         ->find($id);
         $order->user->count_orders = count($order->user->orders);
         if (!empty($order->branch)) {
