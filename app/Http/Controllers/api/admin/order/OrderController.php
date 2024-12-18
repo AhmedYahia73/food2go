@@ -20,6 +20,12 @@ class OrderController extends Controller
     public function orders(){
         // https://bcknd.food2go.online/admin/order
         $orders = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -29,6 +35,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $pending = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -39,6 +51,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $confirmed = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -49,6 +67,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $processing = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -59,6 +83,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $out_for_delivery = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -69,6 +99,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $delivered = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -79,6 +115,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $returned = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -89,6 +131,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $faild_to_deliver = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -99,6 +147,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $canceled = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -109,6 +163,12 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $scheduled = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -138,12 +198,8 @@ class OrderController extends Controller
 
     public function count_orders(){
         // https://bcknd.food2go.online/admin/order/count
-        $orders = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        $orders = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -153,11 +209,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $pending = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -168,11 +219,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $confirmed = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -183,11 +229,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $processing = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -198,11 +239,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $out_for_delivery = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -213,11 +249,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $delivered = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -228,11 +259,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $returned = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -243,11 +269,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $faild_to_deliver = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -258,11 +279,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $canceled = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
@@ -273,11 +289,6 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'delivery'])
         ->count();
         $scheduled = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'customer_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
