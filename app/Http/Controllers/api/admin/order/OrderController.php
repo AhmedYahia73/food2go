@@ -22,7 +22,7 @@ class OrderController extends Controller
         $orders = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -37,7 +37,7 @@ class OrderController extends Controller
         $pending = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -53,7 +53,7 @@ class OrderController extends Controller
         $confirmed = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -69,7 +69,7 @@ class OrderController extends Controller
         $processing = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -85,7 +85,7 @@ class OrderController extends Controller
         $out_for_delivery = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -101,7 +101,7 @@ class OrderController extends Controller
         $delivered = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -117,7 +117,7 @@ class OrderController extends Controller
         $returned = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -133,7 +133,7 @@ class OrderController extends Controller
         $faild_to_deliver = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -149,7 +149,7 @@ class OrderController extends Controller
         $canceled = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -165,7 +165,7 @@ class OrderController extends Controller
         $scheduled = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -327,7 +327,7 @@ class OrderController extends Controller
             $orders = $this->orders
             ->select('id', 'date', 'user_id', 'branch_id', 'amount',
             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
@@ -343,7 +343,7 @@ class OrderController extends Controller
             $orders = $this->orders
             ->select('id', 'date', 'user_id', 'branch_id', 'amount',
             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
@@ -417,7 +417,7 @@ class OrderController extends Controller
             $orders = $this->orders
             ->select('id', 'date', 'user_id', 'branch_id', 'amount',
             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
@@ -429,7 +429,7 @@ class OrderController extends Controller
             $orders = $this->orders
             ->select('id', 'date', 'user_id', 'branch_id', 'amount',
             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivry_id', 'delivery_id', 'address_id',
+            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
