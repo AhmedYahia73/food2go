@@ -15,6 +15,7 @@ class PaymentMethod extends Model
         'logo',
         'status',
         'type',
+        'order',
     ];
     protected $appends = ['logo_link'];
 
