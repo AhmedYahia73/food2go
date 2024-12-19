@@ -156,6 +156,7 @@ class MakeOrderController extends Controller
     }
 
     public function callback_status($id){
+        // https://bcknd.food2go.online/customer/callback_status/{id}
         $order = $this->order
         ->where('id', $id)
         ->first();
