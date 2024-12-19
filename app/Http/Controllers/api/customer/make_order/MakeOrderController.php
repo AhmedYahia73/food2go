@@ -162,12 +162,12 @@ class MakeOrderController extends Controller
         ->first();
         if ($order->status == 1) {
             return response()->json([
-                'success' => 'You make process success'
+                'status' => 'success'
             ]);
         } 
         else {
             return response()->json([
-                'faild' => 'process unsuccess'
+                'status' => 'faild'
             ], 400);
         }
         
