@@ -147,13 +147,28 @@ class MakeOrderController extends Controller
                     'payment_id' => $data['id'],
                     'payment_status' => "Failed"
                 ]);
-
-
                 return response()->json(['message' => 'Something Went Wrong Please Try Again']);
             }
-        } else {
+        } 
+        else {
             return response()->json(['message' => 'Something Went Wrong Please Try Again']);
         }
-    
+    }
+
+    public function callback_status($id){
+        $order = $this->order
+        ->where('id', $id)
+        ->first();
+        if ($order->status == 1) {
+            return response()->json([
+                'success' => 'You make process success'
+            ]);
+        } 
+        else {
+            return response()->json([
+                'faild' => 'process unsuccess'
+            ], 400);
+        }
+        
     }
 }

@@ -58,6 +58,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(MakeOrderController::class)->prefix('make_order')->group(function(){
         Route::post('/', 'order'); 
         Route::any('/callback', 'callback')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/callback_status/{id}', 'callback_status');
     });
 
     Route::controller(ProfileController::class)->prefix('profile')->group(function(){

@@ -12,7 +12,8 @@ use App\Models\User;
 
 class AddressController extends Controller
 {
-    public function __construct(private Address $address, private Zone $zones, private User $user){}
+    public function __construct(private Address $address, private Zone $zones, 
+    private User $user){}
     protected $AddressRequest = [
         'zone_id',
         'address',
