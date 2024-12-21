@@ -49,6 +49,7 @@ use App\Http\Controllers\api\admin\settings\OrderTypeController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodAutoController;
 use App\Http\Controllers\api\admin\settings\business_setup\CompanyController;
+use App\Http\Controllers\api\admin\settings\business_setup\MaintenanceController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->middleware('can:isOrder')
@@ -315,6 +316,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::controller(CompanyController::class)
             ->prefix('company')->group(function(){
                 Route::get('/', 'view');
+                Route::post('/add', 'add');
+            });
+            
+            Route::controller(MaintenanceController::class)
+            ->prefix('maintenance')->group(function(){
+                Route::get('/', 'view');
+                Route::put('/status', 'status');
                 Route::post('/add', 'add');
             });
         });
