@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\admin\branch;
+namespace App\Http\Controllers\api\admin\settings\business_setup;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Branch;
 
-class BranchController extends Controller
+class MainBranchesController extends Controller
 {
     public function __construct(private Branch $branches){}
     protected $branchRequest = [
@@ -31,8 +31,9 @@ class BranchController extends Controller
     use image;
 
     public function view(){
-        // https://bcknd.food2go.online/admin/branch
+        // https://bcknd.food2go.online/admin/settings/business_setup/branch
         $branches = $this->branches
+        ->where('main', 1)
         ->with('city')
         ->get();
 
@@ -42,7 +43,7 @@ class BranchController extends Controller
     }
 
     public function branch($id){
-        // https://bcknd.food2go.online/admin/branch/item/{id}
+        // https://bcknd.food2go.online/admin/settings/business_setup/branch/item/{id} 
         $branch = $this->branches
         ->where('id', $id)
         ->with('city')
@@ -52,49 +53,20 @@ class BranchController extends Controller
             'branch' => $branch,
         ]);
     }
-
-    public function status(Request $request, $id){
-        // https://bcknd.food2go.online/admin/branch/status/{id}
-        // Keys
-        // status
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|boolean',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'error' => $validator->errors(),
-            ],400);
-        }
-
-        $this->branches->where('id', $id)
-        ->where('main', '!=', 1)
-        ->update([
-            'status' => $request->status
-        ]);
-
-        if ($request->status == 0) {
-            return response()->json([
-                'success' => 'banned'
-            ]);
-        } else {
-            return response()->json([
-                'success' => 'active'
-            ]);
-        }
-    }
     
     public function create(BranchRequest $request){
-        // https://bcknd.food2go.online/admin/branch/add
+        // https://bcknd.food2go.online/admin/settings/business_setup/branch/add 
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
         // coverage, status, image, cover_image, city_id
   
         $branchRequest = $request->only($this->branchRequest);
-        if (is_file($request->image)) {
+        $branchRequest['main'] = 1;
+        if ($request->image && !is_string($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/branch/image');
             $branchRequest['image'] = $imag_path; 
         }
-        if (is_file($request->cover_image)) {
+        if ($request->cover_image && !is_string($request->cover_image)) {
             $imag_path = $this->upload($request, 'cover_image', 'users/branch/cover_image');
             $branchRequest['cover_image'] = $imag_path; 
         }
@@ -106,21 +78,22 @@ class BranchController extends Controller
     }
     
     public function modify(UpdateBranchRequest $request, $id){
-        // https://bcknd.food2go.online/admin/branch/update/{id}
+        // https://bcknd.food2go.online/admin/settings/business_setup/branch/update/{id}
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
         // coverage, status, image, cover_image, city_id
 
         $branchRequest = $request->only($this->branchRequest);
+        $branchRequest['main'] = 1;
         $branch = $this->branches
         ->where('id', $id)
         ->first();
-        if (is_file($request->image)) {
+        if ($request->image  && !is_string($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/branch/image');
             $branchRequest['image'] = $imag_path;
             $this->deleteImage($branch->image);
         }
-        if (is_file($request->cover_image)) {
+        if ($request->cover_image && !is_string($request->cover_image)) {
             $imag_path = $this->upload($request, 'cover_image', 'users/branch/cover_image');
             $branchRequest['cover_image'] = $imag_path;
             $this->deleteImage($branch->cover_image);
@@ -131,20 +104,4 @@ class BranchController extends Controller
             'success' => 'You update data success'
         ]); 
     }
-    
-    public function delete($id){
-        // https://bcknd.food2go.online/admin/branch/delete/{id}
-        $branch = $this->branches
-        ->where('id', $id)
-        ->where('main', '!=', 1)
-        ->first();
-        $this->deleteImage($branch->image);
-        $this->deleteImage($branch->cover_image);
-        $branch->delete();
-
-        return response()->json([
-            'success' => 'You delete data success'
-        ]);
-    }
-    
 }

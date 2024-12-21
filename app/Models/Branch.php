@@ -26,6 +26,7 @@ class Branch extends Authenticatable
         'coverage',
         'status',
         'email_verified_at',
+        'main'
     ];
     protected $appends = ['role', 'image_link', 'cover_image_link'];
 

@@ -50,6 +50,8 @@ use App\Http\Controllers\api\admin\settings\PaymentMethodController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodAutoController;
 use App\Http\Controllers\api\admin\settings\business_setup\CompanyController;
 use App\Http\Controllers\api\admin\settings\business_setup\MaintenanceController;
+use App\Http\Controllers\api\admin\settings\business_setup\MainBranchesController;
+use App\Http\Controllers\api\admin\settings\business_setup\TimeSlotController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->middleware('can:isOrder')
@@ -324,6 +326,14 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
                 Route::get('/', 'view');
                 Route::put('/status', 'status');
                 Route::post('/add', 'add');
+            });
+
+            Route::controller(MainBranchesController::class)
+            ->prefix('branch')->group(function(){
+                Route::get('/', 'view');
+                Route::get('/item/{id}', 'branch');
+                Route::post('/add', 'create');
+                Route::post('/update/{id}', 'modify');
             });
         });
         
