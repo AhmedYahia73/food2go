@@ -139,13 +139,12 @@ class MakeOrderController extends Controller
             //    "alert('payment Success')"
             //    ]));
                
-            } else {
-                $payment_id = $data['order'];
-                $payment =  $this->payment->with('orders','orders.plans','orders.extra','orders.domain')->where('transaction_id', $payment_id)->first();
-
-                $payment->update([
-                    'payment_id' => $data['id'],
-                    'payment_status' => "Failed"
+            } else {        
+                $order = $this->order
+                ->where('transaction_id', $data['order'])
+                ->first();
+                $order->update([
+                    'payment_status' => 'faild'
                 ]);
                 return response()->json(['message' => 'Something Went Wrong Please Try Again']);
             }
