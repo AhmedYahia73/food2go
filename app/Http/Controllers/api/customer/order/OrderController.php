@@ -74,6 +74,7 @@ class OrderController extends Controller
         
         // If you want to format the final time as 'H:i:s'
         $formattedTime = $time->format('H:i:s');
+        $formattedTime = Carbon::createFromFormat('H:i:s', $formattedTime)->format('h:i:s A');
         
         
         return response()->json([
