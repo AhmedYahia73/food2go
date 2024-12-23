@@ -44,6 +44,7 @@ class ProductController extends Controller
         ->where('id', $id)
         ->first();//extra_id
         $translations = $this->translations
+        ->where('status', 1)
         ->get();
         $product_names = [];
         $product_descriptions = [];
