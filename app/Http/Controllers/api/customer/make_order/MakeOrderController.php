@@ -42,9 +42,6 @@ class MakeOrderController extends Controller
         // deal[{deal_id, count}], payment_method_id, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-        return response()->json([
-            'success' => $request->all()
-        ]);
         if ($request->payment_method_id == 1) {
             $payment_method_auto = $this->payment_method_auto
             ->where('payment_method_id', 1)
