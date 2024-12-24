@@ -35,22 +35,10 @@ class MainBranchesController extends Controller
         $branches = $this->branches
         ->where('main', 1)
         ->with('city')
-        ->get();
-
-        return response()->json([
-            'branches' => $branches,
-        ]);
-    }
-
-    public function branch($id){
-        // https://bcknd.food2go.online/admin/settings/business_setup/branch/item/{id} 
-        $branch = $this->branches
-        ->where('id', $id)
-        ->with('city')
         ->first();
 
         return response()->json([
-            'branch' => $branch,
+            'branches' => $branches,
         ]);
     }
     
@@ -70,38 +58,20 @@ class MainBranchesController extends Controller
             $imag_path = $this->upload($request, 'cover_image', 'users/branch/cover_image');
             $branchRequest['cover_image'] = $imag_path; 
         }
-        $this->branches->create($branchRequest);
-
-        return response()->json([
-            'success' => 'You add data success'
-        ]);
-    }
-    
-    public function modify(UpdateBranchRequest $request, $id){
-        // https://bcknd.food2go.online/admin/settings/business_setup/branch/update/{id}
-        // Keys
-        // name, address, email, phone, password, food_preparion_time, latitude, longitude
-        // coverage, status, image, cover_image, city_id
-
-        $branchRequest = $request->only($this->branchRequest);
-        $branchRequest['main'] = 1;
-        $branch = $this->branches
-        ->where('id', $id)
+        $branches = $this->branches
+        ->where('main', 1)
+        ->with('city')
         ->first();
-        if ($request->image  && !is_string($request->image)) {
-            $imag_path = $this->upload($request, 'image', 'users/branch/image');
-            $branchRequest['image'] = $imag_path;
-            $this->deleteImage($branch->image);
-        }
-        if ($request->cover_image && !is_string($request->cover_image)) {
-            $imag_path = $this->upload($request, 'cover_image', 'users/branch/cover_image');
-            $branchRequest['cover_image'] = $imag_path;
-            $this->deleteImage($branch->cover_image);
-        }
-        $branch->update($branchRequest);
 
+        if (empty($branches)) {
+            $this->branches->create($branchRequest);
+        } 
+        else {
+            $branch->update($branchRequest);
+        }
+        
         return response()->json([
-            'success' => 'You update data success'
-        ]); 
+            'success' => 'You make proccess success'
+        ]);
     }
 }
