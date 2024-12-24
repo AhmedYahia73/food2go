@@ -22,7 +22,7 @@ class CompanyController extends Controller
         ->orderByDesc('id')
         ->first();
         $currency = $this->currency
-        ->select('id', 'currancy_name')
+        ->select('id', 'currancy_name as name')
         ->get();
 
         return response()->json([
