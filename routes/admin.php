@@ -330,10 +330,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
             Route::controller(MainBranchesController::class)
             ->prefix('branch')->group(function(){
-                Route::get('/', 'view');
-                Route::get('/item/{id}', 'branch');
-                Route::post('/add', 'create');
-                Route::post('/update/{id}', 'modify');
+                Route::get('/', 'view'); 
+                Route::post('/add', 'update'); 
             });
         });
         
