@@ -67,7 +67,7 @@ class MainBranchesController extends Controller
             $this->branches->create($branchRequest);
         } 
         else {
-            $branch->update($branchRequest);
+            $branches->update($branchRequest);
         }
         
         return response()->json([
