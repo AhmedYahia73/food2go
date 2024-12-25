@@ -55,6 +55,7 @@ class CategoryController extends Controller
         ->where('id', $id)
         ->first();
         $translations = $this->translations
+        ->where('status', 1)
         ->get();
         $category_names = [];
         foreach ($translations as $item) {

@@ -50,6 +50,7 @@ class DealController extends Controller
         ->where('id', $id)
         ->first();
         $translations = $this->translations
+        ->where('status', 1)
         ->get();
         $deal_names = [];
         $deal_descriptions = [];

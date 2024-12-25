@@ -41,6 +41,7 @@ class PointOffersController extends Controller
         ->where('id', $id)
         ->first();
         $translations = $this->translations
+        ->where('status', 1)
         ->get();
         $offer_names = [];
         foreach ($translations as $item) {
