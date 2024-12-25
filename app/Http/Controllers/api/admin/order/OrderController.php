@@ -536,7 +536,7 @@ class OrderController extends Controller
             ],400);
         }
 
-        if ($request->order_status == 'confirmed') { 
+        if ($request->order_status == 'processing') { 
             $orders = $this->orders
             ->where('id', $id)
             ->update([
