@@ -119,8 +119,10 @@ class ProductController extends Controller
                         ];
                         $extra_options[$option->id][$extra_item->id]['extra_price'] = $extra_item->price;
                     }
-                    $extra_option = array_values($extra_options[$option->id]);
-                    $options[$variation_item->id][$option->id]['extra'] = $extra_option;
+                    if (isset($extra_options[$option->id])) {
+                        $extra_option = array_values($extra_options[$option->id]);
+                        $options[$variation_item->id][$option->id]['extra'] = $extra_option;
+                    }
                 }
                 $variation[$variation_item->id]['options'] = array_values($options[$variation_item->id]);
             }
