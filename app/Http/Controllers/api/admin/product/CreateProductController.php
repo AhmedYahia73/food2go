@@ -63,136 +63,142 @@ class CreateProductController extends Controller
         // product_names[{product_name, tranlation_id, tranlation_name}]
         // product_descriptions[{product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
-        $default = $request->product_names[0];
-        $default_description = $request->product_descriptions[0];
-        $productRequest = $request->only($this->productRequest);
-        $productRequest['name'] = $default['product_name'];
-        $productRequest['description'] = $default_description['product_description'];
-        $extra_num = [];
-
-        if (is_file($request->image)) {
-            $imag_path = $this->upload($request, 'image', 'admin/product/image');
-            $productRequest['image'] = $imag_path;
-        } // if send image upload it
-        $product = $this->products->create($productRequest); // create product
-        foreach ($request->product_names as $item) {
-            $product->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['product_name'],
-                'value' => $item['product_name']
-            ]); 
-         }
-        foreach ($request->product_descriptions as $item) {
-            $product->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default_description['product_description'],
-                'value' => $item['product_description']
-            ]); 
-        }
-        if ($request->addons) {
-            $product->addons()->attach($request->addons); // add addons of product
-        }
-        if ($request->excludes) {
-            foreach ($request->excludes as $item) {
-                $exclude = $this->excludes
-                ->create([
-                    'name' => $item['names'][0]['exclude_name'],
-                    'product_id' => $product->id
-                ]);
-                foreach ($item['names'] as $key => $element) {
-                    $exclude->translations()->create([
-                        'locale' => $element['tranlation_name'],
-                        'key' => $item['names'][0]['exclude_name'],
-                        'value' => $element['exclude_name'],
-                    ]); 
-                }
-            }
-        }// add excludes
-        if ($request->extra) {
-            foreach ($request->extra as $item) {
-                $new_extra = $this->extra
-                ->create([
-                    'name' => $item['names'][0]['extra_name'],
-                    'price' => $item['extra_price'],
-                    'product_id' => $product->id
-                ]);
-                $extra_num[] = $new_extra;
-                foreach ($item['names'] as $key => $element) {
-                    $new_extra->translations()->create([
-                        'locale' => $element['tranlation_name'],
-                        'key' => $item['names'][0]['extra_name'],
-                        'value' => $element['extra_name'],
-                    ]); 
-                }
-            }
-        }// add extra
-        // ______________________________________________________________
-        if ($request->variations) {
-            foreach ($request->variations as $item) {
-                $variation = $this->variations
-                ->create([
-                    'name' => $item['names'][0]['name'],
-                    'type' => $item['type'],
-                    'min' => $item['min'] ?? null,
-                    'max' => $item['max'] ?? null,
-                    'required' => $item['required'],
-                    'product_id' => $product->id,
-                ]); // add variation
-                foreach ($item['names'] as $key => $element) {
-                    $variation->translations()->create([
-                        'locale' => $element['tranlation_name'],
-                        'key' => $item['names'][0]['name'],
-                        'value' => $element['name'],
-                    ]);  
-                }
-                foreach ($item['options'] as $element) {
-                    $option = $this->option_product
-                    ->create([
-                        'name' => $element['names'][0]['name'],
-                        'price' => $element['price'],
-                        'status' => $element['status'],
-                        'product_id' => $product->id,
-                        'variation_id' => $variation->id,
-                        'points' => $element['points'],
-                    ]);// add options
-                    foreach ($element['names'] as $key => $value) {
-                        $option->translations()->create([
-                            'locale' => $value['tranlation_name'],
-                            'key' => $element['names'][0]['name'],
-                            'value' => $value['name'],
-                        ]);   
-                    }
-                    if (isset($element['extra']) && $element['extra']) {
-                        foreach ($element['extra'] as $key => $extra) {
-                            // ['extra_names']
-                            $extra_item = $this->extra
-                            ->create([
-                                'name' => $extra['extra_names'][0]['extra_name'],
-                                'price' => $extra['extra_price'],
-                                'product_id' => $product->id,
-                                'variation_id' => $variation->id,
-                                'option_id' => $option->id
-                            ]);// add extra for option
+        try {
+            $default = $request->product_names[0];
+            $default_description = $request->product_descriptions[0];
+            $productRequest = $request->only($this->productRequest);
+            $productRequest['name'] = $default['product_name'];
+            $productRequest['description'] = $default_description['product_description'];
+            $extra_num = [];
     
-                            foreach ($extra['extra_names'] as $key => $value) {
-                                $extra_item->translations()->create([
-                                    'locale' => $value['tranlation_name'],
-                                    'key' => $extra['extra_names'][0]['extra_name'],
-                                    'value' => $value['extra_name'],
-                                ]);    
-                            }
-                            foreach ($extra_num as $extra_num_item) {
-                                $extra_num_item->delete();
+            if (is_file($request->image)) {
+                $imag_path = $this->upload($request, 'image', 'admin/product/image');
+                $productRequest['image'] = $imag_path;
+            } // if send image upload it
+            $product = $this->products->create($productRequest); // create product
+            foreach ($request->product_names as $item) {
+                $product->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['product_name'],
+                    'value' => $item['product_name']
+                ]); 
+             }
+            foreach ($request->product_descriptions as $item) {
+                $product->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default_description['product_description'],
+                    'value' => $item['product_description']
+                ]); 
+            }
+            if ($request->addons) {
+                $product->addons()->attach($request->addons); // add addons of product
+            }
+            if ($request->excludes) {
+                foreach ($request->excludes as $item) {
+                    $exclude = $this->excludes
+                    ->create([
+                        'name' => $item['names'][0]['exclude_name'],
+                        'product_id' => $product->id
+                    ]);
+                    foreach ($item['names'] as $key => $element) {
+                        $exclude->translations()->create([
+                            'locale' => $element['tranlation_name'],
+                            'key' => $item['names'][0]['exclude_name'],
+                            'value' => $element['exclude_name'],
+                        ]); 
+                    }
+                }
+            }// add excludes
+            if ($request->extra) {
+                foreach ($request->extra as $item) {
+                    $new_extra = $this->extra
+                    ->create([
+                        'name' => $item['names'][0]['extra_name'],
+                        'price' => $item['extra_price'],
+                        'product_id' => $product->id
+                    ]);
+                    $extra_num[] = $new_extra;
+                    foreach ($item['names'] as $key => $element) {
+                        $new_extra->translations()->create([
+                            'locale' => $element['tranlation_name'],
+                            'key' => $item['names'][0]['extra_name'],
+                            'value' => $element['extra_name'],
+                        ]); 
+                    }
+                }
+            }// add extra
+            // ______________________________________________________________
+            if ($request->variations) {
+                foreach ($request->variations as $item) {
+                    $variation = $this->variations
+                    ->create([
+                        'name' => $item['names'][0]['name'],
+                        'type' => $item['type'],
+                        'min' => $item['min'] ?? null,
+                        'max' => $item['max'] ?? null,
+                        'required' => $item['required'],
+                        'product_id' => $product->id,
+                    ]); // add variation
+                    foreach ($item['names'] as $key => $element) {
+                        $variation->translations()->create([
+                            'locale' => $element['tranlation_name'],
+                            'key' => $item['names'][0]['name'],
+                            'value' => $element['name'],
+                        ]);  
+                    }
+                    foreach ($item['options'] as $element) {
+                        $option = $this->option_product
+                        ->create([
+                            'name' => $element['names'][0]['name'],
+                            'price' => $element['price'],
+                            'status' => $element['status'],
+                            'product_id' => $product->id,
+                            'variation_id' => $variation->id,
+                            'points' => $element['points'],
+                        ]);// add options
+                        foreach ($element['names'] as $key => $value) {
+                            $option->translations()->create([
+                                'locale' => $value['tranlation_name'],
+                                'key' => $element['names'][0]['name'],
+                                'value' => $value['name'],
+                            ]);   
+                        }
+                        if (isset($element['extra']) && $element['extra']) {
+                            foreach ($element['extra'] as $key => $extra) {
+                                // ['extra_names']
+                                $extra_item = $this->extra
+                                ->create([
+                                    'name' => $extra['extra_names'][0]['extra_name'],
+                                    'price' => $extra['extra_price'],
+                                    'product_id' => $product->id,
+                                    'variation_id' => $variation->id,
+                                    'option_id' => $option->id
+                                ]);// add extra for option
+        
+                                foreach ($extra['extra_names'] as $key => $value) {
+                                    $extra_item->translations()->create([
+                                        'locale' => $value['tranlation_name'],
+                                        'key' => $extra['extra_names'][0]['extra_name'],
+                                        'value' => $value['extra_name'],
+                                    ]);    
+                                }
+                                foreach ($extra_num as $extra_num_item) {
+                                    $extra_num_item->delete();
+                                }
                             }
                         }
-                    }
-                } 
+                    } 
+                }
             }
+    
+            return response()->json([
+                'success' => $request->all()
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'faild' => 'Something wrong'
+            ], 400);
         }
-
-        return response()->json([
-            'success' => $request->all()
-        ]);
     }
 
     public function modify(ProductRequest $request, $id){
