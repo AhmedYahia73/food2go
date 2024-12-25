@@ -59,6 +59,10 @@ class DealController extends Controller
             ->where('locale', $item->name)
             ->where('key', $deal->title)
             ->first();
+            $deal_description = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->where('key', $deal->description)
+            ->first();
            $deal_names[] = [
                'tranlation_id' => $item->id,
                'tranlation_name' => $item->name,
@@ -67,7 +71,7 @@ class DealController extends Controller
            $deal_descriptions[] = [
                 'tranlation_id' => $item->id,
                 'tranlation_name' => $item->name,
-                'deal_description' => $deal_name->value ?? null,
+                'deal_description' => $deal_description->value ?? null,
            ];
         }
         $deal->deal_names = $deal_names;
