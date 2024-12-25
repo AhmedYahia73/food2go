@@ -162,7 +162,7 @@ class CreateProductController extends Controller
                             'value' => $value['name'],
                         ]);   
                     }
-                    if ($element['extra']) {
+                    if (isset($element['extra']) && $element['extra']) {
                         foreach ($element['extra'] as $key => $extra) {
                             // ['extra_names']
                             $extra_item = $this->extra
