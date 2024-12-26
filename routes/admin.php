@@ -97,6 +97,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PaymentController::class)->middleware('can:isPayments')
     ->prefix('payment')->group(function(){
         Route::get('/pending', 'pending');
+        Route::get('/receipt/{id}', 'receipt');
         Route::get('/history', 'history');
         Route::put('/approve/{id}', 'approve');
         Route::put('/rejected/{id}', 'rejected');

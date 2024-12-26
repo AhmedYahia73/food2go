@@ -16,6 +16,11 @@ class PaymentController extends Controller
     public function pending(){
         // https://bcknd.food2go.online/admin/payment/pending
         $orders_details = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
         ->whereNull('status')
         ->with('user')
         ->get();
@@ -28,12 +33,29 @@ class PaymentController extends Controller
     public function history(){
         // https://bcknd.food2go.online/admin/payment/history
         $orders_details = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
         ->whereNotNull('status')
         ->with(['user'])
         ->get();
 
         return response()->json([
             'orders' => $orders_details
+        ]);
+    }
+
+    public function receipt($id){
+        // https://bcknd.food2go.online/admin/payment/receipt/{id}
+        $receipt = $this->orders
+        ->select('receipt')
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'receipt' => $receipt
         ]);
     }
 
