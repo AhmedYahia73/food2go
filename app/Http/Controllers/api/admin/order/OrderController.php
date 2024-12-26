@@ -420,7 +420,6 @@ class OrderController extends Controller
                 'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
                 'status', 'points', 'rejected_reason', 'transaction_id')
                 ->where('pos', 0)
-                ->where('status', 1)
                 ->with(['user', 'branch', 'delivery'])
                 ->orderBy('created_at')
                 ->get();
@@ -432,7 +431,6 @@ class OrderController extends Controller
                 'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
                 'status', 'points', 'rejected_reason', 'transaction_id')
                 ->where('pos', 0)
-                ->where('status', 1)
                 ->where('order_status', $request->type)
                 ->with(['user', 'branch', 'delivery'])
                 ->orderBy('created_at')
@@ -447,7 +445,6 @@ class OrderController extends Controller
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
-            ->where('status', 1)
             ->with(['user', 'branch', 'delivery'])
             ->orderBy('created_at')
             ->get();
