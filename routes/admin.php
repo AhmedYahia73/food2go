@@ -334,6 +334,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
                 Route::get('/', 'view'); 
                 Route::post('/add', 'update'); 
             });
+
+            Route::controller(TimeSlotController::class)
+            ->prefix('time_slot')->group(function(){
+                Route::get('/', 'view'); 
+                Route::post('/add', 'add'); 
+            });
         });
         
         Route::controller(SettingController::class)

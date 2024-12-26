@@ -4,12 +4,10 @@ namespace App\Http\Controllers\api\admin\settings\business_setup;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Validator;
 
 use App\Models\Setting;
 
-class TimeSlotController extends Controller
+class CustomerLoginController extends Controller
 {
     public function __construct(private Setting $settings){}
 
