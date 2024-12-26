@@ -23,7 +23,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -38,7 +38,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -54,7 +54,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -70,7 +70,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -86,7 +86,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -102,7 +102,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -118,7 +118,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -134,7 +134,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -150,7 +150,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
@@ -166,7 +166,7 @@ class OrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->where('pos', 0)
