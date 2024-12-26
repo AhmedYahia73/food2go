@@ -4,16 +4,20 @@ namespace App\Http\Controllers\api\admin\settings\business_setup;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\admin\settings\bussiness_setup\CompanyRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\trait\image;
 
 use App\Models\CompanyInfo;
+use App\Models\Maintenance;
 use App\Models\Currency;
+use Carbon\Carbon;
 
 class CompanyController extends Controller
 {
     public function __construct(private CompanyInfo $company_info, 
-    private Currency $currency){}
+    private Currency $currency, private Maintenance $maintenance){}
     use image;
     
     public function view(){
@@ -24,10 +28,14 @@ class CompanyController extends Controller
         $currency = $this->currency
         ->select('id', 'currancy_name as name')
         ->get();
+        $maintenance = $this->maintenance
+        ->orderByDesc('id')
+        ->first();
 
         return response()->json([
             'company_info' => $company_info,
             'currency' => $currency,
+            'maintenance' => $maintenance,
         ]);
     }
 
@@ -40,6 +48,7 @@ class CompanyController extends Controller
         $company_info = $this->company_info
         ->orderByDesc('id')
         ->first();
+        $maintenance = [];
         if (empty($company_info)) {
             if ($request->logo) {
                 $logo = $this->upload($request, 'logo', 'admin/settings/business_setup/company/logo');
@@ -64,9 +73,51 @@ class CompanyController extends Controller
             }
             $company_info->update($companyRequest);
         }
+        if (isset($request->maintenance) && $request->maintenance) {
+            
+            $validator = Validator::make($request->all(), [
+                'maintenance.all' => ['boolean'],
+                'maintenance.branch' => ['boolean'],
+                'maintenance.customer' => ['boolean'],
+                'maintenance.web' => ['boolean'],
+                'maintenance.delivery' => ['boolean'],
+                'maintenance.day' => ['required', 'boolean'],
+                'maintenance.week' => ['required', 'boolean'],
+                'maintenance.until_change' => ['required', 'boolean'],
+                'maintenance.customize' => ['required', 'boolean'],
+                'maintenance.start_date' => ['date'],
+                'maintenance.end_date' => ['date'],
+                'maintenance.status' => ['required', 'boolean'],
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                    'error' => $validator->errors(),
+                ],400);
+            }
+            $maintenanceRequest = $request->maintenance;
+            $currentDate = Carbon::now();
+            $maintenance = $this->maintenance
+            ->orderByDesc('id')
+            ->first();
+            if ($request->day) {
+                $maintenanceRequest['start_date'] = date('Y-m-d');
+                $maintenanceRequest['end_date'] = $currentDate->addDay();
+            }
+            elseif ($request->week) {
+                $maintenanceRequest['start_date'] = date('Y-m-d');
+                $maintenanceRequest['end_date'] = $currentDate->addDay(7); 
+            }
+            if (!empty($maintenance)) {
+                $maintenance->update($maintenanceRequest);
+            } else {
+                $maintenance = $this->maintenance
+                ->create($maintenanceRequest);
+            }
+        }
 
         return response()->json([
-            'success' => $company_info
+            'company_info' => $company_info,
+            'maintenance' => $maintenance,
         ]);
     }
 }

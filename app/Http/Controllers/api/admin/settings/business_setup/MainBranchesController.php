@@ -42,7 +42,7 @@ class MainBranchesController extends Controller
         ]);
     }
     
-    public function update(BranchRequest $request){
+    public function update(UpdateBranchRequest $request){
         // https://bcknd.food2go.online/admin/settings/business_setup/branch/add 
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
