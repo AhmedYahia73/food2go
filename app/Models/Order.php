@@ -40,6 +40,7 @@ class Order extends Model
         'order_details',
         'rejected_reason',
         'transaction_id',
+        'receipt'
     ];
     protected $appends = ['order_date'];
     
