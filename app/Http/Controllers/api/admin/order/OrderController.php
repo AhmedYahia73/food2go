@@ -411,28 +411,43 @@ class OrderController extends Controller
             ],400);
         }
 
-        if ($request->type == 'all') {
+        if ($request->type) {
+            if ($request->type == 'all') {
+                $orders = $this->orders
+                ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+                'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+                'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+                'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+                'status', 'points', 'rejected_reason', 'transaction_id')
+                ->where('pos', 0)
+                ->where('status', 1)
+                ->with(['user', 'branch', 'delivery'])
+                ->orderBy('created_at')
+                ->get();
+            } else {
+                $orders = $this->orders
+                ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+                'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+                'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+                'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
+                'status', 'points', 'rejected_reason', 'transaction_id')
+                ->where('pos', 0)
+                ->where('status', 1)
+                ->where('order_status', $request->type)
+                ->with(['user', 'branch', 'delivery'])
+                ->orderBy('created_at')
+                ->get();
+            }
+        }
+        else{
             $orders = $this->orders
             ->select('id', 'date', 'user_id', 'branch_id', 'amount',
             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
             'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-            'status', 'points', 'rejected_reason', 'transaction_id', 'order_date')
+            'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
             ->where('status', 1)
-            ->with(['user', 'branch', 'delivery'])
-            ->orderBy('created_at')
-            ->get();
-        } else {
-            $orders = $this->orders
-            ->select('id', 'date', 'user_id', 'branch_id', 'amount',
-            'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-            'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-            'status', 'points', 'rejected_reason', 'transaction_id', 'order_date')
-            ->where('pos', 0)
-            ->where('status', 1)
-            ->where('order_status', $request->type)
             ->with(['user', 'branch', 'delivery'])
             ->orderBy('created_at')
             ->get();
