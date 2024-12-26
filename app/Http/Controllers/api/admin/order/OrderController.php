@@ -402,10 +402,8 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/admin/order/filter
         // Key
         // from, to, branch_id, type
-        $validator = Validator::make($request->all(), [
-            'from' => 'date',
-            'to' => 'date',
-            'type' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled'
+        $validator = Validator::make($request->all(), [ 
+            'type' => 'in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -419,7 +417,7 @@ class OrderController extends Controller
             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
             'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-            'status', 'points', 'rejected_reason', 'transaction_id')
+            'status', 'points', 'rejected_reason', 'transaction_id', 'order_date')
             ->where('pos', 0)
             ->where('status', 1)
             ->with(['user', 'branch', 'delivery'])
@@ -431,7 +429,7 @@ class OrderController extends Controller
             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
             'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'receipt',
-            'status', 'points', 'rejected_reason', 'transaction_id')
+            'status', 'points', 'rejected_reason', 'transaction_id', 'order_date')
             ->where('pos', 0)
             ->where('status', 1)
             ->where('order_status', $request->type)
