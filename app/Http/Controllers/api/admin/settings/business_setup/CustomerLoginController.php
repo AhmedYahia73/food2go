@@ -4,6 +4,8 @@ namespace App\Http\Controllers\api\admin\settings\business_setup;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Setting;
 
@@ -12,71 +14,64 @@ class CustomerLoginController extends Controller
     public function __construct(private Setting $settings){}
 
     public function view(){
-        // https://bcknd.food2go.online/admin/settings/business_setup/time_slot
-        $time_slot = $this->settings
-        ->where('name', 'time_slot')
+        // https://bcknd.food2go.online/admin/settings/business_setup/customer_login
+        $customer_login = $this->settings
+        ->where('name', 'customer_login')
         ->orderByDesc('id')
         ->first();
-        $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        if (empty($time_slot)) {
-            $setting = [
-                'daily' => [],
-                'custom' => [],
-            ];
+        if (empty($customer_login)) {
+            $setting = ['login' => null, 'verification' => null,];
             $setting = json_encode($setting);
-            $time_slot = $this->settings
+            $customer_login = $this->settings
             ->create([
-                'name' => 'time_slot',
+                'name' => 'customer_login',
                 'setting' => $setting
             ]);
         } 
         
         return response()->json([
-            'time_slot' => $time_slot,
-            'days' => $days
+            'customer_login' => $customer_login,
         ]);
         
     }
 
     public function add(Request $request){
-        // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add
-        // "daily": [{"'from'": "00:10:00","'to'": "00:11:00"}],
-        // "custom": [["Sunday","Monday"]]
+        // https://bcknd.food2go.online/admin/settings/business_setup/customer_login/add
+        // {"login": "manuel","verification": "email"}
+        // login => [manuel, otp], verification => [email, phone]
         $validator = Validator::make($request->all(), [
-            'daily' => 'required|array',
-            'custom' => 'required|array',
+            'login' => 'required|in:manuel,otp',
+            'verification' => 'in:email,phone',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'error' => $validator->errors(),
             ],400);
         }
-        $daily = $request->daily;
-        $custom = $request->custom;
         $setting = [
-            'daily' => $daily,
-            'custom' => $custom,
+            'login' => $request->login,
+            'verification' => $request->verification ?? null,
         ];
         $setting = json_encode($setting);
-        $time_slot = $this->settings
-        ->where('name', 'time_slot')
+        $customer_login = $this->settings
+        ->where('name', 'customer_login')
         ->orderByDesc('id')
         ->first();
-        if (empty($time_slot)) {
-            $time_slot = $this->settings
+        if (empty($customer_login)) {
+            $customer_login = $this->settings
             ->create([
-                'name' => 'time_slot',
+                'name' => 'customer_login',
                 'setting' => $setting
             ]);
         } 
         else{
-            $time_slot->update([
+            $customer_login->update([
                 'setting' => $setting
             ]);
         }
 
         return response()->json([
-            'time_slot' => $time_slot,
+            'customer_login' => $customer_login,
             'request' => $request->all(),
         ]);
     }

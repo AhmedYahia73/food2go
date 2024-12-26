@@ -52,6 +52,7 @@ use App\Http\Controllers\api\admin\settings\business_setup\CompanyController;
 use App\Http\Controllers\api\admin\settings\business_setup\MaintenanceController;
 use App\Http\Controllers\api\admin\settings\business_setup\MainBranchesController;
 use App\Http\Controllers\api\admin\settings\business_setup\TimeSlotController;
+use App\Http\Controllers\api\admin\settings\business_setup\CustomerLoginController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)->middleware('can:isOrder')
@@ -337,6 +338,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
             Route::controller(TimeSlotController::class)
             ->prefix('time_slot')->group(function(){
+                Route::get('/', 'view'); 
+                Route::post('/add', 'add'); 
+            });
+
+            Route::controller(CustomerLoginController::class)
+            ->prefix('customer_login')->group(function(){
                 Route::get('/', 'view'); 
                 Route::post('/add', 'add'); 
             });
