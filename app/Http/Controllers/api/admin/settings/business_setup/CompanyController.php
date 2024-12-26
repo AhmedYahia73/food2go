@@ -43,7 +43,7 @@ class CompanyController extends Controller
         // https://bcknd.food2go.online/admin/settings/business_setup/company/add
         // Keys
         // name, phone, email, address, logo, fav_icon, time_zone, time_format => [24hours,am/pm],
-        // currency_id, currency_position => [left,right], copy_right, logo, fav_icon
+        // currency_id, currency_position => [left,right], copy_right, logo, fav_icon, country
         $companyRequest = $request->validated(); 
         $company_info = $this->company_info
         ->orderByDesc('id')
@@ -118,6 +118,7 @@ class CompanyController extends Controller
         return response()->json([
             'company_info' => $company_info,
             'maintenance' => $maintenance,
+            'request' => $request->all()
         ]);
     }
 }
