@@ -44,7 +44,7 @@ class Order extends Model
     protected $appends = ['order_date'];
     
     public function getOrderDateAttribute(){
-        if ($this->attributes['created_at'] && !empty($this->attributes['created_at'])) {
+        if (isset($this->attributes['created_at'] )&& !empty($this->attributes['created_at'])) {
             return Carbon::parse($this->attributes['created_at'])->format('Y-m-d');
         } 
         else {
