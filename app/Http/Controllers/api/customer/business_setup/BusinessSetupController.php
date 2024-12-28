@@ -16,6 +16,7 @@ class BusinessSetupController extends Controller
     private CompanyInfo $company_info, private Setting $settings){}
 
     public function business_setup(Request $request){
+        // https://bcknd.food2go.online/api/business_setup
         // Maintenance status
         $role = $request->user()->role;
         $maintenance = $this->maintenance
