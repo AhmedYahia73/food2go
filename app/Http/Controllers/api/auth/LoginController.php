@@ -11,12 +11,11 @@ use App\Models\Admin;
 use App\Models\Delivery;
 use App\Models\User;
 use App\Models\Branch;
-use App\Models\Maintenance;
 
 class LoginController extends Controller
 {
     public function __construct(private Admin $admin, private Delivery $delivery, private User $user, 
-    private Branch $branch, private Maintenance $maintenance){}
+    private Branch $branch){}
 
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login
@@ -54,9 +53,6 @@ class LoginController extends Controller
         // https://bcknd.food2go.online/api/user/auth/login
         // Keys
         // email, password
-        $maintenance = $this->maintenance
-        ->orderByDesc('id')
-        ->first();
         $user = $this->delivery
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
@@ -87,33 +83,11 @@ class LoginController extends Controller
             ], 400);
         }
         if (password_verify($request->input('password'), $user->password)) {
-            $login = true;
-            $login_web = true;
-            if (($maintenance->start_date <= date('Y-m-d') && $maintenance->end_date >= date('Y-m-d') && $maintenance->status)
-            || $maintenance->until_change && $maintenance->status) {
-                if ($maintenance->all) {
-                    $login = false;
-                }
-                if ($maintenance->branch && $role == 'branch') {
-                    $login = false;
-                }
-                if ($maintenance->customer && $role == 'customer') {
-                    $login = false;
-                }
-                if ($maintenance->delivery && $role == 'delivery') {
-                    $login = false;
-                }
-                if ($maintenance->web || !$login) {
-                    $login_web = false;
-                }
-            }
             $user->role = $role;
             $user->token = $user->createToken($user->role)->plainTextToken;
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
-                'login' => $login,
-                'login_web' => $login_web,
             ], 200);
         }
         else { 

@@ -43,7 +43,7 @@ class TimeSlotController extends Controller
     public function add(Request $request){
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add
         // "daily": [{"'from'": "00:10:00","'to'": "00:11:00"}],
-        // "custom": [["Sunday","Monday"]]
+        // "custom": ["Sunday","Monday"]
         $validator = Validator::make($request->all(), [
             'daily' => 'required|array',
             'custom' => 'required|array',

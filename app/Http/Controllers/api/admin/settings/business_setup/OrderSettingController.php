@@ -29,7 +29,7 @@ class OrderSettingController extends Controller
                 'name' => 'order_setting',
                 'setting' => $setting,
             ]);
-        } 
+        }
         
         return response()->json([
             'order_setting' => $order_setting, 
