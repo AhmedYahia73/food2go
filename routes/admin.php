@@ -17,6 +17,8 @@ use App\Http\Controllers\api\admin\banner\BannerController;
 
 use App\Http\Controllers\api\admin\point_offers\PointOffersController;
 
+use App\Http\Controllers\api\admin\home\HomeController;
+
 use App\Http\Controllers\api\admin\customer\CustomerController;
 use App\Http\Controllers\api\admin\delivery\DeliveryController;
 use App\Http\Controllers\api\admin\branch\BranchController;
@@ -68,6 +70,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/invoice/{id}', 'invoice');
         Route::put('/status/{id}', 'status');
         Route::post('/delivery', 'delivery');
+    });
+
+    Route::controller(HomeController::class)->middleware('can:isHome')
+    ->prefix('home')->group(function(){
+        Route::get('/', 'home');
     });
 
     Route::controller(AdminRolesController::class)->middleware('can:isAdminRoles')

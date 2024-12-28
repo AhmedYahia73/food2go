@@ -28,7 +28,7 @@ class AdminRolesController extends Controller
         $roles = ['Admin', 'Addons', 'AdminRoles', 'Banner',
         'Branch', 'Category', 'Coupon', 'Customer', 'Deal', 
         'DealOrder', 'Delivery', 'OfferOrder', 'Order', 
-        'Payments', 'PointOffers', 'Product', 'Settings'];
+        'Payments', 'PointOffers', 'Product', 'Settings', 'Home'];
 
         return response()->json([
             'user_positions' => $user_positions,

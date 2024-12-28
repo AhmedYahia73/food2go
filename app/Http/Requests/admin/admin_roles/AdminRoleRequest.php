@@ -27,7 +27,7 @@ class AdminRoleRequest extends FormRequest
             'name' => ['required'],
             'status' => ['required', 'boolean'],
             'roles' => ['array'],
-            'roles.*' => ['in:Admin,Addons,AdminRoles,Banner,Branch,Category,Coupon,Customer,Deal,DealOrder,Delivery,OfferOrder,Order,Payments,PointOffers,Product,Settings'],
+            'roles.*' => ['in:Admin,Addons,AdminRoles,Banner,Branch,Category,Coupon,Customer,Deal,DealOrder,Delivery,OfferOrder,Order,Payments,PointOffers,Product,Settings,Home'],
         ];
     }
 

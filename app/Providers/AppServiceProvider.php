@@ -22,6 +22,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // if roles have home module
+        Gate::define('isHome', function (Admin $user) {
+            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Home')){
+                return true;
+            }
+        });
 
         // if roles have admin module
         Gate::define('isAdmin', function (Admin $user) {
