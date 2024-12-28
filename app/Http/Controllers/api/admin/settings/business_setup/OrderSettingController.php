@@ -34,7 +34,6 @@ class OrderSettingController extends Controller
         return response()->json([
             'order_setting' => $order_setting, 
         ]);
-        
     }
 
     public function add(Request $request){
