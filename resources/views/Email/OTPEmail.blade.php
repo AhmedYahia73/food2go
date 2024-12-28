@@ -38,7 +38,9 @@
 </head>
 <body>
     <div class="email-container">
-        <h1>Hello, [{{$data['name']}}]!</h1>
+        @if (isset($data['name']))
+            <h1>Hello, [{{$data['name']}}]!</h1>
+        @endif
         <p>Thank you for joining us. Your unique code is:</p>
         <div class="code">[{{$data['code']}}]</div>
         <p>If you have any questions, feel free to reach out!</p>

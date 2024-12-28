@@ -97,4 +97,28 @@ class BusinessSetupController extends Controller
             'today' => $today
         ]);
     }
+
+    public function customer_login(){
+        // https://bcknd.food2go.online/api/customer_login
+        $customer_login = $this->settings
+        ->where('name', 'customer_login')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($customer_login)) {
+            $setting = ['login' => 'manuel', 'verification' => null,];
+            $setting = json_encode($setting);
+            $customer_login = $this->settings
+            ->create([
+                'name' => 'customer_login',
+                'setting' => $setting
+            ]);
+        }
+        $customer_login = json_decode($customer_login->setting) ?? 
+        ['login' => 'manuel', 'verification' => null];
+
+        
+        return response()->json([
+            'customer_login' => $customer_login,
+        ]);
+    }
 }

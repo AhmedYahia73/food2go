@@ -20,7 +20,7 @@ class CustomerLoginController extends Controller
         ->orderByDesc('id')
         ->first();
         if (empty($customer_login)) {
-            $setting = ['login' => null, 'verification' => null,];
+            $setting = ['login' => 'manuel', 'verification' => null];
             $setting = json_encode($setting);
             $customer_login = $this->settings
             ->create([
@@ -28,11 +28,10 @@ class CustomerLoginController extends Controller
                 'setting' => $setting
             ]);
         } 
-        
+
         return response()->json([
             'customer_login' => $customer_login,
         ]);
-        
     }
 
     public function add(Request $request){
