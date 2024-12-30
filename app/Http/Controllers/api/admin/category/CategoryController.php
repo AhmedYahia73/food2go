@@ -139,20 +139,29 @@ class CategoryController extends Controller
         $current_category = $this->categories
         ->where('id', $id)
         ->first();
-        $category = $this->categories
-        ->where('priority', $request->priority)
-        ->first();
-        if (!empty($category) && empty($current_category->category_id)) {
-            $this->categories
-            ->where('priority', '>=', $request->priority)
+        if (empty($current_category->category_id)) {
+            $category = $this->categories
+            ->where('priority', $request->priority)
             ->whereNull('category_id')
-            ->increment('priority');
+            ->first();
+            if (!empty($category)) {
+                $this->categories
+                ->where('priority', '>=', $request->priority)
+                ->whereNull('category_id')
+                ->increment('priority');
+            }
         }
-        elseif (!empty($category)) {
-            $this->categories
-            ->where('priority', '>=', $request->priority)
+        else {
+            $category = $this->categories
+            ->where('priority', $request->priority)
             ->whereNotNull('category_id')
-            ->increment('priority');
+            ->first();
+            if (!empty($category)) {
+                $this->categories
+                ->where('priority', '>=', $request->priority)
+                ->whereNotNull('category_id')
+                ->increment('priority');
+            }
         }
         $current_category->update(['priority' => $request->priority]);
 

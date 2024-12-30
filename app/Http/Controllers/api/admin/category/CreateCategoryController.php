@@ -45,21 +45,30 @@ class CreateCategoryController extends Controller
         if ($request->banner_image) {
             $imag_path = $this->upload($request, 'banner_image', 'admin/category/banner_image');
             $categoryRequest['banner_image'] = $imag_path;
-        } // if send image upload it
-        $category = $this->categories
-        ->where('priority', $request->priority)
-        ->first();
-        if (!empty($category) && empty($request->category_id)) {
-            $this->categories
-            ->where('priority', '>=', $request->priority)
+        } // if send image upload it 
+        if (empty($request->category_id)) {
+            $category = $this->categories
+            ->where('priority', $request->priority)
             ->whereNull('category_id')
-            ->increment('priority');
+            ->first();
+            if (!empty($category)) {
+                $this->categories
+                ->where('priority', '>=', $request->priority)
+                ->whereNull('category_id')
+                ->increment('priority');
+            }
         }
-        elseif (!empty($category)) {
-            $this->categories
-            ->where('priority', '>=', $request->priority)
+        else {
+            $category = $this->categories
+            ->where('priority', $request->priority)
             ->whereNotNull('category_id')
-            ->increment('priority');
+            ->first();
+            if (!empty($category)) {
+                $this->categories
+                ->where('priority', '>=', $request->priority)
+                ->whereNotNull('category_id')
+                ->increment('priority');
+            }
         }
         $categories = $this->categories
         ->create($categoryRequest); // create category
@@ -93,6 +102,30 @@ class CreateCategoryController extends Controller
         $category = $this->categories
         ->where('id', $id)
         ->first(); // get category
+        if (empty($request->category_id)) {
+            $category_item = $this->categories
+            ->where('priority', $request->priority)
+            ->whereNull('category_id')
+            ->first();
+            if (!empty($category_item)) {
+                $this->categories
+                ->where('priority', '>=', $request->priority)
+                ->whereNull('category_id')
+                ->increment('priority');
+            }
+        }
+        else {
+            $category_item = $this->categories
+            ->where('priority', $request->priority)
+            ->whereNotNull('category_id')
+            ->first();
+            if (!empty($category_item)) {
+                $this->categories
+                ->where('priority', '>=', $request->priority)
+                ->whereNotNull('category_id')
+                ->increment('priority');
+            }
+        }
         if (is_file($request->image)) {
             $this->deleteImage($category->image);
             $imag_path = $this->upload($request, 'image', 'admin/category/image');
