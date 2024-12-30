@@ -33,8 +33,8 @@ Route::controller(OtpController::class)->prefix('otp')->group(function(){
 
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
-        Route::get('/', 'products');
-        Route::get('/slider', 'slider');
+        Route::get('/', 'products')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/slider', 'slider')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
     });
@@ -67,7 +67,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(OffersController::class)->prefix('offers')->group(function(){
-        Route::get('/', 'offers');
+        Route::get('/', 'offers')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/buy_offer', 'buy_offer');
     });
 
@@ -81,7 +81,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(DealController::class)->prefix('deal')->group(function(){
-        Route::get('/', 'index');
+        Route::get('/', 'index')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/order', 'order');
     });
 
