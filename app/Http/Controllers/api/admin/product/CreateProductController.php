@@ -64,6 +64,7 @@ class CreateProductController extends Controller
         // product_descriptions[{product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $product_id = 0;
+        try{
             $default = $request->product_names[0];
             $default_description = $request->product_descriptions[0] ?? null;
             $productRequest = $request->only($this->productRequest);
@@ -197,12 +198,14 @@ class CreateProductController extends Controller
             return response()->json([
                 'success' => $request->all()
             ]);
+        } catch (\Throwable $th) {
             $this->products
             ->where('id', $product_id)
             ->delete();
             return response()->json([
                 'faild' => 'Something wrong'
             ], 400);
+        } 
     }
 
     public function modify(ProductRequest $request, $id){
@@ -229,10 +232,10 @@ class CreateProductController extends Controller
         //  أول عنصر هو default language
         $extra_num = [];
         $default = $request->product_names[0];
-        $default_description = $request->product_descriptions[0];
+        $default_description = $request->product_descriptions[0] ?? null;
         $productRequest = $request->only($this->productRequest);
         $productRequest['name'] = $default['product_name'];
-        $productRequest['description'] = $default_description['product_description'];
+        $productRequest['description'] = $default_description['product_description'] ?? null;
         
         $product = $this->products->
         where('id', $id)
@@ -244,13 +247,15 @@ class CreateProductController extends Controller
                 'value' => $item['product_name']
             ]); 
          }
-        foreach ($request->product_descriptions as $item) {
-            $product->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default_description['product_description'],
-                'value' => $item['product_description']
-            ]); 
-        }
+         if ($request->product_descriptions) {
+            foreach ($request->product_descriptions as $item) {
+                $product->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default_description['product_description'],
+                    'value' => $item['product_description']
+                ]); 
+            }
+         }
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/product/image');
             $productRequest['image'] = $imag_path;
