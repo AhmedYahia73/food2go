@@ -64,7 +64,7 @@ class CreateProductController extends Controller
         // product_descriptions[{product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $product_id = 0;
-        try{
+        // try{
             $default = $request->product_names[0];
             $default_description = $request->product_descriptions[0] ?? null;
             $productRequest = $request->only($this->productRequest);
@@ -198,14 +198,14 @@ class CreateProductController extends Controller
             return response()->json([
                 'success' => $request->all()
             ]);
-        } catch (\Throwable $th) {
-            $this->products
-            ->where('id', $product_id)
-            ->delete();
-            return response()->json([
-                'faild' => 'Something wrong'
-            ], 400);
-        } 
+        // } catch (\Throwable $th) {
+        //     $this->products
+        //     ->where('id', $product_id)
+        //     ->delete();
+        //     return response()->json([
+        //         'faild' => 'Something wrong'
+        //     ], 400);
+        // } 
     }
 
     public function modify(ProductRequest $request, $id){
