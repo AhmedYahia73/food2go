@@ -22,23 +22,28 @@ class BusinessSetupController extends Controller
         $maintenance = $this->maintenance
         ->orderByDesc('id')
         ->first();
-        $login = true;
+        $login_branch = true;
+        $login_customer = true;
+        $login_delivery = true;
         $login_web = true;
         if (($maintenance->start_date <= date('Y-m-d') && $maintenance->end_date >= date('Y-m-d') && $maintenance->status)
         || $maintenance->until_change && $maintenance->status) {
             if ($maintenance->all) {
-                $login = false;
+                $login_branch = false;
+                $login_customer = false;
+                $login_delivery = false;
+                $login_web = false;
             }
             if ($maintenance->branch && $role == 'branch') {
-                $login = false;
+                $login_branch = false;
             }
             if ($maintenance->customer && $role == 'customer') {
-                $login = false;
+                $login_customer = false;
             }
             if ($maintenance->delivery && $role == 'delivery') {
-                $login = false;
+                $login_delivery = false;
             }
-            if ($maintenance->web || !$login) {
+            if ($maintenance->web) {
                 $login_web = false;
             }
         }
@@ -94,7 +99,11 @@ class BusinessSetupController extends Controller
             'currency' => $company_info->currency ?? null,
             'min_order' => floatval($min_order),
             'time_slot' =>  $time_slot,
-            'today' => $today
+            'today' => $today, 
+            'login_branch' => $login_branch,
+            'login_customer' => $login_customer,
+            'login_delivery' => $login_delivery,
+            'login_web' => $login_web,
         ]);
     }
 
