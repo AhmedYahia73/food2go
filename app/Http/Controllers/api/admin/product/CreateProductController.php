@@ -68,7 +68,7 @@ class CreateProductController extends Controller
             $default_description = $request->product_descriptions[0] ?? null;
             $productRequest = $request->only($this->productRequest);
             $productRequest['name'] = $default['product_name'];
-            $productRequest['description'] = $default_description['product_description'];
+            $productRequest['description'] = $default_description['product_description'] ?? null;
             $extra_num = [];
     
             if (is_file($request->image)) {
@@ -84,7 +84,7 @@ class CreateProductController extends Controller
                     'value' => $item['product_name']
                 ]); 
              }
-             if (isset($request->product_descriptions)) {
+             if (($request->product_descriptions)) {
                 foreach ($request->product_descriptions as $item) {
                     $product->translations()->create([
                         'locale' => $item['tranlation_name'],
