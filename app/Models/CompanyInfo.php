@@ -27,13 +27,8 @@ class CompanyInfo extends Model
     public function getLogoLinkAttribute(){
         return url('storage/' . $attributes['logo']);
     }
-    public function getFavIconLinkAttribute(){
-        if (!empty($attributes['fav_icon_link'])) {
-            return url('storage/' . $attributes['fav_icon_link']);
-        }
-        else {
-            return null;
-        } 
+    public function getFavIconLinkAttribute(){ 
+        return url('storage/' . $attributes['fav_icon']);
     }
     public function currency(){
         return $this->belongsTo(Currency::class);
