@@ -25,10 +25,10 @@ class CompanyInfo extends Model
     protected $appends = ['logo_link', 'fav_icon_link'];
 
     public function getLogoLinkAttribute(){
-        return url('storage/' . $attributes['logo']);
+        return url('storage/' . $this->attributes['logo']);
     }
     public function getFavIconLinkAttribute(){ 
-        return url('storage/' . $attributes['fav_icon']);
+        return url('storage/' . $this->attributes['fav_icon']);
     }
     public function currency(){
         return $this->belongsTo(Currency::class);
