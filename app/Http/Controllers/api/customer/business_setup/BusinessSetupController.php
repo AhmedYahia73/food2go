@@ -92,7 +92,7 @@ class BusinessSetupController extends Controller
             'login_web' => $login_web,
             'company_info' => $company_info,
             'currency' => $company_info->currency ?? null,
-            'min_order' => $min_order,
+            'min_order' => floatval($min_order),
             'time_slot' =>  $time_slot,
             'today' => $today
         ]);
