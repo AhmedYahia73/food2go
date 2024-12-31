@@ -16,8 +16,7 @@ Route::prefix('logout')->middleware('auth:sanctum')->controller(LoginController:
     Route::post('/', 'logout');
 });
 
-Route::prefix('business_setup')->middleware('auth:sanctum')
-->controller(BusinessSetupController::class)->group(function(){
+Route::prefix('business_setup')->controller(BusinessSetupController::class)->group(function(){
     Route::get('/', 'business_setup');
 });
 
