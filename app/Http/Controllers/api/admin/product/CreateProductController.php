@@ -65,7 +65,7 @@ class CreateProductController extends Controller
         //  أول عنصر هو default language
         $product_id = 0;
             $default = $request->product_names[0];
-            $default_description = $request->product_descriptions[0];
+            $default_description = $request->product_descriptions[0] ?? null;
             $productRequest = $request->only($this->productRequest);
             $productRequest['name'] = $default['product_name'];
             $productRequest['description'] = $default_description['product_description'];
@@ -84,13 +84,15 @@ class CreateProductController extends Controller
                     'value' => $item['product_name']
                 ]); 
              }
-            foreach ($request->product_descriptions as $item) {
-                $product->translations()->create([
-                    'locale' => $item['tranlation_name'],
-                    'key' => $default_description['product_description'],
-                    'value' => $item['product_description']
-                ]); 
-            }
+             if (isset($request->product_descriptions)) {
+                foreach ($request->product_descriptions as $item) {
+                    $product->translations()->create([
+                        'locale' => $item['tranlation_name'],
+                        'key' => $default_description['product_description'],
+                        'value' => $item['product_description']
+                    ]); 
+                }
+             }
             if ($request->addons) {
                 $product->addons()->attach($request->addons); // add addons of product
             }
