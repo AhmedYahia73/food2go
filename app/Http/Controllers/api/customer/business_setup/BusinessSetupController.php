@@ -91,8 +91,7 @@ class BusinessSetupController extends Controller
         ];
         $today = Carbon::now()->format('l');
 
-        return response()->json([
-            'login' => $login,
+        return response()->json([ 
             'login_web' => $login_web,
             'company_info' => $company_info,
             'currency' => $company_info->currency ?? null,
