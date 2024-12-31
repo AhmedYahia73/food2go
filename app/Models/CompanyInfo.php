@@ -25,12 +25,7 @@ class CompanyInfo extends Model
     protected $appends = ['logo_link', 'fav_icon_link'];
 
     public function getLogoLinkAttribute(){
-        if (!empty($attributes['logo'])) {
-            return url('storage/' . $attributes['logo']);
-        }
-        else {
-            return null;
-        }
+        return url('storage/' . $attributes['logo']);
     }
     public function getFavIconLinkAttribute(){
         if (!empty($attributes['fav_icon_link'])) {
