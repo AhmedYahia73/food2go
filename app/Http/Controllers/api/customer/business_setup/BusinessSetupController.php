@@ -18,7 +18,6 @@ class BusinessSetupController extends Controller
     public function business_setup(Request $request){
         // https://bcknd.food2go.online/api/business_setup
         // Maintenance status
-        $role = $request->user()->role;
         $maintenance = $this->maintenance
         ->orderByDesc('id')
         ->first();
@@ -34,13 +33,13 @@ class BusinessSetupController extends Controller
                 $login_delivery = false;
                 $login_web = false;
             }
-            if ($maintenance->branch && $role == 'branch') {
+            if ($maintenance->branch) {
                 $login_branch = false;
             }
-            if ($maintenance->customer && $role == 'customer') {
+            if ($maintenance->customer) {
                 $login_customer = false;
             }
-            if ($maintenance->delivery && $role == 'delivery') {
+            if ($maintenance->delivery ) {
                 $login_delivery = false;
             }
             if ($maintenance->web) {
