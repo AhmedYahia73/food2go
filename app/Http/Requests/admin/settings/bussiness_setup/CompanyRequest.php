@@ -34,6 +34,9 @@ class CompanyRequest extends FormRequest
             'currency_id' => ['required', 'exists:currencies,id'],
             'currency_position' => ['required', 'in:left,right'],
             'copy_right' => ['required'],
+            'time_zone' => ['required'],
+            'country' => ['required'],
+            'logo' => ['required'],
         ];
     }
 
