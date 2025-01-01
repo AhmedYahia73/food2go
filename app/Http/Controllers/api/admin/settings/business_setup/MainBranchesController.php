@@ -5,7 +5,7 @@ namespace App\Http\Controllers\api\admin\settings\business_setup;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\branch\BranchRequest;
-use App\Http\Requests\admin\branch\UpdateBranchRequest;
+use App\Http\Requests\admin\settings\bussiness_setup\MainBranchRequest;
 use App\trait\image;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
@@ -41,7 +41,7 @@ class MainBranchesController extends Controller
         ]);
     }
     
-    public function update(UpdateBranchRequest $request){
+    public function update(MainBranchRequest $request){
         // https://bcknd.food2go.online/admin/settings/business_setup/branch/add 
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
