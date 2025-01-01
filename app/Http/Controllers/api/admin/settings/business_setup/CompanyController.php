@@ -45,6 +45,7 @@ class CompanyController extends Controller
         // name, phone, email, address, logo, fav_icon, time_zone, time_format => [24hours,am/pm],
         // currency_id, currency_position => [left,right], copy_right, logo, fav_icon, country
         $companyRequest = $request->validated(); 
+        $companyRequest['time_zone'] = $companyRequest['time_zone']->name;
         $company_info = $this->company_info
         ->orderByDesc('id')
         ->first();

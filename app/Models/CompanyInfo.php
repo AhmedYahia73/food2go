@@ -21,6 +21,7 @@ class CompanyInfo extends Model
         'currency_id', 
         'currency_position',
         'copy_right', 
+        'country',
     ];
     protected $appends = ['logo_link', 'fav_icon_link'];
 
