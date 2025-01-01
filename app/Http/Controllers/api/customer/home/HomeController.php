@@ -18,35 +18,47 @@ class HomeController extends Controller
     public function __construct(private Category $categories, private User $user,
     private Product $product, private Banner $banner, private Setting $settings){}
 
-    public function products(){
+    public function products(Request $request){
         // https://bcknd.food2go.online/customer/home
         $categories = $this->categories
         ->with(['sub_categories', 'addons'])
         ->where('category_id', null)
         ->get();
-        $products = $this->product
-        ->with(['favourite_product', 'addons', 'excludes', 'extra', 'discount', 
-        'variations.options.extra.parent_extra', 'sales_count', 'tax'])
-        ->where('item_type', '!=', 'offline')
-        ->get();
-        foreach ($products as $product) {
-            if (count($product->favourite_product) > 0) {
-                $product->favourite = true;
+        if ($request->user_id) {
+            $user_id = $request->user_id;
+            $products = $this->product
+            ->with(['favourite_product' => function($query) use($user_id){
+                $query->where('users.id', $user_id);
+            }, 'addons', 'excludes', 'extra', 'discount', 
+            'variations.options.extra.parent_extra', 'sales_count', 'tax'])
+            ->where('item_type', '!=', 'offline')
+            ->get();
+            foreach ($products as $product) {
+                if (count($product->favourite_product) > 0) {
+                    $product->favourite = true;
+                }
+                else {
+                    $product->favourite = false;
+                }
+                //get count of sales of product to detemine stock
+                if ($product->stock_type == 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                    $product->in_stock = $product->number > $product->count ? true : false;
+                }
+                elseif ($product->stock_type == 'daily') {
+                    $product->count = $product->sales_count
+                    ->where('date', date('Y-m-d'))
+                    ->sum('count');
+                    $product->in_stock = $product->number > $product->count ? true : false;
+                }
             }
-            else {
-                $product->favourite = false;
-            }
-            //get count of sales of product to detemine stock
-            if ($product->stock_type == 'fixed') {
-                $product->count = $product->sales_count->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            elseif ($product->stock_type == 'daily') {
-                $product->count = $product->sales_count
-                ->where('date', date('Y-m-d'))
-                ->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
+        }
+        else{
+            $products = $this->product
+            ->with(['addons', 'excludes', 'extra', 'discount', 
+            'variations.options.extra.parent_extra', 'sales_count', 'tax'])
+            ->where('item_type', '!=', 'offline')
+            ->get();
         }
         $discounts = $this->product
         ->with('discount')
