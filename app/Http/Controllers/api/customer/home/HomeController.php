@@ -139,7 +139,7 @@ class HomeController extends Controller
     public function filter_product(Request $request){
         // https://bcknd.food2go.online/customer/home/filter_product
         // Keys
-        // category_id, min_price, max_price
+        // category_id, min_price, max_price, user_id
         $validator = Validator::make($request->all(), [
             'category_id' => 'required|exists:categories,id',
             'min_price' => 'required|numeric',
@@ -151,12 +151,44 @@ class HomeController extends Controller
             ],400);
         }
 
-        $products = $this->product
-        ->where('category_id', $request->category_id)
-        ->where('price', '>=', $request->min_price)
-        ->where('price', '<=', $request->max_price)
-        ->with(['favourite_product', 'addons', 'excludes', 'extra', 'variations'])
-        ->get();
+        if ($request->user_id) {
+            $user_id = $request->user_id;
+            $products = $this->product
+            ->where('category_id', $request->category_id)
+            ->where('price', '>=', $request->min_price)
+            ->where('price', '<=', $request->max_price)
+            ->with(['favourite_product' => function($query) use($user_id){
+                $query->where('users.id', $user_id);
+            }, 'addons', 'excludes', 'extra', 'variations'])
+            ->get();
+            foreach ($products as $product) {
+                if (count($product->favourite_product) > 0) {
+                    $product->favourite = true;
+                }
+                else {
+                    $product->favourite = false;
+                }
+                //get count of sales of product to detemine stock
+                if ($product->stock_type == 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                    $product->in_stock = $product->number > $product->count ? true : false;
+                }
+                elseif ($product->stock_type == 'daily') {
+                    $product->count = $product->sales_count
+                    ->where('date', date('Y-m-d'))
+                    ->sum('count');
+                    $product->in_stock = $product->number > $product->count ? true : false;
+                }
+            }
+        }
+        else{
+            $products = $this->product
+            ->where('category_id', $request->category_id)
+            ->where('price', '>=', $request->min_price)
+            ->where('price', '<=', $request->max_price)
+            ->with(['addons', 'excludes', 'extra', 'variations'])
+            ->get();
+        }
 
         return response()->json([
             'products' => $products
