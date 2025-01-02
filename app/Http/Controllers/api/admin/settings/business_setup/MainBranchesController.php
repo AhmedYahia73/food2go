@@ -65,7 +65,7 @@ class MainBranchesController extends Controller
         ->with('city')
         ->first();
         $check = $this->branches
-        ->where('id', '!=', $branches->id ?? null)
+        ->where('id', '!=', $branches->id ?? 0)
         ->where('email', $request->email)
         ->where('phone', $request->phone)
         ->first();
