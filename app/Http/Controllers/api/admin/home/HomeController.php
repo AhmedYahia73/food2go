@@ -7,10 +7,14 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\Deal;
+use App\Models\User;
 
 class HomeController extends Controller
 {
-    public function __construct(private Order $orders){}
+    public function __construct(private Order $orders, private Product $products,
+    private Deal $deals, private User $users){}
 
     public function home(){
         // https://bcknd.food2go.online/admin/home
@@ -200,11 +204,39 @@ class HomeController extends Controller
             'Nov' => $orders_nov->sum('amount'),
             'Dec' => $orders_dec->sum('amount'),
         ];
+        $products = $this->products
+        ->get();
+        $top_selling = $products
+        ->sortByDesc('orders_count');       
+        $today = Carbon::now()->format('l');
+        $deals = $this->deals
+        ->with('times')
+        ->where('daily', 1)
+        ->where('status', 1)
+        ->where('start_date', '<=', date('Y-m-d'))
+        ->where('end_date', '>=', date('Y-m-d'))
+        ->orWhere('status', 1)
+        ->where('start_date', '<=', date('Y-m-d'))
+        ->where('end_date', '>=', date('Y-m-d'))
+        ->whereHas('times', function($query) use($today) {
+            $query->where('day', $today)
+            ->where('from', '<=', now()->format('H:i:s'))
+            ->where('to', '>=', now()->format('H:i:s'));
+        })
+        ->get();
+        $users = $this->users
+        ->get();
+        $top_customers = $users
+        ->sortByDesc('orders_count');
+
         return response()->json([
             'orders' => $orders_count,
             'order_statistics' => $order_statistics,
             'earning_statistics' => $earning_statistics,
-            'recent_orders' => $all_orders
+            'recent_orders' => $all_orders,
+            'top_selling' => $top_selling,
+            'offers' => $deals,
+            'top_customers' => $top_customers,
         ]);
     }
 }

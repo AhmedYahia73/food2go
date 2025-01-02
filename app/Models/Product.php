@@ -36,7 +36,7 @@ class Product extends Model
         'recommended',
         'points',
     ];
-    protected $appends = ['image_link'];
+    protected $appends = ['image_link', 'orders_count'];
 
     public function getImageLinkAttribute(){
         return url('storage/' . $this->attributes['image']);
@@ -85,5 +85,10 @@ class Product extends Model
     public function translations()
     {
         return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
+
+    public function getOrdersCountAttribute(){
+        return $this->belongsToMany(Order::class, 'order_product', 'product_id', 'order_id')
+        ->count();
     }
 }

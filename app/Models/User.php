@@ -36,7 +36,7 @@ class User extends Authenticatable
         'bio',
         'code',
     ];
-    protected $appends = ['role', 'image_link', 'name', 'type'];
+    protected $appends = ['role', 'orders_count', 'image_link', 'name', 'type'];
 
     public function getNameAttribute(){
         return $this->attributes['f_name'] . ' ' . $this->attributes['l_name'];
@@ -83,6 +83,11 @@ class User extends Authenticatable
 
     public function orders(){
         return $this->hasMany(Order::class, 'user_id');
+    }
+
+    public function getOrdersCountAttribute(){
+        return $this->hasMany(Order::class, 'user_id')
+        ->count();
     }
 
     public function favourite_product(){
