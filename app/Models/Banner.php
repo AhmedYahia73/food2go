@@ -20,6 +20,7 @@ class Banner extends Model
         'product_id',
         'deal_id',
         'translation_id',
+        'status',
     ];
     protected $appends = ['image_link'];
 

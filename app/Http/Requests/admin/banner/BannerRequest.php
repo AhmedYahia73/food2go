@@ -30,6 +30,7 @@ class BannerRequest extends FormRequest
             'category_id' => ['exists:categories,id', 'nullable'],
             'product_id' => ['exists:products,id', 'nullable'],
             'deal_id' => ['exists:deals,id', 'nullable'],
+            'status' => ['required', 'boolean'],
         ];
     }
 

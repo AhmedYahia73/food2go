@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\CategoryResource;
 
 use App\Models\Category;
 use App\Models\Product;
@@ -26,6 +27,7 @@ class HomeController extends Controller
         ->withLocale($locale)
         ->where('category_id', null)
         ->get();
+        $categories = CategoryResource::collection($categories);
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product

@@ -24,6 +24,7 @@ class BannerController extends Controller
         'category_id',
         'product_id',
         'deal_id',
+        'status',
     ];
     use image;
 
