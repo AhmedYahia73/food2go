@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Config;
 
 use App\Models\Admin;
+use App\Models\CompanyInfo;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $company = CompanyInfo::orderByDesc('id')
+        ->first();
+        $timezone = $company->time_zone ?? config('app.timezone');
+        Config::set('app.timezone', $timezone);
+        date_default_timezone_set($timezone);
         // if roles have home module
         Gate::define('isHome', function (Admin $user) {
             if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Home')){
