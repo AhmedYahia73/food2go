@@ -67,7 +67,8 @@ class AdminRolesController extends Controller
         $user_positions = $this->user_positions
         ->create($roleRequest);
         if ($request->roles) {
-            foreach ($request->roles as $role) {
+            $roles = json_decode($request->roles) ?? [];
+            foreach ($roles as $role) {
                 $this->user_roles
                 ->create([
                     'user_position_id' => $user_positions->id,

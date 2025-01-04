@@ -20,8 +20,10 @@ class HomeController extends Controller
 
     public function products(Request $request){
         // https://bcknd.food2go.online/customer/home
+        $locale = $request->query('locale', app()->getLocale()); // Get Local Translation
         $categories = $this->categories
         ->with(['sub_categories', 'addons'])
+        ->withLocale($locale)
         ->where('category_id', null)
         ->get();
         if ($request->user_id) {
