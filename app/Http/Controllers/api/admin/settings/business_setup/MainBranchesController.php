@@ -67,7 +67,8 @@ class MainBranchesController extends Controller
         $check = $this->branches
         ->where('id', '!=', $branches->id ?? 0)
         ->where('email', $request->email)
-        ->where('phone', $request->phone)
+        ->orWhere('phone', $request->phone)
+        ->where('id', '!=', $branches->id ?? 0)
         ->first();
 
         if (!empty($check)) {
