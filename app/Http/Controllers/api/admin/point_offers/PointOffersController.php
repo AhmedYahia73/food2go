@@ -91,11 +91,13 @@ class PointOffersController extends Controller
         $offer = $this->offers
         ->create($offerRequest);
         foreach ($request->offer_names as $item) {
-            $offer->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['offer_product'],
-                'value' => $item['offer_product']
-            ]); 
+            if (!empty($item['offer_product'])) {
+                $offer->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['offer_product'],
+                    'value' => $item['offer_product']
+                ]); 
+            }
         }
 
         return response()->json([
@@ -122,12 +124,15 @@ class PointOffersController extends Controller
             $this->deleteImage($offer->image);
         }
         $offer->update($offerRequest);
+        $offer->translations()->delete();
         foreach ($request->offer_names as $item) {
-            $offer->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['offer_product'],
-                'value' => $item['offer_product']
-            ]); 
+            if (!empty($item['offer_product'])) {
+                $offer->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['offer_product'],
+                    'value' => $item['offer_product']
+                ]); 
+            }
         }
 
         return response()->json([

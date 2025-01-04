@@ -98,26 +98,26 @@ class BannerController extends Controller
                 if (!is_string($item['image'])) {
                     $image_path = $this->uploadFile($item['image'], 'admin/banner/image');
                     $bannerRequest['image'] = $image_path;
+                    $bannerRequest['translation_id'] = $item['translation_id'];
+                    $banner = $this->banner
+                    ->create($bannerRequest);
+                    $banner->translations()->create([
+                        'locale' => $item['tranlation_name'],
+                        'key' => $image_path,
+                        'value' => $image_path
+                    ]);
                 }
-                $bannerRequest['translation_id'] = $item['translation_id'];
-                $banner = $this->banner
-                ->create($bannerRequest);
-                $banner->translations()->create([
-                    'locale' => $item['tranlation_name'],
-                    'key' => $image_path,
-                    'value' => $image_path
-                ]);
             }
             else{
                 if (!is_string($item['image'])) {
                     $image_translation_path = $this->uploadFile($item['image'], 'admin/banner/image');
                     $bannerRequest['image'] = $image_translation_path;
+                    $banner->translations()->create([
+                        'locale' => $item['tranlation_name'],
+                        'key' => $image_path,
+                        'value' => $image_translation_path
+                    ]);
                 }
-                $banner->translations()->create([
-                    'locale' => $item['tranlation_name'],
-                    'key' => $image_path,
-                    'value' => $image_translation_path
-                ]);
             }
         }
 

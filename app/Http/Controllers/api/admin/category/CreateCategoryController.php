@@ -73,11 +73,13 @@ class CreateCategoryController extends Controller
         $categories = $this->categories
         ->create($categoryRequest); // create category
         foreach ($request->category_names as $item) {
-            $categories->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['category_name'],
-                'value' => $item['category_name']
-            ]);
+            if (!empty($item['category_name'])) {
+                $categories->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['category_name'],
+                    'value' => $item['category_name']
+                ]);
+            }
         }
         if ($request->addons_id) { 
             $categories->addons()->attach($request->addons_id);
@@ -137,12 +139,15 @@ class CreateCategoryController extends Controller
             $categoryRequest['banner_image'] = $imag_path;
         } // if send new image delete old image and add new image
         $category->update($categoryRequest); // update category
+        $category->translations()->delete();
         foreach ($request->category_names as $item) {
-            $category->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['category_name'],
-                'value' => $item['category_name']
-            ]); 
+            if (!empty($item['category_name'])) {
+                $category->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['category_name'],
+                    'value' => $item['category_name']
+                ]); 
+            }
         }
 
         $category->addons()->sync($request->addons_id);

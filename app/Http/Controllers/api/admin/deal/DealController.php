@@ -133,18 +133,22 @@ class DealController extends Controller
         $deal = $this->deals
         ->create($dealRequest);
         foreach ($request->deal_names as $item) {
-            $deal->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['deal_title'],
-                'value' => $item['deal_title']
-            ]); 
+            if (!empty($item['deal_title'])) {
+                $deal->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['deal_title'],
+                    'value' => $item['deal_title']
+                ]); 
+            }
         }
         foreach ($request->deal_descriptions as $item) {
-            $deal->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default_description['deal_description'],
-                'value' => $item['deal_description']
-            ]);  
+            if (!empty($item['deal_description'])) {
+                $deal->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default_description['deal_description'],
+                    'value' => $item['deal_description']
+                ]);
+            }
         }
         if ($request->times) {
             foreach ($request->times as $item) {
@@ -180,19 +184,24 @@ class DealController extends Controller
         $deal = $this->deals
         ->where('id', $id)
         ->first();
+        $deal->translations()->delete();
         foreach ($request->deal_names as $item) {
-            $deal->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['deal_title'],
-                'value' => $item['deal_title']
-            ]); 
+            if (!empty($item['deal_title'])) {
+                $deal->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['deal_title'],
+                    'value' => $item['deal_title']
+                ]);
+            }
         }
         foreach ($request->deal_descriptions as $item) {
-            $deal->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default_description['deal_description'],
-                'value' => $item['deal_description']
-            ]);  
+            if (!empty($item['deal_description'])) {
+                $deal->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default_description['deal_description'],
+                    'value' => $item['deal_description']
+                ]);  
+            }
         }
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'admin/deals/image');

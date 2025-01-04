@@ -88,11 +88,13 @@ class AddonController extends Controller
         ->create($addonRequest);
 
         foreach ($request->addon_names as $item) {
-            $addon->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['addon_name'],
-                'value' => $item['addon_name']
-            ]); 
+            if (!empty($item['addon_name'])) {
+                $addon->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['addon_name'],
+                    'value' => $item['addon_name']
+                ]); 
+            }
         }
 
         return response()->json([
@@ -114,12 +116,15 @@ class AddonController extends Controller
         ->where('id', $id)
         ->first();
         $addon->update($addonRequest);
+        $addon->translations()->delete(); 
         foreach ($request->addon_names as $item) {
-            $addon->translations()->create([
-                'locale' => $item['tranlation_name'],
-                'key' => $default['addon_name'],
-                'value' => $item['addon_name']
-            ]);  
+            if (!empty($item['addon_name'])) {
+                $addon->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['addon_name'],
+                    'value' => $item['addon_name']
+                ]); 
+            } 
         }
 
         return response()->json([

@@ -108,7 +108,7 @@ class AdminRolesController extends Controller
     }
 
     public function delete($id){
-        // https://bcknd.food2go.online/admin/admin_roles/update/{id}
+        // https://bcknd.food2go.online/admin/admin_roles/delete/{id}
         $user_positions = $this->user_positions
         ->where('id', $id)
         ->delete();
