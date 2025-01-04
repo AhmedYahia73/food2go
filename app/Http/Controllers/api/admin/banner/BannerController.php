@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\trait\image;
 use App\Http\Requests\admin\banner\BannerRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Banner;
 use App\Models\Translation;
@@ -83,6 +85,27 @@ class BannerController extends Controller
             'categories' => $categories,
             'products' => $products,
             'deals' => $deals,
+        ]);
+    }
+
+    public function status(Request $request, $id){
+        // https://bcknd.food2go.online/admin/banner/status/{id}
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $banners = $this->banner
+        ->where('id', $id)
+        ->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'success' => $request->status ? 'active' : 'banned',
         ]);
     }
     
