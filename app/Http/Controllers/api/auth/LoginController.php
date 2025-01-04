@@ -11,11 +11,12 @@ use App\Models\Admin;
 use App\Models\Delivery;
 use App\Models\User;
 use App\Models\Branch;
+use App\Models\Setting;
 
 class LoginController extends Controller
 {
-    public function __construct(private Admin $admin, private Delivery $delivery, private User $user, 
-    private Branch $branch){}
+    public function __construct(private Admin $admin, private Delivery $delivery, 
+    private User $user, private Branch $branch, private Setting $settings){}
 
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login

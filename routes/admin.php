@@ -258,7 +258,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
         Route::controller(OrderTypeController::class)
         ->prefix('order_type')->group(function(){
-            Route::get('/', 'view');
+            Route::get('/', 'view')->withOutMiddleware(['auth:sanctum', 'IsAdmin', 'can:isSettings']);
             Route::put('/update', 'modify');
         });
 
