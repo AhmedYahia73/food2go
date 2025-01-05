@@ -14,6 +14,18 @@ class ExtraResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        $locale = app()->getLocale(); // Use the application's current locale
+        return [
+            'id' => $this->id,
+            'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
+            'price' => $this->price,
+            'product_id' => $this->product_id,
+            'variation_id' => $this->variation_id,
+            'extra_id' => $this->extra_id,
+            'option_id' => $this->option_id,
+            'parent_extra' => ExtraResource::collection($this->whenLoaded('parent_extra')),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 }

@@ -26,12 +26,19 @@ class Admin extends Authenticatable
         'status',
         'email_verified_at',
     ];
-    protected $appends = ['role'];
+    protected $appends = ['role', 'image_link', 'identity_image_link'];
 
     public function getRoleAttribute(){
         return 'admin';
     }
 
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
+    }
+
+    public function getIdentityImageLinkAttribute(){
+        return url('storage/' . $this->attributes['identity_image']);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

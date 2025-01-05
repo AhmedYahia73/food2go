@@ -14,6 +14,13 @@ class ExcludeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        $locale = app()->getLocale(); // Use the application's current locale
+        return [
+            'id' => $this->id,
+            'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
+            'product_id' => $this->product_id,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 }

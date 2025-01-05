@@ -27,16 +27,13 @@ class CategoryResource extends JsonResource
             'active' => $this->active,
             'image_link' => $this->image_link,
             'banner_link' => $this->banner_link,
-
             'sub_categories' => CategoryResource::collection($this->whenLoaded('sub_categories')),
             'parent_categories' => CategoryResource::collection($this->whenLoaded('parent_categories')),
             'parent' => CategoryResource::collection($this->whenLoaded('parent')),
-
-            'products' => $this->whenLoaded('products'),
-            'category_products' => $this->whenLoaded('category_products'),
+            'products' => ProductResource::collection($this->whenLoaded('products')),
+            'category_products' => ProductResource::collection($this->whenLoaded('category_products')),
             'addons' => AddonResource::collection($this->whenLoaded('addons')),
            //'tax' => ExtraResource::collection($this->whenLoaded('extras')),
-   
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

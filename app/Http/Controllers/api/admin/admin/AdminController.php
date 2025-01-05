@@ -31,7 +31,9 @@ class AdminController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/admin
         $admins = $this->admins
-        ->with('user_positions')->get();
+        ->with('user_positions')
+        ->where('id', '!=', auth()->user()->id)
+        ->get();
         $user_positions = $this->user_positions
         ->where('status', 1)
         ->get();

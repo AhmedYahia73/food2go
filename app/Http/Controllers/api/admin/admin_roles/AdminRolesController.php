@@ -94,7 +94,8 @@ class AdminRolesController extends Controller
         ->where('user_position_id', $id)
         ->delete();
         if ($request->roles) {
-            foreach ($request->roles as $role) {
+            $roles = json_decode($request->roles) ?? [];
+            foreach ($roles as $role) {
                 $this->user_roles
                 ->create([
                     'user_position_id' => $id,
