@@ -50,9 +50,13 @@ class AdminController extends Controller
         ->where('id', $id)
         ->with('user_positions')
         ->first();
+        $user_positions = $this->user_positions
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'admin' => $admin,
+            'user_positions' => $user_positions
         ]);
     }
 
