@@ -74,12 +74,12 @@ class MainBranchesController extends Controller
         if (!empty($check)) {
             if ($check->email == $request->email) {
                 return response()->json([
-                    'faild' => 'email is exist you must select another email'
+                    'errors' => 'email is exist you must select another email'
                 ], 400);
             }
             if ($check->phone == $request->phone) {
                 return response()->json([
-                    'faild' => 'phone is exist you must select another phone'
+                    'errors' => 'phone is exist you must select another phone'
                 ], 400);
             }
         }
