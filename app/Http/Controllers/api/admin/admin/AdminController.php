@@ -22,7 +22,6 @@ class AdminController extends Controller
         'identity_number',
         'email',
         'phone',
-        'password',
         'user_position_id',
         'status',
     ];
@@ -104,6 +103,7 @@ class AdminController extends Controller
             $imag_path = $this->upload($request, 'identity_image', 'users/admin/identity_image');
             $adminRequest['identity_image'] = $imag_path;
         }
+        $adminRequest['password'] = $request->password;
         $this->admins->create($adminRequest);
 
         return response()->json([
@@ -128,6 +128,9 @@ class AdminController extends Controller
             $imag_path = $this->upload($request, 'identity_image', 'users/admin/identity_image');
             $adminRequest['identity_image'] = $imag_path;
             $this->deleteImage($admin->identity_image);
+        }
+        if (!empty($request->password)) {
+            $adminRequest['password'] = $request->password;
         }
         $admin->update($adminRequest);
 
