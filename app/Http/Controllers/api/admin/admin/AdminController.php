@@ -44,6 +44,17 @@ class AdminController extends Controller
         ]);
     }
 
+    public function admin($id){
+        // https://bcknd.food2go.online/admin/admin/item/{id}
+        $admin = $this->admins
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'admin' => $admin,
+        ]);
+    }
+
     public function status(Request $request, $id){
         // https://bcknd.food2go.online/admin/admin/status/{id}
         // Keys
