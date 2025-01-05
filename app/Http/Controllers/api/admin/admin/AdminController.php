@@ -48,6 +48,7 @@ class AdminController extends Controller
         // https://bcknd.food2go.online/admin/admin/item/{id}
         $admin = $this->admins
         ->where('id', $id)
+        ->with('user_positions')
         ->first();
 
         return response()->json([
