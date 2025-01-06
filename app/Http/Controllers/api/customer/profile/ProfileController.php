@@ -44,4 +44,12 @@ class ProfileController extends Controller
             'success' => 'You update customer success'
         ]);
     }
+
+    public function delete_account(Request $request){
+        $request->user()->delete();
+
+        return response()->json([
+            'success' => 'You delete account success'
+        ]);
+    }
 }
