@@ -27,14 +27,17 @@ class OrderTypeController extends Controller
                 'name' => 'order_type',
                 'setting' => json_encode([
                     [
+                        'id' => 1,
                         'type' => 'take_away',
                         'status' => 1
                     ],
                     [
+                        'id' => 2,
                         'type' => 'dine_in',
                         'status' => 1
                     ],
                     [
+                        'id' => 3,
                         'type' => 'delivery',
                         'status' => 1
                     ]
