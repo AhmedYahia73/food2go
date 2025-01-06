@@ -46,7 +46,6 @@ class TimeSlotController extends Controller
         // "custom": ["Sunday","Monday"]
         $validator = Validator::make($request->all(), [
             'daily' => 'required|array',
-            'custom' => 'required|array',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -54,7 +53,7 @@ class TimeSlotController extends Controller
             ],400);
         }
         $daily = $request->daily;
-        $custom = $request->custom;
+        $custom = $request->custom ?? [];
         $setting = [
             'daily' => $daily,
             'custom' => $custom,
