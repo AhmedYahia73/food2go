@@ -36,6 +36,7 @@ class HomeController extends Controller
             }, 'addons', 'excludes', 'extra', 'discount', 
             'variations.options.extra.parent_extra', 'sales_count', 'tax'])
             ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
             ->get();
             foreach ($products as $product) {
                 if (count($product->favourite_product) > 0) {
@@ -62,6 +63,7 @@ class HomeController extends Controller
             ->with(['addons', 'excludes', 'extra', 'discount', 
             'variations.options.extra.parent_extra', 'sales_count', 'tax'])
             ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
             ->get();
         }
         $discounts = $this->product
@@ -164,6 +166,7 @@ class HomeController extends Controller
             ->with(['favourite_product' => function($query) use($user_id){
                 $query->where('users.id', $user_id);
             }, 'addons', 'excludes', 'extra', 'variations'])
+            ->where('status', 1)
             ->get();
             foreach ($products as $product) {
                 if (count($product->favourite_product) > 0) {
@@ -191,6 +194,7 @@ class HomeController extends Controller
             ->where('price', '>=', $request->min_price)
             ->where('price', '<=', $request->max_price)
             ->with(['addons', 'excludes', 'extra', 'variations'])
+            ->where('status', 1)
             ->get();
         }
 
