@@ -25,7 +25,7 @@ class ZoneRequest extends FormRequest
     {
         return [
             'city_id' => ['required', 'exists:cities,id'],
-            'branch_id' => ['exists:branches,id'],
+            'branch_id' => ['exists:branches,id', 'nullable'],
             'price' => ['required', 'numeric'],
             'zone' => ['required']
         ];
