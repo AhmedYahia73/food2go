@@ -37,7 +37,7 @@ trait PlaceOrder
                     'paymentMethod.message' => 'This Payment Method Unavailable ',
                 ], 404);
             }
-            $order = $this->make_order($request);
+            $order = $this->make_order($request, 1);
         } catch (\Throwable $th) {
             throw new HttpResponseException(response()->json(['error' => 'Payment processing failed'], 500));
         }
@@ -117,7 +117,7 @@ trait PlaceOrder
     {
     }
 
-    public function make_order($request){
+    public function make_order($request, $paymob = 0){
         $orderRequest = $request->only($this->paymentRequest); 
         $user = auth()->user();
         $orderRequest['user_id'] = $user->id;
@@ -261,6 +261,9 @@ trait PlaceOrder
             }
         }
         $order->order_details = json_encode($order_details);
+        if ($paymob) {
+            $order->status = 2;
+        }
         $order->save();
 
         return [
