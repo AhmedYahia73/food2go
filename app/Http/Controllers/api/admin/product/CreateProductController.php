@@ -254,7 +254,7 @@ class CreateProductController extends Controller
         $product = $this->products->
         where('id', $id)
         ->first(); // get product
-        $product->translations()->delete();
+        $product->translations()->delete() ?? null;
         foreach ($request->product_names as $item) {
             if (!empty($item['product_name'])) {
                 $product->translations()->create([
@@ -287,7 +287,7 @@ class CreateProductController extends Controller
         $exclude = $this->excludes
         ->where('product_id', $id)
         ->first();
-        $exclude->translations()->delete();
+        $exclude->translations()->delete() ?? null;
 
         $this->excludes
         ->where('product_id', $id)
@@ -313,7 +313,7 @@ class CreateProductController extends Controller
         $extra = $this->extra
         ->where('product_id', $id)
         ->first();
-        $extra->translations()->delete();
+        $extra->translations()->delete() ?? null;
         $this->extra
         ->where('product_id', $id)
         ->delete(); // delete old extra
@@ -340,7 +340,7 @@ class CreateProductController extends Controller
         $variations = $this->variations
         ->where('product_id', $id)
         ->first();
-        $variations->translations()->delete();
+        $variations->translations()->delete() ?? null;
         $this->variations
         ->where('product_id', $id)
         ->delete(); // delete old product
