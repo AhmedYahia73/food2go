@@ -253,10 +253,10 @@ class CreateProductController extends Controller
         
         $product = $this->products->
         where('id', $id)
-        ->first(); // get produc
+        ->first(); // get product
         if ($product->translations()) {
         $product->translations()->delete();            # code...
-        }t
+        }
         foreach ($request->product_names as $item) {
             if (!empty($item['product_name'])) {
                 $product->translations()->create([
