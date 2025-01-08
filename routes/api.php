@@ -32,6 +32,7 @@ Route::prefix('user/auth')->group(function(){
     Route::controller(SignupController::class)->group(function(){
         Route::post('signup', 'signup');
         Route::post('signup/code', 'code');
+        Route::post('signup/phone_code', 'otp_phone');
     });
 });
 
