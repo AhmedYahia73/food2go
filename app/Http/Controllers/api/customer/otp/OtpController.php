@@ -111,10 +111,13 @@ class OtpController extends Controller
         }
         $user->password = $request->password;
         $user->code = null;
-        $user->save();
+        $user->save(); 
+        $user->role = 'customer';
+        $user->token = $user->createToken('customer')->plainTextToken;
 
         return response()->json([
-            'success' => 'You change password success'
-        ]);
+            'user' => $user,
+            'token' => $user->token,
+        ], 200);
     }
 }
