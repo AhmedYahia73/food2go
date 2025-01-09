@@ -26,7 +26,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -41,7 +40,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -57,7 +55,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -73,7 +70,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -89,7 +85,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -105,7 +100,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -121,7 +115,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -137,7 +130,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -153,7 +145,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -169,7 +160,6 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
-        ->where('status', '!=', 2)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -205,7 +195,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
         ->count();
@@ -215,7 +204,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'pending')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
@@ -226,7 +214,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'confirmed')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
@@ -237,7 +224,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'processing')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
@@ -248,7 +234,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'out_for_delivery')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
@@ -259,7 +244,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'delivered')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
@@ -270,7 +254,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'returned')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
@@ -281,7 +264,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'faild_to_deliver')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
@@ -292,7 +274,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'canceled')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
@@ -303,7 +284,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('status', '!=', 2)
         ->where('order_status', 'scheduled')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'delivery'])
