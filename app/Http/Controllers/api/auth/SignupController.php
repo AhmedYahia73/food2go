@@ -92,7 +92,6 @@ class SignupController extends Controller
     
     private function sendOtp($phone, $otp)
     {
-        
         // Send OTP using Mobishastra API
         try {
             $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [

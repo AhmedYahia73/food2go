@@ -90,9 +90,8 @@ class OtpController extends Controller
     public function change_password(Request $request){
         // https://bcknd.food2go.online/customer/otp/change_password
         // Keys
-        // code, email, password
+        // email, password
         $validator = Validator::make($request->all(), [
-            'code' => 'required',
             'email' => 'required',
             'password' => 'required',
         ]);
