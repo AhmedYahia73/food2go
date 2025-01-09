@@ -94,6 +94,7 @@ class OtpController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required',
             'password' => 'required',
+            'code' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
