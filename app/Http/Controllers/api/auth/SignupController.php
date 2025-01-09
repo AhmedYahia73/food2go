@@ -79,6 +79,11 @@ class SignupController extends Controller
         $temporaryToken = Str::random(40);
         $otp = rand(10000, 99999);  // Generate OTP
         $phone = $request->phone;
+        $user = $this->user
+        ->where('phone', $request->phone)
+        ->update([
+            'code' => $request->code
+        ]);
     
         // Send OTP to the new user
         $this->sendOtp($phone, $otp);
