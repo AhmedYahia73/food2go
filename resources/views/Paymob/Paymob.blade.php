@@ -97,7 +97,7 @@
         document.getElementById('success-message').textContent = response.success;
     });
     setTimeout(() => {
-        window.close();
+        window.closeWebView();
     }, 3000); // Delay of 2 seconds (2000 milliseconds)
 </script>
 </html>
