@@ -77,6 +77,7 @@ class MakeOrderController extends Controller
         ->first();
         //this call back function its return the data from paymob and we show the full response and we checked if hmac is correct means successfull payment
         $data = $request->all();
+        $appUrl = env('Mobile_URL');
         ksort($data);
         $hmac = $data['hmac'];
         $array = [
@@ -130,8 +131,7 @@ class MakeOrderController extends Controller
                 ->first();
                 $user->points += $order->points;
                 $user->save();
-                
-                return view('Paymob.Paymob');
+                return redirect($appUrl . '://callback_success');
             //    return redirect()->away($redirectUrl . '?' . http_build_query([
             //    'success' => true,
             //    'payment_id' => $payment_id,
@@ -146,11 +146,12 @@ class MakeOrderController extends Controller
                 $order->update([
                     'payment_status' => 'faild'
                 ]);
-                return response()->json(['message' => 'Something Went Wrong Please Try Again']);
+                return view('Paymob.Paymob');
+                //return redirect($appUrl . '://callback_faild');
             }
         } 
         else {
-            return response()->json(['message' => 'Something Went Wrong Please Try Again']);
+            return redirect($appUrl . '://callback_faild');
         }
     }
 
