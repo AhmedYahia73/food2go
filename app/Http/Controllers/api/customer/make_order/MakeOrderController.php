@@ -131,7 +131,7 @@ class MakeOrderController extends Controller
                 $user->points += $order->points;
                 $user->save();
                 
-                return response()->json(['success' => 'You make proccess success']);
+                return view('Paymob.Paymob');
             //    return redirect()->away($redirectUrl . '?' . http_build_query([
             //    'success' => true,
             //    'payment_id' => $payment_id,
