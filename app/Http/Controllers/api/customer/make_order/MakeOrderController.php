@@ -77,7 +77,7 @@ class MakeOrderController extends Controller
         ->first();
         //this call back function its return the data from paymob and we show the full response and we checked if hmac is correct means successfull payment
         $data = $request->all();
-        $appUrl = env('APP_URL');
+        $appUrl = env('Mobile_URL');
         ksort($data);
         $hmac = $data['hmac'];
         $array = [
