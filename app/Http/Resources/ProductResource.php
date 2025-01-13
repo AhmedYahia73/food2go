@@ -40,7 +40,7 @@ class ProductResource extends JsonResource
             'subCategory' => CategoryResource::collection($this->whenLoaded('subCategory')),
             'discount' => $this->whenLoaded('discount'),
             'tax' => $this->whenLoaded('tax'),
-            'addons' => AddonResource::collection($this->whenLoaded('addons')->withLocale($locale)),
+            'addons' => AddonResource::collection($this->whenLoaded('addons')),
             'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')),
             'extra' => ExtraResource::collection($this->whenLoaded('extra')),
             'variations' => VariationResource::collection($this->whenLoaded('variations')),
