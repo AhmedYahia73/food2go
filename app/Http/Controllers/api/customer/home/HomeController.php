@@ -145,6 +145,82 @@ class HomeController extends Controller
         ]);
     }
 
+    public function web_products(Request $request){
+        // https://bcknd.food2go.online/customer/home/web_products
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $categories = $this->categories
+        ->with(['sub_categories' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 
+        'addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }])
+        ->withLocale($locale)
+        ->where('category_id', null)
+        ->get();
+    
+        $products = $this->product
+        ->with(['addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'excludes' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'extra' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'discount', 
+        'variations' => function($query) use($locale){
+            $query->withLocale($locale)
+            ->with(['options' => function($query_option) use($locale){
+                $query_option->with(['extra' => function($query_extra) use($locale){
+                    $query_extra->with('parent_extra')
+                    ->withLocale($locale);
+                }])
+                ->withLocale($locale);
+            }]);
+        }, 'sales_count', 'tax'])
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->where('status', 1)
+        ->get();
+            
+        $discounts = $this->product
+        ->with('discount')
+        ->whereHas('discount')
+        ->get();
+        $resturant_time = $this->settings
+        ->where('name', 'resturant_time')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($resturant_time)) {
+            $resturant_time = $resturant_time->setting;
+            $resturant_time = json_decode($resturant_time) ?? $resturant_time;
+        }
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+        $categories = CategoryResource::collection($categories);
+        $products = ProductResource::collection($products);
+
+        return response()->json([
+            'categories' => $categories,
+            'products' => $products,
+            'discounts' => $discounts,
+            'resturant_time' => $resturant_time,
+            'tax' => $tax,
+        ]);
+    }
+
     public function fav_products(Request $request){
         // https://bcknd.food2go.online/customer/home/fav_products
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation   
