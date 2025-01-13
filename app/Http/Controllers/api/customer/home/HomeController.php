@@ -24,7 +24,12 @@ class HomeController extends Controller
         // https://bcknd.food2go.online/customer/home
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $categories = $this->categories
-        ->with(['sub_categories', 'addons'])
+        ->with(['sub_categories' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 
+        'addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }])
         ->withLocale($locale)
         ->where('category_id', null)
         ->get();
