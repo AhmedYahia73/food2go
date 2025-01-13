@@ -23,7 +23,7 @@ class OptionResource extends JsonResource
             'variation_id' => $this->variation_id,
             'status' => $this->status,
             'points' => $this->points,
-            'extra' => ExtraResource::collection($this->whenLoaded('extra')),
+          //  'extra' => ExtraResource::collection($this->whenLoaded('extra')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

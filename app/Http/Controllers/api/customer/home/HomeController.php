@@ -94,7 +94,7 @@ class HomeController extends Controller
             $tax = $tax->setting;
         }
         $categories = CategoryResource::collection($categories);
-        $categories = ProductResource::collection($categories);
+        $products = ProductResource::collection($products);
 
         return response()->json([
             'categories' => $categories,
