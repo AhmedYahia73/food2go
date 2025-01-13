@@ -100,7 +100,7 @@ class SignupController extends Controller
         // Send OTP using Mobishastra API
         try {
             $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
-                'user' => 'WEGOAPI',
+                'user' => '20101263',
                 'pwd' => 'L@m@d@2005',
                 'senderid' => 'Lamada',
                 'mobileno' => $phone,
