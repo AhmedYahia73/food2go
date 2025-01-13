@@ -67,7 +67,13 @@ class HomeController extends Controller
         }
         else{
             $products = $this->product
-            ->with(['addons', 'excludes', 'extra', 'discount', 
+            ->with([ 'addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'excludes' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'extra' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'discount', 
             'variations.options.extra.parent_extra', 'sales_count', 'tax'])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
