@@ -23,6 +23,7 @@ class OffersController extends Controller
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $offers = $this->offers
         ->withLocale($locale)->get();
+        $deals = DealResource::collection($deals);
 
         return response()->json([
             'offers' => $offers

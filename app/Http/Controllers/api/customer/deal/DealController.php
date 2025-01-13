@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\DealResource;
 
 use App\Models\Deal;
 use App\Models\DealTimes;
@@ -35,6 +36,7 @@ class DealController extends Controller
         })
         ->withLocale($locale)
         ->get();
+        $deals = DealResource::collection($deals);
         
         return response()->json([
             'deals' => $deals,
