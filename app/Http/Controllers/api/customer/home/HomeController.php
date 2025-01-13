@@ -35,9 +35,9 @@ class HomeController extends Controller
                 $query->where('users.id', $user_id);
             }, 'addons' => function($query) use($locale){
                 $query->withLocale($locale);
-            }, 'excludes' => function($query){
+            }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
-            }, 'extra' => function($query){
+            }, 'extra' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'discount', 
             'variations.options.extra.parent_extra', 'sales_count', 'tax'])
