@@ -14,11 +14,13 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Banner;
 use App\Models\Setting;
+use App\Models\Translation;
 
 class HomeController extends Controller
 {
     public function __construct(private Category $categories, private User $user,
-    private Product $product, private Banner $banner, private Setting $settings){}
+    private Product $product, private Banner $banner, private Setting $settings,
+    private Translation $translations){}
 
     public function products(Request $request){
         // https://bcknd.food2go.online/customer/home
@@ -260,6 +262,17 @@ class HomeController extends Controller
 
         return response()->json([
             'products' => $products
+        ]);
+    }
+
+    public function translation(){
+        // https://bcknd.food2go.online/customer/home/translation
+        $translation = $this->translations
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'translation' => $translation
         ]);
     }
 }

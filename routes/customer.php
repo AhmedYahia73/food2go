@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::post('/', 'products')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/slider', 'slider')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/translation', 'translation')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
     });
@@ -54,7 +55,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::put('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
     });
-    
+
     Route::controller(MakeOrderController::class)->prefix('make_order')->group(function(){
         Route::post('/', 'order'); 
         Route::any('/callback', 'callback')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
