@@ -205,7 +205,15 @@ class HomeController extends Controller
             ->where('price', '<=', $request->max_price)
             ->with(['favourite_product' => function($query) use($user_id){
                 $query->where('users.id', $user_id);
-            }, 'addons', 'excludes', 'extra', 'variations'])
+            }, 'addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'excludes' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'extra' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'variations' => function($query) use($locale){
+                $query->withLocale($locale);
+            }])
             ->where('status', 1)
             ->get();
             foreach ($products as $product) {
@@ -233,10 +241,19 @@ class HomeController extends Controller
             ->where('category_id', $request->category_id)
             ->where('price', '>=', $request->min_price)
             ->where('price', '<=', $request->max_price)
-            ->with(['addons', 'excludes', 'extra', 'variations'])
+            ->with(['addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'excludes' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'extra' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'variations' => function($query) use($locale){
+                $query->withLocale($locale);
+            }])
             ->where('status', 1)
             ->get();
         }
+        $products = ProductResource::collection($products);
 
         return response()->json([
             'products' => $products
