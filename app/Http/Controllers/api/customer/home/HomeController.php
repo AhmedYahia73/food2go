@@ -40,7 +40,16 @@ class HomeController extends Controller
             }, 'extra' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'discount', 
-            'variations.options.extra.parent_extra', 'sales_count', 'tax'])
+            'variations' => function($query) use($locale){
+                $query->withLocale($locale)
+                ->with(['options' => function($query_option) use($locale){
+                    $query_option->with(['extra' => function($query_extra) use($locale){
+                        $query_extra->with('parent_extra')
+                        ->withLocale($locale);
+                    }])
+                    ->withLocale($locale);
+                }]);
+            }, 'sales_count', 'tax'])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
@@ -74,7 +83,17 @@ class HomeController extends Controller
             }, 'extra' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'discount', 
-            'variations.options.extra.parent_extra', 'sales_count', 'tax'])
+             
+            'variations' => function($query) use($locale){
+                $query->withLocale($locale)
+                ->with(['options' => function($query_option) use($locale){
+                    $query_option->with(['extra' => function($query_extra) use($locale){
+                        $query_extra->with('parent_extra')
+                        ->withLocale($locale);
+                    }])
+                    ->withLocale($locale);
+                }]);
+            }, 'sales_count', 'tax'])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
