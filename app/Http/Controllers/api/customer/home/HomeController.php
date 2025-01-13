@@ -35,6 +35,7 @@ class HomeController extends Controller
                 $query->where('users.id', $user_id);
             }, 'addons', 'excludes', 'extra', 'discount', 
             'variations.options.extra.parent_extra', 'sales_count', 'tax'])
+            ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
             ->get();
@@ -62,6 +63,7 @@ class HomeController extends Controller
             $products = $this->product
             ->with(['addons', 'excludes', 'extra', 'discount', 
             'variations.options.extra.parent_extra', 'sales_count', 'tax'])
+            ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
             ->get();
