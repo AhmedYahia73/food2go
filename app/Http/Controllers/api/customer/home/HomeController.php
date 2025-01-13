@@ -145,6 +145,60 @@ class HomeController extends Controller
         ]);
     }
 
+    public function fav_products(Request $request){
+        // https://bcknd.food2go.online/customer/home/fav_products
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation   
+        $user_id = $request->user_id;
+        $products = $this->product
+        ->with(['favourite_product', 
+        'addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'excludes' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'extra' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'discount', 
+        'variations' => function($query) use($locale){
+            $query->withLocale($locale)
+            ->with(['options' => function($query_option) use($locale){
+                $query_option->with(['extra' => function($query_extra) use($locale){
+                    $query_extra->with('parent_extra')
+                    ->withLocale($locale);
+                }])
+                ->withLocale($locale);
+            }]);
+        }, 'sales_count', 'tax'])
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->where('status', 1)
+        ->get();
+        foreach ($products as $product) {
+            if (count($product->favourite_product) > 0) {
+                $product->favourite = true;
+            }
+            else {
+                $product->favourite = false;
+            }
+            //get count of sales of product to detemine stock
+            if ($product->stock_type == 'fixed') {
+                $product->count = $product->sales_count->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            elseif ($product->stock_type == 'daily') {
+                $product->count = $product->sales_count
+                ->where('date', date('Y-m-d'))
+                ->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+        }
+             
+        $products = ProductResource::collection($products);
+
+        return response()->json([
+            'products' => array_values($products->where('favourite', true)->toArray()),
+        ]);
+    }
+
     public function slider(){
         // https://bcknd.food2go.online/customer/home/slider
         $banners = $this->banner

@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/translation', 'translation')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
+        Route::get('/fav_products', 'fav_products');
     });
 
     Route::controller(ChatController::class)->prefix('chat')->group(function(){
