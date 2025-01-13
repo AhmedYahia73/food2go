@@ -23,7 +23,7 @@ class ExtraResource extends JsonResource
             'variation_id' => $this->variation_id,
             'extra_id' => $this->extra_id,
             'option_id' => $this->option_id,
-            'parent_extra' => ExtraResource::collection($this->whenLoaded('parent_extra')),
+            'parent_extra' => $this->parent_extra,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
