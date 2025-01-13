@@ -18,9 +18,11 @@ class OffersController extends Controller
     public function __construct(private Offer $offers, private User $user, private Order $orders,
     private OfferOrder $offer_order){}
 
-    public function offers(){
+    public function offers(Request $request){
         // https://bcknd.food2go.online/customer/offers
-        $offers = $this->offers->get();
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $offers = $this->offers
+        ->withLocale($locale)->get();
 
         return response()->json([
             'offers' => $offers

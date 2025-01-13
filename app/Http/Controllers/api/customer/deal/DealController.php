@@ -15,8 +15,9 @@ class DealController extends Controller
 {
     public function __construct(private Deal $deals, private DealTimes $deal_times){}
 
-    public function index(){
+    public function index(Request $request){
         // https://bcknd.food2go.online/customer/deal
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $today = Carbon::now()->format('l');
         $deals = $this->deals
         ->with('times')
@@ -32,6 +33,7 @@ class DealController extends Controller
             ->where('from', '<=', now()->format('H:i:s'))
             ->where('to', '>=', now()->format('H:i:s'));
         })
+        ->withLocale($locale)
         ->get();
         
         return response()->json([
