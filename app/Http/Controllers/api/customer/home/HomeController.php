@@ -196,6 +196,7 @@ class HomeController extends Controller
                 'error' => $validator->errors(),
             ],400);
         }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
 
         if ($request->user_id) {
             $user_id = $request->user_id;
