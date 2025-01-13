@@ -215,7 +215,7 @@ class HomeController extends Controller
             }, 'variations' => function($query) use($locale){
                 $query->withLocale($locale);
             }])
-            $query->withLocale($locale);
+            ->withLocale($locale)
             ->where('status', 1)
             ->get();
             foreach ($products as $product) {
@@ -252,7 +252,7 @@ class HomeController extends Controller
             }, 'variations' => function($query) use($locale){
                 $query->withLocale($locale);
             }])
-            $query->withLocale($locale);
+            ->withLocale($locale)
             ->where('status', 1)
             ->get();
         }
