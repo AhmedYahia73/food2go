@@ -226,7 +226,7 @@ class HomeController extends Controller
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation   
         $user_id = $request->user_id;
         $products = $this->product
-        ->with(['favourite_product', 
+        ->with([ 
         'addons' => function($query) use($locale){
             $query->withLocale($locale);
         }, 'excludes' => function($query) use($locale){
@@ -248,25 +248,6 @@ class HomeController extends Controller
         ->where('item_type', '!=', 'offline')
         ->where('status', 1)
         ->get();
-        foreach ($products as $product) {
-            if (count($product->favourite_product) > 0) {
-                $product->favourite = true;
-            }
-            else {
-                $product->favourite = false;
-            }
-            //get count of sales of product to detemine stock
-            if ($product->stock_type == 'fixed') {
-                $product->count = $product->sales_count->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            elseif ($product->stock_type == 'daily') {
-                $product->count = $product->sales_count
-                ->where('date', date('Y-m-d'))
-                ->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-        }
              
         $products = ProductResource::collection($products);
 
