@@ -131,7 +131,9 @@ class MakeOrderController extends Controller
                 ->first();
                 $user->points += $order->points;
                 $user->save();
-                return redirect($appUrl . '://callback_success');
+                return redirect()->route('customer.callback_success');
+            //    return view('Paymob.Paymob');
+            //    return redirect($appUrl . '://callback_success');
             //    return redirect()->away($redirectUrl . '?' . http_build_query([
             //    'success' => true,
             //    'payment_id' => $payment_id,
@@ -139,20 +141,29 @@ class MakeOrderController extends Controller
             //    "alert('payment Success')"
             //    ]));
                
-            } else {        
+            } 
+            else {        
                 $order = $this->order
                 ->where('transaction_id', $data['order'])
                 ->first();
                 $order->update([
                     'payment_status' => 'faild'
                 ]);
-                return view('Paymob.Paymob');
-                //return redirect($appUrl . '://callback_faild');
+                return redirect()->route('customer.callback_faild');
+            //    return redirect($appUrl . '://callback_faild');
             }
-        } 
+        }
         else {
             return redirect($appUrl . '://callback_faild');
         }
+    }
+
+    public function callback_success(){
+        return view('Paymob.Paymob');
+    }
+
+    public function callback_faild(){
+        return view('Paymob.FaildPayment');
     }
 
     public function callback_status($id){

@@ -54,11 +54,13 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::put('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
     });
-
+    
     Route::controller(MakeOrderController::class)->prefix('make_order')->group(function(){
         Route::post('/', 'order'); 
         Route::any('/callback', 'callback')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/callback_status/{id}', 'callback_status');
+        Route::any('/callback_success', 'callback_success')->name('callback_success')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::any('/callback_faild', 'callback_faild')->name('callback_faild')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
     });
 
     Route::controller(ProfileController::class)->prefix('profile')->group(function(){
