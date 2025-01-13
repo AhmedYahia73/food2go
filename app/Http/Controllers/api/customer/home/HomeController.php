@@ -33,7 +33,13 @@ class HomeController extends Controller
             $products = $this->product
             ->with(['favourite_product' => function($query) use($user_id){
                 $query->where('users.id', $user_id);
-            }, 'addons', 'excludes', 'extra', 'discount', 
+            }, 'addons' => function($query){
+                $query->withLocale($locale);
+            }, 'excludes' => function($query){
+                $query->withLocale($locale);
+            }, 'extra' => function($query){
+                $query->withLocale($locale);
+            }, 'discount', 
             'variations.options.extra.parent_extra', 'sales_count', 'tax'])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
