@@ -235,6 +235,22 @@ trait PlaceOrder
                         ->first();
                     }
                 }
+                if (isset($product['product_extra_id'])) {
+                    foreach ($product['product_extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        
+                        $order_details[$key]['extras'][] = $this->extras
+                        ->where('id', $extra)
+                        ->first();
+                    }
+                }
                 if (isset($product['variation'])) {
                     foreach ($product['variation'] as $variation) {
                         foreach ($variation['option_id'] as $option_id) {
