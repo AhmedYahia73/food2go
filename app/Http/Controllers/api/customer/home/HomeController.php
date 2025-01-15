@@ -45,7 +45,8 @@ class HomeController extends Controller
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'extra' => function($query) use($locale){
-                $query->withLocale($locale);
+                $query->whereNull('option_id')
+                ->withLocale($locale);
             }, 'discount', 
             'variations' => function($query) use($locale){
                 $query->withLocale($locale)
@@ -88,7 +89,8 @@ class HomeController extends Controller
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'extra' => function($query) use($locale){
-                $query->withLocale($locale);
+                $query->whereNull('option_id')
+                ->withLocale($locale);
             }, 'discount', 
              
             'variations' => function($query) use($locale){
@@ -165,7 +167,8 @@ class HomeController extends Controller
         }, 'excludes' => function($query) use($locale){
             $query->withLocale($locale);
         }, 'extra' => function($query) use($locale){
-            $query->withLocale($locale);
+            $query->whereNull('option_id')
+            ->withLocale($locale);
         }, 'discount', 
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
@@ -232,7 +235,8 @@ class HomeController extends Controller
         }, 'excludes' => function($query) use($locale){
             $query->withLocale($locale);
         }, 'extra' => function($query) use($locale){
-            $query->withLocale($locale);
+            $query->whereNull('option_id')
+            ->withLocale($locale);
         }, 'discount', 
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
@@ -324,7 +328,8 @@ class HomeController extends Controller
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'extra' => function($query) use($locale){
-                $query->withLocale($locale);
+                $query->whereNull('option_id')
+                ->withLocale($locale);
             }, 'variations' => function($query) use($locale){
                 $query->withLocale($locale);
             }])
@@ -361,7 +366,8 @@ class HomeController extends Controller
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'extra' => function($query) use($locale){
-                $query->withLocale($locale);
+                $query->whereNull('option_id')
+                ->withLocale($locale);
             }, 'variations' => function($query) use($locale){
                 $query->withLocale($locale);
             }])
