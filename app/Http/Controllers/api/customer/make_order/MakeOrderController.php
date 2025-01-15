@@ -131,7 +131,9 @@ class MakeOrderController extends Controller
                 ->first();
                 $user->points += $order->points;
                 $user->save();
-                return redirect()->route('customer.callback_success');
+                return response()->json([
+                    'link' => route('customer.callback_success')
+                ]);
             //    return view('Paymob.Paymob');
             //    return redirect($appUrl . '://callback_success');
             //    return redirect()->away($redirectUrl . '?' . http_build_query([
@@ -148,13 +150,17 @@ class MakeOrderController extends Controller
                 ->first();
                 $order->update([
                     'payment_status' => 'faild'
+                ]); 
+                return response()->json([
+                    'link' => route('customer.callback_faild')
                 ]);
-                return redirect()->route('customer.callback_faild');
             //    return redirect($appUrl . '://callback_faild');
             }
         }
         else {
-            return redirect($appUrl . '://callback_faild');
+            return response()->json([
+                'link' => route('customer.callback_faild')
+            ]);
         }
     }
 
