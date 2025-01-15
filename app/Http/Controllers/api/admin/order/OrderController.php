@@ -463,7 +463,7 @@ class OrderController extends Controller
     public function order($id){
         // https://bcknd.food2go.online/admin/order/order/{id}
         $order = $this->orders
-        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
@@ -485,8 +485,8 @@ class OrderController extends Controller
         }
         $deliveries = $this->deliveries
         ->get();
-        $order_status = ['pending', 'confirmed', 'processing', 'out_for_delivery',
-        'delivered' ,'returned' ,'faild_to_deliver' ,'canceled' ,'scheduled'];
+        $order_status = ['pending', 'processing', 'out_for_delivery',
+        'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,'faild_to_deliver'];
         $preparing_time = $this->settings
         ->where('name', 'preparing_time')
         ->orderByDesc('id')
