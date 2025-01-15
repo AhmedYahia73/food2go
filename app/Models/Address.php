@@ -20,6 +20,7 @@ class Address extends Model
         'apartment',
         'additional_data',
         'type',
+        'map',
     ];
 
     public function zone(){

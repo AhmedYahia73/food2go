@@ -23,6 +23,7 @@ class AddressController extends Controller
         'apartment',
         'additional_data',
         'type',
+        'map',
     ];
 
     public function view(Request $request){
@@ -73,6 +74,7 @@ class AddressController extends Controller
         $address->apartment = $request->apartment ?? $address->apartment;
         $address->additional_data = $request->additional_data ?? $address->additional_data;
         $address->type = $request->type ?? $address->type;
+        $address->map = $request->map ?? $address->map;
         $address->save();
 
         return response()->json([
