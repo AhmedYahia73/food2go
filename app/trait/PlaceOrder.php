@@ -328,6 +328,14 @@ trait PlaceOrder
                             $amount_product = $amount_product + $tax_item->amount;
                         }
                     }
+                    else{ 
+                        if ($tax_item->type == 'precentage') {
+                            $total_tax += $amount_product * $tax_item->amount / 100;
+                        }
+                        else{
+                            $total_tax += $tax_item->amount;
+                        }
+                    }
                 }
                 $amount_products += $amount_product;
             }
