@@ -292,16 +292,6 @@ trait PlaceOrder
                 }
                 $discount_item = $product_item->discount;
                 $tax_item = $product_item->tax;
-                if (!empty($discount_item)) {
-                    if ($discount_item->type == 'precentage') {
-                        $total_discount += $amount_product * $discount_item->amount / 100;
-                        $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
-                    }
-                    else{
-                        $total_discount += $discount_item->amount;
-                        $amount_product = $amount_product - $discount_item->amount;
-                    }
-                }
                 if (!empty($tax_item)) {
                     $tax = $this->settings
                     ->where('name', 'tax')
@@ -335,6 +325,16 @@ trait PlaceOrder
                         else{
                             $total_tax += $tax_item->amount;
                         }
+                    }
+                }
+                if (!empty($discount_item)) {
+                    if ($discount_item->type == 'precentage') {
+                        $total_discount += $amount_product * $discount_item->amount / 100;
+                        $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
+                    }
+                    else{
+                        $total_discount += $discount_item->amount;
+                        $amount_product = $amount_product - $discount_item->amount;
                     }
                 }
                 $amount_products += $amount_product;
