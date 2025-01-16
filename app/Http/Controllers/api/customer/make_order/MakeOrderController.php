@@ -22,6 +22,7 @@ use App\Models\PaymentMethod;
 use App\Models\User;
 use App\Models\Addon;
 use App\Models\PaymentMethodAuto;
+use App\Models\Setting;
 
 class MakeOrderController extends Controller
 {
@@ -29,7 +30,7 @@ class MakeOrderController extends Controller
     private ProductSale $product_sales, private Product $products, private ExcludeProduct $excludes,
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
-    private PaymentMethodAuto $payment_method_auto){}
+    private PaymentMethodAuto $payment_method_auto,private Setting $settings){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;

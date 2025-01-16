@@ -123,6 +123,10 @@ trait PlaceOrder
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
         $points = 0;
+        $amount_products = 0;
+        $amount_extras = 0;
+        $total_discount = 0;
+        $total_tax = 0;
         $items = [];
         $order_details = [];
         if (isset($request->products)) {
@@ -163,18 +167,22 @@ trait PlaceOrder
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
+                $amount_product = 0;
                 $order_details[$key]['extras'] = [];
                 $order_details[$key]['addons'] = [];
                 $order_details[$key]['excludes'] = [];
                 $order_details[$key]['product'] = [];
                 $order_details[$key]['variations'] = [];
 
+                $product_item = $this->products
+                ->where('id', $product['product_id'])
+                ->first();
                 $order_details[$key]['product'][] = [
-                    'product' => $this->products
-                    ->where('id', $product['product_id'])
-                    ->first(),
+                    'product' => $product_item,
                     'count' => $product['count']
                 ];
+                // Add product price
+                $amount_product += $product_item->price;
 
                 $this->order_details
                 ->create([
@@ -211,12 +219,14 @@ trait PlaceOrder
                             'product_index' => $key,
                         ]); // Add excludes
                         
+                        $addon_item = $this->addons
+                        ->where('id', $addon['addon_id'])
+                        ->first();
                         $order_details[$key]['addons'][] = [
-                            'addon' => $this->addons
-                            ->where('id', $addon['addon_id'])
-                            ->first(),
+                            'addon' => $addon_item,
                             'count' => $addon['count']
                         ];
+                        $amount_extras += $addon_item->price;
                     }
                 }
                 if (isset($product['extra_id'])) {
@@ -229,10 +239,11 @@ trait PlaceOrder
                             'count' => $product['count'],
                             'product_index' => $key,
                         ]); // Add extra
-                        
-                        $order_details[$key]['extras'][] = $this->extras
+                        $extra_item = $this->extras
                         ->where('id', $extra)
                         ->first();
+                        $order_details[$key]['extras'][] = $extra_item;
+                        $amount_extras += $extra_item->price;
                     }
                 }
                 if (isset($product['product_extra_id'])) {
@@ -246,9 +257,11 @@ trait PlaceOrder
                             'product_index' => $key,
                         ]); // Add extra
                         
-                        $order_details[$key]['extras'][] = $this->extras
+                        $extra_item = $this->extras
                         ->where('id', $extra)
                         ->first();
+                        $order_details[$key]['extras'][] = $extra_item;
+                        $amount_extras += $extra_item->price;
                     }
                 }
                 if (isset($product['variation'])) {
@@ -272,11 +285,57 @@ trait PlaceOrder
                             ->whereIn('id', $variation['option_id'])
                             ->get()
                         ];
+                        $amount_product += $this->options
+                        ->whereIn('id', $variation['option_id'])
+                        ->sum('price');
                     }
                 }
+                $discount_item = $product_item->discount;
+                $tax_item = $product_item->tax;
+                if (!empty($discount_item)) {
+                    if ($discount_item->type == 'precentage') {
+                        $total_discount += $amount_product * $discount_item->amount / 100;
+                        $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
+                    }
+                    else{
+                        $total_discount += $discount_item->amount;
+                        $amount_product = $amount_product - $discount_item->amount;
+                    }
+                }
+                if (!empty($tax_item)) {
+                    $tax = $this->settings
+                    ->where('name', 'tax')
+                    ->orderByDesc('id')
+                    ->first();
+                    if (!empty($tax)) {
+                        $tax = $tax->setting;
+                    }
+                    else {
+                        $tax = $this->settings
+                        ->create([
+                            'name' => 'tax',
+                            'setting' => 'included',
+                        ]);
+                        $tax = $tax->setting;
+                    }
+                    if ($tax != 'included') {
+                        if ($tax_item->type == 'precentage') {
+                            $total_tax += $amount_product * $tax_item->amount / 100;
+                            $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
+                        }
+                        else{
+                            $total_tax += $tax_item->amount;
+                            $amount_product = $amount_product + $tax_item->amount;
+                        }
+                    }
+                }
+                $amount_products += $amount_product;
             }
         }
         $order->order_details = json_encode($order_details);
+        $order->amount = $amount_products + $amount_extras;
+        $order->total_discount = $total_discount;
+        $order->total_tax = $total_tax;
         if ($paymob) {
             $order->status = 2;
         }
