@@ -308,23 +308,13 @@ trait PlaceOrder
                         ]);
                         $tax = $tax->setting;
                     }
-                    if ($tax != 'included') {
-                        if ($tax_item->type == 'precentage') {
-                            $total_tax += $amount_product * $tax_item->amount / 100;
-                            $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
-                        }
-                        else{
-                            $total_tax += $tax_item->amount;
-                            $amount_product = $amount_product + $tax_item->amount;
-                        }
+                    if ($tax_item->type == 'precentage') {
+                        $total_tax += $amount_product * $tax_item->amount / 100;
+                        $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
                     }
-                    else{ 
-                        if ($tax_item->type == 'precentage') {
-                            $total_tax += $amount_product * $tax_item->amount / 100;
-                        }
-                        else{
-                            $total_tax += $tax_item->amount;
-                        }
+                    else{
+                        $total_tax += $tax_item->amount;
+                        $amount_product = $amount_product + $tax_item->amount;
                     }
                 }
                 if (!empty($discount_item)) {
