@@ -150,6 +150,21 @@ class HomeController extends Controller
     public function web_products(Request $request){
         // https://bcknd.food2go.online/customer/home/web_products
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
         $categories = $this->categories
         ->with(['sub_categories' => function($query) use($locale){
             $query->withLocale($locale);
@@ -197,23 +212,8 @@ class HomeController extends Controller
             $resturant_time = $resturant_time->setting;
             $resturant_time = json_decode($resturant_time) ?? $resturant_time;
         }
-        $tax = $this->settings
-        ->where('name', 'tax')
-        ->orderByDesc('id')
-        ->first();
-        if (!empty($tax)) {
-            $tax = $tax->setting;
-        }
-        else {
-            $tax = $this->settings
-            ->create([
-                'name' => 'tax',
-                'setting' => 'included',
-            ]);
-            $tax = $tax->setting;
-        }
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products);
+        $products = ProductResource::collection($products, 'dffdg');
 
         return response()->json([
             'categories' => $categories,

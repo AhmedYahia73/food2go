@@ -292,11 +292,11 @@ trait PlaceOrder
                 }
                 $discount_item = $product_item->discount;
                 $tax_item = $product_item->tax;
+                $tax = $this->settings
+                ->where('name', 'tax')
+                ->orderByDesc('id')
+                ->first();
                 if (!empty($tax_item)) {
-                    $tax = $this->settings
-                    ->where('name', 'tax')
-                    ->orderByDesc('id')
-                    ->first();
                     if (!empty($tax)) {
                         $tax = $tax->setting;
                     }

@@ -36,7 +36,13 @@ class Product extends Model
         'recommended',
         'points',
     ];
-    protected $appends = ['image_link', 'orders_count'];
+    protected $appends = ['image_link', 'orders_count', 'taxes'];
+
+    public function getTaxesAttribute(){
+        return Setting::where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+    }
 
     public function getImageLinkAttribute(){
         return url('storage/' . $this->attributes['image']);

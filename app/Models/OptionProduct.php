@@ -19,9 +19,20 @@ class OptionProduct extends Model
         'status',
         'points',
     ];
+    protected $appends = ['taxes'];
 
     public function extra(){
         return $this->hasMany(ExtraProduct::class, 'option_id');
+    }
+
+    public function product(){
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+    
+    public function getTaxesAttribute(){
+        return Setting::where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
     }
     
     public function translations()
