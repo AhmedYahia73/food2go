@@ -12,11 +12,14 @@ use App\Models\Delivery;
 use App\Models\User;
 use App\Models\Branch;
 use App\Models\Setting;
+use App\Models\Address;
+use App\Models\Zone;
 
 class LoginController extends Controller
 {
     public function __construct(private Admin $admin, private Delivery $delivery, 
-    private User $user, private Branch $branch, private Setting $settings){}
+    private User $user, private Branch $branch, private Setting $settings,
+    private Address $address, private Zone $zones){}
 
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login
@@ -84,11 +87,23 @@ class LoginController extends Controller
             ], 400);
         }
         if (password_verify($request->input('password'), $user->password)) {
+            $addresses = $this->user
+            ->where('id', $request->user()->id)
+            ->with('address.zone')
+            ->first()->address; 
+            $zones = $this->zones->get();
+
+            return response()->json([
+                'addresses' => $addresses,
+                'zones' => $zones,
+            ]);
             $user->role = $role;
             $user->token = $user->createToken($user->role)->plainTextToken;
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
+                'addresses' => $addresses,
+                'zones' => $zones,
             ], 200);
         }
         else { 
