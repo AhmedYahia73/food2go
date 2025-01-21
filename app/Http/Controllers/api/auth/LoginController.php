@@ -93,10 +93,6 @@ class LoginController extends Controller
             ->first()->address; 
             $zones = $this->zones->get();
 
-            return response()->json([
-                'addresses' => $addresses,
-                'zones' => $zones,
-            ]);
             $user->role = $role;
             $user->token = $user->createToken($user->role)->plainTextToken;
             return response()->json([
