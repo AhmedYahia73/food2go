@@ -88,7 +88,7 @@ class LoginController extends Controller
         }
         if (password_verify($request->input('password'), $user->password)) {
             $addresses = $this->user
-            ->where('id', $request->user()->id)
+            ->where('id', $user->id)
             ->with('address.zone')
             ->first()->address; 
             $zones = $this->zones->get();
