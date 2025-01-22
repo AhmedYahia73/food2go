@@ -17,9 +17,16 @@ class Addon extends Model
         'tax_id',
         'quantity_add',
     ];
+    protected $appends = ['taxes'];
 
     public function tax(){
         return $this->belongsTo(Tax::class, 'tax_id');
+    }
+
+    public function getTaxesAttribute(){
+        return Setting::where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
     }
 
     public function translations()
