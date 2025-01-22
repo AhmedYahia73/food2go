@@ -583,7 +583,8 @@ class OrderController extends Controller
         }
         $order->update([
             'delivery_id' => $request->delivery_id,
-            'order_number' => $request->order_number
+            'order_number' => $request->order_number,
+            'order_status' => 'out_for_delivery',
         ]);
 
         return response()->json([
