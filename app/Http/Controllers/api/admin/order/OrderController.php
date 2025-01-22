@@ -11,11 +11,12 @@ use App\Models\Order;
 use App\Models\Delivery;
 use App\Models\Branch;
 use App\Models\Setting;
+use App\Models\User;
 
 class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Delivery $deliveries, 
-    private Branch $branches, private Setting $settings){}
+    private Branch $branches, private Setting $settings, private User $user){}
 
     public function orders(){
         // https://bcknd.food2go.online/admin/order
@@ -588,6 +589,25 @@ class OrderController extends Controller
 
         return response()->json([
             'success' => 'You select delivery success'
+        ]);
+    }
+
+    public function user_details($id){
+        // https://bcknd.food2go.online/admin/order/user_details/{user_id}
+        $data = $this->user
+        ->where('id', $id)
+        ->withCount('orders')
+        ->with(['orders' => function($query){
+            $query->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
+            'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+            'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
+            'status', 'points', 'rejected_reason', 'transaction_id');
+        }, 'address'])
+        ->get();
+
+        return response()->json([
+            'data' => $data
         ]);
     }
 }

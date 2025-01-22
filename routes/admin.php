@@ -70,7 +70,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/invoice/{id}', 'invoice');
         Route::put('/status/{id}', 'status');
         Route::post('/delivery', 'delivery');
-        Route::post('/user_details', 'user_details');
+        Route::get('/user_details/{id}', 'user_details');
     });
 
     Route::controller(HomeController::class)->middleware('can:isHome')
