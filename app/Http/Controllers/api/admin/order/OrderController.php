@@ -566,7 +566,6 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'delivery_id' => 'required|exists:deliveries,id',
             'order_id' => 'required|exists:orders,id',
-            'order_number' => 'required|numeric'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -583,7 +582,7 @@ class OrderController extends Controller
         }
         $order->update([
             'delivery_id' => $request->delivery_id,
-            'order_number' => $request->order_number,
+            'order_number' => $request->order_number ?? $order->order_number,
             'order_status' => 'out_for_delivery',
         ]);
 
