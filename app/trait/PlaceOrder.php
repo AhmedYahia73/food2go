@@ -123,10 +123,6 @@ trait PlaceOrder
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
         $points = 0;
-        $amount_products = 0;
-        $amount_extras = 0;
-        $total_discount = 0;
-        $total_tax = 0;
         $items = [];
         $order_details = [];
         if (isset($request->products)) {
@@ -225,8 +221,7 @@ trait PlaceOrder
                         $order_details[$key]['addons'][] = [
                             'addon' => $addon_item,
                             'count' => $addon['count']
-                        ];
-                        $amount_extras += $addon_item->price;
+                        ]; 
                     }
                 }
                 if (isset($product['extra_id'])) {
@@ -242,8 +237,7 @@ trait PlaceOrder
                         $extra_item = $this->extras
                         ->where('id', $extra)
                         ->first();
-                        $order_details[$key]['extras'][] = $extra_item;
-                        $amount_extras += $extra_item->price;
+                        $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
                 if (isset($product['product_extra_id'])) {
@@ -260,8 +254,7 @@ trait PlaceOrder
                         $extra_item = $this->extras
                         ->where('id', $extra)
                         ->first();
-                        $order_details[$key]['extras'][] = $extra_item;
-                        $amount_extras += $extra_item->price;
+                        $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
                 if (isset($product['variation'])) {
@@ -308,32 +301,24 @@ trait PlaceOrder
                         ]);
                         $tax = $tax->setting;
                     }
-                    if ($tax_item->type == 'precentage') {
-                        $total_tax += $amount_product * $tax_item->amount / 100;
+                    if ($tax_item->type == 'precentage') { 
                         $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
                     }
-                    else{
-                        $total_tax += $tax_item->amount;
+                    else{ 
                         $amount_product = $amount_product + $tax_item->amount;
                     }
                 }
                 if (!empty($discount_item)) {
-                    if ($discount_item->type == 'precentage') {
-                        $total_discount += $amount_product * $discount_item->amount / 100;
+                    if ($discount_item->type == 'precentage') { 
                         $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
                     }
-                    else{
-                        $total_discount += $discount_item->amount;
+                    else{ 
                         $amount_product = $amount_product - $discount_item->amount;
                     }
-                }
-                $amount_products += $amount_product;
+                } 
             }
         }
         $order->order_details = json_encode($order_details);
-        $order->amount = $amount_products + $amount_extras;
-        $order->total_discount = $total_discount;
-        $order->total_tax = $total_tax;
         if ($paymob) {
             $order->status = 2;
         }
