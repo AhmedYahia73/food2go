@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $company = CompanyInfo::orderByDesc('id')
-        ->first();
+        ->first() ?? collection([]);
         $timezone = $company->time_zone ?? config('app.timezone');
         Config::set('app.timezone', $timezone);
         date_default_timezone_set($timezone);
