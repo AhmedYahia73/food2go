@@ -61,7 +61,7 @@ class Order extends Model
         return $this->belongsTo(Delivery::class, 'delivery_id');
     }
 
-    public function pament_method(){
+    public function payment_method(){
         return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
 
