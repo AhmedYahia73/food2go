@@ -98,8 +98,8 @@ class LoginController extends Controller
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
-                'addresses' => $addresses,
-                'zones' => $zones,
+                // 'addresses' => $addresses,
+                // 'zones' => $zones,
             ], 200);
         }
         else { 
