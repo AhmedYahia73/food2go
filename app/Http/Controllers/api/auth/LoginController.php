@@ -87,19 +87,19 @@ class LoginController extends Controller
             ], 400);
         }
         if (password_verify($request->input('password'), $user->password)) {
-            // $addresses = $this->user
-            // ->where('id', $user->id)
-            // ->with('address.zone')
-            // ->first()->address ?? []; 
-            // $zones = $this->zones->get();
+            $addresses = $this->user
+            ->where('id', $user->id)
+            ->with('address.zone')
+            ->first()->address ?? []; 
+            $zones = $this->zones->get();
 
             $user->role = $role;
             $user->token = $user->createToken($user->role)->plainTextToken;
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
-                // 'addresses' => $addresses,
-                // 'zones' => $zones,
+                'addresses' => $addresses,
+                'zones' => $zones,
             ], 200);
         }
         else { 
