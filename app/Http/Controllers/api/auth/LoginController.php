@@ -87,11 +87,11 @@ class LoginController extends Controller
             ], 400);
         }
         if (password_verify($request->input('password'), $user->password)) {
-            $addresses = $this->user
-            ->where('id', $user->id)
-            ->with('address.zone')
-            ->first()->address; 
-            $zones = $this->zones->get();
+            // $addresses = $this->user
+            // ->where('id', $user->id)
+            // ->with('address.zone')
+            // ->first()->address ?? []; 
+            // $zones = $this->zones->get();
 
             $user->role = $role;
             $user->token = $user->createToken($user->role)->plainTextToken;
