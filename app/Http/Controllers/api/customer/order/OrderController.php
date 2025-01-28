@@ -20,6 +20,10 @@ class OrderController extends Controller
         ->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'scheduled'])
         ->with('delivery', 'payment_method')
         ->get();
+        $cancel_time = $this->settings
+        ->where('name', 'time_cancel')
+        ->orderByDesc('id')
+        ->first();
         $cancel_time = $cancel_time->setting ?? '00:00:00';
 
         return response()->json([
