@@ -48,13 +48,15 @@ class Order extends Model
         if ($this->attributes['status'] == 1) {
             return 'approved';
         } 
+        elseif (empty($this->attributes['status'])) {
+            return 'pending';
+        } 
         elseif ($this->attributes['status'] == 0) {
             return 'rejected';
         } 
         elseif ($this->attributes['status'] == 2) {
             return 'faild';
-        }
-        return 'pending';
+        } 
     }
     
     public function getOrderDateAttribute(){
