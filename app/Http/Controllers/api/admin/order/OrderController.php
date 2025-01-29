@@ -581,7 +581,7 @@ class OrderController extends Controller
                 'faild' => 'Status must be processing'
             ], 400);
         }
-        if (!$request->order_number) {
+        if (!is_numeric($request->order_number)) {
             $order->update([
                 'delivery_id' => $request->delivery_id, 
                 'order_status' => 'out_for_delivery',
