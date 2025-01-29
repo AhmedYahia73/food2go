@@ -48,7 +48,7 @@ class Order extends Model
         if ($this->attributes['status'] == 1) {
             return 'approved';
         } 
-        elseif (empty($this->attributes['status'])) {
+        elseif (!isset($this->attributes['status'])) { // Use isset to check if it's null or not set
             return 'pending';
         } 
         elseif ($this->attributes['status'] == 0) {
