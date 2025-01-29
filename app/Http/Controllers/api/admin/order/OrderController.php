@@ -581,11 +581,19 @@ class OrderController extends Controller
                 'faild' => 'Status must be processing'
             ], 400);
         }
-        $order->update([
-            'delivery_id' => $request->delivery_id,
-            'order_number' => $request->order_number ?? $order->order_number,
-            'order_status' => 'out_for_delivery',
-        ]);
+        if (!$request->order_number) {
+            $order->update([
+                'delivery_id' => $request->delivery_id, 
+                'order_status' => 'out_for_delivery',
+            ]);
+        }
+        else{ 
+            $order->update([
+                'delivery_id' => $request->delivery_id,
+                'order_number' => $request->order_number ?? $order->order_number,
+                'order_status' => 'out_for_delivery',
+            ]);
+        }
 
         return response()->json([
             'success' => 'You select delivery success'
