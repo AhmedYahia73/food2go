@@ -47,7 +47,7 @@ class CompanyController extends Controller
         $companyRequest = $request->validated(); 
         $companyRequest['time_zone'] = is_string($companyRequest['time_zone']) ?
         json_decode($companyRequest['time_zone']):$companyRequest['time_zone'];
-        $companyRequest['time_zone'] = $companyRequest['time_zone']->name;
+        $companyRequest['time_zone'] = str_replace('"', '', $companyRequest['time_zone']->name);
         $company_info = $this->company_info
         ->orderByDesc('id')
         ->first();
