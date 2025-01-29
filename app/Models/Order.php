@@ -42,7 +42,20 @@ class Order extends Model
         'transaction_id',
         'receipt',
     ];
-    protected $appends = ['order_date'];
+    protected $appends = ['order_date', 'status_payment'];
+
+    public function getStatusPaymentAttribute(){
+        if ($this->attributes['status'] == 1) {
+            return 'approved';
+        } 
+        elseif ($this->attributes['status'] == 0) {
+            return 'rejected';
+        } 
+        elseif ($this->attributes['status'] == 2) {
+            return 'faild';
+        }
+        return 'pending';
+    }
     
     public function getOrderDateAttribute(){
         if (isset($this->attributes['created_at'] )&& !empty($this->attributes['created_at'])) {
