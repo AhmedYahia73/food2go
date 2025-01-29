@@ -36,7 +36,6 @@ class CompanyRequest extends FormRequest
             'copy_right' => ['required'],
             'time_zone' => ['required'],
             'country' => ['required'],
-            'logo' => ['required'],
         ];
     }
 
