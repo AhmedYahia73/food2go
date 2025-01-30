@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api\customer\offer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DealResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
