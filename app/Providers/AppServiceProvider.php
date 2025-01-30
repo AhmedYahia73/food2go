@@ -27,8 +27,11 @@ class AppServiceProvider extends ServiceProvider
         $company = CompanyInfo::orderByDesc('id')
         ->first() ?? collection([]);
         $timezone = $company->time_zone ?? config('app.timezone');
-        Config::set('app.timezone', $timezone);
-        date_default_timezone_set($timezone);
+        if ($timezone != '') { 
+            Config::set('app.timezone', $timezone);
+            date_default_timezone_set($timezone);
+        }
+        
         // if roles have home module
         Gate::define('isHome', function (Admin $user) {
             if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Home')){
