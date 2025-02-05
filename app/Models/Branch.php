@@ -28,8 +28,12 @@ class Branch extends Authenticatable
         'email_verified_at',
         'main'
     ];
-    protected $appends = ['role', 'image_link', 'cover_image_link'];
+    protected $appends = ['role', 'image_link', 'cover_image_link', 'map'];
 
+    public function getMapAttribute(){
+        return "https://www.google.com/maps?q={$this->attributes['latitude']},{$this->attributes['longitude']}";
+    }
+    
     public function getImageLinkAttribute(){
         return url('storage/' . $this->attributes['image']);
     }
