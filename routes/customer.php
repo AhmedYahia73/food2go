@@ -92,6 +92,6 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(OrderTypeController::class)->prefix('order_type')->group(function(){
-        Route::get('/', 'view');
+        Route::get('/', 'view')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
     });
 });
