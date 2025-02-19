@@ -468,14 +468,14 @@ class OrderController extends Controller
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason')
         ->with(['user.orders' => function($query){
             $query->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id');
-        }, 'branch', 'delivery', 'payment_method', 'address'])
+        }, 'branch', 'delivery', 'payment_method', 'address', 'customer_cancel_reason'])
         ->find($id);
         $order->user->count_orders = count($order->user->orders);
         if (!empty($order->branch)) {
@@ -530,6 +530,7 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/admin/order/status/{id}
         // Keys
         // order_status, order_number
+        // if canceled => key admin_cancel_reason
         $validator = Validator::make($request->all(), [
             'order_status' => 'required|in:delivery,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled',
         ]);
@@ -544,10 +545,28 @@ class OrderController extends Controller
             ->where('id', $id)
             ->update([
                 'order_status' => $request->order_status,
-                'order_number' => $request->order_number,
+                'order_number' => $request->order_number ?? null,
             ]);
-        } else {
-        
+        }
+        elseif($request->order_status == 'canceled'){
+            // Key
+            // admin_cancel_reason
+            $validator = Validator::make($request->all(), [
+                'admin_cancel_reason' => 'required',
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                    'error' => $validator->errors(),
+                ],400);
+            }
+            $orders = $this->orders
+            ->where('id', $id)
+            ->update([
+                'order_status' => $request->order_status,
+                'admin_cancel_reason' => $request->admin_cancel_reason,
+            ]);
+        }
+        else {
             $orders = $this->orders
             ->where('id', $id)
             ->update([

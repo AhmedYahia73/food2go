@@ -5,6 +5,8 @@ namespace App\Http\Controllers\api\customer\order;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Order;
 use App\Models\Setting;
@@ -110,11 +112,22 @@ class OrderController extends Controller
     //     ]);
     // }
 
-    public function cancel($id){
+    public function cancel(Request $request, $id){
         // https://bcknd.food2go.online/customer/orders/cancel/{id}
+        // Key
+        // customer_cancel_reason
+        $validator = Validator::make($request->all(), [
+            'customer_cancel_reason' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
         $order = $this->orders
         ->where('id', $id)
         ->update([
+            'customer_cancel_reason' => $request->customer_cancel_reason,
             'order_status' => 'canceled'
         ]);
 

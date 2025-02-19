@@ -41,6 +41,7 @@ class Order extends Model
         'rejected_reason',
         'transaction_id',
         'receipt',
+        'cancel_reason',
     ];
     protected $appends = ['order_date', 'status_payment'];
 
