@@ -163,8 +163,12 @@ class CreateCategoryController extends Controller
         $category = $this->categories
         ->where('id', $id)
         ->first(); // get category
-        $this->deleteImage($category->image); // delete old image
-        $this->deleteImage($category->banner_image); // delete old image
+        if (!empty($category->image)) {
+            $this->deleteImage($category->image); // delete old image
+        }
+        if (!empty($category->banner_image)) {
+            $this->deleteImage($category->banner_image); // delete old image
+        }
         $category->delete(); // delete category
 
         return response()->json([
