@@ -475,7 +475,7 @@ class OrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id',
         'status', 'points', 'rejected_reason', 'transaction_id');
-        }, 'branch', 'delivery', 'payment_method', 'address', 'customer_cancel_reason'])
+        }, 'branch', 'delivery', 'payment_method', 'address'])
         ->find($id);
         $order->user->count_orders = count($order->user->orders);
         if (!empty($order->branch)) {
