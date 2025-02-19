@@ -42,6 +42,7 @@ class Order extends Model
         'transaction_id',
         'receipt',
         'cancel_reason',
+        'customer_cancel_reason',
     ];
     protected $appends = ['order_date', 'status_payment'];
 
