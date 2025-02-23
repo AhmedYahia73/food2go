@@ -380,7 +380,7 @@ class OrderController extends Controller
 
         return response()->json([
             'new_orders' => $total,
-            'order_id' => $new_orders[$new_orders->count() - 1] ?? null,
+            'order_id' => $new_orders->last() ?? null,
         ]);
     }
 
