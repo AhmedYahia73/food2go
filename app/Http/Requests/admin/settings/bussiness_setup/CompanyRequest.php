@@ -43,7 +43,8 @@ class CompanyRequest extends FormRequest
             'order_online' => ['required', 'boolean'],
         ];
     }
-
+    // migrate --path=/database/migrations/2025_02_23_124537_add_columns_to_company_infos.php
+    // migrate --path=/database/migrations/2025_02_23_130221_create_menue_images_table.php
     public function failedValidation(Validator $validator){
        throw new HttpResponseException(response()->json([
                'message'=>'validation error',
