@@ -38,8 +38,8 @@ class CompanyRequest extends FormRequest
             'country' => ['required'],
             'phone2' => ['sometimes'],
             'watts' => ['sometimes'],
-            'android_link' => ['required'],
-            'ios_link' => ['required'],
+            'android_link' => ['sometimes'],
+            'ios_link' => ['sometimes'],
             'order_online' => ['required', 'boolean'],
         ];
     }
