@@ -43,7 +43,8 @@ class CompanyController extends Controller
         // https://bcknd.food2go.online/admin/settings/business_setup/company/add
         // Keys
         // name, phone, email, address, logo, fav_icon, time_zone, time_format => [24hours,am/pm],
-        // currency_id, currency_position => [left,right], copy_right, logo, fav_icon, country
+        // currency_id, currency_position => [left,right], copy_right, logo, fav_icon, country,
+        // phone2, watts, android_link, ios_link, order_online
         $companyRequest = $request->validated(); 
         $companyRequest['time_zone'] = is_string($companyRequest['time_zone']) ?
         json_decode($companyRequest['time_zone']):$companyRequest['time_zone'];

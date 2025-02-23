@@ -22,6 +22,11 @@ class CompanyInfo extends Model
         'currency_position',
         'copy_right', 
         'country',
+        'phone2',
+        'watts',
+        'android_link',
+        'ios_link',
+        'order_online',
     ];
     protected $appends = ['logo_link', 'fav_icon_link'];
 

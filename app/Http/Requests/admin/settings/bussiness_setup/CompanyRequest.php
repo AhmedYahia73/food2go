@@ -36,6 +36,11 @@ class CompanyRequest extends FormRequest
             'copy_right' => ['required'],
             'time_zone' => ['required'],
             'country' => ['required'],
+            'phone2' => ['sometimes'],
+            'watts' => ['sometimes'],
+            'android_link' => ['required'],
+            'ios_link' => ['required'],
+            'order_online' => ['required', 'boolean'],
         ];
     }
 
