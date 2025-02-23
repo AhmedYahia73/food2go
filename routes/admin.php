@@ -50,6 +50,7 @@ use App\Http\Controllers\api\admin\settings\SettingController;
 use App\Http\Controllers\api\admin\settings\OrderTypeController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodAutoController;
+use App\Http\Controllers\api\admin\settings\MenueController;
 use App\Http\Controllers\api\admin\settings\business_setup\CompanyController;
 use App\Http\Controllers\api\admin\settings\business_setup\MaintenanceController;
 use App\Http\Controllers\api\admin\settings\business_setup\MainBranchesController;
@@ -255,6 +256,14 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/', 'view');
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
+            Route::delete('/delete/{id}', 'delete');
+        });
+
+        Route::controller(MenueController::class)
+        ->prefix('menue')->group(function(){
+            Route::get('/', 'view')->withOutMiddleware(['auth:sanctum', 'IsAdmin', 'can:isSettings']);
+            Route::post('/add', 'create');
+            Route::put('/status/{id}', 'status');
             Route::delete('/delete/{id}', 'delete');
         });
 
