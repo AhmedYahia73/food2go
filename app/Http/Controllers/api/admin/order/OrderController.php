@@ -498,24 +498,26 @@ class OrderController extends Controller
         ->get();
         $order_status = ['pending', 'processing', 'out_for_delivery',
         'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,'faild_to_deliver'];
-        $preparing_time = $this->settings
-        ->where('name', 'preparing_time')
-        ->orderByDesc('id')
-        ->first();
-        if (empty($preparing_time)) {
+        $preparing_time = $order->branch->food_preparion_time ?? '00:30';
+        // if (empty($preparing_time)) {
+        $time_parts = explode(':', $preparing_time);
+
+        // Get hours, minutes, and seconds
+        $hours = $time_parts[0];
+        $minutes = $time_parts[1]; 
             $preparing_arr = [
                 'days' => 0,
-                'hours' => 0,
-                'minutes' => 30,
-                'seconds' => 0
+                'hours' => $hours,
+                'minutes' => $minutes,
+                'seconds' => 0,
             ];
-            $preparing_time = $this->settings
-            ->create([
-                'name' => 'preparing_time',
-                'setting' => json_encode($preparing_arr),
-            ]);
-        }
-        $preparing_time = json_decode($preparing_time->setting);
+        //     $preparing_time = $this->settings
+        //     ->create([
+        //         'name' => 'preparing_time',
+        //         'setting' => json_encode($preparing_arr),
+        //     ]);
+        // }
+        // $preparing_time = json_decode($preparing_time->setting);
 
         return response()->json([
             'order' => $order,
