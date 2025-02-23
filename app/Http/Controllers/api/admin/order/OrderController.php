@@ -369,9 +369,18 @@ class OrderController extends Controller
             ->count();
             $total = $new_orders - $old_orders;
         }
+        $new_orders = $this->orders
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->orderByDesc('id')
+        ->limit($total)->pluck('id');
 
         return response()->json([
-            'new_orders' => $total
+            'new_orders' => $total,
+            'order_id' => $new_orders[$new_orders->count() - 1] ?? null,
         ]);
     }
 
