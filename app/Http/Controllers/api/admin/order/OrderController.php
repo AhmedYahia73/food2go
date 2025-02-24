@@ -523,7 +523,7 @@ class OrderController extends Controller
             'order' => $order,
             'deliveries' => $deliveries,
             'order_status' => $order_status,
-            'preparing_time' => $preparing_time
+            'preparing_time' => $preparing_arr
         ]);
     }
 
