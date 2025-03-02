@@ -354,11 +354,7 @@ trait PlaceOrder
                     }
                 } 
             }
-        }
-        return [
-            'payment' => $order, 
-            'items' => $items
-        ];
+        } 
         $order->order_details = json_encode($order_details);
         if ($paymob) {
             $order->status = 2;
@@ -367,7 +363,7 @@ trait PlaceOrder
 
         return [
             'payment' => $order,
-            'orderItems' => $order_details,
+            'orderItems' => $order->order_details,
             'items' => $items
         ];
     }
