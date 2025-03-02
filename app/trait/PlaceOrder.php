@@ -219,8 +219,7 @@ trait PlaceOrder
                         $exclude = count($exclude) > 0 ? $exclude[0] : null;
                         $order_details[$key]['excludes'][] = $exclude;
                     }
-                }
-                return response()->json([2]);
+                } 
                 if (isset($product['addons'])) {
                     foreach ($product['addons'] as $addon) {
                         $this->order_details
