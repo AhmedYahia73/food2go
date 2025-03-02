@@ -182,6 +182,7 @@ trait PlaceOrder
                 ->where('id', $product['product_id'])
                 ->withLocale($locale)
                 ->first();
+                $product_item = collect([$product_item]);
                 $product_item = ProductResource::collection($product_item);
                 $product_item = count($product_item) > 0 ? $product_item[0] : null;
                 $order_details[$key]['product'][] = [
@@ -213,6 +214,7 @@ trait PlaceOrder
                         ->where('id', $exclude)
                         ->withLocale($locale)
                         ->first();
+                        $exclude = collect([$exclude]);
                         $exclude = ExcludeResource::collection($exclude);
                         $exclude = count($exclude) > 0 ? $exclude[0] : null;
                         $order_details[$key]['excludes'][] = $exclude;
@@ -234,6 +236,7 @@ trait PlaceOrder
                         ->where('id', $addon['addon_id'])
                         ->withLocale($locale)
                         ->first();
+                        $addon_item = collect([$addon_item]);
                         $addon_item = AddonResource::collection($addon_item);
                         $addon_item = count($addon_item) > 0 ? $addon_item[0] : null;
                         $order_details[$key]['addons'][] = [
@@ -256,6 +259,7 @@ trait PlaceOrder
                         ->where('id', $extra)
                         ->withLocale($locale)
                         ->first();
+                        $extra_item = collect([$extra_item]);
                         $extra_item = ExtraResource::collection($extra_item);
                         $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
                         $order_details[$key]['extras'][] = $extra_item; 
@@ -276,6 +280,7 @@ trait PlaceOrder
                         ->where('id', $extra)
                         ->withLocale($locale)
                         ->first();
+                        $extra_item = collect([$extra_item]);
                         $extra_item = ExtraResource::collection($extra_item);
                         $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
                         $order_details[$key]['extras'][] = $extra_item; 
