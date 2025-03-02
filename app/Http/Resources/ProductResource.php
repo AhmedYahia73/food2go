@@ -26,8 +26,7 @@ class ProductResource extends JsonResource
             ->merge(AddonResource::collection($this->whenLoaded('category_addons')));
         }
         else{  
-            $addons = collect([])
-            ->merge(AddonResource::collection($this->whenLoaded('addons')));
+            $addons = AddonResource::collection($this->whenLoaded('addons'));
         }
     
         $locale = app()->getLocale(); // Use the application's current locale
