@@ -14,10 +14,21 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $addons = collect([])
-        ->merge(AddonResource::collection($this->whenLoaded('category_addons')))
-        ->merge(AddonResource::collection($this->whenLoaded('sub_category_addons')))
-        ->merge(AddonResource::collection($this->whenLoaded('addons')));
+        if (!empty($this->addons) && !empty($this->category_addons) && !empty($this->sub_category_addons)) {   
+            $addons = collect([])
+            ->merge(AddonResource::collection($this->whenLoaded('addons')))
+            ->merge(AddonResource::collection($this->whenLoaded('category_addons')))
+            ->merge(AddonResource::collection($this->whenLoaded('sub_category_addons')));
+        }
+        elseif (!empty($this->addons) && !empty($this->category_addons)) {   
+            $addons = collect([])
+            ->merge(AddonResource::collection($this->whenLoaded('addons')))
+            ->merge(AddonResource::collection($this->whenLoaded('category_addons')));
+        }
+        else{  
+            $addons = collect([])
+            ->merge(AddonResource::collection($this->whenLoaded('addons')));
+        }
     
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
