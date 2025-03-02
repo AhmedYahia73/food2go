@@ -320,10 +320,6 @@ trait PlaceOrder
                         ->sum('price');
                     }
                 }
-                return [
-                    'payment' => $order, 
-                    'items' => $items
-                ];
                 $discount_item = $product_item->discount;
                 $tax_item = $product_item->tax;
                 $tax = $this->settings
@@ -359,6 +355,10 @@ trait PlaceOrder
                 } 
             }
         }
+        return [
+            'payment' => $order, 
+            'items' => $items
+        ];
         $order->order_details = json_encode($order_details);
         if ($paymob) {
             $order->status = 2;
