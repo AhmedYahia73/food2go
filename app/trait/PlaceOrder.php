@@ -168,10 +168,6 @@ trait PlaceOrder
         $order = $this->order
         ->create($orderRequest);
         $user->save();
-        return [
-            'payment' => $order, 
-            'items' => $items
-        ];
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
@@ -203,6 +199,10 @@ trait PlaceOrder
                     'count' => $product['count'],
                     'product_index' => $key,
                 ]); // Add product with count
+                return [
+                    'payment' => $order, 
+                    'items' => $items
+                ];
                 if (isset($product['exclude_id'])) {
                     foreach ($product['exclude_id'] as $exclude) {
                         $this->order_details
