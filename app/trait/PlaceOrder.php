@@ -319,7 +319,7 @@ trait PlaceOrder
                         ->whereIn('id', $variation['option_id'])
                         ->sum('price');
                     }
-                }return 7;
+                }
                 $discount_item = $product_item->discount;
                 $tax_item = $product_item->tax;
                 $tax = $this->settings
@@ -355,6 +355,7 @@ trait PlaceOrder
                 } 
             }
         }
+        return 99;
         $order->order_details = json_encode($order_details);
         if ($paymob) {
             $order->status = 2;
