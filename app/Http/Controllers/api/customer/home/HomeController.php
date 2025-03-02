@@ -192,7 +192,12 @@ class HomeController extends Controller
         }, 'extra' => function($query) use($locale){
             $query->whereNull('option_id')
             ->withLocale($locale);
-        }, 'discount', 
+        }, 'discount',
+        'sub_category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        },
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options' => function($query_option) use($locale){
@@ -245,7 +250,11 @@ class HomeController extends Controller
         }, 'extra' => function($query) use($locale){
             $query->whereNull('option_id')
             ->withLocale($locale);
-        }, 'discount', 
+        }, 'discount','sub_category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        },
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options' => function($query_option) use($locale){
@@ -333,6 +342,10 @@ class HomeController extends Controller
                 $query->where('users.id', $user_id);
             }, 'addons' => function($query) use($locale){
                 $query->withLocale($locale);
+            },'sub_category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'extra' => function($query) use($locale){
@@ -370,6 +383,10 @@ class HomeController extends Controller
             ->where('price', '>=', $request->min_price)
             ->where('price', '<=', $request->max_price)
             ->with(['addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            },'sub_category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'category_addons' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
