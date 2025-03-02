@@ -220,10 +220,6 @@ trait PlaceOrder
                         $order_details[$key]['excludes'][] = $exclude;
                     }
                 } 
-                return [
-                    'payment' => $order, 
-                    'items' => $items
-                ];
                 if (isset($product['addons'])) {
                     foreach ($product['addons'] as $addon) {
                         $this->order_details
@@ -269,6 +265,10 @@ trait PlaceOrder
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
+                return [
+                    'payment' => $order, 
+                    'items' => $items
+                ];
                 if (isset($product['product_extra_id'])) {
                     foreach ($product['product_extra_id'] as $extra) {
                         $this->order_details
