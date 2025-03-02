@@ -265,10 +265,6 @@ trait PlaceOrder
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
-                return [
-                    'payment' => $order, 
-                    'items' => $items
-                ];
                 if (isset($product['product_extra_id'])) {
                     foreach ($product['product_extra_id'] as $extra) {
                         $this->order_details
@@ -290,6 +286,10 @@ trait PlaceOrder
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
+                return [
+                    'payment' => $order, 
+                    'items' => $items
+                ];
                 if (isset($product['variation'])) {
                     foreach ($product['variation'] as $variation) {
                         foreach ($variation['option_id'] as $option_id) {
