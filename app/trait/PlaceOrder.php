@@ -8,6 +8,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\AddonResource;
+use App\Http\Resources\ExcludeResource;
+use App\Http\Resources\ExtraResource;
+use App\Http\Resources\VariationResource;
+use App\Http\Resources\OptionResource;
+
 trait PlaceOrder
 { 
     // This Traite About Place Order
