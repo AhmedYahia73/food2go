@@ -286,7 +286,6 @@ trait PlaceOrder
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
-                return 5;
                 if (isset($product['variation'])) {
                     foreach ($product['variation'] as $variation) {
                         foreach ($variation['option_id'] as $option_id) {
@@ -320,7 +319,7 @@ trait PlaceOrder
                         ->whereIn('id', $variation['option_id'])
                         ->sum('price');
                     }
-                }
+                }return 7;
                 $discount_item = $product_item->discount;
                 $tax_item = $product_item->tax;
                 $tax = $this->settings
