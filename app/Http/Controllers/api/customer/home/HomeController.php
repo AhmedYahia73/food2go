@@ -42,6 +42,10 @@ class HomeController extends Controller
                 $query->where('users.id', $user_id);
             }, 'addons' => function($query) use($locale){
                 $query->withLocale($locale);
+            },'sub_category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'extra' => function($query) use($locale){
@@ -84,9 +88,13 @@ class HomeController extends Controller
         }
         else{
             $products = $this->product
-            ->with([ 'addons' => function($query) use($locale){
+            ->with(['addons' => function($query) use($locale){
                 $query->withLocale($locale);
-            }, 'excludes' => function($query) use($locale){
+            },'category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            },'sub_category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            },'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'extra' => function($query) use($locale){
                 $query->whereNull('option_id')

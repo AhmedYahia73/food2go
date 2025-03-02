@@ -20,7 +20,7 @@ class AddonResource extends JsonResource
                 'id' => $this->id,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
                 'price' => empty($this->tax) ? $this->price: 
-                ($this->tax->type == 'value' ? $this->price + $this->tax->amount :$this->price + $this->tax->amount * $this->price / 100),
+                ($this->tax->type == 'value' ? $this->price + $this->tax->amount : $this->price + $this->tax->amount * $this->price / 100),
                 'tax_id' => $this->tax_id,
                 'quantity_add' => $this->quantity_add,
                 'tax' => $this->whenLoaded('tax'),

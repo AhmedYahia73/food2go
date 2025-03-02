@@ -14,6 +14,11 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $addons = collect([])
+        ->merge(AddonResource::collection($this->whenLoaded('category_addons')))
+        ->merge(AddonResource::collection($this->whenLoaded('sub_category_addons')))
+        ->merge(AddonResource::collection($this->whenLoaded('addons')));
+    
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
             return [
@@ -43,7 +48,7 @@ class ProductResource extends JsonResource
                 'subCategory' => CategoryResource::collection($this->whenLoaded('subCategory')),
                 'discount' => $this->whenLoaded('discount'),
                 'tax' => $this->whenLoaded('tax'),
-                'addons' => AddonResource::collection($this->whenLoaded('addons')),
+                'addons' => $addons, 
                 'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')),
                 'extra' => ExtraResource::collection($this->whenLoaded('extra')),
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
@@ -81,7 +86,7 @@ class ProductResource extends JsonResource
                 'subCategory' => CategoryResource::collection($this->whenLoaded('subCategory')),
                 'discount' => $this->whenLoaded('discount'),
                 'tax' => $this->whenLoaded('tax'),
-                'addons' => AddonResource::collection($this->whenLoaded('addons')),
+                'addons' => $addons, 
                 'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')),
                 'extra' => ExtraResource::collection($this->whenLoaded('extra')),
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),

@@ -65,7 +65,15 @@ class Product extends Model
     }
 
     public function addons(){
-        return $this->belongsToMany(Addon::class, 'product_addon', 'product_id', 'addon_id');
+        return $this->belongsToMany(Addon::class, 'product_addon', 'product_id', 'addon_id', '');
+    }
+
+    public function category_addons(){
+        return $this->belongsToMany(Addon::class, 'category_addon', 'category_id', 'addon_id', 'category_id', 'id');
+    }
+
+    public function sub_category_addons(){
+        return $this->belongsToMany(Addon::class, 'category_addon', 'category_id', 'addon_id', 'sub_category_id', 'id');
     }
 
     public function excludes(){

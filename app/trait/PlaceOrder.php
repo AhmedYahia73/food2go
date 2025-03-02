@@ -122,6 +122,7 @@ trait PlaceOrder
         $user = auth()->user();
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
+        $locale = $request->locale ?? 'العربيه'; // Get Local Translation
         $points = 0;
         $items = [];
         $order_details = [];
@@ -172,7 +173,10 @@ trait PlaceOrder
 
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
+                ->withLocale($locale)
                 ->first();
+                $product_item = ProductResource::collection($product_item);
+                $product_item = count($product_item) > 0 ? $product_item[0] : null;
                 $order_details[$key]['product'][] = [
                     'product' => $product_item,
                     'count' => $product['count']
@@ -198,9 +202,13 @@ trait PlaceOrder
                             'product_index' => $key,
                         ]); // Add excludes
                         
-                        $order_details[$key]['excludes'][] = $this->excludes
+                        $exclude = $this->excludes
                         ->where('id', $exclude)
+                        ->withLocale($locale)
                         ->first();
+                        $exclude = ExcludeResource::collection($exclude);
+                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
+                        $order_details[$key]['excludes'][] = $exclude;
                     }
                 }
                 if (isset($product['addons'])) {
@@ -217,7 +225,10 @@ trait PlaceOrder
                         
                         $addon_item = $this->addons
                         ->where('id', $addon['addon_id'])
+                        ->withLocale($locale)
                         ->first();
+                        $addon_item = AddonResource::collection($addon_item);
+                        $addon_item = count($addon_item) > 0 ? $addon_item[0] : null;
                         $order_details[$key]['addons'][] = [
                             'addon' => $addon_item,
                             'count' => $addon['count']
@@ -236,7 +247,10 @@ trait PlaceOrder
                         ]); // Add extra
                         $extra_item = $this->extras
                         ->where('id', $extra)
+                        ->withLocale($locale)
                         ->first();
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
@@ -253,7 +267,10 @@ trait PlaceOrder
                         
                         $extra_item = $this->extras
                         ->where('id', $extra)
+                        ->withLocale($locale)
                         ->first();
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
@@ -270,13 +287,21 @@ trait PlaceOrder
                                 'product_index' => $key,
                             ]); // Add variations & options
                         }
+                        $variations = $this->variation
+                        ->where('id', $variation['variation_id'])
+                        ->withLocale($locale)
+                        ->first();
+                        $variations = collect([$variations]);
+                        $options = $this->options
+                        ->whereIn('id', $variation['option_id'])
+                        ->withLocale($locale)
+                        ->get();
+                        $variations = VariationResource::collection([$variations]);
+                        $variations = count($variations) > 0 ? $variations[0] : null;
+                        $options = OptionResource::collection($options);
                         $order_details[$key]['variations'][] = [
-                            'variation' => $this->variation
-                            ->where('id', $variation['variation_id'])
-                            ->first(),
-                            'options' => $this->options
-                            ->whereIn('id', $variation['option_id'])
-                            ->get()
+                            'variation' => $variations,
+                            'options' => $options,
                         ];
                         $amount_product += $this->options
                         ->whereIn('id', $variation['option_id'])
