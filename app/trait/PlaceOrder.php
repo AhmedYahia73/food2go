@@ -189,6 +189,7 @@ trait PlaceOrder
                     'product' => $product_item,
                     'count' => $product['count']
                 ];
+                return 1;
                 // Add product price
                 $amount_product += $product_item->price;
 
@@ -220,6 +221,7 @@ trait PlaceOrder
                         $order_details[$key]['excludes'][] = $exclude;
                     }
                 }
+                return 2;
                 if (isset($product['addons'])) {
                     foreach ($product['addons'] as $addon) {
                         $this->order_details
@@ -245,6 +247,7 @@ trait PlaceOrder
                         ]; 
                     }
                 }
+                return 3;
                 if (isset($product['extra_id'])) {
                     foreach ($product['extra_id'] as $extra) {
                         $this->order_details
@@ -265,6 +268,7 @@ trait PlaceOrder
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
+                return 4;
                 if (isset($product['product_extra_id'])) {
                     foreach ($product['product_extra_id'] as $extra) {
                         $this->order_details
