@@ -168,6 +168,10 @@ trait PlaceOrder
         $order = $this->order
         ->create($orderRequest);
         $user->save();
+        return [
+            'payment' => $order, 
+            'items' => $items
+        ];
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
