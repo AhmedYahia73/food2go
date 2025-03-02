@@ -199,10 +199,6 @@ trait PlaceOrder
                     'count' => $product['count'],
                     'product_index' => $key,
                 ]); // Add product with count
-                return [
-                    'payment' => $order, 
-                    'items' => $items
-                ];
                 if (isset($product['exclude_id'])) {
                     foreach ($product['exclude_id'] as $exclude) {
                         $this->order_details
@@ -224,6 +220,10 @@ trait PlaceOrder
                         $order_details[$key]['excludes'][] = $exclude;
                     }
                 } 
+                return [
+                    'payment' => $order, 
+                    'items' => $items
+                ];
                 if (isset($product['addons'])) {
                     foreach ($product['addons'] as $addon) {
                         $this->order_details
