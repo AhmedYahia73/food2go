@@ -67,6 +67,7 @@ class MakeOrderController extends Controller
             $order = $this->make_order($request);
             return response()->json([
                 'success' => $order['payment']->id,
+                'order' => $order,
             ]);
         }
         
