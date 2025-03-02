@@ -189,7 +189,6 @@ trait PlaceOrder
                     'product' => $product_item,
                     'count' => $product['count']
                 ];
-                return 1;
                 // Add product price
                 $amount_product += $product_item->price;
 
@@ -221,7 +220,7 @@ trait PlaceOrder
                         $order_details[$key]['excludes'][] = $exclude;
                     }
                 }
-                return 2;
+                return response()->json([2]);
                 if (isset($product['addons'])) {
                     foreach ($product['addons'] as $addon) {
                         $this->order_details
