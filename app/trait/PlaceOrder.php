@@ -286,10 +286,6 @@ trait PlaceOrder
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
-                return [
-                    'payment' => $order, 
-                    'items' => $items
-                ];
                 if (isset($product['variation'])) {
                     foreach ($product['variation'] as $variation) {
                         foreach ($variation['option_id'] as $option_id) {
@@ -324,6 +320,10 @@ trait PlaceOrder
                         ->sum('price');
                     }
                 }
+                return [
+                    'payment' => $order, 
+                    'items' => $items
+                ];
                 $discount_item = $product_item->discount;
                 $tax_item = $product_item->tax;
                 $tax = $this->settings
