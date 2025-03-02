@@ -129,7 +129,7 @@ trait PlaceOrder
         $user = auth()->user();
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
-        $locale = $request->locale ?? 'العربيه'; // Get Local Translation
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $points = 0;
         $items = [];
         $order_details = [];
