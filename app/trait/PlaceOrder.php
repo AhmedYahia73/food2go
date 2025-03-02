@@ -244,8 +244,7 @@ trait PlaceOrder
                             'count' => $addon['count']
                         ]; 
                     }
-                }
-                return 3;
+                } 
                 if (isset($product['extra_id'])) {
                     foreach ($product['extra_id'] as $extra) {
                         $this->order_details
@@ -266,7 +265,6 @@ trait PlaceOrder
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
-                return 4;
                 if (isset($product['product_extra_id'])) {
                     foreach ($product['product_extra_id'] as $extra) {
                         $this->order_details
@@ -288,6 +286,7 @@ trait PlaceOrder
                         $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
+                return 5;
                 if (isset($product['variation'])) {
                     foreach ($product['variation'] as $variation) {
                         foreach ($variation['option_id'] as $option_id) {
