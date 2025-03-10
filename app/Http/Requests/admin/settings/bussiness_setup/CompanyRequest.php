@@ -41,6 +41,8 @@ class CompanyRequest extends FormRequest
             'android_link' => ['sometimes'],
             'ios_link' => ['sometimes'],
             'order_online' => ['required', 'boolean'],
+            'android_switch' => ['boolean'],
+            'ios_switch' => ['boolean'],
         ];
     }
     // migrate --path=/database/migrations/2025_02_23_124537_add_columns_to_company_infos.php

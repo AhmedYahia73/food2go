@@ -27,6 +27,8 @@ class CompanyInfo extends Model
         'android_link',
         'ios_link',
         'order_online',
+        'android_switch',
+        'ios_switch',
     ];
     protected $appends = ['logo_link', 'fav_icon_link'];
 
