@@ -19,6 +19,9 @@ use App\Http\Controllers\api\admin\point_offers\PointOffersController;
 
 use App\Http\Controllers\api\admin\home\HomeController;
 
+use App\Http\Controllers\api\admin\cafe\CafeTablesController;
+use App\Http\Controllers\api\admin\cafe\CafeLocationController;
+
 use App\Http\Controllers\api\admin\customer\CustomerController;
 use App\Http\Controllers\api\admin\delivery\DeliveryController;
 use App\Http\Controllers\api\admin\branch\BranchController;
@@ -104,8 +107,28 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
-    });
+    }); 
 
+    Route::controller(CafeLocationController::class)->middleware('can:isPayments')
+    ->prefix('caffe_location')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'location');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(CafeTablesController::class)->middleware('can:isPayments')
+    ->prefix('caffe_tables')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'table');
+        Route::put('/status/{id}', 'status');
+        Route::put('/occupied/{id}', 'occupied');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
     Route::controller(PaymentController::class)->middleware('can:isPayments')
     ->prefix('payment')->group(function(){
         Route::get('/pending', 'pending');
