@@ -35,6 +35,7 @@ class Product extends Model
         'status',
         'recommended',
         'points',
+        'kitchen_id',
     ];
     protected $appends = ['image_link', 'orders_count', 'taxes'];
 

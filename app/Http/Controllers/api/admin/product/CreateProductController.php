@@ -212,12 +212,12 @@ class CreateProductController extends Controller
             return response()->json([
                 'success' => $request->all()
             ]);
-        } catch (\Throwable $th) {
+        } catch (QueryException $e) {
             $this->products
             ->where('id', $product_id)
             ->delete();
             return response()->json([
-                'faild' => 'Something wrong'
+                'faild' => $e
             ], 400);
         } 
     }

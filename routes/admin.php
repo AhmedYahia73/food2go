@@ -37,6 +37,9 @@ use App\Http\Controllers\api\admin\pos\PosSaleController;
 
 use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
 
+use App\Http\Controllers\api\admin\pos\kitchen\KitchenController;
+use App\Http\Controllers\api\admin\pos\captain_order\CaptainOrderController;
+
 use App\Http\Controllers\api\admin\payments\PaymentController;
 
 use App\Http\Controllers\api\admin\coupon\CouponController;
@@ -80,6 +83,29 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(HomeController::class)->middleware('can:isHome')
     ->prefix('home')->group(function(){
         Route::get('/', 'home');
+    });
+
+    Route::controller(KitchenController::class)
+    //->middleware('can:isAdminRoles')
+    ->prefix('pos/kitchens')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');
+        Route::get('/item/{id}', 'kitchen');
+        Route::post('/select_product', 'select_product');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(CaptainOrderController::class)
+    //->middleware('can:isAdminRoles')
+    ->prefix('pos/captain')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'captain');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(AdminRolesController::class)->middleware('can:isAdminRoles')
