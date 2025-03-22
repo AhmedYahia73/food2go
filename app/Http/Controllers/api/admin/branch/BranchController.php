@@ -162,13 +162,12 @@ class BranchController extends Controller
         ->where('status', 1)
         ->get()
         ->map(function($item) use($branch_off) {
-            $product_off = $branch_off->pluck('product_id')->toArray();
-            $category_off = $branch_off->pluck('category_id')->toArray();
+            $product_off = $branch_off->pluck('product_id')->filter()->toArray();
+            $category_off = $branch_off->pluck('category_id')->filter()->toArray();
             if (in_array($item->id, $product_off)) {
                 $item->status = 0;
             }
-            if (!empty($item->category_id) && !empty($item->sub_category_id) && 
-            (in_array($item->category_id, $category_off) || in_array($item->sub_category_id, $category_off))) {
+            if (in_array($item->category_id, $category_off) || in_array($item->sub_category_id, $category_off)) {
                 $item->status = 0;
             }
             return $item;
@@ -195,7 +194,7 @@ class BranchController extends Controller
         $branch_off = $this->branch_off
         ->where('branch_id', $id)
         ->get();
-        $option_off = $branch_off->pluck('option_id')->toArray();
+        $option_off = $branch_off->pluck('option_id')->filter()->toArray();
         $variations = $this->variations
         ->with(['options' => function($query){
             $query->where('status', 1);
