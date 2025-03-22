@@ -10,10 +10,12 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\PaymentMethod;
+use App\Models\PaymentMethodAuto;
 
 class PaymentMethodController extends Controller
 {
-    public function __construct(private PaymentMethod $payment_methods){}
+    public function __construct(private PaymentMethod $payment_methods, 
+    private PaymentMethodAuto $payment_method_auto){}
     protected $paymentMethodRequest = [
         'name',
         'description', 
@@ -25,7 +27,32 @@ class PaymentMethodController extends Controller
         // https://bcknd.food2go.online/admin/settings/payment_methods
         $payment_methods = $this->payment_methods
         ->where('type', 'manuel')
-        ->get();
+        ->get();  
+        $payment_method_paymob = $this->payment_methods
+        ->where('id', 1)
+        ->first();
+        if (empty($payment_method_paymob)) {
+            $payment_method_paymob = $this->payment_methods
+            ->create([
+                'id' => 1,
+                'name' => 'paymob',
+                'description' => 'paymob',
+                'logo' => '',
+                'status' => 1,
+                'type' => 'automatic',
+            ]);
+            $this->payment_method_auto
+            ->create([	
+                'title' => '',
+                'type' => 'live',
+                'callback' => '',
+                'api_key' => '',
+                'iframe_id' => '',
+                'integration_id' => '',
+                'Hmac' => '',
+                'payment_method_id ' => 1,
+            ]);
+        }
 
         return response()->json([
             'payment_methods' => $payment_methods
