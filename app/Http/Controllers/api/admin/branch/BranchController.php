@@ -167,7 +167,7 @@ class BranchController extends Controller
             if (in_array($item->id, $product_off)) {
                 $item->status = 0;
             }
-            if (in_array($item->category_id, $category_off) || in_array($item->sub_category_id, $category_off)) {
+            if (!empty($item->category_id) && (in_array($item->category_id, $category_off) || in_array($item->sub_category_id, $category_off))) {
                 $item->status = 0;
             }
             return $item;
