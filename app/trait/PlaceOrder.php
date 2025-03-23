@@ -47,6 +47,9 @@ trait PlaceOrder
                 ], 404);
             }
             $order = $this->make_order($request, 1);
+            if (isset($order['errors']) && !empty($order['errors'])) {
+                return $order;
+            }
         } catch (\Throwable $th) {
             throw new HttpResponseException(response()->json(['error' => 'Payment processing failed'], 500));
         }

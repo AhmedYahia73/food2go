@@ -51,6 +51,9 @@ class MakeOrderController extends Controller
             $user = $request->user();
             $amount_cents = $request->amount * 100;
             $order = $this->createOrder($request, $tokens, $user);
+            if (isset($order['errors']) && !empty($order['errors'])) {
+                return response()->json($order, 400);
+            }
             $order_id = $this->order
             ->where('transaction_id', $order->id)
             ->first();
@@ -66,7 +69,7 @@ class MakeOrderController extends Controller
         else {
             $order = $this->make_order($request);
             if (isset($order['errors']) && !empty($order['errors'])) {
-                return response()->json($order['errors'], 400);
+                return response()->json($order, 400);
             }
             return response()->json([
                 'success' => $order['payment']->id, 

@@ -25,6 +25,9 @@ trait PaymentPaymob
         //here we add example for test only
         $items = $this->placeOrder($request,$user);
 
+        if (isset($items['errors']) && !empty($items['errors'])) {
+            return $items;
+        }
         $totalAmountCents = $items['payment']->amount;
         
         //  $total = 100;
