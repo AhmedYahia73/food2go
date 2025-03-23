@@ -2,7 +2,9 @@
 
 namespace App\trait;
 
-use App\Models\Payment; 
+use App\Models\Payment;
+use App\Models\BranchOff;
+
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -125,6 +127,12 @@ trait PlaceOrder
     }
 
     public function make_order($request, $paymob = 0){
+        $branch_off = BranchOff::
+        where('branch_id', $request->branch_id)
+        ->get();
+        $products_off = $branch_off->pluck('product_id')->filter()->toArray();
+        $options_off = $branch_off->pluck('option_id')->filter()->toArray();
+        $categories_off = $branch_off->pluck('category_id')->filter()->toArray();
         $orderRequest = $request->only($this->paymentRequest); 
         $user = auth()->user();
         $orderRequest['user_id'] = $user->id;
@@ -139,6 +147,14 @@ trait PlaceOrder
                 $item = $this->products
                 ->where('id', $product['product_id'])
                 ->first();
+                if (in_array($item->id, $products_off) || 
+                in_array($item->category_id, $categories_off) ||
+                in_array($item->sub_category_id, $categories_off)) {
+                    return response()->json([
+                        'errors' => 'Product ' . $item->name . 
+                        ' is not found at this branch you can change branch or order'
+                    ], 400);
+                }
                 if (!empty($item)) {
                     $items[] = [ "name"=> $item->name,
                             "amount_cents"=> $item->price,
@@ -152,8 +168,14 @@ trait PlaceOrder
                                 foreach ($variation['option_id'] as $option_id) {
                                     $option_points = $this->options
                                     ->where('id', $option_id)
-                                    ->first()->points;
-                                    $points += $option_points * $product['count'];
+                                    ->first();
+                                    if (in_array($option_points->id, $options_off)) {
+                                        return response()->json([
+                                            'errors' => 'Option ' . $option_points->name . ' at product ' . $item->name . 
+                                            ' is not found at this branch you can change branch or order'
+                                        ], 400);
+                                    }
+                                    $points += $option_points->points * $product['count'];
                                 }
                             }
                         }
