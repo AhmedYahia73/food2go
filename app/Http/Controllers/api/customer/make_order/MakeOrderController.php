@@ -51,7 +51,7 @@ class MakeOrderController extends Controller
             $user = $request->user();
             $amount_cents = $request->amount * 100;
             $order = $this->createOrder($request, $tokens, $user);
-            if (isset($order['errors']) && !empty($order['errors'])) {
+            if (is_array($order) && isset($order['errors']) && !empty($order['errors'])) {
                 return response()->json($order, 400);
             }
             $order_id = $this->order
