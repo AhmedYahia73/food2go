@@ -65,6 +65,9 @@ class MakeOrderController extends Controller
         } 
         else {
             $order = $this->make_order($request);
+            if (isset($order['errors']) && !empty($order['errors'])) {
+                return response()->json($order['errors'], 400);
+            }
             return response()->json([
                 'success' => $order['payment']->id, 
             ]);

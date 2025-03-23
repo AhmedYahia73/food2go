@@ -130,9 +130,9 @@ trait PlaceOrder
         $branch_off = BranchOff::
         where('branch_id', $request->branch_id)
         ->get();
-        $products_off = $branch_off->pluck('product_id')->filter()->toArray();
-        $options_off = $branch_off->pluck('option_id')->filter()->toArray();
-        $categories_off = $branch_off->pluck('category_id')->filter()->toArray();
+        $products_off = $branch_off->pluck('product_id')->filter()->values()->all();
+        $options_off = $branch_off->pluck('option_id')->filter()->values()->all();
+        $categories_off = $branch_off->pluck('category_id')->filter()->values()->all();
         $orderRequest = $request->only($this->paymentRequest); 
         $user = auth()->user();
         $orderRequest['user_id'] = $user->id;
@@ -150,10 +150,10 @@ trait PlaceOrder
                 if (in_array($item->id, $products_off) || 
                 in_array($item->category_id, $categories_off) ||
                 in_array($item->sub_category_id, $categories_off)) {
-                    return response()->json([
+                    return [
                         'errors' => 'Product ' . $item->name . 
                         ' is not found at this branch you can change branch or order'
-                    ], 400);
+                    ];
                 }
                 if (!empty($item)) {
                     $items[] = [ "name"=> $item->name,
@@ -170,10 +170,10 @@ trait PlaceOrder
                                     ->where('id', $option_id)
                                     ->first();
                                     if (in_array($option_points->id, $options_off)) {
-                                        return response()->json([
+                                        return [
                                             'errors' => 'Option ' . $option_points->name . ' at product ' . $item->name . 
                                             ' is not found at this branch you can change branch or order'
-                                        ], 400);
+                                        ];
                                     }
                                     $points += $option_points->points * $product['count'];
                                 }
