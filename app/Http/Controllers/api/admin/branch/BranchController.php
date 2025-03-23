@@ -196,6 +196,7 @@ class BranchController extends Controller
         ->get();
         $option_off = $branch_off->pluck('option_id')->filter()->toArray();
         $variations = $this->variations
+        ->where('product_id', $id)
         ->with(['options' => function($query){
             $query->where('status', 1);
         }])
