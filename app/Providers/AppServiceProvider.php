@@ -24,12 +24,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $company = CompanyInfo::orderByDesc('id')
-        ->first() ?? collection([]);
-        $timezone = $company->time_zone ?? config('app.timezone');
-        if ($timezone != '') { 
-            Config::set('app.timezone', $timezone);
-            date_default_timezone_set($timezone);
+        try {
+            $company = CompanyInfo::orderByDesc('id')
+            ->first() ?? collection([]);
+            $timezone = $company->time_zone ?? config('app.timezone');
+            if ($timezone != '') { 
+                Config::set('app.timezone', $timezone);
+                date_default_timezone_set($timezone);
+            }
+        } catch (\Throwable $th) {
         }
         
         // if roles have home module
