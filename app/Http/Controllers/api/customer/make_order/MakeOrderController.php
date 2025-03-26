@@ -79,7 +79,10 @@ class MakeOrderController extends Controller
     }
 
     public function callback(Request $request){
-        // https://bcknd.food2go.online/customer/callback
+        // https://bcknd.food2go.online/customer/callback         
+        $order = $this->order
+        ->where('id', 223)
+        ->first();
         $order->update([
             'payment_status' => 'welcome'
         ]); 
