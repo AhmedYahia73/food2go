@@ -381,7 +381,7 @@ trait PlaceOrder
             }
         } 
         $order->order_details = json_encode($order_details);
-        if ($paymob) {
+        if (!$paymob) {
             $order->status = 2;
         }
         $order->save();
