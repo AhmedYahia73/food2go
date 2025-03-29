@@ -120,6 +120,5 @@ class LoginController extends Controller
                 'faild' => 'You faild to logout'
             ], 400);
         }
-        
     }
 }

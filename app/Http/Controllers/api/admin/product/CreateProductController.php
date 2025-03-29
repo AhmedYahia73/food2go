@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\admin\product\ProductRequest;
 use App\trait\image;
 use App\trait\translaion;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ProductImport;
 
 use App\Models\Product;
 use App\Models\VariationProduct;
@@ -225,7 +227,6 @@ class CreateProductController extends Controller
     public function modify(ProductRequest $request, $id){
         // https://bcknd.food2go.online/admin/product/update/{id}
         // Keys
-        // Keys
         // category_id, sub_category_id, item_type[online, offline, all], 
         // stock_type[daily, unlimited, fixed], number, price
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
@@ -439,5 +440,15 @@ class CreateProductController extends Controller
         return response()->json([
             'success' => 'You delete data success'
         ]);
+    }
+
+    public function import_excel() {
+        // https://bcknd.food2go.online/admin/product/import_excel
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+        Excel::import(new ProductImport, $request->file('file'));
+
+        return response()->json(['message' => 'File uploaded successfully']);
     }
 }

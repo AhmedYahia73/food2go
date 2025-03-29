@@ -275,6 +275,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
         Route::controller(CreateProductController::class)->group(function(){
             Route::post('/add', 'create'); 
+            Route::post('/import_excel', 'import_excel'); 
             Route::post('/update/{id}', 'modify'); 
             Route::delete('/delete/{id}', 'delete'); 
         });
