@@ -5,11 +5,10 @@ namespace App\Imports;
 use App\Models\Product;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
-
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class ProductImport implements ToModel
+class ProductImport implements ToModel, WithHeadingRow
 {
     /**
     * @param array $row
@@ -19,6 +18,7 @@ class ProductImport implements ToModel
     public function model(array $row)
     {
         // Keys
+        // name, description
         // id, item_type, stock_type, number, price
         // product_time_status, from, to, points 
 
@@ -41,6 +41,8 @@ class ProductImport implements ToModel
         // variations2_option3_status, variations2_option3_points
         Product::where('id', $row['id'])
         ->update([
+            'name' => $row['name'] ?? null,
+            'description' => $row['description'] ?? null,
             'item_type' => $row['item_type'],
             'stock_type' => $row['stock_type'],
             'number' => $row['number'],

@@ -9,6 +9,7 @@ use App\trait\image;
 use App\trait\translaion;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProductImport;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Product;
 use App\Models\VariationProduct;
@@ -442,11 +443,16 @@ class CreateProductController extends Controller
         ]);
     }
 
-    public function import_excel() {
+    public function import_excel(Request $request) {
         // https://bcknd.food2go.online/admin/product/import_excel
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'file' => 'required|mimes:xlsx,xls,csv',
         ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
         Excel::import(new ProductImport, $request->file('file'));
 
         return response()->json(['message' => 'File uploaded successfully']);
