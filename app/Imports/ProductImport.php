@@ -127,9 +127,9 @@ class ProductImport implements ToModel, WithHeadingRow
             $variation = VariationProduct::
             create([
                 'name' => $row['variations1_name'],
-                'type' => $row['variations1_type'],
-                'min' => $row['variations1_min'],
-                'max' => $row['variations1_max'],
+                'type' => $row['variations1_type'], 
+                'min' => empty($row['variations1_min']) ? null: $row['variations1_min'],
+                'max' => empty($row['variations1_max']) ? null: $row['variations1_max'],
                 'required' => $row['variations1_required'], 
                 'product_id' => $row['id'], 
             ]);
@@ -170,8 +170,8 @@ class ProductImport implements ToModel, WithHeadingRow
             ->update([
                 'name' => $row['variations2_name'],
                 'type' => $row['variations2_type'],
-                'min' => $row['variations2_min'],
-                'max' => $row['variations2_max'],
+                'min' => empty($row['variations2_min']) ? null: $row['variations2_min'],
+                'max' => empty($row['variations2_max']) ? null: $row['variations2_max'],
                 'required' => $row['variations2_required'], 
             ]);
             if (isset($row['variations2_option1_id']) && is_numeric($row['variations2_option1_id'])) {
