@@ -12,6 +12,10 @@ Route::prefix('admin/auth')->controller(LoginController::class)->group(function(
     Route::post('login', 'admin_login');
 });
 
+Route::prefix('captain/auth')->controller(LoginController::class)->group(function(){
+    Route::post('login', 'captain_login');
+});
+
 Route::prefix('logout')->middleware('auth:sanctum')->controller(LoginController::class)->group(function(){
     Route::post('/', 'logout');
 });
@@ -24,6 +28,7 @@ Route::prefix('customer_login')->controller(BusinessSetupController::class)
 ->group(function(){
     Route::get('/', 'customer_login');
 });
+
 
 Route::prefix('user/auth')->group(function(){
     Route::controller(LoginController::class)->group(function(){

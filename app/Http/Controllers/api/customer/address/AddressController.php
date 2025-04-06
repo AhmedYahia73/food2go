@@ -9,11 +9,12 @@ use App\Http\Requests\customer\address\AddressRequest;
 use App\Models\Address;
 use App\Models\Zone;
 use App\Models\User;
+use App\Models\Branch;
 
 class AddressController extends Controller
 {
     public function __construct(private Address $address, private Zone $zones, 
-    private User $user){}
+    private User $user, private Branch $branch){}
     protected $AddressRequest = [
         'zone_id',
         'address',
@@ -33,10 +34,14 @@ class AddressController extends Controller
         ->with('address.zone')
         ->first()->address; 
         $zones = $this->zones->get();
+        $branches = $this->branch
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'addresses' => $addresses,
             'zones' => $zones,
+            'branches' => $branches,
         ]);
     }
 

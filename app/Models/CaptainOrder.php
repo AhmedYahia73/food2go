@@ -17,7 +17,13 @@ class CaptainOrder extends Model
         'email',
         'phone',
         'password',
+        'captain_id',
     ];
+    protected $appends = ['role'];
+
+    public function getRoleAttribute(){
+        return 'captain_order';
+    }
 
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');

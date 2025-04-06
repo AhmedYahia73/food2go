@@ -44,6 +44,8 @@ class Order extends Model
         'cancel_reason',
         'customer_cancel_reason',
         'admin_cancel_reason',
+        'table_id',
+        'captain_id',
     ];
     protected $appends = ['order_date', 'status_payment'];
 

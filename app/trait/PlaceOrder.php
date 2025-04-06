@@ -140,6 +140,12 @@ trait PlaceOrder
         $user = auth()->user();
         $orderRequest['user_id'] = $user->id;
         $orderRequest['order_status'] = 'pending';
+        if ($request->table_id) {
+            $orderRequest['table_id'] = $request->table_id;
+        }
+        if ($request->captain_id) {
+            $orderRequest['captain_id'] = $request->captain_id;
+        }
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $points = 0;
         $items = [];

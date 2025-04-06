@@ -27,6 +27,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -41,6 +42,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -56,6 +58,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -71,6 +74,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -86,6 +90,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -101,6 +106,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -116,6 +122,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -131,6 +138,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -146,6 +154,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -161,6 +170,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -191,7 +201,7 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/admin/order/count
         $orders = $this->orders 
         ->where('pos', 0)
-        ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -201,6 +211,7 @@ class OrderController extends Controller
         ->count();
         $pending = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -211,6 +222,7 @@ class OrderController extends Controller
         ->count();
         $confirmed = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -221,6 +233,7 @@ class OrderController extends Controller
         ->count();
         $processing = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -231,6 +244,7 @@ class OrderController extends Controller
         ->count();
         $out_for_delivery = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -241,6 +255,7 @@ class OrderController extends Controller
         ->count();
         $delivered = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -251,6 +266,7 @@ class OrderController extends Controller
         ->count();
         $returned = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -261,6 +277,7 @@ class OrderController extends Controller
         ->count();
         $faild_to_deliver = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -271,6 +288,7 @@ class OrderController extends Controller
         ->count();
         $canceled = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -281,6 +299,7 @@ class OrderController extends Controller
         ->count();
         $scheduled = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -322,6 +341,7 @@ class OrderController extends Controller
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
+        ->whereNull('captain_id')
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -338,6 +358,7 @@ class OrderController extends Controller
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
+        ->whereNull('captain_id')
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -362,6 +383,7 @@ class OrderController extends Controller
             $old_orders = $request->orders;
             $new_orders = $this->orders
             ->where('pos', 0)
+        ->whereNull('captain_id')
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -371,6 +393,7 @@ class OrderController extends Controller
         }
         $new_orders = $this->orders
         ->where('pos', 0)
+        ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -420,6 +443,7 @@ class OrderController extends Controller
                 'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
                 'status', 'points', 'rejected_reason', 'transaction_id')
                 ->where('pos', 0)
+        ->whereNull('captain_id')
                 ->where('status', '!=', 2)
                 ->with(['user', 'branch', 'delivery'])
                 ->orderBy('created_at')
@@ -432,6 +456,7 @@ class OrderController extends Controller
                 'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
                 'status', 'points', 'rejected_reason', 'transaction_id')
                 ->where('pos', 0)
+        ->whereNull('captain_id')
                 ->where('status', '!=', 2)
                 ->where('order_status', $request->type)
                 ->with(['user', 'branch', 'delivery'])
@@ -447,6 +472,7 @@ class OrderController extends Controller
             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
+        ->whereNull('captain_id')
             ->with(['user', 'branch', 'delivery'])
             ->orderBy('created_at')
             ->get();

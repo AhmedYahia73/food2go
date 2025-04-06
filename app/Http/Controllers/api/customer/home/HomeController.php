@@ -15,16 +15,39 @@ use App\Models\User;
 use App\Models\Banner;
 use App\Models\Setting;
 use App\Models\Translation;
+use App\Models\BranchOff;
+use App\Models\Address;
 
 class HomeController extends Controller
 {
     public function __construct(private Category $categories, private User $user,
     private Product $product, private Banner $banner, private Setting $settings,
-    private Translation $translations){}
+    private Translation $translations, private BranchOff $branch_off,
+    private Address $address){}
 
     public function products(Request $request){
         // https://bcknd.food2go.online/customer/home
+        // Keys
+        // address_id, branch_id
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $option_off = $branch_off->pluck('option_id')->filter();
+
         $categories = $this->categories
         ->with(['sub_categories' => function($query) use($locale){
             $query->withLocale($locale);
@@ -34,7 +57,10 @@ class HomeController extends Controller
         }])
         ->withLocale($locale)
         ->where('category_id', null)
-        ->get();
+        ->get()
+        ->filter(function($item) use($category_off){
+            return !$category_off->contains($item->id);
+        });
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
@@ -65,8 +91,8 @@ class HomeController extends Controller
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
-            ->get();
-            foreach ($products as $product) {
+            ->get()
+            ->map(function($product) use($category_off, $product_off, $option_off){
                 if (count($product->favourite_product) > 0) {
                     $product->favourite = true;
                 }
@@ -84,7 +110,19 @@ class HomeController extends Controller
                     ->sum('count');
                     $product->in_stock = $product->number > $product->count ? true : false;
                 }
-            }
+                // return !$category_off->contains($item->id);
+                // $category_off, $product_off, $option_off
+                if ($category_off->contains($product->category_id) || 
+                $category_off->contains($product->sub_category_id)
+                || $product_off->contains($product->id)) {
+                    return null;
+                }
+                $product->variations = $product->variations->map(function ($variation) use ($option_off) {
+                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                    return $variation;
+                });
+                return $product;
+            })->filter(); 
         }
         else{
             $products = $this->product
@@ -114,7 +152,19 @@ class HomeController extends Controller
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
-            ->get();
+            ->get()
+            ->map(function($product) use($category_off, $product_off, $option_off){ 
+                if ($category_off->contains($product->category_id) || 
+                $category_off->contains($product->sub_category_id)
+                || $product_off->contains($product->id)) {
+                    return null;
+                }
+                $product->variations = $product->variations->map(function ($variation) use ($option_off) {
+                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                    return $variation;
+                });
+                return $product;
+            })->filter();
         }
         $discounts = $this->product
         ->with('discount')
@@ -157,7 +207,26 @@ class HomeController extends Controller
 
     public function web_products(Request $request){
         // https://bcknd.food2go.online/customer/home/web_products
+        // Keys
+        // address_id, branch_id
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $option_off = $branch_off->pluck('option_id')->filter();
+
         $tax = $this->settings
         ->where('name', 'tax')
         ->orderByDesc('id')
@@ -182,7 +251,10 @@ class HomeController extends Controller
         }])
         ->withLocale($locale)
         ->where('category_id', null)
-        ->get();
+        ->get()
+        ->filter(function($item) use($category_off){
+            return !$category_off->contains($item->id);
+        });
     
         $products = $this->product
         ->with(['addons' => function($query) use($locale){
@@ -211,7 +283,19 @@ class HomeController extends Controller
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($product) use($category_off, $product_off, $option_off){ 
+            if ($category_off->contains($product->category_id) || 
+            $category_off->contains($product->sub_category_id)
+            || $product_off->contains($product->id)) {
+                return null;
+            }
+            $product->variations = $product->variations->map(function ($variation) use ($option_off) {
+                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                return $variation;
+            });
+            return $product;
+        })->filter();
             
         $discounts = $this->product
         ->with('discount')
