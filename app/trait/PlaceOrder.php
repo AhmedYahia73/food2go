@@ -62,8 +62,6 @@ trait PlaceOrder
         ];
     }
 
-
-
     private function createOrdersForItems(array $items, string $field, array $baseData)
     {
 

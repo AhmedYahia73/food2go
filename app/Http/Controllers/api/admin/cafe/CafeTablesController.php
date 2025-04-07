@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\admin\cafe\CafeTableRequest;
 use App\trait\image;
 use Illuminate\Support\Facades\Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\CafeLocation;
 use App\Models\CafeTable;
@@ -99,25 +101,24 @@ class CafeTablesController extends Controller
         // Keys
         // qr_code, table_number, location_id, branch_id, capacity
         // occupied, status
-        $tablesRequest = $request->validated();
-        $validator = Validator::make($request->all(), [
-            'qr_code' => 'required',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                    'error' => $validator->errors(),
-            ],400);
-        }
-        if ($request->qr_code) {
-            $imag_path = $this->upload($request, 'qr_code', 'admin/cafe/tables/qr_code');
-            $tablesRequest['qr_code'] = $imag_path;
-        } // if send image upload it
 
-        $this->cafe_tables
-        ->create($tablesRequest);
+        $tablesRequest = $request->validated(); 
 
+        $cafe_tables = $this->cafe_tables
+        ->create($tablesRequest); 
+     
+        $qrContent = 'cafe table ' . $cafe_tables->id;
+    
+        $qrImage = QrCode::format('png')->size(300)->generate($qrContent);
+        $fileName = 'admin/cafe/tables/qr/'.$table->id.'.png';
+    
+        Storage::disk('public')->put($fileName, $qrImage);
+    
+        $cafe_tables->qr_code = $fileName;
+        $cafe_tables->save();
+     
         return response()->json([
-            'success' => 'You add data success'
+            'success' => $cafe_tables
         ]);
     }
 
