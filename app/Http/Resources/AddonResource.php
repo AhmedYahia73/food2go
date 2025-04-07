@@ -16,29 +16,43 @@ class AddonResource extends JsonResource
     {
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
-            return [
+            $price =  empty($this->tax) ? $this->price: 
+            ($this->tax->type == 'value' ? $this->price + $this->tax->amount : $this->price + $this->tax->amount * $this->price / 100);
+
+            $addon_arr = [
                 'id' => $this->id,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
-                'price' => empty($this->tax) ? $this->price: 
-                ($this->tax->type == 'value' ? $this->price + $this->tax->amount : $this->price + $this->tax->amount * $this->price / 100),
+                'price' => $price,
+                'price_after_discount' => $discount,
                 'tax_id' => $this->tax_id,
                 'quantity_add' => $this->quantity_add,
                 'tax' => $this->whenLoaded('tax'),
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
-            ];
+            ];       
+            if ($this->discount && !empty($this->discount) && $this->discount->type == 'precentage') {
+                $discount = $price - $this->discount->amount * $price / 100;
+                $addon_arr['price_after_discount'] = $discount;
+            }
         }
         else {
-            return [
+            $price = $this->price;
+            $addon_arr = [
                 'id' => $this->id,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
-                'price' => $this->price,
+                'price' => $price,
                 'tax_id' => $this->tax_id,
                 'quantity_add' => $this->quantity_add,
                 'tax' => $this->whenLoaded('tax'),
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ];
+            if ($this->discount && !empty($this->discount) && $this->discount->type == 'precentage') {
+                $discount = $price - $this->discount->amount * $price / 100;
+                $addon_arr['price_after_discount'] = $discount;
+            }
+
         }
+        return $addon_arr;
     }
 } 

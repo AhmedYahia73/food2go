@@ -125,6 +125,12 @@ class CaptainMakeOrderController extends Controller
               
                 return $variation;
             });
+            $product->addons = $product->addons->map(function ($addon) 
+            use ($product) {
+                $addon->discount = $product->discount;
+              
+                return $addon;
+            });
             return $product;
         })->filter(); 
         $tax = $this->settings
