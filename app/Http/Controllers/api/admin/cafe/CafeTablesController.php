@@ -110,7 +110,7 @@ class CafeTablesController extends Controller
         $qrContent = 'cafe table ' . $cafe_tables->id;
     
         $qrImage = QrCode::format('png')->size(300)->generate($qrContent);
-        $fileName = 'admin/cafe/tables/qr/'.$table->id.'.png';
+        $fileName = 'admin/cafe/tables/qr/'.$cafe_tables->id.'.png';
     
         Storage::disk('public')->put($fileName, $qrImage);
     
