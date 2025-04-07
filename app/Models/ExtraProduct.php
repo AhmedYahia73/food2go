@@ -27,6 +27,10 @@ class ExtraProduct extends Model
         return $this->morphMany(TranslationTbl::class, 'translatable');
     }
 
+    public function product(){
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
     public function scopeWithLocale($query, $locale = null)
     {
         $locale = $locale ?: app()->getLocale();

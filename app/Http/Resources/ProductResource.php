@@ -31,6 +31,20 @@ class ProductResource extends JsonResource
     
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
+            $price = empty($this->tax) ? $this->price: 
+            ($this->tax->type == 'value' ? $this->price + $this->tax->amount 
+            : $this->price + $this->tax->amount * $this->price / 100);
+            
+            if (!empty($this->discount)) {
+                if ($this->discount->type == 'precentage') {
+                    $discount = $price - $this->discount->amount * $price / 100;
+                } else {
+                    $discount = $price - $this->discount->amount;
+                }
+            }
+            else{
+                $discount = $price;
+            }
             return [
                 'id' => $this->id,
                 'taxes' => $this->taxes->setting,
@@ -42,8 +56,8 @@ class ProductResource extends JsonResource
                 'item_type' => $this->item_type,
                 'stock_type' => $this->stock_type,
                 'number' => $this->number,
-                'price' => empty($this->tax) ? $this->price: 
-                ($this->tax->type == 'value' ? $this->price + $this->tax->amount :$this->price + $this->tax->amount * $this->price / 100),
+                'price' => $price,
+                'price_after_discount' => $discount,
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
@@ -70,6 +84,18 @@ class ProductResource extends JsonResource
             ];
         } 
         else {
+            $price = $this->price;
+            
+            if (!empty($this->discount)) {
+                if ($this->discount->type == 'precentage') {
+                    $discount = $price - $this->discount->amount * $price / 100;
+                } else {
+                    $discount = $price - $this->discount->amount;
+                }
+            }
+            else{
+                $discount = $price;
+            }
             return [
                 'id' => $this->id,
                 'taxes' => $this->taxes->setting,
@@ -81,7 +107,8 @@ class ProductResource extends JsonResource
                 'item_type' => $this->item_type,
                 'stock_type' => $this->stock_type,
                 'number' => $this->number,
-                'price' => $this->price,
+                'price' => $price,
+                'price_after_discount' => $discount,
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,

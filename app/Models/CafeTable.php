@@ -21,7 +21,7 @@ class CafeTable extends Model
 
     public function getQrCodeLinkAttribute(){
         if ($this->qr_code) {
-            return url('storage' . $this->qr_code);
+            return url('storage/' . $this->qr_code);
         }
     }
 
