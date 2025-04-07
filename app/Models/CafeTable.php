@@ -17,6 +17,13 @@ class CafeTable extends Model
         'occupied',
         'status',
     ];
+    protected $appends = ['qr_code_link'];
+
+    public function getQrCodeLinkAttribute(){
+        if ($this->qr_code_link) {
+            return $this->qr_code_link;
+        }
+    }
 
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');

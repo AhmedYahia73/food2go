@@ -99,7 +99,7 @@ class CafeTablesController extends Controller
     public function create(CafeTableRequest $request){
         // /admin/caffe_tables/add
         // Keys
-        // qr_code, table_number, location_id, branch_id, capacity
+        // table_number, location_id, branch_id, capacity
         // occupied, status
 
         $tablesRequest = $request->validated(); 
@@ -125,7 +125,7 @@ class CafeTablesController extends Controller
     public function modify(CafeTableRequest $request, $id){
         // /admin/caffe_tables/update/{id}
         // Keys
-        // qr_code, table_number, location_id, branch_id, capacity
+        // table_number, location_id, branch_id, capacity
         // occupied, status
         $tablesRequest = $request->validated();
         $cafe_tables = $this->cafe_tables
