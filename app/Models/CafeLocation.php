@@ -11,4 +11,8 @@ class CafeLocation extends Model
     protected $fillable = [
         'name', 
     ];
+
+    public function tables(){
+        return $this->hasMany(CafeTable::class, 'location_id');
+    }
 }

@@ -23,6 +23,7 @@ use App\Models\PaymentMethodAuto;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Models\BranchOff;
+use App\Models\CafeLocation;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -35,7 +36,8 @@ class CaptainMakeOrderController extends Controller
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
-    private Category $category, private BranchOff $branch_off){}
+    private Category $category, private BranchOff $branch_off, 
+    private CafeLocation $cafe_location){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -132,28 +134,17 @@ class CaptainMakeOrderController extends Controller
                 return $addon;
             });
             return $product;
-        })->filter(); 
-        $tax = $this->settings
-        ->where('name', 'tax')
-        ->orderByDesc('id')
-        ->first();
-        if (!empty($tax)) {
-            $tax = $tax->setting;
-        }
-        else {
-            $tax = $this->settings
-            ->create([
-                'name' => 'tax',
-                'setting' => 'included',
-            ]);
-            $tax = $tax->setting;
-        }
+        })->filter();
+        $cafe_location = $this->cafe_location
+        ->with('tables')
+        ->get();
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products);
 
         return response()->json([
             'categories' => $categories,
             'products' => $products, 
+            'cafe_location' => $cafe_location, 
         ]);
     }
 
