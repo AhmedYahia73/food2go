@@ -9,6 +9,7 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CustomerMiddleware;
 use App\Http\Middleware\DeliveryMiddleware;
 use App\Http\Middleware\CaptainMiddleware;
+use App\Http\Middleware\CashierMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -34,6 +35,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ->prefix('captain')
             ->name('captain.')
             ->group(base_path('routes/captain.php'));
+            Route::middleware('api')
+            ->prefix('cashier')
+            ->name('cashier.')
+            ->group(base_path('routes/cashier.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -42,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'IsCustomer' => CustomerMiddleware::class,
             'IsDelivery' => DeliveryMiddleware::class,
             'IsCaptain' => CaptainMiddleware::class,
+            'IsCashier' => CashierMiddleware::class,
         ]);
          $middleware->redirectGuestsTo(function (Request $request) {
             if (!$request->is('api/*')) {

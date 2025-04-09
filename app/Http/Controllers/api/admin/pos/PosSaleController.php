@@ -59,34 +59,34 @@ class PosSaleController extends Controller
         ]);
     }
 
-    public function add_order_user(OrderRequest $request){
-         //  لما يكون اللى هيشترى user
-        // Keys
-        // date, branch_id, user_id, amount, order_status, order_type
-        // total_tax, total_discount, paid_by, payment_status, address
-        // name, number, road, house, floor, personal_address
-        // products_id[], addons_id[]
-        $orderRequest = $request->only($this->orderRequest);
-        $orderRequest['pos'] = true;
-        if (!$request->date) {
-            $orderRequest['date'] = now();
-        }
-        $order = $this->orders->create($orderRequest);
-        if (!empty($request->name)) {
-            $order_information = $request->only($this->personal_information);
-            $order_information['order_id'] = $order->id;
-            $order_information['address'] = $request->personal_address;
-            $this->order_information->create($order_information);
-        }
-        if ($request->products_id) {
-            $order->products()->attach($request->products_id);
-        }
-        if ($request->addons_id) {
-            $order->addons()->attach($request->addons_id);
-        }
+    // public function add_order_user(OrderRequest $request){
+    //      //  لما يكون اللى هيشترى user
+    //     // Keys
+    //     // date, branch_id, user_id, amount, order_status, order_type
+    //     // total_tax, total_discount, paid_by, payment_status, address
+    //     // name, number, road, house, floor, personal_address
+    //     // products_id[], addons_id[]
+    //     $orderRequest = $request->only($this->orderRequest);
+    //     $orderRequest['pos'] = true;
+    //     if (!$request->date) {
+    //         $orderRequest['date'] = now();
+    //     }
+    //     $order = $this->orders->create($orderRequest);
+    //     if (!empty($request->name)) {
+    //         $order_information = $request->only($this->personal_information);
+    //         $order_information['order_id'] = $order->id;
+    //         $order_information['address'] = $request->personal_address;
+    //         $this->order_information->create($order_information);
+    //     }
+    //     if ($request->products_id) {
+    //         $order->products()->attach($request->products_id);
+    //     }
+    //     if ($request->addons_id) {
+    //         $order->addons()->attach($request->addons_id);
+    //     }
 
-        return response()->json([
-            'success' => 'You Add data success'
-        ]);
-    }
+    //     return response()->json([
+    //         'success' => 'You Add data success'
+    //     ]);
+    // }
 }

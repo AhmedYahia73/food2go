@@ -18,7 +18,12 @@ class CashierMan extends Model
         'password',
         'status',
     ];
+    protected $appends = ['role'];
 
+    public function getRoleAttribute(){
+        return 'cashier';
+    }
+    
     public function getmodulesAttribute($data){
         if (json_decode($data)) {
             return json_decode($data);

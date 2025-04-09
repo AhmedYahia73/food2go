@@ -12,6 +12,10 @@ Route::prefix('admin/auth')->controller(LoginController::class)->group(function(
     Route::post('login', 'admin_login');
 });
 
+Route::prefix('cashier/auth')->controller(LoginController::class)->group(function(){
+    Route::post('login', 'cashier_login');
+});
+
 Route::prefix('captain/auth')->controller(LoginController::class)->group(function(){
     Route::post('login', 'captain_login');
 });

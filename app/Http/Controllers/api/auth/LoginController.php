@@ -10,6 +10,7 @@ use App\Http\Requests\auth\SignupRequest;
 use App\Models\Admin;
 use App\Models\Delivery;
 use App\Models\CaptainOrder;
+use App\Models\CashierMan;
 use App\Models\User;
 use App\Models\Branch;
 use App\Models\Setting;
@@ -20,7 +21,8 @@ class LoginController extends Controller
 {
     public function __construct(private Admin $admin, private Delivery $delivery, 
     private User $user, private Branch $branch, private Setting $settings,
-    private Address $address, private Zone $zones, private CaptainOrder $captain_order){}
+    private Address $address, private Zone $zones, private CaptainOrder $captain_order,
+    private CashierMan $cashier){}
 
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login
@@ -77,6 +79,37 @@ class LoginController extends Controller
             $user->token = $user->createToken('captain_order')->plainTextToken;
             return response()->json([
                 'captain_order' => $user,
+                'token' => $user->token,
+            ], 200);
+        }
+        else { 
+            return response()->json(['faield'=>'creational not Valid'],403);
+        }
+    }
+
+    public function cashier_login(Request $request){
+        // /api/cashier/auth/login
+        // Keys
+        // user_name, password
+        $user = $this->cashier
+        ->where('user_name', $request->user_name)
+        ->with('branch', 'cashier')
+        ->first();
+        if (empty($user)) {
+            return response()->json([
+                'faield' => 'This user does not have the ability to login'
+            ], 405);
+        }
+        if ($user->status == 0) {
+            return response()->json([
+                'falid' => 'cashier is banned'
+            ], 400);
+        }
+        if (password_verify($request->input('password'), $user->password)) {
+            $user->role = 'cashier';
+            $user->token = $user->createToken('cashier')->plainTextToken;
+            return response()->json([
+                'cashier' => $user,
                 'token' => $user->token,
             ], 200);
         }

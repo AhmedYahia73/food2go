@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\api\captain_order\make_order;
+namespace App\Http\Controllers\api\cashier\make_order;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\captain\order\OrderRequest;
+use App\Http\Requests\customer\order\OrderRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 
@@ -29,7 +29,7 @@ use App\trait\image;
 use App\trait\PlaceOrder;
 use App\trait\PaymentPaymob;
 
-class CaptainMakeOrderController extends Controller
+class CashierMakeOrderController extends Controller
 {
     public function __construct(private Order $order, private OrderDetail $order_details,
     private ProductSale $product_sales, private Product $products, private ExcludeProduct $excludes,
@@ -43,7 +43,7 @@ class CaptainMakeOrderController extends Controller
     use PaymentPaymob;
 
     public function lists(Request $request){
-        // /captain/lists
+        // /cashier/lists
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;
         $payment_methods = $this->paymentMethod
@@ -138,33 +138,27 @@ class CaptainMakeOrderController extends Controller
             });
             return $product;
         })->filter();
-        $cafe_location = $this->cafe_location
-        ->with('tables')
-        ->get();
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products);
 
         return response()->json([
             'categories' => $categories,
-            'products' => $products, 
-            'cafe_location' => $cafe_location,
+            'products' => $products,
             'payment_methods' => $payment_methods,
         ]);
     }
 
     public function order(OrderRequest $request){
-        // https://bcknd.food2go.online/captain/make_order
+        // cashier/make_order
         // Keys
         // date, branch_id, amount, total_tax, total_discount
-        // notes
+        // notes, payment_method_id, order_type
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-        $request->merge([
-            'order_type' => 'dine_in',
-            'captain_id' => $request->user()->id,
-            'table_id' => $request->table_id
+        $request->merge([ 
+            'cashier_id' => $request->user()->cashier_id,
+            'cashier_man_id' => $request->user()->id,
         ]);
-        $request->payment_method_id = null;
         $order = $this->make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);

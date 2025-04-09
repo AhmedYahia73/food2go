@@ -144,6 +144,12 @@ trait PlaceOrder
         if ($request->captain_id) {
             $orderRequest['captain_id'] = $request->captain_id;
         }
+        if ($request->cashier_id) {
+            $orderRequest['cashier_id'] = $request->cashier_id;
+        }
+        if ($request->cashier_man_id) {
+            $orderRequest['cashier_man_id'] = $request->cashier_man_id;
+        }
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $points = 0;
         $items = [];

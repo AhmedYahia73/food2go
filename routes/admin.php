@@ -290,6 +290,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
         Route::controller(PosOrderController::class)->group(function(){
             Route::get('/order', 'pos_orders');
+            Route::post('/make_order', 'new_order');
         });
     });
     
