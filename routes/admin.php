@@ -35,6 +35,9 @@ use App\Http\Controllers\api\admin\product\CreateProductController;
 use App\Http\Controllers\api\admin\pos\PosOrderController;
 use App\Http\Controllers\api\admin\pos\PosSaleController;
 
+use App\Http\Controllers\api\admin\cashier\CashierController;
+use App\Http\Controllers\api\admin\cashier\CashierManController;
+
 use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
 
 use App\Http\Controllers\api\admin\pos\kitchen\KitchenController;
@@ -57,6 +60,7 @@ use App\Http\Controllers\api\admin\settings\OrderTypeController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodController;
 use App\Http\Controllers\api\admin\settings\PaymentMethodAutoController;
 use App\Http\Controllers\api\admin\settings\MenueController;
+use App\Http\Controllers\api\admin\settings\FinancialAccountingController;
 use App\Http\Controllers\api\admin\settings\business_setup\CompanyController;
 use App\Http\Controllers\api\admin\settings\business_setup\MaintenanceController;
 use App\Http\Controllers\api\admin\settings\business_setup\MainBranchesController;
@@ -83,6 +87,28 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(HomeController::class)->middleware('can:isHome')
     ->prefix('home')->group(function(){
         Route::get('/', 'home');
+    });
+
+    Route::controller(CashierController::class)
+    //->middleware('can:isAdminRoles')
+    ->prefix('cashier')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'cashier');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(CashierManController::class)
+    //->middleware('can:isAdminRoles')
+    ->prefix('cashier_man')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'cashier_man');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(KitchenController::class)
@@ -312,6 +338,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
             Route::delete('/delete/{id}', 'delete');
+        });
+
+        Route::controller(FinancialAccountingController::class)->prefix('financial')->group(function(){
+            Route::get('/', 'view');
+            Route::get('item/{id}', 'financial');
+            Route::put('status/{id}', 'status');
+            Route::post('add', 'create');
+            Route::post('update/{id}', 'modify');
+            Route::delete('delete/{id}', 'delete');
         });
 
         Route::controller(MenueController::class)
