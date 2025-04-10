@@ -21,6 +21,7 @@ class Address extends Model
         'additional_data',
         'type',
         'map',
+        'customer_id',
     ];
 
     public function zone(){

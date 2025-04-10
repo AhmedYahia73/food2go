@@ -13,7 +13,10 @@ class CashierMan extends Model
     protected $fillable = [
         'branch_id',
         'cashier_id',
-        'modules',
+        'take_away',
+        'dine_in',
+        'car_slow',
+        'take_away',
         'user_name',
         'password',
         'status',

@@ -33,7 +33,8 @@ use App\Http\Controllers\api\admin\product\ProductController;
 use App\Http\Controllers\api\admin\product\CreateProductController;
 
 use App\Http\Controllers\api\admin\pos\PosOrderController;
-use App\Http\Controllers\api\admin\pos\PosSaleController;
+use App\Http\Controllers\api\admin\pos\PosCustomerController;
+use App\Http\Controllers\api\admin\pos\PosAddressController;
 
 use App\Http\Controllers\api\admin\cashier\CashierController;
 use App\Http\Controllers\api\admin\cashier\CashierManController;
@@ -284,13 +285,24 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
     
     Route::prefix('pos')->group(function(){
-        Route::controller(PosSaleController::class)->group(function(){
-            Route::get('/sale', 'sale');
-            Route::post('/order_user/add', 'add_order_user');
+        Route::controller(PosCustomerController::class)
+        ->prefix('/customer')->group(function(){
+            Route::get('/', 'view');
+            Route::post('/add', 'create');
+            Route::post('/update/{id}', 'modify');
         });
-        Route::controller(PosOrderController::class)->group(function(){
-            Route::get('/order', 'pos_orders');
+        Route::controller(PosAddressController::class)
+        ->prefix('/address')->group(function(){
+            Route::get('/item/{id}', 'address');
+            Route::post('/add', 'create');
+            Route::post('/update/{id}', 'modify');
+        });
+        Route::controller(PosOrderController::class)
+        ->prefix('order')->group(function(){
+            Route::get('/lists', 'lists');
+            Route::get('/orders', 'pos_orders');
             Route::post('/make_order', 'new_order');
+            Route::put('/tables_status/{id}', 'tables_status');
         });
     });
     

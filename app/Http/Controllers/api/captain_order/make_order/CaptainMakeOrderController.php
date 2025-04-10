@@ -162,7 +162,8 @@ class CaptainMakeOrderController extends Controller
         $request->merge([
             'order_type' => 'dine_in',
             'captain_id' => $request->user()->id,
-            'table_id' => $request->table_id
+            'table_id' => $request->table_id,
+            'user_id' => 'empty',
         ]);
         $request->payment_method_id = null;
         $order = $this->make_order($request);
