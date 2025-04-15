@@ -128,36 +128,50 @@ class CashierMakeOrderController extends Controller
 
     public function printReceipt(Request $request)
     { 
-        $validator = Validator::make($request->all(), [
-            'pdf' => 'required|file|mimes:pdf',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'error' => $validator->errors(),
-            ],400);
-        }
+        // cashier/printReceipt
+        // $validator = Validator::make($request->all(), [
+        //     'pdf' => 'required|file|mimes:pdf',
+        // ]);
+        // if ($validator->fails()) { // if Validate Make Error Return Message Error
+        //     return response()->json([
+        //         'error' => $validator->errors(),
+        //     ],400);
+        // }
     
-        $connector = new WindowsPrintConnector("XPrinter");
+        // $connector = new WindowsPrintConnector("XPrinter");
+        // $printer = new Printer($connector);
+        // $pdf = $request->file('pdf');
+        // $pdfPath = storage_path('app/public/temp_receipt.pdf');
+        // $pdf->move(storage_path('app/public'), 'temp_receipt.pdf');
+    
+        // // Convert the PDF to image (use ImageMagick or imagick)
+        // $imagick = new \Imagick();
+        // $imagick->readImage($pdfPath);
+        // $imagick->setImageFormat("png");
+        // $imagePath = storage_path('app/public/temp_receipt.png');
+        // $imagick->writeImage($imagePath);
+    
+        // // Print the image
+        // $connector = new WindowsPrintConnector("XPrinter"); // Or CupsPrintConnector
+        // $printer = new Printer($connector);
+        // $printer->graphics(new \Mike42\Escpos\EscposImage($imagePath));
+        // $printer->cut();
+        // $printer->close();
+    
+        // return response()->json(['message' => 'Receipt printed successfully']);
+                
+        $connector = new WindowsPrintConnector("XP-80C");
         $printer = new Printer($connector);
-        $pdf = $request->file('pdf');
-        $pdfPath = storage_path('app/public/temp_receipt.pdf');
-        $pdf->move(storage_path('app/public'), 'temp_receipt.pdf');
-    
-        // Convert the PDF to image (use ImageMagick or imagick)
-        $imagick = new \Imagick();
-        $imagick->readImage($pdfPath);
-        $imagick->setImageFormat("png");
-        $imagePath = storage_path('app/public/temp_receipt.png');
-        $imagick->writeImage($imagePath);
-    
-        // Print the image
-        $connector = new WindowsPrintConnector("XPrinter"); // Or CupsPrintConnector
-        $printer = new Printer($connector);
-        $printer->graphics(new \Mike42\Escpos\EscposImage($imagePath));
+        $printer->text("Store Name\n");
+        $printer->text("Item 1 x1 $10.00\n");
+        $printer->text("Total: $10.00\n");
+        $printer->text("Total: $10.00\n");
+        $printer->text("Total: $10.00\n");
         $printer->cut();
         $printer->close();
-    
-        return response()->json(['message' => 'Receipt printed successfully']);
+        return response()->json([
+            'success' => 'success'
+        ]);
     }
     
 
