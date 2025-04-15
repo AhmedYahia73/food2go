@@ -128,6 +128,7 @@ class CashierMakeOrderController extends Controller
 
     public function printReceipt(Request $request)
     { 
+        // cashier/printReceipt
         // $validator = Validator::make($request->all(), [
         //     'pdf' => 'required|file|mimes:pdf',
         // ]);
