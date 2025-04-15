@@ -11,7 +11,7 @@ use App\Http\Resources\ProductResource;
 
 // ____________________________________________________
 use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 // ____________________________________________________
 
 use App\Models\Order;
@@ -160,18 +160,38 @@ class CashierMakeOrderController extends Controller
     
         // return response()->json(['message' => 'Receipt printed successfully']);
                 
-        $connector = new WindowsPrintConnector("XP-80C");
+    try {
+        $connector = new WindowsPrintConnector("XP-80C"); // Windows printer share name
+        // OR use NetworkPrintConnector("192.168.0.100", 9100);
+
         $printer = new Printer($connector);
-        $printer->text("Store Name\n");
-        $printer->text("Item 1 x1 $10.00\n");
-        $printer->text("Total: $10.00\n");
-        $printer->text("Total: $10.00\n");
-        $printer->text("Total: $10.00\n");
+
+        // Print receipt content
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->text("My Store\n");
+        $printer->text("123 Market Street\n");
+        $printer->text("Tel: 0123456789\n");
+        $printer->feed();
+
+        $printer->setJustification(Printer::JUSTIFY_LEFT);
+        $printer->text("Item        Qty    Price\n");
+        $printer->text("--------------------------\n");
+        $printer->text("Coffee       2     40.00\n");
+        $printer->text("Donut        1     15.00\n");
+        $printer->text("--------------------------\n");
+        $printer->setJustification(Printer::JUSTIFY_RIGHT);
+        $printer->text("TOTAL:       55.00\n");
+
+        $printer->feed(2);
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->text("Thank you!\n");
         $printer->cut();
         $printer->close();
-        return response()->json([
-            'success' => 'success'
-        ]);
+
+        return response()->json(['message' => 'Printed successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Failed to print: ' . $e->getMessage()], 500);
+    }
     }
     
 
