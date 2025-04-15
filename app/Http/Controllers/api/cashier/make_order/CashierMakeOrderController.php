@@ -11,7 +11,7 @@ use App\Http\Resources\ProductResource;
 
 // ____________________________________________________
 use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 // ____________________________________________________
 
 use App\Models\Order;
@@ -128,53 +128,36 @@ class CashierMakeOrderController extends Controller
 
     public function printReceipt(Request $request)
     { 
-        // cashier/printReceipt
-        // $validator = Validator::make($request->all(), [
-        //     'pdf' => 'required|file|mimes:pdf',
-        // ]);
-        // if ($validator->fails()) { // if Validate Make Error Return Message Error
-        //     return response()->json([
-        //         'error' => $validator->errors(),
-        //     ],400);
-        // }
-    
-        // $connector = new WindowsPrintConnector("XPrinter");
-        // $printer = new Printer($connector);
-        // $pdf = $request->file('pdf');
-        // $pdfPath = storage_path('app/public/temp_receipt.pdf');
-        // $pdf->move(storage_path('app/public'), 'temp_receipt.pdf');
-    
-        // // Convert the PDF to image (use ImageMagick or imagick)
-        // $imagick = new \Imagick();
-        // $imagick->readImage($pdfPath);
-        // $imagick->setImageFormat("png");
-        // $imagePath = storage_path('app/public/temp_receipt.png');
-        // $imagick->writeImage($imagePath);
-    
-        // // Print the image
-        // $connector = new WindowsPrintConnector("XPrinter"); // Or CupsPrintConnector
-        // $printer = new Printer($connector);
-        // $printer->graphics(new \Mike42\Escpos\EscposImage($imagePath));
-        // $printer->cut();
-        // $printer->close();
-    
-        // return response()->json(['message' => 'Receipt printed successfully']);
-        
-        try {
-            // Connect to your XPrinter (replace the name with actual printer name in Windows)
-            $connector = new NetworkPrintConnector("192.168.1.100", 9100);
-
-            $printer = new Printer($connector);
-            $printer->text("Hello from Laravel!\n");
-            $printer->feed(2);
-            $printer->cut();
-            $printer->close();
-
-            return response()->json(['message' => 'Printed successfully!']);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        $validator = Validator::make($request->all(), [
+            'pdf' => 'required|file|mimes:pdf',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
         }
+    
+        $connector = new WindowsPrintConnector("XPrinter");
+        $printer = new Printer($connector);
+        $pdf = $request->file('pdf');
+        $pdfPath = storage_path('app/public/temp_receipt.pdf');
+        $pdf->move(storage_path('app/public'), 'temp_receipt.pdf');
+    
+        // Convert the PDF to image (use ImageMagick or imagick)
+        $imagick = new \Imagick();
+        $imagick->readImage($pdfPath);
+        $imagick->setImageFormat("png");
+        $imagePath = storage_path('app/public/temp_receipt.png');
+        $imagick->writeImage($imagePath);
+    
+        // Print the image
+        $connector = new WindowsPrintConnector("XPrinter"); // Or CupsPrintConnector
+        $printer = new Printer($connector);
+        $printer->graphics(new \Mike42\Escpos\EscposImage($imagePath));
+        $printer->cut();
+        $printer->close();
+    
+        return response()->json(['message' => 'Receipt printed successfully']);
     }
     
 

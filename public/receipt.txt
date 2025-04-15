@@ -1,0 +1,12 @@
+Store Name
+Address Line 1
+-----------------------------
+Item       Qty   Price
+Apple      2     10.00
+Orange     1     5.00
+-----------------------------
+Total:          25.00
+Thank you!
+
+
+
