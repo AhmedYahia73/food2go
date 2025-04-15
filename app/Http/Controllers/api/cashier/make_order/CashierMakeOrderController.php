@@ -11,7 +11,7 @@ use App\Http\Resources\ProductResource;
 
 // ____________________________________________________
 use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
 // ____________________________________________________
 
 use App\Models\Order;
@@ -162,7 +162,7 @@ class CashierMakeOrderController extends Controller
         
         try {
             // Connect to your XPrinter (replace the name with actual printer name in Windows)
-            $connector = new WindowsPrintConnector("XPrinter");
+            $connector = new NetworkPrintConnector("192.168.1.100", 9100);
 
             $printer = new Printer($connector);
             $printer->text("Hello from Laravel!\n");
