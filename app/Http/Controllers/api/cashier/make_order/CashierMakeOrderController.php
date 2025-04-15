@@ -160,33 +160,50 @@ class CashierMakeOrderController extends Controller
     
         // return response()->json(['message' => 'Receipt printed successfully']);
                 
+    // try {
+    //     $connector = new WindowsPrintConnector("XP-80C"); // Windows printer share name
+    //     // OR use NetworkPrintConnector("192.168.0.100", 9100);
+
+    //     $printer = new Printer($connector);
+
+    //     // Print receipt content
+    //     $printer->setJustification(Printer::JUSTIFY_CENTER);
+    //     $printer->text("My Store\n");
+    //     $printer->text("123 Market Street\n");
+    //     $printer->text("Tel: 0123456789\n");
+    //     $printer->feed();
+
+    //     $printer->setJustification(Printer::JUSTIFY_LEFT);
+    //     $printer->text("Item        Qty    Price\n");
+    //     $printer->text("--------------------------\n");
+    //     $printer->text("Coffee       2     40.00\n");
+    //     $printer->text("Donut        1     15.00\n");
+    //     $printer->text("--------------------------\n");
+    //     $printer->setJustification(Printer::JUSTIFY_RIGHT);
+    //     $printer->text("TOTAL:       55.00\n");
+
+    //     $printer->feed(2);
+    //     $printer->setJustification(Printer::JUSTIFY_CENTER);
+    //     $printer->text("Thank you!\n");
+    //     $printer->cut();
+    //     $printer->close();
+
+    //     return response()->json(['message' => 'Printed successfully']);
+    // } catch (\Exception $e) {
+    //     return response()->json(['error' => 'Failed to print: ' . $e->getMessage()], 500);
+    // }
+    
     try {
-        $connector = new WindowsPrintConnector("XP-80C"); // Windows printer share name
-        // OR use NetworkPrintConnector("192.168.0.100", 9100);
+        // The smbclient command will attempt to connect to the network share and print
+        $printerPath = "//hostego.net/XP-80C"; // Update this to match the correct network share
+        $command = "smbclient '$printerPath' -c 'print -' -N -m SMB2";
 
-        $printer = new Printer($connector);
+        // Execute the command using PHP's shell_exec() function
+        $output = shell_exec($command);
 
-        // Print receipt content
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("My Store\n");
-        $printer->text("123 Market Street\n");
-        $printer->text("Tel: 0123456789\n");
-        $printer->feed();
-
-        $printer->setJustification(Printer::JUSTIFY_LEFT);
-        $printer->text("Item        Qty    Price\n");
-        $printer->text("--------------------------\n");
-        $printer->text("Coffee       2     40.00\n");
-        $printer->text("Donut        1     15.00\n");
-        $printer->text("--------------------------\n");
-        $printer->setJustification(Printer::JUSTIFY_RIGHT);
-        $printer->text("TOTAL:       55.00\n");
-
-        $printer->feed(2);
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("Thank you!\n");
-        $printer->cut();
-        $printer->close();
+        if ($output === null) {
+            throw new Exception("Failed to print.");
+        }
 
         return response()->json(['message' => 'Printed successfully']);
     } catch (\Exception $e) {
