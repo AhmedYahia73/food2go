@@ -165,7 +165,7 @@ class CashierMakeOrderController extends Controller
         // OR use NetworkPrintConnector("192.168.0.100", 9100);
 
         $printer = new Printer($connector);
-
+        $printer->pulse();  // This command sends a pulse to open the cash drawer
         // Print receipt content
         $printer->setJustification(Printer::JUSTIFY_CENTER);
         $printer->text("My Store\n");
