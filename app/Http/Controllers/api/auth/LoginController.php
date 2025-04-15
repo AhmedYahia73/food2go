@@ -95,6 +95,8 @@ class LoginController extends Controller
         ->where('user_name', $request->user_name)
         ->with('branch', 'cashier')
         ->first();
+        $user->shift_number++;
+        $user->save();
         if (empty($user)) {
             return response()->json([
                 'faield' => 'This user does not have the ability to login'

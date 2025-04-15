@@ -52,16 +52,16 @@ class Order extends Model
     protected $appends = ['order_date', 'status_payment'];
 
     public function getStatusPaymentAttribute(){
-        if ($this->attributes['status'] == 1) {
+        if (isset($this->attributes['status']) && $this->attributes['status'] == 1) {
             return 'approved';
         } 
         elseif (!isset($this->attributes['status'])) { // Use isset to check if it's null or not set
             return 'pending';
         } 
-        elseif ($this->attributes['status'] == 0) {
+        elseif (isset($this->attributes['status']) && $this->attributes['status'] == 0) {
             return 'rejected';
         } 
-        elseif ($this->attributes['status'] == 2) {
+        elseif (isset($this->attributes['status']) && $this->attributes['status'] == 2) {
             return 'faild';
         } 
     }
