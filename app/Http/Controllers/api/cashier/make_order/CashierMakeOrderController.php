@@ -11,7 +11,7 @@ use App\Http\Resources\ProductResource;
 
 // ____________________________________________________
 use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
+use Mike42\Escpos\PrintConnectors\NetworkPrintConnector; // Windows only
 // ____________________________________________________
 
 use App\Models\Order;
@@ -161,7 +161,7 @@ class CashierMakeOrderController extends Controller
         // return response()->json(['message' => 'Receipt printed successfully']);
                 
     try {
-        $connector = new WindowsPrintConnector("XP-80C"); // Windows printer share name
+        $connector = new NetworkPrintConnector("192.168.1.100", 9100); // Windows printer share name
         // OR use NetworkPrintConnector("192.168.0.100", 9100);
 
         $printer = new Printer($connector);

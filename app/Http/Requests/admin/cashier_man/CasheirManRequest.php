@@ -25,7 +25,6 @@ class CasheirManRequest extends FormRequest
     {
         return [
             'branch_id' => ['required', 'exists:branches,id'],
-            'cashier_id' => ['required', 'exists:cashiers,id'],
             'modules' => ['required', 'array'],
             'modules.*' => ['required', 'in:take_away,dine_in,delivery,car_slow'],
             'user_name' => ['required'],

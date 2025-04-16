@@ -72,7 +72,7 @@ class CashierManController extends Controller
     public function create(CasheirManRequest $request){
         // admin/cashier_man/add
         // Keys
-        // user_name, password, branch_id, cashier_id, 
+        // user_name, password, branch_id, 
         // modules => [take_away,dine_in,delivery,car_slow], status
         $cashierRequest = $request->validated();
         $cashierRequest['modules'] = json_encode($request->modules);
@@ -86,7 +86,7 @@ class CashierManController extends Controller
 
     public function modify(CasheirManRequest $request, $id){
         // admin/cashier_man/update/{id}
-        // user_name, password, branch_id, cashier_id, 
+        // user_name, password, branch_id, 
         // modules => [take_away,dine_in,delivery,car_slow], status
         $cashierRequest = $request->validated();
         $cashierRequest['modules'] = json_encode($request->modules);
