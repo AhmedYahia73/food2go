@@ -97,6 +97,16 @@ class LoginController extends Controller
         ->where('user_name', $request->user_name)
         ->with('branch', 'cashier')
         ->first();
+        if (empty($user)) {
+            return response()->json([
+                'faield' => 'This user does not have the ability to login'
+            ], 405);
+        }
+        if ($user->status == 0) {
+            return response()->json([
+                'falid' => 'cashier is banned'
+            ], 400);
+        }
         if ($request->shift_number && is_numeric($request->shift_number)) {
             $shift_number = $request->shift_number;
         }
@@ -113,16 +123,6 @@ class LoginController extends Controller
         }
         $user->shift_number = $shift_number;
         $user->save();
-        if (empty($user)) {
-            return response()->json([
-                'faield' => 'This user does not have the ability to login'
-            ], 405);
-        }
-        if ($user->status == 0) {
-            return response()->json([
-                'falid' => 'cashier is banned'
-            ], 400);
-        }
         if (password_verify($request->input('password'), $user->password)) {
             $user->role = 'cashier';
             $user->token = $user->createToken('cashier')->plainTextToken;

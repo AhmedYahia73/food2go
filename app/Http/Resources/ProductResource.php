@@ -45,6 +45,7 @@ class ProductResource extends JsonResource
             else{
                 $discount = $price;
             }
+            $tax = $price;
             return [
                 'id' => $this->id,
                 'taxes' => $this->taxes->setting,
@@ -58,6 +59,7 @@ class ProductResource extends JsonResource
                 'number' => $this->number,
                 'price' => $price,
                 'price_after_discount' => $discount,
+                'price_after_tax' => $tax,
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
@@ -86,6 +88,17 @@ class ProductResource extends JsonResource
         else {
             $price = $this->price;
             
+            if (!empty($this->tax)) {
+                if ($this->tax->type == 'precentage') {
+                    $tax = $price + $this->tax->amount * $price / 100;
+                } else {
+                    $tax = $price + $this->tax->amount;
+                }
+            }
+            else{
+                $tax = $price;
+            }
+
             if (!empty($this->discount)) {
                 if ($this->discount->type == 'precentage') {
                     $discount = $price - $this->discount->amount * $price / 100;
@@ -109,6 +122,7 @@ class ProductResource extends JsonResource
                 'number' => $this->number,
                 'price' => $price,
                 'price_after_discount' => $discount,
+                'price_after_tax' => $tax,
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,

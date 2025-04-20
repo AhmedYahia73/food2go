@@ -340,6 +340,22 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
+    public function dine_in_table_carts(Request $request, $id){
+        // /cashier/dine_in_table_carts/{id}
+        $order_cart = $this->order_cart
+        ->where('table_id', $id)
+        ->get();
+        $carts = [];
+        foreach ($order_cart as $item) {
+            $order_item = $this->order_format($item);
+            $carts[] = $order_item;
+        }
+
+        return response()->json([
+            'carts' => $carts
+        ]);
+    }
+
     public function dine_in_table_order(Request $request, $id){
         // /cashier/dine_in_table_order/{id}
         $order_cart = $this->order_cart

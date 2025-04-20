@@ -54,7 +54,9 @@ use App\Providers\gates\NotificationSoundGate;
 use App\Providers\gates\DealOrderGate;
 use App\Providers\gates\OfferOrderGate;
 use App\Providers\gates\OrderGate;
-
+use App\Providers\gates\PaymentGate;
+use App\Providers\gates\PosReportsGate;
+ 
 use App\Models\CompanyInfo;
 
 class AppServiceProvider extends ServiceProvider
