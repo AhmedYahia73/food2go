@@ -234,6 +234,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(BranchController::class)
     ->prefix('branch')->group(function(){
         Route::get('/', 'view')->middleware('can:view_branch');
+        Route::get('/branch_in_product/{id}', 'branch_in_product')->middleware('can:product_branch');
         Route::get('/branch_product/{id}', 'branch_product')->middleware('can:product_branch');
         Route::get('/branch_options/{id}', 'branch_options')->middleware('can:option_branch');
         Route::put('/branch_product_status/{id}', 'branch_product_status')->middleware('can:product_branch');

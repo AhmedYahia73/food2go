@@ -153,6 +153,40 @@ class BranchController extends Controller
         ]);
     }
 
+    public function branch_in_product($product_id){
+        // /admin/branch/branch_in_product/{product_id}
+        $product = $this->products
+        ->where('id', $product_id)
+        ->first();
+        $branch_off_product = $this->branch_off
+        ->where('product_id', $product_id) 
+        ->get();
+        $branch_off_category = $this->branch_off 
+        ->orWhere('category_id', $product->category_id)
+        ->orWhere('category_id', $product->sub_category_id)
+        ->get();
+        $branches = $this->branches->where('status', 1)
+        ->get()
+        ->map(function($item) use($branch_off_product, $branch_off_category) {
+            $branches_product_off = $branch_off_product->pluck('branch_id')->filter()->toArray();
+            $branches_category_off = $branch_off_category->pluck('branch_id')->filter()->toArray();
+            if (in_array($item->id, $branches_product_off)) {
+                $item->product_status = 0;
+            }
+            elseif (in_array($item->id, $branches_category_off) || in_array($item->id, $branches_category_off)) {
+                $item->product_status = 0;
+            }
+            else{
+                $item->product_status = 1;
+            }
+            return $item;
+        });
+
+        return response()->json([
+            'branches' => $branches,
+        ]);
+    }
+
     public function branch_product($id){
         // /admin/branch/branch_product/{id}
         $branch_off = $this->branch_off
