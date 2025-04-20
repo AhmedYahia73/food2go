@@ -190,167 +190,167 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(PointOffersController::class)
     ->prefix('offer')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'offer');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_point_offers');
+        Route::get('/item/{id}', 'offer')->middleware('can:edit_point_offers');
+        Route::post('/add', 'create')->middleware('can:add_point_offers');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_point_offers');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_point_offers');
     });
 
     // Make Deal Module
-    Route::controller(DealOrderController::class)->middleware('can:isDealOrder')
+    Route::controller(DealOrderController::class)
     ->prefix('dealOrder')->group(function(){
-        Route::post('/', 'deal_order');
-        Route::post('/add', 'add');
+        Route::post('/', 'deal_order')->middleware('can:view_deal_order');
+        Route::post('/add', 'add')->middleware('can:add_deal_order');
     });
 
-    Route::controller(OfferOrderController::class)->middleware('can:isOfferOrder')
+    Route::controller(OfferOrderController::class)
     ->prefix('offerOrder')->group(function(){
-        Route::post('/', 'check_order');
-        Route::post('/approve_offer', 'approve_offer');
+        Route::post('/', 'check_order')->middleware('can:approve_offer_order');
+        Route::post('/approve_offer', 'approve_offer')->middleware('can:approve_offer_order');
     });
 
     // Make Deal Module
-    Route::controller(DealController::class)->middleware('can:isDeal')
+    Route::controller(DealController::class)
     ->prefix('deal')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'deal');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_deal');
+        Route::get('/item/{id}', 'deal')->middleware('can:edit_deal');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_deal');
+        Route::post('/add', 'create')->middleware('can:add_deal');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_deal');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_deal');
     });
 
-    Route::controller(AdminController::class)->middleware('can:isAdmin')
+    Route::controller(AdminController::class)
     ->prefix('admin')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'admin');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_admin');
+        Route::get('/item/{id}', 'admin')->middleware('can:edit_admin');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_admin');
+        Route::post('/add', 'create')->middleware('can:add_admin');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_admin');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_admin');
     });
 
-    Route::controller(BranchController::class)->middleware('can:isBranch')
+    Route::controller(BranchController::class)
     ->prefix('branch')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/branch_product/{id}', 'branch_product');
-        Route::get('/branch_options/{id}', 'branch_options');
-        Route::put('/branch_product_status/{id}', 'branch_product_status');
-        Route::put('/branch_category_status/{id}', 'branch_category_status');
-        Route::put('/branch_option_status/{id}', 'branch_option_status');
-        Route::get('/item/{id}', 'branch');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_branch');
+        Route::get('/branch_product/{id}', 'branch_product')->middleware('can:product_branch');
+        Route::get('/branch_options/{id}', 'branch_options')->middleware('can:option_branch');
+        Route::put('/branch_product_status/{id}', 'branch_product_status')->middleware('can:product_branch');
+        Route::put('/branch_category_status/{id}', 'branch_category_status')->middleware('can:category_branch');
+        Route::put('/branch_option_status/{id}', 'branch_option_status')->middleware('can:option_branch');
+        Route::get('/item/{id}', 'branch')->middleware('can:edit_branch');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_branch');
+        Route::post('/add', 'create')->middleware('can:add_branch');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_branch');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_branch');
     });
 
-    Route::controller(DeliveryController::class)->middleware('can:isDelivery')
+    Route::controller(DeliveryController::class)
     ->prefix('delivery')->group(function(){
-    Route::get('/', 'view');
-    Route::get('/item/{id}', 'delivery');
-        Route::get('/history/{id}', 'history');
-        Route::post('/history_filter/{id}', 'filter_history');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_delivery');
+        Route::get('/item/{id}', 'delivery')->middleware('can:edit_delivery');
+        Route::get('/history/{id}', 'history')->middleware('can:view_delivery');
+        Route::post('/history_filter/{id}', 'filter_history')->middleware('can:view_delivery');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_delivery');
+        Route::post('/add', 'create')->middleware('can:add_delivery');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_delivery');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_delivery');
     });
 
-    Route::controller(CustomerController::class)->middleware('can:isCustomer')
+    Route::controller(CustomerController::class)
     ->prefix('customer')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'customer');
-        Route::post('/add', 'create');
-        Route::put('/status/{id}', 'status');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_customer');
+        Route::get('/item/{id}', 'customer')->middleware('can:edit_customer');
+        Route::post('/add', 'create')->middleware('can:add_customer');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_customer');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_customer');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_customer');
     });
     
-    Route::prefix('coupon')->middleware('can:isCoupon')->group(function(){
+    Route::prefix('coupon')->group(function(){
         Route::controller(CouponController::class)->group(function(){
-            Route::get('/', 'view');
-            Route::get('/item/{id}', 'coupon');
-            Route::put('/status/{id}', 'status');
+            Route::get('/', 'view')->middleware('can:view_coupon');
+            Route::get('/item/{id}', 'coupon')->middleware('can:edit_coupon');
+            Route::put('/status/{id}', 'status')->middleware('can:edit_coupon');
         });
         Route::controller(CreateCouponController::class)->group(function(){
-            Route::post('/add', 'create');
-            Route::post('/update/{id}', 'modify');
-            Route::delete('/delete/{id}', 'delete');
+            Route::post('/add', 'create')->middleware('can:add_coupon');
+            Route::post('/update/{id}', 'modify')->middleware('can:edit_coupon');
+            Route::delete('/delete/{id}', 'delete')->middleware('can:delete_coupon');
         });
     });
     
     Route::prefix('pos')->group(function(){
         Route::controller(PosCustomerController::class)
         ->prefix('/customer')->group(function(){
-            Route::get('/', 'view');
-            Route::post('/add', 'create');
-            Route::post('/update/{id}', 'modify');
+            Route::get('/', 'view')->middleware('can:view_pos_customer');
+            Route::post('/add', 'create')->middleware('can:add_pos_customer');
+            Route::post('/update/{id}', 'modify')->middleware('can:edit_pos_customer');
         });
         Route::controller(PosAddressController::class)
         ->prefix('/address')->group(function(){
-            Route::get('/item/{id}', 'address');
-            Route::post('/add', 'create');
-            Route::post('/update/{id}', 'modify');
+            Route::get('/item/{id}', 'address')->middleware('can:view_pos_address');
+            Route::post('/add', 'create')->middleware('can:add_pos_address');
+            Route::post('/update/{id}', 'modify')->middleware('can:edit_pos_address');
         });
         Route::controller(PosReportsController::class)
         ->prefix('/reports')->group(function(){
-            Route::get('shift_reports', 'shift_reports');
+            Route::get('shift_reports', 'shift_reports')->middleware('can:view_pos_reports');
         });
         Route::controller(PosOrderController::class)
         ->prefix('order')->group(function(){
-            Route::get('/lists', 'lists');
-            Route::get('/orders', 'pos_orders'); 
-            Route::put('/tables_status/{id}', 'tables_status');
+            Route::get('/lists', 'lists')->middleware('can:view_pos_order');
+            Route::get('/orders', 'pos_orders')->middleware('can:view_pos_order'); 
+            Route::put('/tables_status/{id}', 'tables_status')->middleware('can:status_pos_table');
         });
     });
     
-    Route::prefix('product')->middleware('can:isProduct')->group(function(){
+    Route::prefix('product')->group(function(){
         Route::controller(ProductController::class)->group(function(){
-            Route::get('/', 'view');
-            Route::get('/item/{id}', 'product');
-            Route::get('/reviews', 'reviews');
+            Route::get('/', 'view')->middleware('can:view_product');
+            Route::get('/item/{id}', 'product')->middleware('can:edit_product');
+            Route::get('/reviews', 'reviews')->middleware('can:view_product');
         });
         Route::controller(CreateProductController::class)->group(function(){
-            Route::post('/add', 'create'); 
-            Route::post('/import_excel', 'import_excel'); 
-            Route::post('/update/{id}', 'modify'); 
-            Route::delete('/delete/{id}', 'delete'); 
+            Route::post('/add', 'create')->middleware('can:add_product'); 
+            Route::post('/import_excel', 'import_excel')->middleware('can:edit_product'); 
+            Route::post('/update/{id}', 'modify')->middleware('can:edit_product'); 
+            Route::delete('/delete/{id}', 'delete')->middleware('can:delete_product'); 
         });
     });
     
-    Route::prefix('category')->middleware('can:isCategory')->group(function(){
+    Route::prefix('category')->group(function(){
         Route::controller(CategoryController::class)->group(function(){
-            Route::get('/', 'view');
-            Route::get('/item/{id}', 'category');
-            Route::put('/active/{id}', 'active');
-            Route::put('/status/{id}', 'status');
-            Route::put('/priority/{id}', 'priority');
+            Route::get('/', 'view')->middleware('can:view_category');
+            Route::get('/item/{id}', 'category')->middleware('can:edit_category');
+            Route::put('/active/{id}', 'active')->middleware('can:edit_category');
+            Route::put('/status/{id}', 'status')->middleware('can:edit_category');
+            Route::put('/priority/{id}', 'priority')->middleware('can:edit_category');
         });
         Route::controller(CreateCategoryController::class)->group(function(){
-            Route::post('/add', 'create'); 
-            Route::post('/update/{id}', 'modify'); 
-            Route::delete('/delete/{id}', 'delete'); 
+            Route::post('/add', 'create')->middleware('can:add_category'); 
+            Route::post('/update/{id}', 'modify')->middleware('can:edit_category'); 
+            Route::delete('/delete/{id}', 'delete')->middleware('can:delete_category'); 
         });
     });
 
-    Route::controller(AddonController::class)->middleware('can:isAddons')
+    Route::controller(AddonController::class)
     ->prefix('addons')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'addon');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_addons');
+        Route::get('/item/{id}', 'addon')->middleware('can:edit_addons');
+        Route::post('/add', 'create')->middleware('can:add_addons');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_addons');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_addons');
     });
 
-    Route::prefix('settings')->middleware('can:isSettings')->group(function(){
+    Route::prefix('settings')->group(function(){
         Route::controller(ExtraController::class)
         ->prefix('extra')->group(function(){
-            Route::get('/', 'view');
-            Route::post('/add', 'create');
-            Route::post('/update/{id}', 'modify');
-            Route::delete('/delete/{id}', 'delete');
+            Route::get('/', 'view')->middleware('can:view_extra');
+            Route::post('/add', 'create')->middleware('can:add_extra');
+            Route::post('/update/{id}', 'modify')->middleware('can:edit_extra');
+            Route::delete('/delete/{id}', 'delete')->middleware('can:delete_extra');
         });
 
         Route::controller(FinancialAccountingController::class)->prefix('financial')->group(function(){

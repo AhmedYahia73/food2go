@@ -19,7 +19,7 @@ class PosOrderGate
             }
             return false;
         });
-        Gate::define('view_pos_table', function (Admin $admin) {
+        Gate::define('status_pos_table', function (Admin $admin) {
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosTable') &&

@@ -49,5 +49,36 @@ class BranchGate
             }
             return false;
         });
+        
+        Gate::define('product_branch', function (Admin $admin) {
+            if (
+                $admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('Branch') &&
+                $admin->user_positions->roles->pluck('action')->intersect(['all', 'product'])->isNotEmpty()
+            ) {
+                return true;
+            }
+            return false;
+        });
+        Gate::define('category_branch', function (Admin $admin) {
+            if (
+                $admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('Branch') &&
+                $admin->user_positions->roles->pluck('action')->intersect(['all', 'category'])->isNotEmpty()
+            ) {
+                return true;
+            }
+            return false;
+        });
+        Gate::define('option_branch', function (Admin $admin) {
+            if (
+                $admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('Branch') &&
+                $admin->user_positions->roles->pluck('action')->intersect(['all', 'option'])->isNotEmpty()
+            ) {
+                return true;
+            }
+            return false;
+        });
     }
 }

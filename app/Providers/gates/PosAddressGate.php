@@ -38,16 +38,6 @@ class PosAddressGate
                 return true;
             }
             return false;
-        });
-        Gate::define('delete_pos_address', function (Admin $admin) {
-            if (
-                $admin->user_positions &&
-                $admin->user_positions->roles->pluck('role')->contains('PosAddress') &&
-                $admin->user_positions->roles->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
-            ) {
-                return true;
-            }
-            return false;
-        });
+        }); 
     }
 }

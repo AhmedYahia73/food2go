@@ -38,16 +38,6 @@ class PosCustomerGate
                 return true;
             }
             return false;
-        });
-        Gate::define('delete_pos_customer', function (Admin $admin) {
-            if (
-                $admin->user_positions &&
-                $admin->user_positions->roles->pluck('role')->contains('PosCustomer') &&
-                $admin->user_positions->roles->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
-            ) {
-                return true;
-            }
-            return false;
-        });
+        }); 
     }
 }
