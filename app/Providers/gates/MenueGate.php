@@ -29,11 +29,11 @@ class MenueGate
             }
             return false;
         });
-        Gate::define('edit_menue', function (Admin $admin) {
+        Gate::define('status_menue', function (Admin $admin) {
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Menue') &&
-                $admin->user_positions->roles->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
             ) {
                 return true;
             }

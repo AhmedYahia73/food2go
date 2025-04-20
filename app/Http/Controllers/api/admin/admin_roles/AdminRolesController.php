@@ -56,7 +56,7 @@ class AdminRolesController extends Controller
             'Discount' => ['all', 'view', 'add', 'edit', 'delete'],
             'PaymentMethod' => ['all', 'view', 'add', 'edit', 'delete'],
             'FinancialAccounting' => ['all', 'view', 'add', 'edit', 'delete'],
-            'Menue' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Menue' => ['all', 'view', 'add', 'status', 'delete'],
             'DealOrder' => ['all', 'view', 'add'], 
             'OfferOrder' => ['all', 'approve_offer'], 
             'Order' => ['all', 'view', 'status'], 

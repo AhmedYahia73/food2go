@@ -29,7 +29,7 @@ class PaymentMethodAutoGate
             }
             return false;
         });
-        Gate::define('delete_payment_method_auto', function (Admin $admin) {
+        Gate::define('status_payment_method_auto', function (Admin $admin) {
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PaymentMethodAuto') &&
