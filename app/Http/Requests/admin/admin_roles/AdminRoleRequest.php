@@ -27,6 +27,9 @@ class AdminRoleRequest extends FormRequest
             'name' => ['required'],
             'status' => ['required', 'boolean'],
             'roles' => ['required'],
+            'roles.*.role' => ['required'],
+            'roles.*.action' => ['required'],
+            'roles.*.action.*' => ['required', 'in:all,view,add,edit,delete'],
         ];
     }
 

@@ -35,6 +35,7 @@ use App\Http\Controllers\api\admin\product\CreateProductController;
 use App\Http\Controllers\api\admin\pos\PosOrderController;
 use App\Http\Controllers\api\admin\pos\PosCustomerController;
 use App\Http\Controllers\api\admin\pos\PosAddressController;
+use App\Http\Controllers\api\admin\pos\PosReportsController;
 
 use App\Http\Controllers\api\admin\cashier\CashierController;
 use App\Http\Controllers\api\admin\cashier\CashierManController;
@@ -70,128 +71,124 @@ use App\Http\Controllers\api\admin\settings\business_setup\CustomerLoginControll
 use App\Http\Controllers\api\admin\settings\business_setup\OrderSettingController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
-    Route::controller(OrderController::class)->middleware('can:isOrder')
+    Route::controller(OrderController::class)
     ->prefix('order')->group(function(){
         Route::get('/', 'orders');
-        Route::get('/count', 'count_orders');
-        Route::post('/data', 'orders_data');
-        Route::post('/notification', 'notification');
-        Route::post('/filter', 'order_filter');
-        Route::get('/branches', 'branches');
-        Route::get('/order/{id}', 'order');
-        Route::get('/invoice/{id}', 'invoice');
-        Route::put('/status/{id}', 'status');
-        Route::post('/delivery', 'delivery');
-        Route::get('/user_details/{id}', 'user_details');
+        Route::get('/count', 'count_orders')->middleware('can:view_order');
+        Route::post('/data', 'orders_data')->middleware('can:view_order');
+        Route::post('/notification', 'notification')->middleware('can:view_order');
+        Route::post('/filter', 'order_filter')->middleware('can:view_order');
+        Route::get('/branches', 'branches')->middleware('can:view_order');
+        Route::get('/order/{id}', 'order')->middleware('can:view_order');
+        Route::get('/invoice/{id}', 'invoice')->middleware('can:view_order');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_order');
+        Route::post('/delivery', 'delivery')->middleware('can:edit_order');
+        Route::get('/user_details/{id}', 'user_details')->middleware('can:view_order');
     });
 
-    Route::controller(HomeController::class)->middleware('can:isHome')
+    Route::controller(HomeController::class)
     ->prefix('home')->group(function(){
-        Route::get('/', 'home');
+        Route::get('/', 'home')->middleware('can:view_home');
     });
 
-    Route::controller(CashierController::class)
-    //->middleware('can:isAdminRoles')
+    Route::controller(CashierController::class) 
     ->prefix('cashier')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'cashier');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_cashier');
+        Route::get('/item/{id}', 'cashier')->middleware('can:edit_cashier');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_cashier');
+        Route::post('/add', 'create')->middleware('can:add_cashier');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_cashier');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_cashier');
     });
 
-    Route::controller(CashierManController::class)
-    //->middleware('can:isAdminRoles')
+    Route::controller(CashierManController::class) 
     ->prefix('cashier_man')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'cashier_man');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_cashier_man');
+        Route::get('/item/{id}', 'cashier_man')->middleware('can:edit_cashier_man');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_cashier_man');
+        Route::post('/add', 'create')->middleware('can:add_cashier_man');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_cashier_man');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_cashier_man');
     });
 
     Route::controller(KitchenController::class)
-    //->middleware('can:isAdminRoles')
     ->prefix('pos/kitchens')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/lists', 'lists');
-        Route::get('/item/{id}', 'kitchen');
-        Route::post('/select_product', 'select_product');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_kitchen');
+        Route::get('/lists', 'lists')->middleware('can:view_kitchen');
+        Route::get('/item/{id}', 'kitchen')->middleware('can:edit_kitchen');
+        Route::post('/select_product', 'select_product')->middleware('can:view_kitchen');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_kitchen');
+        Route::post('/add', 'create')->middleware('can:add_kitchen');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_kitchen');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_kitchen');
     });
 
-    Route::controller(CaptainOrderController::class)
-    //->middleware('can:isAdminRoles')
+    Route::controller(CaptainOrderController::class) 
     ->prefix('pos/captain')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'captain');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_captain');
+        Route::get('/item/{id}', 'captain')->middleware('can:edit_captain');
+        Route::post('/add', 'create')->middleware('can:add_captain');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_captain');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_captain');
     });
 
-    Route::controller(AdminRolesController::class)->middleware('can:isAdminRoles')
+    Route::controller(AdminRolesController::class)
     ->prefix('admin_roles')->group(function(){
-        Route::get('/', 'view');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_admin_roles');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_admin_roles');
+        Route::post('/add', 'create')->middleware('can:add_admin_roles');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_admin_roles');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_admin_roles');
     });
 
-    Route::controller(TranslationController::class)->middleware('can:isSettings')
+    Route::controller(TranslationController::class)
     ->prefix('translation')->group(function(){
-        Route::get('/', 'view');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_translation');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_translation');
+        Route::post('/add', 'create')->middleware('can:add_translation');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_translation');
     });
 
-    Route::controller(BannerController::class)->middleware('can:isBanner')
+    Route::controller(BannerController::class)
     ->prefix('banner')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'banner');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_banner');
+        Route::get('/item/{id}', 'banner')->middleware('can:edit_banner');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_banner');
+        Route::post('/add', 'create')->middleware('can:add_banner');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_banner');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_banner');
     }); 
 
-    Route::controller(CafeLocationController::class)->middleware('can:isPayments')
+    Route::controller(CafeLocationController::class)
     ->prefix('caffe_location')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'location');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_cafe_location');
+        Route::get('/item/{id}', 'location')->middleware('can:edit_cafe_location');
+        Route::post('/add', 'create')->middleware('can:add_cafe_location');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_cafe_location');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_cafe_location');
     });
     
-    Route::controller(CafeTablesController::class)->middleware('can:isPayments')
+    Route::controller(CafeTablesController::class)
     ->prefix('caffe_tables')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'table');
-        Route::put('/status/{id}', 'status');
-        Route::put('/occupied/{id}', 'occupied');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_cafe_tables');
+        Route::get('/item/{id}', 'table')->middleware('can:edit_cafe_tables');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_cafe_tables');
+        Route::put('/occupied/{id}', 'occupied')->middleware('can:edit_cafe_tables');
+        Route::post('/add', 'create')->middleware('can:add_cafe_tables');
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_cafe_tables');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_cafe_tables');
     });
     
-    Route::controller(PaymentController::class)->middleware('can:isPayments')
+    Route::controller(PaymentController::class)
     ->prefix('payment')->group(function(){
-        Route::get('/pending', 'pending');
-        Route::get('/receipt/{id}', 'receipt');
-        Route::get('/history', 'history');
-        Route::put('/approve/{id}', 'approve');
-        Route::put('/rejected/{id}', 'rejected');
+        Route::get('/pending', 'pending')->middleware('can:view_payments');
+        Route::get('/receipt/{id}', 'receipt')->middleware('can:view_payments');
+        Route::get('/history', 'history')->middleware('can:view_payments');
+        Route::put('/approve/{id}', 'approve')->middleware('can:status_payments');
+        Route::put('/rejected/{id}', 'rejected')->middleware('can:status_payments');
     });
 
-    Route::controller(PointOffersController::class)->middleware('can:isPointOffers')
+    Route::controller(PointOffersController::class)
     ->prefix('offer')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'offer');
@@ -297,11 +294,14 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::post('/add', 'create');
             Route::post('/update/{id}', 'modify');
         });
+        Route::controller(PosReportsController::class)
+        ->prefix('/reports')->group(function(){
+            Route::get('shift_reports', 'shift_reports');
+        });
         Route::controller(PosOrderController::class)
         ->prefix('order')->group(function(){
             Route::get('/lists', 'lists');
-            Route::get('/orders', 'pos_orders');
-            Route::post('/make_order', 'new_order');
+            Route::get('/orders', 'pos_orders'); 
             Route::put('/tables_status/{id}', 'tables_status');
         });
     });

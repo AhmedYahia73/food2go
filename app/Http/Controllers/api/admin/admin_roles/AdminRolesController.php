@@ -17,7 +17,8 @@ class AdminRolesController extends Controller
     private UserRole $user_roles){}
     protected $roleRequest = [
         'name',
-        'status'
+        'action',
+        'status',
     ];
 
     public function view(){
@@ -25,10 +26,59 @@ class AdminRolesController extends Controller
         $user_positions = $this->user_positions
         ->with('roles')
         ->get();
-        $roles = ['Admin', 'Addons', 'AdminRoles', 'Banner',
-        'Branch', 'Category', 'Coupon', 'Customer', 'Deal', 
-        'DealOrder', 'Delivery', 'OfferOrder', 'Order', 
-        'Payments', 'PointOffers', 'Product', 'Settings', 'Home'];
+        $roles = [
+            'Admin' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Home' => ['all', 'view'],
+            'Addons' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Banner' => ['all', 'view', 'add', 'edit', 'delete'],
+            'AdminRoles' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Category' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Coupon' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Customer' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Deal' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Delivery' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Product' => ['all', 'view', 'add', 'edit', 'delete'],
+            'PointOffers' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Branch' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Cashier' => ['all', 'view', 'add', 'edit', 'delete'],
+            'CashierMan' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Kitchen' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Captain' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Translation' => ['all', 'view', 'add', 'edit', 'delete'],
+            'CafeLocation' => ['all', 'view', 'add', 'edit', 'delete'],
+            'CafeTable' => ['all', 'view', 'add', 'edit', 'delete'],
+            'PosCustomer' => ['all', 'view', 'add', 'edit', 'delete'],
+            'PosAddress' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Extra' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Zone' => ['all', 'view', 'add', 'edit', 'delete'],
+            'City' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Tax' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Discount' => ['all', 'view', 'add', 'edit', 'delete'],
+            'PaymentMethod' => ['all', 'view', 'add', 'edit', 'delete'],
+            'FinancialAccounting' => ['all', 'view', 'add', 'edit', 'delete'],
+            'Menue' => ['all', 'view', 'add', 'edit', 'delete'],
+            'DealOrder' => ['all', 'view', 'add'], 
+            'OfferOrder' => ['all', 'approve_offer'], 
+            'Order' => ['all', 'view', 'status'], 
+            'Payments' => ['all', 'view', 'status'],
+            'PosReports' => ['all', 'view'], 
+            'PosOrder' => ['all', 'view'], 
+            'PosTable' => ['all', 'status'], 
+            'OrderType' => ['all', 'view', 'edit'], 
+            'PaymentMethodAuto' => ['all', 'view', 'edit', 'status'], 
+            'CompanyInfo' => ['all', 'view', 'edit'], 
+            'Maintenance' => ['all', 'view', 'add'], 
+            'MainBranch' => ['all', 'view', 'edit'], 
+            'TimeSlot' => ['all', 'view', 'edit'],
+            'CustomerLogin' => ['all', 'view', 'edit'],
+            'OrderSettings' => ['all', 'view', 'edit'],
+            'TimeCancel' => ['all', 'view', 'edit'],
+            'ResturantTime' => ['all', 'view', 'edit'],
+            'TaxType' => ['all', 'view', 'edit'],
+            'DeliveryTime' => ['all', 'view', 'edit'],
+            'PreparingTime' => ['all', 'view', 'edit'],
+            'NotificationSound' => ['all', 'view', 'edit'],
+        ];
 
         return response()->json([
             'user_positions' => $user_positions,
@@ -62,18 +112,21 @@ class AdminRolesController extends Controller
     public function create(AdminRoleRequest $request){
         // https://bcknd.food2go.online/admin/admin_roles/add
         // Keys
-        // name, status, roles[]
+        // name, status, roles[role, action[all, view, add, edit, delete]]
         $roleRequest = $request->only($this->roleRequest);
         $user_positions = $this->user_positions
         ->create($roleRequest);
         if ($request->roles) {
-            $roles = json_decode($request->roles) ?? [];
+            $roles = $request->roles;
             foreach ($roles as $role) {
-                $this->user_roles
-                ->create([
-                    'user_position_id' => $user_positions->id,
-                    'role' => $role,
-                ]);
+                foreach ($role['action'] as $key => $action) {
+                    $this->user_roles
+                    ->create([
+                        'user_position_id' => $user_positions->id,
+                        'role' => $role['role'],
+                        'action' => $action,
+                    ]);
+                }
             }
         }
 
@@ -85,7 +138,7 @@ class AdminRolesController extends Controller
     public function modify(AdminRoleRequest $request, $id){
         // https://bcknd.food2go.online/admin/admin_roles/update/{id}
         // Keys
-        // name, status, roles[]
+        // name, status, roles[role, action[all, view, add, edit, delete]]
         $roleRequest = $request->only($this->roleRequest);
         $user_positions = $this->user_positions
         ->where('id', $id)
@@ -94,13 +147,16 @@ class AdminRolesController extends Controller
         ->where('user_position_id', $id)
         ->delete();
         if ($request->roles) {
-            $roles = json_decode($request->roles) ?? [];
+            $roles = $request->roles;
             foreach ($roles as $role) {
-                $this->user_roles
-                ->create([
-                    'user_position_id' => $id,
-                    'role' => $role,
-                ]);
+                foreach ($role['action'] as $action) {
+                    $this->user_roles
+                    ->create([
+                        'user_position_id' => $id,
+                        'role' => $role['role'],
+                        'action' => $action,
+                    ]);
+                }
             }
         }
 

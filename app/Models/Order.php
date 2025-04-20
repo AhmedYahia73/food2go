@@ -48,6 +48,7 @@ class Order extends Model
         'captain_id',
         'cashier_man_id',
         'cashier_id',
+        'shift',
     ];
     protected $appends = ['order_date', 'status_payment'];
 

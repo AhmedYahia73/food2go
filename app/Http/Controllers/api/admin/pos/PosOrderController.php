@@ -177,38 +177,38 @@ class PosOrderController extends Controller
         ]);
     }
 
-    public function new_order(OrderRequest $request){
-        // /admin/pos/order/make_order
-        // Keys
-        // date, branch_id, amount, total_tax, total_discount
-        // notes, payment_method_id, order_type, user_id
-        // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
-        // variation[{variation_id, option_id[]}], count}]
+    // public function new_order(OrderRequest $request){
+    //     // /admin/pos/order/make_order
+    //     // Keys
+    //     // date, branch_id, amount, total_tax, total_discount
+    //     // notes, payment_method_id, order_type, user_id
+    //     // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
+    //     // variation[{variation_id, option_id[]}], count}]
 
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:customers,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'error' => $validator->errors(),
-            ],400);
-        }
-        $request->merge([ 
-            'user_id' => $request->user_id,
-        ]);
-        $order = $this->make_order($request);
-        if (isset($order['errors']) && !empty($order['errors'])) {
-            return response()->json($order, 400);
-        }
-        $this->order
-        ->where('id', $order['payment']->id)
-        ->update([
-            'pos' => 1
-        ]);
-        return response()->json([
-            'success' => $order['payment']->id, 
-        ]);
-    }
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required|exists:customers,id',
+    //     ]);
+    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
+    //         return response()->json([
+    //             'error' => $validator->errors(),
+    //         ],400);
+    //     }
+    //     $request->merge([ 
+    //         'user_id' => $request->user_id,
+    //     ]);
+    //     $order = $this->make_order($request);
+    //     if (isset($order['errors']) && !empty($order['errors'])) {
+    //         return response()->json($order, 400);
+    //     }
+    //     $this->order
+    //     ->where('id', $order['payment']->id)
+    //     ->update([
+    //         'pos' => 1
+    //     ]);
+    //     return response()->json([
+    //         'success' => $order['payment']->id, 
+    //     ]);
+    // }
 
     public function tables_status(Request $request, $id){
         // /admin/pos/order/tables_status/{id}

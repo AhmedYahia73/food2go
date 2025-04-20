@@ -11,7 +11,7 @@ use App\Http\Resources\ProductResource;
 
 // ____________________________________________________
 use Mike42\Escpos\Printer;
-use Mike42\Escpos\PrintConnectors\NetworkPrintConnector; // Windows only
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 // ____________________________________________________
 
 use App\Models\Order;
@@ -161,7 +161,9 @@ class CashierMakeOrderController extends Controller
         // return response()->json(['message' => 'Receipt printed successfully']);
                 
     try {
-        $connector = new NetworkPrintConnector("192.168.1.100", 9100); // Windows printer share name
+        $connector = new WindowsPrintConnector("XP-80C"); 
+        // $connector = new NetworkPrintConnector("192.168.1.15", 9100); 
+        // Windows printer share name
         // OR use NetworkPrintConnector("192.168.0.100", 9100);
 
         $printer = new Printer($connector);
@@ -229,6 +231,7 @@ class CashierMakeOrderController extends Controller
             'user_id' => 'empty',
             'order_type' => 'delivery',
             'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
         ]);
         $order = $this->make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
@@ -281,6 +284,7 @@ class CashierMakeOrderController extends Controller
             'user_id' => 'empty',
             'order_type' => 'take_away',
             'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
         ]);
         $order = $this->make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
@@ -318,6 +322,7 @@ class CashierMakeOrderController extends Controller
             'user_id' => 'empty',
             'order_type' => 'delivery',
             'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
         ]);
         $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
@@ -413,6 +418,7 @@ class CashierMakeOrderController extends Controller
         ->update([
             'pos' => 1,
             'status' => 1,
+            'shift' => $request->user()->shift_number,
         ]);
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']));

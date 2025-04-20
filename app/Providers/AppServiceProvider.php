@@ -6,7 +6,55 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Config;
 
-use App\Models\Admin;
+use App\Providers\gates\AdminGate;
+use App\Providers\gates\HomeGate;
+use App\Providers\gates\AddonsGate;
+use App\Providers\gates\BannerGate;
+use App\Providers\gates\AdminRolesGate;
+use App\Providers\gates\CategoryGate;
+use App\Providers\gates\CouponGate;
+use App\Providers\gates\CustomerGate;
+use App\Providers\gates\DeliveryGate;
+use App\Providers\gates\ProductGate;
+use App\Providers\gates\DealGate;
+use App\Providers\gates\CashierGate;
+use App\Providers\gates\CashierManGate;
+use App\Providers\gates\KitchentGate;
+use App\Providers\gates\CaptainOrderGate;
+use App\Providers\gates\TranslationGate;
+use App\Providers\gates\CafeLocationGate;
+use App\Providers\gates\CafeTablesGate;
+use App\Providers\gates\PointOffersGate;
+use App\Providers\gates\BranchGate;
+use App\Providers\gates\PosCustomerGate;
+use App\Providers\gates\PosAddressGate;
+use App\Providers\gates\ExtraGate;
+use App\Providers\gates\ZoneGate;
+use App\Providers\gates\CityGate;
+use App\Providers\gates\TaxGate;
+use App\Providers\gates\DiscountGate;
+use App\Providers\gates\PaymentMethodGate;
+use App\Providers\gates\FinancialAccountingGate;
+use App\Providers\gates\MenueGate;
+use App\Providers\gates\PosOrderGate;
+use App\Providers\gates\OrderTypeGate;
+use App\Providers\gates\PaymentMethodAutoGate;
+use App\Providers\gates\CompanyInfoGate;
+use App\Providers\gates\MaintenanceGate;
+use App\Providers\gates\MainBranchesGate;
+use App\Providers\gates\TimeSlotGate;
+use App\Providers\gates\CustomerLoginGate;
+use App\Providers\gates\OrderSettingGate;
+use App\Providers\gates\TimeCancelGate;
+use App\Providers\gates\ResturantTimeGate;
+use App\Providers\gates\TaxTypeGate;
+use App\Providers\gates\DeliveryTimeGate;
+use App\Providers\gates\PreparingTimeGate;
+use App\Providers\gates\NotificationSoundGate;
+use App\Providers\gates\DealOrderGate;
+use App\Providers\gates\OfferOrderGate;
+use App\Providers\gates\OrderGate;
+
 use App\Models\CompanyInfo;
 
 class AppServiceProvider extends ServiceProvider
@@ -34,115 +82,61 @@ class AppServiceProvider extends ServiceProvider
             }
         } catch (\Throwable $th) {
         }
-        
-        // if roles have home module
-        Gate::define('isHome', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Home')){
-                return true;
-            }
-        });
+        // , , 
+        AdminGate::defineGates();
+        HomeGate::defineGates();
+        AddonsGate::defineGates();
+        BannerGate::defineGates();
+        AdminRolesGate::defineGates();
+        CategoryGate::defineGates();
+        CouponGate::defineGates();
+        CustomerGate::defineGates();
+        DealGate::defineGates();
+        DeliveryGate::defineGates();
+        ProductGate::defineGates();
+        CashierGate::defineGates();
+        CashierManGate::defineGates();
+        KitchentGate::defineGates();
+        CaptainOrderGate::defineGates();
+        TranslationGate::defineGates();
+        CafeLocationGate::defineGates();
+        CafeTablesGate::defineGates();
+        PointOffersGate::defineGates();
+        BranchGate::defineGates();
+        PosCustomerGate::defineGates();
+        PosAddressGate::defineGates();
+        ExtraGate::defineGates();
+        ZoneGate::defineGates();
+        CityGate::defineGates();
+        TaxGate::defineGates();
+        DiscountGate::defineGates();
+        PaymentMethodGate::defineGates();
+        FinancialAccountingGate::defineGates();
+        MenueGate::defineGates();
+          
+        // ___________________________________________________________________________
+        DealOrderGate::defineGates(); // view, add
+        OfferOrderGate::defineGates(); // approve_offer
+        PaymentGate::defineGates(); // view, status
+        OrderGate::defineGates(); // view, status
+        PosReportsGate::defineGates(); // view
+        PosOrderGate::defineGates(); // PosOrder => view, PosTable => status
+        OrderTypeGate::defineGates(); // view, edit
+        PaymentMethodAutoGate::defineGates(); // view, edit, status
+        CompanyInfoGate::defineGates(); // view, edit
+        MaintenanceGate::defineGates(); // view, add
+        MainBranchesGate::defineGates(); // view, edit
+        TimeSlotGate::defineGates(); // view, edit
+        CustomerLoginGate::defineGates(); // view, edit
+        OrderSettingGate::defineGates(); // view, edit
 
-        // if roles have admin module
-        Gate::define('isAdmin', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Admin')){
-                return true;
-            }
-        });
-        // if roles have addons module
-        Gate::define('isAddons', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Addons')){
-                return true;
-            }
-        });
-        // if roles have AdminRoles module
-        Gate::define('isAdminRoles', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('AdminRoles')){
-                return true;
-            }
-        });
-        // if roles have Banner module
-        Gate::define('isBanner', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Banner')){
-                return true;
-            }
-        });
-        // if roles have Branch module
-        Gate::define('isBranch', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Branch')){
-                return true;
-            }
-        });
-        // if roles have Category module
-        Gate::define('isCategory', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Category')){
-                return true;
-            }
-        });
-        // if roles have Coupon module
-        Gate::define('isCoupon', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Coupon')){
-                return true;
-            }
-        });
-        // if roles have Customer module
-        Gate::define('isCustomer', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Customer')){
-                return true;
-            }
-        });
-        // if roles have Deal module
-        Gate::define('isDeal', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Deal')){
-                return true;
-            }
-        });
-        // if roles have DealOrder module
-        Gate::define('isDealOrder', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('DealOrder')){
-                return true;
-            }
-        });
-        // if roles have Delivery module
-        Gate::define('isDelivery', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Delivery')){
-                return true;
-            }
-        });
-        // if roles have OfferOrder module
-        Gate::define('isOfferOrder', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('OfferOrder')){
-                return true;
-            }
-        });
-        // if roles have Order module
-        Gate::define('isOrder', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Order')){
-                return true;
-            }
-        });
-        // if roles have Payments module
-        Gate::define('isPayments', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Payments')){
-                return true;
-            }
-        });
-        // if roles have PointOffers module
-        Gate::define('isPointOffers', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('PointOffers')){
-                return true;
-            }
-        });
-        // if roles have Product module
-        Gate::define('isProduct', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Product')){
-                return true;
-            }
-        });
-        // if roles have Settings module
-        Gate::define('isSettings', function (Admin $user) {
-            if($user->user_positions && $user->user_positions->roles->pluck('role')->contains('Settings')){
-                return true;
-            }
-        });
+        TimeCancelGate::defineGates(); // view, edit
+        ResturantTimeGate::defineGates(); // view, edit
+        
+        TaxTypeGate::defineGates(); // view, edit 
+        DeliveryTimeGate::defineGates(); // view, edit 
+        PreparingTimeGate::defineGates(); // view, edit 
+        NotificationSoundGate::defineGates(); // view, edit
+
     }
 }

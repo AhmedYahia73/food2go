@@ -159,6 +159,9 @@ trait PlaceOrder
         if ($request->cashier_man_id) {
             $orderRequest['cashier_man_id'] = $request->cashier_man_id;
         }
+        if ($request->shift) { 
+            $orderRequest['shift'] = $request->shift;
+        }
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $points = 0;
         $items = [];
@@ -433,6 +436,9 @@ trait PlaceOrder
         }
         if ($request->cashier_man_id) {
             $orderRequest['cashier_man_id'] = $request->cashier_man_id;
+        }
+        if ($request->shift) { 
+            $orderRequest['shift'] = $request->shift;
         }
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $points = 0;

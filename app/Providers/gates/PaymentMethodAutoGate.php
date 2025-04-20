@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Providers\gates;
+use Illuminate\Support\Facades\Gate;
+
+use App\Models\Admin;
+
+class PaymentMethodAutoGate
+{
+    public static function defineGates()
+    {
+        Gate::define('view_payment_method_auto', function (Admin $admin) {
+            if (
+                $admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('PaymentMethodAuto') &&
+                $admin->user_positions->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+            ) {
+                return true;
+            }
+            return false;
+        });
+        Gate::define('edit_payment_method_auto', function (Admin $admin) {
+            if (
+                $admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('PaymentMethodAuto') &&
+                $admin->user_positions->roles->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+            ) {
+                return true;
+            }
+            return false;
+        });
+        Gate::define('delete_payment_method_auto', function (Admin $admin) {
+            if (
+                $admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('PaymentMethodAuto') &&
+                $admin->user_positions->roles->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
+            ) {
+                return true;
+            }
+            return false;
+        });
+    }
+}

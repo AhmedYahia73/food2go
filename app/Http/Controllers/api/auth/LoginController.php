@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\Branch;
 use App\Models\Setting;
 use App\Models\Address;
+use App\Models\CashierShift;
 use App\Models\Zone;
 
 class LoginController extends Controller
@@ -22,7 +23,7 @@ class LoginController extends Controller
     public function __construct(private Admin $admin, private Delivery $delivery, 
     private User $user, private Branch $branch, private Setting $settings,
     private Address $address, private Zone $zones, private CaptainOrder $captain_order,
-    private CashierMan $cashier){}
+    private CashierMan $cashier, private CashierShift $cashier_shift){}
 
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login
@@ -91,11 +92,26 @@ class LoginController extends Controller
         // /api/cashier/auth/login
         // Keys
         // user_name, password
+        // shift_number => sometimes
         $user = $this->cashier
         ->where('user_name', $request->user_name)
         ->with('branch', 'cashier')
         ->first();
-        $user->shift_number++;
+        if ($request->shift_number && is_numeric($request->shift_number)) {
+            $shift_number = $request->shift_number;
+        }
+        else{
+            $cashier = $this->cashier_shift
+            ->max('shift') ?? 0;
+            $shift_number = $cashier + 1;
+            $this->cashier_shift
+            ->create([
+                'shift' => $shift_number,
+                'start_time' => now(),
+                'cashier_man_id' => $user->id,
+            ]);
+        }
+        $user->shift_number = $shift_number;
         $user->save();
         if (empty($user)) {
             return response()->json([

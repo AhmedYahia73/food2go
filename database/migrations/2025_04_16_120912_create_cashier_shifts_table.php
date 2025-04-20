@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cashier_men', function (Blueprint $table) {
+        Schema::create('cashier_shifts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_id')->nullable()->constrained('branches')->onUpdate('cascade')->onDelete('cascade');
-            $table->string('modules');
-            $table->string('user_name');
-            $table->string('password');
-            $table->boolean('status')->default(1);
+            $table->integer('shift');
+            $table->datetime('start_time')->nullable();
+            $table->datetime('end_time')->nullable();
+            $table->foreignId('cashier_man_id')->nullable()->constrained('cashier_men')->onUpdate('cascade')->onDelete('set null');
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cashier_men');
+        Schema::dropIfExists('cashier_shifts');
     }
 };
