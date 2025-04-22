@@ -45,7 +45,7 @@ class MakeOrderController extends Controller
         // deal[{deal_id, count}], payment_method_id, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count, note}]
-        if (!empty($request->address_id)) {
+        if (!empty($request->address_id) && empty($request->branch_id)) {
             $address = $this->address
             ->where('id', $request->address_id)
             ->first();
