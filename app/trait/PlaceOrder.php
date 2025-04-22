@@ -234,7 +234,8 @@ trait PlaceOrder
                 $product_item = count($product_item) > 0 ? $product_item[0] : null;
                 $order_details[$key]['product'][] = [
                     'product' => $product_item,
-                    'count' => $product['count']
+                    'count' => $product['count'],
+                    'notes' => isset($product['note']) ? $product['note'] : null,
                 ];
                 // Add product price
                 $amount_product += $product_item->price;
@@ -509,7 +510,8 @@ trait PlaceOrder
                 $product_item = count($product_item) > 0 ? $product_item[0] : null; 
                 $order_details[$key]['product'][] = [
                     'product' => $product_item,
-                    'count' => $product['count']
+                    'count' => $product['count'],
+                    'notes' => isset($product['note']) ? $product['note'] : null,
                 ];
                 // Add product price
                 $amount_product += $product_item->price;

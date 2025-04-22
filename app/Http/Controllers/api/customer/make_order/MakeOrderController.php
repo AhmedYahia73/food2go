@@ -39,10 +39,10 @@ class MakeOrderController extends Controller
         // https://bcknd.food2go.online/customer/make_order
         // Keys
         // date, branch_id, amount, coupon_discount, total_tax, total_discount, address_id
-        // order_type[take_away,dine_in,delivery], notes
+        // order_type[take_away,dine_in,delivery]
         // deal[{deal_id, count}], payment_method_id, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
-        // variation[{variation_id, option_id[]}], count}]
+        // variation[{variation_id, option_id[]}], count, note}]
         if ($request->payment_method_id == 1) {
             $payment_method_auto = $this->payment_method_auto
             ->where('payment_method_id', 1)
