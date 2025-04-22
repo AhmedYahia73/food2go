@@ -23,6 +23,7 @@ use App\Models\User;
 use App\Models\Addon;
 use App\Models\PaymentMethodAuto;
 use App\Models\Setting;
+use App\Models\Address;
 
 class MakeOrderController extends Controller
 {
@@ -30,7 +31,8 @@ class MakeOrderController extends Controller
     private ProductSale $product_sales, private Product $products, private ExcludeProduct $excludes,
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
-    private PaymentMethodAuto $payment_method_auto,private Setting $settings){}
+    private PaymentMethodAuto $payment_method_auto,private Setting $settings, 
+    private Address $address){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -43,6 +45,15 @@ class MakeOrderController extends Controller
         // deal[{deal_id, count}], payment_method_id, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count, note}]
+        if (!empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id ?? null;
+            $request->merge([
+                'branch_id' => $branch_id,
+            ]);
+        }
         if ($request->payment_method_id == 1) {
             $payment_method_auto = $this->payment_method_auto
             ->where('payment_method_id', 1)
