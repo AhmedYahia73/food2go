@@ -74,6 +74,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)
     ->prefix('order')->group(function(){
         Route::get('/', 'orders');
+        Route::post('/log', 'order_log');
         Route::get('/count', 'count_orders')->middleware('can:view_order');
         Route::post('/data', 'orders_data')->middleware('can:view_order');
         Route::post('/notification', 'notification')->middleware('can:view_order');

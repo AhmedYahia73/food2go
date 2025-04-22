@@ -11,12 +11,14 @@ use App\Models\Order;
 use App\Models\Delivery;
 use App\Models\Branch;
 use App\Models\Setting;
+use App\Models\LogOrder;
 use App\Models\User;
 
 class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Delivery $deliveries, 
-    private Branch $branches, private Setting $settings, private User $user){}
+    private Branch $branches, private Setting $settings, private User $user,
+    private LogOrder $log_order){}
 
     public function orders(){
         // https://bcknd.food2go.online/admin/order
@@ -179,6 +181,192 @@ class OrderController extends Controller
         ->orderByDesc('id')
         ->with(['user', 'branch', 'payment_method', 'delivery'])
         ->get();
+
+        $all_data = [
+            'orders' => $orders,
+            'pending' => $pending,
+            'confirmed' => $confirmed,
+            'processing' => $processing,
+            'out_for_delivery' => $out_for_delivery,
+            'delivered' => $delivered,
+            'returned' => $returned,
+            'faild_to_deliver' => $faild_to_deliver,
+            'canceled' => $canceled,
+            'scheduled' => $scheduled,
+        ];
+
+        // _____________________________________________________________
+        
+        $orders = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $pending = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'pending')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $confirmed = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'confirmed')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $processing = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'processing')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $out_for_delivery = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'out_for_delivery')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $delivered = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'delivered')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $returned = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'returned')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $faild_to_deliver = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'faild_to_deliver')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $canceled = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'canceled')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get();
+        $scheduled = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'scheduled')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'payment_method', 'delivery'])
+        ->get(); 
+        
         $deliveries = $this->deliveries
         ->get();
 
@@ -193,6 +381,7 @@ class OrderController extends Controller
             'faild_to_deliver' => $faild_to_deliver,
             'canceled' => $canceled,
             'scheduled' => $scheduled,
+            'all_data' => $all_data,
             'deliveries' => $deliveries
         ]);
     }
@@ -577,11 +766,23 @@ class OrderController extends Controller
                 'error' => $validator->errors(),
             ],400);
         }
-
+        $order = $this->orders
+        ->where('id', $id)
+        ->first();
+        if (empty($order)) {
+            return response()->json([
+                'error' => 'order is not found'
+            ], 400);
+        }
+        $this->log_order
+        ->create([
+            'order_id' => $id,
+            'admin_id' => $request->user()->id,
+            'from_status' => $order->order_status,
+            'to_status' => $request->order_status,
+        ]);
         if ($request->order_status == 'processing') { 
-            $orders = $this->orders
-            ->where('id', $id)
-            ->update([
+            $order->update([
                 'order_status' => $request->order_status,
                 'order_number' => $request->order_number ?? null,
             ]);
@@ -597,17 +798,13 @@ class OrderController extends Controller
                     'error' => $validator->errors(),
                 ],400);
             }
-            $orders = $this->orders
-            ->where('id', $id)
-            ->update([
+            $order->update([
                 'order_status' => $request->order_status,
                 'admin_cancel_reason' => $request->admin_cancel_reason,
             ]);
         }
         else {
-            $orders = $this->orders
-            ->where('id', $id)
-            ->update([
+            $order->update([
                 'order_status' => $request->order_status, 
             ]);
         }
@@ -673,6 +870,26 @@ class OrderController extends Controller
 
         return response()->json([
             'data' => $data
+        ]);
+    }
+
+    public function order_log(Request $request){
+        // /admin/order/log
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $log_order = $this->log_order
+        ->where('order_id', $request->order_id)
+        ->with('admin')
+        ->get();
+
+        return response()->json([
+            'log_order' => $log_order,
         ]);
     }
 }
