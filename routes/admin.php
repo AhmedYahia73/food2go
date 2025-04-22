@@ -69,6 +69,7 @@ use App\Http\Controllers\api\admin\settings\business_setup\MainBranchesControlle
 use App\Http\Controllers\api\admin\settings\business_setup\TimeSlotController;
 use App\Http\Controllers\api\admin\settings\business_setup\CustomerLoginController;
 use App\Http\Controllers\api\admin\settings\business_setup\OrderSettingController;
+use App\Http\Controllers\api\admin\settings\business_setup\OrderNotificationController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)
@@ -477,6 +478,14 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             ->prefix('order_setting')->group(function(){
                 Route::get('/', 'view')->middleware('can:view_order_settings');
                 Route::post('/add', 'add')->middleware('can:edit_order_settings');
+            });
+
+            Route::controller(OrderNotificationController::class)
+            ->prefix('order_delay_notification')->group(function(){
+                Route::get('/', 'view');
+                Route::post('/add', 'create');
+                Route::put('/update/{id}', 'modify');
+                Route::post('/delete/{id}', 'delete');
             });
         });
         
