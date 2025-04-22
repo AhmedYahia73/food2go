@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->datetime('date');
+            $table->string('date');
             $table->foreignId('user_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
             $table->foreignId('branch_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
             $table->float('amount');
