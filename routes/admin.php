@@ -485,7 +485,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
                 Route::get('/', 'view');
                 Route::post('/add', 'create');
                 Route::put('/update/{id}', 'modify');
-                Route::post('/delete/{id}', 'delete');
+                Route::delete('/delete/{id}', 'delete');
             });
         });
         

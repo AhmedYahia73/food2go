@@ -13,6 +13,7 @@ class OrderNotificationController extends Controller
     public function __construct(private OrderNotification $order_notification){}
 
     public function view(){
+        // admin/settings/business_setup/order_delay_notification
         $order_notification = $this->order_notification
         ->get();
 
