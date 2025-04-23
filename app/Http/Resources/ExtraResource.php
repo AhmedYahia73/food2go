@@ -15,7 +15,7 @@ class ExtraResource extends JsonResource
     public function toArray(Request $request): array
     {
         $locale = app()->getLocale(); // Use the application's current locale
-        if ($this->product->taxes->setting == 'included') {
+        if ($this->product?->taxes?->setting == 'included') {
             $price = empty($this->product->tax) ? $this->price: 
             ($this->product->tax->type == 'value' ? $this->price 
             : $this->price + $this->product->tax->amount * $this->price / 100);

@@ -14,6 +14,17 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $allExtras = [];
+        $allExtras = $this->extra->toArray();  
+        
+        // Merge variation's extras
+            foreach ($this->variations as $variation) {
+                foreach ($variation->options as $option) {
+                    $allExtras = array_merge($allExtras, $option->extra->toArray()); // Merge correctly
+                }
+            }
+        
+
         if (!empty($this->addons) && !empty($this->category_addons) && !empty($this->sub_category_addons)) {   
             $addons = collect([])
             ->merge(AddonResource::collection($this->whenLoaded('addons')))
@@ -48,6 +59,7 @@ class ProductResource extends JsonResource
             $tax = $price;
             return [
                 'id' => $this->id,
+                'allExtras' => $allExtras,
                 'taxes' => $this->taxes->setting,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
                 'description' => $this->translations->where('key', $this->description)->first()?->value ?? $this->description,
@@ -111,6 +123,7 @@ class ProductResource extends JsonResource
             }
             return [
                 'id' => $this->id,
+                'allExtras' => $allExtras,
                 'taxes' => $this->taxes->setting,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
                 'description' => $this->translations->where('key', $this->description)->first()?->value ?? $this->description,
