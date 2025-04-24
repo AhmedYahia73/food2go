@@ -164,6 +164,7 @@ class BranchController extends Controller
         $branch_off_category = $this->branch_off 
         ->orWhere('category_id', $product->category_id)
         ->orWhere('category_id', $product->sub_category_id)
+        ->whereNotNull('category_id')
         ->get();
         $branches = $this->branches->where('status', 1)
         ->get()
