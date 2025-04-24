@@ -170,11 +170,7 @@ class BranchController extends Controller
         ->get()
         ->map(function($item) use($branch_off_product, $branch_off_category) {
             $branches_product_off = $branch_off_product->pluck('branch_id')->filter();
-            $branches_category_off = $branch_off_category->pluck('branch_id')->filter();
-            return [
-                'branches_product_off' => $branches_product_off,
-                'branches_category_off' => $branches_category_off,
-            ];
+            $branches_category_off = $branch_off_category->pluck('branch_id')->filter(); 
             if ( $branches_category_off->contains($item->id) || $branches_product_off->contains($item->id)) {
                 $item->product_status = 0;
             }
