@@ -168,9 +168,9 @@ class BranchController extends Controller
         $branches = $this->branches->where('status', 1)
         ->get()
         ->map(function($item) use($branch_off_product, $branch_off_category) {
-            $branches_product_off = $branch_off_product->pluck('branch_id')->filter()->toArray();
-            $branches_category_off = $branch_off_category->pluck('branch_id')->filter()->toArray();
-            if (in_array($item->id, $branches_category_off) || in_array($item->id, $branches_product_off)) {
+            $branches_product_off = $branch_off_product->pluck('branch_id')->filter();
+            $branches_category_off = $branch_off_category->pluck('branch_id')->filter();
+            if ( $branches_category_off->contains($item->id) || $branches_product_off->contains($item->id)) {
                 $item->product_status = 0;
             }
             else{
