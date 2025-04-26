@@ -16,11 +16,13 @@ use App\Models\VariationProduct;
 use App\Models\OptionProduct;
 use App\Models\ExcludeProduct;
 use App\Models\ExtraProduct;
+use App\Models\ExtraPricing;
 
 class CreateProductController extends Controller
 {
     public function __construct(private Product $products, private VariationProduct $variations,
-    private OptionProduct $option_product, private ExcludeProduct $excludes, private ExtraProduct $extra){}
+    private OptionProduct $option_product, private ExcludeProduct $excludes, private ExtraProduct $extra,
+    private ExtraPricing $extra_pricing){}
     protected $productRequest = [
         'name',
         'description',
@@ -51,8 +53,10 @@ class CreateProductController extends Controller
         // product_time_status, from, to, discount_id, tax_id, status, recommended, image, points
         // addons[]
         // excludes[][{exclude_name, tranlation_id, tranlation_name}]
+        
         // extra[][names][{extra_name, tranlation_id, tranlation_name}]
         // extra[][extra_price]
+        
         // variations[][names][{name, tranlation_id, tranlation_name}] ,variations[][type],
         // variations[][min] ,variations[][max]
         // variations[][required]
@@ -60,7 +64,7 @@ class CreateProductController extends Controller
         // variations[][options][][price], variations[][options][][status],
         // variations[][options][][points],
 
-        // variations[][options][][extra][][extra_names][{extra_name, tranlation_id, tranlation_name}], 
+        // variations[][options][][extra][][extra_index], 
         // variations[][options][][extra][][extra_price],
 
         // product_names[{product_name, tranlation_id, tranlation_name}]
@@ -127,9 +131,16 @@ class CreateProductController extends Controller
                     $new_extra = $this->extra
                     ->create([
                         'name' => $item['names'][0]['extra_name'],
-                        'price' => $item['extra_price'],
-                        'product_id' => $product->id
+                        'product_id' => $product->id,
                     ]);
+                    if (!empty($item['extra_price'])) {
+                        $this->extra_pricing
+                        ->create([
+                            'price' => $item['extra_price'],
+                            'product_id' => $product->id,
+                            'extra_id' => $new_extra->id,
+                        ]);
+                    }
                     $extra_num[] = $new_extra;
                     foreach ($item['names'] as $key => $element) {
                         if (!empty($element['extra_name'])) {
@@ -185,27 +196,14 @@ class CreateProductController extends Controller
                         if (isset($element['extra']) && $element['extra']) {
                             foreach ($element['extra'] as $key => $extra) {
                                 // ['extra_names']
-                                $extra_item = $this->extra
-                                ->create([
-                                    'name' => $extra['extra_names'][0]['extra_name'],
+                                $extra_pricing = $this->extra_pricing
+                                ->create([ 
                                     'price' => $extra['extra_price'],
                                     'product_id' => $product->id,
                                     'variation_id' => $variation->id,
-                                    'option_id' => $option->id
+                                    'extra_id' => $extra_num[$extra['extra_index']]->id,
+                                    'option_id' => $option->id,
                                 ]);// add extra for option
-        
-                                foreach ($extra['extra_names'] as $key => $value) {
-                                    if (!empty($value['extra_name'])) {
-                                        $extra_item->translations()->create([
-                                            'locale' => $value['tranlation_name'],
-                                            'key' => $extra['extra_names'][0]['extra_name'],
-                                            'value' => $value['extra_name'],
-                                        ]);
-                                    }
-                                }
-                                foreach ($extra_num as $extra_num_item) {
-                                    $extra_num_item->delete();
-                                }
                             }
                         }
                     } 
@@ -327,12 +325,21 @@ class CreateProductController extends Controller
         ->delete(); // delete old extra
         if ($request->extra) {
             foreach ($request->extra as $item) {
+                
                 $new_extra = $this->extra
                 ->create([
                     'name' => $item['names'][0]['extra_name'],
-                    'price' => $item['extra_price'],
-                    'product_id' => $product->id
+                    'product_id' => $product->id,
                 ]);
+                if (!empty($item['extra_price'])) {
+                    $this->extra_pricing
+                    ->create([
+                        'price' => $item['extra_price'],
+                        'product_id' => $product->id,
+                        'extra_id' => $new_extra->id,
+                    ]);
+                }
+                
                 $extra_num[] = $new_extra;
                 foreach ($item['names'] as $key => $element) {
                     if (!empty($element['extra_name'])) {
@@ -397,27 +404,14 @@ class CreateProductController extends Controller
                         if (isset($element['extra']) && $element['extra']) {
                             foreach ($element['extra'] as $key => $extra) {
                                 // ['extra_names']
-                                $extra_item = $this->extra
-                                ->create([
-                                    'name' => $extra['extra_names'][0]['extra_name'],
+                                $extra_pricing = $this->extra_pricing
+                                ->create([ 
                                     'price' => $extra['extra_price'],
                                     'product_id' => $product->id,
                                     'variation_id' => $variation->id,
-                                    'option_id' => $option->id
+                                    'extra_id' => $extra_num[$extra['extra_index']]->id,
+                                    'option_id' => $option->id,
                                 ]);// add extra for option
-        
-                                foreach ($extra['extra_names'] as $key => $value) {
-                                    if (!empty($value['extra_name'])) {
-                                        $extra_item->translations()->create([
-                                            'locale' => $value['tranlation_name'],
-                                            'key' => $extra['extra_names'][0]['extra_name'],
-                                            'value' => $value['extra_name'],
-                                        ]);
-                                    }
-                                }
-                                foreach ($extra_num as $extra_num_item) {
-                                    $extra_num_item->delete();
-                                }
                             }
                         }
                     }

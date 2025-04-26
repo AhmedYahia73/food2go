@@ -11,10 +11,8 @@ class ExtraProduct extends Model
 
     protected $fillable = [
         'name',
-        'price',
         'product_id',
         'variation_id',
-        'extra_id',
         'option_id'
     ];
 
