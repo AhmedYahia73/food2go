@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 use App\Http\Controllers\api\cashier\address\AddressController;
-use App\Http\Controllers\api\cashier\customer\CustomerController; 
+use App\Http\Controllers\api\cashier\customer\CustomerController;
+use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
 Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CashierMakeOrderController::class)
@@ -35,5 +36,16 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/item/{id}', 'address');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
+    }); 
+    Route::controller(AddressController::class)
+    ->prefix('/shift_branch_reports')->group(function(){
+        Route::get('/item/{id}', 'address');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+    }); 
+    Route::controller(CashierReportsController::class)
+    ->prefix('/reports')->group(function(){
+        Route::get('shift_branch', 'shift_branch_reports');
+        Route::get('shift_all_branch', 'shift_reports');
     }); 
 });
