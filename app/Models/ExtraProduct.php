@@ -25,6 +25,10 @@ class ExtraProduct extends Model
         return $this->morphMany(TranslationTbl::class, 'translatable');
     }
 
+    public function pricing(){
+        return $this->hasMany(ExtraPricing::class, 'extra_id');
+    }
+    
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
     }
