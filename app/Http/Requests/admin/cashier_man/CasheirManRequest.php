@@ -25,11 +25,13 @@ class CasheirManRequest extends FormRequest
     {
         return [
             'branch_id' => ['required', 'exists:branches,id'],
-            'modules' => ['required', 'array'],
-            'modules.*' => ['required', 'in:take_away,dine_in,delivery,car_slow'],
             'user_name' => ['required'],
             'password' => ['required', 'min:8'],
             'status' => ['required', 'boolean'],
+            'take_away' => ['required', 'boolean'],
+            'dine_in' => ['required', 'boolean'],
+            'delivery' => ['required', 'boolean'],
+            'car_slow' => ['required', 'boolean'],
         ];
     }
 

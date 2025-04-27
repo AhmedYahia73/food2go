@@ -56,6 +56,8 @@ use App\Providers\gates\OfferOrderGate;
 use App\Providers\gates\OrderGate;
 use App\Providers\gates\PaymentGate;
 use App\Providers\gates\PosReportsGate;
+
+use App\Providers\Cashier\CashierRoles;
  
 use App\Models\CompanyInfo;
 
@@ -139,6 +141,9 @@ class AppServiceProvider extends ServiceProvider
         DeliveryTimeGate::defineGates(); // view, edit 
         PreparingTimeGate::defineGates(); // view, edit 
         NotificationSoundGate::defineGates(); // view, edit
+          
+        // ________________________  Cashier  ________________________
 
+        CashierRoles::defineGates();
     }
 }

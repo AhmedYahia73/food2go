@@ -13,17 +13,18 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/lists', 'lists');
         Route::get('/orders', 'pos_orders');
         Route::get('/get_order/{id}', 'get_order');
-        Route::post('/delivery_order', 'delivery_order');
-        Route::post('/determine_delivery/{order_id}', 'determine_delivery');
+        Route::post('/delivery_order', 'delivery_order')->middleware('can:delivery');
+        Route::post('/determine_delivery/{order_id}', 'determine_delivery')->middleware('can:delivery');
         Route::post('/printReceipt', 'printReceipt')->withOutMiddleware(['auth:sanctum', 'IsCashier']);
 
-        Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts');
-        Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
-        Route::post('/dine_in_order', 'dine_in_order');
-        Route::post('/dine_in_payment', 'dine_in_payment');
+        Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts')->middleware('can:dine_in');
+        Route::get('/dine_in_table_order/{id}', 'dine_in_table_order')->middleware('can:dine_in');
+        Route::post('/dine_in_order', 'dine_in_order')->middleware('can:dine_in');
+        Route::post('/dine_in_payment', 'dine_in_payment')->middleware('can:dine_in');
 
-        Route::post('/take_away_order', 'take_away_order');
-       // Route::put('/tables_status/{id}', 'tables_status');
+        Route::post('/take_away_order', 'take_away_order')->middleware('can:take_away');
+       
+        Route::put('/tables_status/{id}', 'tables_status')->middleware('can:table_status');
     }); 
     Route::controller(CustomerController::class)
     ->prefix('/customer')->group(function(){
@@ -45,7 +46,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     }); 
     Route::controller(CashierReportsController::class)
     ->prefix('/reports')->group(function(){
-        Route::get('shift_branch', 'shift_branch_reports');
-        Route::get('shift_all_branch', 'shift_reports');
+        Route::get('shift_branch', 'shift_branch_reports')->middleware('can:branch_reports');
+        Route::get('shift_all_branch', 'shift_reports')->middleware('can:all_reports');
     }); 
 });

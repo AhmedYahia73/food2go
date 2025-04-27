@@ -95,7 +95,7 @@ class LoginController extends Controller
         // shift_number => sometimes
         $user = $this->cashier
         ->where('user_name', $request->user_name)
-        ->with('branch', 'cashier')
+        ->with('branch')
         ->first();
         if (empty($user)) {
             return response()->json([

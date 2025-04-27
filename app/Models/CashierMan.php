@@ -34,12 +34,12 @@ class CashierMan extends Model
         return [$data];
     }
 
+    public function roles(){
+        return $this->hasMany(CashierRole::class, 'cashier_man_id');
+    }
+
     public function branch(){
         return $this->belongsTo(Branch::class);
-    }
-    
-    public function cashier(){
-        return $this->belongsTo(Cashier::class);
     }
 
     protected $hidden = [

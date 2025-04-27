@@ -213,9 +213,9 @@ class PosOrderController extends Controller
     public function tables_status(Request $request, $id){
         // /admin/pos/order/tables_status/{id}
         // Keys
-        // occupied
+        // current_status
         $validator = Validator::make($request->all(), [
-            'occupied' => 'required|boolean',
+            'current_status' => 'required|in:available,not_available_pre_order,not_available_with_order,not_available_but_checkout,reserved',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -225,11 +225,11 @@ class PosOrderController extends Controller
         $this->tables
         ->where('id', $id)
         ->update([
-            'occupied' => $request->occupied
+            'current_status' => $request->current_status
         ]);
 
         return response()->json([
-            'success' => $request->occupied ? 'active' : 'banned'
+            'success' => $request->current_status
         ]);
     }
 }

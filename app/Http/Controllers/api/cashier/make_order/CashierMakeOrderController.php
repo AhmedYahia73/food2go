@@ -331,7 +331,7 @@ class CashierMakeOrderController extends Controller
         $this->cafe_table
         ->where('id', $request->table_id)
         ->update([
-            'occupied' => 1
+            'current_status' => 'not_available_with_order'
         ]);
         $order_data = $this->order_format($order['payment']);
 
@@ -441,7 +441,7 @@ class CashierMakeOrderController extends Controller
         $this->cafe_table
         ->where('id', $request->table_id)
         ->update([
-            'occupied' => 0
+            'current_status' => 'not_available_but_checkout'
         ]);
         $order_cart = $this->order_cart
         ->where('table_id', $request->table_id)
@@ -449,6 +449,30 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => $order, 
+        ]);
+    }
+    
+
+    public function tables_status(Request $request, $id){
+        // /cashier/tables_status/{id}
+        // Keys
+        // current_status => [available,not_available_pre_order,not_available_with_order,not_available_but_checkout,reserved]
+        $validator = Validator::make($request->all(), [
+            'current_status' => 'required|in:available,not_available_pre_order,not_available_with_order,not_available_but_checkout,reserved',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $this->cafe_table
+        ->where('id', $id)
+        ->update([
+            'current_status' => $request->current_status
+        ]);
+
+        return response()->json([
+            'success' => $request->current_status
         ]);
     }
 }

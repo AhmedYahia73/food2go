@@ -9,28 +9,36 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Cashier;
 use App\Models\CashierMan;
+use App\Models\CashierRole;
 use App\Models\Branch;
 
 class CashierManController extends Controller
 {
     public function __construct(private Cashier $cashier,
-    private CashierMan $cashier_men, private Branch $branch){}
+    private CashierMan $cashier_men, private Branch $branch,
+    private CashierRole $cashier_role){}
 
     public function view(Request $request){
         // /admin/cashier_man
         $cashier = $this->cashier
         ->get();
         $cashier_men = $this->cashier_men
-        ->with('branch', 'cashier')
+        ->with('branch', 'roles')
         ->get();
         $branches = $this->branch
         ->where('status', 1)
         ->get();
+        $roles = [
+            'branch_reports',
+            'all_reports',
+            'table_status',
+        ];
 
         return response()->json([
             'cashiers' => $cashier,
             'cashier_men' => $cashier_men,
             'branches' => $branches,
+            'roles' => $roles,
         ]);
     }
 
@@ -60,7 +68,7 @@ class CashierManController extends Controller
     public function cashier_man(Request $request, $id){
         // /admin/cashier_man/item/{id}
         $cashier_man = $this->cashier_men
-        ->with('branch', 'cashier')
+        ->with('branch')
         ->where('id', $id)
         ->first();
 
@@ -72,12 +80,29 @@ class CashierManController extends Controller
     public function create(CasheirManRequest $request){
         // admin/cashier_man/add
         // Keys
-        // user_name, password, branch_id, 
-        // modules => [take_away,dine_in,delivery,car_slow], status
-        $cashierRequest = $request->validated();
-        $cashierRequest['modules'] = json_encode($request->modules);
+        // user_name, password, branch_id, status,
+        // take_away, dine_in, delivery, car_slow
+        // roles[]
+        $validation = Validator::make($request->all(), [
+            'roles.*' => ['in:branch_reports,all_reports,table_status'],
+        ]);
+        if ($validation->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validation->errors(),
+            ],400);
+        }
+        $cashierRequest = $request->validated(); 
         $cashier_men = $this->cashier_men
         ->create($cashierRequest);
+        if ($request->roles) {
+            foreach ($request->roles as $item) {
+                $this->cashier_role
+                ->create([
+                    'roles' => $item,
+                    'cashier_man_id' => $cashier_men->id,
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => $cashier_men,
@@ -86,10 +111,18 @@ class CashierManController extends Controller
 
     public function modify(CasheirManRequest $request, $id){
         // admin/cashier_man/update/{id}
-        // user_name, password, branch_id, 
-        // modules => [take_away,dine_in,delivery,car_slow], status
-        $cashierRequest = $request->validated();
-        $cashierRequest['modules'] = json_encode($request->modules);
+        // user_name, password, branch_id, status
+        // take_away, dine_in, delivery, car_slow
+        // roles[]
+        $validation = Validator::make($request->all(), [
+            'roles.*' => ['in:branch_reports,all_reports,table_status'],
+        ]);
+        if ($validation->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validation->errors(),
+            ],400);
+        }
+        $cashierRequest = $request->validated(); 
         $cashier_men = $this->cashier_men
         ->where('id', $id)
         ->first();
@@ -99,6 +132,18 @@ class CashierManController extends Controller
             ], 400);
         }
         $cashier_men->update($cashierRequest);
+        $this->cashier_role
+        ->where('cashier_man_id', $id)
+        ->delete();
+        if ($request->roles) {
+            foreach ($request->roles as $item) {
+                $this->cashier_role
+                ->create([
+                    'roles' => $item,
+                    'cashier_man_id' => $id,
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => $cashier_men,
