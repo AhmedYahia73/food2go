@@ -451,7 +451,6 @@ class CashierMakeOrderController extends Controller
             'success' => $order, 
         ]);
     }
-    
 
     public function tables_status(Request $request, $id){
         // /cashier/tables_status/{id}
