@@ -75,7 +75,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)
     ->prefix('order')->group(function(){
         Route::get('/', 'orders');
-        Route::post('/log', 'order_log');
+        Route::post('/log', 'order_log')->middleware('can:log_order');
         Route::get('/count', 'count_orders')->middleware('can:view_order');
         Route::post('/data', 'orders_data')->middleware('can:view_order');
         Route::post('/notification', 'notification')->middleware('can:view_order');
@@ -482,10 +482,10 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
             Route::controller(OrderNotificationController::class)
             ->prefix('order_delay_notification')->group(function(){
-                Route::get('/', 'view');
-                Route::post('/add', 'create');
-                Route::put('/update/{id}', 'modify');
-                Route::delete('/delete/{id}', 'delete');
+                Route::get('/', 'view')->middleware('can:view_order_delay');
+                Route::post('/add', 'create')->middleware('can:add_order_delay');
+                Route::put('/update/{id}', 'modify')->middleware('can:edit_order_delay');
+                Route::delete('/delete/{id}', 'delete')->middleware('can:delete_order_delay');
             });
         });
         

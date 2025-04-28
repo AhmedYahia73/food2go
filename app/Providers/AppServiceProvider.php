@@ -56,6 +56,7 @@ use App\Providers\gates\OfferOrderGate;
 use App\Providers\gates\OrderGate;
 use App\Providers\gates\PaymentGate;
 use App\Providers\gates\PosReportsGate;
+use App\Providers\gates\OrderDelayGate;
 
 use App\Providers\Cashier\CashierRoles;
  
@@ -117,6 +118,7 @@ class AppServiceProvider extends ServiceProvider
         PaymentMethodGate::defineGates();
         FinancialAccountingGate::defineGates();
         MenueGate::defineGates();
+        OrderDelayGate::defineGates();
           
         // ___________________________________________________________________________
         DealOrderGate::defineGates(); // view, add

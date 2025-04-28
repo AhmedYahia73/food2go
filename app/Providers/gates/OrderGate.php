@@ -29,5 +29,15 @@ class OrderGate
             }
             return false;
         }); 
+        Gate::define('log_order', function (Admin $admin) {
+            if (
+                $admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('Order') &&
+                $admin->user_positions->roles->pluck('action')->intersect(['all', 'log'])->isNotEmpty()
+            ) {
+                return true;
+            }
+            return false;
+        }); 
     }
 }
