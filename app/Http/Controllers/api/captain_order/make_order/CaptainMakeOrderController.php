@@ -25,6 +25,7 @@ use App\Models\Setting;
 use App\Models\BranchOff;
 use App\Models\CafeLocation;
 use App\Models\CafeTable;
+use App\Models\Zone;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -39,7 +40,7 @@ class CaptainMakeOrderController extends Controller
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, 
     private CafeLocation $cafe_location, private CafeTable $cafe_table,
-    private OrderCart $order_cart){}
+    private OrderCart $order_cart, private Zone $zone){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -151,6 +152,15 @@ class CaptainMakeOrderController extends Controller
             'products' => $products, 
             'cafe_location' => $cafe_location,
             'payment_methods' => $payment_methods,
+        ]);
+    }
+
+    public function zones_list(){
+        $zones = $this->zone
+        ->get();
+
+        return response()->json([
+            'zones' => $zones
         ]);
     }
 

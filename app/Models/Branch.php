@@ -35,7 +35,7 @@ class Branch extends Authenticatable
     }
 
     public function zone(){
-        $this->hasOne(Zone::class, 'branch_id');
+        return $this->hasOne(Zone::class, 'branch_id');
     }
     
     public function getImageLinkAttribute(){
