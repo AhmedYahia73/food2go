@@ -25,6 +25,7 @@ use App\Models\Setting;
 use App\Models\BranchOff;
 use App\Models\CafeLocation;
 use App\Models\CafeTable;
+use App\Models\OrderCart;
 use App\Models\Zone;
 
 use App\trait\image;
@@ -156,6 +157,7 @@ class CaptainMakeOrderController extends Controller
     }
 
     public function zones_list(){
+        // /captain/zones_list
         $zones = $this->zone
         ->get();
 
