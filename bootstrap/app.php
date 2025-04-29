@@ -51,7 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
          $middleware->redirectGuestsTo(function (Request $request) {
             if (!$request->is('api/*')) {
-                return route('unauthorized');
+                return response()->json(['errors' => 'you must login', 400]);
             } 
         });
     })

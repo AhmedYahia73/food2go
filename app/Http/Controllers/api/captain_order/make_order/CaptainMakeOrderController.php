@@ -24,6 +24,7 @@ use App\Models\Category;
 use App\Models\Setting;
 use App\Models\BranchOff;
 use App\Models\CafeLocation;
+use App\Models\CafeTable;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -37,7 +38,8 @@ class CaptainMakeOrderController extends Controller
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, 
-    private CafeLocation $cafe_location){}
+    private CafeLocation $cafe_location, private CafeTable $cafe_table,
+    private OrderCart $order_cart){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -152,20 +154,130 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
-    public function order(OrderRequest $request){
-        // https://bcknd.food2go.online/captain/make_order
+    public function dine_in_order(OrderRequest $request){
+        // /cashier/dine_in_order
         // Keys
-        // date, branch_id, amount, total_tax, total_discount
-        // notes
+        // date, amount, total_tax, total_discount, table_id
+        // notes, order_type
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-        $request->merge([
-            'order_type' => 'dine_in',
-            'captain_id' => $request->user()->id,
-            'table_id' => $request->table_id,
-            'user_id' => 'empty',
+ 
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
         ]);
-        $request->payment_method_id = null;
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $request->merge([  
+            'branch_id' => $request->user()->branch_id,
+            'user_id' => 'empty',
+            'order_type' => 'delivery',
+            'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
+        ]);
+        $order = $this->make_order_cart($request);
+        if (isset($order['errors']) && !empty($order['errors'])) {
+            return response()->json($order, 400);
+        }
+        $this->cafe_table
+        ->where('id', $request->table_id)
+        ->update([
+            'current_status' => 'not_available_with_order'
+        ]);
+        $order_data = $this->order_format($order['payment']);
+
+        return response()->json([
+            'success' => $order_data, 
+        ]);
+    }
+
+    public function dine_in_table_carts(Request $request, $id){
+        // /cashier/dine_in_table_carts/{id}
+        $order_cart = $this->order_cart
+        ->where('table_id', $id)
+        ->get();
+        $carts = [];
+        foreach ($order_cart as $item) {
+            $order_item = $this->order_format($item);
+            $carts[] = $order_item;
+        }
+
+        return response()->json([
+            'carts' => $carts
+        ]);
+    }
+
+    public function dine_in_table_order(Request $request, $id){
+        // /cashier/dine_in_table_order/{id}
+        $order_cart = $this->order_cart
+        ->where('table_id', $id)
+        ->get();
+        $orders = collect([]);
+        foreach ($order_cart as $item) {
+            $order_item = $this->order_format($item);
+            $orders = $orders->merge($order_item);
+        }
+
+        return response()->json([
+            'success' => $orders
+        ]);
+    }
+
+    public function dine_in_payment(OrderRequest $request){
+        // /cashier/dine_in_payment
+        // Keys
+        // date, amount, total_tax, total_discount
+        // notes, payment_method_id, table_id
+
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $request->merge([  
+            'branch_id' => $request->user()->branch_id,
+            'user_id' => 'empty',
+            'order_type' => 'dine_in',
+            'cashier_man_id' =>$request->user()->id,
+        ]);
+        $order_carts = $this->order_cart
+        ->where('table_id', $request->table_id)
+        ->get();
+        $orders = collect([]);
+        $product = [];
+        foreach ($order_carts as $item) {
+            $order_item = $this->order_format($item);
+            $orders = $orders->merge($order_item);
+        }
+       
+        foreach ($orders as $key => $item) {
+            $product[$key]['exclude_id'] = collect($item->excludes)->pluck('id');
+            $product[$key]['extra_id'] = collect($item->extras)->pluck('id');
+            $product[$key]['variation'] = collect($item->variations)->map(function($element){
+                return [
+                    'variation_id' => $element->variation->id,
+                    'option_id' => collect($element->options)->pluck('id'),
+                ];
+            });
+            $product[$key]['addons'] = collect($item->addons_selected)->map(function($element){
+                return [
+                    'addon_id' => ($element->id),
+                    'count' => ($element->count),
+                ];
+            }); 
+        
+            $product[$key]['count'] = $item->count;
+            $product[$key]['product_id'] = $item->id;
+        }
+        $request->merge([  
+            'products' => $product, 
+        ]);
+        
         $order = $this->make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
@@ -173,11 +285,46 @@ class CaptainMakeOrderController extends Controller
         $this->order
         ->where('id', $order['payment']->id)
         ->update([
-            'pos' => 1
+            'pos' => 1,
+            'status' => 1,
+            'shift' => $request->user()->shift_number,
         ]);
+        $order['payment']['cart'] = $order['payment']['order_details'];
+        $order = $this->order_format(($order['payment']));
+        $this->cafe_table
+        ->where('id', $request->table_id)
+        ->update([
+            'current_status' => 'not_available_but_checkout'
+        ]);
+        $order_cart = $this->order_cart
+        ->where('table_id', $request->table_id)
+        ->delete();
+
         return response()->json([
-            'success' => $order['payment']->id, 
+            'success' => $order, 
         ]);
-        
+    }
+
+    public function tables_status(Request $request, $id){
+        // /cashier/tables_status/{id}
+        // Keys
+        // current_status => [available,not_available_pre_order,not_available_with_order,not_available_but_checkout,reserved]
+        $validator = Validator::make($request->all(), [
+            'current_status' => 'required|in:available,not_available_pre_order,not_available_with_order,not_available_but_checkout,reserved',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        $this->cafe_table
+        ->where('id', $id)
+        ->update([
+            'current_status' => $request->current_status
+        ]);
+
+        return response()->json([
+            'success' => $request->current_status
+        ]);
     }
 }

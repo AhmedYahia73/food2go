@@ -33,6 +33,10 @@ class Branch extends Authenticatable
     public function getMapAttribute(){
         return "https://www.google.com/maps?q={$this->attributes['latitude']},{$this->attributes['longitude']}";
     }
+
+    public function zone(){
+        $this->hasOne(Zone::class, 'branch_id');
+    }
     
     public function getImageLinkAttribute(){
         return url('storage/' . $this->attributes['image']);
