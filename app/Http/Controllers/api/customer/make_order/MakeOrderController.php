@@ -42,7 +42,7 @@ class MakeOrderController extends Controller
         // Keys
         // date, branch_id, amount, coupon_discount, total_tax, total_discount, address_id
         // order_type[take_away,dine_in,delivery]
-        // deal[{deal_id, count}], payment_method_id, receipt
+        // deal[{deal_id, count}], c, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count, note}]
         if (!empty($request->address_id) && empty($request->branch_id)) {

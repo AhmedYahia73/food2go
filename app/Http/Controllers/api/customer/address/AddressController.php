@@ -32,14 +32,14 @@ class AddressController extends Controller
         $addresses = $this->user
         ->where('id', $request->user()->id)
         ->with('address.zone')
-        ->first()->address; 
+        ->first()->toArray(); 
         $zones = $this->zones->get();
         $branches = $this->branch
         ->where('status', 1)
         ->get();
 
         return response()->json([
-            'addresses' => $addresses,
+            'addresses' => $addresses['address'],
             'zones' => $zones,
             'branches' => $branches,
         ]);
