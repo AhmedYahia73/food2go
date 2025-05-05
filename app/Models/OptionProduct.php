@@ -25,6 +25,10 @@ class OptionProduct extends Model
         return $this->hasMany(ExtraProduct::class, 'option_id');
     }
 
+    public function extra_pricing(){
+        return $this->hasMany(ExtraPricing::class, 'option_id');
+    }
+
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
     }

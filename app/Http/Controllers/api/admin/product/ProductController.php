@@ -40,7 +40,7 @@ class ProductController extends Controller
     public function product($id){
         // https://bcknd.food2go.online/admin/product/item/{id}
         $product = $this->products
-        ->with(['addons', 'excludes', 'extra.pricing', 'variations.options.extra.pricing', 'category', 'subCategory', 'discount', 'tax'])
+        ->with(['addons', 'excludes', 'extra.pricing', 'variations.options.extra_pricing.extra', 'category', 'subCategory', 'discount', 'tax'])
         ->where('id', $id)
         ->first();//extra_id
         $translations = $this->translations

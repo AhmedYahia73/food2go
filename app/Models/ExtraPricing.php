@@ -17,6 +17,10 @@ class ExtraPricing extends Model
         'option_id',
     ];
     
+    public function extra(){
+        return $this->belongsTo(ExtraProduct::class, 'extra_id');
+    }
+    
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
     }
