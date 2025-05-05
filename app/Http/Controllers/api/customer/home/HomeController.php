@@ -310,7 +310,7 @@ class HomeController extends Controller
             $resturant_time = json_decode($resturant_time) ?? $resturant_time;
         }
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products, 'dffdg');
+        $products = ProductResource::collection($products);
 
         return response()->json([
             'categories' => $categories,
