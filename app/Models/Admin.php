@@ -27,11 +27,11 @@ class Admin extends Authenticatable
 
     public function getRoleAttribute(){
         return 'admin';
-    } 
-
-    public function getIdentityImageLinkAttribute(){
-        return url('storage/' . $this->attributes['identity_image']);
     }
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
+    } 
     /**
      * The attributes that should be hidden for serialization.
      *
