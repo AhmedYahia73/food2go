@@ -15,26 +15,19 @@ class Admin extends Authenticatable
 
     protected $fillable = [
         'name',
-        'identity_type',
-        'identity_number',
         'email',
         'phone',
         'image',
-        'identity_image',
         'password',
         'user_position_id',
         'status',
         'email_verified_at',
     ];
-    protected $appends = ['role', 'image_link', 'identity_image_link'];
+    protected $appends = ['role', 'image_link'];
 
     public function getRoleAttribute(){
         return 'admin';
-    }
-
-    public function getImageLinkAttribute(){
-        return url('storage/' . $this->attributes['image']);
-    }
+    } 
 
     public function getIdentityImageLinkAttribute(){
         return url('storage/' . $this->attributes['identity_image']);
