@@ -27,10 +27,8 @@ class UpdateAdminRequest extends FormRequest
         $userId = $this->route('id');
         return [
             'name' => ['required'],
-            'identity_type' => ['required'],
             'email' => ['email', 'required', Rule::unique('admins')->ignore($userId)],
             'phone' => ['required', Rule::unique('admins')->ignore($userId)],
-            'identity_number' => ['required', 'numeric'],  
             'user_position_id' => ['nullable', 'exists:user_positions,id'],   
             'status' => ['required', 'boolean'],
         ];

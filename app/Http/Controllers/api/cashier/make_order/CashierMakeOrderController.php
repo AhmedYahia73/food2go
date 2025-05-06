@@ -248,7 +248,7 @@ class CashierMakeOrderController extends Controller
     }
 
     public function determine_delivery(Request $request, $order_id){
-        // /cashier/orders
+        // /cashier/determine_delivery/{order_id}
         // Keys
         // delivery_id
         $validator = Validator::make($request->all(), [

@@ -25,10 +25,8 @@ class AdminRequest extends FormRequest
     {
         return [
             'name' => ['required'],
-            'identity_type' => ['required'],
             'email' => ['email', 'required', 'unique:admins'],
             'phone' => ['required', 'unique:admins'],
-            'identity_number' => ['required', 'numeric'],  
             'user_position_id' => ['required', 'exists:user_positions,id'],   
             'password' => ['required'],   
             'status' => ['required', 'boolean'],

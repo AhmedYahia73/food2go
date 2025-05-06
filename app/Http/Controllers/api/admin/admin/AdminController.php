@@ -18,8 +18,6 @@ class AdminController extends Controller
     public function __construct(private Admin $admins, private UserPosition $user_positions){}
     protected $adminRequest = [
         'name',
-        'identity_type',
-        'identity_number',
         'email',
         'phone',
         'user_position_id',
@@ -92,16 +90,12 @@ class AdminController extends Controller
     public function create(AdminRequest $request){
         // https://bcknd.food2go.online/admin/admin/add
         // Keys
-        // name, identity_type, identity_number, email, phone, password, user_position_id
-        // status, image, identity_image
+        // name, email, phone, password, user_position_id
+        // status, image
         $adminRequest = $request->only($this->adminRequest); 
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/admin/image');
             $adminRequest['image'] = $imag_path;
-        }
-        if (is_file($request->identity_image)) {
-            $imag_path = $this->upload($request, 'identity_image', 'users/admin/identity_image');
-            $adminRequest['identity_image'] = $imag_path;
         }
         $adminRequest['password'] = $request->password;
         $this->admins->create($adminRequest);
@@ -114,8 +108,8 @@ class AdminController extends Controller
     public function modify(UpdateAdminRequest $request, $id){
         // https://bcknd.food2go.online/admin/admin/update/{id}
         // Keys
-        // name, identity_type, identity_number, email, phone, password, user_position_id
-        // status, image, identity_image
+        // name, email, phone, password, user_position_id
+        // status, image
         $adminRequest = $request->only($this->adminRequest);
         $admin = $this->admins->where('id', $id)
         ->first();
@@ -123,11 +117,6 @@ class AdminController extends Controller
             $imag_path = $this->upload($request, 'image', 'users/admin/image');
             $adminRequest['image'] = $imag_path;
             $this->deleteImage($admin->image);
-        }
-        if (is_file($request->identity_image)) {
-            $imag_path = $this->upload($request, 'identity_image', 'users/admin/identity_image');
-            $adminRequest['identity_image'] = $imag_path;
-            $this->deleteImage($admin->identity_image);
         }
         if (!empty($request->password)) {
             $adminRequest['password'] = $request->password;
@@ -144,7 +133,6 @@ class AdminController extends Controller
         $admin = $this->admins->where('id', $id)
         ->first();
         $this->deleteImage($admin->image);
-        $this->deleteImage($admin->identity_image);
         $admin->delete();
 
         return response()->json([
