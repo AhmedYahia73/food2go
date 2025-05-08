@@ -27,6 +27,7 @@ trait PlaceOrder
         'total_tax',
         'total_discount',
         'address_id',
+        'branch_id',
         'order_type',
         'payment_method_id',
         'notes',
