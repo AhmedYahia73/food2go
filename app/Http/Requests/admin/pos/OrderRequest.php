@@ -29,7 +29,7 @@ class OrderRequest extends FormRequest
             'branch_id' => ['exists:branches,id'],
             'customer_id' => ['exists:customers,id'],
             'amount' => ['required', 'numeric'],
-            'order_status' => ['in:pending,confirmed,processing,out_for_delivery,delivered,faild_to_deliver,canceled,scheduled'],
+            'order_status' => ['in:pending,confirmed,processing,out_for_delivery,delivered,faild_to_deliver,canceled,scheduled,refund'],
             'order_type' => ['required'], 
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],

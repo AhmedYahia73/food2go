@@ -365,6 +365,23 @@ class OrderController extends Controller
         ->where('order_status', 'scheduled')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'address.zone', 'payment_method', 'delivery'])
+        ->get();
+        $refund = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereDate('created_at', date('Y-m-d'))
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'refund')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'address.zone', 'payment_method', 'delivery'])
         ->get(); 
         
         $deliveries = $this->deliveries
@@ -379,10 +396,11 @@ class OrderController extends Controller
             'delivered' => $delivered,
             'returned' => $returned,
             'faild_to_deliver' => $faild_to_deliver,
+            'refund' => $refund,
             'canceled' => $canceled,
             'scheduled' => $scheduled,
             'all_data' => $all_data,
-            'deliveries' => $deliveries
+            'deliveries' => $deliveries,
         ]);
     }
 
@@ -497,6 +515,17 @@ class OrderController extends Controller
         ->orderByDesc('id')
         ->with(['user', 'branch', 'address.zone', 'payment_method', 'delivery'])
         ->count();
+        $refund = $this->orders
+        ->where('pos', 0)
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'refund')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'address.zone', 'payment_method', 'delivery'])
+        ->count();
 
         return response()->json([
             'orders' => $orders,
@@ -506,6 +535,7 @@ class OrderController extends Controller
             'out_for_delivery' => $out_for_delivery,
             'delivered' => $delivered,
             'returned' => $returned,
+            'refund' => $refund,
             'faild_to_deliver' => $faild_to_deliver,
             'canceled' => $canceled,
             'scheduled' => $scheduled,
@@ -515,7 +545,7 @@ class OrderController extends Controller
     public function orders_data(Request $request){
         // https://bcknd.food2go.online/admin/order/data
         $validator = Validator::make($request->all(), [
-            'order_status' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled',
+            'order_status' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -615,7 +645,7 @@ class OrderController extends Controller
         // Key
         // from, to, branch_id, type
         $validator = Validator::make($request->all(), [ 
-            'type' => 'in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled'
+            'type' => 'in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -759,7 +789,7 @@ class OrderController extends Controller
         // order_status, order_number
         // if canceled => key admin_cancel_reason
         $validator = Validator::make($request->all(), [
-            'order_status' => 'required|in:delivery,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled',
+            'order_status' => 'required|in:delivery,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
