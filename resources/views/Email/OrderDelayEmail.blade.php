@@ -17,7 +17,9 @@
 
 
           <p>Order #{{$data['id']}} is delayed
-          Order placed from </strong>"{{ $data['date'] }}"</strong>
+          Order placed from 
+        {{-- </strong>"{{ $data['date'] }}" --}}
+      </strong>
             </p> 
         </td>
       </tr>
