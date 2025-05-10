@@ -13,14 +13,19 @@
       </tr>
       <tr>
         <td style="padding:20px; color:#333333;">
-          <p>Hello,</p>
-          <p>We wanted to let you know that your order has been slightly delayed and will be processed within the next <strong>3 minutes</strong>.</p>
-          <p style="margin-top:30px;">Order ,<br /><strong>#{{$data['id']}}</strong></p>
+          <p>Hello, admin</p> 
+
+
+          <p>Order #{{$data['id']}} is delayed
+          Order placed from </strong>"{{ $data['date'] }}"</strong>
+            </p> 
         </td>
       </tr>
       <tr>
         <td style="padding:15px; background-color:#eeeeee; text-align:center; font-size:12px; color:#666;">
-          This is an automated message. Please do not reply.
+                  
+        "This email is automatically sent from your restaurant dashboard"
+        Thank you for using Food2go
         </td>
       </tr>
     </table>
