@@ -55,6 +55,7 @@ class HomeController extends Controller
         'addons' => function($query) use($locale){
             $query->withLocale($locale);
         }])
+        ->orderBy('priority')
         ->withLocale($locale)
         ->where('category_id', null)
         ->get()
@@ -243,6 +244,7 @@ class HomeController extends Controller
             $tax = $tax->setting;
         }
         $categories = $this->categories
+        ->orderBy('priority')
         ->with(['sub_categories' => function($query) use($locale){
             $query->withLocale($locale);
         }, 
