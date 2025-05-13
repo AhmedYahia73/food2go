@@ -821,13 +821,24 @@ class OrderController extends Controller
                 'error' => 'order is not found'
             ], 400);
         }
-        $this->log_order
-        ->create([
-            'order_id' => $id,
-            'admin_id' => $request->user()->id,
-            'from_status' => $order->order_status,
-            'to_status' => $request->order_status,
-        ]);
+        // $this->log_order
+        // ->create([
+        //     'order_id' => $id,
+        //     'admin_id' => $request->user()->id,
+        //     'from_status' => $order->order_status,
+        //     'to_status' => $request->order_status,
+        // ]);
+        if (empty($order->admin_id)) {
+            $order->update([
+                'admin_id' => $request->user()->id,
+                'operation_status' => 'opened',
+            ]);
+        }
+        else{
+            if ($order->admin_id != $request->user()->id) {
+                # code...
+            }
+        }
         if ($request->order_status == 'processing') { 
             $order->update([
                 'order_status' => $request->order_status,
