@@ -181,6 +181,22 @@ class OrderController extends Controller
         ->orderByDesc('id')
         ->with(['user', 'branch', 'address.zone', 'payment_method', 'delivery'])
         ->get();
+        $scheduled = $this->orders
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_status', 'refund')
+        ->orderByDesc('id')
+        ->with(['user', 'branch', 'address.zone', 'payment_method', 'delivery'])
+        ->get();
 
         $all_data = [
             'orders' => $orders,
@@ -193,6 +209,7 @@ class OrderController extends Controller
             'faild_to_deliver' => $faild_to_deliver,
             'canceled' => $canceled,
             'scheduled' => $scheduled,
+            'refund' => $refund,
         ];
 
         // _____________________________________________________________
