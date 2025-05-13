@@ -181,7 +181,7 @@ class OrderController extends Controller
         ->orderByDesc('id')
         ->with(['user', 'branch', 'address.zone', 'payment_method', 'delivery'])
         ->get();
-        $scheduled = $this->orders
+        $refund = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
