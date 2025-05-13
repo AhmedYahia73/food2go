@@ -701,7 +701,7 @@ trait PlaceOrder
             $order_data[$key]->count = $item->product[0]->count;
             $order_data[$key]->excludes = $item->excludes;
             $order_data[$key]->extras = $item->extras;
-            $order_data[$key]->variations = $item->variations;
+            $order_data[$key]->variation_selected = $item->variations;
             $order_data[$key]->addons_selected = $item->addons;
         }
 
