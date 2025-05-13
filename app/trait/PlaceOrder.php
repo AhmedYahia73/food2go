@@ -697,6 +697,7 @@ trait PlaceOrder
         foreach ($order->cart ?? $order as $key => $item) {
             $product = $item->product[0]->product;
             unset($product->addons);
+            unset($product->variations);
             $order_data[$key] = $product;
             $order_data[$key]->count = $item->product[0]->count;
             $order_data[$key]->excludes = $item->excludes;
