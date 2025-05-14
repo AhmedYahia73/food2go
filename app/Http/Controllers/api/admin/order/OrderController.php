@@ -835,10 +835,19 @@ class OrderController extends Controller
             ]);
         }
         else{
-            if ($order->admin_id != $request->user()->id) {
-                # code...
+            $user = $request->user();
+            $roles = $user?->user_positions?->roles?->where('role', 'Order')->pluck('action')->values();
+            $hasAllPermission = $roles->contains('all');
+            $hasStatusPermission = $roles->contains('status');
+            $hasRequiredPermission = $hasAllPermission && $hasStatusPermission;
+
+            if ($order->admin_id !== $user->id && !$hasRequiredPermission) {
+                return response()->json([
+                    'error' => "You can't change status"
+                ], 400);
             }
         }
+
         if ($request->order_status == 'processing') { 
             $order->update([
                 'order_status' => $request->order_status,
