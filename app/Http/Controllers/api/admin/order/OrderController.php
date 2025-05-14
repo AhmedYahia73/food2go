@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 use App\Models\Order;
 use App\Models\Delivery;
@@ -957,6 +958,40 @@ class OrderController extends Controller
 
         return response()->json([
             'log_order' => $log_order,
+        ]);
+    }
+
+    public function order_filter_date(Request $request){
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date',
+            'type' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+        // settings
+        $time_setting = $request->date;
+        $settings = $this->settings
+        ->where('name', 'time_setting')
+        ->first();
+        $time_setting = json_decode($settings->name);
+        $from = $time_setting->resturant_time->from;
+        $from = $date . ' ' . $from;
+        $start = Carbon::parse($from);
+        $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
+
+        $orders = $this->orders
+        ->whereBetween('created_at', [$start, $end])
+        ->where('pos', 0)
+        ->get();
+        if ($request->type != 'all') {
+            $orders = $orders->where('order_status', $request->type)->values();
+        }
+
+        return response()->json([
+            'orders' => $orders
         ]);
     }
 }
