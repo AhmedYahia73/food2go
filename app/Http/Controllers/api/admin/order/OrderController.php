@@ -839,7 +839,7 @@ class OrderController extends Controller
             $roles = $user?->user_positions?->roles?->where('role', 'Order')->pluck('action')->values();
             $hasAllPermission = $roles->contains('all');
             $hasStatusPermission = $roles->contains('status');
-            $hasRequiredPermission = $hasAllPermission && $hasStatusPermission;
+            $hasRequiredPermission = $hasAllPermission || $hasStatusPermission;
 
             if ($order->admin_id !== $user->id && !$hasRequiredPermission) {
                 return response()->json([
