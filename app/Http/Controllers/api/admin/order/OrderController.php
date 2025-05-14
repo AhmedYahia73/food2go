@@ -978,6 +978,21 @@ class OrderController extends Controller
         $settings = $this->settings
         ->where('name', 'time_setting')
         ->first();
+        if (empty($time_slot)) {
+            $setting = [
+                'resturant_time' => [
+                    'from' => '00:00:00',
+                    'hours' => '22',
+                ],
+                'custom' => [],
+            ];
+            $setting = json_encode($setting);
+            $time_slot = $this->settings
+            ->create([
+                'name' => 'time_slot',
+                'setting' => $setting
+            ]);
+        } 
         $time_setting = json_decode($settings->setting);
         $from = $time_setting->resturant_time->from;
         $from = $request->date . ' ' . $from;
