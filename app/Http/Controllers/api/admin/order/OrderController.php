@@ -979,10 +979,10 @@ class OrderController extends Controller
         ->where('name', 'time_setting')
         ->first();
         $time_setting = json_decode($settings->setting);
-        $from = $time_setting['resturant_time']['from'];
+        $from = $time_setting->resturant_time->from;
         $from = $date . ' ' . $from;
         $start = Carbon::parse($from);
-        $end = Carbon::parse($from)->addHours(intval($time_setting['resturant_time']['hours']));
+        $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
 
         $orders = $this->orders
         ->whereBetween('created_at', [$start, $end])
