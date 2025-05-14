@@ -1,3 +1,16 @@
+
+@php
+  use Carbon\Carbon;
+
+  $now = Carbon::now();
+  $subtractTime = Carbon::createFromTimeString($data['time']);
+
+  // Subtract the time duration from now
+  $updatedTime = $now->copy()->subHours($subtractTime->hour)->subMinutes($subtractTime->minute)->subSeconds($subtractTime->second);
+
+  // Get the difference in minutes
+  $diffInMinutes = $now->diffInMinutes($updatedTime); // this will return 9
+@endphp
 <!DOCTYPE html>
 <html>
   <head>
@@ -17,7 +30,8 @@
 
 
           <p>Order #{{$data['id']}} is delayed
-          Order placed from 
+            {{ $diffInMinutes }}
+          Order placed from is delayed from time
         {{-- </strong>"{{ $data['date'] }}" --}}
       </strong>
             </p> 
