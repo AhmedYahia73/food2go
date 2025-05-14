@@ -49,7 +49,7 @@ class TimeSlotController extends Controller
         // "custom": ["Sunday","Monday"]
         $validator = Validator::make($request->all(), [
             'resturant_time' => 'required|array',
-            'resturant_time.from' => 'required|regex:/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/',
+            'resturant_time.from' => 'required|regex:/^([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$/',
             'resturant_time.hours' => 'required|numeric',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
