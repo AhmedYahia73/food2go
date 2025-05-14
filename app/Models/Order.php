@@ -120,6 +120,10 @@ class Order extends Model
         return $this->belongsTo(Address::class, 'address_id');
     }
 
+    public function admin(){
+        return $this->belongsTo(Admin::class, 'admin_id');
+    }
+
     public function details(){
         return $this->hasMany(OrderDetail::class, 'order_id');
     }

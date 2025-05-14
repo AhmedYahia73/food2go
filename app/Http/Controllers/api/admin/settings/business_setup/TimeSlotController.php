@@ -16,13 +16,16 @@ class TimeSlotController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot
         $time_slot = $this->settings
-        ->where('name', 'time_slot')
+        ->where('name', 'time_setting')
         ->orderByDesc('id')
         ->first();
         $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
         if (empty($time_slot)) {
             $setting = [
-                'daily' => [],
+                'resturant_time' => [
+                    'from' => '00:00:00',
+                    'hours' => '22',
+                ],
                 'custom' => [],
             ];
             $setting = json_encode($setting);
@@ -34,7 +37,7 @@ class TimeSlotController extends Controller
         } 
         
         return response()->json([
-            'time_slot' => $time_slot,
+            'resturant_time' => $time_slot,
             'days' => $days
         ]);
         
@@ -42,31 +45,34 @@ class TimeSlotController extends Controller
 
     public function add(Request $request){
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add
-        // "daily": [{"'from'": "00:10:00","'to'": "00:11:00"}],
+        // "resturant_time": {"'from'": "00:10:00","'hours'": 22},
         // "custom": ["Sunday","Monday"]
         $validator = Validator::make($request->all(), [
-            'daily' => 'required|array',
+            'resturant_time' => 'required|array',
+            'resturant_time.from' => 'required|regex:/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/',
+            'resturant_time.hours' => 'required|numeric',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'error' => $validator->errors(),
             ],400);
         }
-        $daily = $request->daily;
+      
+        $resturant_time = $request->resturant_time;
         $custom = $request->custom ?? [];
         $setting = [
-            'daily' => $daily,
+            'resturant_time' => $resturant_time,
             'custom' => $custom,
         ];
         $setting = json_encode($setting);
         $time_slot = $this->settings
-        ->where('name', 'time_slot')
+        ->where('name', 'time_setting')
         ->orderByDesc('id')
         ->first();
         if (empty($time_slot)) {
             $time_slot = $this->settings
             ->create([
-                'name' => 'time_slot',
+                'name' => 'time_setting',
                 'setting' => $setting
             ]);
         } 
@@ -77,7 +83,7 @@ class TimeSlotController extends Controller
         }
 
         return response()->json([
-            'time_slot' => $time_slot,
+            'resturant_time' => $time_slot,
             'request' => $request->all(),
         ]);
     }
