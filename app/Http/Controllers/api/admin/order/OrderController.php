@@ -980,7 +980,7 @@ class OrderController extends Controller
         ->first();
         $time_setting = json_decode($settings->setting);
         $from = $time_setting->resturant_time->from;
-        $from = $date . ' ' . $from;
+        $from = $request->date . ' ' . $from;
         $start = Carbon::parse($from);
         $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
 
