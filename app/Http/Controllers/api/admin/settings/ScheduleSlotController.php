@@ -65,8 +65,8 @@ class ScheduleSlotController extends Controller
         $validator = Validator::make($request->all(), [
             'slot_names' => 'required',
             'slot_names.*.name' => 'required',
-            'slot_names.*.tranlation_id' => 'required|exists:Translation,id',
-            'slot_names.*.tranlation_name' => 'required|exists:Translation,name',
+            'slot_names.*.tranlation_id' => 'required|exists:translations,id',
+            'slot_names.*.tranlation_name' => 'required|exists:translations,name',
             'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
