@@ -51,7 +51,16 @@ class ExtraController extends Controller
         }
         $extraRequest = $request->only($this->extraRequest);
         $extraRequest['name'] = $default['extra_name'];
-        $this->extra->create($extraRequest);
+        $extra = $this->extra->create($extraRequest);
+        foreach ($request->extra_names as $item) {
+            if (!empty($item['extra_name'])) {
+                $extra->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['extra_name'],
+                    'value' => $item['extra_name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -65,15 +74,23 @@ class ExtraController extends Controller
         // extra_names[{extra_name, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
         $default = $request->extra_names[0];
-        foreach ($request->extra_names as $item) {
-            $this->translate($item['tranlation_name'], $default['extra_name'], $item['extra_name']); 
-        }
+
         $extraRequest = $request->only($this->extraRequest);
         $extraRequest['name'] = $default['extra_name'];
         $extra = $this->extra
         ->where('id', $id)
         ->first();
         $extra->update($extraRequest);
+        $extra->translations()->delete();
+        foreach ($request->extra_names as $item) {
+            if (!empty($item['extra_name'])) {
+                $extra->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['extra_name'],
+                    'value' => $item['extra_name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => 'You update data success'

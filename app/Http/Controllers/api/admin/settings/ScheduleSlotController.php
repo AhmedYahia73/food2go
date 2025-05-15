@@ -60,9 +60,13 @@ class ScheduleSlotController extends Controller
     public function create(Request $request){
         // https://bcknd.food2go.online/admin/settings/schedule_time_slot/add
         //Key
-        // name, status
+        // status
+        // slot_names[{name, tranlation_id, tranlation_name}]
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'slot_names' => 'required',
+            'slot_names.*.name' => 'required',
+            'slot_names.*.tranlation_id' => 'required|exists:Translation,id',
+            'slot_names.*.tranlation_name' => 'required|exists:Translation,name',
             'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -70,12 +74,22 @@ class ScheduleSlotController extends Controller
                 'error' => $validator->errors(),
             ],400);
         }
+        $default = $request->slot_names[0];
 
-        $this->time_slot
+        $time_slot = $this->time_slot
         ->create([
             'name' => $request->name,
             'status' => $request->status,
         ]);
+        foreach ($request->slot_names as $item) {
+            if (!empty($item['name'])) {
+                $time_slot->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['name'],
+                    'value' => $item['name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -84,10 +98,14 @@ class ScheduleSlotController extends Controller
 
     public function modify(Request $request, $id){
         // https://bcknd.food2go.online/admin/settings/schedule_time_slot/update/{id}
-        //Key
-        // name, status
+        // Key
+        // status
+        // slot_names[{name, tranlation_id, tranlation_name}]
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'slot_names' => 'required',
+            'slot_names.*.name' => 'required',
+            'slot_names.*.tranlation_id' => 'required|exists:Translation,id',
+            'slot_names.*.tranlation_name' => 'required|exists:Translation,name',
             'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -96,12 +114,23 @@ class ScheduleSlotController extends Controller
             ],400);
         }
 
-        $this->time_slot
+        $time_slot = $this->time_slot
         ->where('id', $id)
-        ->update([
+        ->first();
+        $time_slot->update([
             'name' => $request->name,
             'status' => $request->status,
         ]);
+        $time_slot->translations()->delete();
+        foreach ($request->slot_names as $item) {
+            if (!empty($item['name'])) {
+                $time_slot->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['name'],
+                    'value' => $item['name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => 'You update data success'
