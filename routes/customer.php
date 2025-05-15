@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/slider', 'slider')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/translation', 'translation')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/web_products', 'web_products')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/schedule_list', 'schedule_list')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
         Route::get('/fav_products', 'fav_products');

@@ -45,16 +45,6 @@ class HomeController extends Controller
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();
-        $schedule_list = $this->schedule_list
-        ->where('status', 1)
-        ->get()
-        ->map(function($item) use($locale){
-            return [
-                'id' => $item->id,
-                'name' => $item->translations->where('key', $item->name)
-                ->where('locale', $locale)->first()?->value ?? $item->name,
-            ];
-        });
         $product_off = $branch_off->pluck('product_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
         $option_off = $branch_off->pluck('option_id')->filter();
@@ -214,7 +204,6 @@ class HomeController extends Controller
             'discounts' => $discounts,
             'resturant_time' => $resturant_time,
             'tax' => $tax,
-            'schedule_list' => $schedule_list,
         ]);
     }
 
@@ -239,16 +228,6 @@ class HomeController extends Controller
         $product_off = $branch_off->pluck('product_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
         $option_off = $branch_off->pluck('option_id')->filter();
-        $schedule_list = $this->schedule_list
-        ->where('status', 1)
-        ->get()
-        ->map(function($item) use($locale){
-            return [
-                'id' => $item->id,
-                'name' => $item->translations->where('key', $item->name)
-                ->where('locale', $locale)->first()?->value ?? $item->name,
-            ];
-        });
         $tax = $this->settings
         ->where('name', 'tax')
         ->orderByDesc('id')
@@ -341,6 +320,22 @@ class HomeController extends Controller
             'discounts' => $discounts,
             'resturant_time' => $resturant_time,
             'tax' => $tax,
+        ]);
+    }
+
+    public function schedule_list(){
+        $schedule_list = $this->schedule_list
+        ->where('status', 1)
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                'id' => $item->id,
+                'name' => $item->translations->where('key', $item->name)
+                ->where('locale', $locale)->first()?->value ?? $item->name,
+            ];
+        });
+
+        return response()->json([
             'schedule_list' => $schedule_list,
         ]);
     }
