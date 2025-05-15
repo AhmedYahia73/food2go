@@ -55,7 +55,7 @@ class OrderController extends Controller
         }
 
         $orders = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -71,7 +71,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $pending = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -88,7 +88,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $confirmed = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -105,7 +105,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $processing = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -122,7 +122,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $out_for_delivery = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -139,7 +139,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $delivered = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -156,7 +156,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $returned = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -173,7 +173,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $faild_to_deliver = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -190,7 +190,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $canceled = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -207,7 +207,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $scheduled = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -224,7 +224,7 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone', 'payment_method', 'delivery'])
         ->get();
         $refund = $this->orders
-        ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -857,6 +857,7 @@ class OrderController extends Controller
                 'error' => $validator->errors(),
             ],400);
         }
+
         $order = $this->orders
         ->where('id', $id)
         ->first();
@@ -886,11 +887,21 @@ class OrderController extends Controller
             ]);
         }
         else{
+            $arr =  ['pending','confirmed','processing','out_for_delivery','delivered','returned'
+            ,'faild_to_deliver','canceled','scheduled','refund'];
+            $new_index = array_search($request->order_status, $arr);
+            $old_index = array_search($order->order_status, $arr);
             $user = $request->user();
             $roles = $user?->user_positions?->roles?->where('role', 'Order')->pluck('action')->values();
             $hasAllPermission = $roles->contains('all');
+            $hasBackStatus = $roles->contains('back_status');
             $hasStatusPermission = $roles->contains('change_status');
             $hasRequiredPermission = $hasAllPermission || $hasStatusPermission;
+            if (!$hasAllPermission && !$hasBackStatus && $new_index < $old_index) {
+                return response()->json([
+                    'error' => "You can't back by status"
+                ], 400);
+            }
 
             if ($order->admin_id !== $user->id && !$hasRequiredPermission) {
                 return response()->json([
