@@ -21,7 +21,7 @@ class OrderController extends Controller
     private Branch $branches, private Setting $settings, private User $user,
     private LogOrder $log_order){}
 
-    public function orders(){
+    public function orders(Request $request){
         // https://bcknd.food2go.online/admin/order
       
         // settings
