@@ -704,17 +704,19 @@ trait PlaceOrder
             foreach ($item->variations as $key => $element) {
                 $element->variation->option = $element->options;
                 unset($element->options);
+                $element = $element->variation;
             }
             foreach ($item->addons as $key => $element) {
                 $element->addon->count = $element->count;
                 unset($element->count);
+                $element = $element->addon;
             }
             $order_data[$key] = $product;
             $order_data[$key]->count = $item->product[0]->count;
             $order_data[$key]->excludes = $item->excludes;
             $order_data[$key]->extras = $item->extras;
-            $order_data[$key]->variation_selected = $item->variations->values();
-            $order_data[$key]->addons_selected = $item->addons->values();
+            $order_data[$key]->variation_selected = $item->variations;
+            $order_data[$key]->addons_selected = $item->addons;
         }
 
         return $order_data;
