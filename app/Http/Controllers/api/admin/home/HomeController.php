@@ -10,14 +10,46 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Deal;
 use App\Models\User;
+use App\Models\Setting;
 
 class HomeController extends Controller
 {
     public function __construct(private Order $orders, private Product $products,
-    private Deal $deals, private User $users){}
+    private Deal $deals, private User $users, private Setting $settings){}
 
     public function home(){
         // https://bcknd.food2go.online/admin/home
+        
+        // settings
+        $settings = $this->settings
+        ->where('name', 'time_setting')
+        ->first();
+        if (empty($settings)) {
+            $setting = [
+                'resturant_time' => [
+                    'from' => '00:00:00',
+                    'hours' => '22',
+                ],
+                'custom' => [],
+            ];
+            $setting = json_encode($setting);
+            $settings = $this->settings
+            ->create([
+                'name' => 'time_setting',
+                'setting' => $setting
+            ]);
+        } 
+        $time_setting = json_decode($settings->setting);
+        $from = $time_setting->resturant_time->from;
+        $from = $request->date . ' ' . $from;
+        $start = Carbon::parse($from);
+        if ($start > date('H:i:s')) {
+            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours))->subDay();;
+        }
+        else{
+            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
+        }
+
         $orders = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
