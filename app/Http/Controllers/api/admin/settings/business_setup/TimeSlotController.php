@@ -34,7 +34,8 @@ class TimeSlotController extends Controller
                 'name' => 'time_setting',
                 'setting' => $setting
             ]);
-        } 
+        }
+        $time_slot = json_decode($time_slot->value);
         
         return response()->json([
             'resturant_time' => $time_slot,
