@@ -99,9 +99,9 @@ class BusinessSetupController extends Controller
         $open_flag = false;
 		$open_from = $open_from;
 		$open_to = $open_to; 
-if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
-    $open_flag = true;
-}
+        if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
+            $open_flag = true;
+        }
 
         return response()->json([ 
             'login_web' => $login_web,

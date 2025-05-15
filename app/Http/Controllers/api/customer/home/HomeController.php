@@ -16,6 +16,7 @@ use App\Models\Banner;
 use App\Models\Setting;
 use App\Models\Translation;
 use App\Models\BranchOff;
+use App\Models\ScheduleSlot;
 use App\Models\Address;
 
 class HomeController extends Controller
@@ -23,7 +24,7 @@ class HomeController extends Controller
     public function __construct(private Category $categories, private User $user,
     private Product $product, private Banner $banner, private Setting $settings,
     private Translation $translations, private BranchOff $branch_off,
-    private Address $address){}
+    private Address $address, private ScheduleSlot $schedule_list){}
 
     public function products(Request $request){
         // https://bcknd.food2go.online/customer/home
@@ -43,6 +44,9 @@ class HomeController extends Controller
         }
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
+        ->get();
+        $schedule_list = $this->schedule_list
+        ->where('status', 1)
         ->get();
         $product_off = $branch_off->pluck('product_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
@@ -203,6 +207,7 @@ class HomeController extends Controller
             'discounts' => $discounts,
             'resturant_time' => $resturant_time,
             'tax' => $tax,
+            'schedule_list' => $schedule_list,
         ]);
     }
 
@@ -227,7 +232,9 @@ class HomeController extends Controller
         $product_off = $branch_off->pluck('product_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
         $option_off = $branch_off->pluck('option_id')->filter();
-
+        $schedule_list = $this->schedule_list
+        ->where('status', 1)
+        ->get();
         $tax = $this->settings
         ->where('name', 'tax')
         ->orderByDesc('id')
@@ -320,6 +327,7 @@ class HomeController extends Controller
             'discounts' => $discounts,
             'resturant_time' => $resturant_time,
             'tax' => $tax,
+            'schedule_list' => $schedule_list,
         ]);
     }
 

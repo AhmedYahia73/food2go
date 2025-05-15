@@ -32,6 +32,7 @@ trait PlaceOrder
         'payment_method_id',
         'notes',
         'coupon_discount',
+        'sechedule_slot_id',
     ];
     protected $orderRequest = ['user_id', 'cart'];
     protected $priceCycle;

@@ -39,6 +39,7 @@ class OrderRequest extends FormRequest
             'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
             'products.*.count' => ['numeric', 'required'],
             'products.*.note' => ['sometimes'],
+            'sechedule_slot_id' => ['exists:schedule_slots,id']
         ];
     }
 
