@@ -78,7 +78,7 @@ class ScheduleSlotController extends Controller
 
         $time_slot = $this->time_slot
         ->create([
-            'name' => $request->name,
+            'name' => $default['name'],
             'status' => $request->status,
         ]);
         foreach ($request->slot_names as $item) {
@@ -118,7 +118,7 @@ class ScheduleSlotController extends Controller
         ->where('id', $id)
         ->first();
         $time_slot->update([
-            'name' => $request->name,
+            'name' => $default['name'],
             'status' => $request->status,
         ]);
         $time_slot->translations()->delete();
