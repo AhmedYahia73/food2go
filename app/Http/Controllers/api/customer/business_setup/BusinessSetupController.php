@@ -108,7 +108,7 @@ class BusinessSetupController extends Controller
             'min_order' => floatval($min_order),
             'time_slot' =>  $time_slot,
             'today' => $today, 
-            'open_flag' => $open_flag
+            'open_flag' => $open_flag,
             'login_branch' => $login_branch,
             'login_customer' => $login_customer,
             'login_delivery' => $login_delivery,
