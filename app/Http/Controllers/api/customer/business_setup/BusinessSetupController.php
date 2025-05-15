@@ -97,7 +97,7 @@ class BusinessSetupController extends Controller
         $today = Carbon::now()->format('l');
         $now = date('H:i:s');
         $open_flag = false;
-        if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
+        if ($now >= $open_from && $now <= $open_to && !in_array($today, $days)) {
             $open_flag = true;
         }
 
