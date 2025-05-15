@@ -70,26 +70,36 @@ class BusinessSetupController extends Controller
         $min_order = $order_setting->min_order ?? 0;
         // Time slot
         $time_slot = $this->settings
-        ->where('name', 'time_slot')
+        ->where('name', 'time_setting')
         ->orderByDesc('id')
         ->first();
         if (empty($time_slot)) {
             $setting = [
-                'daily' => [],
+                'resturant_time' => [
+                    'from' => '00:00:00',
+                    'hours' => '22',
+                ],
                 'custom' => [],
             ];
             $setting = json_encode($setting);
             $time_slot = $this->settings
             ->create([
-                'name' => 'time_slot',
+                'name' => 'time_setting',
                 'setting' => $setting
             ]);
         }
-        $time_slot = json_decode($time_slot->setting) ?? [
-            'daily' => [],
-            'custom' => [],
-        ];
+        $time_slot = json_decode($time_slot->setting);
+        $resturant_time = $time_slot->resturant_time;
+        $days = $time_slot->custom;
+        $open_from = $resturant_time->from;
+        $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
+        $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
         $today = Carbon::now()->format('l');
+        $now = date('H:i:s');
+        $open_flag = false;
+        if ($now >= $open_from && $now <= $open_to && !in_array($today, $days)) {
+            $open_flag = true;
+        }
 
         return response()->json([ 
             'login_web' => $login_web,
@@ -98,6 +108,7 @@ class BusinessSetupController extends Controller
             'min_order' => floatval($min_order),
             'time_slot' =>  $time_slot,
             'today' => $today, 
+            'open_flag' => $open_flag
             'login_branch' => $login_branch,
             'login_customer' => $login_customer,
             'login_delivery' => $login_delivery,

@@ -1016,6 +1016,8 @@ class OrderController extends Controller
         // date, type => all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
+            'date_to' => 'required|date',
+            'branch_id' => 'required|exists:branches,id',
             'type' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -1046,8 +1048,9 @@ class OrderController extends Controller
         $time_setting = json_decode($settings->setting);
         $from = $time_setting->resturant_time->from;
         $from = $request->date . ' ' . $from;
+        $date_to = $request->date_to . ' ' . $from;
         $start = Carbon::parse($from);
-        $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
+        $end = Carbon::parse($date_to)->addHours(intval($time_setting->resturant_time->hours));
 
         $orders = $this->orders
         ->whereBetween('created_at', [$start, $end])
