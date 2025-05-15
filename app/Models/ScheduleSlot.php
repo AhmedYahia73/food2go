@@ -12,7 +12,7 @@ class ScheduleSlot extends Model
     protected $fillable = [
         'name',
     ];
-    
+
     public function translations()
     {
         return $this->morphMany(TranslationTbl::class, 'translatable');

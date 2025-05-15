@@ -7,10 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\ScheduleSlot;
+use App\Models\Translation;
+use App\Models\TranslationTbl;
 
 class ScheduleSlotController extends Controller
 {
-    public function __construct(private ScheduleSlot $time_slot){}
+    public function __construct(private ScheduleSlot $time_slot,
+    private Translation $translations, private TranslationTbl $translation_tbl){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/settings/schedule_time_slot
@@ -27,9 +30,34 @@ class ScheduleSlotController extends Controller
         $schedule_time_slot = $this->time_slot
         ->where('id', $id)
         ->first();
+        $translations = $this->translations
+        ->where('status', 1)
+        ->get();
+        $slot_names = [];
+        foreach ($translations as $item) {
+            $schedule_time_slot = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->where('key', $schedule_time_slot->name)
+            ->first();
+           $slot_names[] = [
+               'tranlation_id' => $item->id,
+               'tranlation_name' => $item->name,
+               'schedule_time_slot' => $schedule_time_slot->value ?? null,
+           ];
+            // $filePath = base_path("lang/{$item->name}/messages.php");
+            // if (File::exists($filePath)) {
+            //     $translation_file = require $filePath;
+            //     $category_names[] = [
+            //         'id' => $item->id,
+            //         'lang' => $item->name,
+            //         'name' => $translation_file[$category->name] ?? null
+            //     ];
+            // }
+        }
 
         return response()->json([
-            'schedule_time_slot' => $schedule_time_slot
+            'schedule_time_slot' => $schedule_time_slot,
+            'slot_names' => $slot_names,
         ]);
     }
 
