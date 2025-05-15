@@ -47,7 +47,14 @@ class HomeController extends Controller
         ->get();
         $schedule_list = $this->schedule_list
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                'id' => $id,
+                'name' => $this->translations->where('key', $this->name)
+                ->where('locale', $locale)->first()?->value ?? $this->name,
+            ];
+        });
         $product_off = $branch_off->pluck('product_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
         $option_off = $branch_off->pluck('option_id')->filter();
@@ -234,7 +241,14 @@ class HomeController extends Controller
         $option_off = $branch_off->pluck('option_id')->filter();
         $schedule_list = $this->schedule_list
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                'id' => $id,
+                'name' => $this->translations->where('key', $this->name)
+                ->where('locale', $locale)->first()?->value ?? $this->name,
+            ];
+        });
         $tax = $this->settings
         ->where('name', 'tax')
         ->orderByDesc('id')
