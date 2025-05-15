@@ -49,16 +49,11 @@ class OrderController extends Controller
         $start = Carbon::parse($from);
         $time_setting = $request->date;
         if ($start > date('H:i:s')) {
-            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
+            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours))->subDay();;
         }
         else{
             $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
         }
-
-        $orders = $this->orders
-        ->whereBetween('created_at', [$start, $end])
-        ->where('pos', 0)
-        ->get();
 
         $orders = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -67,6 +62,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -82,6 +78,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -98,6 +95,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -114,6 +112,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -130,6 +129,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -146,6 +146,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -162,6 +163,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -178,6 +180,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -194,6 +197,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -210,6 +214,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
@@ -226,6 +231,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
         ->where(function($query) {
             $query->where('status', 1)
