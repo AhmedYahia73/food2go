@@ -27,7 +27,7 @@ class ScheduleSlotController extends Controller
 
     public function schedule_time_slot($id){
         // https://bcknd.food2go.online/admin/settings/schedule_time_slot/item/{id}
-        $schedule_time_slot = $this->time_slot
+        $schedule_time_slot_item = $this->time_slot
         ->where('id', $id)
         ->first();
         $translations = $this->translations
@@ -37,7 +37,7 @@ class ScheduleSlotController extends Controller
         foreach ($translations as $item) {
             $schedule_time_slot = $this->translation_tbl
             ->where('locale', $item->name)
-            ->where('key', $schedule_time_slot->name)
+            ->where('key', $schedule_time_slot_item->name)
             ->first();
            $slot_names[] = [
                'tranlation_id' => $item->id,
@@ -56,7 +56,7 @@ class ScheduleSlotController extends Controller
         }
 
         return response()->json([
-            'schedule_time_slot' => $schedule_time_slot,
+            'schedule_time_slot' => $schedule_time_slot_item,
             'slot_names' => $slot_names,
         ]);
     }
