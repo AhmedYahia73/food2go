@@ -701,6 +701,9 @@ trait PlaceOrder
             unset($product->variations);
             // $item->addons->addon->count = $item->addons->count;
             // $item->variations->variation->options = $item->variations->options;
+            foreach ($item->variations as $key => $element) {
+                $element->variation->option = 
+            }
             $order_data[$key] = $product;
             $order_data[$key]->count = $item->product[0]->count;
             $order_data[$key]->excludes = $item->excludes;
