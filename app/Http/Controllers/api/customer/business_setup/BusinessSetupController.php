@@ -95,11 +95,13 @@ class BusinessSetupController extends Controller
         $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
         $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
         $today = Carbon::now()->format('l');
-        $now = date('H:i:s');
+		$now = Carbon::now(); // Don't override this later
         $open_flag = false;
-        if ($now >= $open_from && $now <= $open_to && !in_array($today, $days)) {
-            $open_flag = true;
-        }
+		$open_from = $open_from;
+		$open_to = $open_to; 
+if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
+    $open_flag = true;
+}
 
         return response()->json([ 
             'login_web' => $login_web,
