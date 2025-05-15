@@ -802,7 +802,8 @@ class OrderController extends Controller
         $deliveries = $this->deliveries
         ->get();
         $order_status = ['pending', 'processing', 'out_for_delivery',
-        'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,'faild_to_deliver'];
+        'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
+        'faild_to_deliver', 'refund'];
         $preparing_time = $order->branch->food_preparion_time ?? '00:30';
         // if (empty($preparing_time)) {
         $time_parts = explode(':', $preparing_time);
