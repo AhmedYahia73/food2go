@@ -31,7 +31,7 @@ class TimeSlotController extends Controller
             $setting = json_encode($setting);
             $time_slot = $this->settings
             ->create([
-                'name' => 'time_slot',
+                'name' => 'time_setting',
                 'setting' => $setting
             ]);
         } 

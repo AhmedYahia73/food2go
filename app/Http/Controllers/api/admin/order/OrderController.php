@@ -39,7 +39,7 @@ class OrderController extends Controller
             $setting = json_encode($setting);
             $settings = $this->settings
             ->create([
-                'name' => 'time_slot',
+                'name' => 'time_setting',
                 'setting' => $setting
             ]);
         } 
