@@ -50,9 +50,9 @@ class HomeController extends Controller
         ->get()
         ->map(function($item) use($locale){
             return [
-                'id' => $id,
-                'name' => $this->translations->where('key', $this->name)
-                ->where('locale', $locale)->first()?->value ?? $this->name,
+                'id' => $item->id,
+                'name' => $item->translations->where('key', $item->name)
+                ->where('locale', $locale)->first()?->value ?? $item->name,
             ];
         });
         $product_off = $branch_off->pluck('product_id')->filter();
@@ -244,9 +244,9 @@ class HomeController extends Controller
         ->get()
         ->map(function($item) use($locale){
             return [
-                'id' => $id,
-                'name' => $this->translations->where('key', $this->name)
-                ->where('locale', $locale)->first()?->value ?? $this->name,
+                'id' => $item->id,
+                'name' => $item->translations->where('key', $item->name)
+                ->where('locale', $locale)->first()?->value ?? $item->name,
             ];
         });
         $tax = $this->settings
