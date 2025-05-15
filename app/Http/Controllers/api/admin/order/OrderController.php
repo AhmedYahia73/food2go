@@ -1013,7 +1013,8 @@ class OrderController extends Controller
 
     public function order_filter_date(Request $request){
         // https://sultanayubbcknd.food2go.online/admin/order_filter_date
-        // date, date_to, branch_id, type => all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund
+        // date, date_to, branch_id, 
+        // type => all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund,
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'date_to' => 'required|date',
