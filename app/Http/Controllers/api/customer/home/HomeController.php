@@ -324,6 +324,7 @@ class HomeController extends Controller
     }
 
     public function schedule_list(Request $request){
+        $locale = $request->locale ?? 'en';
         $schedule_list = $this->schedule_list
         ->where('status', 1)
         ->get()
