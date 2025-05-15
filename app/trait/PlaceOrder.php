@@ -704,7 +704,7 @@ trait PlaceOrder
             // $item->addons->addon->count = $item->addons->count;
             // $item->variations->variation->options = $item->variations->options;
             foreach ($item->variations as $key => $element) {
-                $element->variation->option = $element->options;
+                $element->variation->options = $element->options;
                 unset($element->options);
                 $variation[] = $element->variation;
             }
