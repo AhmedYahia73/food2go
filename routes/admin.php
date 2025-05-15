@@ -22,6 +22,7 @@ use App\Http\Controllers\api\admin\home\HomeController;
 use App\Http\Controllers\api\admin\cafe\CafeTablesController;
 use App\Http\Controllers\api\admin\cafe\CafeLocationController;
 
+
 use App\Http\Controllers\api\admin\customer\CustomerController;
 use App\Http\Controllers\api\admin\delivery\DeliveryController;
 use App\Http\Controllers\api\admin\branch\BranchController;
@@ -50,6 +51,7 @@ use App\Http\Controllers\api\admin\payments\PaymentController;
 use App\Http\Controllers\api\admin\coupon\CouponController;
 use App\Http\Controllers\api\admin\coupon\CreateCouponController;
 
+use App\Http\Controllers\api\admin\settings\ScheduleSlotController;
 use App\Http\Controllers\api\admin\settings\ExtraController;
 use App\Http\Controllers\api\admin\settings\ExcludeController;
 use App\Http\Controllers\api\admin\settings\TaxController;
@@ -364,6 +366,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::post('add', 'create')->middleware('can:add_financial_accounting');
             Route::post('update/{id}', 'modify')->middleware('can:edit_financial_accounting');
             Route::delete('delete/{id}', 'delete')->middleware('can:delete_financial_accounting');
+        });
+
+        Route::controller(ScheduleSlotController::class)->prefix('schedule_time_slot')->group(function(){
+            Route::get('/', 'view');
+            Route::get('item/{id}', 'schedule_time_slot');
+            Route::put('status/{id}', 'status');
+            Route::post('add', 'create');
+            Route::post('update/{id}', 'modify');
+            Route::delete('delete/{id}', 'delete');
         });
 
         Route::controller(MenueController::class)

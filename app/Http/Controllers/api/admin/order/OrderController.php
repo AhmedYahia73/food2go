@@ -23,6 +23,43 @@ class OrderController extends Controller
 
     public function orders(){
         // https://bcknd.food2go.online/admin/order
+      
+        // settings
+        $settings = $this->settings
+        ->where('name', 'time_setting')
+        ->first();
+        if (empty($settings)) {
+            $setting = [
+                'resturant_time' => [
+                    'from' => '00:00:00',
+                    'hours' => '22',
+                ],
+                'custom' => [],
+            ];
+            $setting = json_encode($setting);
+            $settings = $this->settings
+            ->create([
+                'name' => 'time_slot',
+                'setting' => $setting
+            ]);
+        } 
+        $time_setting = json_decode($settings->setting);
+        $from = $time_setting->resturant_time->from;
+        $from = $request->date . ' ' . $from;
+        $start = Carbon::parse($from);
+        $time_setting = $request->date;
+        if ($start > date('H:i:s')) {
+            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
+        }
+        else{
+            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
+        }
+
+        $orders = $this->orders
+        ->whereBetween('created_at', [$start, $end])
+        ->where('pos', 0)
+        ->get();
+
         $orders = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -978,7 +1015,7 @@ class OrderController extends Controller
         $settings = $this->settings
         ->where('name', 'time_setting')
         ->first();
-        if (empty($time_slot)) {
+        if (empty($settings)) {
             $setting = [
                 'resturant_time' => [
                     'from' => '00:00:00',
@@ -987,7 +1024,7 @@ class OrderController extends Controller
                 'custom' => [],
             ];
             $setting = json_encode($setting);
-            $time_slot = $this->settings
+            $settings = $this->settings
             ->create([
                 'name' => 'time_slot',
                 'setting' => $setting
