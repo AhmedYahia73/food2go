@@ -114,6 +114,7 @@ class ScheduleSlotController extends Controller
             ],400);
         }
 
+        $default = $request->slot_names[0];
         $time_slot = $this->time_slot
         ->where('id', $id)
         ->first();
