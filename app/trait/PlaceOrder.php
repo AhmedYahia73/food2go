@@ -695,39 +695,19 @@ trait PlaceOrder
 
     public function order_format($order){
         $order_data = [];
-     $order_data = [];
-
-foreach ($order->cart ?? [$order] as $key => $item) {
-    $product = optional($item->product[0] ?? null)->product;
-
-    if (!$product) {
-        continue; // لو المنتج مش موجود نكمل اللي بعده
-    }
-
-    // إزالة العلاقات اللي مش محتاجينها
-    unset($product->addons);
-    unset($product->variations);
-
-    // تجهيز بيانات الإضافات والاختيارات
-    $addon = optional($item->addons)->addon;
-    if ($addon) {
-        $addon->count = $item->addons->count ?? 0;
-    }
-
-    $variation = optional($item->variations)->variation;
-    if ($variation) {
-        $variation->options = $item->variations->options ?? [];
-    }
-
-    // تعبئة البيانات النهائية
-    $order_data[$key] = clone $product; // clone علشان منعدّليش الأصل
-    $order_data[$key]->count = optional($item->product[0] ?? null)->count ?? 0;
-    $order_data[$key]->excludes = $item->excludes ?? [];
-    $order_data[$key]->extras = $item->extras ?? [];
-    $order_data[$key]->variation_selected = $variation;
-    $order_data[$key]->addons_selected = $addon;
-}
-
+        foreach ($order->cart ?? $order as $key => $item) {
+            $product = $item->product[0]->product;
+            unset($product->addons);
+            unset($product->variations);
+            // $item->addons->addon->count = $item->addons->count;
+            // $item->variations->variation->options = $item->variations->options;
+            $order_data[$key] = $product;
+            $order_data[$key]->count = $item->product[0]->count;
+            $order_data[$key]->excludes = $item->excludes;
+            $order_data[$key]->extras = $item->extras;
+            $order_data[$key]->variation_selected = $item->variations->variation;
+            $order_data[$key]->addons_selected = $item->addons->addon;
+        }
 
         return $order_data;
     }
