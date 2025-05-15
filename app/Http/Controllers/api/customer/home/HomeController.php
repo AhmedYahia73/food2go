@@ -323,7 +323,7 @@ class HomeController extends Controller
         ]);
     }
 
-    public function schedule_list(){
+    public function schedule_list(Request $request){
         $schedule_list = $this->schedule_list
         ->where('status', 1)
         ->get()
