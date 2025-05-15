@@ -590,7 +590,7 @@ class OrderController extends Controller
         return response()->json([
             'orders' => $orders,
             'pending' => $pending,
-            'confirmed' => $confirmed,
+            // 'confirmed' => $confirmed,
             'processing' => $processing,
             'out_for_delivery' => $out_for_delivery,
             'delivered' => $delivered,
