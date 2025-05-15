@@ -889,7 +889,7 @@ class OrderController extends Controller
             $user = $request->user();
             $roles = $user?->user_positions?->roles?->where('role', 'Order')->pluck('action')->values();
             $hasAllPermission = $roles->contains('all');
-            $hasStatusPermission = $roles->contains('status');
+            $hasStatusPermission = $roles->contains('change_status');
             $hasRequiredPermission = $hasAllPermission || $hasStatusPermission;
 
             if ($order->admin_id !== $user->id && !$hasRequiredPermission) {
