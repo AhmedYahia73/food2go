@@ -47,7 +47,6 @@ class OrderController extends Controller
         $from = $time_setting->resturant_time->from;
         $from = $request->date . ' ' . $from;
         $start = Carbon::parse($from);
-        $time_setting = $request->date;
         if ($start > date('H:i:s')) {
             $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours))->subDay();;
         }
