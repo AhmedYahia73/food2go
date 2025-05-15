@@ -52,6 +52,7 @@ class Order extends Model
         'shift',
         'admin_id',
         'operation_status',
+        'sechedule_slot_id',
     ];
     protected $appends = ['order_date', 'status_payment'];
 
