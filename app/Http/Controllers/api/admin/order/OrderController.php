@@ -25,21 +25,7 @@ class OrderController extends Controller
     public function orders(Request $request){
         // https://bcknd.food2go.online/admin/order
       
-        // settings
-        $settings = $this->settings
-        ->where('name', 'time_setting')
-        ->first();
-        if (empty($settings)) {
-            $setting = [
-                'custom' => [],
-            ];
-            $setting = json_encode($setting);
-            $settings = $this->settings
-            ->create([
-                'name' => 'time_setting',
-                'setting' => $setting
-            ]);
-        } 
+        // settings 
         $time_sittings = $this->TimeSittings
         ->get();
         $from = $time_sittings->min('from');
@@ -47,8 +33,8 @@ class OrderController extends Controller
         if (!empty($from)) {
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
-            if ($start > date('H:i:s')) {
-                $end = Carbon::parse($from)->addHours($hours)->subDay();;
+            if ($start > date('Y-m-d H:i:s')) {
+                $end = Carbon::parse($from)->addHours($hours)->subDay();
             }
             else{
                 $end = Carbon::parse($from)->addHours(intval($hours));
