@@ -20,7 +20,7 @@ class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Delivery $deliveries, 
     private Branch $branches, private Setting $settings, private User $user,
-    private LogOrder $log_order){}
+    private LogOrder $log_order, private TimeSittings $TimeSittings){}
 
     public function orders(Request $request){
         // https://bcknd.food2go.online/admin/order
