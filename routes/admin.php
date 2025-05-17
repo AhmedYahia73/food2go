@@ -477,7 +477,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::controller(TimeSlotController::class)
             ->prefix('time_slot')->group(function(){
                 Route::get('/', 'view')->middleware('can:view_time_slot');
-                Route::post('/add', 'add')->middleware('can:edit_time_slot'); 
+                Route::post('/add_custom', 'add_custom')->middleware('can:edit_time_slot'); 
+                Route::post('/add_times', 'add_times')->middleware('can:edit_time_slot'); 
+                Route::post('/update_times/{id}', 'update_times')->middleware('can:edit_time_slot'); 
             });
 
             Route::controller(CustomerLoginController::class)

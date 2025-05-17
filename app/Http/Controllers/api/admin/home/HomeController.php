@@ -11,35 +11,37 @@ use App\Models\Product;
 use App\Models\Deal;
 use App\Models\User;
 use App\Models\Setting;
+use App\Models\TimeSittings;
 
 class HomeController extends Controller
 {
     public function __construct(private Order $orders, private Product $products,
-    private Deal $deals, private User $users, private Setting $settings){}
+    private Deal $deals, private User $users, private Setting $settings
+    , private TimeSittings $TimeSittings){}
 
     public function home(){
         // https://bcknd.food2go.online/admin/home
         
         // settings
-        $settings = $this->settings
-        ->where('name', 'time_setting')
-        ->first();
-        if (empty($settings)) {
-            $setting = [
-                'resturant_time' => [
-                    'from' => '00:00:00',
-                    'hours' => '22',
-                    'branch_id' => null,
-                ],
-                'custom' => [],
-            ];
-            $setting = json_encode($setting);
-            $settings = $this->settings
-            ->create([
-                'name' => 'time_setting',
-                'setting' => $setting
-            ]);
-        }
+        // $settings = $this->settings
+        // ->where('name', 'time_setting')
+        // ->first();
+        // if (empty($settings)) {
+        //     $setting = [
+        //         'resturant_time' => [
+        //             'from' => '00:00:00',
+        //             'hours' => '22',
+        //             'branch_id' => null,
+        //         ],
+        //         'custom' => [],
+        //     ];
+        //     $setting = json_encode($setting);
+        //     $settings = $this->settings
+        //     ->create([
+        //         'name' => 'time_setting',
+        //         'setting' => $setting
+        //     ]);
+        // }
         // $time_setting = json_decode($settings->setting);
         // $from = $time_setting->resturant_time->from;
         // $from = $request->date . ' ' . $from;

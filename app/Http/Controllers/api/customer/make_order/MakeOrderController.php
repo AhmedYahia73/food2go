@@ -23,6 +23,7 @@ use App\Models\User;
 use App\Models\Addon;
 use App\Models\PaymentMethodAuto;
 use App\Models\Setting;
+use App\Models\TimeSittings;
 use App\Models\Address;
 
 class MakeOrderController extends Controller
@@ -32,7 +33,7 @@ class MakeOrderController extends Controller
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings, 
-    private Address $address){}
+    private Address $address, private TimeSittings $TimeSittings){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -53,6 +54,52 @@ class MakeOrderController extends Controller
             $request->merge([
                 'branch_id' => $branch_id,
             ]);
+        }
+        $time_slot = $this->settings
+        ->where('name', 'time_setting')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($time_slot)) {
+            $setting = [
+                'custom' => [],
+            ];
+            $setting = json_encode($setting);
+            $time_slot = $this->settings
+            ->create([
+                'name' => 'time_setting',
+                'setting' => $setting
+            ]);
+        }
+        $time_sitting = $this->TimeSittings
+        ->where('branch_id', $request->branch_id)
+        ->first();
+        if (empty($time_sitting)) {
+            $open_flag = true;
+        }
+        else{
+            $resturant_time = $time_sitting;
+            $days = $time_slot->custom;
+            $open_from = $resturant_time->from;
+            if (!empty($open_from)) {
+                $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
+                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+                $today = Carbon::now()->format('l');
+                $now = Carbon::now(); // Don't override this later
+                $open_flag = false;
+                $open_from = $open_from;
+                $open_to = $open_to; 
+                if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
+                    $open_flag = true;
+                }
+            }
+            else{
+                $open_flag = true;
+            }
+        }
+        if (!$open_flag) {
+            return response()->json([
+                'error' => 'Resurant is closed'
+            ], 403);
         }
         if ($request->payment_method_id == 1) {
             $payment_method_auto = $this->payment_method_auto

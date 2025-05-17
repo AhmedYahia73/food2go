@@ -9,11 +9,13 @@ use Carbon\Carbon;
 use App\Models\Maintenance;
 use App\Models\CompanyInfo;
 use App\Models\Setting;
+use App\Models\TimeSittings;
 
 class BusinessSetupController extends Controller
 {
     public function __construct(private Maintenance $maintenance,
-    private CompanyInfo $company_info, private Setting $settings){}
+    private CompanyInfo $company_info, private Setting $settings,
+    private TimeSittings $time_sitting){}
 
     public function business_setup(Request $request){
         // https://bcknd.food2go.online/api/business_setup
@@ -69,17 +71,13 @@ class BusinessSetupController extends Controller
         $order_setting = json_decode($order_setting->setting) ?? null;
         $min_order = $order_setting->min_order ?? 0;
         // Time slot
+        
         $time_slot = $this->settings
         ->where('name', 'time_setting')
         ->orderByDesc('id')
         ->first();
         if (empty($time_slot)) {
             $setting = [
-                'resturant_time' => [
-                    'from' => '00:00:00',
-                    'hours' => '22',
-                    'branch_id' => null,
-                ],
                 'custom' => [],
             ];
             $setting = json_encode($setting);
@@ -89,24 +87,31 @@ class BusinessSetupController extends Controller
                 'setting' => $setting
             ]);
         }
-        $time_slot = json_decode($time_slot->setting);
-        $resturant_time = $time_slot->resturant_time;
-        $days = $time_slot->custom;
-        $open_from = $resturant_time->where('branch_id', $request->branch_id)?->from;
-        if (!empty($open_from)) {
-            $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
-            $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
-            $today = Carbon::now()->format('l');
-            $now = Carbon::now(); // Don't override this later
-            $open_flag = false;
-            $open_from = $open_from;
-            $open_to = $open_to; 
-            if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
-                $open_flag = true;
-            }
+        $time_sitting = $this->time_sitting
+        ->where('branch_id', $request->branch_id ?? null)
+        ->first();
+        if (empty($time_sitting)) {
+            $open_flag = true;
         }
         else{
-            $open_flag = true;
+            $resturant_time = $time_sitting;
+            $days = $time_slot->custom;
+            $open_from = $resturant_time->from;
+            if (!empty($open_from)) {
+                $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
+                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+                $today = Carbon::now()->format('l');
+                $now = Carbon::now(); // Don't override this later
+                $open_flag = false;
+                $open_from = $open_from;
+                $open_to = $open_to; 
+                if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
+                    $open_flag = true;
+                }
+            }
+            else{
+                $open_flag = true;
+            }
         }
 
         return response()->json([ 

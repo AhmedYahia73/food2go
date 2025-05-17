@@ -8,10 +8,12 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Setting;
+use App\Models\TimeSittings;
 
 class TimeSlotController extends Controller
 {
-    public function __construct(private Setting $settings){}
+    public function __construct(private Setting $settings,
+    private TimeSittings $time_setting){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot
@@ -22,11 +24,6 @@ class TimeSlotController extends Controller
         $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
         if (empty($time_slot)) {
             $setting = [
-                'resturant_time' => [
-                    'from' => '00:00:00',
-                    'hours' => '22',
-                    'branch_id' => null,
-                ],
                 'custom' => [],
             ];
             $setting = json_encode($setting);
@@ -36,30 +33,24 @@ class TimeSlotController extends Controller
                 'setting' => $setting
             ]);
         }
+        $time_slot = $time_slot->setting;
         $time_slot = json_decode($time_slot->setting);
+        $time_slot = $time_slot->custom;
+        $time_setting = $this->time_setting
+        ->get();
         
         return response()->json([
-            'resturant_time' => $time_slot,
-            'days' => $days
+            'days' => $time_slot,
+            'time_setting' => $time_setting
         ]);
         
     }
 
-    public function add(Request $request){
-        // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add
-        // "resturant_time": {"'from'": "00:10:00","'hours'": 22},
+    public function add_custom(Request $request){
+        // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add_custom
         // "custom": ["Sunday","Monday"]
         $validator = Validator::make($request->all(), [
-            'resturant_time' => 'required|array',
-            'resturant_time.from' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', $value)) {
-                        $fail('The '.$attribute.' must be a valid time in HH:MM:SS format.');
-                    }
-                },
-            ],
-            'resturant_time.hours' => 'required|numeric',
+            'custom' => 'required|array',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -70,7 +61,6 @@ class TimeSlotController extends Controller
         $resturant_time = $request->resturant_time;
         $custom = $request->custom ?? [];
         $setting = [
-            'resturant_time' => $resturant_time,
             'custom' => $custom,
         ];
         $setting = json_encode($setting);
@@ -96,4 +86,79 @@ class TimeSlotController extends Controller
             'request' => $request->all(),
         ]);
     }
+
+    public function add_times(Request $request, $id){
+        // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add_times
+        // from, hours,  branch_id, 
+        $validator = Validator::make($request->all(), [
+            'from' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', $value)) {
+                        $fail('The '.$attribute.' must be a valid time in HH:MM:SS format.');
+                    }
+                },
+            ],
+            'hours' => 'required|numeric',
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+      
+        $resturant_time = $request->resturant_time;
+
+        $time_setting = $this->time_setting->create([
+            'from' => $request->from,
+            'hours' => $request->hours,
+            'branch_id' => $request->branch_id,
+        ]);
+        
+
+        return response()->json([
+            'resturant_time' => $time_setting,
+            'request' => $request->all(),
+        ]);
+    }
+
+    public function update_times(Request $request, $id){
+        // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/update_times/{id}
+        // from, hours,  branch_id, 
+        $validator = Validator::make($request->all(), [
+            'from' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/', $value)) {
+                        $fail('The '.$attribute.' must be a valid time in HH:MM:SS format.');
+                    }
+                },
+            ],
+            'hours' => 'required|numeric',
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'error' => $validator->errors(),
+            ],400);
+        }
+      
+        $resturant_time = $request->resturant_time;
+        $time_setting = $this->time_setting
+        ->where('id', $id)
+        ->first();
+        $time_setting->update([
+            'from' => $request->from,
+            'hours' => $request->hours,
+            'branch_id' => $request->branch_id,
+        ]);
+        
+
+        return response()->json([
+            'resturant_time' => $time_setting,
+            'request' => $request->all(),
+        ]);
+    }
+    
 }
