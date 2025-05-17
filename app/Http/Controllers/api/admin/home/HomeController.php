@@ -29,6 +29,7 @@ class HomeController extends Controller
                 'resturant_time' => [
                     'from' => '00:00:00',
                     'hours' => '22',
+                    'branch_id' => null,
                 ],
                 'custom' => [],
             ];
@@ -38,17 +39,17 @@ class HomeController extends Controller
                 'name' => 'time_setting',
                 'setting' => $setting
             ]);
-        } 
-        $time_setting = json_decode($settings->setting);
-        $from = $time_setting->resturant_time->from;
-        $from = $request->date . ' ' . $from;
-        $start = Carbon::parse($from);
-        if ($start > date('H:i:s')) {
-            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours))->subDay();;
         }
-        else{
-            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
-        }
+        // $time_setting = json_decode($settings->setting);
+        // $from = $time_setting->resturant_time->from;
+        // $from = $request->date . ' ' . $from;
+        // $start = Carbon::parse($from);
+        // if ($start > date('H:i:s')) {
+        //     $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours))->subDay();;
+        // }
+        // else{
+        //     $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
+        // }
 
         $orders = $this->orders 
         ->where('pos', 0)

@@ -25,6 +25,7 @@ class TimeSlotController extends Controller
                 'resturant_time' => [
                     'from' => '00:00:00',
                     'hours' => '22',
+                    'branch_id' => null,
                 ],
                 'custom' => [],
             ];

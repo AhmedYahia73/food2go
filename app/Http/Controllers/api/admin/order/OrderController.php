@@ -14,6 +14,7 @@ use App\Models\Branch;
 use App\Models\Setting;
 use App\Models\LogOrder;
 use App\Models\User;
+use App\Models\TimeSittings;
 
 class OrderController extends Controller
 {
@@ -30,10 +31,6 @@ class OrderController extends Controller
         ->first();
         if (empty($settings)) {
             $setting = [
-                'resturant_time' => [
-                    'from' => '00:00:00',
-                    'hours' => '22',
-                ],
                 'custom' => [],
             ];
             $setting = json_encode($setting);
@@ -43,16 +40,24 @@ class OrderController extends Controller
                 'setting' => $setting
             ]);
         } 
-        $time_setting = json_decode($settings->setting);
-        $from = $time_setting->resturant_time->from;
-        $from = $request->date . ' ' . $from;
-        $start = Carbon::parse($from);
-        if ($start > date('H:i:s')) {
-            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours))->subDay();;
+        $time_sittings = $this->TimeSittings
+        ->get();
+        $from = $time_sittings->min('from');
+        $hours = $time_sittings->max('hours');
+        if (!empty($from)) {
+            $from = $request->date . ' ' . $from;
+            $start = Carbon::parse($from);
+            if ($start > date('H:i:s')) {
+                $end = Carbon::parse($from)->addHours($hours)->subDay();;
+            }
+            else{
+                $end = Carbon::parse($from)->addHours(intval($hours));
+            }
+        } else {
+            $start = Carbon::parse($request->date . ' 00:00:00');
+            $end = Carbon::parse($request->date . ' 23:59:59');
         }
-        else{
-            $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
-        }
+        
 
         $orders = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -824,12 +829,17 @@ class OrderController extends Controller
         //     ]);
         // }
         // $preparing_time = json_decode($preparing_time->setting);
+        $log_order = $this->log_order
+        ->with('admin')
+        ->where('order_id', $id)
+        ->get();
 
         return response()->json([
             'order' => $order,
             'deliveries' => $deliveries,
             'order_status' => $order_status,
-            'preparing_time' => $preparing_arr
+            'preparing_time' => $preparing_arr,
+            'log_order' => $log_order,
         ]);
     }
 
@@ -866,13 +876,13 @@ class OrderController extends Controller
                 'error' => 'order is not found'
             ], 400);
         }
-        // $this->log_order
-        // ->create([
-        //     'order_id' => $id,
-        //     'admin_id' => $request->user()->id,
-        //     'from_status' => $order->order_status,
-        //     'to_status' => $request->order_status,
-        // ]); 
+        $this->log_order
+        ->create([
+            'order_id' => $id,
+            'admin_id' => $request->user()->id,
+            'from_status' => $order->order_status,
+            'to_status' => $request->order_status,
+        ]); 
         if ($request->order_status == 'delivered' || $request->order_status == 'returned'
         || $request->order_status == 'faild_to_deliver'|| $request->order_status == 'refund'
         || $request->order_status == 'canceled') {
@@ -1038,32 +1048,38 @@ class OrderController extends Controller
             ],400);
         }
         // settings
-        $time_setting = $request->date;
         $settings = $this->settings
         ->where('name', 'time_setting')
         ->first();
         if (empty($settings)) {
             $setting = [
-                'resturant_time' => [
-                    'from' => '00:00:00',
-                    'hours' => '22',
-                ],
                 'custom' => [],
             ];
             $setting = json_encode($setting);
             $settings = $this->settings
             ->create([
-                'name' => 'time_slot',
+                'name' => 'time_setting',
                 'setting' => $setting
             ]);
         } 
-        $time_setting = json_decode($settings->setting);
-        $from = $time_setting->resturant_time->from;
-        $from = $request->date . ' ' . $from;
-        $date_to = $request->date_to . ' ' . $from;
-        $start = Carbon::parse($from);
-        $end = Carbon::parse($date_to)->addHours(intval($time_setting->resturant_time->hours));
-
+        $time_sittings = $this->TimeSittings
+        ->get();
+        $from = $time_sittings->min('from');
+        $hours = $time_sittings->max('hours');
+        if (!empty($from)) {
+            $from = $request->date . ' ' . $from;
+            $start = Carbon::parse($from);
+            if ($start > date('H:i:s')) {
+                $end = Carbon::parse($from)->addHours($hours)->subDay();;
+            }
+            else{
+                $end = Carbon::parse($from)->addHours(intval($hours));
+            }
+        } else {
+            $start = Carbon::parse($request->date . ' 00:00:00');
+            $end = Carbon::parse($request->date . ' 23:59:59');
+        }
+        
         $orders = $this->orders
         ->whereBetween('created_at', [$start, $end])
         ->where('pos', 0)
