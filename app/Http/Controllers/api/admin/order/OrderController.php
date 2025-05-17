@@ -45,7 +45,7 @@ class OrderController extends Controller
         $from = $time_sittings->min('from');
         $hours = $time_sittings->max('hours');
         if (!empty($from)) {
-            $from = $request->date . ' ' . $from;
+            $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
             if ($start > date('H:i:s')) {
                 $end = Carbon::parse($from)->addHours($hours)->subDay();;
@@ -54,8 +54,8 @@ class OrderController extends Controller
                 $end = Carbon::parse($from)->addHours(intval($hours));
             }
         } else {
-            $start = Carbon::parse($request->date . ' 00:00:00');
-            $end = Carbon::parse($request->date . ' 23:59:59');
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
         
 
