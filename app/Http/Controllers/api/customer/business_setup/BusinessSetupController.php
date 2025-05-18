@@ -90,6 +90,7 @@ class BusinessSetupController extends Controller
         $time_sitting = $this->time_sitting
         ->where('branch_id', $request->branch_id ?? null)
         ->first();
+        $today = Carbon::now()->format('l');
         if (empty($time_sitting)) {
             $open_flag = true;
         }
@@ -101,7 +102,6 @@ class BusinessSetupController extends Controller
             if (!empty($open_from)) {
                 $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
                 $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
-                $today = Carbon::now()->format('l');
                 $now = Carbon::now(); // Don't override this later
                 $open_flag = false;
                 $open_from = $open_from;
