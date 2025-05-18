@@ -95,6 +95,7 @@ class BusinessSetupController extends Controller
         }
         else{
             $resturant_time = $time_sitting;
+            $time_slot = json_decode($time_slot->setting);
             $days = $time_slot->custom;
             $open_from = $resturant_time->from;
             if (!empty($open_from)) {
