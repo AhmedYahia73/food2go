@@ -28,7 +28,7 @@ class CustomerRequest extends FormRequest
             'l_name' => ['required'],
             'email' => ['email', 'required', 'unique:users,email'],
             'phone' => ['required', 'unique:users,phone'],
-            'phone_2' => ['required', 'unique:users,phone_2'],
+            'phone_2' => ['unique:users,phone_2'],
             'password' => ['required'],
         ];
     }
