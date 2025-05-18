@@ -34,7 +34,7 @@ class TimeSlotController extends Controller
             ]);
         }
         $time_slot = $time_slot->setting;
-        $time_slot = json_decode($time_slot->setting);
+        $time_slot = json_decode($time_slot);
         $time_slot = $time_slot->custom;
         $time_setting = $this->time_setting
         ->get();
