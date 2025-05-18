@@ -100,7 +100,7 @@ class MakeOrderController extends Controller
         }
         if (!$open_flag) {
             return response()->json([
-                'error' => 'Resurant is closed'
+                'errors' => 'Resurant is closed'
             ], 403);
         }
         if ($request->payment_method_id == 1) {
