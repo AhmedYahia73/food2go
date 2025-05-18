@@ -42,6 +42,7 @@ class TimeSlotController extends Controller
         ->get();
         $branches = $this->branches
         ->where('status', 1)
+        ->whereNotIn('id', $time_setting->pluck('branch_id'))
         ->get();
 
         return response()->json([
