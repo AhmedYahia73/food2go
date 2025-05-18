@@ -42,7 +42,6 @@ class TimeSlotController extends Controller
         ->get();
         $branches = $this->branches
         ->where('status', 1)
-        ->whereNotIn('id', $time_setting->pluck('branch_id'))
         ->get();
 
         return response()->json([
@@ -116,6 +115,14 @@ class TimeSlotController extends Controller
         }
       
         $resturant_time = $request->resturant_time;
+        $time_setting = $this->time_setting
+        ->where('branch_id', $request->branch_id)
+        ->first();
+        if (!empty($time_setting)) {
+            return response()->json([
+                'errors' => 'branch is found'
+            ],400);
+        }
 
         $time_setting = $this->time_setting->create([
             'from' => $request->from,
@@ -151,6 +158,16 @@ class TimeSlotController extends Controller
             ],400);
         }
       
+        $time_setting = $this->time_setting
+        ->where('branch_id', $request->branch_id)
+        ->where('id', '!=', $id)
+        ->first();
+        if (!empty($time_setting)) {
+            return response()->json([
+                'errors' => 'branch is found'
+            ],400);
+        }
+
         $resturant_time = $request->resturant_time;
         $time_setting = $this->time_setting
         ->where('id', $id)
