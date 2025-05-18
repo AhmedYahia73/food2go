@@ -12,12 +12,13 @@ use App\Models\Deal;
 use App\Models\User;
 use App\Models\Setting;
 use App\Models\TimeSittings;
+use App\Models\LogOrder;
 
 class HomeController extends Controller
 {
     public function __construct(private Order $orders, private Product $products,
     private Deal $deals, private User $users, private Setting $settings
-    , private TimeSittings $TimeSittings){}
+    , private TimeSittings $TimeSittings, private LogOrder $log_order){}
 
     public function home(){
         // https://bcknd.food2go.online/admin/home
@@ -52,6 +53,9 @@ class HomeController extends Controller
         // else{
         //     $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
         // }
+        $this->log_order
+        ->whereDate('created_at', '>=', now()->subDays(14))
+        ->delete();
 
         $orders = $this->orders 
         ->where('pos', 0)
