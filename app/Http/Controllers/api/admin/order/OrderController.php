@@ -1057,6 +1057,7 @@ class OrderController extends Controller
         ->whereBetween('created_at', [$start, $end])
         ->where('pos', 0)
         ->where('branch_id', $request->branch_id)
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
         ->get();
         if ($request->type != 'all') {
             $orders = $orders->where('order_status', $request->type)->values();
