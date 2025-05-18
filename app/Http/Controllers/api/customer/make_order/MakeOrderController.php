@@ -56,6 +56,7 @@ class MakeOrderController extends Controller
                 'branch_id' => $branch_id,
             ]);
         }
+        // Time Slot
         $time_slot = $this->settings
         ->where('name', 'time_setting')
         ->orderByDesc('id')
@@ -103,6 +104,18 @@ class MakeOrderController extends Controller
                 'errors' => 'Resurant is closed'
             ], 403);
         }
+        // Check if has order at proccessing
+        $order = $this->order
+        ->where('order_status', 'processing')
+        ->where('user_id', $request->user()->id)
+        ->first();
+        if (!empty($order) && !$request->confirm_order) {
+            return response()->json([
+                'errors' => 'You has order at proccessing',
+                'data' => $order->order_details
+            ], 400);
+        }
+        // Make Order
         if ($request->payment_method_id == 1) {
             $payment_method_auto = $this->payment_method_auto
             ->where('payment_method_id', 1)
