@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Setting;
 use App\Models\TimeSittings;
+use App\Models\Branch;
 
 class TimeSlotController extends Controller
 {
     public function __construct(private Setting $settings,
-    private TimeSittings $time_setting){}
+    private TimeSittings $time_setting, private Branch $branches){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot
@@ -39,10 +40,14 @@ class TimeSlotController extends Controller
         $time_setting = $this->time_setting
         ->with('branch')
         ->get();
-        
+        $branches = $this->branches
+        ->where('status', 1)
+        ->get();
+
         return response()->json([
             'days' => $time_slot,
-            'time_setting' => $time_setting
+            'time_setting' => $time_setting,
+            'branches' => $branches,
         ]);
         
     }
