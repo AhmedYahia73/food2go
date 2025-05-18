@@ -1036,11 +1036,11 @@ class OrderController extends Controller
         // settings
         $time_sittings = $this->TimeSittings
         ->get();
-        $from = $time_sittings->min('from');
+        $from_time = $time_sittings->min('from');
         $hours = $time_sittings->max('hours');
         if (!empty($from)) {
-            $from = $request->date . ' ' . $from;
-            $date_to = $request->date_to . ' ' . $from;
+            $from = $request->date . ' ' . $from_time;
+            $date_to = $request->date_to . ' ' . $from_time;
             $start = Carbon::parse($from);
             if ($start > date('H:i:s')) {
                 $end = Carbon::parse($date_to)->addHours($hours)->subDay();
