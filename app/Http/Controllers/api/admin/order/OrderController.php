@@ -600,7 +600,7 @@ class OrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         if ($request->order_status == 'all') {
@@ -700,7 +700,7 @@ class OrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
 
@@ -850,7 +850,7 @@ class OrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
 
@@ -859,7 +859,7 @@ class OrderController extends Controller
         ->first();
         if (empty($order)) {
             return response()->json([
-                'error' => 'order is not found'
+                'errors' => 'order is not found'
             ], 400);
         }
         $this->log_order
@@ -895,13 +895,13 @@ class OrderController extends Controller
             $hasRequiredPermission = $hasAllPermission || $hasStatusPermission;
             if (!$hasAllPermission && !$hasBackStatus && $new_index < $old_index) {
                 return response()->json([
-                    'error' => "You can't back by status"
+                    'errors' => "You can't back by status"
                 ], 400);
             }
 
             if ($order->admin_id !== $user->id && !$hasRequiredPermission) {
                 return response()->json([
-                    'error' => "You can't change status"
+                    'errors' => "You can't change status"
                 ], 400);
             }
         }
@@ -920,7 +920,7 @@ class OrderController extends Controller
             ]);
             if ($validator->fails()) { // if Validate Make Error Return Message Error
                 return response()->json([
-                    'error' => $validator->errors(),
+                    'errors' => $validator->errors(),
                 ],400);
             }
             $order->update([
@@ -949,7 +949,7 @@ class OrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         $order = $this->orders
@@ -1005,7 +1005,7 @@ class OrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         $log_order = $this->log_order
@@ -1030,7 +1030,7 @@ class OrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         // settings
