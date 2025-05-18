@@ -34,7 +34,7 @@ class FinancialAccountingController extends Controller
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validation->errors(),
+                'errors' => $validation->errors(),
             ],400);
         }
         $financial = $this->financial

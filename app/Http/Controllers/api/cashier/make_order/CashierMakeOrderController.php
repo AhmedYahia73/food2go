@@ -134,7 +134,7 @@ class CashierMakeOrderController extends Controller
         // ]);
         // if ($validator->fails()) { // if Validate Make Error Return Message Error
         //     return response()->json([
-        //         'error' => $validator->errors(),
+        //         'errors' => $validator->errors(),
         //     ],400);
         // }
     
@@ -192,7 +192,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json(['message' => 'Printed successfully']);
     } catch (\Exception $e) {
-        return response()->json(['error' => 'Failed to print: ' . $e->getMessage()], 500);
+        return response()->json(['errors' => 'Failed to print: ' . $e->getMessage()], 500);
     }
     }
     
@@ -223,7 +223,7 @@ class CashierMakeOrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         $request->merge([  
@@ -256,7 +256,7 @@ class CashierMakeOrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
 
@@ -314,7 +314,7 @@ class CashierMakeOrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         $request->merge([  
@@ -383,7 +383,7 @@ class CashierMakeOrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         $request->merge([  
@@ -461,7 +461,7 @@ class CashierMakeOrderController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         $this->cafe_table

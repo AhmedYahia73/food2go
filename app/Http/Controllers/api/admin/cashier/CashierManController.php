@@ -51,7 +51,7 @@ class CashierManController extends Controller
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validation->errors(),
+                'errors' => $validation->errors(),
             ],400);
         }
         $cashier_men = $this->cashier_men
@@ -88,7 +88,7 @@ class CashierManController extends Controller
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validation->errors(),
+                'errors' => $validation->errors(),
             ],400);
         }
         $cashierRequest = $request->validated(); 
@@ -119,7 +119,7 @@ class CashierManController extends Controller
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validation->errors(),
+                'errors' => $validation->errors(),
             ],400);
         }
         $cashierRequest = $request->validated(); 

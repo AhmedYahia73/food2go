@@ -59,7 +59,7 @@ class CafeTablesController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                    'error' => $validator->errors(),
+                    'errors' => $validator->errors(),
             ],400);
         }
         $cafe_tables = $this->cafe_tables
@@ -82,7 +82,7 @@ class CafeTablesController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                    'error' => $validator->errors(),
+                    'errors' => $validator->errors(),
             ],400);
         }
         $cafe_tables = $this->cafe_tables

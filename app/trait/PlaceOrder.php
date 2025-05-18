@@ -53,7 +53,7 @@ trait PlaceOrder
                 return $order;
             }
         } catch (\Throwable $th) {
-            throw new HttpResponseException(response()->json(['error' => 'Payment processing failed'], 500));
+            throw new HttpResponseException(response()->json(['errors' => 'Payment processing failed'], 500));
         }
         // End Make Payment
 

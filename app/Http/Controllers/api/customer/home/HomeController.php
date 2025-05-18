@@ -402,7 +402,7 @@ class HomeController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
 
@@ -431,7 +431,7 @@ class HomeController extends Controller
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validator->errors(),
+                'errors' => $validator->errors(),
             ],400);
         }
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation

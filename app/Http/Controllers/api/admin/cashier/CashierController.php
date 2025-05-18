@@ -31,7 +31,7 @@ class CashierController extends Controller
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validation->errors(),
+                'errors' => $validation->errors(),
             ],400);
         }
         $cashier = $this->cashier
@@ -67,7 +67,7 @@ class CashierController extends Controller
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validation->errors(),
+                'errors' => $validation->errors(),
             ],400);
         }
         $cashierRequest = $validation->validated();
@@ -90,7 +90,7 @@ class CashierController extends Controller
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
-                'error' => $validation->errors(),
+                'errors' => $validation->errors(),
             ],400);
         }
         $cashierRequest = $validation->validated();
