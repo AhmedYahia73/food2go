@@ -56,6 +56,10 @@ class Order extends Model
     ];
     protected $appends = ['order_date', 'status_payment'];
 
+    public function getdateAttribute(){
+        return $this->created_at->format('H:i:s');
+    }
+
     public function getStatusPaymentAttribute(){
         if (isset($this->attributes['status']) && $this->attributes['status'] == 1) {
             return 'approved';
