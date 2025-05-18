@@ -10,16 +10,26 @@ use App\Models\Maintenance;
 use App\Models\CompanyInfo;
 use App\Models\Setting;
 use App\Models\TimeSittings;
+use App\Models\Address;
 
 class BusinessSetupController extends Controller
 {
     public function __construct(private Maintenance $maintenance,
     private CompanyInfo $company_info, private Setting $settings,
-    private TimeSittings $time_sitting){}
+    private TimeSittings $time_sitting, private Address $address){}
 
     public function business_setup(Request $request){
         // https://bcknd.food2go.online/api/business_setup
         // Maintenance status
+        if (!empty($request->address_id) && empty($request->branch_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id ?? null;
+            $request->merge([
+                'branch_id' => $branch_id,
+            ]);
+        }
         $maintenance = $this->maintenance
         ->orderByDesc('id')
         ->first();
