@@ -89,7 +89,7 @@ class MakeOrderController extends Controller
                 $open_flag = false;
                 $open_from = $open_from;
                 $open_to = $open_to; 
-                if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
+                if ($now->between($open_from, $open_to) && is_array($days) && !in_array($today, $days)) {
                     $open_flag = true;
                 }
             }
