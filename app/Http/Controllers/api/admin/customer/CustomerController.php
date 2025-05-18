@@ -20,6 +20,7 @@ class CustomerController extends Controller
         'l_name',
         'email',
         'phone',
+        'phone_2',
         'password',
         'status',
     ];
@@ -27,7 +28,8 @@ class CustomerController extends Controller
         'f_name',
         'l_name',
         'email',
-        'phone', 
+        'phone',
+        'phone_2',
         'status',
     ];
     use image;
@@ -76,7 +78,7 @@ class CustomerController extends Controller
     public function create(CustomerRequest $request) {
         // https://bcknd.food2go.online/admin/customer/add
         // Keys
-        // f_name, l_name, email, phone, password, status, image
+        // f_name, l_name, email, phone, password, status, image, phone_2
         $data = $request->only($this->customerRequest);
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'users/customers/image');
@@ -106,7 +108,7 @@ class CustomerController extends Controller
     public function modify(UpdateCustomerRequest $request, $id){
         // https://bcknd.food2go.online/admin/customer/update/2
         // Keys
-        // f_name, l_name, email, phone, password, status, image
+        // f_name, l_name, email, phone, password, status, image, phone_2
         $data = $request->only($this->customerUpdateRequest);
         $user = $this->customers
         ->where('id', $id)

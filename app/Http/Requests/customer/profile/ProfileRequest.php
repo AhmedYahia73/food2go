@@ -28,6 +28,7 @@ class ProfileRequest extends FormRequest
         return [
             'email' => ['email', Rule::unique('users')->ignore($userId)],
             'phone' => [Rule::unique('users')->ignore($userId)],
+            'phone_2' => [Rule::unique('users')->ignore($userId)],
         ];
     }
 

@@ -29,6 +29,7 @@ class ProfileController extends Controller
         $customer->l_name = $request->l_name ?? $customer->l_name;
         $customer->email = $request->email ?? $customer->email;
         $customer->phone = $request->phone ?? $customer->phone;
+        $customer->phone_2 = $request->phone_2 ?? $customer->phone_2;
         $customer->bio = $request->bio ?? $customer->bio;
         if ($request->password && !empty($request->password)) {
             $customer->password = $request->password;
