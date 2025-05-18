@@ -129,6 +129,10 @@ class Order extends Model
         return $this->belongsTo(Admin::class, 'admin_id');
     }
 
+    public function schedule(){
+        return $this->belongsTo(ScheduleSlot::class, 'sechedule_slot_id');
+    }
+
     public function details(){
         return $this->hasMany(OrderDetail::class, 'order_id');
     }

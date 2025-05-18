@@ -59,7 +59,8 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $pending = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -76,7 +77,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'pending')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $confirmed = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -93,7 +95,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'confirmed')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $processing = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -110,7 +113,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'processing')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $out_for_delivery = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -127,7 +131,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'out_for_delivery')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $delivered = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -144,7 +149,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'delivered')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $returned = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -161,7 +167,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'returned')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $faild_to_deliver = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -178,7 +185,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'faild_to_deliver')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $canceled = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -195,7 +203,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'canceled')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $scheduled = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -212,7 +221,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'scheduled')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $refund = $this->orders
         ->select('id', 'date', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -229,7 +239,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'refund')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
 
         $all_data = [
@@ -262,7 +273,8 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $pending = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
@@ -279,7 +291,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'pending')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $confirmed = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
@@ -296,7 +309,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'confirmed')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $processing = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
@@ -313,7 +327,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'processing')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $out_for_delivery = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
@@ -330,7 +345,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'out_for_delivery')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $delivered = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
@@ -347,7 +363,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'delivered')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $returned = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
@@ -364,7 +381,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'returned')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $faild_to_deliver = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
@@ -381,7 +399,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'faild_to_deliver')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $canceled = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
@@ -398,7 +417,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'canceled')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $scheduled = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
@@ -415,7 +435,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'scheduled')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         $refund = $this->orders
         ->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
@@ -432,7 +453,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'refund')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get(); 
         
         $deliveries = $this->deliveries
@@ -465,7 +487,8 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $pending = $this->orders
         ->where('pos', 0)
@@ -476,7 +499,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'pending')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $confirmed = $this->orders
         ->where('pos', 0)
@@ -487,7 +511,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'confirmed')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $processing = $this->orders
         ->where('pos', 0)
@@ -498,7 +523,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'processing')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $out_for_delivery = $this->orders
         ->where('pos', 0)
@@ -509,7 +535,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'out_for_delivery')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $delivered = $this->orders
         ->where('pos', 0)
@@ -520,7 +547,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'delivered')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $returned = $this->orders
         ->where('pos', 0)
@@ -531,7 +559,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'returned')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $faild_to_deliver = $this->orders
         ->where('pos', 0)
@@ -542,7 +571,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'faild_to_deliver')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $canceled = $this->orders
         ->where('pos', 0)
@@ -553,7 +583,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'canceled')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $scheduled = $this->orders
         ->where('pos', 0)
@@ -564,7 +595,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'scheduled')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
         $refund = $this->orders
         ->where('pos', 0)
@@ -575,7 +607,8 @@ class OrderController extends Controller
         })
         ->where('order_status', 'refund')
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->count();
 
         return response()->json([
@@ -617,7 +650,8 @@ class OrderController extends Controller
                 ->orWhereNull('status');
             })
             ->orderByDesc('id')
-            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+            'schedule', 'delivery'])
             ->get();
         } 
         else {
@@ -635,7 +669,8 @@ class OrderController extends Controller
             })
             ->where('order_status', $request->order_status)
             ->orderByDesc('id')
-            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+            'schedule', 'delivery'])
             ->get();
         }
 
@@ -715,7 +750,8 @@ class OrderController extends Controller
                 ->where('pos', 0)
         ->whereNull('captain_id')
                 ->where('status', '!=', 2)
-                ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+                ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+                'schedule', 'delivery'])
                 ->orderBy('created_at')
                 ->get();
             } else {
@@ -729,7 +765,8 @@ class OrderController extends Controller
         ->whereNull('captain_id')
                 ->where('status', '!=', 2)
                 ->where('order_status', $request->type)
-                ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+                ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+                'schedule', 'delivery'])
                 ->orderBy('created_at')
                 ->get();
             }
@@ -743,7 +780,8 @@ class OrderController extends Controller
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
         ->whereNull('captain_id')
-            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+            'schedule', 'delivery'])
             ->orderBy('created_at')
             ->get();
         }
@@ -1057,7 +1095,8 @@ class OrderController extends Controller
         ->whereBetween('created_at', [$start, $end])
         ->where('pos', 0)
         ->where('branch_id', $request->branch_id)
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method', 'delivery'])
+        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+        'schedule', 'delivery'])
         ->get();
         if ($request->type != 'all') {
             $orders = $orders->where('order_status', $request->type)->values();
