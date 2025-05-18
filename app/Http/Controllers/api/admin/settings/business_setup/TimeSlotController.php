@@ -87,7 +87,7 @@ class TimeSlotController extends Controller
         ]);
     }
 
-    public function add_times(Request $request, $id){
+    public function add_times(Request $request){
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add_times
         // from, hours,  branch_id, 
         $validator = Validator::make($request->all(), [
