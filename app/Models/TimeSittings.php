@@ -15,4 +15,7 @@ class TimeSittings extends Model
         'branch_id',
     ];
 
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
 }
