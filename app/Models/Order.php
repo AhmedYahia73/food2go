@@ -124,6 +124,10 @@ class Order extends Model
         return $this->belongsTo(Address::class, 'address_id');
     }
 
+    public function order_address(){
+        return $this->belongsTo(Address::class, 'address_id');
+    }
+
     public function admin(){
         return $this->belongsTo(Admin::class, 'admin_id');
     }

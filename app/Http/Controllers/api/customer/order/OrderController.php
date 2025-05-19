@@ -23,9 +23,9 @@ class OrderController extends Controller
         ->with('delivery', 'payment_method')
         ->get()
         ->map(function($item){
-            $item->delivery_price = $item?->address?->zone?->price ?? null;
+            $item->delivery_price = $item?->order_address?->zone?->price ?? null;
             $item->branch_name = $item?->branch?->name ?? null;
-            $item->address_name = $item?->address?->address ?? null;
+            $item->address_name = $item?->order_address?->address ?? null;
             return $item;
         });
         $cancel_time = $this->settings
@@ -48,9 +48,9 @@ class OrderController extends Controller
         ->with('payment_method')
         ->get()
         ->map(function($item){
-            $item->delivery_price = $item?->address?->zone?->price ?? null;
+            $item->delivery_price = $item?->order_address?->zone?->price ?? null;
             $item->branch_name = $item?->branch?->name ?? null;
-            $item->address_name = $item?->address?->address ?? null;
+            $item->address_name = $item?->order_address?->address ?? null;
             return $item;
         });
 
