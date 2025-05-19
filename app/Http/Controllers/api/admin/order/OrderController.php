@@ -921,7 +921,7 @@ class OrderController extends Controller
             ]);
         }
         else{
-            $arr =  ['pending','confirmed','processing','out_for_delivery','delivered','returned'
+            $arr =  ['pending','processing','confirmed','out_for_delivery','delivered','returned'
             ,'faild_to_deliver','canceled','scheduled','refund'];
             $new_index = array_search($request->order_status, $arr);
             $old_index = array_search($order->order_status, $arr);
