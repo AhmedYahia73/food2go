@@ -113,7 +113,7 @@ class MakeOrderController extends Controller
             return response()->json([
                 'errors' => 'You has order at proccessing',
                 'data' => $order->order_details
-            ], 407);
+            ], 400);
         }
         // Make Order
         if ($request->payment_method_id == 1) {
