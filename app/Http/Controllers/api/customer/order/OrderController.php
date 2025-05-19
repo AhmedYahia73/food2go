@@ -21,7 +21,11 @@ class OrderController extends Controller
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'scheduled'])
         ->with('delivery', 'payment_method')
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->delivery_price = $item?->address?->zone?->price ?? null;
+            return $item;
+        });
         $cancel_time = $this->settings
         ->where('name', 'time_cancel')
         ->orderByDesc('id')
@@ -40,7 +44,11 @@ class OrderController extends Controller
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['delivered', 'faild_to_deliver', 'canceled'])
         ->with('payment_method')
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->delivery_price = $item?->address?->zone?->price ?? null;
+            return $item;
+        });
 
         return response()->json([
             'orders' => $orders
