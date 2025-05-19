@@ -106,7 +106,7 @@ class MakeOrderController extends Controller
         }
         // Check if has order at proccessing
         $order = $this->order
-        ->where('order_status', 'processing')
+        ->whereIn('order_status', ['pending', 'processing', 'confirmed', 'out_for_delivery', 'scheduled'])
         ->where('user_id', $request->user()->id)
         ->first();
         if (!empty($order) && !$request->confirm_order) {
