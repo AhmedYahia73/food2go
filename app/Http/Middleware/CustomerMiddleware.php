@@ -15,7 +15,7 @@ class CustomerMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->role == 'customer' && auth()->user()->status == 1) {
+        if (auth()->user()->role == 'customer') {
             return $next($request);
         }
         return response()->json([

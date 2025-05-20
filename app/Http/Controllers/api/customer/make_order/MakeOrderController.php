@@ -47,6 +47,11 @@ class MakeOrderController extends Controller
         // deal[{deal_id, count}], c, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count, note}], sechedule_slot_id
+        if ($request->user()->status == 0) {
+            return response()->json([
+                'errors' => "You are blocked you can't make order"
+            ], 400);
+        }
         if (!empty($request->address_id) && empty($request->branch_id)) {
             $address = $this->address
             ->where('id', $request->address_id)
