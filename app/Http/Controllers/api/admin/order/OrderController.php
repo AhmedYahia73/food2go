@@ -900,13 +900,6 @@ class OrderController extends Controller
                 'errors' => 'order is not found'
             ], 400);
         }
-        $this->log_order
-        ->create([
-            'order_id' => $id,
-            'admin_id' => $request->user()->id,
-            'from_status' => $order->order_status,
-            'to_status' => $request->order_status,
-        ]); 
         if ($request->order_status == 'delivered' || $request->order_status == 'returned'
         || $request->order_status == 'faild_to_deliver'|| $request->order_status == 'refund'
         || $request->order_status == 'canceled') {
@@ -971,6 +964,13 @@ class OrderController extends Controller
                 'order_status' => $request->order_status, 
             ]);
         }
+        $this->log_order
+        ->create([
+            'order_id' => $id,
+            'admin_id' => $request->user()->id,
+            'from_status' => $order->order_status,
+            'to_status' => $request->order_status,
+        ]); 
 
         return response()->json([
             'order_status' => $request->order_status

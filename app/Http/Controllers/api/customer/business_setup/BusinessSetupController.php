@@ -21,7 +21,6 @@ class BusinessSetupController extends Controller
     public function business_setup(Request $request){
         // https://bcknd.food2go.online/api/business_setup
         // Maintenance status
-        $branch_id = $request->branch_id;
         if (!empty($request->address_id) && empty($request->branch_id)) {
             $address = $this->address
             ->where('id', $request->address_id)
@@ -99,7 +98,7 @@ class BusinessSetupController extends Controller
             ]);
         }
         $time_sitting = $this->time_sitting
-        ->where('branch_id', $branch_id ?? null)
+        ->where('branch_id', $request->branch_id ?? null)
         ->first();
         $today = Carbon::now()->format('l');
         if (empty($time_sitting)) {
