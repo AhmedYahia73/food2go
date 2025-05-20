@@ -895,6 +895,7 @@ class OrderController extends Controller
         $order = $this->orders
         ->where('id', $id)
         ->first();
+        $old_status = $order->order_status;
         if (empty($order)) {
             return response()->json([
                 'errors' => 'order is not found'
@@ -968,7 +969,7 @@ class OrderController extends Controller
         ->create([
             'order_id' => $id,
             'admin_id' => $request->user()->id,
-            'from_status' => $order->order_status,
+            'from_status' => $old_status,
             'to_status' => $request->order_status,
         ]); 
 
