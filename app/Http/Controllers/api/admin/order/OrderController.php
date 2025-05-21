@@ -812,9 +812,9 @@ class OrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
-        'admin_cancel_reason')
+        'admin_cancel_reason', 'sechedule_slot_id')
         ->with(['user.orders' => function($query){
-            $query->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+            $query->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id',
