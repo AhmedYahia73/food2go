@@ -22,6 +22,7 @@ class Address extends Model
         'type',
         'map',
         'customer_id',
+        'city_id',
     ];
 
     public function zone(){

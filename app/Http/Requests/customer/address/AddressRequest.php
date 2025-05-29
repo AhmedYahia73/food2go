@@ -24,6 +24,7 @@ class AddressRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'city_id' => ['required', 'exists:cities,id'],
             'zone_id' => ['required', 'exists:zones,id'],
             'address' => ['required'],
         ];

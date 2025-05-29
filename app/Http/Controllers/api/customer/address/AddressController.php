@@ -10,11 +10,12 @@ use App\Models\Address;
 use App\Models\Zone;
 use App\Models\User;
 use App\Models\Branch;
+use App\Models\City;
 
 class AddressController extends Controller
 {
     public function __construct(private Address $address, private Zone $zones, 
-    private User $user, private Branch $branch){}
+    private User $user, private Branch $branch, private City $city){}
     protected $AddressRequest = [
         'zone_id',
         'address',
@@ -25,6 +26,7 @@ class AddressController extends Controller
         'additional_data',
         'type',
         'map',
+        'city_id',
     ];
 
     public function view(Request $request){
@@ -37,18 +39,22 @@ class AddressController extends Controller
         $branches = $this->branch
         ->where('status', 1)
         ->get();
+        $cities = $this->city
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'addresses' => $addresses['address'],
             'zones' => $zones,
             'branches' => $branches,
+            'cities' => $cities,
         ]);
     }
 
     public function add(AddressRequest $request){
         // https://bcknd.food2go.online/customer/address/add
         // Keys
-        // zone_id, address, street, building_num, floor_num, apartment, additional_data, type
+        // zone_id, address, street, building_num, floor_num, apartment, additional_data, type, city_id
         $address_request = $request->only($this->AddressRequest);
         $address = $this->address
         ->create($address_request);
@@ -80,6 +86,7 @@ class AddressController extends Controller
         $address->additional_data = $request->additional_data ?? $address->additional_data;
         $address->type = $request->type ?? $address->type;
         $address->map = $request->map ?? $address->map;
+        $address->city_id = $request->city_id ?? $address->city_id;
         $address->save();
 
         return response()->json([
