@@ -201,10 +201,9 @@ class MakeOrderController extends Controller
             //this below data used to get the last order created by the customer and check if its exists to 
             // $todayDate = Carbon::now();
             // $datas = Order::where('user_id',Auth::user()->id)->whereDate('created_at',$todayDate)->orderBy('created_at','desc')->first();
-            $status = $data['success'];
+            $status = $data['success']; 
             // $pending = $data['pending'];
-
-            if ($status == "true") {
+            if ($status == "true") { 
                 //here we checked that the success payment is true and we updated the data base and empty the cart and redirct the customer to thankyou page
                 $order = $this->order
                 ->where('transaction_id', $data['order'])
