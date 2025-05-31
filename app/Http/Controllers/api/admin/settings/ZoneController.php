@@ -49,6 +49,21 @@ class ZoneController extends Controller
         ->where('id', $id)
         ->with(['city', 'branch'])
         ->first();
+        $translations = $this->translations
+        ->where('status', 1)
+        ->get();
+        $zone_names = [];
+        foreach ($translations as $item) {
+             $zone_name = $this->translation_tbl
+             ->where('locale', $item->name)
+             ->where('key', $zones->zone)
+             ->first();
+            $zone_names[] = [
+                'tranlation_id' => $item->id,
+                'tranlation_name' => $item->zone,
+                'zone_name' => $zone_name->value ?? null,
+            ];
+        }
 
         return response()->json([
             'zones' => $zones,
