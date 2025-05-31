@@ -134,9 +134,11 @@ class AddonController extends Controller
 
     public function delete($id){
         // https://bcknd.food2go.online/admin/addons/delete/{id}
-        $this->addons
+        $addon = $this->addons
         ->where('id', $id)
-        ->delete();
+        ->first();
+        $addon->translations()->delete(); 
+        $addon->delete();
 
         return response()->json([
             'success' => 'You delete data success',

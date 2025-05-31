@@ -31,11 +31,22 @@ class AddressController extends Controller
 
     public function view(Request $request){
         // https://bcknd.food2go.online/customer/address
+        $local = $request->local ?? 'en';
         $addresses = $this->user
         ->where('id', $request->user()->id)
         ->with('address.zone')
         ->first()->toArray(); 
-        $zones = $this->zones->get();
+        $zones = $this->zones
+        ->where('status', 1)
+        ->get()
+        ->map(function($item) use($local){
+            return [
+                'zone' => $item->translations->where('key', $item->zone)
+                ->where('locale', $local)->first()?->value ?? $item->zone,
+                'price' => $item->price,
+                'status' => $item->status,
+            ];
+        });
         $branches = $this->branch
         ->where('status', 1)
         ->get();

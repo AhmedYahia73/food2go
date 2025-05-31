@@ -24,4 +24,17 @@ class Zone extends Model
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
+
+    public function scopeWithLocale($query, $locale = null)
+    {
+        $locale = $locale ?: app()->getLocale();
+        return $query->with(['translations' => function ($query) use ($locale) {
+            $query->where('locale', $locale);
+        }]);
+    }
 }

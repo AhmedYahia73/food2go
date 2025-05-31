@@ -27,7 +27,10 @@ class ZoneRequest extends FormRequest
             'city_id' => ['required', 'exists:cities,id'],
             'branch_id' => ['exists:branches,id', 'nullable'],
             'price' => ['required', 'numeric'],
-            'zone' => ['required']
+            'zone_names' => ['required', 'array'],
+            'zone_names.*.tranlation_name' => ['required'],
+            'zone_names.*.zone_name' => ['required'],
+            'zone_names.*.tranlation_id' => ['required'],
         ];
     }
 
