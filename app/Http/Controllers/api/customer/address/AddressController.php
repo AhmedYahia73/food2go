@@ -45,6 +45,8 @@ class AddressController extends Controller
                 ->where('locale', $local)->first()?->value ?? $item->zone,
                 'price' => $item->price,
                 'status' => $item->status,
+                'city_id' => $item->city_id,
+                'branch_id' => $item->branch_id,
             ];
         });
         $branches = $this->branch
