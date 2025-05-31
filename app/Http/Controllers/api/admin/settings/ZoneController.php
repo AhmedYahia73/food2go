@@ -67,6 +67,7 @@ class ZoneController extends Controller
 
         return response()->json([
             'zones' => $zones,
+            'zone_names' => $zone_names
         ]);
     }
 
