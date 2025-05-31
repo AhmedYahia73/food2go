@@ -162,9 +162,9 @@ class MakeOrderController extends Controller
         $payment_method_auto = $this->payment_method_auto
         ->where('payment_method_id', 1)
         ->first();
+        
         //this call back function its return the data from paymob and we show the full response and we checked if hmac is correct means successfull payment
         $data = $request->all();
-        $appUrl = env('Mobile_URL');
         ksort($data);
         $hmac = $data['hmac'];
         $array = [
@@ -205,7 +205,6 @@ class MakeOrderController extends Controller
             // $pending = $data['pending'];
 
             if ($status == "true") {
-                
                 //here we checked that the success payment is true and we updated the data base and empty the cart and redirct the customer to thankyou page
                 $order = $this->order
                 ->where('transaction_id', $data['order'])
@@ -221,16 +220,7 @@ class MakeOrderController extends Controller
                 return response()->json([
                     'link' => route('customer.callback_success')
                 ]);
-            //    return view('Paymob.Paymob');
-            //    return redirect($appUrl . '://callback_success');
-            //    return redirect()->away($redirectUrl . '?' . http_build_query([
-            //    'success' => true,
-            //    'payment_id' => $payment_id,
-            //    'total_amount' => $totalAmount,
-            //    "alert('payment Success')"
-            //    ]));
-               
-            } 
+            }
             else {        
                 $order = $this->order
                 ->where('transaction_id', $data['order'])
@@ -249,6 +239,10 @@ class MakeOrderController extends Controller
                 'link' => route('customer.callback_faild')
             ]);
         }
+             
+        return response()->json([
+            'success' => 'You payment success'
+        ]);
     }
 
     public function callback_success(){
