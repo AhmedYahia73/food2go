@@ -60,7 +60,7 @@ class ZoneController extends Controller
              ->first();
             $zone_names[] = [
                 'tranlation_id' => $item->id,
-                'tranlation_name' => $item->zone,
+                'tranlation_name' => $item->name,
                 'zone_name' => $zone_name->value ?? null,
             ];
         }
