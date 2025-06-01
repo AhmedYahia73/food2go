@@ -216,9 +216,12 @@ class MakeOrderController extends Controller
                 ->first();
                 $user->points += $order->points;
                 $user->save();
-                return response()->json([
-                    'link' => route('customer.callback_success')
-                ]);
+                $totalAmount = $data['amount_cents'];
+                $message = 'Your payment is being processed. Please wait...';
+                $redirectUrl = env('WEB_LINK') . '/orders/order_traking/' . $order->id;
+                $timer = 3; // 3  seconds
+
+               return  view('paymob.checkout', compact('totalAmount','message','redirectUrl','timer'));
             }
             else {        
                 $order = $this->order
@@ -227,16 +230,12 @@ class MakeOrderController extends Controller
                 $order->update([
                     'payment_status' => 'faild'
                 ]); 
-                return response()->json([
-                    'link' => route('customer.callback_faild')
-                ]);
+               return  view('paymob.FaildPayment');
             //    return redirect($appUrl . '://callback_faild');
             }
         }
         else {
-            return response()->json([
-                'link' => route('customer.callback_faild')
-            ]);
+               return  view('paymob.FaildPayment');
         }
              
         return response()->json([

@@ -94,6 +94,9 @@
             // Displaying the error message in the HTML
             document.getElementById('failure-message').textContent = response.error;
         });
+        setTimeout(()=>{
+            window.close();
+        }, 3000);
     </script>
 </body>
 </html>

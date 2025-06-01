@@ -22,7 +22,7 @@ class ProfileController extends Controller
     public function update_profile(ProfileRequest $request){
         // https://bcknd.food2go.online/customer/profile/update
         // Keys
-        // f_name, l_name, email, phone, bio, address => key = value
+        // f_name, l_name, email, phone, bio
         // password, image, phone_2
         $customer = $request->user();
         $customer->f_name = $request->f_name ?? $customer->f_name;
