@@ -221,7 +221,7 @@ class MakeOrderController extends Controller
                 $redirectUrl = env('WEB_LINK') . '/orders/order_traking/' . $order->id;
                 $timer = 3; // 3  seconds
 
-               return  view('paymob.checkout', compact('totalAmount','message','redirectUrl','timer'));
+               return  view('Paymob.checkout', compact('totalAmount','message','redirectUrl','timer'));
             }
             else {        
                 $order = $this->order
@@ -230,12 +230,12 @@ class MakeOrderController extends Controller
                 $order->update([
                     'payment_status' => 'faild'
                 ]); 
-               return  view('paymob.FaildPayment');
+               return  view('Paymob.FaildPayment');
             //    return redirect($appUrl . '://callback_faild');
             }
         }
         else {
-               return  view('paymob.FaildPayment');
+               return  view('Paymob.FaildPayment');
         }
              
         return response()->json([
