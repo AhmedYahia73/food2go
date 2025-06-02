@@ -1065,7 +1065,7 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'date_to' => 'required|date',
-            'branch_id' => 'required|exists:branches,id',
+            'branch_id' => 'exists:branches,id',
             'type' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -1102,6 +1102,9 @@ class OrderController extends Controller
         ->get();
         if ($request->type != 'all') {
             $orders = $orders->where('order_status', $request->type)->values();
+        }
+        if ($request->branch_id) {
+            $orders = $orders->where('branch_id', $request->branch_id)->values();
         }
 
         return response()->json([
