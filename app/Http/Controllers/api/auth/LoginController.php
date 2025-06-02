@@ -182,7 +182,7 @@ class LoginController extends Controller
                 'user' => $user,
                 'token' => $user->token,
                 'addresses' => $addresses,
-                'zones' => $zones,
+                'zones' => $zones, 
             ], 200);
         }
         else { 

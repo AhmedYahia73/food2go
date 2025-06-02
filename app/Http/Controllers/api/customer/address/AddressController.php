@@ -41,6 +41,7 @@ class AddressController extends Controller
         ->get()
         ->map(function($item) use($local){
             return [
+                'id' => $item->id,
                 'zone' => $item->translations->where('key', $item->zone)
                 ->where('locale', $local)->first()?->value ?? $item->zone,
                 'price' => $item->price,

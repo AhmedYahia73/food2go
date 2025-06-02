@@ -119,8 +119,8 @@
 <body>
     <div class="message-box">
         <div class="success-container">
-            <img src="https://scontent-lcy1-1.xx.fbcdn.net/v/t1.6435-9/31301640_2114242505489348_3921532491046846464_n.png?_nc_cat=104&ccb=1-3&_nc_sid=973b4a&_nc_ohc=pfOalMq8BzUAX-k-rhY&_nc_ht=scontent-lcy1-1.xx&oh=3af014dd12fa6e3d1816a3425a80e516&oe=609BE04A"
-                alt="Wego Stores Logo">
+            <img src="https://images.app.goo.gl/pfyGA1sPmRpcbGMq7"
+                alt="Paymob Logo">
 
             <h3><i>Paymob</i></h3>
             <hr>
