@@ -162,6 +162,7 @@ class BranchController extends Controller
             $this->deleteImage($branch->cover_image);
         }
         $branch->update($branchRequest);
+        $branch->translations()->delete();
         foreach ($request->branch_names as $item) {
             if (!empty($item['branch_name'])) {
                 $branch->translations()->create([
