@@ -59,6 +59,7 @@ class HomeController extends Controller
         ->orderBy('priority')
         ->withLocale($locale)
         ->where('category_id', null)
+        ->where('status', 1)
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
@@ -252,6 +253,7 @@ class HomeController extends Controller
             $query->withLocale($locale);
         }])
         ->withLocale($locale)
+        ->where('status', 1)
         ->where('category_id', null)
         ->get()
         ->filter(function($item) use($category_off){

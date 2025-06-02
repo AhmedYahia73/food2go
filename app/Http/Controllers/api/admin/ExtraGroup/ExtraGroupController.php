@@ -31,31 +31,7 @@ class ExtraGroupController extends Controller
         return response()->json([
             'extra_group' => $extra_group
         ]);
-    }
-
-    public function status($id, Request $request){
-        // https://bcknd.food2go.online/admin/extra_group/status/{id}
-        // Key
-        // status
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|boolean',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-
-        $this->extra_group
-        ->where('id', $id)
-        ->update([
-            'status' => $request->status,
-        ]);
-
-        return response()->json([
-            'status' => $request->status ? 'approve' : 'banned'
-        ]);
-    }
+    } 
 
     public function create(Request $request){
         // https://bcknd.food2go.online/admin/extra_group/add
