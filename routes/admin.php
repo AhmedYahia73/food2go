@@ -48,6 +48,8 @@ use App\Http\Controllers\api\admin\pos\captain_order\CaptainOrderController;
 
 use App\Http\Controllers\api\admin\payments\PaymentController;
 
+use App\Http\Controllers\api\admin\Group\GroupController;
+
 use App\Http\Controllers\api\admin\coupon\CouponController;
 use App\Http\Controllers\api\admin\coupon\CreateCouponController;
 
@@ -74,6 +76,16 @@ use App\Http\Controllers\api\admin\settings\business_setup\OrderSettingControlle
 use App\Http\Controllers\api\admin\settings\business_setup\OrderNotificationController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
+    Route::controller(GroupController::class)
+    ->prefix('group')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'group');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
     Route::controller(OrderController::class)
     ->prefix('order')->group(function(){
         Route::get('/', 'orders');
