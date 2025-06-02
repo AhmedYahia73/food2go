@@ -30,6 +30,19 @@ class Branch extends Authenticatable
     ];
     protected $appends = ['role', 'image_link', 'cover_image_link', 'map'];
 
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
+
+    public function scopeWithLocale($query, $locale = null)
+    {
+        $locale = $locale ?: app()->getLocale();
+        return $query->with(['translations' => function ($query) use ($locale) {
+            $query->where('locale', $locale);
+        }]);
+    }
+
     public function getMapAttribute(){
         return "https://www.google.com/maps?q={$this->attributes['latitude']},{$this->attributes['longitude']}";
     }

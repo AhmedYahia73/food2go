@@ -26,7 +26,6 @@ class UpdateBranchRequest extends FormRequest
     {
         $userId = $this->route('id');
         return [
-            'name' => ['required'],
             'address' => ['required'],          
             'email' => ['email', 'required', Rule::unique('branches')->ignore($userId)],
             'phone' => ['required', Rule::unique('branches')->ignore($userId)],
@@ -36,6 +35,9 @@ class UpdateBranchRequest extends FormRequest
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
             'coverage' => ['required'],
+            'branch_names.*.tranlation_name' => ['required'],
+            'branch_names.*.branch_name' => ['required'],
+            'branch_names.*.tranlation_id' => ['required'],
         ];
     }
 

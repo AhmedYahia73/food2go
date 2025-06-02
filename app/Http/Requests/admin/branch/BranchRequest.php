@@ -24,7 +24,6 @@ class BranchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required'],
             'address' => ['required'],
             'email' => ['required', 'email', 'unique:branches'],
             'phone' => ['required', 'unique:branches'],
@@ -34,6 +33,9 @@ class BranchRequest extends FormRequest
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
             'coverage' => ['required'],
+            'branch_names.*.tranlation_name' => ['required'],
+            'branch_names.*.branch_name' => ['required'],
+            'branch_names.*.tranlation_id' => ['required'],
         ];
     }
 

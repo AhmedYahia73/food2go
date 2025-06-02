@@ -53,9 +53,23 @@ class BranchController extends Controller
         ->where('id', $id)
         ->with('city')
         ->first();
+        $translations = $branch->translations;
+        $branch_names = [];
+        foreach ($translations as $item) {
+            $branch_name = $item
+            ->where('locale', $item->name)
+            ->where('key', $category->name)
+            ->first();
+           $branch_names[] = [
+               'tranlation_id' => $item->id,
+               'tranlation_name' => $item->name,
+               'branch_name' => $branch_name->value ?? null,
+           ];
+        }
 
         return response()->json([
             'branch' => $branch,
+            'branch_names' => $branch_names,
         ]);
     }
 
@@ -92,10 +106,13 @@ class BranchController extends Controller
     public function create(BranchRequest $request){
         // https://bcknd.food2go.online/admin/branch/add
         // Keys
-        // name, address, email, phone, password, food_preparion_time, latitude, longitude
+        //  address, email, phone, password, food_preparion_time, latitude, longitude
         // coverage, status, image, cover_image, city_id
+        // branch_names[tranlation_name, branch_name, tranlation_id]
   
         $branchRequest = $request->only($this->branchRequest);
+        $default = $request->branch_names[0]['branch_name'];
+        $branchRequest['name'] = $default;
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/branch/image');
             $branchRequest['image'] = $imag_path; 
@@ -104,7 +121,17 @@ class BranchController extends Controller
             $imag_path = $this->upload($request, 'cover_image', 'users/branch/cover_image');
             $branchRequest['cover_image'] = $imag_path; 
         }
-        $this->branches->create($branchRequest);
+        $branch = $this->branches->create($branchRequest);
+
+        foreach ($request->branch_names as $item) {
+            if (!empty($item['branch_name'])) {
+                $branch->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default,
+                    'value' => $item['branch_name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -116,8 +143,11 @@ class BranchController extends Controller
         // Keys
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
         // coverage, status, image, cover_image, city_id
+        // branch_names[tranlation_name, branch_name, tranlation_id]
 
         $branchRequest = $request->only($this->branchRequest);
+        $default = $request->branch_names[0]['branch_name'];
+        $branchRequest['name'] = $default;
         $branch = $this->branches
         ->where('id', $id)
         ->first();
@@ -132,6 +162,15 @@ class BranchController extends Controller
             $this->deleteImage($branch->cover_image);
         }
         $branch->update($branchRequest);
+        foreach ($request->branch_names as $item) {
+            if (!empty($item['branch_name'])) {
+                $branch->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default,
+                    'value' => $item['branch_name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => 'You update data success'
