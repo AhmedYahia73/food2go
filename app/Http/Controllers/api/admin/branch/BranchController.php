@@ -58,7 +58,7 @@ class BranchController extends Controller
         foreach ($translations as $item) {
             $branch_name = $item
             ->where('locale', $item->name)
-            ->where('key', $category->name)
+            ->where('key', $branch->name)
             ->first();
            $branch_names[] = [
                'tranlation_id' => $item->id,
