@@ -35,7 +35,7 @@ class UpdateBranchRequest extends FormRequest
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
             'coverage' => ['required'],
-            'branch_names' => ['required'],
+            'branch_names' => ['required', 'array'],
             'branch_names.*.tranlation_name' => ['required'],
             'branch_names.*.branch_name' => ['required'],
             'branch_names.*.tranlation_id' => ['required'],
