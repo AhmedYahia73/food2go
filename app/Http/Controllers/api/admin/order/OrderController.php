@@ -822,7 +822,7 @@ class OrderController extends Controller
         }, 'branch', 'delivery', 'payment_method', 'address.zone', 'admin:id,name,email,phone,image', 
         'schedule'])
         ->find($id);
-        $order_details = $order->order_details;
+        $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
             $item->product->map(function($element) use($item){
                 $total = $item->variations->pluck('options')
