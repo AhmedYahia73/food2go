@@ -824,12 +824,11 @@ class OrderController extends Controller
         ->find($id);
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
-            $item->product->map(function($element) use($item){
+            foreach ($item->product as $element) {
                 $total = $item->variations->pluck('options')
                 ->where('product_id', $element->product->id)->sum('price');
                 $element->product->price += $total;
-                return $element;
-            });
+            }
         }
         $order->user->count_orders = count($order->user->orders);
         if (!empty($order->branch)) {
