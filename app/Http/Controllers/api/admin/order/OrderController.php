@@ -825,11 +825,12 @@ class OrderController extends Controller
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
             foreach ($item->product as $element) {
-                $total = collect($item->variations)->pluck('options')
+                $total = collect($item->variations)->pluck('options')->flatten(1)
                 ->where('product_id', $element->product->id)->sum('price');
                 $element->product->price += $total;
             }
         }
+        $order->order_details = $order_details;
         $order->user->count_orders = count($order->user->orders);
         if (!empty($order->branch)) {
             $order->branch->count_orders = count($order->branch->orders);
