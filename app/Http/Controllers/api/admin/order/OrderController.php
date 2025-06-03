@@ -1078,7 +1078,7 @@ class OrderController extends Controller
         ->get();
         $from_time = $time_sittings->min('from');
         $hours = $time_sittings->max('hours');
-        if (!empty($from)) {
+        if (!empty($from_time)) {
             $from = $request->date . ' ' . $from_time;
             $date_to = $request->date_to . ' ' . $from_time;
             $start = Carbon::parse($from);
@@ -1096,7 +1096,6 @@ class OrderController extends Controller
         $orders = $this->orders
         ->whereBetween('created_at', [$start, $end])
         ->where('pos', 0)
-        ->where('branch_id', $request->branch_id)
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->get();
