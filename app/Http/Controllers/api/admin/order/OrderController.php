@@ -825,7 +825,7 @@ class OrderController extends Controller
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
             foreach ($item->product as $element) {
-                $total = $item->variations->pluck('options')
+                $total = collect($item->variations)->pluck('options')
                 ->where('product_id', $element->product->id)->sum('price');
                 $element->product->price += $total;
             }
