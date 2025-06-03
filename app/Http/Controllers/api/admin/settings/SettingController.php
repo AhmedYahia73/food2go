@@ -362,12 +362,12 @@ class SettingController extends Controller
 
     public function cancelation_notification(Request $request){
         // https://bcknd.food2go.online/admin/settings/cancelation_notification
-        $notification_sound = $this->settings
+        $re_notification = $this->settings
         ->where('name', 'repeated')
         ->orderByDesc('id')
         ->first(); 
-        if (empty($notification_sound)) { 
-            $notification_sound = $this->settings
+        if (empty($re_notification)) { 
+            $re_notification = $this->settings
             ->create([
                 'name' => 'repeated',
                 'setting' => 1
@@ -375,7 +375,7 @@ class SettingController extends Controller
         }
 
         return response()->json([
-            'repeated_notification' => $notification_soun->setting
+            'repeated_notification' => $re_notification->setting
         ]);
     }
 
