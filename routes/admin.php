@@ -545,6 +545,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             
             Route::get('/notification_sound', 'notification_sound')->middleware('can:view_notification_sound');
             Route::post('/notification_sound_update', 'notification_sound_update')->middleware('can:edit_notification_sound');
+
+            Route::get('/cancelation_notification', 'cancelation_notification');
+            Route::put('/update_cancelation_notification', 'update_cancelation_notification');
         });
     });
 });

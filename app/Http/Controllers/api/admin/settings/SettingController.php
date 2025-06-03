@@ -359,4 +359,51 @@ class SettingController extends Controller
             'notification_sound' => $notification_sound
         ]);
     }
+
+    public function cancelation_notification(Request $request){
+        // https://bcknd.food2go.online/admin/settings/cancelation_notification
+        $notification_sound = $this->settings
+        ->where('name', 'repeated')
+        ->orderByDesc('id')
+        ->first(); 
+
+        return response()->json([
+            'notification_sound' => $notification_sound
+        ]);
+    }
+
+    public function update_cancelation_notification(Request $request){
+        // https://bcknd.food2go.online/admin/settings/update_cancelation_notification
+        // Keys
+        // repeated
+        $validator = Validator::make($request->all(), [
+            'repeated' => 'required|boolean', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $notification_sound = $this->settings
+        ->where('name', 'repeated')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($notification_sound)) { 
+            $notification_sound = $this->settings
+            ->create([
+                'name' => 'repeated',
+                'setting' => $request->repeated
+            ]);
+        }
+        else{ 
+            $notification_sound
+            ->update([
+                'setting' => $request->repeated
+            ]);
+        } 
+
+        return response()->json([
+            'success' => $request->repeated ? 'active' : 'banned'
+        ]);
+    }
 }

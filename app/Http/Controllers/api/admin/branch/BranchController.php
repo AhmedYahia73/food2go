@@ -161,6 +161,9 @@ class BranchController extends Controller
             $branchRequest['cover_image'] = $imag_path;
             $this->deleteImage($branch->cover_image);
         }
+        if (!empty($request->password)) {
+            $branchRequest['password'] = $request->password;
+        }
         $branch->update($branchRequest);
         $branch->translations()->delete();
         foreach ($request->branch_names as $item) {
