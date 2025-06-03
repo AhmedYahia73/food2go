@@ -366,6 +366,13 @@ class SettingController extends Controller
         ->where('name', 'repeated')
         ->orderByDesc('id')
         ->first(); 
+        if (empty($notification_sound)) { 
+            $notification_sound = $this->settings
+            ->create([
+                'name' => 'repeated',
+                'setting' => 1
+            ]);
+        }
 
         return response()->json([
             'notification_sound' => $notification_sound
