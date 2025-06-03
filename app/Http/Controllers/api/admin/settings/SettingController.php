@@ -375,7 +375,7 @@ class SettingController extends Controller
         }
 
         return response()->json([
-            'notification_sound' => $notification_sound
+            'repeated_notification' => $notification_soun->setting
         ]);
     }
 
