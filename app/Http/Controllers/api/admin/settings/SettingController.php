@@ -434,7 +434,7 @@ class SettingController extends Controller
         }
         $repeated = $settings->setting;
         if ($repeated == '0') {
-            $order = $this->order
+            $this->order
             ->where('canceled_noti', 0)
             ->where('order_status', 'canceled')
             ->update([
