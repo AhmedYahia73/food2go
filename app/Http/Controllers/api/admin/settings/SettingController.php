@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\Validator;
 use App\trait\image;
 
 use App\Models\Setting;
+use App\Models\Order;
 
 class SettingController extends Controller
 {
-    public function __construct(private Setting $settings){}
+    public function __construct(private Setting $settings,
+    private Order $order){}
     use image;
 
     public function view_time_cancel_order(){
@@ -411,6 +413,49 @@ class SettingController extends Controller
 
         return response()->json([
             'success' => $request->repeated ? 'active' : 'banned'
+        ]);
+    }
+
+    public function cancelation(Request $request){
+        $order = $this->order
+        ->where('canceled_noti', 0)
+        ->where('order_status', 'canceled')
+        ->get();
+        $settings = $this->settings
+        ->where('name', 'repeated')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($settings)) {
+            $settings = $this->settings
+            ->create([
+                'name' => 'repeated',
+                'setting' => $request->repeated
+            ]);
+        }
+        $repeated = $settings->setting;
+        if ($repeated == '0') {
+            $order = $this->order
+            ->where('canceled_noti', 0)
+            ->where('order_status', 'canceled')
+            ->update([
+                'canceled_noti' => 1
+            ]);
+        }
+
+        return response()->json([
+            'orders' => $order,
+        ]);
+    }
+
+    public function cancelation_status(Request $request, $id){
+        $order = $this->order
+        ->where('id', $id) 
+        ->update([
+            'canceled_noti' => 1
+        ]);
+
+        return response()->json([
+            'success' => 'You change status success',
         ]);
     }
 }

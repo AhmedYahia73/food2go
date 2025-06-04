@@ -548,6 +548,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
             Route::get('/cancelation_notification', 'cancelation_notification');
             Route::put('/update_cancelation_notification', 'update_cancelation_notification');
+            Route::get('/cancelation', 'cancelation');
+            Route::put('/cancelation_status/{id}', 'cancelation_status');
         });
     });
 });

@@ -52,6 +52,7 @@ class Order extends Model
         'admin_id',
         'operation_status',
         'sechedule_slot_id',
+        'canceled_noti',
     ];
     protected $appends = ['order_date', 'status_payment'];
 
