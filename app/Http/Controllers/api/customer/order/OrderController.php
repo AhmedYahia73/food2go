@@ -102,7 +102,9 @@ class OrderController extends Controller
             'status' => $order->order_status,
             'delivery_id' => $order->delivery_id,
             'delivery_time' =>$delivery_time,
-            'time_delivered' => $formattedTime
+            'time_delivered' => $formattedTime,
+            'customer_cancel_reason' => $order->customer_cancel_reason,
+            'admin_cancel_reason' => $order->admin_cancel_reason,
         ]);
     }
 
