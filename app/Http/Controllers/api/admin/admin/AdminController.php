@@ -12,6 +12,7 @@ use App\trait\image;
 
 use App\Models\Admin;
 use App\Models\UserPosition;
+use App\Models\PersonalAccessToken;
 
 class AdminController extends Controller
 {
@@ -120,6 +121,10 @@ class AdminController extends Controller
         }
         if (!empty($request->password)) {
             $adminRequest['password'] = $request->password;
+            PersonalAccessToken::
+            where('name', 'admin')
+            ->where('tokenable_id', $admin->id)
+            ->delete();
         }
         $admin->update($adminRequest);
 

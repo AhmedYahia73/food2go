@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Delivery;
 use App\Models\Branch;
+use App\Models\PersonalAccessToken;
 use App\Models\Order;
 
 class DeliveryController extends Controller
@@ -171,6 +172,10 @@ class DeliveryController extends Controller
         }
         if (!empty($request->password)) { 
             $deliveryRequest['password'] = $request->password;
+            PersonalAccessToken::
+            where('name', 'delivery')
+            ->where('tokenable_id', $id)
+            ->delete();
         }
         $delivery->update($deliveryRequest);
 

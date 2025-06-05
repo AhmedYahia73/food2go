@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Cashier;
 use App\Models\CashierMan;
 use App\Models\CashierRole;
+use App\Models\PersonalAccessToken;
 use App\Models\Branch;
 
 class CashierManController extends Controller
@@ -85,6 +86,7 @@ class CashierManController extends Controller
         // roles[]
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],
+            'password' => ['required'],
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -92,6 +94,7 @@ class CashierManController extends Controller
             ],400);
         }
         $cashierRequest = $request->validated(); 
+        $cashierRequest['password'] = $request->password;
         $cashier_men = $this->cashier_men
         ->create($cashierRequest);
         if ($request->roles) {
@@ -116,6 +119,7 @@ class CashierManController extends Controller
         // roles[]
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],
+            'password' => ['nullable', 'min:8'],
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -130,6 +134,13 @@ class CashierManController extends Controller
             return response()->json([
                 'errors' => 'cashier is not found'
             ], 400);
+        }
+        if (!empty($request->password)) {
+            $cashierRequest['password'] = bcrypt($request->password);
+            PersonalAccessToken::
+            where('name', 'cashier')
+            ->where('tokenable_id', $id)
+            ->delete();
         }
         $cashier_men->update($cashierRequest);
         $this->cashier_role

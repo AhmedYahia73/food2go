@@ -26,7 +26,6 @@ class CasheirManRequest extends FormRequest
         return [
             'branch_id' => ['required', 'exists:branches,id'],
             'user_name' => ['required'],
-            'password' => ['required', 'min:8'],
             'status' => ['required', 'boolean'],
             'take_away' => ['required', 'boolean'],
             'dine_in' => ['required', 'boolean'],

@@ -10,6 +10,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 use App\trait\image;
 
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 
 class CustomerController extends Controller
@@ -120,6 +121,10 @@ class CustomerController extends Controller
         }
         if (!empty($request->password)) {
             $data['password'] = $request->password;
+            PersonalAccessToken::
+            where('name', 'customer')
+            ->where('tokenable_id', $id)
+            ->delete(); 
         }
         $user->update($data);
 

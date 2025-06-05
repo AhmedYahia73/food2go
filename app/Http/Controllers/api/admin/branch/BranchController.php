@@ -15,6 +15,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\VariationProduct;
 use App\Models\BranchOff;
+use App\Models\PersonalAccessToken;
 
 class BranchController extends Controller
 {
@@ -163,6 +164,10 @@ class BranchController extends Controller
         }
         if (!empty($request->password)) {
             $branchRequest['password'] = $request->password;
+            PersonalAccessToken::
+            where('name', 'branch')
+            ->where('tokenable_id', $admin->id)
+            ->delete();
         }
         $branch->update($branchRequest);
         $branch->translations()->delete();
