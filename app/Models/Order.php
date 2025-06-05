@@ -53,11 +53,35 @@ class Order extends Model
         'operation_status',
         'sechedule_slot_id',
         'canceled_noti',
+        'customer_id',
     ];
     protected $appends = ['order_date', 'status_payment'];
 
     public function getdateAttribute(){
         return $this->created_at->format('H:i:s');
+    }
+
+    public function getorderNumberAttribute(){
+        $time_settings = TimeSittings::
+        where('branch_id', $this->branch_id)
+        ->orderByDesc('id')
+        ->first();
+        if (empty($time_settings)) {
+            return $this->created_at->format('d') . $this->created_at->format('m') . 
+            $this->created_at->format('y') . $this->id;
+        }
+        else{
+            $from = $time_settings->from;
+            $to = $this->created_at->format('H:i:s');
+            if ($from > $to) {
+                $date = Carbon::parse($this->created_at)->subDay();
+            }
+            else{
+                $date = $this->created_at;
+            }
+            return $this->created_at->format('d') . $this->created_at->format('m') . 
+            $this->created_at->format('y') . $this->id;
+        }
     }
 
     public function getStatusPaymentAttribute(){
