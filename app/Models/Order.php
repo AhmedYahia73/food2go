@@ -79,8 +79,8 @@ class Order extends Model
             else{
                 $date = $this->created_at;
             }
-            return $this->created_at->format('d') . $this->created_at->format('m') . 
-            $this->created_at->format('y') . $this->id;
+            return $date->format('d') . $date->format('m') . 
+            $date->format('y') . $this->id;
         }
     }
 
