@@ -31,26 +31,26 @@ class AddressController extends Controller
 
     public function view(Request $request){
         // https://bcknd.food2go.online/customer/address
-        $local = $request->local ?? 'en';
+        $locale = $request->local ?? 'en';
         $addresses = $this->address
         ->whereHas('address', function($query) use($request){
             $query->where('users.id', $request->user()->id);
         })
         ->with('zone')
         ->get()
-        ->map(function($item) use($local){
+        ->map(function($item) use($locale){
             $item->zone->zone = $item->zone->translations->where('key', $item->zone->zone)
-            ->where('locale', $local)->first()?->value ?? $item->zone->zone;
+            ->where('locale', $locale)->first()?->value ?? $item->zone->zone;
             return $item;
         });
         $zones = $this->zones
         ->where('status', 1)
         ->get()
-        ->map(function($item) use($local){
+        ->map(function($item) use($locale){
             return [
                 'id' => $item->id,
                 'zone' => $item->translations->where('key', $item->zone)
-                ->where('locale', $local)->first()?->value ?? $item->zone,
+                ->where('locale', $locale)->first()?->value ?? $item->zone,
                 'price' => $item->price,
                 'status' => $item->status,
                 'city_id' => $item->city_id,
