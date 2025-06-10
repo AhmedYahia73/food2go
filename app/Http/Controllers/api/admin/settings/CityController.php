@@ -64,7 +64,9 @@ class CityController extends Controller
         //Key
         // status, city_names
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'city_names' => 'required',
+            'city_names.*.tranlation_name' => 'required',
+            'city_names.*.city_name' => 'required',
             'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -99,7 +101,9 @@ class CityController extends Controller
         //Key
         // status, city_names
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'city_names' => 'required',
+            'city_names.*.tranlation_name' => 'required',
+            'city_names.*.city_name' => 'required',
             'status' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
