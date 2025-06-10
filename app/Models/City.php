@@ -13,4 +13,17 @@ class City extends Model
         'name',
         'status',
     ];
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
+
+    public function scopeWithLocale($query, $locale = null)
+    {
+        $locale = $locale ?: app()->getLocale();
+        return $query->with(['translations' => function ($query) use ($locale) {
+            $query->where('locale', $locale);
+        }]);
+    }
 }
