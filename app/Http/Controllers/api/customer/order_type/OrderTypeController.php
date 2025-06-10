@@ -20,7 +20,11 @@ class OrderTypeController extends Controller
         ->where('name', 'order_type')
         ->first();
         $branches = $this->branches
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->name = $request->locale == 'en' ? $item->name : $item?->translations?->value ?? $item->name;
+            return $item;
+        });
         if (empty($order_types)) {
             $order_types = $this->settings
             ->create([
