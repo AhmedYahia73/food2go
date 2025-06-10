@@ -97,7 +97,7 @@ class CityController extends Controller
     public function modify(Request $request, $id){
         // https://bcknd.food2go.online/admin/settings/city/update/{id}
         //Key
-        // name, status
+        // status, city_names
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'status' => 'required|boolean',
