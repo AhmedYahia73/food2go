@@ -33,7 +33,9 @@ class AddressController extends Controller
         // https://bcknd.food2go.online/customer/address
         $local = $request->local ?? 'en';
         $addresses = $this->address
-        ->where('customer_id', $request->user()->id)
+        ->whereHas('address', function($query){
+            $query->where('users.id', $request->user()->id);
+        })
         ->with('zone')
         ->get()
         ->map(function($item) use($local){

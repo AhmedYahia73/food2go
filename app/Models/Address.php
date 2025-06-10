@@ -28,4 +28,8 @@ class Address extends Model
     public function zone(){
         return $this->belongsTo(Zone::class, 'zone_id');
     }
+
+    public function address(){
+        return $this->belongsToMany(User::class ,'user_address');
+    }
 }
