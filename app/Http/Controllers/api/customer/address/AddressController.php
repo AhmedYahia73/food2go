@@ -35,7 +35,12 @@ class AddressController extends Controller
         $addresses = $this->user
         ->where('id', $request->user()->id)
         ->with('address.zone')
-        ->first()->toArray(); 
+        ->first()?->address
+        ->map(function($item) use($locale){
+            $item->zone->zone = $item->translations->where('key', $item->zone->zone)
+            ->where('locale', $locale)->first()?->value ?? $item->zone;
+            return $item;
+        });
         $zones = $this->zones
         ->where('status', 1)
         ->get()
@@ -58,7 +63,7 @@ class AddressController extends Controller
         ->get();
 
         return response()->json([
-            'addresses' => $addresses['address'],
+            'addresses' => $addresses,
             'zones' => $zones,
             'branches' => $branches,
             'cities' => $cities,
