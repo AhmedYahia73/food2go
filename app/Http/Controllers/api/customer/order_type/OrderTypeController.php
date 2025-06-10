@@ -21,7 +21,7 @@ class OrderTypeController extends Controller
         ->first();
         $branches = $this->branches
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($request){
             $item->name = $request->locale == 'en' ? $item->name : $item?->translations?->value ?? $item->name;
             return $item;
         });
