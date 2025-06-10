@@ -78,7 +78,7 @@ class CityController extends Controller
         $default = $request->city_names[0];
         $city = $this->cities
         ->create([
-            'name' => $default,
+            'name' => $default['city_name'],
             'status' => $request->status,
         ]);
         foreach ($request->city_names as $item) {
