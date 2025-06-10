@@ -32,13 +32,13 @@ class AddressController extends Controller
     public function view(Request $request){
         // https://bcknd.food2go.online/customer/address
         $local = $request->local ?? 'en';
-        $addresses = $this->user
-        ->where('id', $request->user()->id)
-        ->with('address.zone')
-        ->first()?->address
-        ->map(function($item) use($locale){
-            $item->zone->zone = $item->translations->where('key', $item->zone->zone)
-            ->where('locale', $locale)->first()?->value ?? $item->zone;
+        $addresses = $this->address
+        ->where('customer_id', $request->user()->id)
+        ->with('zone')
+        ->get()
+        ->map(function($item) use($local){
+            $item->zone = $item->translations->where('key', $item->zone)
+            ->where('locale', $local)->first()?->value ?? $item->zone;
             return $item;
         });
         $zones = $this->zones
