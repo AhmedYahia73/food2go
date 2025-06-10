@@ -39,8 +39,8 @@ class AddressController extends Controller
         ->with('zone')
         ->get()
         ->map(function($item) use($local){
-            $item->zone = $item->translations->where('key', $item->zone)
-            ->where('locale', $local)->first()?->value ?? $item->zone;
+            $item->zone->zone = $item->zone->translations->where('key', $item->zone->zone)
+            ->where('locale', $local)->first()?->value ?? $item->zone->zone;
             return $item;
         });
         $zones = $this->zones
