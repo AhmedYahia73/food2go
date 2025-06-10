@@ -43,6 +43,7 @@ class OrderController extends Controller
     public function order_history(Request $request){
         // https://bcknd.food2go.online/customer/orders/history
         $orders = $this->orders
+        ->orderByDesc('id')
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['delivered', 'faild_to_deliver', 'canceled'])
         ->with('payment_method')
