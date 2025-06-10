@@ -31,7 +31,7 @@ class AddressController extends Controller
 
     public function view(Request $request){
         // https://bcknd.food2go.online/customer/address
-        $locale = $request->local ?? 'en';
+        $locale = $request->locale ?? 'en';
         $addresses = $this->address
         ->whereHas('address', function($query) use($request){
             $query->where('users.id', $request->user()->id);
