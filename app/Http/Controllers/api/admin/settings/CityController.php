@@ -140,7 +140,7 @@ class CityController extends Controller
         // https://bcknd.food2go.online/admin/settings/city/delete/{id}
         $city = $this->cities
         ->where('id', $id)
-        ->delete();
+        ->first();
         $city->translations()->delete();
         $city->delete();
 
