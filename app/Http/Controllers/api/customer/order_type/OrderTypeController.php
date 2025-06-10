@@ -14,7 +14,7 @@ class OrderTypeController extends Controller
     public function __construct(private Setting $settings, private PaymentMethod $payment_methods,
     private Branch $branches){}
 
-    public function view(){
+    public function view(Request $request){
         // https://bcknd.food2go.online/customer/order_type
         $order_types = $this->settings
         ->where('name', 'order_type')
