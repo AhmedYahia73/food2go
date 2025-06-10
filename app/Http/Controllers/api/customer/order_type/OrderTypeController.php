@@ -22,8 +22,8 @@ class OrderTypeController extends Controller
         $branches = $this->branches
         ->get()
         ->map(function($item) use($request){
-            $item->name = $request->locale == 'en' ? $item->name : $item?->translations
-            ?->where('locale', 'ar')?->first()?->value ?? $item->name;
+            $item->name = $request->locale == 'ar' ? $item?->translations
+            ?->where('locale', 'ar')?->first()?->value ?? $item->name : $item->name;
             return $item;
         });
         if (empty($order_types)) {
