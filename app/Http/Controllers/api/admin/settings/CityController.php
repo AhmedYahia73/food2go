@@ -112,11 +112,12 @@ class CityController extends Controller
             ],400);
         }
 
+        $default = $request->city_names[0];
         $city = $this->cities
         ->where('id', $id)
         ->first();
         $city->update([
-            'name' => $request->name,
+            'name' => $default['city_name'],
             'status' => $request->status,
         ]);
         $city->translations()->delete();
