@@ -62,7 +62,15 @@ class AddressController extends Controller
         ->get();
         $cities = $this->city
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                'id' => $item->id,
+                'name' => $item->translations->where('key', $item->name)
+                ->where('locale', $locale)->first()?->value ?? $item->name, 
+                'status' => $item->status, 
+            ];
+        });
 
         return response()->json([
             'addresses' => $addresses,
