@@ -12,8 +12,11 @@ class ExtraProduct extends Model
     protected $fillable = [
         'name',
         'product_id',
+        'price',
+        'min',
+        'max',
+        'option_id',
         'variation_id',
-        'option_id'
     ];
 
     public function parent_extra(){

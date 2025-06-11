@@ -132,15 +132,18 @@ class CreateProductController extends Controller
                     ->create([
                         'name' => $item['names'][0]['extra_name'],
                         'product_id' => $product->id,
+                        'price' => $item['price'],
+                        'min' => $item['min'] ?? null,
+                        'max' => $item['max'] ?? null, 
                     ]);
-                    if (!empty($item['extra_price'])) {
-                        $this->extra_pricing
-                        ->create([
-                            'price' => $item['extra_price'],
-                            'product_id' => $product->id,
-                            'extra_id' => $new_extra->id,
-                        ]);
-                    }
+                    // if (!empty($item['extra_price'])) {
+                    //     $this->extra_pricing
+                    //     ->create([
+                    //         'price' => $item['extra_price'],
+                    //         'product_id' => $product->id,
+                    //         'extra_id' => $new_extra->id,
+                    //     ]);
+                    // }
                     $extra_num[] = $new_extra;
                     foreach ($item['names'] as $key => $element) {
                         if (!empty($element['extra_name'])) {
@@ -196,14 +199,24 @@ class CreateProductController extends Controller
                         if (isset($element['extra']) && $element['extra']) {
                             foreach ($element['extra'] as $key => $extra) {
                                 // ['extra_names']
-                                $extra_pricing = $this->extra_pricing
-                                ->create([ 
-                                    'price' => $extra['extra_price'],
+                                // $extra_pricing = $this->extra_pricing
+                                // ->create([ 
+                                //     'price' => $extra['extra_price'],
+                                //     'product_id' => $product->id,
+                                //     'variation_id' => $variation->id,
+                                //     'extra_id' => $extra_num[$extra['extra_index']]->id,
+                                //     'option_id' => $option->id,
+                                // ]);// add extra for option
+                                $new_extra = $this->extra
+                                ->create([
+                                    'name' => $extra['names'][0]['extra_name'],
                                     'product_id' => $product->id,
-                                    'variation_id' => $variation->id,
-                                    'extra_id' => $extra_num[$extra['extra_index']]->id,
+                                    'price' => $extra['price'],
+                                    'min' => $extra['min'] ?? null,
+                                    'max' => $extra['max'] ?? null,
                                     'option_id' => $option->id,
-                                ]);// add extra for option
+                                    'variation_id' => $variation->id,
+                                ]);
                             }
                         }
                     } 
@@ -325,20 +338,22 @@ class CreateProductController extends Controller
         ->delete(); // delete old extra
         if ($request->extra) {
             foreach ($request->extra as $item) {
-                
                 $new_extra = $this->extra
                 ->create([
                     'name' => $item['names'][0]['extra_name'],
                     'product_id' => $product->id,
+                    'price' => $item['price'],
+                    'min' => $item['min'] ?? null,
+                    'max' => $item['max'] ?? null,
                 ]);
-                if (!empty($item['extra_price'])) {
-                    $this->extra_pricing
-                    ->create([
-                        'price' => $item['extra_price'],
-                        'product_id' => $product->id,
-                        'extra_id' => $new_extra->id,
-                    ]);
-                }
+                // if (!empty($item['extra_price'])) {
+                //     $this->extra_pricing
+                //     ->create([
+                //         'price' => $item['extra_price'],
+                //         'product_id' => $product->id,
+                //         'extra_id' => $new_extra->id,
+                //     ]);
+                // }
                 
                 $extra_num[] = $new_extra;
                 foreach ($item['names'] as $key => $element) {
@@ -403,15 +418,16 @@ class CreateProductController extends Controller
                         }
                         if (isset($element['extra']) && $element['extra']) {
                             foreach ($element['extra'] as $key => $extra) {
-                                // ['extra_names']
-                                $extra_pricing = $this->extra_pricing
-                                ->create([ 
-                                    'price' => $extra['extra_price'],
+                                $new_extra = $this->extra
+                                ->create([
+                                    'name' => $extra['names'][0]['extra_name'],
                                     'product_id' => $product->id,
-                                    'variation_id' => $variation->id,
-                                    'extra_id' => $extra_num[$extra['extra_index']]->id,
+                                    'price' => $extra['price'],
+                                    'min' => $extra['min'] ?? null,
+                                    'max' => $extra['max'] ?? null,
                                     'option_id' => $option->id,
-                                ]);// add extra for option
+                                    'variation_id' => $variation->id,
+                                ]);
                             }
                         }
                     }

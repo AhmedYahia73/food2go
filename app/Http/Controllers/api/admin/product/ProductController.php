@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\File;
 
 use App\Models\Product;
 use App\Models\Discount;
+use App\Models\Group;
 use App\Models\Tax;
 use App\Models\ProductReview;
 use App\Models\Translation;
@@ -17,7 +18,8 @@ class ProductController extends Controller
 {
     public function __construct(private Product $products,
     private Discount $discounts, private Tax $taxes, private ProductReview $reviews,
-    private Translation $translations, private TranslationTbl $translation_tbl){}
+    private Translation $translations, private TranslationTbl $translation_tbl,
+    private Group $group){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/product
@@ -29,11 +31,16 @@ class ProductController extends Controller
         ->get();
         $taxes = $this->taxes
         ->get();
+        $group = $this->group
+        ->where('status', 1)
+        ->with('extra')
+        ->get();
 
         return response()->json([
             'products' => $products,
             'discounts' => $discounts,
             'taxes' => $taxes,
+            'group' => $group,
         ]);
     }
 

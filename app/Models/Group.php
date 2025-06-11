@@ -13,4 +13,8 @@ class Group extends Model
         'name', 
         'status',
     ];
+
+    public function extra(){
+        return $this->hasMany(ExtraGroup::class, 'group_id');
+    }
 }
