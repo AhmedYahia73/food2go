@@ -7,11 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\Translation;
 use App\Models\City;
 
 class CityController extends Controller
 {
-    public function __construct(private City $cities){}
+    public function __construct(private City $cities, private Translation $translations){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/settings/city
@@ -26,12 +27,27 @@ class CityController extends Controller
     public function city($id){
         // https://bcknd.food2go.online/admin/settings/city/item/{id}
         $city = $this->cities
-        ->with('translations')
         ->where('id', $id)
         ->first();
+        $translations = $this->translations
+        ->where('status', 1)
+        ->get();
+        $city_names = [];
+        foreach ($translations as $item) {
+             $city_name = $this->translation_tbl
+             ->where('locale', $item->name)
+             ->where('key', $city->name)
+             ->first();
+            $city_names[] = [
+                'tranlation_id' => $item->id,
+                'tranlation_name' => $item->name,
+                'city_name' => $city_name->value ?? null,
+            ];
+        }
 
         return response()->json([
-            'city' => $city
+            'city' => $city,
+            'city_names' => $city_names,
         ]);
     }
 
