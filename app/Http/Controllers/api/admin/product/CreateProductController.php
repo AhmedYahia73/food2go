@@ -17,12 +17,14 @@ use App\Models\OptionProduct;
 use App\Models\ExcludeProduct;
 use App\Models\ExtraProduct;
 use App\Models\ExtraPricing;
+use App\Models\ExtraGroup;
 
 class CreateProductController extends Controller
 {
     public function __construct(private Product $products, private VariationProduct $variations,
-    private OptionProduct $option_product, private ExcludeProduct $excludes, private ExtraProduct $extra,
-    private ExtraPricing $extra_pricing){}
+    private OptionProduct $option_product, private ExcludeProduct $excludes, 
+    private ExtraProduct $extra, private ExtraPricing $extra_pricing, 
+    private ExtraGroup $extra_group){}
     protected $productRequest = [
         'name',
         'description',
@@ -56,7 +58,7 @@ class CreateProductController extends Controller
         
         // extra[][names][{extra_name, tranlation_id, tranlation_name}]
         // extra[][extra_price]
-        
+    
         // variations[][names][{name, tranlation_id, tranlation_name}] ,variations[][type],
         // variations[][min] ,variations[][max]
         // variations[][required]
@@ -125,16 +127,20 @@ class CreateProductController extends Controller
                         }
                     }
                 }
-            }// add excludes
+            }// add extra
             if ($request->extra) {
-                foreach ($request->extra as $item) {
+                $extra_group = $this->extra_group
+                ->whereIn('id', $request->extra)
+                ->with('translations')
+                ->get();
+                foreach ($extra_group as $item) {
                     $new_extra = $this->extra
                     ->create([
-                        'name' => $item['names'][0]['extra_name'],
+                        'name' => $item->names,
                         'product_id' => $product->id,
-                        'price' => $item['price'],
-                        'min' => $item['min'] ?? null,
-                        'max' => $item['max'] ?? null, 
+                        'price' => $item->pricing,
+                        'min' => $item->min,
+                        'max' => $item->max,
                     ]);
                     // if (!empty($item['extra_price'])) {
                     //     $this->extra_pricing
@@ -145,12 +151,12 @@ class CreateProductController extends Controller
                     //     ]);
                     // }
                     $extra_num[] = $new_extra;
-                    foreach ($item['names'] as $key => $element) {
+                    foreach ($item->translations as $key => $element) {
                         if (!empty($element['extra_name'])) {
                             $new_extra->translations()->create([
-                                'locale' => $element['tranlation_name'],
-                                'key' => $item['names'][0]['extra_name'],
-                                'value' => $element['extra_name'],
+                                'locale' => $element->locale,
+                                'key' => $item->key,
+                                'value' => $element->value,
                             ]); 
                         }
                     }
@@ -197,7 +203,11 @@ class CreateProductController extends Controller
                             }
                         }
                         if (isset($element['extra']) && $element['extra']) {
-                            foreach ($element['extra'] as $key => $extra) {
+                            $extra_group = $this->extra_group
+                            ->whereIn('id', $$element['extra'])
+                            ->with('translations')
+                            ->get();
+                            foreach ($extra_group as $key => $extra) {
                                 // ['extra_names']
                                 // $extra_pricing = $this->extra_pricing
                                 // ->create([ 
@@ -209,14 +219,24 @@ class CreateProductController extends Controller
                                 // ]);// add extra for option
                                 $new_extra = $this->extra
                                 ->create([
-                                    'name' => $extra['names'][0]['extra_name'],
+                                    'name' => $extra->names,
                                     'product_id' => $product->id,
-                                    'price' => $extra['price'],
-                                    'min' => $extra['min'] ?? null,
-                                    'max' => $extra['max'] ?? null,
+                                    'price' => $extra->pricing,
+                                    'min' => $extra->min,
+                                    'max' => $extra->max,
                                     'option_id' => $option->id,
                                     'variation_id' => $variation->id,
                                 ]);
+
+                                foreach ($extra->translations as $key => $element) {
+                                    if (!empty($element['extra_name'])) {
+                                        $new_extra->translations()->create([
+                                            'locale' => $element->locale,
+                                            'key' => $item->key,
+                                            'value' => $element->value,
+                                        ]); 
+                                    }
+                                }
                             }
                         }
                     } 
