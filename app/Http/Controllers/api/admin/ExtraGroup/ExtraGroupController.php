@@ -15,9 +15,10 @@ class ExtraGroupController extends Controller
     public function __construct(private ExtraGroup $extra_group, private Translation $translations,
     private TranslationTbl $translation_tbl){}
 
-    public function view(){
-        // https://bcknd.food2go.online/admin/extra_group
+    public function view($id){
+        // https://bcknd.food2go.online/admin/extra_group/group/{id}
         $extra_group = $this->extra_group
+        ->where('group_id', $id)
         ->get();
 
         return response()->json([

@@ -89,7 +89,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(ExtraGroupController::class)
     ->prefix('extra_group')->group(function(){
-        Route::get('/', 'view');
+        Route::get('/group/{id}', 'view');
         Route::get('/item/{id}', 'group');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
