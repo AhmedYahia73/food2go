@@ -7,10 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\ExtraGroup;
+use App\Models\TranslationTbl;
+use App\Models\Translation;
 
 class ExtraGroupController extends Controller
 {
-    public function __construct(private ExtraGroup $extra_group){}
+    public function __construct(private ExtraGroup $extra_group, private Translation $translations,
+    private TranslationTbl $translation_tbl){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/extra_group
@@ -27,9 +30,25 @@ class ExtraGroupController extends Controller
         $extra_group = $this->extra_group
         ->where('id', $id)
         ->first();
+        $translations = $this->translations
+        ->where('status', 1)
+        ->get();
+        $extra_names = [];
+        foreach ($translations as $item) {
+             $extra_name = $this->translation_tbl
+             ->where('locale', $item->name)
+             ->where('key', $extra_group->name)
+             ->first();
+            $extra_names[] = [
+                'tranlation_id' => $item->id,
+                'tranlation_name' => $item->name,
+                'extra_name' => $extra_name->value ?? null,
+            ];
+        }
 
         return response()->json([
-            'extra_group' => $extra_group
+            'extra_group' => $extra_group,
+            'extra_names' => $extra_names,
         ]);
     } 
 
@@ -38,7 +57,9 @@ class ExtraGroupController extends Controller
         //Key
         // name, pricing, group_id
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'extra_names' => 'required',
+            'extra_names.*.tranlation_name' => 'required',
+            'extra_names.*.extra_name' => 'required',
             'pricing' => 'required|numeric',
             'group_id' => 'required|exists:groups,id',
         ]);
@@ -48,12 +69,22 @@ class ExtraGroupController extends Controller
             ],400);
         }
 
-        $this->extra_group
+        $default = $request->extra_names[0];
+        $extra_group = $this->extra_group
         ->create([
-            'name' => $request->name,
+            'name' => $default['extra_name'],
             'pricing' => $request->pricing,
             'group_id' => $request->group_id,
         ]);
+        foreach ($request->extra_names as $item) {
+            if (!empty($item['extra_name'])) {
+                $extra_group->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['extra_name'],
+                    'value' => $item['extra_name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -65,7 +96,9 @@ class ExtraGroupController extends Controller
         //Key
         // name, status
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'extra_names' => 'required',
+            'extra_names.*.tranlation_name' => 'required',
+            'extra_names.*.extra_name' => 'required',
             'pricing' => 'required|numeric',
             'group_id' => 'required|exists:groups,id',
         ]);
@@ -75,13 +108,24 @@ class ExtraGroupController extends Controller
             ],400);
         }
 
-        $this->extra_group
+        $extra_group = $this->extra_group
         ->where('id', $id)
-        ->update([
+        ->first();
+        $extra_group->update([
             'name' => $request->name,
             'pricing' => $request->pricing,
             'group_id' => $request->group_id,
         ]);
+        $extra_group->translations()->delete();
+        foreach ($request->extra_names as $item) {
+            if (!empty($item['extra_name'])) {
+                $extra_group->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default['extra_name'],
+                    'value' => $item['extra_name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => 'You update data success'
@@ -90,9 +134,11 @@ class ExtraGroupController extends Controller
 
     public function delete($id){
         // https://bcknd.food2go.online/admin/extra_group/delete/{id}
-        $this->extra_group
+        $extra_group = $this->extra_group
         ->where('id', $id)
-        ->delete();
+        ->first();
+        $extra_group->translations()->delete();
+        $extra_group->delete();
 
         return response()->json([
             'success' => 'You delete data success'
