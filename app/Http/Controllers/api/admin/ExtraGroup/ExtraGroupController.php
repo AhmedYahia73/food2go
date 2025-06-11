@@ -115,11 +115,12 @@ class ExtraGroupController extends Controller
             ],400);
         }
 
+        $default = $request->extra_names[0];
         $extra_group = $this->extra_group
         ->where('id', $id)
         ->first();
         $extra_group->update([
-            'name' => $request->name,
+            'name' => $default['extra_name'],
             'pricing' => $request->pricing,
             'group_id' => $request->group_id,
             'min' => $request->min,
