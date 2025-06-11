@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\TranslationTbl;
 use App\Models\Translation;
 use App\Models\City;
 
 class CityController extends Controller
 {
-    public function __construct(private City $cities, private Translation $translations){}
+    public function __construct(private City $cities, private Translation $translations,
+    private TranslationTbl $translation_tbl){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/settings/city
