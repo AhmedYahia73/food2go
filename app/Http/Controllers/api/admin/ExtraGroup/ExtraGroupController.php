@@ -55,7 +55,7 @@ class ExtraGroupController extends Controller
     public function create(Request $request){
         // https://bcknd.food2go.online/admin/extra_group/add
         //Key
-        // name, pricing, group_id
+        // extra_names[tranlation_name, extra_name], pricing, group_id
         $validator = Validator::make($request->all(), [
             'extra_names' => 'required',
             'extra_names.*.tranlation_name' => 'required',
@@ -94,7 +94,7 @@ class ExtraGroupController extends Controller
     public function modify(Request $request, $id){
         // https://bcknd.food2go.online/admin/extra_group/update/{id}
         //Key
-        // name, status
+        // extra_names[tranlation_name, extra_name], pricing, group_id
         $validator = Validator::make($request->all(), [
             'extra_names' => 'required',
             'extra_names.*.tranlation_name' => 'required',
