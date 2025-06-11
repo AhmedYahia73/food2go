@@ -13,6 +13,8 @@ class ExtraGroup extends Model
         'name',
         'pricing',
         'group_id',
+        'min',
+        'max',
     ];
     
     public function translations()

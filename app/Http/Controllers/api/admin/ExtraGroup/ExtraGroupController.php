@@ -63,6 +63,8 @@ class ExtraGroupController extends Controller
             'extra_names.*.extra_name' => 'required',
             'pricing' => 'required|numeric',
             'group_id' => 'required|exists:groups,id',
+            'min' => 'required|numeric',
+            'max' => 'required|numeric',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -76,6 +78,8 @@ class ExtraGroupController extends Controller
             'name' => $default['extra_name'],
             'pricing' => $request->pricing,
             'group_id' => $request->group_id,
+            'min' => $request->min,
+            'max' => $request->max,
         ]);
         foreach ($request->extra_names as $item) {
             if (!empty($item['extra_name'])) {
@@ -102,6 +106,8 @@ class ExtraGroupController extends Controller
             'extra_names.*.extra_name' => 'required',
             'pricing' => 'required|numeric',
             'group_id' => 'required|exists:groups,id',
+            'min' => 'required|numeric',
+            'max' => 'required|numeric',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -116,6 +122,8 @@ class ExtraGroupController extends Controller
             'name' => $request->name,
             'pricing' => $request->pricing,
             'group_id' => $request->group_id,
+            'min' => $request->min,
+            'max' => $request->max,
         ]);
         $extra_group->translations()->delete();
         foreach ($request->extra_names as $item) {
