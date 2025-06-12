@@ -204,7 +204,7 @@ class CreateProductController extends Controller
                         }
                         if (isset($element['extra']) && $element['extra']) {
                             $extra_group = $this->extra_group
-                            ->whereIn('id', $$element['extra'])
+                            ->whereIn('id', $element['extra'])
                             ->with('translations')
                             ->get();
                             foreach ($extra_group as $key => $extra) {
