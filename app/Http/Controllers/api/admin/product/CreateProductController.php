@@ -141,6 +141,7 @@ class CreateProductController extends Controller
                         'price' => $item->pricing,
                         'min' => $item->min,
                         'max' => $item->max,
+                        'group_id' => $item->group_id,
                     ]);
                     // if (!empty($item['extra_price'])) {
                     //     $this->extra_pricing
@@ -226,6 +227,7 @@ class CreateProductController extends Controller
                                     'max' => $extra->max,
                                     'option_id' => $option->id,
                                     'variation_id' => $variation->id,
+                                    'group_id' => $extra->group_id,
                                 ]);
 
                                 foreach ($extra->translations as $key => $element) {
@@ -365,6 +367,7 @@ class CreateProductController extends Controller
                     'price' => $item['price'],
                     'min' => $item['min'] ?? null,
                     'max' => $item['max'] ?? null,
+                    'group_id' => $item['group_id'] ?? null,
                 ]);
                 // if (!empty($item['extra_price'])) {
                 //     $this->extra_pricing

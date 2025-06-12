@@ -17,10 +17,15 @@ class ExtraProduct extends Model
         'max',
         'option_id',
         'variation_id',
+        'group_id'
     ];
 
     public function parent_extra(){
         return $this->belongsTo(ExtraProduct::class, 'extra_id');
+    }
+
+    public function group(){
+        return $this->belongsTo(Group::class, 'group_id');
     }
     
     public function translations()
