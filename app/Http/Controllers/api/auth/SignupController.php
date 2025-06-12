@@ -12,11 +12,13 @@ use App\trait\image;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 
+use App\Models\SmsIntegration;
 use App\Models\User;
 
 class SignupController extends Controller
 {
-    public function __construct(private User $user){}
+    public function __construct(private User $user,
+    private SmsIntegration $sms_integration){}
     protected $userRequest = [
         'f_name',
         'l_name',
@@ -99,14 +101,17 @@ class SignupController extends Controller
     {
         // Send OTP using Mobishastra API
         try {
+            $sms_integration = $this->sms_integration
+            ->orderByDesc('id')
+            ->first();
             $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
-                'user' => '20101263',
-                'pwd' => 'L@m@d@2005',
-                'senderid' => 'Lamada',
+                'user' => $sms_integration->user,
+                'pwd' => $sms_integration->pwd,
+                'senderid' => $sms_integration->senderid,
                 'mobileno' => $phone,
                 'msgtext' => "Your activation number: " . $otp,
-                'CountryCode' => '+20',
-                'profileid' => '20101263',
+                'CountryCode' => $sms_integration->CountryCode,
+                'profileid' => $sms_integration->profileid,
             ]);
     
             if ($response->successful()) {

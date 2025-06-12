@@ -16,8 +16,7 @@ return new class extends Migration
             $table->string('user');
             $table->string('pwd');
             $table->string('senderid');
-            $table->string('mobileno');
-            $table->string('msgtext');
+            $table->string('mobileno'); 
             $table->string('CountryCode');
             $table->string('profileid');
             $table->timestamps();

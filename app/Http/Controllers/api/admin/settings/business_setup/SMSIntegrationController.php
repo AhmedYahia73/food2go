@@ -26,8 +26,7 @@ class SMSIntegrationController extends Controller
             'user' => ['required'],
             'pwd' => ['required'],
             'senderid' => ['required'],
-            'mobileno' => ['required'],
-            'msgtext' => ['required'],
+            'mobileno' => ['required'], 
             'CountryCode' => ['required'],
             'profileid' => ['required'],
         ]);
@@ -46,7 +45,6 @@ class SMSIntegrationController extends Controller
                 'pwd' => $request->pwd,
                 'senderid' => $request->senderid,
                 'mobileno' => $request->mobileno,
-                'msgtext' => $request->msgtext,
                 'CountryCode' => $request->CountryCode,
                 'profileid' => $request->profileid,
             ]);

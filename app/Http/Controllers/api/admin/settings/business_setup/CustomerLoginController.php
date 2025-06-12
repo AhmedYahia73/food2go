@@ -45,7 +45,7 @@ class CustomerLoginController extends Controller
     public function add(Request $request){
         // https://bcknd.food2go.online/admin/settings/business_setup/customer_login/add
         // {"login": "manuel","verification": "email"}
-        // login => [manuel, otp], verification => [email, phone]   
+        // login => [manuel, otp], verification => [email, phone]
         // verification => [email, phone], 
         // email, integration_password
         // user, pwd, senderid, mobileno, msgtext, CountryCode, profileid

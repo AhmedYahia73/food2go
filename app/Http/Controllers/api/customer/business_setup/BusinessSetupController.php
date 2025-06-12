@@ -156,7 +156,7 @@ class BusinessSetupController extends Controller
             ]);
         }
         $customer_login = json_decode($customer_login->setting) ?? 
-        ['login' => 'manuel', 'verification' => null];
+        ['login' => 'otp', 'verification' => 'email'];
 
         
         return response()->json([
