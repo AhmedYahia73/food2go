@@ -29,7 +29,7 @@ class OtpController extends Controller
         }
         $user = $this->user
         ->where('email', $request->email)
-        ->orWhere('phone', $request->email)
+        ->orWhere('phone', $request->phone)
         ->first();
         if (empty($user)) {
             return response()->json([
