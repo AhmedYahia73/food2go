@@ -61,7 +61,6 @@ class CustomerLoginController extends Controller
             'pwd' => ['required_if:verification,phone'],
             'senderid' => ['required_if:verification,phone'],
             'mobileno' => ['required_if:verification,phone'],
-            'msgtext' => ['required_if:verification,phone'],
             'CountryCode' => ['required_if:verification,phone'],
             'profileid' => ['required_if:verification,phone'],
         ]);
@@ -121,7 +120,6 @@ class CustomerLoginController extends Controller
                     'pwd' => $request->pwd,
                     'senderid' => $request->senderid,
                     'mobileno' => $request->mobileno,
-                    'msgtext' => $request->msgtext,
                     'CountryCode' => $request->CountryCode,
                     'profileid' => $request->profileid,
                 ]);
@@ -133,7 +131,6 @@ class CustomerLoginController extends Controller
                     'pwd' => $request->pwd,
                     'senderid' => $request->senderid,
                     'mobileno' => $request->mobileno,
-                    'msgtext' => $request->msgtext,
                     'CountryCode' => $request->CountryCode,
                     'profileid' => $request->profileid,
                 ]);
