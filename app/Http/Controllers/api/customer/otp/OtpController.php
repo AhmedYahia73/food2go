@@ -8,6 +8,8 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\OTPMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 use App\Models\User;
 
@@ -44,15 +46,57 @@ class OtpController extends Controller
             Mail::to($user->email)->send(new OTPMail($data));
         } 
         elseif($request->phone) {
-            # code...
+            $temporaryToken = Str::random(40);
+            $otp = rand(10000, 99999);  // Generate OTP
+            $phone = $request->phone;
+            $user = $this->user
+            ->where('phone', $request->phone)
+            ->update([
+                'code' => $otp
+            ]);
+        
+            // Send OTP to the new user
+            $this->sendOtp($phone, $otp);
         }
         else{
-            
+            return response()->json([
+                'errors' => 'Phone or email is requred'
+            ], 400);
         }
         
         return response()->json([
             'code' => $code,
         ]);
+    }
+
+    private function sendOtp($phone, $otp)
+    {
+        // Send OTP using Mobishastra API
+        try {
+            $sms_integration = $this->sms_integration
+            ->orderByDesc('id')
+            ->first();
+            $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
+                'user' => $sms_integration->user,
+                'pwd' => $sms_integration->pwd,
+                'senderid' => $sms_integration->senderid,
+                'mobileno' => $phone,
+                'msgtext' => "Your activation number: " . $otp,
+                'CountryCode' => $sms_integration->CountryCode,
+                'profileid' => $sms_integration->profileid,
+            ]);
+    
+            if ($response->successful()) {
+                // Store the OTP in the database
+                $user->otp()->create(['otp' => $otp]);
+    
+                return response()->json(['message' => 'OTP sent successfully.'], 200);
+            } else {
+                throw new Exception('Failed to send OTP.');
+            }
+        } catch (\Throwable $e) {
+            return response()->json(['errors' => 'Unable to send OTP at this time. Please try again later.'], 500);
+        }
     }
 
     public function check_code(Request $request){

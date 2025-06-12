@@ -84,7 +84,7 @@ class SignupController extends Controller
         $user = $this->user
         ->where('phone', $request->phone)
         ->update([
-            'code' => $request->code
+            'code' => $otp
         ]);
     
         // Send OTP to the new user
