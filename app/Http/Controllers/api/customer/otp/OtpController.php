@@ -18,15 +18,7 @@ class OtpController extends Controller
     public function create_code(Request $request){
         // https://bcknd.food2go.online/customer/otp/create_code
         // Keys
-        // email
-        $validator = Validator::make($request->all(), [
-            'email' => 'required',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
+        // email, phone
 
         $code = rand(10000, 99999);
         $user_codes = $this->user->get()->pluck('code')->toArray();
@@ -44,13 +36,20 @@ class OtpController extends Controller
         }
         $user->code = $code;
         $user->save();
-        $data = [
-            'code' => $code,
-            'name' => $user->f_name . ' ' . $user->l_name
-        ];
-        Mail::to($user->email)->send(new OTPMail($data));
-    
-
+        if ($request->email) {
+            $data = [
+                'code' => $code,
+                'name' => $user->f_name . ' ' . $user->l_name
+            ];
+            Mail::to($user->email)->send(new OTPMail($data));
+        } 
+        elseif($request->phone) {
+            # code...
+        }
+        else{
+            
+        }
+        
         return response()->json([
             'code' => $code,
         ]);
