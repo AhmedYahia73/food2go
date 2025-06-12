@@ -136,7 +136,7 @@ class CreateProductController extends Controller
                 foreach ($extra_group as $item) {
                     $new_extra = $this->extra
                     ->create([
-                        'name' => $item->names,
+                        'name' => $item->name,
                         'product_id' => $product->id,
                         'price' => $item->pricing,
                         'min' => $item->min,
@@ -219,7 +219,7 @@ class CreateProductController extends Controller
                                 // ]);// add extra for option
                                 $new_extra = $this->extra
                                 ->create([
-                                    'name' => $extra->names,
+                                    'name' => $extra->name,
                                     'product_id' => $product->id,
                                     'price' => $extra->pricing,
                                     'min' => $extra->min,
