@@ -45,13 +45,14 @@ class CustomerLoginController extends Controller
     public function add(Request $request){
         // https://bcknd.food2go.online/admin/settings/business_setup/customer_login/add
         // {"login": "manuel","verification": "email"}
-        // login => [manuel, otp], verification => [email, phone]
+        // login => [manuel, otp], verification => [email, phone]   
+        // verification => [email, phone], 
+        // email, integration_password
+        // user, pwd, senderid, mobileno, msgtext, CountryCode, profileid
         $validator = Validator::make($request->all(), [
             'verification' => ['required', 'in:email,phone'],
-
             'email' => ['required_if:verification,email', 'email'],
             'integration_password' => ['required_if:verification,email'],
-
             'user' => ['required_if:verification,phone'],
             'pwd' => ['required_if:verification,phone'],
             'senderid' => ['required_if:verification,phone'],
@@ -87,10 +88,52 @@ class CustomerLoginController extends Controller
             ]);
         }
         if ($request->verification == 'email') {
-            # code...
+            $email_integration = $this->email_integration
+            ->orderByDesc('id')
+            ->first();
+            if (empty($email_integration)) {
+                $this->email_integration
+                ->create([
+                    'email' => $request->email,
+                    'integration_password' => $request->integration_password,
+                ]);
+            } 
+            else {
+                $email_integration
+                ->update([
+                    'email' => $request->email,
+                    'integration_password' => $request->integration_password,
+                ]);
+            }
         }
         elseif ($request->verification == 'phone') {
-            # code...
+            $sms_integration = $this->sms_integration
+            ->orderByDesc('id')
+            ->first();
+            if (empty($sms_integration)) {
+                $this->sms_integration
+                ->create([
+                    'user' => $request->user,
+                    'pwd' => $request->pwd,
+                    'senderid' => $request->senderid,
+                    'mobileno' => $request->mobileno,
+                    'msgtext' => $request->msgtext,
+                    'CountryCode' => $request->CountryCode,
+                    'profileid' => $request->profileid,
+                ]);
+            } 
+            else {
+                $sms_integration
+                ->update([
+                    'user' => $request->user,
+                    'pwd' => $request->pwd,
+                    'senderid' => $request->senderid,
+                    'mobileno' => $request->mobileno,
+                    'msgtext' => $request->msgtext,
+                    'CountryCode' => $request->CountryCode,
+                    'profileid' => $request->profileid,
+                ]);
+            }
         }
 
         return response()->json([

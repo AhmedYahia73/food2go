@@ -24,8 +24,8 @@ class EmailIntegrationController extends Controller
 
     public function update(Request $request){
         $validator = Validator::make($request->all(), [
-            'email' => 'required|',
-            '' => 'required',
+            'email' => 'required|email',
+            'integration_password' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
