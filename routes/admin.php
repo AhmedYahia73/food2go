@@ -75,6 +75,8 @@ use App\Http\Controllers\api\admin\settings\business_setup\TimeSlotController;
 use App\Http\Controllers\api\admin\settings\business_setup\CustomerLoginController;
 use App\Http\Controllers\api\admin\settings\business_setup\OrderSettingController;
 use App\Http\Controllers\api\admin\settings\business_setup\OrderNotificationController;
+use App\Http\Controllers\api\admin\settings\business_setup\SMSIntegrationController;
+use App\Http\Controllers\api\admin\settings\business_setup\EmailIntegrationController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(GroupController::class)
@@ -477,7 +479,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::post('/update/{id}', 'modify')->middleware('can:edit_payment_method_auto');
         });
 
-        Route::prefix('business_setup')->group(function(){
+        Route::prefix('business_setup')->group(function(){s
+            
             Route::controller(CompanyController::class)
             ->prefix('company')->group(function(){
                 Route::get('/', 'view')->middleware('can:view_company_info');

@@ -27,10 +27,18 @@ class CustomerLoginController extends Controller
                 'name' => 'customer_login',
                 'setting' => $setting
             ]);
-        } 
+        }
+        $email_integration = $this->email_integration
+        ->orderByDesc('id')
+        ->first();
+        $sms_integration = $this->sms_integration
+        ->orderByDesc('id')
+        ->first();
 
         return response()->json([
             'customer_login' => $customer_login,
+            'email_integration' => $email_integration,
+            'sms_integration' => $sms_integration,
         ]);
     }
 
@@ -39,8 +47,18 @@ class CustomerLoginController extends Controller
         // {"login": "manuel","verification": "email"}
         // login => [manuel, otp], verification => [email, phone]
         $validator = Validator::make($request->all(), [
-            'login' => 'required|in:manuel,otp',
-            'verification' => 'in:email,phone',
+            'verification' => ['required', 'in:email,phone'],
+
+            'email' => ['required_if:verification,email', 'email'],
+            'integration_password' => ['required_if:verification,email'],
+
+            'user' => ['required_if:verification,phone'],
+            'pwd' => ['required_if:verification,phone'],
+            'senderid' => ['required_if:verification,phone'],
+            'mobileno' => ['required_if:verification,phone'],
+            'msgtext' => ['required_if:verification,phone'],
+            'CountryCode' => ['required_if:verification,phone'],
+            'profileid' => ['required_if:verification,phone'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -48,7 +66,7 @@ class CustomerLoginController extends Controller
             ],400);
         }
         $setting = [
-            'login' => $request->login,
+            'login' => 'otp',
             'verification' => $request->verification ?? null,
         ];
         $setting = json_encode($setting);
@@ -67,6 +85,12 @@ class CustomerLoginController extends Controller
             $customer_login->update([
                 'setting' => $setting
             ]);
+        }
+        if ($request->verification == 'email') {
+            # code...
+        }
+        elseif ($request->verification == 'phone') {
+            # code...
         }
 
         return response()->json([

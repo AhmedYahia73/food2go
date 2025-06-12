@@ -39,10 +39,7 @@ class ProductRequest extends FormRequest
             'excludes.*.names.*.exclude_name' => ['required'],
             'excludes.*.names.*.tranlation_id' => ['required', 'exists:translations,id'],
             'excludes.*.names.*.tranlation_name' => ['required'],
-            'extra.*.names.*.extra_name' => ['required'],
-            'extra.*.names.*.tranlation_id' => ['required', 'exists:translations,id'],
-            'extra.*.names.*.tranlation_name' => ['required'],
-            'extra.*.extra_price' => ['nullable', 'numeric'],
+            'extra.*.names.*.extra.*' => ['required', 'exists:extra_products,id'],
             'variations.*.names.*.name' => ['required'],
             'variations.*.names.*.tranlation_id' => ['required', 'exists:translations,id'],
             'variations.*.names.*.tranlation_name' => ['required'],
@@ -56,8 +53,7 @@ class ProductRequest extends FormRequest
             'variations.*.options.*.price' => ['required', 'numeric'],
             'variations.*.options.*.status' => ['required', 'boolean'],
             'variations.*.options.*.names.*.name' => ['required'],
-            'variations.*.options.*.extra.*.extra_price' => ['required', 'numeric'],
-            'variations.*.options.*.extra.*.extra_index' => ['required', 'numeric'],
+            'variations.*.options.*.extra.*' => ['required', 'exists:extra_products,id'],
             'variations.*.options.*.points' => ['numeric', 'required'],
         ];
     }
