@@ -479,7 +479,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::post('/update/{id}', 'modify')->middleware('can:edit_payment_method_auto');
         });
 
-        Route::prefix('business_setup')->group(function(){s
+        Route::prefix('business_setup')->group(function(){
             
             Route::controller(CompanyController::class)
             ->prefix('company')->group(function(){
