@@ -8,10 +8,14 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Setting;
+use App\Models\EmailIntegration;
+use App\Models\SmsIntegration;
 
 class CustomerLoginController extends Controller
 {
-    public function __construct(private Setting $settings){}
+    public function __construct(private Setting $settings,
+    private EmailIntegration $email_integration, 
+    private SmsIntegration $sms_integration){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/settings/business_setup/customer_login
