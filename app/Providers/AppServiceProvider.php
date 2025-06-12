@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Config;
 
+use App\Models\EmailIntegration;
+use App\Models\CompanyInfo;
 use App\Providers\gates\AdminGate;
 use App\Providers\gates\HomeGate;
 use App\Providers\gates\AddonsGate;
@@ -59,8 +61,6 @@ use App\Providers\gates\PosReportsGate;
 use App\Providers\gates\OrderDelayGate;
 
 use App\Providers\Cashier\CashierRoles;
- 
-use App\Models\CompanyInfo;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -86,6 +86,22 @@ class AppServiceProvider extends ServiceProvider
                 date_default_timezone_set($timezone);
             }
         } catch (\Throwable $th) {
+        }
+        try {
+            $email = EmailIntegration::orderByDesc('id')->first();
+            $company = CompanyInfo::orderByDesc('id')->first();
+
+            if ($email) {
+                Config::set('mail.mailers.smtp.username', $email->email);
+                Config::set('mail.mailers.smtp.password', $email->integration_password);
+                Config::set('mail.from.address', $email->email);
+            }
+
+            if ($company) {
+                Config::set('mail.from.name', $company->name);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
         }
         // , , 
         AdminGate::defineGates();
