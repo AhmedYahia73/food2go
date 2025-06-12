@@ -49,17 +49,38 @@ class SignupController extends Controller
         // keys
         // email
         $validator = Validator::make($request->all(), [ 
-            'email' => 'required|email|unique:users,id',
+            'email' => 'email|unique:users,email',
+            'phone' => 'unique:users,phone',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         }
-        $code = rand(10000, 99999);
-        $data['code'] = $code;
-        Mail::to($request->email)->send(new OTPMail($data));
 
+        if ($request->email) {
+            $code = rand(10000, 99999);
+            $data['code'] = $code;
+            Mail::to($request->email)->send(new OTPMail($data));
+        } 
+        elseif($request->phone) {
+            $temporaryToken = Str::random(40);
+            $otp = rand(10000, 99999);  // Generate OTP
+            $phone = $request->phone;
+            $user = $this->user
+            ->where('phone', $request->phone)
+            ->update([
+                'code' => $otp
+            ]);
+        
+            // Send OTP to the new user
+            $this->sendOtp($phone, $otp);
+        }
+        else{
+            return response()->json([
+                'errors' => 'Phone or email is requred'
+            ], 400);
+        }
         return response()->json([
             'code' => $code
         ]);
@@ -69,32 +90,43 @@ class SignupController extends Controller
     {
         // https://bcknd.food2go.online/api/user/auth/signup/phone_code
         // keys
-        // phone
-        $validator = Validator::make($request->all(), [ 
-            'phone' => 'required',
+        // phone, email
+        $validator = Validator::make($request->all(), [
+            'email' => 'email|unique:users,email',
+            'phone' => 'unique:users,phone',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         }
-        $temporaryToken = Str::random(40);
-        $otp = rand(10000, 99999);  // Generate OTP
-        $phone = $request->phone;
-        $user = $this->user
-        ->where('phone', $request->phone)
-        ->update([
-            'code' => $otp
-        ]);
-    
-        // Send OTP to the new user
-        $this->sendOtp($phone, $otp);
-    
+
+        if ($request->email) {
+            $code = rand(10000, 99999);
+            $data['code'] = $code;
+            Mail::to($request->email)->send(new OTPMail($data));
+        } 
+        elseif($request->phone) {
+            $temporaryToken = Str::random(40);
+            $otp = rand(10000, 99999);  // Generate OTP
+            $phone = $request->phone;
+            $user = $this->user
+            ->where('phone', $request->phone)
+            ->update([
+                'code' => $otp
+            ]);
+        
+            // Send OTP to the new user
+            $this->sendOtp($phone, $otp);
+        }
+        else{
+            return response()->json([
+                'errors' => 'Phone or email is requred'
+            ], 400);
+        }
         return response()->json([
-            'message' => 'OTP sent successfully.', 
-            'phone' => $phone,
-            'code' => $otp
-        ], 201);
+            'code' => $code
+        ]);
     }
     
     private function sendOtp($phone, $otp)
