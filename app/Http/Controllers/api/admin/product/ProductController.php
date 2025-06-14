@@ -29,8 +29,10 @@ class ProductController extends Controller
         'category', 'subCategory', 'discount', 'tax'])
         ->get()
         ->map(function($item) use($locale){
-            $item->name = $item->translations->where('key', $item->name)->first()?->value ?? $item->name;
-            $item->description = $item->translations->where('key', $item->description)->first()?->value ?? $item->description;
+            $item->name = $item->translations->where('key', $item->name)
+            ->where('locale', $locale)->first()?->value ?? $item->name;
+            $item->description = $item->translations->where('key', $item->description)
+            ->where('locale', $locale)->first()?->value ?? $item->description;
             return $item;
         });//extra_id
         $discounts = $this->discounts
