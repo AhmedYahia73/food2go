@@ -449,7 +449,7 @@ class CreateProductController extends Controller
                                 ->create([
                                     'name' => $extra->name,
                                     'product_id' => $product->id,
-                                    'price' => $extra->pricing,
+                                    'price' => $extra->price,
                                     'min' => $extra->min,
                                     'max' => $extra->max,
                                     'option_id' => $option->id, 
