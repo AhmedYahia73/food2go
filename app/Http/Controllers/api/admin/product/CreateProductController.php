@@ -444,7 +444,11 @@ class CreateProductController extends Controller
                             }
                         }
                         if (isset($element['extra']) && $element['extra']) {
-                            foreach ($element['extra'] as $key => $extra) {
+                            $extra_group = $this->extra_group
+                            ->whereIn('id', $element['extra'])
+                            ->with('translations')
+                            ->get();
+                            foreach ($extra_group as $key => $extra) {
                                 $new_extra = $this->extra
                                 ->create([
                                     'name' => $extra->name,
