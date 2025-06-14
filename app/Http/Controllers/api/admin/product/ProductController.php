@@ -21,12 +21,18 @@ class ProductController extends Controller
     private Translation $translations, private TranslationTbl $translation_tbl,
     private Group $group){}
 
-    public function view(){
+    public function view(Request $request){
         // https://bcknd.food2go.online/admin/product
+        $locale = $request->locale ?? 'en';
         $products = $this->products
         ->with(['addons', 'excludes', 'extra', 'variations.options.extra',
         'category', 'subCategory', 'discount', 'tax'])
-        ->get();//extra_id
+        ->get()
+        ->map(function($item) use($locale){
+            $item->name = $item->translations->where('key', $item->name)->first()?->value ?? $item->name;
+            $item->description = $item->translations->where('key', $item->description)->first()?->value ?? $item->description;
+            return $item;
+        });//extra_id
         $discounts = $this->discounts
         ->get();
         $taxes = $this->taxes
