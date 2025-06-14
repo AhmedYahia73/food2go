@@ -386,6 +386,7 @@ class HomeController extends Controller
     public function slider(){
         // https://bcknd.food2go.online/customer/home/slider
         $banners = $this->banner
+        ->where('status', 1)
         ->with('category_banner')
         ->orderBy('order')
         ->get();
