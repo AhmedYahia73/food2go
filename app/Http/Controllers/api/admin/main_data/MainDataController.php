@@ -19,10 +19,12 @@ class MainDataController extends Controller
         $main_data = $this->main_data
         ->orderByDesc('id')
         ->first();
-        $main_data->base = base_path();
-        $main_data->ar_name = $main_data->translations()
-        ->where('locale', 'ar')->where('key', $main_data->name)
-        ->first()?->value ?? null;
+        if (!empty($main_data)) {
+            $main_data->base = base_path();
+            $main_data->ar_name = $main_data->translations()
+            ->where('locale', 'ar')->where('key', $main_data->name)
+            ->first()?->value ?? null;
+        }
 
         return response()->json([
             'main_data' => $main_data
