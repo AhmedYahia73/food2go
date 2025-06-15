@@ -20,7 +20,6 @@ class MainDataController extends Controller
         ->orderByDesc('id')
         ->first();
         if (!empty($main_data)) {
-            $main_data->base = url('/');
             $main_data->ar_name = $main_data->translations()
             ->where('locale', 'ar')->where('key', $main_data->name)
             ->first()?->value ?? null;

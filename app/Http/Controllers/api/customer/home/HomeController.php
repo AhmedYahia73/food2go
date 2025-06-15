@@ -18,13 +18,32 @@ use App\Models\Translation;
 use App\Models\BranchOff;
 use App\Models\ScheduleSlot;
 use App\Models\Address;
+use App\Models\MainData;
 
 class HomeController extends Controller
 {
     public function __construct(private Category $categories, private User $user,
     private Product $product, private Banner $banner, private Setting $settings,
     private Translation $translations, private BranchOff $branch_off,
-    private Address $address, private ScheduleSlot $schedule_list){}
+    private Address $address, private ScheduleSlot $schedule_list,
+    private MainData $main_data){}
+
+    public function mainData(){
+        // https://bcknd.food2go.online/customer/main_data
+        $main_data = $this->main_data
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($main_data)) {
+            $main_data->base = url('/');
+            $main_data->ar_name = $main_data->translations()
+            ->where('locale', 'ar')->where('key', $main_data->name)
+            ->first()?->value ?? null;
+        }
+
+        return response()->json([
+            'main_data' => $main_data
+        ]);
+    }
 
     public function products(Request $request){
         // https://bcknd.food2go.online/customer/home
