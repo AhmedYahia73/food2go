@@ -429,7 +429,7 @@ class SettingController extends Controller
             $settings = $this->settings
             ->create([
                 'name' => 'repeated',
-                'setting' => $request->repeated
+                'setting' => 0
             ]);
         }
         $repeated = $settings->setting;
