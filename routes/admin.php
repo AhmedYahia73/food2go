@@ -77,6 +77,7 @@ use App\Http\Controllers\api\admin\settings\business_setup\OrderSettingControlle
 use App\Http\Controllers\api\admin\settings\business_setup\OrderNotificationController;
 use App\Http\Controllers\api\admin\settings\business_setup\SMSIntegrationController;
 use App\Http\Controllers\api\admin\settings\business_setup\EmailIntegrationController;
+use App\Http\Controllers\api\admin\main_data\MainDataController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(GroupController::class)
@@ -553,6 +554,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::put('/update_cancelation_notification', 'update_cancelation_notification');
             Route::get('/cancelation', 'cancelation');
             Route::put('/cancelation_status/{id}', 'cancelation_status');
+        });
+        
+        Route::controller(MainDataController::class)
+        ->group(function(){
+            Route::get('/main_data', 'view')->withOutMiddleware(['auth:sanctum', 'IsAdmin', 'can:isSettings']);
+            Route::post('/main_data/update', 'update')->withOutMiddleware(['auth:sanctum', 'IsAdmin', 'can:isSettings']);
         });
     });
 });
