@@ -19,6 +19,7 @@ use App\Models\BranchOff;
 use App\Models\ScheduleSlot;
 use App\Models\Address;
 use App\Models\MainData;
+use App\Models\MenueImage;
 use App\Models\Policy;
 
 class HomeController extends Controller
@@ -27,7 +28,8 @@ class HomeController extends Controller
     private Product $product, private Banner $banner, private Setting $settings,
     private Translation $translations, private BranchOff $branch_off,
     private Address $address, private ScheduleSlot $schedule_list,
-    private MainData $main_data, private Policy $policies){}
+    private MainData $main_data, private Policy $policies,
+    private MenueImage $menue_image){}
 
     public function mainData(){
         // https://bcknd.food2go.online/customer/main_data
@@ -553,6 +555,16 @@ class HomeController extends Controller
 
         return response()->json([
             'translation' => $translation
+        ]);
+    }
+
+    public function menue(){
+        $menue_images = $this->menue_image
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'menue_images' => $menue_images
         ]);
     }
 }

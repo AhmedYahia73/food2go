@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/schedule_list', 'schedule_list')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/main_data', 'mainData')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/policies', 'policies')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/menue', 'menue')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
         Route::get('/fav_products', 'fav_products');
