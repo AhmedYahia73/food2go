@@ -23,7 +23,12 @@ class MainData extends Model
         'third_color',
     ];
     protected $appends = ['image1_link', 'image2_link', 
-    'image3_link', 'image4_link', 'image5_link', 'image6_link'];
+    'image3_link', 'image4_link', 'image5_link', 'image6_link'
+    , 'logo_link'];
+
+    public function getLogoLinkAttribute(){
+        return url('storage/' . $this->logo);
+    }
 
     public function getImage1LinkAttribute(){
         return url('storage/' . $this->image_1);
