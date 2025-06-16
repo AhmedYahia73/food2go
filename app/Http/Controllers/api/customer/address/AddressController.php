@@ -11,11 +11,13 @@ use App\Models\Zone;
 use App\Models\User;
 use App\Models\Branch;
 use App\Models\City;
+use App\Models\CompanyInfo;
 
 class AddressController extends Controller
 {
     public function __construct(private Address $address, private Zone $zones, 
-    private User $user, private Branch $branch, private City $city){}
+    private User $user, private Branch $branch, private City $city, 
+    private CompanyInfo $company_info){}
     protected $AddressRequest = [
         'zone_id',
         'address',
@@ -71,11 +73,15 @@ class AddressController extends Controller
                 'status' => $item->status, 
             ];
         });
+        $call_center_phone = $this->company_info
+        ->orderByDesc('id')
+        ->first()?->phone;
 
         return response()->json([
             'addresses' => $addresses,
             'zones' => $zones,
             'branches' => $branches,
+            'call_center_phone' => $call_center_phone,
             'cities' => $cities,
         ]);
     }
