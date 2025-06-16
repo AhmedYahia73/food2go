@@ -266,7 +266,7 @@ class HomeController extends Controller
         $users = $this->users
         ->get();
         $top_customers = $users
-        ->sortByDesc('orders_count');
+        ->sortByDesc('orders_count')->values();
 
         return response()->json([
             'orders' => $orders_count,
