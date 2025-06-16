@@ -29,6 +29,7 @@ class UpdateBranchRequest extends FormRequest
             'address' => ['required'],          
             'email' => ['email', 'required', Rule::unique('branches')->ignore($userId)],
             'phone' => ['required', Rule::unique('branches')->ignore($userId)],
+            'phone_status' => ['required', 'boolean'],
             'food_preparion_time' => ['required'],
             'status' => ['required'],
             'latitude' => ['required', 'numeric'],

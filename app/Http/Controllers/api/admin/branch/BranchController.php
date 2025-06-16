@@ -26,6 +26,7 @@ class BranchController extends Controller
         'name',
         'address',
         'email',
+        'phone_status',
         'phone',
         'password',
         'food_preparion_time',

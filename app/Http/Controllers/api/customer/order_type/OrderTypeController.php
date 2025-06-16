@@ -8,17 +8,21 @@ use Illuminate\Http\Request;
 use App\Models\Setting;
 use App\Models\PaymentMethod;
 use App\Models\Branch;
+use App\Models\CompanyInfo;
 
 class OrderTypeController extends Controller
 {
     public function __construct(private Setting $settings, private PaymentMethod $payment_methods,
-    private Branch $branches){}
+    private Branch $branches, private CompanyInfo $company_info){}
 
     public function view(Request $request){
         // https://bcknd.food2go.online/customer/order_type
         $order_types = $this->settings
         ->where('name', 'order_type')
         ->first();
+        $call_center_phone = $this->company_info
+        ->orderByDesc('id')
+        ->first()?->phone;
         $branches = $this->branches
         ->get()
         ->map(function($item) use($request){
@@ -58,7 +62,8 @@ class OrderTypeController extends Controller
         return response()->json([
             'order_types' => $order_types,
             'payment_methods' => $payment_methods,
-            'branches' => $branches
+            'branches' => $branches,
+            'call_center_phone' => $call_center_phone,
         ]);
     }
 }

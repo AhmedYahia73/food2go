@@ -27,6 +27,7 @@ class BranchRequest extends FormRequest
             'address' => ['required'],
             'email' => ['required', 'email', 'unique:branches'],
             'phone' => ['required', 'unique:branches'],
+            'phone_status' => ['required', 'boolean'],
             'password' => ['required'],
             'food_preparion_time' => ['required'],
             'status' => ['required'],
