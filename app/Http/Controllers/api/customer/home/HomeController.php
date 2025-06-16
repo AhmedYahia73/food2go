@@ -45,6 +45,17 @@ class HomeController extends Controller
         ]);
     }
 
+    public function policies(){
+        // https://bcknd.food2go.online/customer/policies
+        $policies = $this->policies
+        ->orderByDesc('id')
+        ->first(); 
+
+        return response()->json([
+            'policies' => $policies
+        ]);
+    }
+
     public function products(Request $request){
         // https://bcknd.food2go.online/customer/home
         // Keys
