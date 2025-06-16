@@ -558,8 +558,10 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         
         Route::controller(MainDataController::class)
         ->group(function(){
-            Route::get('/main_data', 'view')->withOutMiddleware(['auth:sanctum', 'IsAdmin', 'can:isSettings']);
-            Route::post('/main_data/update', 'update')->withOutMiddleware(['auth:sanctum', 'IsAdmin', 'can:isSettings']);
+            Route::get('/main_data', 'view');
+            Route::post('/main_data/update', 'update');
+            Route::post('/policy', 'view_policy');
+            Route::post('/policy/update', 'update_policy');
         });
     });
 });

@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Validator;
 use App\trait\image;
 
 use App\Models\MainData;
+use App\Models\Policy;
 
 class MainDataController extends Controller
 {
-    public function __construct(private MainData $main_data){}
+    public function __construct(private MainData $main_data, private Policy $policy){}
     use image;
 
     public function view(){
@@ -124,6 +125,50 @@ class MainDataController extends Controller
             'key' => $request->name,
             'value' => $request->ar_name,
         ]);
+
+        return response()->json([
+            'success' => 'You update data success',
+            'request' => $request->all(),
+        ]);
+    }
+    
+
+    public function view_policy(){
+        // https://bcknd.food2go.online/admin/policy
+        $data = $this->policy
+        ->orderByDesc('id')
+        ->first();
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+    public function update_policy(Request $request){
+        // https://bcknd.food2go.online/admin/policy/update
+        //Key
+        // policy, support
+        $validator = Validator::make($request->all(), [
+            'policy' => 'required',
+            'support' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $data = $this->policy
+        ->orderByDesc('id')
+        ->first();
+        $dataRequest = $validator->validated();
+        if (empty($data)) { 
+            $data = $this->policy
+            ->create($dataRequest);
+        } 
+        else {
+            $data->update($dataRequest);
+        }
 
         return response()->json([
             'success' => 'You update data success',
