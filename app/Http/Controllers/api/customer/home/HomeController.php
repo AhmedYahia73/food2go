@@ -178,10 +178,7 @@ class HomeController extends Controller
             'variations' => function($query) use($locale){
                 $query->withLocale($locale)
                 ->with(['options' => function($query_option) use($locale){
-                    $query_option->with(['extra' => function($query_extra) use($locale){
-                        $query_extra->with('parent_extra')
-                        ->withLocale($locale);
-                    }])
+                    $query_option->with(['extra'])
                     ->withLocale($locale);
                 }]);
             }, 'sales_count', 'tax'])
@@ -310,10 +307,7 @@ class HomeController extends Controller
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options' => function($query_option) use($locale){
-                $query_option->with(['extra_pricing.extra' => function($query_extra) use($locale){
-                    $query_extra->with('parent_extra')
-                    ->withLocale($locale);
-                }])
+                $query_option->with(['extra'])
                 ->withLocale($locale);
             }]);
         }, 'sales_count', 'tax'])
