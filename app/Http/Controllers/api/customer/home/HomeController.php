@@ -46,7 +46,7 @@ class HomeController extends Controller
     }
 
     public function policies(){
-        // https://bcknd.food2go.online/customer/policies
+        // https://bcknd.food2go.online/customer/home/policies
         $policies = $this->policies
         ->orderByDesc('id')
         ->first(); 
