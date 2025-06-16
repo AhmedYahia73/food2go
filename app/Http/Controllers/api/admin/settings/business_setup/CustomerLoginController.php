@@ -38,6 +38,7 @@ class CustomerLoginController extends Controller
         $sms_integration = $this->sms_integration
         ->orderByDesc('id')
         ->first();
+        $customer_login = json_decode($customer_login->setting);
 
         return response()->json([
             'customer_login' => $customer_login,
