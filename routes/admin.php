@@ -560,7 +560,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         ->group(function(){
             Route::get('/main_data', 'view');
             Route::post('/main_data/update', 'update');
-            Route::post('/policy', 'view_policy');
+            Route::get('/policy', 'view_policy');
             Route::post('/policy/update', 'update_policy');
         });
     });
