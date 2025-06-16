@@ -21,6 +21,8 @@ class MainData extends Model
         'first_color',
         'second_color',
         'third_color',
+        'instagram',
+        'facebook',
     ];
     protected $appends = ['image1_link', 'image2_link', 
     'image3_link', 'image4_link', 'image5_link', 'image6_link'
