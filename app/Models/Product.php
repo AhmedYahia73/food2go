@@ -37,7 +37,7 @@ class Product extends Model
         'points',
         'kitchen_id',
     ];
-    protected $appends = ['image_link', 'orders_count', 'taxes', 'favourite'];
+    protected $appends = ['image_link', 'orders_count', 'taxes'];
 
     public function getTaxesAttribute(){
         return Setting::where('name', 'tax')
