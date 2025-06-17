@@ -52,6 +52,11 @@ class MainDataController extends Controller
         $dataRequest = [
             'name' => $request->name,
             'logo' => $request->logo,
+            'first_color' => $request->first_color ?? null,
+            'second_color' => $request->second_color ?? null,
+            'third_color' => $request->third_color ?? null,
+            'instagram' => $request->instagram ?? null,
+            'facebook' => $request->facebook ?? null,
         ];
         if (empty($main_data)) {
             if (!empty($request->logo) && !is_string($request->logo)) {
