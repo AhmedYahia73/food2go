@@ -37,12 +37,16 @@ class Product extends Model
         'points',
         'kitchen_id',
     ];
-    protected $appends = ['image_link', 'orders_count', 'taxes'];
+    protected $appends = ['image_link', 'orders_count', 'taxes', 'favourite'];
 
     public function getTaxesAttribute(){
         return Setting::where('name', 'tax')
         ->orderByDesc('id')
         ->first();
+    }
+
+    public function getFavouriteAttribute(){
+        return 
     }
 
     public function getImageLinkAttribute(){
