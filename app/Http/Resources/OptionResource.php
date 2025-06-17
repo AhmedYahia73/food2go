@@ -43,8 +43,7 @@ class OptionResource extends JsonResource
                 'product_id' => $this->product_id,
                 'variation_id' => $this->variation_id,
                 'status' => $this->status,
-                'points' => $this->points,
-                'extra_pricing' => $this->extra_pricing,
+                'points' => $this->points, 
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
                 
@@ -85,8 +84,7 @@ class OptionResource extends JsonResource
                 'product_id' => $this->product_id,
                 'variation_id' => $this->variation_id,
                 'status' => $this->status,
-                'points' => $this->points,
-                'extra_pricing' => $this->extra_pricing,
+                'points' => $this->points, 
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ];
