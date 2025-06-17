@@ -321,7 +321,7 @@ class HomeController extends Controller
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
                     return $variation;
                 });
-                return $product;
+                return $item;
             })->filter();
         }
         else{
