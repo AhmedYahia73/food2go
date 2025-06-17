@@ -415,7 +415,9 @@ class HomeController extends Controller
             $query->withLocale($locale);
         }, 'category_addons' => function($query) use($locale){
             $query->withLocale($locale);
-        }, 'favourite_product',
+        }, 'favourite_product' => function($query) use($user_id){
+                $query->where('users.id', $user_id);
+        },
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options' => function($query_option) use($locale){
@@ -429,7 +431,11 @@ class HomeController extends Controller
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($product) use($request){
+            $product->setAttribute('favourite', $product->favourite_product->isNotEmpty());
+            return $product;
+        });
              
         $products = ProductResource::collection($products);
 
