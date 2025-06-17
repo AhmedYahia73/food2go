@@ -415,8 +415,8 @@ class HomeController extends Controller
             $query->withLocale($locale);
         }, 'category_addons' => function($query) use($locale){
             $query->withLocale($locale);
-        }, 'favourite_product' => function($query) use($user_id){
-                $query->where('users.id', $user_id);
+        }, 'favourite_product' => function($query) use($request){
+                $query->where('users.id', $request->user()->id);
         },
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
