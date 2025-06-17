@@ -63,6 +63,9 @@ class MainDataController extends Controller
                 $imag_path = $this->upload($request, 'logo', 'admin/main_data/image');
                 $dataRequest['logo'] = $imag_path;
             }
+            else{
+                $dataRequest['logo'] = null;
+            }
             if (!empty($request->image_1) && !is_string($request->image_1)) {
                 $imag_path = $this->upload($request, 'image_1', 'admin/main_data/image');
                 $dataRequest['image_1'] = $imag_path;
@@ -94,6 +97,9 @@ class MainDataController extends Controller
             if (!empty($request->logo) && !is_string($request->logo)) {
                 $imag_path = $this->update_image($request, $main_data->logo, 'logo', 'admin/main_data/image');
                 $dataRequest['logo'] = $imag_path;
+            }
+            else{
+                $dataRequest['logo'] = null;
             }
             if (!empty($request->image_1) && !is_string($request->image_1)) {
                 $imag_path = $this->update_image($request, $main_data->image_1, 'image_1', 'admin/main_data/image');
