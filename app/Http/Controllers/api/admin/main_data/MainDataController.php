@@ -16,7 +16,7 @@ class MainDataController extends Controller
     use image;
 
     public function view(){
-        // https://bcknd.food2go.online/admin/main_data
+        // https://bcknd.food2go.online/admin/settings/main_data
         $main_data = $this->main_data
         ->orderByDesc('id')
         ->first();
@@ -32,7 +32,7 @@ class MainDataController extends Controller
     }
 
     public function update(Request $request){
-        // https://bcknd.food2go.online/admin/main_data/update
+        // https://bcknd.food2go.online/admin/settings/main_data/update
         //Key
         // name, status
         $validator = Validator::make($request->all(), [
