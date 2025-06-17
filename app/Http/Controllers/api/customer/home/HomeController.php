@@ -306,6 +306,12 @@ class HomeController extends Controller
             ->where('status', 1)
             ->get()
             ->map(function($product) use($category_off, $product_off, $option_off){ 
+                if (count($product->favourite_product) > 0) {
+                    $product->favourite = true;
+                }
+                else {
+                    $product->favourite = false;
+                }
                 if ($category_off->contains($product->category_id) || 
                 $category_off->contains($product->sub_category_id)
                 || $product_off->contains($product->id)) {
@@ -340,6 +346,8 @@ class HomeController extends Controller
             ->where('status', 1)
             ->get()
             ->map(function($product) use($category_off, $product_off, $option_off){ 
+         
+                $product->favourite = false;
                 if ($category_off->contains($product->category_id) || 
                 $category_off->contains($product->sub_category_id)
                 || $product_off->contains($product->id)) {

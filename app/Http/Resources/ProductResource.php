@@ -83,7 +83,6 @@ class ProductResource extends JsonResource
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
                 'favourite_product' => $this->whenLoaded('favourite_product'),
                 'sales_count' => $this->whenLoaded('sales_count'),
-                'favourite' => is_array($this->whenLoaded('favourite_product')) ? true : false,
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ];
@@ -145,8 +144,7 @@ class ProductResource extends JsonResource
                 'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')), 
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
                 'favourite_product' => $this->whenLoaded('favourite_product'),
-                'sales_count' => $this->whenLoaded('sales_count'),
-                'favourite' => !empty($this->whenLoaded('favourite_product')) ? true : false,
+                'sales_count' => $this->whenLoaded('sales_count'), 
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ];
