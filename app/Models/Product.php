@@ -45,9 +45,6 @@ class Product extends Model
         ->first();
     }
 
-    public function getFavouriteAttribute(){
-        return 
-    }
 
     public function getImageLinkAttribute(){
         return url('storage/' . $this->attributes['image']);
