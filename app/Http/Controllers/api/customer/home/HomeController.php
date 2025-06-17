@@ -167,7 +167,7 @@ class HomeController extends Controller
                 $query->withLocale($locale);
             },'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
-            }, 'discount', 'extra',
+            }, 'discount', 'extra', 
              
             'variations' => function($query) use($locale){
                 $query->withLocale($locale)
@@ -281,37 +281,76 @@ class HomeController extends Controller
             return !$category_off->contains($item->id);
         });
     
-        $products = $this->product
-        ->with(['addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'excludes' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'discount',
-        'sub_category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'extra',
-        'variations' => function($query) use($locale){
-            $query->withLocale($locale)
-            ->with(['options']);
-        }, 'sales_count', 'tax'])
-        ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
-        ->where('status', 1)
-        ->get()
-        ->map(function($product) use($category_off, $product_off, $option_off){ 
-            if ($category_off->contains($product->category_id) || 
-            $category_off->contains($product->sub_category_id)
-            || $product_off->contains($product->id)) {
-                return null;
+        if ($request->user_id) {
+            $products = $this->product
+            ->with(['addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'excludes' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 
+            'discount', 'favourite_product' => function($query) use($user_id){
+                $query->where('users.id', $user_id);
             }
-            $product->variations = $product->variations->map(function ($variation) use ($option_off) {
-                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                return $variation;
-            });
-            return $product;
-        })->filter();
+            ,'sub_category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'extra',
+            'variations' => function($query) use($locale){
+                $query->withLocale($locale)
+                ->with(['options']);
+            }, 'sales_count', 'tax'])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
+            ->get()
+            ->map(function($product) use($category_off, $product_off, $option_off){ 
+                if ($category_off->contains($product->category_id) || 
+                $category_off->contains($product->sub_category_id)
+                || $product_off->contains($product->id)) {
+                    return null;
+                }
+                $product->variations = $product->variations->map(function ($variation) use ($option_off) {
+                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                    return $variation;
+                });
+                return $product;
+            })->filter();
+        }
+        else{
+            $products = $this->product
+            ->with(['addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'excludes' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 
+            'discount'
+            ,'sub_category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'category_addons' => function($query) use($locale){
+                $query->withLocale($locale);
+            }, 'extra',
+            'variations' => function($query) use($locale){
+                $query->withLocale($locale)
+                ->with(['options']);
+            }, 'sales_count', 'tax'])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
+            ->get()
+            ->map(function($product) use($category_off, $product_off, $option_off){ 
+                if ($category_off->contains($product->category_id) || 
+                $category_off->contains($product->sub_category_id)
+                || $product_off->contains($product->id)) {
+                    return null;
+                }
+                $product->variations = $product->variations->map(function ($variation) use ($option_off) {
+                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                    return $variation;
+                });
+                return $product;
+            })->filter();
+        }
             
         $discounts = $this->product
         ->with('discount')
