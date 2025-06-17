@@ -110,9 +110,6 @@ class HomeController extends Controller
                 $query->withLocale($locale);
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
-            }, 'extra' => function($query) use($locale){
-                $query->whereNull('option_id')
-                ->withLocale($locale);
             }, 'discount', 
             'variations' => function($query) use($locale){
                 $query->withLocale($locale)
@@ -170,17 +167,11 @@ class HomeController extends Controller
                 $query->withLocale($locale);
             },'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
-            }, 'extra' => function($query) use($locale){
-                $query->whereNull('option_id')
-                ->withLocale($locale);
             }, 'discount', 
              
             'variations' => function($query) use($locale){
                 $query->withLocale($locale)
-                ->with(['options' => function($query_option) use($locale){
-                    $query_option->with(['extra'])
-                    ->withLocale($locale);
-                }]);
+                ->with(['options']);
             }, 'sales_count', 'tax'])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
@@ -295,9 +286,6 @@ class HomeController extends Controller
             $query->withLocale($locale);
         }, 'excludes' => function($query) use($locale){
             $query->withLocale($locale);
-        }, 'extra' => function($query) use($locale){
-            $query->whereNull('option_id')
-            ->withLocale($locale);
         }, 'discount',
         'sub_category_addons' => function($query) use($locale){
             $query->withLocale($locale);
@@ -306,10 +294,7 @@ class HomeController extends Controller
         },
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
-            ->with(['options' => function($query_option) use($locale){
-                $query_option->with(['extra'])
-                ->withLocale($locale);
-            }]);
+            ->with(['options']);
         }, 'sales_count', 'tax'])
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
