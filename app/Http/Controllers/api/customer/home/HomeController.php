@@ -282,6 +282,7 @@ class HomeController extends Controller
         });
     
         if ($request->user_id) {
+            $user_id = $request->user_id;
             $products = $this->product
             ->with(['addons' => function($query) use($locale){
                 $query->withLocale($locale);
