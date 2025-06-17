@@ -82,8 +82,7 @@ class ProductResource extends JsonResource
                 'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')), 
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
                 'favourite_product' => $this->whenLoaded('favourite_product'),
-                'sales_count' => $this->whenLoaded('sales_count'),
-                'favourite' => false,
+                'sales_count' => $this->whenLoaded('sales_count'), 
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ];
