@@ -306,22 +306,23 @@ class HomeController extends Controller
             ->where('status', 1)
             ->get()
             ->map(function($item) use($category_off, $product_off, $option_off){ 
-                if (count($item->favourite_product) > 0) {
-                    $item->favourite = true;
+                $product = clone $item;
+                if (count($product->favourite_product) > 0) {
+                    $product->favourite = true;
                 }
                 else {
-                    $item->favourite = false;
+                    $product->favourite = false;
                 }
-                if ($category_off->contains($item->category_id) || 
-                $category_off->contains($item->sub_category_id)
-                || $product_off->contains($item->id)) {
+                if ($category_off->contains($product->category_id) || 
+                $category_off->contains($product->sub_category_id)
+                || $product_off->contains($product->id)) {
                     return null;
                 }
-                $item->variations = $item->variations->map(function ($variation) use ($option_off) {
+                $product->variations = $product->variations->map(function ($variation) use ($option_off) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
                     return $variation;
                 });
-                return $item;
+                return $product;
             })->filter();
         }
         else{
