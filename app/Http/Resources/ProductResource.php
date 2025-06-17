@@ -16,7 +16,7 @@ class ProductResource extends JsonResource
     {
         $allExtras = [];
         $allExtras = $this->extra->toArray();  
-        
+
         if (!empty($this->addons) && !empty($this->category_addons) && !empty($this->sub_category_addons)) {   
             $addons = collect([])
             ->merge(AddonResource::collection($this->whenLoaded('addons')))
@@ -51,7 +51,7 @@ class ProductResource extends JsonResource
             $tax = $price;
             return [
                 'id' => $this->id,
-                'allExtras' => $allExtras,
+                'allExtras' => ExtraResource::collection($this->whenLoaded('extra')),
                 'taxes' => $this->taxes->setting,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
                 'description' => $this->translations->where('key', $this->description)->first()?->value ?? $this->description,
@@ -79,8 +79,7 @@ class ProductResource extends JsonResource
                 'discount' => $this->whenLoaded('discount'),
                 'tax' => $this->whenLoaded('tax'),
                 'addons' => $addons, 
-                'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')),
-                'extra' => ExtraResource::collection($this->whenLoaded('extra')),
+                'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')), 
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
                 'favourite_product' => $this->whenLoaded('favourite_product'),
                 'sales_count' => $this->whenLoaded('sales_count'),
@@ -115,7 +114,7 @@ class ProductResource extends JsonResource
             }
             return [
                 'id' => $this->id,
-                'allExtras' => $allExtras,
+                'allExtras' => ExtraResource::collection($this->whenLoaded('extra')),
                 'taxes' => $this->taxes->setting,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
                 'description' => $this->translations->where('key', $this->description)->first()?->value ?? $this->description,
@@ -143,8 +142,7 @@ class ProductResource extends JsonResource
                 'discount' => $this->whenLoaded('discount'),
                 'tax' => $this->whenLoaded('tax'),
                 'addons' => $addons, 
-                'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')),
-                'extra' => ExtraResource::collection($this->whenLoaded('extra')),
+                'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')), 
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
                 'favourite_product' => $this->whenLoaded('favourite_product'),
                 'sales_count' => $this->whenLoaded('sales_count'),

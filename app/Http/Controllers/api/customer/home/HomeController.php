@@ -110,7 +110,7 @@ class HomeController extends Controller
                 $query->withLocale($locale);
             }, 'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
-            }, 'discount', 
+            }, 'discount', 'extra',
             'variations' => function($query) use($locale){
                 $query->withLocale($locale)
                 ->with(['options' => function($query_option) use($locale){
@@ -167,7 +167,7 @@ class HomeController extends Controller
                 $query->withLocale($locale);
             },'excludes' => function($query) use($locale){
                 $query->withLocale($locale);
-            }, 'discount', 
+            }, 'discount', 'extra',
              
             'variations' => function($query) use($locale){
                 $query->withLocale($locale)
@@ -291,7 +291,7 @@ class HomeController extends Controller
             $query->withLocale($locale);
         }, 'category_addons' => function($query) use($locale){
             $query->withLocale($locale);
-        },
+        }, 'extra',
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options']);
