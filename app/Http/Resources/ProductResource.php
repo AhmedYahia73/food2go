@@ -17,14 +17,6 @@ class ProductResource extends JsonResource
         $allExtras = [];
         $allExtras = $this->extra->toArray();  
         
-        // Merge variation's extras
-            foreach ($this->variations as $variation) {
-                foreach ($variation->options as $option) {
-                    $allExtras = array_merge($allExtras, $option->extra->toArray()); // Merge correctly
-                }
-            }
-        
-
         if (!empty($this->addons) && !empty($this->category_addons) && !empty($this->sub_category_addons)) {   
             $addons = collect([])
             ->merge(AddonResource::collection($this->whenLoaded('addons')))
