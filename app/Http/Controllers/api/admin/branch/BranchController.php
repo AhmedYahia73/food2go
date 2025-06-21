@@ -287,12 +287,48 @@ class BranchController extends Controller
             $query->where('status', 1);
         }])
         ->get()
-        ->map(function($item) use($option_off, $id) {
-            $item->options->map(function($element) use($option_off, $id) {
+        ->map(function($item) use($option_off) {
+            $item->options->map(function($element) use($option_off) {
+                if (in_array($element->id, $option_off)) {
+                    $element->status = 0;
+                } 
+                return $element;
+            });
+            return $item;
+        });
+
+        return response()->json([
+            'variations' => $variations,
+        ]);
+    }
+
+    public function branch_product_options(Request $request){
+        // /admin/branch/branch_product_options
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+            'product_id' => 'required|exists:products,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $request->product_id)
+        ->get();
+        $option_off = $branch_off->pluck('option_id')->filter()->toArray();
+        $variations = $this->variations
+        ->where('product_id', $request->product_id)
+        ->with(['options' => function($query){
+            $query->where('status', 1);
+        }])
+        ->get()
+        ->map(function($item) use($option_off, $request) {
+            $item->options->map(function($element) use($option_off, $request) {
                 if (in_array($element->id, $option_off)) {
                     $element->status = 0;
                 }
-                $element->price = $element?->option_pricing->where('branch_id', $id)
+                $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
                 ->first()?->price ?? $element->price;
                 return $element;
             });
