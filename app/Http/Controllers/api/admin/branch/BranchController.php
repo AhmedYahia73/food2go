@@ -420,7 +420,7 @@ class BranchController extends Controller
         ->where('branch_id', $request->branch_id)
         ->first();
 
-        if (emprt($products)) {
+        if (empty($products)) {
             $this->product_pricing
             ->create([
                 'product_id' => $request->product_id,
@@ -455,7 +455,7 @@ class BranchController extends Controller
         ->where('branch_id', $request->branch_id)
         ->first();
 
-        if (emprt($option_pricing)) {
+        if (empty($option_pricing)) {
             $this->product_pricing
             ->create([
                 'option_id' => $request->option_id,
