@@ -16,12 +16,15 @@ use App\Models\Product;
 use App\Models\VariationProduct;
 use App\Models\BranchOff;
 use App\Models\PersonalAccessToken;
+use App\Models\ProductPricing;
+use App\Models\OptionPricing;
 
 class BranchController extends Controller
 {
     public function __construct(private Branch $branches, private Category $categories
     , private Product $products, private BranchOff $branch_off,
-    private VariationProduct $variations){}
+    private VariationProduct $variations, private ProductPricing $product_pricing,
+    private OptionPricing $option_pricing){}
     protected $branchRequest = [
         'name',
         'address',
@@ -242,7 +245,7 @@ class BranchController extends Controller
         $products = $this->products
         ->where('status', 1)
         ->get()
-        ->map(function($item) use($branch_off) {
+        ->map(function($item) use($branch_off, $id) {
             $product_off = $branch_off->pluck('product_id')->filter()->toArray();
             $category_off = $branch_off->pluck('category_id')->filter()->toArray();
             if (in_array($item->id, $product_off)) {
@@ -251,6 +254,8 @@ class BranchController extends Controller
             if (in_array($item->category_id, $category_off) || in_array($item->sub_category_id, $category_off)) {
                 $item->status = 0;
             }
+            $item->price = $item?->product_pricing->where('branch_id', $id)
+            ->first()?->price ?? $item->price;
             return $item;
         });
         $categories = $this->categories
@@ -283,10 +288,12 @@ class BranchController extends Controller
         }])
         ->get()
         ->map(function($item) use($option_off) {
-            $item->options->map(function($element) use($option_off) {
+            $item->options->map(function($element) use($option_off, $id) {
                 if (in_array($element->id, $option_off)) {
                     $element->status = 0;
                 }
+                $element->price = $element?->option_pricing->where('branch_id', $id)
+                ->first()?->price ?? $element->price;
                 return $element;
             });
             return $item;
@@ -393,6 +400,76 @@ class BranchController extends Controller
         
         return response()->json([
             'success' => 'You change status success'
+        ]);
+    }
+
+    public function product_pricing(Request $request){
+        $validator = Validator::make($request->all(), [
+            'product_id' => 'required|exists:products,id',
+            'branch_id' => 'required|exists:branches,id',
+            'price' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        
+        $products = $this->product_pricing
+        ->where('product_id', $request->product_id)
+        ->where('branch_id', $request->branch_id)
+        ->first();
+
+        if (emprt($products)) {
+            $this->product_pricing
+            ->create([
+                'product_id' => $request->product_id,
+                'branch_id' => $request->branch_id,
+                'price' => $request->price,
+            ]);
+        } 
+        else {
+            $products->price = $request->price;
+            $products->save();
+        }
+        
+        return response()->json([
+            'success' => 'You add data success'
+        ]);
+    }
+
+    public function option_pricing(Request $request){
+        $validator = Validator::make($request->all(), [
+            'option_id' => 'required|exists:option_products,id',
+            'branch_id' => 'required|exists:branches,id',
+            'price' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        
+        $option_pricing = $this->option_pricing
+        ->where('option_id', $request->option_id)
+        ->where('branch_id', $request->branch_id)
+        ->first();
+
+        if (emprt($option_pricing)) {
+            $this->product_pricing
+            ->create([
+                'option_id' => $request->option_id,
+                'branch_id' => $request->branch_id,
+                'price' => $request->price,
+            ]);
+        } 
+        else {
+            $option_pricing->price = $request->price;
+            $option_pricing->save();
+        }
+        
+        return response()->json([
+            'success' => 'You add data success'
         ]);
     }
 }

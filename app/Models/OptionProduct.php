@@ -21,6 +21,10 @@ class OptionProduct extends Model
     ];
     protected $appends = ['taxes'];
 
+    public function option_pricing(){
+        return $this->hasMany(OptionPricing::class, 'option_id');
+    }
+
     public function extra(){
         return $this->hasMany(ExtraProduct::class, 'option_id');
     }
