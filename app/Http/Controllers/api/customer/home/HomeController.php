@@ -132,6 +132,8 @@ class HomeController extends Controller
                 else {
                     $product->favourite = false;
                 }
+                $product->price = $product?->product_pricing->where('branch_id', $id)
+                ->first()?->price ?? $product->price;
                 //get count of sales of product to detemine stock
                 if ($product->stock_type == 'fixed') {
                     $product->count = $product->sales_count->sum('count');
@@ -152,6 +154,11 @@ class HomeController extends Controller
                 }
                 $product->variations = $product->variations->map(function ($variation) use ($option_off) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                    $variation->options = $variation->options->map(function($element){
+                        $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
+                        ->first()?->price ?? $element->price;
+                        return $element;
+                    });
                     return $variation;
                 });
                 return $product;
@@ -178,13 +185,20 @@ class HomeController extends Controller
             ->where('status', 1)
             ->get()
             ->map(function($product) use($category_off, $product_off, $option_off){ 
+                $product->price = $product?->product_pricing->where('branch_id', $id)
+                ->first()?->price ?? $product->price;
                 if ($category_off->contains($product->category_id) || 
                 $category_off->contains($product->sub_category_id)
                 || $product_off->contains($product->id)) {
                     return null;
                 }
                 $product->variations = $product->variations->map(function ($variation) use ($option_off) {
-                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));     
+                    $variation->options = $variation->options->map(function($element){
+                        $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
+                        ->first()?->price ?? $element->price;
+                        return $element;
+                    });
                     return $variation;
                 });
                 return $product;
@@ -307,6 +321,8 @@ class HomeController extends Controller
             ->get()
             ->map(function($item) use($category_off, $product_off, $option_off){ 
                 
+                $item->price = $item?->product_pricing->where('branch_id', $id)
+                ->first()?->price ?? $item->price;
                 $item->setAttribute('favourite', $item->favourite_product->isNotEmpty());
                 if ($category_off->contains($item->category_id) || 
                 $category_off->contains($item->sub_category_id)
@@ -315,6 +331,11 @@ class HomeController extends Controller
                 }
                 $item->variations = $item->variations->map(function ($variation) use ($option_off) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                    $variation->options = $variation->options->map(function($element){
+                        $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
+                        ->first()?->price ?? $element->price;
+                        return $element;
+                    });
                     return $variation;
                 });
                 return $item;
@@ -343,6 +364,8 @@ class HomeController extends Controller
             ->get()
             ->map(function($product) use($category_off, $product_off, $option_off){ 
         
+                $item->price = $item?->product_pricing->where('branch_id', $id)
+                ->first()?->price ?? $item->price;
                 if ($category_off->contains($product->category_id) || 
                 $category_off->contains($product->sub_category_id)
                 || $product_off->contains($product->id)) {
@@ -350,6 +373,11 @@ class HomeController extends Controller
                 }
                 $product->variations = $product->variations->map(function ($variation) use ($option_off) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                    $variation->options = $variation->options->map(function($element){
+                        $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
+                        ->first()?->price ?? $element->price;
+                        return $element;
+                    });
                     return $variation;
                 });
                 return $product;
