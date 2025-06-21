@@ -492,7 +492,7 @@ class BranchController extends Controller
         ->first();
 
         if (empty($option_pricing)) {
-            $this->product_pricing
+            $this->option_pricing
             ->create([
                 'option_id' => $request->option_id,
                 'branch_id' => $request->branch_id,
