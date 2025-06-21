@@ -125,14 +125,14 @@ class HomeController extends Controller
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
             ->get()
-            ->map(function($product) use($category_off, $product_off, $option_off){
+            ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
                 if (count($product->favourite_product) > 0) {
                     $product->favourite = true;
                 }
                 else {
                     $product->favourite = false;
                 }
-                $product->price = $product?->product_pricing->where('branch_id', $id)
+                $product->price = $product?->product_pricing->where('branch_id', $branch_id)
                 ->first()?->price ?? $product->price;
                 //get count of sales of product to detemine stock
                 if ($product->stock_type == 'fixed') {
@@ -184,8 +184,8 @@ class HomeController extends Controller
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
             ->get()
-            ->map(function($product) use($category_off, $product_off, $option_off){ 
-                $product->price = $product?->product_pricing->where('branch_id', $id)
+            ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){ 
+                $product->price = $product?->product_pricing->where('branch_id', $branch_id)
                 ->first()?->price ?? $product->price;
                 if ($category_off->contains($product->category_id) || 
                 $category_off->contains($product->sub_category_id)
@@ -319,9 +319,9 @@ class HomeController extends Controller
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
             ->get()
-            ->map(function($item) use($category_off, $product_off, $option_off){ 
+            ->map(function($item) use($category_off, $product_off, $option_off, $branch_id){ 
                 
-                $item->price = $item?->product_pricing->where('branch_id', $id)
+                $item->price = $item?->product_pricing->where('branch_id', $branch_id)
                 ->first()?->price ?? $item->price;
                 $item->setAttribute('favourite', $item->favourite_product->isNotEmpty());
                 if ($category_off->contains($item->category_id) || 
@@ -362,9 +362,9 @@ class HomeController extends Controller
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
             ->get()
-            ->map(function($product) use($category_off, $product_off, $option_off){ 
+            ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){ 
         
-                $item->price = $item?->product_pricing->where('branch_id', $id)
+                $item->price = $item?->product_pricing->where('branch_id', $branch_id)
                 ->first()?->price ?? $item->price;
                 if ($category_off->contains($product->category_id) || 
                 $category_off->contains($product->sub_category_id)
