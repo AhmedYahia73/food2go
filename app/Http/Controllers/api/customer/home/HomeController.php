@@ -152,10 +152,10 @@ class HomeController extends Controller
                 || $product_off->contains($product->id)) {
                     return null;
                 }
-                $product->variations = $product->variations->map(function ($variation) use ($option_off) {
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                    $variation->options = $variation->options->map(function($element){
-                        $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
+                    $variation->options = $variation->options->map(function($element) use($branch_id){
+                        $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                         ->first()?->price ?? $element->price;
                         return $element;
                     });
@@ -192,10 +192,10 @@ class HomeController extends Controller
                 || $product_off->contains($product->id)) {
                     return null;
                 }
-                $product->variations = $product->variations->map(function ($variation) use ($option_off) {
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));     
-                    $variation->options = $variation->options->map(function($element){
-                        $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
+                    $variation->options = $variation->options->map(function($element) use($branch_id){
+                        $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                         ->first()?->price ?? $element->price;
                         return $element;
                     });
@@ -329,10 +329,10 @@ class HomeController extends Controller
                 || $product_off->contains($item->id)) {
                     return null;
                 }
-                $item->variations = $item->variations->map(function ($variation) use ($option_off) {
+                $item->variations = $item->variations->map(function ($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                    $variation->options = $variation->options->map(function($element){
-                        $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
+                    $variation->options = $variation->options->map(function($element) use($branch_id){
+                        $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                         ->first()?->price ?? $element->price;
                         return $element;
                     });
@@ -371,10 +371,10 @@ class HomeController extends Controller
                 || $product_off->contains($product->id)) {
                     return null;
                 }
-                $product->variations = $product->variations->map(function ($variation) use ($option_off) {
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
                     $variation->options = $variation->options->map(function($element){
-                        $element->price = $element?->option_pricing->where('branch_id', $request->branch_id)
+                        $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                         ->first()?->price ?? $element->price;
                         return $element;
                     });
