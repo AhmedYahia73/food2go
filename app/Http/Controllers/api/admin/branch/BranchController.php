@@ -287,7 +287,7 @@ class BranchController extends Controller
             $query->where('status', 1);
         }])
         ->get()
-        ->map(function($item) use($option_off) {
+        ->map(function($item) use($option_off, $id) {
             $item->options->map(function($element) use($option_off, $id) {
                 if (in_array($element->id, $option_off)) {
                     $element->status = 0;
