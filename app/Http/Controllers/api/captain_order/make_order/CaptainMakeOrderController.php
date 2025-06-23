@@ -49,19 +49,7 @@ class CaptainMakeOrderController extends Controller
     public function lists(Request $request){
         // /captain/lists
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
-        $branch_id = 0;
-        $payment_methods = $this->paymentMethod
-        ->where('status', 1)
-        ->get();
-        if ($request->branch_id && !empty($request->branch_id)) {
-            $branch_id = $request->branch_id;
-        }
-        if ($request->address_id && !empty($request->address_id)) {
-            $address = $this->address
-            ->where('id', $request->address_id)
-            ->first();
-            $branch_id = $address?->zone?->branch_id;
-        }
+        $branch_id = $request->user()->branch_id ;
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();
@@ -109,8 +97,10 @@ class CaptainMakeOrderController extends Controller
         ->where('item_type', '!=', 'offline')
         ->where('status', 1)
         ->get()
-        ->map(function($product) use($category_off, $product_off, $option_off){
+        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
             //get count of sales of product to detemine stock
+                $item->price = $item?->product_pricing->where('branch_id', $branch_id)
+                ->first()?->price ?? $item->price;
             if ($product->stock_type == 'fixed') {
                 $product->count = $product->sales_count->sum('count');
                 $product->in_stock = $product->number > $product->count ? true : false;
@@ -129,8 +119,13 @@ class CaptainMakeOrderController extends Controller
                 return null;
             }
             $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product) {
+            use ($option_off, $product, $branch_id) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                $variation->options = $variation->options->map(function($element) use($branch_id){
+                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+                    ->first()?->price ?? $element->price;
+                    return $element;
+                });
               
                 return $variation;
             });
