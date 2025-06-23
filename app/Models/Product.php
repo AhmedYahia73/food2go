@@ -99,8 +99,7 @@ class Product extends Model
     }
 
     public function favourite(){
-        return $this->belongsToMany(User::class, 'favourit_product')
-        ->where('users.id', auth()->user()->id);
+        return $this->belongsToMany(User::class, 'favourit_product');
     }
 
     public function sales_count(){

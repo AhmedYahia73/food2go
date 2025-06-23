@@ -111,8 +111,9 @@ class CaptainMakeOrderController extends Controller
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
             //get count of sales of product to detemine stock
-                $product->price = $product?->product_pricing->where('branch_id', $branch_id)
-                ->first()?->price ?? $product->price;
+            $product->price = $product?->product_pricing->where('branch_id', $branch_id)
+            ->first()?->price ?? $product->price;
+            $product->favourite = false;
             if ($product->stock_type == 'fixed') {
                 $product->count = $product->sales_count->sum('count');
                 $product->in_stock = $product->number > $product->count ? true : false;
