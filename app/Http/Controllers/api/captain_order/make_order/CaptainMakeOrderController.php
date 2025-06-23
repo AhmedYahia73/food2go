@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\captain_order\make_order;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\captain\order\OrderRequest;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 
@@ -48,8 +49,19 @@ class CaptainMakeOrderController extends Controller
 
     public function lists(Request $request){
         // /captain/lists
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $paymentMethod = $this->paymentMethod
+        ->where('status', 1)
+        ->get();
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
-        $branch_id = $request->user()->branch_id ;
+        $branch_id = $request->branch_id;
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();
@@ -99,8 +111,8 @@ class CaptainMakeOrderController extends Controller
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
             //get count of sales of product to detemine stock
-                $item->price = $item?->product_pricing->where('branch_id', $branch_id)
-                ->first()?->price ?? $item->price;
+                $product->price = $product?->product_pricing->where('branch_id', $branch_id)
+                ->first()?->price ?? $product->price;
             if ($product->stock_type == 'fixed') {
                 $product->count = $product->sales_count->sum('count');
                 $product->in_stock = $product->number > $product->count ? true : false;
@@ -147,7 +159,7 @@ class CaptainMakeOrderController extends Controller
             'categories' => $categories,
             'products' => $products, 
             'cafe_location' => $cafe_location,
-            'payment_methods' => $payment_methods,
+            'payment_methods' => $paymentMethod,
         ]);
     }
 
