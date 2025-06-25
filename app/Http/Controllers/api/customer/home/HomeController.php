@@ -373,7 +373,7 @@ class HomeController extends Controller
                 }
                 $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                    $variation->options = $variation->options->map(function($element){
+                    $variation->options = $variation->options->map(function($element) use($branch_id){
                         $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                         ->first()?->price ?? $element->price;
                         return $element;
