@@ -364,8 +364,8 @@ class HomeController extends Controller
             ->get()
             ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){ 
         
-                $item->price = $item?->product_pricing->where('branch_id', $branch_id)
-                ->first()?->price ?? $item->price;
+                $product->price = $product?->product_pricing->where('branch_id', $branch_id)
+                ->first()?->price ?? $product->price;
                 if ($category_off->contains($product->category_id) || 
                 $category_off->contains($product->sub_category_id)
                 || $product_off->contains($product->id)) {
