@@ -147,6 +147,9 @@ trait PlaceOrder
         if (!empty($request->user_id) && is_numeric($request->user_id)) {
             $orderRequest['user_id'] = $request->user_id;
         }
+        if (!empty($request->customer_id) && is_numeric($request->customer_id)) {
+            $orderRequest['customer_id'] = $request->customer_id;
+        }
         
         $orderRequest['order_status'] = 'pending';
         if ($request->table_id) {
