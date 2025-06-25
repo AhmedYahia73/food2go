@@ -28,6 +28,7 @@ class SignupRequest extends FormRequest
             'l_name' => ['required'],
             'email' => ['email', 'required', 'unique:users,email'],
             'phone' => ['required', 'unique:users,phone'],
+            'phone_2' => ['nullable', 'unique:users,phone_2'],
             'password' => ['required'],
             'conf_password' => ['required', 'same:password'],
         ];
