@@ -405,7 +405,7 @@ class CashierMakeOrderController extends Controller
         foreach ($orders as $key => $item) {
             $product[$key]['exclude_id'] = collect($item->excludes)->pluck('id');
             $product[$key]['extra_id'] = collect($item->extras)->pluck('id');
-            $product[$key]['variation'] = collect($item->variations)->map(function($element){
+            $product[$key]['variation'] = collect($item->variation)->map(function($element){
                 return [
                     'variation_id' => $element->variation->id,
                     'option_id' => collect($element->options)->pluck('id'),

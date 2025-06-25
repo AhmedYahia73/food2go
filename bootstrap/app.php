@@ -9,6 +9,7 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CustomerMiddleware;
 use App\Http\Middleware\DeliveryMiddleware;
 use App\Http\Middleware\CaptainMiddleware;
+use App\Http\Middleware\BranchMiddleware;
 use App\Http\Middleware\CashierMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -23,6 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ->prefix('admin')
             ->name('admin.')
             ->group(base_path('routes/admin.php'));
+            Route::middleware('api')
+            ->prefix('branch')
+            ->name('branch.')
+            ->group(base_path('routes/branch.php'));
             Route::middleware('api')
             ->prefix('customer')
             ->name('customer.')
@@ -48,6 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'IsDelivery' => DeliveryMiddleware::class,
             'IsCaptain' => CaptainMiddleware::class,
             'IsCashier' => CashierMiddleware::class,
+            'IsBranch' => BranchMiddleware::class,
         ]);
          $middleware->redirectGuestsTo(function (Request $request) {
             if (!$request->is('api/*')) {
