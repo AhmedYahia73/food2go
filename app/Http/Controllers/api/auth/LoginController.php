@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\auth\LoginRequest;
 use App\Http\Requests\auth\SignupRequest;
+use Google_Client;
 
 use App\Models\Admin;
 use App\Models\Delivery;
@@ -203,5 +204,70 @@ class LoginController extends Controller
                 'faild' => 'You faild to logout'
             ], 400);
         }
+    }
+
+    public function sign_up_google(Request $request){
+        $validation = Validator::make($request->all(),[
+            'id_token' => 'required',
+            'client_id' => 'required',
+            'phone' => 'required|unique:table,column,except,id',
+        ]);
+        if($validation->fails()){
+            return response()->json(['message'=>$validation->errors()],400);
+        }
+
+        $client = new Google_Client(['client_id' => $request->client_id]); // ضع Google Client ID الخاص بتطبيقك
+        $payload = $client->verifyIdToken($request->id_token);
+    
+        if (!$payload) {
+            return response()->json(['error' => 'Invalid Google token'], 400);
+        }
+
+        $user = User::updateOrCreate(
+            ['email' => $payload['email']],
+            [
+                'f_name' => $payload['name'],
+                'phone' => $request->phone,
+                'google_id' => $payload['sub'], // unique ID from Google
+                'image' => $payload['picture'] ?? null,
+            ]
+        );
+ 
+        $token = $user->createToken('user_google')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
+    public function login_google(Request $request){
+       $validation = Validator::make($request->all(),[
+            'id_token' => 'required',
+            'client_id' => 'required',
+        ]);
+        if($validation->fails()){
+            return response()->json(['message'=>$validation->errors()],400);
+        }
+
+        $client = new Google_Client(['client_id' => $request->client_id]); // ضع Google Client ID الخاص بتطبيقك
+        $payload = $client->verifyIdToken($request->id_token);
+    
+        if (!$payload) {
+            return response()->json(['error' => 'Invalid Google token'], 400);
+        }
+
+        $user = User::where('email', $payload['email'])->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not registered'], 400);
+        }
+
+        $token = $user->createToken('user_google')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ]);
     }
 }
