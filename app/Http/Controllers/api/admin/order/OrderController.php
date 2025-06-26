@@ -482,7 +482,8 @@ class OrderController extends Controller
         if (!empty($from)) {
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
-            if ($start > date('H:i:s')) {
+			$end = Carbon::parse($from)->addHours($hours);
+            if ($start > $end) {
                 $end = Carbon::parse($from)->addHours($hours)->subDay();
             }
             else{

@@ -30,7 +30,8 @@ class OnlineOrderController extends Controller
         if (!empty($from)) {
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
-            if ($start > date('H:i:s')) {
+			$end = Carbon::parse($from)->addHours($hours);
+            if ($start > $end) {
                 $end = Carbon::parse($from)->addHours($hours)->subDay();
             }
             else{
@@ -39,8 +40,7 @@ class OnlineOrderController extends Controller
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
-        
+        } 
 
         $orders = $this->orders
         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -738,7 +738,8 @@ class OnlineOrderController extends Controller
             $from = $request->date . ' ' . $from_time;
             $date_to = $request->date_to . ' ' . $from_time;
             $start = Carbon::parse($from);
-            if ($start > date('H:i:s')) {
+			$end = Carbon::parse($from)->addHours($hours);
+            if ($start > $end) {
                 $end = Carbon::parse($date_to)->addHours($hours)->subDay();
             }
             else{
