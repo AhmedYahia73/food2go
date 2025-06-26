@@ -568,7 +568,6 @@ class OnlineOrderController extends Controller
         }
        if (empty($order->admin_id)) {
             $order->update([
-                'admin_id' => $request->user()->id,
                 'operation_status' => 'opened',
             ]);
         }
