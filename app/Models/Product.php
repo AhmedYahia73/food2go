@@ -37,7 +37,7 @@ class Product extends Model
         'points',
         'kitchen_id',
     ];
-    protected $appends = ['image_link', 'orders_count', 'taxes'];
+    protected $appends = ['image_link', 'orders_count', 'taxes', 'orders_count_branch'];
 
     public function getTaxesAttribute(){
         return Setting::where('name', 'tax')
@@ -113,6 +113,12 @@ class Product extends Model
 
     public function getOrdersCountAttribute(){
         return $this->belongsToMany(Order::class, 'order_product', 'product_id', 'order_id')
+        ->count();
+    }
+
+    public function getOrdersCountBranchAttribute(){
+        return $this->belongsToMany(Order::class, 'order_product', 'product_id', 'order_id')
+        ->where('orders.branch_id', auth()->user()->id)
         ->count();
     }
 

@@ -38,7 +38,7 @@ class User extends Authenticatable
         'code',
         'google_id',
     ];
-    protected $appends = ['role', 'orders_count', 'image_link', 'name', 'type'];
+    protected $appends = ['role', 'orders_count', 'image_link', 'name', 'type', 'orders_count_branch'];
 
     public function getNameAttribute(){
         return $this->attributes['f_name'] . ' ' . $this->attributes['l_name'];
@@ -89,6 +89,12 @@ class User extends Authenticatable
 
     public function getOrdersCountAttribute(){
         return $this->hasMany(Order::class, 'user_id')
+        ->count();
+    }
+
+    public function getOrdersCountBranchAttribute(){
+        return $this->hasMany(Order::class, 'user_id')
+        ->where('orders.branch_id', auth()->user()->id)
         ->count();
     }
 

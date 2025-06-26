@@ -23,9 +23,458 @@ class OrderController extends Controller
     private LogOrder $log_order, private TimeSittings $TimeSittings){}
 
     public function orders(Request $request){
-        // https://bcknd.food2go.online/admin/order
+    //     // https://bcknd.food2go.online/admin/order
       
-        // settings 
+    //     // settings 
+    //     $time_sittings = $this->TimeSittings
+    //     ->get();
+    //     $from = $time_sittings->min('from');
+    //     $hours = $time_sittings->max('hours');
+    //     if (!empty($from)) {
+    //         $from = date('Y-m-d') . ' ' . $from;
+    //         $start = Carbon::parse($from);
+    //         if ($start > date('H:i:s')) {
+    //             $end = Carbon::parse($from)->addHours($hours)->subDay();
+    //         }
+    //         else{
+    //             $end = Carbon::parse($from)->addHours(intval($hours));
+    //         }
+    //     } else {
+    //         $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+    //         $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+    //     }
+        
+
+    //     $orders = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $pending = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'pending')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $confirmed = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'confirmed')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $processing = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'processing')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $out_for_delivery = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'out_for_delivery')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $delivered = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'delivered')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $returned = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'returned')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $faild_to_deliver = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'faild_to_deliver')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $canceled = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'canceled')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $scheduled = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'scheduled')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $refund = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereBetween('created_at', [$start, $end])
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'refund')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+
+    //     $all_data = [
+    //         'orders' => $orders,
+    //         'pending' => $pending,
+    //         'confirmed' => $confirmed,
+    //         'processing' => $processing,
+    //         'out_for_delivery' => $out_for_delivery,
+    //         'delivered' => $delivered,
+    //         'returned' => $returned,
+    //         'faild_to_deliver' => $faild_to_deliver,
+    //         'canceled' => $canceled,
+    //         'scheduled' => $scheduled,
+    //         'refund' => $refund,
+    //     ];
+
+    //     // _____________________________________________________________
+        
+    //     $orders = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'admin_id',
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $pending = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'pending')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $confirmed = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount', 'admin_id',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'confirmed')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $processing = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'processing')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $out_for_delivery = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'out_for_delivery')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $delivered = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'delivered')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $returned = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'returned')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $faild_to_deliver = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'faild_to_deliver')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $canceled = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'canceled')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $scheduled = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'admin_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'scheduled')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get();
+    //     $refund = $this->orders
+    //     ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //     'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //     'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'admin_id',
+    //     'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //     'status', 'points', 'rejected_reason', 'transaction_id')
+    //     ->where('pos', 0)
+    //     ->whereDate('created_at', date('Y-m-d'))
+    //     ->whereNull('captain_id')
+    //     ->where(function($query) {
+    //         $query->where('status', 1)
+    //         ->orWhereNull('status');
+    //     })
+    //     ->where('order_status', 'refund')
+    //     ->orderByDesc('id')
+    //     ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //     'schedule', 'delivery'])
+    //     ->get(); 
+        
+    //     $deliveries = $this->deliveries
+    //     ->get();
+
+    //     return response()->json([
+    //         'orders' => $orders,
+    //         'pending' => $pending,
+    //         'confirmed' => $confirmed,
+    //         'processing' => $processing,
+    //         'out_for_delivery' => $out_for_delivery,
+    //         'delivered' => $delivered,
+    //         'returned' => $returned,
+    //         'faild_to_deliver' => $faild_to_deliver,
+    //         'refund' => $refund,
+    //         'canceled' => $canceled,
+    //         'scheduled' => $scheduled,
+    //         'all_data' => $all_data,
+    //         'deliveries' => $deliveries,
+    //     ]);
         $time_sittings = $this->TimeSittings
         ->get();
         $from = $time_sittings->min('from');
@@ -62,187 +511,36 @@ class OrderController extends Controller
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->get();
-        $pending = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        $pending = $orders
         ->where('order_status', 'pending')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $confirmed = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $confirmed = $orders
         ->where('order_status', 'confirmed')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $processing = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $processing = $orders
         ->where('order_status', 'processing')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $out_for_delivery = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $out_for_delivery = $orders
         ->where('order_status', 'out_for_delivery')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $delivered = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $delivered = $orders
         ->where('order_status', 'delivered')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $returned = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $returned = $orders
         ->where('order_status', 'returned')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $faild_to_deliver = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $faild_to_deliver = $orders
         ->where('order_status', 'faild_to_deliver')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $canceled = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $canceled = $orders
         ->where('order_status', 'canceled')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $scheduled = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $scheduled = $orders
         ->where('order_status', 'scheduled')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $refund = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
+        ->values();
+        $refund = $orders
         ->where('order_status', 'refund')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-
+        ->values();
         $all_data = [
             'orders' => $orders,
             'pending' => $pending,
@@ -256,207 +554,6 @@ class OrderController extends Controller
             'scheduled' => $scheduled,
             'refund' => $refund,
         ];
-
-        // _____________________________________________________________
-        
-        $orders = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'admin_id',
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $pending = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'pending')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $confirmed = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount', 'admin_id',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'confirmed')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $processing = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'processing')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $out_for_delivery = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'out_for_delivery')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $delivered = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'delivered')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $returned = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'returned')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $faild_to_deliver = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'faild_to_deliver')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $canceled = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount', 'admin_id',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'canceled')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $scheduled = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'admin_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'scheduled')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        $refund = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'admin_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereDate('created_at', date('Y-m-d'))
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'refund')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get(); 
-        
         $deliveries = $this->deliveries
         ->get();
 
@@ -626,58 +723,58 @@ class OrderController extends Controller
         ]);
     }
 
-    public function orders_data(Request $request){
-        // https://bcknd.food2go.online/admin/order/data
-        $validator = Validator::make($request->all(), [
-            'order_status' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        if ($request->order_status == 'all') {
-            $orders = $this->orders
-            ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-            'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-            'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-            'status', 'points', 'rejected_reason', 'transaction_id')
-            ->where('pos', 0)
-        ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->orderByDesc('id')
-            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-            'schedule', 'delivery'])
-            ->get();
-        } 
-        else {
-            $orders = $this->orders
-            ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-            'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-            'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-            'status', 'points', 'rejected_reason', 'transaction_id')
-            ->where('pos', 0)
-        ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', $request->order_status)
-            ->orderByDesc('id')
-            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-            'schedule', 'delivery'])
-            ->get();
-        }
+    // public function orders_data(Request $request){
+    //     // https://bcknd.food2go.online/admin/order/data
+    //     $validator = Validator::make($request->all(), [
+    //         'order_status' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
+    //     ]);
+    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
+    //         return response()->json([
+    //             'errors' => $validator->errors(),
+    //         ],400);
+    //     }
+    //     if ($request->order_status == 'all') {
+    //         $orders = $this->orders
+    //         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //         'status', 'points', 'rejected_reason', 'transaction_id')
+    //         ->where('pos', 0)
+    //     ->whereNull('captain_id')
+    //         ->where(function($query) {
+    //             $query->where('status', 1)
+    //             ->orWhereNull('status');
+    //         })
+    //         ->orderByDesc('id')
+    //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //         'schedule', 'delivery'])
+    //         ->get();
+    //     } 
+    //     else {
+    //         $orders = $this->orders
+    //         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //         'status', 'points', 'rejected_reason', 'transaction_id')
+    //         ->where('pos', 0)
+    //     ->whereNull('captain_id')
+    //         ->where(function($query) {
+    //             $query->where('status', 1)
+    //             ->orWhereNull('status');
+    //         })
+    //         ->where('order_status', $request->order_status)
+    //         ->orderByDesc('id')
+    //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //         'schedule', 'delivery'])
+    //         ->get();
+    //     }
 
-        return response()->json([
-            'orders' => $orders
-        ]);
-    }
+    //     return response()->json([
+    //         'orders' => $orders
+    //     ]);
+    // }
 
     public function notification(Request $request){
         // https://bcknd.food2go.online/admin/order/notification
@@ -726,83 +823,83 @@ class OrderController extends Controller
         ]);
     }
 
-    public function order_filter(Request $request){
-        // https://bcknd.food2go.online/admin/order/filter
-        // Key
-        // from, to, branch_id, type
-        $validator = Validator::make($request->all(), [ 
-            'type' => 'in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
+    // public function order_filter(Request $request){
+    //     // https://bcknd.food2go.online/admin/order/filter
+    //     // Key
+    //     // from, to, branch_id, type
+    //     $validator = Validator::make($request->all(), [ 
+    //         'type' => 'in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
+    //     ]);
+    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
+    //         return response()->json([
+    //             'errors' => $validator->errors(),
+    //         ],400);
+    //     }
 
-        if ($request->type) {
-            if ($request->type == 'all') {
-                $orders = $this->orders
-                ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-                'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-                'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-                'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-                'status', 'points', 'rejected_reason', 'transaction_id')
-                ->where('pos', 0)
-        ->whereNull('captain_id')
-                ->where('status', '!=', 2)
-                ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-                'schedule', 'delivery'])
-                ->orderBy('created_at')
-                ->get();
-            } else {
-                $orders = $this->orders
-                ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-                'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-                'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-                'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-                'status', 'points', 'rejected_reason', 'transaction_id')
-                ->where('pos', 0)
-        ->whereNull('captain_id')
-                ->where('status', '!=', 2)
-                ->where('order_status', $request->type)
-                ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-                'schedule', 'delivery'])
-                ->orderBy('created_at')
-                ->get();
-            }
-        }
-        else{
-            $orders = $this->orders
-            ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-            'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-            'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-            'status', 'points', 'rejected_reason', 'transaction_id')
-            ->where('pos', 0)
-        ->whereNull('captain_id')
-            ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-            'schedule', 'delivery'])
-            ->orderBy('created_at')
-            ->get();
-        }
+    //     if ($request->type) {
+    //         if ($request->type == 'all') {
+    //             $orders = $this->orders
+    //             ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //             'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //             'status', 'points', 'rejected_reason', 'transaction_id')
+    //             ->where('pos', 0)
+    //     ->whereNull('captain_id')
+    //             ->where('status', '!=', 2)
+    //             ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //             'schedule', 'delivery'])
+    //             ->orderBy('created_at')
+    //             ->get();
+    //         } else {
+    //             $orders = $this->orders
+    //             ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //             'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //             'status', 'points', 'rejected_reason', 'transaction_id')
+    //             ->where('pos', 0)
+    //     ->whereNull('captain_id')
+    //             ->where('status', '!=', 2)
+    //             ->where('order_status', $request->type)
+    //             ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //             'schedule', 'delivery'])
+    //             ->orderBy('created_at')
+    //             ->get();
+    //         }
+    //     }
+    //     else{
+    //         $orders = $this->orders
+    //         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
+    //         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+    //         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+    //         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+    //         'status', 'points', 'rejected_reason', 'transaction_id')
+    //         ->where('pos', 0)
+    //     ->whereNull('captain_id')
+    //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
+    //         'schedule', 'delivery'])
+    //         ->orderBy('created_at')
+    //         ->get();
+    //     }
         
-        if ($request->branch_id && $request->branch_id != 0) {
-            $orders = $orders
-            ->where('branch_id', $request->branch_id);
-        }
-        if ($request->from) {
-            $orders = $orders
-            ->where('order_date', '>=', $request->from);
-        }
-        if ($request->to) {
-            $orders = $orders
-            ->where('order_date', '<=', $request->to);
-        }
+    //     if ($request->branch_id && $request->branch_id != 0) {
+    //         $orders = $orders
+    //         ->where('branch_id', $request->branch_id);
+    //     }
+    //     if ($request->from) {
+    //         $orders = $orders
+    //         ->where('order_date', '>=', $request->from);
+    //     }
+    //     if ($request->to) {
+    //         $orders = $orders
+    //         ->where('order_date', '<=', $request->to);
+    //     }
 
-        return response()->json([
-            'orders' => array_values($orders->toArray())
-        ]);
-    }
+    //     return response()->json([
+    //         'orders' => array_values($orders->toArray())
+    //     ]);
+    // }
 
     public function order($id){
         // https://bcknd.food2go.online/admin/order/order/{id}

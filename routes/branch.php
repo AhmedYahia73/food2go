@@ -3,30 +3,50 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\branch\Home\HomeController;
-use App\Http\Controllers\api\branch\Order\DealController;
+use App\Http\Controllers\api\admin\deal_order\DealOrderController;
 use App\Http\Controllers\api\branch\Order\OfferController;
 use App\Http\Controllers\api\branch\Order\OnlineOrderController;
 use App\Http\Controllers\api\branch\Order\POSOrderController;
 
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
-    Route::controller(HomeController::class)->group(function(){
-
+    Route::controller(HomeController::class)->prefix('home')->group(function(){
+        Route::post('/', 'home');
     });
     
-    Route::controller(DealController::class)->prefix('deal')->group(function(){
-
+    Route::controller(DealOrderController::class)->prefix('deal')->group(function(){
+        Route::post('/', 'deal_order');
+        Route::post('/add', 'add');
     });
     
     Route::controller(OfferController::class)->prefix('offer')->group(function(){
-
+        Route::post('/check_order', 'check_order');
+        Route::post('/approve_offer', 'approve_offer');
     });
     
     Route::controller(OnlineOrderController::class)->prefix('online_order')->group(function(){
-
+        Route::get('/', 'orders');
+        Route::get('/count_orders', 'count_orders');
+        Route::post('/notification', 'notification');
+        Route::get('/order/{id}', 'order');
+        Route::get('/invoice/{id}', 'invoice');
+        Route::put('/status/{id}', 'status');
+        Route::post('/delivery', 'delivery');
+        Route::get('/user_details/{id}', 'user_details');
+        Route::post('/order_log', 'order_log');
+        Route::post('/order_filter_date', 'order_filter_date');
     });
-    
-    Route::controller(POSOrderController::class)->prefix('pos_order')->group(function(){
 
+    Route::controller(POSOrderController::class)->prefix('pos_order')->group(function(){
+        Route::get('/', 'pos_orders');
+        Route::get('/item/{id}', 'get_order');
+        Route::post('/delivery_order', 'delivery_order');
+        Route::post('/determine_delivery/{order_id}', 'determine_delivery');
+        Route::post('/take_away_order', 'take_away_order');
+        Route::post('/dine_in_order', 'dine_in_order');
+        Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts');
+        Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
+        Route::post('/dine_in_payment', 'dine_in_payment');
+        Route::put('/tables_status/{id}', 'tables_status');
     });
 });
 

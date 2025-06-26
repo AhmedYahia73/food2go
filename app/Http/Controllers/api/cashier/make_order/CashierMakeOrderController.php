@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\customer\order\OrderRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
+use Carbon\Carbon;
 
 // ____________________________________________________
 use Mike42\Escpos\Printer;
@@ -32,6 +33,7 @@ use App\Models\Setting;
 use App\Models\BranchOff;
 use App\Models\CafeLocation;
 use App\Models\CafeTable;
+use App\Models\TimeSittings;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -52,6 +54,23 @@ class CashierMakeOrderController extends Controller
 
     public function pos_orders(Request $request){
         // /cashier/orders
+        $time_sittings = $this->TimeSittings
+        ->get();
+        $from = $time_sittings->min('from');
+        $hours = $time_sittings->max('hours');
+        if (!empty($from)) {
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            if ($start > date('H:i:s')) {
+                $end = Carbon::parse($from)->addHours($hours)->subDay();
+            }
+            else{
+                $end = Carbon::parse($from)->addHours(intval($hours));
+            }
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
         $all_orders = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -60,6 +79,7 @@ class CashierMakeOrderController extends Controller
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('cashier_man_id', $request->user()->id)
         ->orderByDesc('id')
+        ->whereBetween('created_at', [$start, $end])
         ->get();
         $delivery_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -70,6 +90,7 @@ class CashierMakeOrderController extends Controller
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'delivery')
+        ->whereBetween('created_at', [$start, $end])
         ->get();
         $take_away_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -80,6 +101,7 @@ class CashierMakeOrderController extends Controller
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'take_away')
+        ->whereBetween('created_at', [$start, $end])
         ->get();
         $dine_in_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -90,6 +112,7 @@ class CashierMakeOrderController extends Controller
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'dine_in')
+        ->whereBetween('created_at', [$start, $end])
         ->get();
         $car_slow_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -100,6 +123,7 @@ class CashierMakeOrderController extends Controller
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'car_slow')
+        ->whereBetween('created_at', [$start, $end])
         ->get();
         $orders = [
             'delivery' => $delivery_order,
@@ -117,6 +141,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'delivery')
         ->whereNull('delivery_id')
+        ->whereBetween('created_at', [$start, $end])
         ->get();
 
         return response()->json([

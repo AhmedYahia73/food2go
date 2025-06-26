@@ -26,6 +26,7 @@ use App\Models\Setting;
 use App\Models\BranchOff;
 use App\Models\CafeLocation;
 use App\Models\CafeTable;
+use App\Models\TimeSittings;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -39,7 +40,7 @@ class PosOrderController extends Controller
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, private CafeTable $tables,
-    private CafeLocation $cafe_location){}
+    private CafeLocation $cafe_location, private TimeSittings $TimeSittings,){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -153,6 +154,24 @@ class PosOrderController extends Controller
 
     public function pos_orders(){
         // /admin/pos/order/orders
+        $time_sittings = $this->TimeSittings
+        ->get();
+        $from = $time_sittings->min('from');
+        $hours = $time_sittings->max('hours');
+        if (!empty($from)) {
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            if ($start > date('H:i:s')) {
+                $end = Carbon::parse($from)->addHours($hours)->subDay();
+            }
+            else{
+                $end = Carbon::parse($from)->addHours(intval($hours));
+            }
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+        
         $orders = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
