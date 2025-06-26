@@ -237,8 +237,7 @@ class HomeController extends Controller
             'order_statistics' => $order_statistics,
             'earning_statistics' => $earning_statistics,
             'recent_orders' => $all_orders,
-            'top_selling' => $top_selling,
-            'offers' => $deals,
+            'top_selling' => $top_selling, 
             'top_customers' => $top_customers,
         ]);
     }

@@ -421,5 +421,5 @@ class POSOrderController extends Controller
             'success' => $request->current_status
         ]);
     }
-    
+    // 
 }

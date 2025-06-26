@@ -10,7 +10,7 @@ use App\Http\Controllers\api\branch\Order\POSOrderController;
 
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
-        Route::post('/', 'home');
+        Route::get('/', 'home');
     });
     
     Route::controller(DealOrderController::class)->prefix('deal')->group(function(){
