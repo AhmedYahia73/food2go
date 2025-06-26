@@ -35,6 +35,16 @@ class LoginController extends Controller
         ->orWhere('phone', $request->email)
         ->with('user_positions.roles')
         ->first();
+        $role = 'branch';
+        $user->role = 'admin';
+        if (empty($user)) {
+            $user = $this->branch
+            ->where('email', $request->email)
+            ->orWhere('phone', $request->email)
+            ->first();
+            $user->role = 'admin';
+            $role = 'branch';
+        }
         if (empty($user)) {
             return response()->json([
                 'faield' => 'This user does not have the ability to login'
@@ -46,11 +56,11 @@ class LoginController extends Controller
             ], 400);
         }
         if (password_verify($request->input('password'), $user->password)) {
-            $user->role = 'admin';
             $user->token = $user->createToken('admin')->plainTextToken;
             return response()->json([
                 'admin' => $user,
                 'token' => $user->token,
+                'role' => $role,
             ], 200);
         }
         else { 
@@ -152,13 +162,6 @@ class LoginController extends Controller
             ->orWhere('phone', $request->email)
             ->first();
             $role = 'customer';
-        }
-        if (empty($user)) {
-            $user = $this->branch
-            ->where('email', $request->email)
-            ->orWhere('phone', $request->email)
-            ->first();
-            $role = 'branch';
         }
         if (empty($user)) {
             return response()->json([
