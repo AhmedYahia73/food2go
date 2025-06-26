@@ -1015,7 +1015,7 @@ class OrderController extends Controller
                 'operation_status' => 'closed',
             ]);
         }
-       if (empty($order->admin_id)) {
+       if ($order->operation_status == 'pending') {
             $order->update([
                 'admin_id' => $request->user()->id,
                 'operation_status' => 'opened',
