@@ -75,7 +75,7 @@ class POSOrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('cashier_man_id', $request->user()->id)
+        ->where('branch_id', $request->user()->id)
         ->orderByDesc('id')
         ->whereBetween('created_at', [$start, $end])
         ->get();
@@ -86,7 +86,7 @@ class POSOrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->orderByDesc('id')
-        ->where('cashier_man_id', $request->user()->id)
+        ->where('branch_id', $request->user()->id)
         ->where('order_type', 'delivery')
         ->whereBetween('created_at', [$start, $end])
         ->get();
@@ -97,7 +97,7 @@ class POSOrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->orderByDesc('id')
-        ->where('cashier_man_id', $request->user()->id)
+        ->where('branch_id', $request->user()->id)
         ->where('order_type', 'take_away')
         ->whereBetween('created_at', [$start, $end])
         ->get();
@@ -108,7 +108,7 @@ class POSOrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->orderByDesc('id')
-        ->where('cashier_man_id', $request->user()->id)
+        ->where('branch_id', $request->user()->id)
         ->where('order_type', 'dine_in')
         ->whereBetween('created_at', [$start, $end])
         ->get();
@@ -119,7 +119,7 @@ class POSOrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->orderByDesc('id')
-        ->where('cashier_man_id', $request->user()->id)
+        ->where('branch_id', $request->user()->id)
         ->where('order_type', 'car_slow')
         ->whereBetween('created_at', [$start, $end])
         ->get();
@@ -136,7 +136,7 @@ class POSOrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->orderByDesc('id')
-        ->where('cashier_man_id', $request->user()->id)
+        ->where('branch_id', $request->user()->id)
         ->where('order_type', 'delivery')
         ->whereNull('delivery_id')
         ->whereBetween('created_at', [$start, $end])

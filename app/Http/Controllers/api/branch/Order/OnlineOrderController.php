@@ -716,12 +716,11 @@ class OnlineOrderController extends Controller
 
     public function order_filter_date(Request $request){
         // https://sultanayubbcknd.food2go.online/admin/order_filter_date
-        // date, date_to, branch_id, 
+        // date, date_to, 
         // type => all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund,
         $validator = Validator::make($request->all(), [
             'date' => 'required|date',
-            'date_to' => 'required|date',
-            'branch_id' => 'exists:branches,id',
+            'date_to' => 'required|date', 
             'type' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -759,9 +758,8 @@ class OnlineOrderController extends Controller
         if ($request->type != 'all') {
             $orders = $orders->where('order_status', $request->type)->values();
         }
-        if ($request->branch_id) {
-            $orders = $orders->where('branch_id', $request->branch_id)->values();
-        }
+        $orders = $orders->where('branch_id', $request->user()->id)->values();
+        
 
         return response()->json([
             'orders' => $orders
