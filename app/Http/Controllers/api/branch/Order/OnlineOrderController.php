@@ -123,7 +123,7 @@ class OnlineOrderController extends Controller
         ]);
     }
 
-    public function count_orders(){
+    public function count_orders(Request $request){
         // https://bcknd.food2go.online/admin/order/count
         $orders = $this->orders 
         ->where('pos', 0)

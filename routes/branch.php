@@ -12,6 +12,9 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::get('/', 'home');
     });
+    // https://bcknd.food2go.online/branch/home
+    // https://bcknd.food2go.online/branch/online_order
+    // 
     
     Route::controller(DealOrderController::class)->prefix('deal')->group(function(){
         Route::post('/', 'deal_order');
