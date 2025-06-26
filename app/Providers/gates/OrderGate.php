@@ -13,7 +13,7 @@ class OrderGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Order') &&
-                $admin->user_positions->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -23,7 +23,7 @@ class OrderGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Order') &&
-                $admin->user_positions->roles->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
+                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -33,7 +33,7 @@ class OrderGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Order') &&
-                $admin->user_positions->roles->pluck('action')->intersect(['all', 'log'])->isNotEmpty()
+                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'log'])->isNotEmpty()
             ) {
                 return true;
             }

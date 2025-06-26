@@ -13,7 +13,7 @@ class CompanyInfoGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('CompanyInfo') &&
-                $admin->user_positions->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -23,7 +23,7 @@ class CompanyInfoGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('CompanyInfo') &&
-                $admin->user_positions->roles->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
             ) {
                 return true;
             }

@@ -180,7 +180,7 @@ class POSOrderController extends Controller
     public function delivery_order(OrderRequest $request){
         // /cashier/delivery_order
         // Keys
-        // date, amount, total_tax, total_discount
+        // date, amount, total_tax, total_discount, address_id,
         // notes, payment_method_id, order_type, customer_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
