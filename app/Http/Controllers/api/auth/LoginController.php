@@ -35,15 +35,17 @@ class LoginController extends Controller
         ->orWhere('phone', $request->email)
         ->with('user_positions.roles')
         ->first();
-        $role = 'branch';
-        $user->role = 'admin';
         if (empty($user)) {
             $user = $this->branch
             ->where('email', $request->email)
             ->orWhere('phone', $request->email)
             ->first();
-            $user->role = 'admin';
+            $user->role = 'branch';
             $role = 'branch';
+        }
+        else{
+            $role = 'admin';
+            $user->role = 'admin';
         }
         if (empty($user)) {
             return response()->json([
