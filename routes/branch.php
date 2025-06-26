@@ -51,6 +51,9 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::post('/order_filter_date', 'order_filter_date');
     });
     // https://bcknd.food2go.online/branch/pos_order
+    // https://bcknd.food2go.online/branch/pos_order/item/{id}
+    // https://bcknd.food2go.online/branch/pos_order/dine_in_table_carts/{id}
+    // https://bcknd.food2go.online/branch/pos_order/dine_in_table_order/{id}
     Route::controller(POSOrderController::class)->prefix('pos_order')->group(function(){
         Route::get('/', 'pos_orders');
         Route::get('/item/{id}', 'get_order');

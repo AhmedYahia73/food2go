@@ -28,7 +28,8 @@ use App\Models\BranchOff;
 use App\Models\CafeLocation;
 use App\Models\CafeTable;
 use App\Models\TimeSittings;
-use App\Models\OrderCart;
+use App\Models\OrderCart; 
+use App\Models\Customer; 
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -44,10 +45,24 @@ class POSOrderController extends Controller
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, private CafeTable $tables,
     private CafeLocation $cafe_location, private TimeSittings $TimeSittings, 
-    private OrderCart $order_cart){}
+    private OrderCart $order_cart, private PaymentMethod $payment_method,
+    private Customer $customers){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
+
+    public function pos_data(Request $request){
+        $payment_method = $this->payment_method
+        ->where('status', 1)
+        ->get();
+        $customers = $this->customers
+        ->get();
+
+        return response()->json([
+            'payment_method' => $payment_method,
+            'customers' => $customers,
+        ]);
+    }
 
     public function pos_orders(Request $request){
         // branch/pos_order
