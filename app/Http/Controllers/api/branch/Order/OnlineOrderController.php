@@ -625,7 +625,6 @@ class OnlineOrderController extends Controller
         $this->log_order
         ->create([
             'order_id' => $id,
-            'admin_id' => $request->user()->id,
             'from_status' => $old_status,
             'to_status' => $request->order_status,
         ]); 
