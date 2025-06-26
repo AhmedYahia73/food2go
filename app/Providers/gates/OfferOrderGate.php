@@ -13,7 +13,7 @@ class OfferOrderGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('OfferOrder') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'approve_offer'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'OfferOrder')->pluck('action')->intersect(['all', 'approve_offer'])->isNotEmpty()
             ) {
                 return true;
             }

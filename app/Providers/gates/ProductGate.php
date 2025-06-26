@@ -13,7 +13,7 @@ class ProductGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Product') &&
-                $admin->user_positions->where('action', 'Product')->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Product')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -23,7 +23,7 @@ class ProductGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Product') &&
-                $admin->user_positions->where('action', 'Product')->roles->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Product')->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -33,7 +33,7 @@ class ProductGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Product') &&
-                $admin->user_positions->where('action', 'Product')->roles->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Product')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -43,7 +43,7 @@ class ProductGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Product') &&
-                $admin->user_positions->where('action', 'Product')->roles->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Product')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
             ) {
                 return true;
             }

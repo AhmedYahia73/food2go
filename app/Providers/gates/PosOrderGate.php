@@ -13,7 +13,7 @@ class PosOrderGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosOrder') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PosOrder')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -23,7 +23,7 @@ class PosOrderGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosTable') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PosOrder')->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
             ) {
                 return true;
             }

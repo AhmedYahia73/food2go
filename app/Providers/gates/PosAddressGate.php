@@ -13,7 +13,7 @@ class PosAddressGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosAddress') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PosAddress')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -23,7 +23,7 @@ class PosAddressGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosAddress') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PosAddress')->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -33,7 +33,7 @@ class PosAddressGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosAddress') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PosAddress')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
             ) {
                 return true;
             }

@@ -13,7 +13,7 @@ class PosReportsGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosReports') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PosReports')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
             ) {
                 return true;
             }

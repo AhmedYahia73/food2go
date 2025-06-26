@@ -13,7 +13,7 @@ class MenueGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Menue') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Menue')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -23,7 +23,7 @@ class MenueGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Menue') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Menue')->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -33,7 +33,7 @@ class MenueGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Menue') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Menue')->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
             ) {
                 return true;
             }
@@ -43,7 +43,7 @@ class MenueGate
             if (
                 $admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Menue') &&
-                $admin->user_positions->where('action', '')->roles->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Menue')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
             ) {
                 return true;
             }
