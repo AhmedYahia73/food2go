@@ -449,7 +449,7 @@ class OnlineOrderController extends Controller
     //     ]);
     // }
 
-    public function order($id){
+    public function order(Request $request, $id){
         // https://bcknd.food2go.online/admin/order/order/{id}
         $order = $this->orders
         ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',

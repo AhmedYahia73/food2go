@@ -14,6 +14,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     });
     // https://bcknd.food2go.online/branch/home
     // https://bcknd.food2go.online/branch/online_order
+    // https://bcknd.food2go.online/branch/online_order/count_orders
     // 
     
     Route::controller(DealOrderController::class)->prefix('deal')->group(function(){
@@ -29,12 +30,14 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(OnlineOrderController::class)->prefix('online_order')->group(function(){
         Route::get('/', 'orders');
         Route::get('/count_orders', 'count_orders');
-        Route::post('/notification', 'notification');
         Route::get('/order/{id}', 'order');
         Route::get('/invoice/{id}', 'invoice');
-        Route::put('/status/{id}', 'status');
-        Route::post('/delivery', 'delivery');
         Route::get('/user_details/{id}', 'user_details');
+
+        Route::put('/status/{id}', 'status');
+        
+        Route::post('/notification', 'notification');
+        Route::post('/delivery', 'delivery');
         Route::post('/order_log', 'order_log');
         Route::post('/order_filter_date', 'order_filter_date');
     });
