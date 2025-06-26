@@ -476,12 +476,14 @@ class OnlineOrderController extends Controller
             }
         }
         $order->order_details = $order_details;
-        $order->user->count_orders = count($order?->user?->orders ?? []) ?? 0;
+        if (!empty($order?->user)) {
+            $order->user->count_orders = count($order->user->orders) ?? 0;
+        }
         if (!empty($order->branch)) {
-            $order->branch->count_orders = count($order?->branch?->orders ?? []);
+            $order->branch->count_orders = count($order->branch->orders);
         }
         if (!empty($order->delivery_id)) {
-            $order->delivery->count_orders = count($order?->delivery?->orders_items ?? []);
+            $order->delivery->count_orders = count($order->delivery->orders_items);
         }
         $deliveries = $this->deliveries
         ->get();
