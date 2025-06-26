@@ -1071,13 +1071,7 @@ class OrderController extends Controller
             $order->update([
                 'order_status' => $request->order_status, 
             ]);
-        }
-        $this->log_order
-        ->create([
-            'order_id' => $id,
-            'from_status' => $old_status,
-            'to_status' => $request->order_status,
-        ]); 
+        } 
 
         return response()->json([
             'order_status' => $request->order_status
