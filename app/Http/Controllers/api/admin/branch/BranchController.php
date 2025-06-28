@@ -38,6 +38,7 @@ class BranchController extends Controller
         'city_id',
         'coverage',
         'status',
+        'block_reason',
     ];
     use image;
 
@@ -84,6 +85,7 @@ class BranchController extends Controller
         // status
         $validator = Validator::make($request->all(), [
             'status' => 'required|boolean',
+            'block_reason' => 'required_if:status,false'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -114,7 +116,16 @@ class BranchController extends Controller
         //  address, email, phone, password, food_preparion_time, latitude, longitude
         // coverage, status, image, cover_image, city_id
         // branch_names[tranlation_name, branch_name, tranlation_id]
-  
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+            'block_reason' => 'required_if:status,false'
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
         $branchRequest = $request->only($this->branchRequest);
         $default = $request->branch_names[0]['branch_name'];
         $branchRequest['name'] = $default;
@@ -149,6 +160,15 @@ class BranchController extends Controller
         // name, address, email, phone, password, food_preparion_time, latitude, longitude
         // coverage, status, image, cover_image, city_id
         // branch_names[tranlation_name, branch_name, tranlation_id]
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+            'block_reason' => 'required_if:status,false'
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
 
         $branchRequest = $request->only($this->branchRequest);
         $default = $request->branch_names[0]['branch_name'];
