@@ -60,7 +60,6 @@ class AddressController extends Controller
             ];
         });
         $branches = $this->branch
-        ->where('status', 1)
         ->get();
         $cities = $this->city
         ->where('status', 1)
