@@ -10,6 +10,7 @@ use App\Events\OrderNotification;
 use App\trait\PlaceOrder;
 use App\trait\PaymentPaymob;
 use Carbon\Carbon;
+use App\Events\OrderEvent;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -135,6 +136,7 @@ class MakeOrderController extends Controller
             $order_id = $this->order
             ->where('transaction_id', $order->id)
             ->first();
+            broadcast(new OrderEvent($order_id))->toOthers();
             // $order = $this->make_order($request);
             // $order = $order['payment']; 
             $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens, $payment_method_auto);
@@ -148,7 +150,8 @@ class MakeOrderController extends Controller
             $order = $this->make_order($request);
             if (isset($order['errors']) && !empty($order['errors'])) {
                 return response()->json($order, 400);
-            }
+            } // new_order
+            broadcast(new OrderEvent($order['payment']))->toOthers();
             return response()->json([
                 'success' => $order['payment']->id, 
             ]);

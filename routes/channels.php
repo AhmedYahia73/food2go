@@ -9,3 +9,7 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('chatChannel', function ($chat) {
     return $chat;
 }, ['guards' => ['sanctum']]);
+
+Broadcast::channel('new_order', function ($user) {
+    return true;
+});
