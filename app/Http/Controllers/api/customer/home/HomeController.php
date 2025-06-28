@@ -321,7 +321,7 @@ class HomeController extends Controller
             ->get()
             ->map(function($item) use($category_off, $product_off, $option_off, $branch_id){ 
                 
-                $item->price = $item?->product_pricing->where('branch_id', $branch_id)
+                $item->price = $item?->product_pricing?->where('branch_id', $branch_id)
                 ->first()?->price ?? $item->price;
                 $item->setAttribute('favourite', $item->favourite_product->isNotEmpty());
                 if ($category_off->contains($item->category_id) || 
@@ -332,7 +332,7 @@ class HomeController extends Controller
                 $item->variations = $item->variations->map(function ($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
                     $variation->options = $variation->options->map(function($element) use($branch_id){
-                        $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+                        $element->price = $element?->option_pricing?->where('branch_id', $branch_id)
                         ->first()?->price ?? $element->price;
                         return $element;
                     });

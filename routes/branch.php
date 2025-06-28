@@ -7,6 +7,8 @@ use App\Http\Controllers\api\admin\deal_order\DealOrderController;
 use App\Http\Controllers\api\branch\Order\OfferController;
 use App\Http\Controllers\api\branch\Order\OnlineOrderController;
 use App\Http\Controllers\api\branch\Order\POSOrderController;
+use App\Http\Controllers\api\cashier\address\AddressController;
+use App\Http\Controllers\api\cashier\customer\CustomerController;
 
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
@@ -31,6 +33,12 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(DealOrderController::class)->prefix('deal')->group(function(){
         Route::post('/', 'deal_order');
         Route::post('/add', 'add');
+    });// CustomerController
+    
+    Route::controller(AddressController::class)->prefix('address')->group(function(){
+        Route::get('/item/{id}', 'address');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify'); 
     });
     
     Route::controller(OfferController::class)->prefix('offer')->group(function(){
