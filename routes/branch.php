@@ -33,10 +33,16 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(DealOrderController::class)->prefix('deal')->group(function(){
         Route::post('/', 'deal_order');
         Route::post('/add', 'add');
-    });// CustomerController
+    });
     
     Route::controller(AddressController::class)->prefix('address')->group(function(){
         Route::get('/item/{id}', 'address');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify'); 
+    });
+    
+    Route::controller(CustomerController::class)->prefix('customer')->group(function(){
+        Route::get('/', 'view');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify'); 
     });
@@ -64,6 +70,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     // https://bcknd.food2go.online/branch/pos_order/dine_in_table_order/{id}
     Route::controller(POSOrderController::class)->prefix('pos_order')->group(function(){
         Route::get('/', 'pos_orders');
+        Route::get('/customer_data', 'customer_data');
         Route::get('/item/{id}', 'get_order');
         Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts');
         Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');

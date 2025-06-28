@@ -51,6 +51,16 @@ class POSOrderController extends Controller
     use PlaceOrder;
     use PaymentPaymob;
 
+    public function customer_data(Request $request){
+        $customers = $this->customers
+        ->with('addresses')
+        ->get();
+
+        return response()->json([
+            'customers' => $customers
+        ]);
+    }
+
     public function pos_data(Request $request){
         $payment_method = $this->payment_method
         ->where('status', 1)
