@@ -173,8 +173,7 @@ class CategoryController extends Controller
     }
 
     public function branch_category(Request $request, $category_id){
-        // /admin/category/branch_category
-        // category_id 
+        // /admin/category/branch_category/{category_id}
         $validator = Validator::make($request->all(), [
             'category_id' => 'required|exists:categories,id',
         ]);
