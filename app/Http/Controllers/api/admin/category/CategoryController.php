@@ -172,7 +172,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function branch_category(Request $request){
+    public function branch_category(Request $request, $category_id){
         // /admin/category/branch_category
         // category_id 
         $validator = Validator::make($request->all(), [
@@ -184,7 +184,7 @@ class CategoryController extends Controller
             ],400);
         }
         $branch_off_category = $this->branch_off 
-        ->orWhere('category_id', $request->category_id)
+        ->orWhere('category_id', $category_id)
         ->whereNotNull('category_id')
         ->get();
         $categories = $this->branch
