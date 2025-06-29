@@ -101,9 +101,7 @@ class BusinessSetupController extends Controller
         ->where('branch_id', $request->branch_id ?? null)
         ->first();
         $today = Carbon::now()->format('l');
-        $start = $time_sitting?->from;
-        $close_message = 'مواعيد العمل من ' . $start . ' الى ' . $end;
-        $holiday = '';
+        $close_message = '';
         if (empty($time_sitting)) {
             $open_flag = true;
         }
@@ -119,8 +117,10 @@ class BusinessSetupController extends Controller
                 $open_flag = false;
                 $open_from = $open_from;
                 $open_to = $open_to; 
+                $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
                 if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
                     $open_flag = true;
+                    $close_message = 'اليوم اجازة';
                 }
             }
             else{
@@ -140,6 +140,7 @@ class BusinessSetupController extends Controller
             'login_customer' => $login_customer,
             'login_delivery' => $login_delivery,
             'login_web' => $login_web,
+            'close_message' => $close_message,
         ]);
     }
 
