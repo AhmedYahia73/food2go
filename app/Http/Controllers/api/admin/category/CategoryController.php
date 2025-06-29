@@ -179,7 +179,7 @@ class CategoryController extends Controller
         ->orWhere('category_id', $category_id)
         ->whereNotNull('category_id')
         ->get();
-        $categories = $this->branch
+        $branches = $this->branch
         ->get()
         ->map(function($item) use($branch_off_category) {
             $branches_category_off = $branch_off_category->pluck('branch_id')->filter(); 
@@ -193,7 +193,7 @@ class CategoryController extends Controller
         });
 
         return response()->json([
-            'variations' => $variations,
+            'branches' => $branches,
         ]);
     }
 }
