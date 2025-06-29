@@ -266,6 +266,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('branch')->group(function(){
         Route::get('/', 'view')->middleware('can:view_branch');
 
+        Route::post('/branch_category', 'branch_category');
         Route::post('/branch_product_options', 'branch_product_options');
         Route::post('/product_pricing', 'product_pricing');
         Route::post('/option_pricing', 'option_pricing');

@@ -322,6 +322,42 @@ class BranchController extends Controller
         ]);
     }
 
+    public function branch_category(Request $request){
+        // /admin/branch/branch_category
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $request->branch_id)
+        ->get();
+        $branch_off_category = $this->branch_off 
+        ->orWhere('category_id', $request->category_id)
+        ->whereNotNull('category_id')
+        ->get();
+        $categories = $this->categories
+        ->get()
+        ->map(function($item) use($branch_off_category) {
+            $branches_category_off = $branch_off_category->pluck('category_id')->filter(); 
+            if ( $branches_category_off->contains($item->id)) {
+                $item->product_status = 0;
+            }
+            else{
+                $item->product_status = 1;
+            }
+            return $item;
+        });
+
+        return response()->json([
+            'variations' => $variations,
+        ]);
+    }
+
     public function branch_product_options(Request $request){
         // /admin/branch/branch_product_options
         $validator = Validator::make($request->all(), [
@@ -334,7 +370,7 @@ class BranchController extends Controller
             ],400);
         }
         $branch_off = $this->branch_off
-        ->where('branch_id', $request->product_id)
+        ->where('branch_id', $request->branch_id)
         ->get();
         $option_off = $branch_off->pluck('option_id')->filter()->toArray();
         $variations = $this->variations

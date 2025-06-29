@@ -77,6 +77,8 @@ class OrderController extends Controller
             ]);
         }
 
+        $branch = $order?->branch?->food_preparion_time ?? '00:00:00';
+
         // Assuming $order->created_at is a valid date-time string in 'Y-m-d H:i:s' format
         $time = Carbon::createFromFormat('Y-m-d H:i:s', $order->created_at);
         
