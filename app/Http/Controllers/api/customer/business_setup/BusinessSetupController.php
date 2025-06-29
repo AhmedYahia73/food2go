@@ -101,6 +101,9 @@ class BusinessSetupController extends Controller
         ->where('branch_id', $request->branch_id ?? null)
         ->first();
         $today = Carbon::now()->format('l');
+        $start = $time_sitting?->from;
+        $close_message = 'مواعيد العمل من ' . $start . ' الى ' . $end;
+        $holiday = '';
         if (empty($time_sitting)) {
             $open_flag = true;
         }
