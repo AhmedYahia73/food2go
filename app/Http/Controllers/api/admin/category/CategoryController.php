@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 
 use App\Models\Category;
+use App\Models\Branch;
 use App\Models\Addon;
 use App\Models\Translation;
 use App\Models\TranslationTbl;
@@ -16,7 +17,8 @@ use App\Models\TranslationTbl;
 class CategoryController extends Controller
 {
     public function __construct(private Category $categories, private Addon $addons,
-    private Translation $translations, private TranslationTbl $translation_tbl){}
+    private Translation $translations, private TranslationTbl $translation_tbl,
+    private Branch $branch){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/category
@@ -167,6 +169,39 @@ class CategoryController extends Controller
 
         return response()->json([
             'success' => 'You update priority success'
+        ]);
+    }
+
+    public function branch_category(Request $request){
+        // /admin/category/branch_category
+        // category_id 
+        $validator = Validator::make($request->all(), [
+            'category_id' => 'required|exists:categories,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $branch_off_category = $this->branch_off 
+        ->orWhere('category_id', $request->category_id)
+        ->whereNotNull('category_id')
+        ->get();
+        $categories = $this->branch
+        ->get()
+        ->map(function($item) use($branch_off_category) {
+            $branches_category_off = $branch_off_category->pluck('branch_id')->filter(); 
+            if ( $branches_category_off->contains($item->id)) {
+                $item->category_status = 0;
+            }
+            else{
+                $item->category_status = 1;
+            }
+            return $item;
+        });
+
+        return response()->json([
+            'variations' => $variations,
         ]);
     }
 }
