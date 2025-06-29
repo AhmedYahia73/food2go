@@ -87,11 +87,12 @@ class OrderController extends Controller
         
         // Split the time string into hours, minutes, and seconds
         list($hours, $minutes, $seconds) = explode(':', $time_to_add);
+        list($order_hours, $order_minutes, $order_seconds) = explode(':', $time_to_add);
         
         // Ensure that $hours, $minutes, and $seconds are integers
-        $hours = (int)$hours;
-        $minutes = (int)$minutes;
-        $seconds = (int)$seconds;
+        $hours = (int)$hours + (int)$order_hours;
+        $minutes = (int)$minutes + (int)$order_minutes;
+        $seconds = (int)$seconds + (int)$order_seconds;
         
         // Add the time to the original Carbon instance
         $time = $time->addHours($hours)->addMinutes($minutes)->addSeconds($seconds);
