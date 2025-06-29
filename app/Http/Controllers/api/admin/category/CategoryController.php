@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 
 use App\Models\Category;
+use App\Models\BranchOff;
 use App\Models\Branch;
 use App\Models\Addon;
 use App\Models\Translation;
@@ -18,7 +19,7 @@ class CategoryController extends Controller
 {
     public function __construct(private Category $categories, private Addon $addons,
     private Translation $translations, private TranslationTbl $translation_tbl,
-    private Branch $branch){}
+    private Branch $branch, private BranchOff $branch_off){}
 
     public function view(){
         // https://bcknd.food2go.online/admin/category
