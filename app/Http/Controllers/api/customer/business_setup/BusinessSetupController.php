@@ -117,10 +117,15 @@ class BusinessSetupController extends Controller
                 $open_flag = false;
                 $open_from = $open_from;
                 $open_to = $open_to; 
-                $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
                 if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
                     $open_flag = true;
+                    $close_message = '';
+                }
+                elseif(in_array($today, $days)){
                     $close_message = 'اليوم اجازة';
+                }
+                elseif(!$now->between($open_from, $open_to)){
+                    $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
                 }
             }
             else{
