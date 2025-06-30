@@ -12,6 +12,7 @@ class HomeController extends Controller
     public function __construct(private Cashier $cashier){}
 
     public function view(Request $request){
+        // https://bcknd.food2go.online/cashier/home
         $cashiers = $this->cashier
         ->where('branch_id', $request->user()->branch_id)
         ->where('cashier_active', 0)
@@ -24,6 +25,7 @@ class HomeController extends Controller
     }
 
     public function active_cashier(Request $request, $id){
+        // https://bcknd.food2go.online/cashier/home/active_cashier/{id}
         $this->cashier
         ->where('id', $id)
         ->update([
