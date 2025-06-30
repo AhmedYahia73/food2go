@@ -128,6 +128,10 @@ class Order extends Model
         return $this->belongsTo(Branch::class, 'branch_id');
     }
 
+    public function casheir(){
+        return $this->belongsTo(Cashier::class, 'cashier_id');
+    }
+
     public function products(){
         return $this->belongsToMany(Product::class, 'order_product', 'order_id', 'product_id')
         ->withPivot('created_at');

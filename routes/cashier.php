@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 use App\Http\Controllers\api\cashier\address\AddressController;
 use App\Http\Controllers\api\cashier\customer\CustomerController;
-use App\Http\Controllers\api\cashier\reports\CashierReportsController;
+use App\Http\Controllers\api\cashier\reports\HomeController;
+use App\Http\Controllers\api\cashier\Home\CashierReportsController;
 
 Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CashierMakeOrderController::class)
@@ -26,6 +27,11 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
        
         Route::put('/tables_status/{id}', 'tables_status')->middleware('can:table_status');
     }); 
+    Route::controller(HomeController::class)
+    ->prefix('/home')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/active_cashier/{id}', 'active_cashier'); 
+    });
     Route::controller(CustomerController::class)
     ->prefix('/customer')->group(function(){
         Route::get('/', 'view');
