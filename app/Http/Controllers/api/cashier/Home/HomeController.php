@@ -13,6 +13,7 @@ class HomeController extends Controller
 
     public function view(Request $request){
         $cashiers = $this->cashier
+        ->where('branch_id', $request->user()->branch_id)
         ->where('cashier_active', 0)
         ->where('status', 1)
         ->get();
