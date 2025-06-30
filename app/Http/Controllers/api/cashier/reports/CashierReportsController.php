@@ -19,13 +19,22 @@ class CashierReportsController extends Controller
     , private TimeSittings $TimeSittings){}
 
     public function all_cashiers(Request $request){
+        $validator = Validator::make($request->all(), [
+            'from_date' => 'date',
+            'to_date' => 'date',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
 
         $time_sittings = $this->TimeSittings
         ->get();
         $from = $time_sittings->min('from');
         $hours = $time_sittings->max('hours');
         if (!empty($from)) {
-            $from = date('Y-m-d') . ' ' . $from;
+            $from = $request->from_date ?? date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
 			$end = Carbon::parse($from)->addHours($hours);
             if ($start > $end) {
@@ -34,31 +43,132 @@ class CashierReportsController extends Controller
             else{
                 $end = Carbon::parse($from)->addHours(intval($hours));
             }
+            $end = $request->to_date ?? date('Y-m-d') . ' ' . $end->format('H:i:s');
+            $end = Carbon::parse($end);
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
         $orders = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->select('cashier_id', 'payment_method_id', 'amount')
         ->where('pos', 1)
         ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
+        ->whereNotNull('cashier_id')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
+        });
+        if (!empty($request->from_date)) {
+            $orders = $orders->where('created_at', '>=', $request->from_date);
+        }
+        if (!empty($request->to_date)) {
+            $orders = $orders->where('created_at', '<=', $request->to_date);
+        }
+        $orders = $orders->get();
+        $payments = [];
+        $payments_data = [];
+        foreach ($orders as $item) {
+            $payments[$item->casheir->name] = [];
+            if (isset($payments[$item->casheir->name][$item->payment_method->name])) {
+                $payments[$item->casheir->name][$item->payment_method->name]['amount'] += $item->amount;
+            } else {
+                $payments[$item->casheir->name][$item->payment_method->name]['amount'] = $item->amount;
+            }
+            
+        }
+        $iter = 0;
+        $iter2 = 0;
+        foreach ($payments as $key => $item) {
+            $payments_data[$iter]['cashier'] = $key;
+            foreach ($item as $key2 => $element) {
+                $payments_data[$iter]['payment_methods'][] = [
+                    'name' => $key2,
+                    'amount' => $element['amount'],
+                ]; 
+            } 
+            $iter++;
+        }
+
+        return response()->json([
+            'payments' => $payments_data
+        ]);
+    }
+
+    public function branch_cashiers(Request $request){
+        $validator = Validator::make($request->all(), [
+            'from_date' => 'date',
+            'to_date' => 'date',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $time_sittings = $this->TimeSittings
         ->get();
-        $results = $this->orders
-        ->selectRaw('cashier_id, payment_method_id, SUM(payment) as total_payment')
-        ->groupBy('cashier_id', 'payment_method_id')
-        ->get();
+        $from = $time_sittings->min('from');
+        $hours = $time_sittings->max('hours');
+        if (!empty($from)) {
+            $from = $request->from_date ?? date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+			$end = Carbon::parse($from)->addHours($hours);
+            if ($start > $end) {
+                $end = Carbon::parse($from)->addHours($hours)->subDay();
+            }
+            else{
+                $end = Carbon::parse($from)->addHours(intval($hours));
+            }
+            $end = $request->to_date ?? date('Y-m-d') . ' ' . $end->format('H:i:s');
+            $end = Carbon::parse($end);
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+        $orders = $this->orders
+        ->select('cashier_id', 'payment_method_id', 'amount')
+        ->where('pos', 1)
+        ->where('branch_id', $request->user()->branch_id)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNotNull('cashier_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        });
+        if (!empty($request->from_date)) {
+            $orders = $orders->where('created_at', '>=', $request->from_date);
+        }
+        if (!empty($request->to_date)) {
+            $orders = $orders->where('created_at', '<=', $request->to_date);
+        }
+        $orders = $orders->get();
+        $payments = [];
+        $payments_data = [];
+        foreach ($orders as $item) {
+            $payments[$item->casheir->name] = [];
+            if (isset($payments[$item->casheir->name][$item->payment_method->name])) {
+                $payments[$item->casheir->name][$item->payment_method->name]['amount'] += $item->amount;
+            } else {
+                $payments[$item->casheir->name][$item->payment_method->name]['amount'] = $item->amount;
+            }
+            
+        }
+        $iter = 0;
+        $iter2 = 0;
+        foreach ($payments as $key => $item) {
+            $payments_data[$iter]['cashier'] = $key;
+            foreach ($item as $key2 => $element) {
+                $payments_data[$iter]['payment_methods'][] = [
+                    'name' => $key2,
+                    'amount' => $element['amount'],
+                ]; 
+            } 
+            $iter++;
+        }
+
+        return response()->json([
+            'payments' => $payments_data
+        ]);
     }
 
     public function shift_branch_reports(Request $request){

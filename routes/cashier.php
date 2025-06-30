@@ -8,6 +8,7 @@ use App\Http\Controllers\api\cashier\customer\CustomerController;
 use App\Http\Controllers\api\cashier\Home\HomeController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
+
 Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CashierMakeOrderController::class)
     ->group(function(){
@@ -54,5 +55,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->prefix('/reports')->group(function(){
         Route::get('shift_branch', 'shift_branch_reports')->middleware('can:branch_reports');
         Route::get('shift_all_branch', 'shift_reports')->middleware('can:all_reports');
+
+        Route::get('branch_cashiers', 'branch_cashiers')->middleware('can:branch_reports');
+        Route::get('all_cashiers', 'all_cashiers')->middleware('can:all_reports');
     }); 
 });
