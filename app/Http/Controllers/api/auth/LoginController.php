@@ -168,9 +168,11 @@ class LoginController extends Controller
             
             $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_domain_package')->body();
             $response = json_decode($response);
-			$response = collect($response);
-            $subscription = $response->where('back_link', url(''))->values(); 
-            if (count($subscription) == 0 || $subscription->from > date('Y-m-d') || $subscription->to < date('Y-m-d')) {
+            $subscription = collect($response?->user_subscription) ?? collect([]); 
+            $subscription = $subscription->where('back_link', url(''))
+			->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+			->first();  
+            if (empty($subscription)) {
                 return response()->json([
                     'errors' => 'Application is stoping now'
                 ], 400);
