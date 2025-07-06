@@ -19,13 +19,15 @@ use App\Models\Setting;
 use App\Models\Address;
 use App\Models\CashierShift;
 use App\Models\Zone;
+use App\Models\SmsBalance;
 
 class LoginController extends Controller
 {
     public function __construct(private Admin $admin, private Delivery $delivery, 
     private User $user, private Branch $branch, private Setting $settings,
     private Address $address, private Zone $zones, private CaptainOrder $captain_order,
-    private CashierMan $cashier, private CashierShift $cashier_shift){}
+    private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
+    ){}
 
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login
@@ -154,6 +156,47 @@ class LoginController extends Controller
         // https://bcknd.food2go.online/api/user/auth/login
         // Keys
         // email, password
+        
+            
+        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+        $response = json_decode($response);
+  
+        $sms_subscription = collect($response?->user_sms) ?? collect([]); 
+        $sms_subscription = $sms_subscription->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+        ->first();
+        $msg_number = $this->sms_balance
+        ->where('package_id', $sms_subscription?->id)
+        ->first();
+        if (!empty($sms_subscription) && empty($msg_number)) {
+            $msg_number = $this->sms_balance
+            ->create([
+                'package_id' => $sms_subscription->id,
+                'balance' => $sms_subscription->msg_number,
+            ]);
+        }
+        if (empty($sms_subscription) || $msg_number->balance >= $sms_subscription->msg_number) {
+            $customer_login = $this->settings
+            ->where('name', 'customer_login')
+            ->first();
+            if(empty($customer_login)){
+                $this->settings
+                ->create([
+                    'name' => 'customer_login',
+                    'setting' => '{"login":"otp","verification":"email"}',
+                ]);
+            }
+            else{
+                $customer_login->update([
+                    'setting' => '{"login":"otp","verification":"email"}',
+                ]);
+            }
+        }
+        return response()->json([
+            'msg_number' => $msg_number,
+            'sms_subscription' => $sms_subscription,
+            'response' => $response,
+        ]);
         $user = $this->delivery
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
