@@ -6,7 +6,18 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\auth\LoginController;
 use App\Http\Controllers\api\auth\SignupController;
 
+use App\Events\OrderEvent;
 use App\Http\Controllers\api\customer\business_setup\BusinessSetupController;
+
+Route::prefix('welcome')->group(function(){
+    Route::get('/', function(){
+		return view('welcome');
+	});
+    Route::get('/v1', function(){
+        event(new OrderEvent('Hello'));
+		return view('welcome');
+	});
+});
 
 Route::prefix('admin/auth')->controller(LoginController::class)->group(function(){
     Route::post('login', 'admin_login');
