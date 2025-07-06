@@ -158,6 +158,7 @@ class LoginController extends Controller
         // email, password
         
             
+        // _______________________________________________________________________
         $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
         $response = json_decode($response);
   
@@ -192,6 +193,7 @@ class LoginController extends Controller
                 ]);
             }
         }
+        // _______________________________________________________________________
         $user = $this->delivery
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
