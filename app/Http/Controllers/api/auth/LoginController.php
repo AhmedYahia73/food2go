@@ -154,8 +154,6 @@ class LoginController extends Controller
         // https://bcknd.food2go.online/api/user/auth/login
         // Keys
         // email, password
-        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_domain_package');
-        return response()->json([$response, url('')]);
         $user = $this->delivery
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
@@ -167,6 +165,15 @@ class LoginController extends Controller
             ->orWhere('phone', $request->email)
             ->first();
             $role = 'customer';
+            
+            $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_domain_package')->body();
+            $response = json_decode($response);
+            $subscription = $response->where('back_link', url(''))->values();
+            if (empty($subscription) || $subscription->from > date('Y-m-d') || $subscription->to < date('Y-m-d')) {
+                return response()->json([
+                    'errors' => 'Application is stoping now'
+                ], 400);
+            } 
         }
         if (empty($user)) {
             return response()->json([
