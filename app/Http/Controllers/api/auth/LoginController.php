@@ -175,7 +175,7 @@ class LoginController extends Controller
                 'balance' => $sms_subscription->msg_number,
             ]);
         }
-        if (empty($sms_subscription) || $msg_number->balance < 0) {
+        if (empty($sms_subscription) || $msg_number->balance <= 0) {
             $customer_login = $this->settings
             ->where('name', 'customer_login')
             ->first();
