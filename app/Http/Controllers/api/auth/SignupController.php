@@ -14,11 +14,14 @@ use Illuminate\Support\Facades\Http;
 
 use App\Models\SmsIntegration;
 use App\Models\User;
+use App\Models\SmsBalance;
+use App\Models\Setting;
 
 class SignupController extends Controller
 {
     public function __construct(private User $user,
-    private SmsIntegration $sms_integration){}
+    private SmsIntegration $sms_integration,
+    private SmsBalance $sms_balance, private Setting $settings){}
     protected $userRequest = [
         'f_name',
         'l_name',
@@ -107,6 +110,11 @@ class SignupController extends Controller
             Mail::to($request->email)->send(new OTPMail($data));
         } 
         elseif($request->phone) {
+            $this->sms_balance
+            ->where('package_id', $sms_subscription->id)
+            ->update([
+                'balance' => $msg_number->balance - 1
+            ]);
             $temporaryToken = Str::random(40);
             $code = rand(10000, 99999);  // Generate OTP
             $phone = $request->phone;
