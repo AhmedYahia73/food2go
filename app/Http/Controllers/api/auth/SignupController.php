@@ -14,11 +14,13 @@ use Illuminate\Support\Facades\Http;
 
 use App\Models\SmsIntegration;
 use App\Models\User;
+use App\Models\SmsBalance;
 
 class SignupController extends Controller
 {
     public function __construct(private User $user,
-    private SmsIntegration $sms_integration){}
+    private SmsIntegration $sms_integration,
+    private SmsBalance $sms_balance){}
     protected $userRequest = [
         'f_name',
         'l_name',
@@ -100,13 +102,36 @@ class SignupController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+            
+        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+        $response = json_decode($response);
+  
+        $sms_subscription = collect($response?->user_sms) ?? collect([]); 
+        $sms_subscription = $sms_subscription->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+        ->first();
+        $msg_number = $this->sms_balance
+        ->where('package_id', $sms_subscription->id)
+        ->first();
+        if (!empty($sms_subscription) && empty($msg_number)) {
+            $msg_number = $this->sms_balance
+            ->create([
+                'package_id' => $sms_subscription->id,
+                'balance' => $sms_subscription->msg_number,
+            ]);
+        }
 
-        if ($request->email) {
+        if ($request->email || empty($sms_subscription) || $msg_number->balance >= $sms_subscription->msg_number ) {
             $code = rand(10000, 99999);
             $data['code'] = $code;
             Mail::to($request->email)->send(new OTPMail($data));
         } 
         elseif($request->phone) {
+            $this->sms_balance
+            ->where('package_id', $sms_subscription->id)
+            ->update([
+                'balance' => $msg_number->balance - 1
+            ]);
             $temporaryToken = Str::random(40);
             $code = rand(10000, 99999);  // Generate OTP
             $phone = $request->phone;
