@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\auth\LoginRequest;
 use App\Http\Requests\auth\SignupRequest;
+use Illuminate\Support\Facades\Http;
 use Google_Client;
 
 use App\Models\Admin;
