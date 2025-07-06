@@ -192,11 +192,6 @@ class LoginController extends Controller
                 ]);
             }
         }
-        return response()->json([
-            'msg_number' => $msg_number,
-            'sms_subscription' => $sms_subscription,
-            'response' => $response,
-        ]);
         $user = $this->delivery
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
