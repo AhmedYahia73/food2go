@@ -155,7 +155,7 @@ class LoginController extends Controller
         // Keys
         // email, password
         $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_domain_package');
-        return reponse()->json([$response, url('')]);
+        return response()->json([$response, url('')]);
         $user = $this->delivery
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
