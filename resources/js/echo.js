@@ -9,6 +9,8 @@ window.Echo = new Echo({
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     wsHost: import.meta.env.VITE_PUSHER_HOST || window.location.hostname,
     wsPort: import.meta.env.VITE_PUSHER_PORT || 6001,
-    forceTLS: false,
-    enabledTransports: ['ws'],
+    wssPort: import.meta.env.VITE_PUSHER_PORT || 6001,
+    forceTLS: true, 
+    disableStats: true,
+    enabledTransports: ['ws', 'wss'],
 });
