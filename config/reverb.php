@@ -12,7 +12,12 @@ return [
     | connected clients. At this time only "reverb" is supported.
     |
     */
-
+    'ssl' => [
+        'local_cert' => env('REVERB_SSL_CERT', null),
+        'local_pk' => env('REVERB_SSL_KEY', null),
+        'passphrase' => env('REVERB_SSL_PASSPHRASE', null),
+    ],
+    
     'default' => env('REVERB_SERVER', 'reverb'),
 
     /*
