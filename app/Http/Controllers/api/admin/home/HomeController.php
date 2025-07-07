@@ -62,8 +62,8 @@ class HomeController extends Controller
         $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
         $response = json_decode($response);
 
-        $sms_subscription = collect($response?->user_sms) ?? collect([]); 
-        $sms_subscription = $sms_subscription->where('back_link', url(''))
+        $sms_subscription_data = collect($response?->user_sms) ?? collect([]); 
+        $sms_subscription = $sms_subscription_data->where('back_link', url(''))
         ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
         ->first();
         $msg_number = $this->sms_balance
@@ -78,7 +78,7 @@ class HomeController extends Controller
             $msg_package['msg_number'] = $msg_number?->balance;
         }
         elseif (!empty($sms_subscription) && !empty($msg_number)) {
-            $sms_subscription = $sms_subscription->where('back_link', url(''))
+            $sms_subscription = $sms_subscription_data->where('back_link', url(''))
             ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
             ->get();
             $msg_number = $this->sms_balance
