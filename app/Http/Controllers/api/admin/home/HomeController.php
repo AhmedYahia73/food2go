@@ -80,7 +80,7 @@ class HomeController extends Controller
         elseif (!empty($sms_subscription) && !empty($msg_number)) {
             $sms_subscription = $sms_subscription_data->where('back_link', url(''))
             ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
-            ->get();
+            ->values();
             $msg_number = $this->sms_balance
             ->whereIn('package_id', $sms_subscription?->pluck('id') ?? collect([]))
             ->sum('balance');
