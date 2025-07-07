@@ -61,6 +61,7 @@ use App\Providers\gates\PosReportsGate;
 use App\Providers\gates\OrderDelayGate;
 
 use App\Providers\Cashier\CashierRoles;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -77,6 +78,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+    Schema::defaultStringLength(191);
         try {
             $company = CompanyInfo::orderByDesc('id')
             ->first() ?? collection([]);

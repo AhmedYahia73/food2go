@@ -12,6 +12,11 @@ return [
     | connected clients. At this time only "reverb" is supported.
     |
     */
+    'ssl' => [
+        'local_cert' => env('REVERB_SSL_CERT', null),
+        'local_pk' => env('REVERB_SSL_KEY', null),
+        'passphrase' => env('REVERB_SSL_PASSPHRASE', null),
+    ],
 
     'default' => env('REVERB_SERVER', 'reverb'),
 
@@ -30,7 +35,7 @@ return [
 
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
-            'port' => env('REVERB_SERVER_PORT', 8080),
+            'port' => env('REVERB_SERVER_PORT', 443),
             'hostname' => env('REVERB_HOST'),
             'options' => [
                 'tls' => [],

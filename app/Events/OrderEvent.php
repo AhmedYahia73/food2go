@@ -22,7 +22,7 @@ class OrderEvent implements ShouldBroadcast
     public function __construct($order)
     {
         $this->order = $order;
-        \Log::info('🔥 NewOrderCreated event fired for order ID: ' . $order->id);
+        \Log::info('🔥 NewOrderCreated event fired for order ID: ' . $order);
     }
 
     /**
