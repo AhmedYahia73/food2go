@@ -79,15 +79,15 @@ class HomeController extends Controller
         }
         $sms_subscription = $sms_subscription_data->where('back_link', url(''))
         ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+			->sortByDesc('id')
         ->values();
         $msg_number = $this->sms_balance
         ->whereIn('package_id', $sms_subscription?->pluck('id') ?? collect([]))
         ->sum('balance');
         $msg_package['msg_number'] = $msg_number;
-        $msg_package['from'] = count($sms_subscription) > 0 ? $sms_subscription[count($sms_subscription) - 1]?->from : null;
-        $msg_package['to'] = count($sms_subscription) > 0 ? $sms_subscription[count($sms_subscription) - 1]?->to : null;
+        $msg_package['from'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->from : null;
+        $msg_package['to'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->to : null;
  
-
         $this->log_order
         ->whereDate('created_at', '<=', now()->subDays(14))
         ->delete();
