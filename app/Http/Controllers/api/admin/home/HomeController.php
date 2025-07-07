@@ -76,26 +76,17 @@ class HomeController extends Controller
                 'package_id' => $sms_subscription->id,
                 'balance' => $sms_subscription->msg_number,
             ]);
-            $msg_package['msg_number'] = $msg_number?->balance;
-            $msg_package['from'] = $sms_subscription?->from;
-            $msg_package['to'] = $sms_subscription?->to;
         }
-        elseif (!empty($sms_subscription) && !empty($msg_number)) {
-            $sms_subscription = $sms_subscription_data->where('back_link', url(''))
-            ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
-            ->values();
-            $msg_number = $this->sms_balance
-            ->whereIn('package_id', $sms_subscription?->pluck('id') ?? collect([]))
-            ->sum('balance');
-            $msg_package['msg_number'] = $msg_number;
-            $msg_package['from'] = count($sms_subscription) > 0 ? $sms_subscription[count($sms_subscription) - 1]?->from : null;
-            $msg_package['to'] = count($sms_subscription) > 0 ? $sms_subscription[count($sms_subscription) - 1]?->to : null;
-        }
-        else{
-            $msg_package['msg_number'] = $msg_number?->balance;
-            $msg_package['from'] = $sms_subscription?->from;
-            $msg_package['to'] = $sms_subscription?->to;
-        }
+        $sms_subscription = $sms_subscription_data->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+        ->values();
+        $msg_number = $this->sms_balance
+        ->whereIn('package_id', $sms_subscription?->pluck('id') ?? collect([]))
+        ->sum('balance');
+        $msg_package['msg_number'] = $msg_number;
+        $msg_package['from'] = count($sms_subscription) > 0 ? $sms_subscription[count($sms_subscription) - 1]?->from : null;
+        $msg_package['to'] = count($sms_subscription) > 0 ? $sms_subscription[count($sms_subscription) - 1]?->to : null;
+ 
 
         $this->log_order
         ->whereDate('created_at', '<=', now()->subDays(14))
