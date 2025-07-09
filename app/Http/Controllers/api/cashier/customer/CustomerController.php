@@ -9,20 +9,25 @@ use App\Http\Requests\admin\pos\OrderRequest;
 
 use App\Models\Customer;
 use App\Models\Address;
+use App\Models\Zone;
 
 class CustomerController extends Controller
 {
     public function __construct(private Customer $customers,
-    private Address $address){}
+    private Address $address, private Zone $zone){}
     
     public function view(){
         // /cashier/customer
         $customers = $this->customers
         ->with('addresses.zone.city:id,name')
         ->get();
+        $zones = $this->zone
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'customers' => $customers,
+            'zones' => $zones,
         ]);
     }
 

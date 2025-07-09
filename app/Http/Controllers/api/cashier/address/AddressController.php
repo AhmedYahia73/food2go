@@ -7,12 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Address;
-use App\Models\Zone;
 
 class AddressController extends Controller
 {
-    public function __construct(private Address $address,
-    private Zone $zone){}
+    public function __construct(private Address $address){}
     
     public function address($id){
         // /cashier/address/item/{id}
@@ -20,13 +18,8 @@ class AddressController extends Controller
         ->with('zone.city:id,name')
         ->where('id', $id)
         ->first();
-        $zones = $this->zone
-        ->where('status', 1)
-        ->get();
-
         return response()->json([
             'address' => $address,
-            'zones' => $zones,
         ]);
     }
 
