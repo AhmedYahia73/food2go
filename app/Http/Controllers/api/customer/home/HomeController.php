@@ -104,109 +104,93 @@ class HomeController extends Controller
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
-            ->with(['favourite_product' => function($query) use($user_id){
-                $query->where('users.id', $user_id);
-            }, 'addons' => function($query) use($locale){
-                $query->withLocale($locale);
-            },'sub_category_addons' => function($query) use($locale){
-                $query->withLocale($locale);
-            }, 'category_addons' => function($query) use($locale){
-                $query->withLocale($locale);
-            }, 'excludes' => function($query) use($locale){
-                $query->withLocale($locale);
-            }, 'discount', 'extra',
-            'variations' => function($query) use($locale){
-                $query->withLocale($locale)
-                ->with(['options' => function($query_option) use($locale){
-                    $query_option->with(['extra' => function($query_extra) use($locale){
-                        $query_extra->with('parent_extra')
-                        ->withLocale($locale);
-                    }])
-                    ->withLocale($locale);
-                }]);
-            }, 'sales_count', 'tax'])
+            ->with([
+                'favourite_product' => fn($q) => $q->where('id', $user_id),
+                'addons' => fn($q) => $q->withLocale($locale),
+                'category_addons' => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                'excludes' => fn($q) => $q->withLocale($locale),
+                'discount', 'extra', 'sales_count', 'tax',
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($q) => $q
+                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
+                        ->withLocale($locale),
+                ]),
+            ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
+            ->whereNotIn('category_id', $category_off)
+            ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('id', $product_off)
             ->get()
-            ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
-                if (count($product->favourite_product) > 0) {
-                    $product->favourite = true;
-                }
-                else {
-                    $product->favourite = false;
-                }
-                $product->price = $product?->product_pricing->where('branch_id', $branch_id)
-                ->first()?->price ?? $product->price;
-                //get count of sales of product to detemine stock
-                if ($product->stock_type == 'fixed') {
+            ->map(function ($product) use ($option_off, $branch_id) {
+                $product->favourite = $product->favourite_product->isNotEmpty();
+
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+
+                if ($product->stock_type === 'fixed') {
                     $product->count = $product->sales_count->sum('count');
-                    $product->in_stock = $product->number > $product->count ? true : false;
-                }
-                elseif ($product->stock_type == 'daily') {
+                } elseif ($product->stock_type === 'daily') {
                     $product->count = $product->sales_count
-                    ->where('date', date('Y-m-d'))
-                    ->sum('count');
-                    $product->in_stock = $product->number > $product->count ? true : false;
+                        ->where('date', date('Y-m-d'))
+                        ->sum('count');
                 }
-                // return !$category_off->contains($item->id);
-                // $category_off, $product_off, $option_off
-                if ($category_off->contains($product->category_id) || 
-                $category_off->contains($product->sub_category_id)
-                || $product_off->contains($product->id)) {
-                    return null;
-                }
+
+                $product->in_stock = $product->number > $product->count;
+
                 $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
-                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                    $variation->options = $variation->options->map(function($element) use($branch_id){
-                        $element->price = $element?->option_pricing->where('branch_id', $branch_id)
-                        ->first()?->price ?? $element->price;
-                        return $element;
-                    });
+                    $variation->options = $variation->options
+                        ->reject(fn($option) => $option_off->contains($option->id))
+                        ->map(function ($option) {
+                            $option->price = $option->option_pricing->first()?->price ?? $option->price;
+                            return $option;
+                        });
+
                     return $variation;
                 });
+
                 return $product;
-            })->filter(); 
+            });
+
         }
         else{
-            $products = $this->product
-            ->with(['addons' => function($query) use($locale){
-                $query->withLocale($locale);
-            },'category_addons' => function($query) use($locale){
-                $query->withLocale($locale);
-            },'sub_category_addons' => function($query) use($locale){
-                $query->withLocale($locale);
-            },'excludes' => function($query) use($locale){
-                $query->withLocale($locale);
-            }, 'discount', 'extra', 
-             
-            'variations' => function($query) use($locale){
-                $query->withLocale($locale)
-                ->with(['options']);
-            }, 'sales_count', 'tax'])
-            ->withLocale($locale)
-            ->where('item_type', '!=', 'offline')
-            ->where('status', 1)
-            ->get()
-            ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){ 
-                $product->price = $product?->product_pricing->where('branch_id', $branch_id)
-                ->first()?->price ?? $product->price;
-                if ($category_off->contains($product->category_id) || 
-                $category_off->contains($product->sub_category_id)
-                || $product_off->contains($product->id)) {
-                    return null;
-                }
-                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
-                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));     
-                    $variation->options = $variation->options->map(function($element) use($branch_id){
-                        $element->price = $element?->option_pricing->where('branch_id', $branch_id)
-                        ->first()?->price ?? $element->price;
-                        return $element;
-                    });
+                $products = $this->product
+                ->with([
+                    'addons' => fn($q) => $q->withLocale($locale),
+                    'category_addons' => fn($q) => $q->withLocale($locale),
+                    'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                    'excludes' => fn($q) => $q->withLocale($locale),
+                    'discount', 'extra', 'sales_count', 'tax',
+                    'variations' => fn($q) => $q->with([
+                        'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
+                    ])->withLocale($locale),
+                ])
+                ->withLocale($locale)
+                ->where('item_type', '!=', 'offline')
+                ->where('status', 1)
+                ->whereNotIn('category_id', $category_off)
+                ->whereNotIn('sub_category_id', $category_off)
+                ->whereNotIn('id', $product_off)
+                ->get();
+
+            $products = $products->map(function($product) use ($branch_id, $option_off) {
+                $product->price = $product->product_pricing
+                    ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
+
+                $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->reject(fn($opt) => $option_off->contains($opt->id))
+                        ->map(function($opt) use ($branch_id) {
+                            $opt->price = $opt->option_pricing
+                                ->firstWhere('branch_id', $branch_id)?->price ?? $opt->price;
+                            return $opt;
+                        });
+
                     return $variation;
                 });
-                return $product;
-            })->filter();
+            });
         }
         $discounts = $this->product
         ->with('discount')
@@ -359,17 +343,15 @@ class HomeController extends Controller
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
+            ->whereNotIn('category_id', $category_off)
+            ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('id', $product_off)
             ->get()
             ->map(function($item) use($category_off, $product_off, $option_off, $branch_id){ 
                 
                 $item->price = $item?->product_pricing?->where('branch_id', $branch_id)
                 ->first()?->price ?? $item->price;
                 $item->setAttribute('favourite', $item->favourite_product->isNotEmpty());
-                if ($category_off->contains($item->category_id) || 
-                $category_off->contains($item->sub_category_id)
-                || $product_off->contains($item->id)) {
-                    return null;
-                }
                 $item->variations = $item->variations->map(function ($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
                     $variation->options = $variation->options->map(function($element) use($branch_id){
