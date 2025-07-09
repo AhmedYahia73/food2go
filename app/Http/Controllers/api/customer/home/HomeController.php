@@ -126,7 +126,7 @@ class HomeController extends Controller
             ->whereNotIn('products.id', $product_off)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {
-                $product->favourite = $product->favourite_product->isNotEmpty();
+                $product->favourites = $product->favourite_product->isNotEmpty();
 
                 $product->price = $product->product_pricing->first()?->price ?? $product->price;
 
@@ -579,10 +579,10 @@ class HomeController extends Controller
             ->get();
             foreach ($products as $product) {
                 if (count($product->favourite_product) > 0) {
-                    $product->favourite = true;
+                    $product->favourites = true;
                 }
                 else {
-                    $product->favourite = false;
+                    $product->favourites = false;
                 }
                 //get count of sales of product to detemine stock
                 if ($product->stock_type == 'fixed') {
