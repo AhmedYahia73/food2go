@@ -67,41 +67,6 @@ class HomeController extends Controller
         // address_id, branch_id
         
         // // _______________________________________________________________________
-        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
-        $response = json_decode($response);
-  
-        $sms_subscription = collect($response?->user_sms) ?? collect([]); 
-        $sms_subscription = $sms_subscription->where('back_link', url(''))
-        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
-        ->first();
-        $msg_number = $this->sms_balance
-        ->where('package_id', $sms_subscription?->id)
-        ->first();
-        if (!empty($sms_subscription) && empty($msg_number)) {
-            $msg_number = $this->sms_balance
-            ->create([
-                'package_id' => $sms_subscription->id,
-                'balance' => $sms_subscription->msg_number,
-            ]);
-        }
-        if (empty($sms_subscription) || $msg_number->balance <= 0) {
-            $customer_login = $this->settings
-            ->where('name', 'customer_login')
-            ->first();
-            if(empty($customer_login)){
-                $this->settings
-                ->create([
-                    'name' => 'customer_login',
-                    'setting' => '{"login":"otp","verification":"email"}',
-                ]);
-            }
-            else{
-                $customer_login->update([
-                    'setting' => '{"login":"otp","verification":"email"}',
-                ]);
-            }
-        }
-        // // _______________________________________________________________________
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         
         $branch_id = 0;
@@ -288,40 +253,40 @@ class HomeController extends Controller
         // address_id, branch_id
         
         // _______________________________________________________________________
-        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
-        $response = json_decode($response);
+        // $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+        // $response = json_decode($response);
   
-        $sms_subscription = collect($response?->user_sms) ?? collect([]); 
-        $sms_subscription = $sms_subscription->where('back_link', url(''))
-        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
-        ->first();
-        $msg_number = $this->sms_balance
-        ->where('package_id', $sms_subscription?->id)
-        ->first();
-        if (!empty($sms_subscription) && empty($msg_number)) {
-            $msg_number = $this->sms_balance
-            ->create([
-                'package_id' => $sms_subscription->id,
-                'balance' => $sms_subscription->msg_number,
-            ]);
-        }
-        if (empty($sms_subscription) || $msg_number->balance <= 0) {
-            $customer_login = $this->settings
-            ->where('name', 'customer_login')
-            ->first();
-            if(empty($customer_login)){
-                $this->settings
-                ->create([
-                    'name' => 'customer_login',
-                    'setting' => '{"login":"otp","verification":"email"}',
-                ]);
-            }
-            else{
-                $customer_login->update([
-                    'setting' => '{"login":"otp","verification":"email"}',
-                ]);
-            }
-        }
+        // $sms_subscription = collect($response?->user_sms) ?? collect([]); 
+        // $sms_subscription = $sms_subscription->where('back_link', url(''))
+        // ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+        // ->first();
+        // $msg_number = $this->sms_balance
+        // ->where('package_id', $sms_subscription?->id)
+        // ->first();
+        // if (!empty($sms_subscription) && empty($msg_number)) {
+        //     $msg_number = $this->sms_balance
+        //     ->create([
+        //         'package_id' => $sms_subscription->id,
+        //         'balance' => $sms_subscription->msg_number,
+        //     ]);
+        // }
+        // if (empty($sms_subscription) || $msg_number->balance <= 0) {
+        //     $customer_login = $this->settings
+        //     ->where('name', 'customer_login')
+        //     ->first();
+        //     if(empty($customer_login)){
+        //         $this->settings
+        //         ->create([
+        //             'name' => 'customer_login',
+        //             'setting' => '{"login":"otp","verification":"email"}',
+        //         ]);
+        //     }
+        //     else{
+        //         $customer_login->update([
+        //             'setting' => '{"login":"otp","verification":"email"}',
+        //         ]);
+        //     }
+        // }
         // _________________________________________________________________________
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;
