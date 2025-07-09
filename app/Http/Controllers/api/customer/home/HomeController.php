@@ -104,7 +104,7 @@ class HomeController extends Controller
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
-            ->with([
+            ->with([ 
                 'favourite_product' => fn($q) => $q->where('id', $user_id),
                 'addons' => fn($q) => $q->withLocale($locale),
                 'category_addons' => fn($q) => $q->withLocale($locale),
@@ -190,6 +190,7 @@ class HomeController extends Controller
 
                     return $variation;
                 });
+                return $product;
             });
         }
         $discounts = $this->product
