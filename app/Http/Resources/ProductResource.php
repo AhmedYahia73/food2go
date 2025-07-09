@@ -83,7 +83,7 @@ class ProductResource extends JsonResource
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
                 'favourite_product' => $this->whenLoaded('favourite_product'),
                 'sales_count' => $this->whenLoaded('sales_count'),
-                'favourite' => is_bool($this->favourite) ? $this->favourite : false,
+                'favourite' => is_numeric($this->favourite) ? $this->favourite : false,
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ];
