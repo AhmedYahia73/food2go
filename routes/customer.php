@@ -56,7 +56,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(AddressController::class)->prefix('address')->group(function(){
-        Route::get('/', 'view')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/', 'view');
         Route::post('/add', 'add');
         Route::put('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
