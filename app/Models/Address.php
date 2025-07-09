@@ -29,7 +29,7 @@ class Address extends Model
         return $this->belongsTo(Zone::class, 'zone_id');
     }
 
-    public function address(){
+    public function users(){
         return $this->belongsToMany(User::class ,'user_address');
     }
 }

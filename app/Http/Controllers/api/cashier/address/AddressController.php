@@ -46,7 +46,8 @@ class AddressController extends Controller
             ],400);
         }
         $addressRequest = $validator->validated();
-        $this->address->create($addressRequest);
+        $address = $this->address->create($addressRequest);
+        $address->users()->attach($request->customer_id);
 
         return response()->json([
             'success' => 'You add data success'
@@ -75,7 +76,10 @@ class AddressController extends Controller
             ],400);
         }
         $addressRequest = $validator->validated();
-        $this->address->create($addressRequest);
+        $this->address
+        ->where('id', $id)
+        ->update($addressRequest);
+        $address->users()->sync($request->customer_id);
 
         return response()->json([
             'success' => 'You update data success'
