@@ -123,7 +123,7 @@ class HomeController extends Controller
             ->where('status', 1)
             ->whereNotIn('category_id', $category_off)
             ->whereNotIn('sub_category_id', $category_off)
-            ->whereNotIn('id', $product_off)
+            ->whereNotIn('products.id', $product_off)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {
                 $product->favourite = $product->favourite_product->isNotEmpty();
