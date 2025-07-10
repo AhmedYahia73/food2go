@@ -19,7 +19,7 @@ class AddressController extends Controller
         $address = $this->address
         ->with('zone.city:id,name')
         ->whereHas('users', function($query) use($id){
-            $query->where('id', $id);
+            $query->where('users.id', $id);
         })
         ->first();
         $zones = $this->zone
@@ -101,7 +101,7 @@ class AddressController extends Controller
             ],400);
         }
         $addressRequest = $validator->validated();
-        $this->address
+        $address = $this->address
         ->where('id', $id)
         ->update($addressRequest);
         $address->users()->sync($request->customer_id);
