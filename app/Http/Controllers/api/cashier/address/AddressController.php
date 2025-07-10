@@ -103,7 +103,8 @@ class AddressController extends Controller
         $addressRequest = $validator->validated();
         $address = $this->address
         ->where('id', $id)
-        ->update($addressRequest);
+        ->first();
+        $address->update($addressRequest);
         $address->users()->sync($request->customer_id);
 
         return response()->json([
