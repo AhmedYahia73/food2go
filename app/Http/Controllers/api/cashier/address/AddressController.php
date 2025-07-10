@@ -14,6 +14,24 @@ class AddressController extends Controller
     public function __construct(private Address $address, 
     private Zone $zone){}
     
+    public function customer_address($id){
+        // /cashier/address/item/{id}
+        $address = $this->address
+        ->with('zone.city:id,name')
+        ->whereHas('users', function($query) use($id){
+            $query->where('id', $id);
+        })
+        ->first();
+        $zones = $this->zone
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'address' => $address,
+            'zones' => $zones,
+        ]);
+    }
+    
     public function address($id){
         // /cashier/address/item/{id}
         $address = $this->address
