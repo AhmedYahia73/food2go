@@ -15,7 +15,7 @@ class AddressController extends Controller
     private Zone $zone){}
     
     public function customer_address($id){
-        // /cashier/address/item/{id}
+        // /cashier/address/customer_address/{id}
         $address = $this->address
         ->with('zone.city:id,name')
         ->whereHas('users', function($query) use($id){

@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     
     Route::controller(AddressController::class)->prefix('address')->group(function(){
         Route::get('/item/{id}', 'address');
+        Route::get('/customer_address/{id}', 'customer_address');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify'); 
     });
