@@ -54,6 +54,7 @@ class Order extends Model
         'sechedule_slot_id',
         'canceled_noti',
         'customer_id',
+        'deleted_at',
     ];
     protected $appends = ['order_date', 'status_payment'];
 
