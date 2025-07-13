@@ -32,4 +32,8 @@ class Address extends Model
     public function address(){
         return $this->belongsToMany(User::class ,'user_address');
     }
+
+    public function users(){
+        return $this->belongsToMany(User::class ,'user_address');
+    }
 }

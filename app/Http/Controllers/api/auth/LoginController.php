@@ -42,13 +42,11 @@ class LoginController extends Controller
             $user = $this->branch
             ->where('email', $request->email)
             ->orWhere('phone', $request->email)
-            ->first();
-            $user->role = 'branch';
+            ->first(); 
             $role = 'branch';
         }
         else{
-            $role = 'admin';
-            $user->role = 'admin';
+            $role = 'admin'; 
         }
         if (empty($user)) {
             return response()->json([
@@ -60,6 +58,7 @@ class LoginController extends Controller
                 'falid' => 'admin is banned'
             ], 400);
         }
+        $user->role = $role;
         if (password_verify($request->input('password'), $user->password)) {
             $user->token = $user->createToken('admin')->plainTextToken;
             return response()->json([

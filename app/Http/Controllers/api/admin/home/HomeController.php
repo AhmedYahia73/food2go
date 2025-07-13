@@ -4,7 +4,11 @@ namespace App\Http\Controllers\api\admin\home;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+
+use App\Models\SmsIntegration; 
+use App\Models\SmsBalance; 
 
 use App\Models\Order;
 use App\Models\Product;
@@ -17,8 +21,9 @@ use App\Models\LogOrder;
 class HomeController extends Controller
 {
     public function __construct(private Order $orders, private Product $products,
-    private Deal $deals, private User $users, private Setting $settings
-    , private TimeSittings $TimeSittings, private LogOrder $log_order){}
+    private Deal $deals, private User $users, private Setting $settings, 
+    private SmsIntegration $sms_integration, private SmsBalance $sms_balance,
+    private TimeSittings $TimeSittings, private LogOrder $log_order){}
 
     public function home(){
         // https://bcknd.food2go.online/admin/home
@@ -53,6 +58,36 @@ class HomeController extends Controller
         // else{
         //     $end = Carbon::parse($from)->addHours(intval($time_setting->resturant_time->hours));
         // }
+        
+        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+        $response = json_decode($response);
+
+        $sms_subscription_data = collect($response?->user_sms) ?? collect([]); 
+        $sms_subscription = $sms_subscription_data->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+        ->first();
+        $msg_number = $this->sms_balance
+        ->where('package_id', $sms_subscription?->id)
+        ->first();
+        $msg_package = [];
+        if (!empty($sms_subscription) && empty($msg_number)) {
+            $msg_number = $this->sms_balance
+            ->create([
+                'package_id' => $sms_subscription->id,
+                'balance' => $sms_subscription->msg_number,
+            ]);
+        }
+        $sms_subscription = $sms_subscription_data->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+			->sortByDesc('id')
+        ->values();
+        $msg_number = $this->sms_balance
+        ->whereIn('package_id', $sms_subscription?->pluck('id') ?? collect([]))
+        ->sum('balance');
+        $msg_package['msg_number'] = $msg_number;
+        $msg_package['from'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->from : null;
+        $msg_package['to'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->to : null;
+ 
         $this->log_order
         ->whereDate('created_at', '<=', now()->subDays(14))
         ->delete();
@@ -276,6 +311,7 @@ class HomeController extends Controller
             'top_selling' => $top_selling,
             'offers' => $deals,
             'top_customers' => $top_customers,
+            'msg_package' => $msg_package,
         ]);
     }
 }

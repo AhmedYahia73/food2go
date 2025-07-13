@@ -47,6 +47,7 @@ class OrderController extends Controller
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['delivered', 'faild_to_deliver', 'canceled'])
         ->with('payment_method')
+        ->where('deleted_at', 0)
         ->get()
         ->map(function($item){
             $item->delivery_price = $item?->order_address?->zone?->price ?? null;

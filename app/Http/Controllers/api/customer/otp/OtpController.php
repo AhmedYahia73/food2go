@@ -12,10 +12,15 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 
 use App\Models\User;
+use App\Models\SmsBalance;
+use App\Models\SmsIntegration;
+use App\Models\Setting;
 
 class OtpController extends Controller
 {
-    public function __construct(private User $user){}
+    public function __construct(private User $user,
+    private SmsIntegration $sms_integration,
+    private SmsBalance $sms_balance, private Setting $settings){}
 
     public function create_code(Request $request){
         // https://bcknd.food2go.online/customer/otp/create_code
@@ -73,6 +78,45 @@ class OtpController extends Controller
     {
         // Send OTP using Mobishastra API
         try {
+           $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+            $response = json_decode($response);
+    
+            $sms_subscription = collect($response?->user_sms) ?? collect([]); 
+            $sms_subscription = $sms_subscription->where('back_link', url(''))
+            ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+            ->first();
+            $msg_number = $this->sms_balance
+            ->where('package_id', $sms_subscription?->id)
+            ->first();
+            if (!empty($sms_subscription) && empty($msg_number)) {
+                $msg_number = $this->sms_balance
+                ->create([
+                    'package_id' => $sms_subscription->id,
+                    'balance' => $sms_subscription->msg_number,
+                ]);
+            }
+            if (empty($sms_subscription) || $msg_number->balance <= 0) {
+                $customer_login = $this->settings
+                ->where('name', 'customer_login')
+                ->first();
+                if(empty($customer_login)){
+                    $this->settings
+                    ->create([
+                        'name' => 'customer_login',
+                        'setting' => '{"login":"otp","verification":"email"}',
+                    ]);
+                }
+                else{
+                    $customer_login->update([
+                        'setting' => '{"login":"otp","verification":"email"}',
+                    ]);
+                }
+            }
+            $this->sms_balance
+            ->where('package_id', $sms_subscription->id)
+            ->update([
+                'balance' => $msg_number->balance - 1
+            ]);
             $sms_integration = $this->sms_integration
             ->orderByDesc('id')
             ->first();

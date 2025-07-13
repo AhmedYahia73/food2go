@@ -12,6 +12,7 @@ use App\trait\PaymentPaymob;
 use Carbon\Carbon;
 use App\Events\OrderEvent;
 
+use App\Models\CompanyInfo;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\ProductSale;
@@ -35,7 +36,8 @@ class MakeOrderController extends Controller
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings, 
-    private Address $address, private TimeSittings $TimeSittings){}
+    private Address $address, private TimeSittings $TimeSittings,
+    private CompanyInfo $company_info){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -52,6 +54,13 @@ class MakeOrderController extends Controller
             return response()->json([
                 'errors' => "You are blocked you can't make order"
             ], 400);
+        }
+        $company_info = $this->company_info
+        ->first();
+        if (!$company_info->order_online) {
+            return response()->json([
+                'errors' => 'online order is closed'
+            ]);
         }
         if (!empty($request->address_id) && empty($request->branch_id)) {
             $address = $this->address

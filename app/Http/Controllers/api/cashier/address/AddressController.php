@@ -7,10 +7,30 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Address;
+use App\Models\Zone;
 
 class AddressController extends Controller
 {
-    public function __construct(private Address $address){}
+    public function __construct(private Address $address, 
+    private Zone $zone){}
+    
+    public function customer_address($id){
+        // /cashier/address/customer_address/{id}
+        $address = $this->address
+        ->with('zone.city:id,name')
+        ->whereHas('users', function($query) use($id){
+            $query->where('users.id', $id);
+        })
+        ->first();
+        $zones = $this->zone
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'address' => $address,
+            'zones' => $zones,
+        ]);
+    }
     
     public function address($id){
         // /cashier/address/item/{id}
@@ -18,9 +38,13 @@ class AddressController extends Controller
         ->with('zone.city:id,name')
         ->where('id', $id)
         ->first();
+        $zones = $this->zone
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'address' => $address,
+            'zones' => $zones,
         ]);
     }
 
@@ -47,7 +71,8 @@ class AddressController extends Controller
             ],400);
         }
         $addressRequest = $validator->validated();
-        $this->address->create($addressRequest);
+        $address = $this->address->create($addressRequest);
+        $address->users()->attach($request->customer_id);
 
         return response()->json([
             'success' => 'You add data success'
@@ -76,7 +101,11 @@ class AddressController extends Controller
             ],400);
         }
         $addressRequest = $validator->validated();
-        $this->address->create($addressRequest);
+        $address = $this->address
+        ->where('id', $id)
+        ->first();
+        $address->update($addressRequest);
+        $address->users()->sync($request->customer_id);
 
         return response()->json([
             'success' => 'You update data success'
