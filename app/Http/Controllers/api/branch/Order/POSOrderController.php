@@ -280,7 +280,7 @@ class POSOrderController extends Controller
         // /cashier/dine_in_order
         // Keys
         // date, amount, total_tax, total_discount, table_id
-        // notes, order_type
+        // notes
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
  
@@ -295,14 +295,14 @@ class POSOrderController extends Controller
         $request->merge([  
             'branch_id' => $request->user()->id,
             'user_id' => 'empty',
-            'order_type' => 'delivery',
+            'order_type' => 'dine_in',
             'shift' => $request->user()->shift_number,
         ]);
         $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
-        $this->cafe_table
+        $this->tables
         ->where('id', $request->table_id)
         ->update([
             'current_status' => 'not_available_with_order'
@@ -411,7 +411,7 @@ class POSOrderController extends Controller
         ]);
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']));
-        $this->cafe_table
+        $this->tables
         ->where('id', $request->table_id)
         ->update([
             'current_status' => 'not_available_but_checkout'
@@ -437,7 +437,7 @@ class POSOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $this->cafe_table
+        $this->tables
         ->where('id', $id)
         ->update([
             'current_status' => $request->current_status
