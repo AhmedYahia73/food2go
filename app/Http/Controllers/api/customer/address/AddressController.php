@@ -107,9 +107,6 @@ class AddressController extends Controller
         }
         $order_types = $order_types->setting;
         $order_types = json_decode($order_types);
-        $payment_methods = $this->payment_methods
-        ->where('status', 1)
-        ->get();
 
         return response()->json([
             'addresses' => $addresses,
