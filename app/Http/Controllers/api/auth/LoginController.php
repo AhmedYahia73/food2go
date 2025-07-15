@@ -29,6 +29,33 @@ class LoginController extends Controller
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
     ){}
 
+    public function sign_up_data(Request $request){ 
+        $response = Http::get('app.lamadafood.com/api/v1/sign_up_data')->body();
+        $response = json_decode($response);
+        $users = collect($response?->users) ?? collect([]);
+        foreach ($users as $item) {
+            $my_user = $this->users
+            ->where('email', $item->email)
+            ->orWhere('phone', $item->phone)
+            ->first();
+            if(!empty($my_user)){
+                $this->users
+                ->create([
+                    'f_name' => $item->f_name,
+                    'l_name' => $item->l_name,
+                    'email' => $item->email,
+                    'password' => $item->password,
+                    'phone' => $item->phone,
+                    'status' => $item->is_active,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => 'You add data success'
+        ]);
+    }
+
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login
         // Keys

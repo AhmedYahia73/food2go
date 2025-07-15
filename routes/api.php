@@ -21,6 +21,7 @@ Route::prefix('welcome')->group(function(){
 
 Route::prefix('admin/auth')->controller(LoginController::class)->group(function(){
     Route::post('login', 'admin_login');
+    Route::post('sign_up_data', 'sign_up_data');
 });
 
 Route::prefix('cashier/auth')->controller(LoginController::class)->group(function(){
