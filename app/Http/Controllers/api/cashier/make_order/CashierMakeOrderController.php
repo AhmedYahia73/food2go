@@ -346,7 +346,7 @@ class CashierMakeOrderController extends Controller
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
             'user_id' => 'empty',
-            'order_type' => 'delivery',
+            'order_type' => 'dine_in',
             'cashier_man_id' =>$request->user()->id,
             'shift' => $request->user()->shift_number,
         ]);
