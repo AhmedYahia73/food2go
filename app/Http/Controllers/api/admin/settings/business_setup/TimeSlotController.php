@@ -56,7 +56,7 @@ class TimeSlotController extends Controller
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add_custom
         // "custom": ["Sunday","Monday"]
         $validator = Validator::make($request->all(), [
-            'custom' => 'required|array',
+            'custom' => 'array',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
