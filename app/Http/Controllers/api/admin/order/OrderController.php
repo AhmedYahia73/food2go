@@ -22,6 +22,22 @@ class OrderController extends Controller
     private Branch $branches, private Setting $settings, private User $user,
     private LogOrder $log_order, private TimeSittings $TimeSittings){}
 
+    public function transfer_branch(Request $request, $id){
+        // admin/order/transfer_branch
+        // keys => branch_id
+        $orders = $this->orders
+        ->where('id', $id)
+        -update([
+            'branch_id' => $request->branch_id,
+            'operation_status' => 'pending',
+            'admin_id' => null,
+        ]);
+
+        return response()->json([
+            'success' => 'You update branch success'
+        ]);
+    }
+
     public function orders(Request $request){
     //     // https://bcknd.food2go.online/admin/order
       
