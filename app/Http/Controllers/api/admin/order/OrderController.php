@@ -572,6 +572,9 @@ class OrderController extends Controller
         ];
         $deliveries = $this->deliveries
         ->get();
+        $branches = $this->branches
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'orders' => $orders,
@@ -587,6 +590,7 @@ class OrderController extends Controller
             'scheduled' => $scheduled,
             'all_data' => $all_data,
             'deliveries' => $deliveries,
+            'branches' => $branches,
         ]);
     }
 
@@ -980,6 +984,9 @@ class OrderController extends Controller
         ->with('admin')
         ->where('order_id', $id)
         ->get();
+        $branches = $this->branches
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'order' => $order,
@@ -987,6 +994,7 @@ class OrderController extends Controller
             'order_status' => $order_status,
             'preparing_time' => $preparing_arr,
             'log_order' => $log_order,
+            'branches' => $branches,
         ]);
     }
 
