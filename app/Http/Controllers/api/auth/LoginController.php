@@ -38,7 +38,7 @@ class LoginController extends Controller
             ->where('email', $item->email)
             ->orWhere('phone', $item->phone)
             ->first();
-            if(!empty($my_user)){
+            if(empty($my_user)){
                 $this->user
                 ->create([
                     'f_name' => $item->f_name,

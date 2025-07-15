@@ -12,12 +12,13 @@ use App\Models\User;
 use App\Models\Branch;
 use App\Models\City;
 use App\Models\CompanyInfo;
+use App\Models\Setting;
 
 class AddressController extends Controller
 {
     public function __construct(private Address $address, private Zone $zones, 
     private User $user, private Branch $branch, private City $city, 
-    private CompanyInfo $company_info){}
+    private CompanyInfo $company_info, private Setting $settings){}
     protected $AddressRequest = [
         'zone_id',
         'address',
@@ -76,7 +77,39 @@ class AddressController extends Controller
         });
         $call_center_phone = $this->company_info
         ->orderByDesc('id')
-        ->first()?->phone;
+        ->first()?->phone; 
+
+        $order_types = $this->settings
+        ->where('name', 'order_type')
+        ->first();  
+        if (empty($order_types)) {
+            $order_types = $this->settings
+            ->create([
+                'name' => 'order_type',
+                'setting' => json_encode([
+                    [
+                        'id' => 1,
+                        'type' => 'take_away',
+                        'status' => 1
+                    ],
+                    [
+                        'id' => 2,
+                        'type' => 'dine_in',
+                        'status' => 1
+                    ],
+                    [
+                        'id' => 3,
+                        'type' => 'delivery',
+                        'status' => 1
+                    ]
+                ]),
+            ]);
+        }
+        $order_types = $order_types->setting;
+        $order_types = json_decode($order_types);
+        $payment_methods = $this->payment_methods
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'addresses' => $addresses,
@@ -84,6 +117,7 @@ class AddressController extends Controller
             'branches' => $branches,
             'call_center_phone' => $call_center_phone,
             'cities' => $cities,
+            'order_types' => $order_types,
         ]);
     }
 
