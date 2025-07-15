@@ -34,12 +34,12 @@ class LoginController extends Controller
         $response = json_decode($response);
         $users = collect($response?->users) ?? collect([]);
         foreach ($users as $item) {
-            $my_user = $this->users
+            $my_user = $this->user
             ->where('email', $item->email)
             ->orWhere('phone', $item->phone)
             ->first();
             if(!empty($my_user)){
-                $this->users
+                $this->user
                 ->create([
                     'f_name' => $item->f_name,
                     'l_name' => $item->l_name,
