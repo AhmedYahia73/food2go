@@ -13,9 +13,11 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CashierMakeOrderController::class)
     ->group(function(){
         Route::get('/lists', 'lists');
-        Route::get('/orders', 'pos_orders');
+
         Route::get('/get_order/{id}', 'get_order');
+        Route::get('/orders', 'pos_orders');
         Route::post('/delivery_order', 'delivery_order')->middleware('can:delivery');
+        
         Route::post('/determine_delivery/{order_id}', 'determine_delivery')->middleware('can:delivery');
         Route::post('/printReceipt', 'printReceipt')->withOutMiddleware(['auth:sanctum', 'IsCashier']);
 
