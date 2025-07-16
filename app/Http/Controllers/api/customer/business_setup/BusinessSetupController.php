@@ -111,22 +111,43 @@ class BusinessSetupController extends Controller
             $days = $time_slot->custom;
             $open_from = $resturant_time->from;
             if (!empty($open_from)) {
+                
                 $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
                 $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
                 $now = Carbon::now(); // Don't override this later
                 $open_flag = false;
                 $open_from = $open_from;
                 $open_to = $open_to; 
-                if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
-                    $open_flag = true;
-                    $close_message = '';
+                
+                // _________________________________________________________
+                if ($open_to->lessThan($open_from)) {
+                    // الحالة اللي الفترة بتعدي نص الليل
+                    if ($now->greaterThanOrEqualTo($open_from) || $now->lessThanOrEqualTo($open_to)) {
+                        $open_flag = true;
+                        $close_message = '';
+                    } else {
+                        $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
+                    }
+                } else {
+                    // الحالة العادية
+                    if ($now->between($open_from, $open_to)) {
+                        $open_flag = true;
+                        $close_message = '';
+                    } else {
+                        $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
+                    }
                 }
-                elseif(in_array($today, $days)){
-                    $close_message = 'اليوم اجازة';
-                }
-                elseif(!$now->between($open_from, $open_to)){
-                    $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
-                }
+                // _________________________________________________________
+                // if ($now->between($open_from, $open_to) ) {
+                //     $open_flag = true;
+                //     $close_message = '';
+                // }
+                // elseif(in_array($today, $days)){
+                //     $close_message = 'اليوم اجازة';
+                // }
+                // elseif(!$now->between($open_from, $open_to)){
+                //     $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
+                // }
             }
             else{
                 $open_flag = true;
@@ -140,7 +161,7 @@ class BusinessSetupController extends Controller
             'min_order' => floatval($min_order),
             'time_slot' =>  $time_slot,
             'today' => $today, 
-            'open_flag' => true,
+            'open_flag' => $open_flag,
             'login_branch' => $login_branch,
             'login_customer' => $login_customer,
             'login_delivery' => $login_delivery,
