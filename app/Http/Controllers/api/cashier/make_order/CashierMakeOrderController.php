@@ -62,12 +62,12 @@ class CashierMakeOrderController extends Controller
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
 			$end = Carbon::parse($from)->addHours($hours);
-            if ($start > $end) {
-                $end = Carbon::parse($from)->addHours($hours)->subDay();
-            }
-            else{
-                $end = Carbon::parse($from)->addHours(intval($hours));
-            }
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // }
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');

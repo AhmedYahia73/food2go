@@ -37,12 +37,12 @@ class CashierReportsController extends Controller
             $from = $request->from_date ?? date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
 			$end = Carbon::parse($from)->addHours($hours);
-            if ($start > $end) {
-                $end = Carbon::parse($from)->addHours($hours)->subDay();
-            }
-            else{
-                $end = Carbon::parse($from)->addHours(intval($hours));
-            }
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // }
             $end = $request->to_date ?? date('Y-m-d') . ' ' . $end->format('H:i:s');
             $end = Carbon::parse($end);
         } else {
@@ -113,12 +113,12 @@ class CashierReportsController extends Controller
             $from = $request->from_date ?? date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
 			$end = Carbon::parse($from)->addHours($hours);
-            if ($start > $end) {
-                $end = Carbon::parse($from)->addHours($hours)->subDay();
-            }
-            else{
-                $end = Carbon::parse($from)->addHours(intval($hours));
-            }
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // }
             $end = $request->to_date ?? date('Y-m-d') . ' ' . $end->format('H:i:s');
             $end = Carbon::parse($end);
         } else {

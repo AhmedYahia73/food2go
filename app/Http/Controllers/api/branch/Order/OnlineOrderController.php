@@ -48,12 +48,12 @@ class OnlineOrderController extends Controller
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
 			$end = Carbon::parse($from)->addHours($hours);
-            if ($start > $end) {
-                $end = Carbon::parse($from)->addHours($hours)->subDay();
-            }
-            else{
-                $end = Carbon::parse($from)->addHours(intval($hours));
-            }
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // }
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
@@ -760,12 +760,12 @@ class OnlineOrderController extends Controller
             $date_to = $request->date_to . ' ' . $from_time;
             $start = Carbon::parse($from);
 			$end = Carbon::parse($from)->addHours($hours);
-            if ($start > $end) {
-                $end = Carbon::parse($date_to)->addHours($hours)->subDay();
-            }
-            else{
-                $end = Carbon::parse($date_to)->addHours(intval($hours));
-            }
+            // if ($start > $end) {
+            //     $end = Carbon::parse($date_to)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($date_to)->addHours(intval($hours));
+            // }
         } else {
             $start = Carbon::parse($request->date . ' 00:00:00');
             $end = Carbon::parse($request->date_to . ' 23:59:59');
