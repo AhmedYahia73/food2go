@@ -1210,14 +1210,16 @@ class OrderController extends Controller
         $hours = $time_sittings->max('hours');
         if (!empty($from_time)) {
             $from = $request->date . ' ' . $from_time;
-            $date_to = $request->date_to . ' ' . $from_time;
+            $date_to = $request->date_to;  
             $start = Carbon::parse($from);
-            if ($start > date('H:i:s')) {
-                $end = Carbon::parse($date_to)->addHours($hours)->subDay();
-            }
-            else{
-                $end = Carbon::parse($date_to)->addHours(intval($hours));
-            }
+            $end = Carbon::parse($date_to);
+			$end = Carbon::parse($end)->addHours($hours);
+            // if ($start > date('H:i:s')) {
+            //     $end = Carbon::parse($date_to)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($date_to)->addHours(intval($hours));
+            // }
         } else {
             $start = Carbon::parse($request->date . ' 00:00:00');
             $end = Carbon::parse($request->date_to . ' 23:59:59');
