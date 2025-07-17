@@ -117,18 +117,18 @@ class BusinessSetupController extends Controller
 
                 $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
                 $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
-                if($open_from->format('A') == 'PM' && $open_from->format('A') == 'AM'){
+                if($open_from->format('A') == 'PM' && $now->format('A') == 'AM'){
                     $open_from->subDay();
                 }
-				if($now <= $open_from && $now >= $open_to){
+                elseif($open_from > $open_to && ($open_from->format('A') == 'AM' && $now->format('A') == 'AM')){
+                    $open_from->subDay();
+                }
+				if($now >= $open_from && $now <= $open_to){
 					$open_flag = true;
 				}
 				else{
 					$open_flag = false;
-				} 
-				return response([
-				'open_from' => $open_flag, 
-				]);
+				}
             }
                 // _________________________________________________________
                 // if ($now->between($open_from, $open_to) ) {
