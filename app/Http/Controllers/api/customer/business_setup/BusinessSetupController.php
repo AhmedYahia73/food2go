@@ -118,24 +118,25 @@ class BusinessSetupController extends Controller
                 $open_flag = false;
                 $open_from = $open_from;
                 $open_to = $open_to; 
-                
-                // _________________________________________________________
-                if ($open_to->lessThan($open_from)) {
-                    // الحالة اللي الفترة بتعدي نص الليل
-                    if ($now->greaterThanOrEqualTo($open_from) || $now->lessThanOrEqualTo($open_to)) {
-                        $open_flag = true;
-                        $close_message = '';
-                    } else {
-                        $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
-                    }
-                } else {
-                    // الحالة العادية
+                $am = Carbon::createFromFormat('H:i:s', '00:00:00');
+                $pm = Carbon::createFromFormat('H:i:s', '23:59:59');
+                // _________________________________________________________ 
+                $now = Carbon::now();
+                if ($open_from < $open_to) {
                     if ($now->between($open_from, $open_to)) {
                         $open_flag = true;
-                        $close_message = '';
-                    } else {
-                        $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
-                    }
+                    } 
+                    else {
+                        $open_flag = false;
+                    } 
+                }
+                elseif($open_from > $open_to){
+                    if ($now->between($open_from, $pm) || $now->between($am, $open_to)) {
+                        $open_flag = true;
+                    } 
+                    else {
+                        $open_flag = false;
+                    } 
                 }
                 // _________________________________________________________
                 // if ($now->between($open_from, $open_to) ) {
