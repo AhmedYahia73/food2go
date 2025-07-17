@@ -122,6 +122,7 @@ class BusinessSetupController extends Controller
                 else{
                     $open_flag = false;
                 }
+            }
         }
         // if (empty($time_sitting)) {
         //     $open_flag = true;
@@ -163,8 +164,7 @@ class BusinessSetupController extends Controller
                 // }
                 // elseif(!$now->between($open_from, $open_to)){
                 //     $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
-                // }  
-        }
+                // }   
 
         return response()->json([ 
             'login_web' => $login_web,
