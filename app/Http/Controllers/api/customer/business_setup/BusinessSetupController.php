@@ -105,38 +105,27 @@ class BusinessSetupController extends Controller
         if (empty($time_sitting)) {
             $open_flag = true;
         }
-        else{
-            $resturant_time = $time_sitting;
-            $time_slot = json_decode($time_slot->setting);
-            $days = $time_slot->custom;
-            $open_from = $resturant_time->from;
+        else{$resturant_time = $time_sitting;
+$time_slot = json_decode($time_slot->setting);
+$days = $time_slot->custom;
+
+$open_from = date('Y-m-d') . ' ' . $resturant_time->from;
+
             if (!empty($open_from)) {
-                $open_from = Carbon::createFromFormat('H:i:s', $open_from)->format('H:i:s');
-                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours))->format('H:i:s');
-                $now = Carbon::now(); // Don't override this later
-                $open_flag = false;
-                $open_from = $open_from;
-                $open_to = $open_to; 
-                $am = Carbon::createFromFormat('H:i:s', '00:00:00');
-                $pm = Carbon::createFromFormat('H:i:s', '23:59:59');
-                // _________________________________________________________ 
+                $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $open_from);
+                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
                 $now = Carbon::now();
-                if ($open_from < $open_to) {
-                    if ($now->between($open_from, $open_to)) {
-                        $open_flag = true;
-                    } 
-                    else {
-                        $open_flag = false;
-                    } 
+                $open_flag = false;
+
+                if ($open_from->gt($open_to)) {
+                    // يعني الفتح عبر منتصف الليل، لازم نعدل التاريخ
+                    $open_to->addDay();
                 }
-                elseif($open_from > $open_to){
-                    if ($now->between($open_from, $pm) || $now->between($am, $open_to)) {
-                        $open_flag = true;
-                    } 
-                    else {
-                        $open_flag = false;
-                    } 
+
+                if ($now->between($open_from, $open_to)) {
+                    $open_flag = true;
                 }
+            }
                 // _________________________________________________________
                 // if ($now->between($open_from, $open_to) ) {
                 //     $open_flag = true;
@@ -147,8 +136,7 @@ class BusinessSetupController extends Controller
                 // }
                 // elseif(!$now->between($open_from, $open_to)){
                 //     $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
-                // }
-            }
+                // } 
             else{
                 $open_flag = true;
             }
