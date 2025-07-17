@@ -106,25 +106,31 @@ class BusinessSetupController extends Controller
             $open_flag = true;
         }
         else{$resturant_time = $time_sitting;
-$time_slot = json_decode($time_slot->setting);
-$days = $time_slot->custom;
+            $time_slot = json_decode($time_slot->setting);
+            $days = $time_slot->custom;
 
-$open_from = date('Y-m-d') . ' ' . $resturant_time->from;
+            $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
 
             if (!empty($open_from)) {
-                $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $open_from);
-                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
                 $now = Carbon::now();
-                $open_flag = false;
 
+                $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
+                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+
+                // لو open_from > open_to (يعني الفتح بيعدي نص الليل)
                 if ($open_from->gt($open_to)) {
-                    // يعني الفتح عبر منتصف الليل، لازم نعدل التاريخ
-                    $open_to->addDay();
+                    // نشوف هل الآن قبل الغلق (يعني ما بين نص الليل والظهر مثلاً)
+                    if ($now->lt($open_to)) {
+                        // معناها أن الفتح بدأ من أمس
+                        $open_from->subDay();
+                    } else {
+                        // لو الآن بعد الفتح (مثلاً الساعة 11 مساءً)
+                        $open_to->addDay();
+                    }
                 }
 
-                if ($now->between($open_from, $open_to)) {
-                    $open_flag = true;
-                }
+                // دلوقت نقارن عادي
+                $open_flag = $now->between($open_from, $open_to);
             }
                 // _________________________________________________________
                 // if ($now->between($open_from, $open_to) ) {
