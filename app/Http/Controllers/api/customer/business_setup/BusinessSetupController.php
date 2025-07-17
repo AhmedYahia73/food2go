@@ -120,18 +120,14 @@ class BusinessSetupController extends Controller
                 if($open_from->format('A') == 'PM' && $open_from->format('A') == 'AM'){
                     $open_from->subDay();
                 }
-				if($now <= $open_from && $now <= $open_to){
+				if($now <= $open_from && $now >= $open_to){
 					$open_flag = true;
 				}
 				else{
 					$open_flag = false;
 				} 
 				return response([
-				'open_from' => $open_from->format('Y-m-d H:i:s'),
-				'open_to' => $open_to->format('Y-m-d H:i:s'),
-				'now' => $now->format('Y-m-d H:i:s'),
-				'open_from <= now' => $open_from <= $now,
-				'open_to >= now' => $open_to >= $now,
+				'open_from' => $open_flag, 
 				]);
             }
                 // _________________________________________________________
