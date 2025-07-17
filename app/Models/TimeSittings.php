@@ -12,6 +12,7 @@ class TimeSittings extends Model
     protected $fillable = [
         'from',
         'hours',
+        'minutes',
         'branch_id',
     ];
 

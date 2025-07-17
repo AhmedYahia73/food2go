@@ -111,8 +111,8 @@ class BusinessSetupController extends Controller
             $days = $time_slot->custom;
             $open_from = $resturant_time->from;
             if (!empty($open_from)) {
-                
-                $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
+                $open_from = Carbon::createFromFormat('H:i:s', $open_from)
+                ->setDate(now()->year, now()->month, now()->day);
                 $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
                 $now = Carbon::now(); // Don't override this later
                 $open_flag = false;
