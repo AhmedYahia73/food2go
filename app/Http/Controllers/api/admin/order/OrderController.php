@@ -492,13 +492,16 @@ class OrderController extends Controller
     //         'deliveries' => $deliveries,
     //     ]);
         $time_sittings = $this->TimeSittings
+        ->orderByDesc('from')
         ->get();
         $from = $time_sittings->min('from');
-        $hours = $time_sittings->max('hours');
         if (!empty($from)) {
+            $end = $time_sittings[0]->from;
+            $hours = $time_sittings[0]->hours;
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
-			$end = Carbon::parse($from)->addHours($hours);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours);
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
