@@ -40,14 +40,18 @@ class OnlineOrderController extends Controller
 
     public function orders(Request $request){
         // https://bcknd.food2go.online/admin/order
+        
         $time_sittings = $this->TimeSittings
+        ->orderByDesc('from')
         ->get();
         $from = $time_sittings->min('from');
-        $hours = $time_sittings->max('hours');
         if (!empty($from)) {
+            $end = date('Y-m-d') . ' ' . $time_sittings[0]->from;
+            $hours = $time_sittings[0]->hours;
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
-			$end = Carbon::parse($from)->addHours($hours);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours);
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
@@ -57,7 +61,7 @@ class OnlineOrderController extends Controller
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        } 
+        }
 
         $orders = $this->orders
         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
@@ -750,26 +754,30 @@ class OnlineOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        // settings
+        
         $time_sittings = $this->TimeSittings
+        ->orderByDesc('from')
         ->get();
         $from_time = $time_sittings->min('from');
-        $hours = $time_sittings->max('hours');
         if (!empty($from_time)) {
+            $date_to = $request->date_to; 
+            $end = $date_to . ' ' . $time_sittings[0]->from;
+            $hours = $time_sittings[0]->hours;
             $from = $request->date . ' ' . $from_time;
-            $date_to = $request->date_to . ' ' . $from_time;
             $start = Carbon::parse($from);
-			$end = Carbon::parse($from)->addHours($hours);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours);  
             // if ($start > $end) {
-            //     $end = Carbon::parse($date_to)->addHours($hours)->subDay();
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
             // else{
-            //     $end = Carbon::parse($date_to)->addHours(intval($hours));
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
             // }
         } else {
-            $start = Carbon::parse($request->date . ' 00:00:00');
-            $end = Carbon::parse($request->date_to . ' 23:59:59');
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
+        // settings   
         
         $orders = $this->orders
         ->whereBetween('created_at', [$start, $end])

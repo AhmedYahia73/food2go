@@ -154,14 +154,18 @@ class PosOrderController extends Controller
 
     public function pos_orders(){
         // /admin/pos/order/orders
+        
         $time_sittings = $this->TimeSittings
+        ->orderByDesc('from')
         ->get();
         $from = $time_sittings->min('from');
-        $hours = $time_sittings->max('hours');
         if (!empty($from)) {
+            $end = date('Y-m-d') . ' ' . $time_sittings[0]->from;
+            $hours = $time_sittings[0]->hours;
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
-			$end = Carbon::parse($from)->addHours($hours);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours);
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
@@ -171,7 +175,7 @@ class PosOrderController extends Controller
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
+        } 
         
         $orders = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',

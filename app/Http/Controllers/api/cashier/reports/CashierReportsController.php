@@ -30,6 +30,28 @@ class CashierReportsController extends Controller
         }
 
         $time_sittings = $this->TimeSittings
+        ->orderByDesc('from')
+        ->get();
+        $from_time = $time_sittings->min('from');
+        if (!empty($from_time)) {
+            $date_to = $request->to_date; 
+            $end = $date_to . ' ' . $time_sittings[0]->from;
+            $hours = $time_sittings[0]->hours;
+            $from = $request->from_date . ' ' . $from_time;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours);  
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // }
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+        $time_sittings = $this->TimeSittings
         ->get();
         $from = $time_sittings->min('from');
         $hours = $time_sittings->max('hours');
