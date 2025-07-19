@@ -53,7 +53,7 @@ class SignupController extends Controller
         // email
         $validator = Validator::make($request->all(), [ 
             'email' => 'email|unique:users,email',
-            'phone' => 'unique:users,phone',
+            'phone' => 'sometimes',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -95,8 +95,7 @@ class SignupController extends Controller
         // keys
         // phone, email
         $validator = Validator::make($request->all(), [
-            'email' => 'email',
-            'phone' => 'sometimes',
+            'email' => 'email', 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
