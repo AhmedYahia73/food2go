@@ -188,8 +188,7 @@ class SignupController extends Controller
             ]);
     
             if ($response->successful()) {
-                // Store the OTP in the database
-                $user->otp()->create(['otp' => $otp]);
+                // Store the OTP in the database 
     
                 return response()->json(['message' => 'OTP sent successfully.'], 200);
             } else {
