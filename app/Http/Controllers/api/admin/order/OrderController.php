@@ -496,7 +496,7 @@ class OrderController extends Controller
         ->get();
         $from = $time_sittings->min('from');
         if (!empty($from)) {
-            $end = $time_sittings[0]->from;
+            $end = date('Y-m-d') . ' ' . $time_sittings[0]->from;
             $hours = $time_sittings[0]->hours;
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
