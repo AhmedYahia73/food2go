@@ -1206,27 +1206,38 @@ class OrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        // settings
+        // _______________________________________
+        
         $time_sittings = $this->TimeSittings
+        ->orderByDesc('from')
         ->get();
         $from_time = $time_sittings->min('from');
-        $hours = $time_sittings->max('hours');
         if (!empty($from_time)) {
+            $date_to = $request->date_to; 
+            $end = $date_to . ' ' . $time_sittings[0]->from;
+            $hours = $time_sittings[0]->hours;
             $from = $request->date . ' ' . $from_time;
-            $date_to = $request->date_to;  
             $start = Carbon::parse($from);
-            $end = Carbon::parse($date_to);
-			$end = Carbon::parse($end)->addHours($hours);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours);  
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // }
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+        // ___________________________________________________
+        // settings     
             // if ($start > date('H:i:s')) {
             //     $end = Carbon::parse($date_to)->addHours($hours)->subDay();
             // }
             // else{
             //     $end = Carbon::parse($date_to)->addHours(intval($hours));
-            // }
-        } else {
-            $start = Carbon::parse($request->date . ' 00:00:00');
-            $end = Carbon::parse($request->date_to . ' 23:59:59');
-        }
+            // } 
         
         $orders = $this->orders
         ->whereBetween('created_at', [$start, $end])
