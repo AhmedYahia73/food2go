@@ -170,6 +170,9 @@ class PosOrderController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }

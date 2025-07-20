@@ -38,22 +38,6 @@ class OrderController extends Controller
         ]);
     }
 
-    public function transfer_branch(Request $request, $id){
-        // admin/order/transfer_branch
-        // keys => branch_id
-        $orders = $this->orders
-        ->where('id', $id)
-        -update([
-            'branch_id' => $request->branch_id,
-            'operation_status' => 'pending',
-            'admin_id' => null,
-        ]);
-
-        return response()->json([
-            'success' => 'You update branch success'
-        ]);
-    }
-
     public function orders(Request $request){
     //     // https://bcknd.food2go.online/admin/order
       
@@ -508,14 +492,7 @@ class OrderController extends Controller
     //         'deliveries' => $deliveries,
     //     ]);
         $time_sittings = $this->TimeSittings 
-        $time_sittings = $this->TimeSittings 
         ->get();
-        if ($time_sittings->count() > 0) {
-            $from = $time_sittings[0]->from;
-            
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
         if ($time_sittings->count() > 0) {
             $from = $time_sittings[0]->from;
             
@@ -545,7 +522,6 @@ class OrderController extends Controller
         $orders = $this->orders
         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
@@ -608,9 +584,6 @@ class OrderController extends Controller
         $branches = $this->branches
         ->where('status', 1)
         ->get();
-        $branches = $this->branches
-        ->where('status', 1)
-        ->get();
 
         return response()->json([
             'orders' => $orders,
@@ -626,9 +599,6 @@ class OrderController extends Controller
             'scheduled' => $scheduled,
             'all_data' => $all_data,
             'deliveries' => $deliveries,
-            'branches' => $branches,
-            'start' => $start->format('Y-m-d H:i:s'),
-            'end' => $end->format('Y-m-d H:i:s'),
             'branches' => $branches,
             'start' => $start->format('Y-m-d H:i:s'),
             'end' => $end->format('Y-m-d H:i:s'),
@@ -968,7 +938,6 @@ class OrderController extends Controller
         ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
         'admin_cancel_reason', 'sechedule_slot_id')
@@ -1029,9 +998,6 @@ class OrderController extends Controller
         $branches = $this->branches
         ->where('status', 1)
         ->get();
-        $branches = $this->branches
-        ->where('status', 1)
-        ->get();
 
         return response()->json([
             'order' => $order,
@@ -1039,7 +1005,6 @@ class OrderController extends Controller
             'order_status' => $order_status,
             'preparing_time' => $preparing_arr,
             'log_order' => $log_order,
-            'branches' => $branches,
             'branches' => $branches,
         ]);
     }
@@ -1252,16 +1217,7 @@ class OrderController extends Controller
         // _______________________________________
         
         $time_sittings = $this->TimeSittings 
-        // _______________________________________
-        
-        $time_sittings = $this->TimeSittings 
         ->get();
-        if ($time_sittings->count() > 0) {
-            $from_time = $time_sittings[0]->from;
-            $date_to = $request->date_to; 
-            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
         if ($time_sittings->count() > 0) {
             $from_time = $time_sittings[0]->from;
             $date_to = $request->date_to; 
@@ -1275,17 +1231,9 @@ class OrderController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             } 
-            // if ($start > $end) {
-            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // }
-            $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
-            if ($start >= $end) {
-                $end = $end->addDay();
-            } 
+			if($start >= now()){
+                $start = $start->subDay();
+			}
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
@@ -1295,17 +1243,7 @@ class OrderController extends Controller
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
-        // ___________________________________________________
-        // settings     
-            // if ($start > date('H:i:s')) {
-            //     $end = Carbon::parse($date_to)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($date_to)->addHours(intval($hours));
-            // } 
         // ___________________________________________________
         // settings     
             // if ($start > date('H:i:s')) {
