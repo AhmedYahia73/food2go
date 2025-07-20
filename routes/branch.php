@@ -73,7 +73,6 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::get('/', 'pos_orders');
         Route::get('/customer_data', 'customer_data');
         Route::get('/item/{id}', 'get_order');
-
         Route::post('/dine_in_order', 'dine_in_order');
         Route::post('/dine_in_payment', 'dine_in_payment');
         Route::put('/tables_status/{id}', 'tables_status');
