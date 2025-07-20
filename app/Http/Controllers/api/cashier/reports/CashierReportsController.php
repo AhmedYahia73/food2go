@@ -29,26 +29,31 @@ class CashierReportsController extends Controller
             ],400);
         }
 
-        $time_sittings = $this->TimeSittings
+        $time_sittings = $this->TimeSittings 
         ->get();
-        $from = $time_sittings->min('from');
-        $hours = $time_sittings->max('hours');
-        if (!empty($from)) {
-            $from = $request->from_date ?? date('Y-m-d') . ' ' . $from;
+        if ($time_sittings->count() > 0) {
+            $from_time = $time_sittings[0]->from;
+            $date_to = $request->date_to; 
+            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = $request->date . ' ' . $from_time;
             $start = Carbon::parse($from);
-			$end = Carbon::parse($from)->addHours($hours);
-            if ($start > $end) {
-                $end = Carbon::parse($from)->addHours($hours)->subDay();
-            }
-            else{
-                $end = Carbon::parse($from)->addHours(intval($hours));
-            }
-            $end = $request->to_date ?? date('Y-m-d') . ' ' . $end->format('H:i:s');
             $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }   
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // }
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
+        } 
         $orders = $this->orders
         ->select('cashier_id', 'payment_method_id', 'amount')
         ->where('pos', 1)
@@ -105,22 +110,21 @@ class CashierReportsController extends Controller
             ],400);
         }
 
-        $time_sittings = $this->TimeSittings
+        $time_sittings = $this->TimeSittings 
         ->get();
-        $from = $time_sittings->min('from');
-        $hours = $time_sittings->max('hours');
-        if (!empty($from)) {
-            $from = $request->from_date ?? date('Y-m-d') . ' ' . $from;
+        if ($time_sittings->count() > 0) {
+            $from_time = $time_sittings[0]->from;
+            $date_to = $request->date_to; 
+            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = $request->date . ' ' . $from_time;
             $start = Carbon::parse($from);
-			$end = Carbon::parse($from)->addHours($hours);
-            if ($start > $end) {
-                $end = Carbon::parse($from)->addHours($hours)->subDay();
-            }
-            else{
-                $end = Carbon::parse($from)->addHours(intval($hours));
-            }
-            $end = $request->to_date ?? date('Y-m-d') . ' ' . $end->format('H:i:s');
             $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+            if ($start >= $end) {
+                $end = $end->addDay();
+            } 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');

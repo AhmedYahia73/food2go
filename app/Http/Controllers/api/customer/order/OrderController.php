@@ -78,7 +78,7 @@ class OrderController extends Controller
             ]);
         }
 
-        $branch = $order?->branch?->food_preparion_time ?? '00:00:00';
+        $branch = $order?->branch?->food_preparion_time ?? '00:00';
 
         // Assuming $order->created_at is a valid date-time string in 'Y-m-d H:i:s' format
         $time = Carbon::createFromFormat('Y-m-d H:i:s', $order->created_at);
@@ -88,15 +88,20 @@ class OrderController extends Controller
         
         // Split the time string into hours, minutes, and seconds
         list($hours, $minutes, $seconds) = explode(':', $time_to_add);
-        list($order_hours, $order_minutes, $order_seconds) = explode(':', $time_to_add);
+        list($order_hours, $order_minutes) = explode(':', $branch);
+        $order_seconds = 0;
+        $order_hours = (int)$order_hours;
+        $order_minutes = (int)$order_minutes;
         
-        // Ensure that $hours, $minutes, and $seconds are integers
-        $hours = (int)$hours + (int)$order_hours;
-        $minutes = (int)$minutes + (int)$order_minutes;
-        $seconds = (int)$seconds + (int)$order_seconds;
+        if($order->order_type == 'delivery'){
+            // Ensure that $hours, $minutes, and $seconds are integers
+            $order_hours = (int)$hours + (int)$order_hours;
+            $order_minutes = (int)$order_minutes + (int)$order_minutes;
+            $order_seconds = (int)$order_seconds + (int)$order_seconds;
+        }
         
         // Add the time to the original Carbon instance
-        $time = $time->addHours($hours)->addMinutes($minutes)->addSeconds($seconds);
+        $time = $time->addHours($order_hours)->addMinutes($order_minutes)->addSeconds($order_seconds);
         
         // If you want to format the final time as 'H:i:s'
         $formattedTime = $time->format('H:i:s');

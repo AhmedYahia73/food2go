@@ -45,7 +45,8 @@ class MakeOrderController extends Controller
     public function order(OrderRequest $request){
         // https://bcknd.food2go.online/customer/make_order
         // Keys
-        // date, branch_id, amount, coupon_discount, total_tax, total_discount, address_id
+        // date, branch_id, amount, coupon_discount, total_tax, total_discount, 
+        // address_id, source
         // order_type[take_away,dine_in,delivery]
         // deal[{deal_id, count}], c, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
@@ -72,53 +73,61 @@ class MakeOrderController extends Controller
             ]);
         }
         // Time Slot
-        $time_slot = $this->settings
-        ->where('name', 'time_setting')
-        ->orderByDesc('id')
-        ->first();
-        if (empty($time_slot)) {
-            $setting = [
-                'custom' => [],
-            ];
-            $setting = json_encode($setting);
-            $time_slot = $this->settings
-            ->create([
-                'name' => 'time_setting',
-                'setting' => $setting
-            ]);
-        }
-        $time_sitting = $this->TimeSittings
-        ->where('branch_id', $request->branch_id)
-        ->first();
-        if (empty($time_sitting)) {
-            $open_flag = true;
-        }
-        else{
-            $resturant_time = $time_sitting;
-            $time_slot = json_decode($time_slot->setting);
-            $days = $time_slot->custom;
-            $open_from = $resturant_time->from;
-            if (!empty($open_from)) {
-                $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
-                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
-                $today = Carbon::now()->format('l');
-                $now = Carbon::now(); // Don't override this later
-                $open_flag = false;
-                $open_from = $open_from;
-                $open_to = $open_to; 
-                if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
-                    $open_flag = true;
-                }
-            }
-            else{
+            // $resturant_time = $time_sitting;
+            // $time_slot = json_decode($time_slot->setting);
+            // $days = $time_slot->custom;
+            // $open_from = $resturant_time->from;
+            
+            // _________________________________________________________________
+            $time_sitting = $this->TimeSittings
+            ->where('branch_id', $request->branch_id ?? null)
+            ->get();
+            $today = Carbon::now()->format('l');
+            $close_message = '';
+            $open_flag = false;
+
+            if($time_sitting->count() == 0){
                 $open_flag = true;
             }
-        }
-        if (!$open_flag) {
-            return response()->json([
-                'errors' => 'Resurant is closed'
-            ], 403);
-        }
+            else{
+                $now = Carbon::now();
+                foreach ($time_sitting as $item) { 
+                    $resturant_time = $item;
+                    $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
+
+                    $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
+                    $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+                    if($now >= $open_from && $now <= $open_to){
+                        $open_flag = true;
+                        break;
+                    }
+                    else{
+                        $open_flag = false;
+                    }
+                }
+            }
+            // _________________________________________________________________
+            //     if (!empty($open_from)) {
+            //         $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
+            //         $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+            //         $today = Carbon::now()->format('l');
+            //         $now = Carbon::now(); // Don't override this later
+            //         $open_flag = false;
+            //         $open_from = $open_from;
+            //         $open_to = $open_to; 
+            //         if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
+            //             $open_flag = true;
+            //         }
+            //     }
+            //     else{
+            //         $open_flag = true;
+            //     }
+            // }
+                if (!$open_flag) {
+                    return response()->json([
+                        'errors' => 'Resurant is closed'
+                    ], 403);
+                }
         // Check if has order at proccessing
         $order = $this->order
         ->whereIn('order_status', ['pending', 'processing', 'confirmed', 'out_for_delivery', 'scheduled'])

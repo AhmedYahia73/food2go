@@ -27,7 +27,7 @@ class LoginController extends Controller
     private User $user, private Branch $branch, private Setting $settings,
     private Address $address, private Zone $zones, private CaptainOrder $captain_order,
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
-    ){}
+    ){} 
 
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login
@@ -155,8 +155,6 @@ class LoginController extends Controller
         // https://bcknd.food2go.online/api/user/auth/login
         // Keys
         // email, password
-        
-            
         // _______________________________________________________________________
         $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
         $response = json_decode($response);

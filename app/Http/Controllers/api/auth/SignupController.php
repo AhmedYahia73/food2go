@@ -53,7 +53,7 @@ class SignupController extends Controller
         // email
         $validator = Validator::make($request->all(), [ 
             'email' => 'email|unique:users,email',
-            'phone' => 'unique:users,phone',
+            'phone' => 'sometimes',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -95,8 +95,7 @@ class SignupController extends Controller
         // keys
         // phone, email
         $validator = Validator::make($request->all(), [
-            'email' => 'email|unique:users,email',
-            'phone' => 'unique:users,phone',
+            'email' => 'email', 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -189,8 +188,7 @@ class SignupController extends Controller
             ]);
     
             if ($response->successful()) {
-                // Store the OTP in the database
-                $user->otp()->create(['otp' => $otp]);
+                // Store the OTP in the database 
     
                 return response()->json(['message' => 'OTP sent successfully.'], 200);
             } else {

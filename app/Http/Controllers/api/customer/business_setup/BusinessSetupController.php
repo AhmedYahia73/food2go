@@ -18,6 +18,12 @@ class BusinessSetupController extends Controller
     private CompanyInfo $company_info, private Setting $settings,
     private TimeSittings $time_sitting, private Address $address){}
 
+    public function arabicTime($carbonTime) {
+        $time = $carbonTime->format('h:i');
+        $period = $carbonTime->format('A') === 'AM' ? 'ص' : 'م';
+        return $time . ' ' . $period;
+    }
+
     public function business_setup(Request $request){
         // https://bcknd.food2go.online/api/business_setup
         // Maintenance status
@@ -99,39 +105,80 @@ class BusinessSetupController extends Controller
         }
         $time_sitting = $this->time_sitting
         ->where('branch_id', $request->branch_id ?? null)
-        ->first();
+        ->get();
         $today = Carbon::now()->format('l');
         $close_message = '';
-        if (empty($time_sitting)) {
+        $open_flag = false;
+
+        if($time_sitting->count() == 0){
             $open_flag = true;
         }
         else{
-            $resturant_time = $time_sitting;
-            $time_slot = json_decode($time_slot->setting);
-            $days = $time_slot->custom;
-            $open_from = $resturant_time->from;
-            if (!empty($open_from)) {
-                $open_from = Carbon::createFromFormat('H:i:s', $open_from); 
-                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
-                $now = Carbon::now(); // Don't override this later
-                $open_flag = false;
-                $open_from = $open_from;
-                $open_to = $open_to; 
-                if ($now->between($open_from, $open_to) && !in_array($today, $days)) {
+            $now = Carbon::now();
+            foreach ($time_sitting as $item) { 
+                $resturant_time = $item;
+                $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
+
+                $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
+                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours))->addMinutes($resturant_time->minutes);
+                if($now >= $open_from && $now <= $open_to){
                     $open_flag = true;
-                    $close_message = '';
+                    break;
                 }
-                elseif(in_array($today, $days)){
-                    $close_message = 'اليوم اجازة';
-                }
-                elseif(!$now->between($open_from, $open_to)){
-                    $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
+                else{
+                    $open_flag = false;
                 }
             }
-            else{
-                $open_flag = true;
+            if (!$open_flag) {
+                $open_from = Carbon::parse($time_sitting[0]->from);
+                $open_to = Carbon::parse($time_sitting[$time_sitting->count() - 1]->from);
+                $open_to = $open_to->addHours($time_sitting[$time_sitting->count() - 1]->hours);
+                $open_from = $this->arabicTime($open_from);
+                $open_to = $this->arabicTime($open_to);
+                $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;
             }
         }
+        // if (empty($time_sitting)) {
+        //     $open_flag = true;
+        // }
+        // else{
+        //     $resturant_time = $time_sitting;
+        //     $time_slot = json_decode($time_slot->setting);
+        //     $days = $time_slot->custom;
+
+        //     $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
+
+        //     if (!empty($open_from)) {
+        //         $now = Carbon::now();
+
+        //         $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
+        //         $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+        //         $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+        //         $end = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $open_to->format('H:i:s'));
+        //         if($open_from->format('A') == 'PM' && $now->format('A') == 'AM'){
+        //             $open_from = $open_from->subDay();
+        //         }
+        //         elseif($open_from > $end ){
+        //             $open_from = $open_from->subDay();
+        //         }
+		// 		if($now >= $open_from && $now <= $open_to){
+		// 			$open_flag = true;
+		// 		}
+		// 		else{
+		// 			$open_flag = false;
+		// 		}
+        //     }
+                // _________________________________________________________
+                // if ($now->between($open_from, $open_to) ) {
+                //     $open_flag = true;
+                //     $close_message = '';
+                // }
+                // elseif(in_array($today, $days)){
+                //     $close_message = 'اليوم اجازة';
+                // }
+                // elseif(!$now->between($open_from, $open_to)){
+                //     $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
+                // }
 
         return response()->json([ 
             'login_web' => $login_web,
@@ -167,7 +214,6 @@ class BusinessSetupController extends Controller
         $customer_login = json_decode($customer_login->setting) ?? 
         ['login' => 'otp', 'verification' => 'email'];
 
-        
         return response()->json([
             'customer_login' => $customer_login,
         ]);

@@ -122,7 +122,7 @@ class HomeController extends Controller
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
             ->whereNotIn('category_id', $category_off)
-            ->whereNotIn('sub_category_id', $category_off)
+            // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {
@@ -171,7 +171,7 @@ class HomeController extends Controller
                 ->where('item_type', '!=', 'offline')
                 ->where('status', 1)
                 ->whereNotIn('category_id', $category_off)
-                ->whereNotIn('sub_category_id', $category_off)
+                //->whereNotIn('sub_category_id', $category_off)
                 ->whereNotIn('products.id', $product_off)
                 ->get();
 
@@ -345,7 +345,7 @@ class HomeController extends Controller
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
             ->whereNotIn('category_id', $category_off)
-            ->whereNotIn('sub_category_id', $category_off)
+            //->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('id', $product_off)
             ->get()
             ->map(function($item) use($category_off, $product_off, $option_off, $branch_id){ 

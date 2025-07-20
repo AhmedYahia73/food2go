@@ -56,7 +56,7 @@ class TimeSlotController extends Controller
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add_custom
         // "custom": ["Sunday","Monday"]
         $validator = Validator::make($request->all(), [
-            'custom' => 'required|array',
+            'custom' => 'array',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -95,7 +95,7 @@ class TimeSlotController extends Controller
 
     public function add_times(Request $request){
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/add_times
-        // from, hours,  branch_id, 
+        // from, hours,  branch_id, minutes
         $validator = Validator::make($request->all(), [
             'from' => [
                 'required',
@@ -115,18 +115,19 @@ class TimeSlotController extends Controller
         }
       
         $resturant_time = $request->resturant_time;
-        $time_setting = $this->time_setting
-        ->where('branch_id', $request->branch_id)
-        ->first();
-        if (!empty($time_setting)) {
-            return response()->json([
-                'errors' => 'branch is found'
-            ],400);
-        }
+        // $time_setting = $this->time_setting
+        // ->where('branch_id', $request->branch_id)
+        // ->first();
+        // if (!empty($time_setting)) {
+        //     return response()->json([
+        //         'errors' => 'branch is found'
+        //     ],400);
+        // }
 
         $time_setting = $this->time_setting->create([
             'from' => $request->from,
             'hours' => $request->hours,
+            'minutes' => $request->minutes ?? 0,
             'branch_id' => $request->branch_id,
         ]);
         
@@ -158,15 +159,15 @@ class TimeSlotController extends Controller
             ],400);
         }
       
-        $time_setting = $this->time_setting
-        ->where('branch_id', $request->branch_id)
-        ->where('id', '!=', $id)
-        ->first();
-        if (!empty($time_setting)) {
-            return response()->json([
-                'errors' => 'branch is found'
-            ],400);
-        }
+        // $time_setting = $this->time_setting
+        // ->where('branch_id', $request->branch_id)
+        // ->where('id', '!=', $id)
+        // ->first();
+        // if (!empty($time_setting)) {
+        //     return response()->json([
+        //         'errors' => 'branch is found'
+        //     ],400);
+        // }
 
         $resturant_time = $request->resturant_time;
         $time_setting = $this->time_setting
@@ -175,6 +176,7 @@ class TimeSlotController extends Controller
         $time_setting->update([
             'from' => $request->from,
             'hours' => $request->hours,
+            'minutes' => $request->minutes ?? 0,
             'branch_id' => $request->branch_id,
         ]);
         

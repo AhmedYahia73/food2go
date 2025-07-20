@@ -47,31 +47,41 @@ class CashierMakeOrderController extends Controller
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, private CafeTable $cafe_table,
-    private CafeLocation $cafe_location, private OrderCart $order_cart){}
+    private CafeLocation $cafe_location, private OrderCart $order_cart,
+    private TimeSittings $TimeSittings){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
 
     public function pos_orders(Request $request){
         // /cashier/orders
-        $time_sittings = $this->TimeSittings
+        
+        $time_sittings = $this->TimeSittings 
         ->get();
-        $from = $time_sittings->min('from');
-        $hours = $time_sittings->max('hours');
-        if (!empty($from)) {
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
-			$end = Carbon::parse($from)->addHours($hours);
-            if ($start > $end) {
-                $end = Carbon::parse($from)->addHours($hours)->subDay();
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
             }
-            else{
-                $end = Carbon::parse($from)->addHours(intval($hours));
-            }
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // }
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
+
         $all_orders = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -240,7 +250,7 @@ class CashierMakeOrderController extends Controller
         // /cashier/delivery_order
         // Keys
         // date, amount, total_tax, total_discount
-        // notes, payment_method_id, order_type, customer_id
+        // notes, payment_method_id, customer_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
 

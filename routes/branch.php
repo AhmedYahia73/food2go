@@ -56,6 +56,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(OnlineOrderController::class)->prefix('online_order')->group(function(){
         Route::get('/', 'orders');
         Route::get('/count_orders', 'count_orders');
+        Route::post('/transfer_branch', 'transfer_branch');
         Route::get('/order/{id}', 'order');
         Route::get('/invoice/{id}', 'invoice');
         Route::get('/user_details/{id}', 'user_details');

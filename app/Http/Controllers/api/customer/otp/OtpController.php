@@ -35,6 +35,8 @@ class OtpController extends Controller
         $user = $this->user
         ->where('email', $request->email)
         ->orWhere('phone', $request->phone)
+        ->orWhere('phone', '+2' . $request->phone)
+        ->orWhere('phone', '+20' . $request->phone)
         ->first();
         if (empty($user)) {
             return response()->json([
@@ -70,7 +72,7 @@ class OtpController extends Controller
         }
         
         return response()->json([
-            'code' => $code,
+            'code' => 'success',
         ]);
     }
 
@@ -162,6 +164,10 @@ class OtpController extends Controller
         ->where('code', $request->code)
         ->orWhere('phone', $request->email)
         ->where('code', $request->code)
+        ->orWhere('phone', '+2' . $request->email)
+        ->where('code', $request->code)
+        ->orWhere('phone', '+20' . $request->email)
+        ->where('code', $request->code)
         ->first();
         if (!empty($user)) {
             return response()->json([
@@ -192,6 +198,10 @@ class OtpController extends Controller
         ->where('email', $request->email)
         ->where('code', $request->code)
         ->orWhere('phone', $request->email)
+        ->where('code', $request->code)
+        ->orWhere('phone', '+2' . $request->email)
+        ->where('code', $request->code)
+        ->orWhere('phone', '+20' . $request->email)
         ->where('code', $request->code)
         ->first();
         if (empty($user)) {
