@@ -503,7 +503,7 @@ class OrderController extends Controller
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
 			$end = Carbon::parse($end)->addHours($hours);
-            if ($from >= $end) {
+            if ($start >= $end) {
                 $end = $end->addDay();
             }
             // if ($start > $end) {
