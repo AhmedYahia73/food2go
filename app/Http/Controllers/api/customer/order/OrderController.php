@@ -90,6 +90,8 @@ class OrderController extends Controller
         list($hours, $minutes, $seconds) = explode(':', $time_to_add);
         list($order_hours, $order_minutes) = explode(':', $branch);
         $order_seconds = 0;
+        $order_hours = (int)$order_hours;
+        $order_minutes = (int)$order_minutes;
         
         if($order->order_type == 'delivery'){
             // Ensure that $hours, $minutes, and $seconds are integers
