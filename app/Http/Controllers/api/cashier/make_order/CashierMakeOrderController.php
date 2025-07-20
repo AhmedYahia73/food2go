@@ -47,7 +47,8 @@ class CashierMakeOrderController extends Controller
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, private CafeTable $cafe_table,
-    private CafeLocation $cafe_location, private OrderCart $order_cart){}
+    private CafeLocation $cafe_location, private OrderCart $order_cart,
+    private TimeSittings $TimeSittings){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
