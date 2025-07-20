@@ -89,7 +89,7 @@ class OrderController extends Controller
         // Split the time string into hours, minutes, and seconds
         list($hours, $minutes, $seconds) = explode(':', $time_to_add);
         list($order_hours, $order_minutes) = explode(':', $branch);
-        $order_seconds = '00';
+        $order_seconds = 0;
         
         if($order->order_type == 'delivery'){
             // Ensure that $hours, $minutes, and $seconds are integers
