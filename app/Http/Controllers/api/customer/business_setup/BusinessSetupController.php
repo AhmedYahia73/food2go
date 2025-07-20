@@ -18,6 +18,12 @@ class BusinessSetupController extends Controller
     private CompanyInfo $company_info, private Setting $settings,
     private TimeSittings $time_sitting, private Address $address){}
 
+    public function arabicTime($carbonTime) {
+        $time = $carbonTime->format('h:i');
+        $period = $carbonTime->format('A') === 'AM' ? 'ص' : 'م';
+        return $time . ' ' . $period;
+    }
+
     public function business_setup(Request $request){
         // https://bcknd.food2go.online/api/business_setup
         // Maintenance status
@@ -127,6 +133,8 @@ class BusinessSetupController extends Controller
                 $open_from = Carbon::parse($time_sitting[0]->from);
                 $open_to = Carbon::parse($time_sitting[$time_sitting->count() - 1]->from);
                 $open_to = $open_to->addHours($time_sitting[$time_sitting->count() - 1]->hours);
+                $open_from = $this->arabicTime($open_from);
+                $open_to = $this->arabicTime($open_to);
                 $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;
             }
         }
