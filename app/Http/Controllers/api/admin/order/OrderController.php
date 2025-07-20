@@ -491,8 +491,7 @@ class OrderController extends Controller
     //         'all_data' => $all_data,
     //         'deliveries' => $deliveries,
     //     ]);
-        $time_sittings = $this->TimeSittings
-        ->orderByDesc('id')
+        $time_sittings = $this->TimeSittings 
         ->get();
         if ($time_sittings->count() > 0) {
             $from = $time_sittings[0]->from;
@@ -598,8 +597,8 @@ class OrderController extends Controller
             'all_data' => $all_data,
             'deliveries' => $deliveries,
             'branches' => $branches,
-            'start' => $start,
-            'end' => $end,
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
         ]);
     }
 
@@ -1214,18 +1213,20 @@ class OrderController extends Controller
         }
         // _______________________________________
         
-        $time_sittings = $this->TimeSittings
-        ->orderByDesc('id')
+        $time_sittings = $this->TimeSittings 
         ->get();
-        $from_time = $time_sittings->min('from');
-        if (!empty($from_time)) {
+        if ($time_sittings->count() > 0) {
+            $from_time = $time_sittings[0]->from;
             $date_to = $request->date_to; 
-            $end = $date_to . ' ' . $time_sittings[0]->from;
+            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
             $hours = $time_sittings[0]->hours;
             $from = $request->date . ' ' . $from_time;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours);  
+			$end = Carbon::parse($end)->addHours($hours); 
+            if ($start >= $end) {
+                $end = $end->addDay();
+            } 
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }

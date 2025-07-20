@@ -55,17 +55,20 @@ class CashierMakeOrderController extends Controller
     public function pos_orders(Request $request){
         // /cashier/orders
         
-        $time_sittings = $this->TimeSittings
-        ->orderByDesc('id')
+        $time_sittings = $this->TimeSittings 
         ->get();
-        $from = $time_sittings->min('from');
-        if (!empty($from)) {
-            $end = date('Y-m-d') . ' ' . $time_sittings[0]->from;
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
             $hours = $time_sittings[0]->hours;
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
 			$end = Carbon::parse($end)->addHours($hours);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
