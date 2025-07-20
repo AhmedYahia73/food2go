@@ -598,6 +598,8 @@ class OrderController extends Controller
             'all_data' => $all_data,
             'deliveries' => $deliveries,
             'branches' => $branches,
+            'start' => $start,
+            'end' => $end,
         ]);
     }
 
