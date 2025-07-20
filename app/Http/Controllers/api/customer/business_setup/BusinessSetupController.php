@@ -121,8 +121,13 @@ class BusinessSetupController extends Controller
                 }
                 else{
                     $open_flag = false;
-                    $close_message = 'مواعيد العمل من ' . $open_from->format('h:i A') . ' الى ' . $open_to->format('h:i A');
                 }
+            }
+            if ($open_flag) {
+                $open_from = Carbon::parse($time_sitting[0]->from);
+                $open_to = Carbon::parse($time_sitting[$time_sitting->count() - 1]->from);
+                $open_to = $open_to->addHours($time_sitting[$time_sitting->count() - 1]->hours);
+                $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;
             }
         }
         // if (empty($time_sitting)) {
