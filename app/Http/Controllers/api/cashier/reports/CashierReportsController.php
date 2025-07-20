@@ -30,7 +30,7 @@ class CashierReportsController extends Controller
         }
 
         $time_sittings = $this->TimeSittings
-        ->orderByDesc('from')
+        ->orderByDesc('id')
         ->get();
         $from_time = $time_sittings->min('from');
         if (!empty($from_time)) {

@@ -42,7 +42,7 @@ class OnlineOrderController extends Controller
         // https://bcknd.food2go.online/admin/order
         
         $time_sittings = $this->TimeSittings
-        ->orderByDesc('from')
+        ->orderByDesc('id')
         ->get();
         $from = $time_sittings->min('from');
         if (!empty($from)) {
@@ -756,7 +756,7 @@ class OnlineOrderController extends Controller
         }
         
         $time_sittings = $this->TimeSittings
-        ->orderByDesc('from')
+        ->orderByDesc('id')
         ->get();
         $from_time = $time_sittings->min('from');
         if (!empty($from_time)) {

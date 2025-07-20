@@ -492,7 +492,7 @@ class OrderController extends Controller
     //         'deliveries' => $deliveries,
     //     ]);
         $time_sittings = $this->TimeSittings
-        ->orderByDesc('from')
+        ->orderByDesc('id')
         ->get();
         $from = $time_sittings->min('from');
         if (!empty($from)) {
@@ -1209,7 +1209,7 @@ class OrderController extends Controller
         // _______________________________________
         
         $time_sittings = $this->TimeSittings
-        ->orderByDesc('from')
+        ->orderByDesc('id')
         ->get();
         $from_time = $time_sittings->min('from');
         if (!empty($from_time)) {

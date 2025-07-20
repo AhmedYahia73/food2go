@@ -56,7 +56,7 @@ class CashierMakeOrderController extends Controller
         // /cashier/orders
         
         $time_sittings = $this->TimeSittings
-        ->orderByDesc('from')
+        ->orderByDesc('id')
         ->get();
         $from = $time_sittings->min('from');
         if (!empty($from)) {

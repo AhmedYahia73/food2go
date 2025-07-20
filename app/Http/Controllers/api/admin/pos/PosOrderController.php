@@ -156,7 +156,7 @@ class PosOrderController extends Controller
         // /admin/pos/order/orders
         
         $time_sittings = $this->TimeSittings
-        ->orderByDesc('from')
+        ->orderByDesc('id')
         ->get();
         $from = $time_sittings->min('from');
         if (!empty($from)) {
