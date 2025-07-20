@@ -123,7 +123,7 @@ class BusinessSetupController extends Controller
                     $open_flag = false;
                 }
             }
-            if ($open_flag) {
+            if (!$open_flag) {
                 $open_from = Carbon::parse($time_sitting[0]->from);
                 $open_to = Carbon::parse($time_sitting[$time_sitting->count() - 1]->from);
                 $open_to = $open_to->addHours($time_sitting[$time_sitting->count() - 1]->hours);
