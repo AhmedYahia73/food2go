@@ -176,6 +176,7 @@ class TimeSlotController extends Controller
         $time_setting->update([
             'from' => $request->from,
             'hours' => $request->hours,
+            'minutes' => $request->minutes ?? 0,
             'branch_id' => $request->branch_id,
         ]);
         

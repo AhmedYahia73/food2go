@@ -45,7 +45,8 @@ class MakeOrderController extends Controller
     public function order(OrderRequest $request){
         // https://bcknd.food2go.online/customer/make_order
         // Keys
-        // date, branch_id, amount, coupon_discount, total_tax, total_discount, address_id
+        // date, branch_id, amount, coupon_discount, total_tax, total_discount, 
+        // address_id, source
         // order_type[take_away,dine_in,delivery]
         // deal[{deal_id, count}], c, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 

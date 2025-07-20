@@ -114,7 +114,7 @@ class BusinessSetupController extends Controller
                 $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
 
                 $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
-                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours))->addMinutes($resturant_time->minutes);
                 if($now >= $open_from && $now <= $open_to){
                     $open_flag = true;
                     break;
@@ -200,7 +200,6 @@ class BusinessSetupController extends Controller
         $customer_login = json_decode($customer_login->setting) ?? 
         ['login' => 'otp', 'verification' => 'email'];
 
-        
         return response()->json([
             'customer_login' => $customer_login,
         ]);

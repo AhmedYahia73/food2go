@@ -497,11 +497,12 @@ class OrderController extends Controller
             $from = $time_sittings[0]->from;
             
             $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[0]->hours;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
             }
@@ -1219,11 +1220,12 @@ class OrderController extends Controller
             $from_time = $time_sittings[0]->from;
             $date_to = $request->date_to; 
             $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[0]->hours;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
             $from = $request->date . ' ' . $from_time;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours); 
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
             if ($start >= $end) {
                 $end = $end->addDay();
             } 

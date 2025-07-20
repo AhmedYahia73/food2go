@@ -55,6 +55,7 @@ class Order extends Model
         'canceled_noti',
         'customer_id',
         'deleted_at',
+        'source',
     ];
     protected $appends = ['order_date', 'status_payment'];
 
