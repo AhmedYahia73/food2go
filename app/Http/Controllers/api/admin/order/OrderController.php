@@ -520,7 +520,7 @@ class OrderController extends Controller
         $orders = $this->orders
         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
@@ -935,7 +935,7 @@ class OrderController extends Controller
         $order = $this->orders
         ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
         'admin_cancel_reason', 'sechedule_slot_id')
