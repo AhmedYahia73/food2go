@@ -107,6 +107,9 @@ class AddressController extends Controller
         }
         $order_types = $order_types->setting;
         $order_types = json_decode($order_types);
+        $order_types = collect($order_types)
+        ->where('status', 1)
+        ->values();
 
         return response()->json([
             'addresses' => $addresses,
