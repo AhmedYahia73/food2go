@@ -500,12 +500,12 @@ class OrderController extends Controller
             $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
             $hours = $time_sittings[0]->hours;
             $from = date('Y-m-d') . ' ' . $from;
-            if ($from >= $end) {
-                $end = $end->addDay();
-            }
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
 			$end = Carbon::parse($end)->addHours($hours);
+            if ($from >= $end) {
+                $end = $end->addDay();
+            }
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
