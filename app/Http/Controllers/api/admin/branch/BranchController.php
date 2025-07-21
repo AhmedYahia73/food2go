@@ -82,7 +82,7 @@ class BranchController extends Controller
     public function status(Request $request, $id){
         // https://bcknd.food2go.online/admin/branch/status/{id}
         // Keys
-        // status
+        // status, block_reason
         $validator = Validator::make($request->all(), [
             'status' => 'required|boolean',
             'block_reason' => 'required_if:status,false'
@@ -96,7 +96,8 @@ class BranchController extends Controller
         $this->branches->where('id', $id)
         ->where('main', '!=', 1)
         ->update([
-            'status' => $request->status
+            'status' => $request->status,
+            'block_reason' => $request->block_reason,
         ]);
 
         if ($request->status == 0) {
