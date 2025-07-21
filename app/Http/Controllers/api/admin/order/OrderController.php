@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CancelOrderMail;
 use Carbon\Carbon;
 
 use App\Models\Order;
@@ -14,7 +16,7 @@ use App\Models\Branch;
 use App\Models\Setting;
 use App\Models\LogOrder;
 use App\Models\User;
-use App\Models\TimeSittings;
+use App\Models\TimeSittings; 
 
 class OrderController extends Controller
 {
@@ -495,7 +497,6 @@ class OrderController extends Controller
         ->get();
         if ($time_sittings->count() > 0) {
             $from = $time_sittings[0]->from;
-            
             $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
             $hours = $time_sittings[$time_sittings->count() - 1]->hours;
             $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
@@ -1095,6 +1096,11 @@ class OrderController extends Controller
                     'errors' => $validator->errors(),
                 ],400);
             }
+            $data = [
+                'name',
+                'reason',
+            ];
+            Mail::to($order->user->email)->send(new CancelOrderMail($data));
             $order->update([
                 'order_status' => $request->order_status,
                 'admin_cancel_reason' => $request->admin_cancel_reason,

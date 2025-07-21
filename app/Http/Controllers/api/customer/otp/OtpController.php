@@ -52,18 +52,11 @@ class OtpController extends Controller
             ];
             Mail::to($user->email)->send(new OTPMail($data));
         } 
-        elseif($request->phone) {
-            $temporaryToken = Str::random(40);
-            $otp = rand(10000, 99999);  // Generate OTP
+        elseif($request->phone) { 
             $phone = $request->phone;
-            $user = $this->user
-            ->where('phone', $request->phone)
-            ->update([
-                'code' => $otp
-            ]);
         
             // Send OTP to the new user
-            $this->sendOtp($phone, $otp);
+            $this->sendOtp($phone, $code);
         }
         else{
             return response()->json([
