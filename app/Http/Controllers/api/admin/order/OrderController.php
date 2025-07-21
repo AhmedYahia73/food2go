@@ -507,17 +507,19 @@ class OrderController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
             // else{
             //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // }
+            // } format('Y-m-d H:i:s')
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
-
+        } 
         $orders = $this->orders
         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -1235,6 +1237,9 @@ class OrderController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             } 
+			if($start >= now()){
+                $start = $start->subDay();
+			}
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }

@@ -44,6 +44,9 @@ class CashierReportsController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             }   
+			if($start >= now()){
+                $start = $start->subDay();
+			}
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
@@ -125,6 +128,9 @@ class CashierReportsController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             } 
+			if($start >= now()){
+                $start = $start->subDay();
+			}
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
