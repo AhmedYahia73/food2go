@@ -190,7 +190,7 @@ class BranchController extends Controller
             $branchRequest['password'] = $request->password;
             PersonalAccessToken::
             where('name', 'branch')
-            ->where('tokenable_id', $admin->id)
+            ->where('tokenable_id', $branch->id)
             ->delete();
         }
         $branch->update($branchRequest);
