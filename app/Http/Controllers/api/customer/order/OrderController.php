@@ -23,9 +23,29 @@ class OrderController extends Controller
         ->with('delivery', 'payment_method')
         ->get()
         ->map(function($item){
+            $total_variation = collect($item->order_details);  
+            $total_variation = collect($total_variation->pluck('variations'));
+            if ($total_variation->count() > 0) {
+                $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
+            } 
+            $total_product = collect($item->order_details);
+            $total_product = collect($total_product->pluck('product')); 
+            $total = 0;
+            if ($total_product->count() > 0) {
+                $total_product = collect($total_product[0]);
+                foreach ($total_product as $item) {
+                    $product = $item->product;
+                    $total = ($product->price + $total_variation
+                    ->where('product_id', $product->id)
+                    ->sum('price')) * $item->count;
+                }
+            }
+
             $item->delivery_price = $item?->order_address?->zone?->price ?? null;
             $item->branch_name = $item?->branch?->name ?? null;
             $item->address_name = $item?->order_address?->address ?? null;
+            $item->total_product = $total;
+
             return $item;
         });
         $cancel_time = $this->settings
@@ -50,9 +70,28 @@ class OrderController extends Controller
         ->where('deleted_at', 0)
         ->get()
         ->map(function($item){
+            $total_variation = collect($item->order_details);  
+            $total_variation = collect($total_variation->pluck('variations'));
+            if ($total_variation->count() > 0) {
+                $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
+            } 
+            $total_product = collect($item->order_details);
+            $total_product = collect($total_product->pluck('product')); 
+            $total = 0;
+            if ($total_product->count() > 0) {
+                $total_product = collect($total_product[0]);
+                foreach ($total_product as $item) {
+                    $product = $item->product;
+                    $total = ($product->price + $total_variation
+                    ->where('product_id', $product->id)
+                    ->sum('price')) * $item->count;
+                }
+            }
+
             $item->delivery_price = $item?->order_address?->zone?->price ?? null;
             $item->branch_name = $item?->branch?->name ?? null;
             $item->address_name = $item?->order_address?->address ?? null;
+            $item->total_product = $total;
             return $item;
         });
 
