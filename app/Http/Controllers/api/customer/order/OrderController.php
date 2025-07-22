@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Order;
 use App\Models\Setting;
-use App\Models\Product;
+use App\Models\Product; 
 
 class OrderController extends Controller
 {
@@ -169,6 +169,7 @@ class OrderController extends Controller
                 'setting' => '00:30:00',
             ]);
         }
+        $delivery_phone = $order?->delivery?->phone;
 
         $branch = $order?->branch?->food_preparion_time ?? '00:00';
 
@@ -207,6 +208,7 @@ class OrderController extends Controller
             'time_delivered' => $formattedTime,
             'customer_cancel_reason' => $order->customer_cancel_reason,
             'admin_cancel_reason' => $order->admin_cancel_reason,
+            'delivery_phone' => $delivery_phone,
         ]);
     }
 
