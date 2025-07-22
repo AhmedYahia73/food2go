@@ -234,6 +234,17 @@ class HomeController extends Controller
         ->get();
         $top_customers = $users
         ->sortByDesc('orders_count')->values();
+        $recent_orders = 
+        $all_orders = $this->orders
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->orderByDesc('id')
+        ->limit(10)
+        ->get();
 
         return response()->json([
             'orders' => $orders_count,
