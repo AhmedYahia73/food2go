@@ -205,7 +205,8 @@ class HomeController extends Controller
             'scheduled' => $scheduled,
         ];
         $currentYear = Carbon::now()->year; 
-        $all_orders = $this->orders 
+        $all_orders = $this->orders
+        ->select('created_at', 'amount')
         ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
