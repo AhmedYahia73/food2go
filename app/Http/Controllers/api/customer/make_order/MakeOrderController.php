@@ -242,10 +242,14 @@ class MakeOrderController extends Controller
                 $redirectUrl = env('WEB_LINK') . '/orders/order_traking/' . $order->id;
                 $timer = 3; // 3  seconds
 
-                return response()->json([
-                    'success' => 'You payment success'
-                ]);
-               return  view('Paymob.checkout', compact('totalAmount','message','redirectUrl','timer'));
+                if($order->source == 'web'){
+                    return  view('Paymob.checkout', compact('totalAmount','message','redirectUrl','timer'));
+                }
+                else{
+                    return response()->json([
+                        'success' => 'You payment success'
+                    ]);
+                }
             }
             else {        
                 $order = $this->order
