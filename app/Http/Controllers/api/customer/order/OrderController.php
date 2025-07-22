@@ -107,8 +107,7 @@ class OrderController extends Controller
             $item->delivery_price = $item?->order_address?->zone?->price ?? null;
             $item->branch_name = $item?->branch?->name ?? null;
             $item->address_name = $item?->order_address?->address ?? null;
-            $item->total_product = $total;
-            $item->addons = $addons;
+            $item->total_product = $total; 
             return $item;
         });
 
