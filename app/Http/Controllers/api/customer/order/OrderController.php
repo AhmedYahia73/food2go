@@ -40,12 +40,12 @@ class OrderController extends Controller
             $total = 0;
             if ($total_product->count() > 0) {
                 $total_product = collect($total_product[0]);
-                foreach ($total_product as $item) {
-                    $product = $item->product;
+                foreach ($total_product as $element) {
+                    $product = $element->product;
                     unset($product->addons);
                     $total += ($product->price + $total_variation
                     ->where('product_id', $product->id)
-                    ->sum('price')) * $item->count;
+                    ->sum('price')) * $element->count;
                 }
             }
 
@@ -95,14 +95,12 @@ class OrderController extends Controller
             $total = 0;
             if ($total_product->count() > 0) {
                 $total_product = collect($total_product[0]);
-                foreach ($total_product as $item) {
-                    $product = $item->product;
-                    unset($product->addons); 
-
-                    $product->addons = $addons;
+                foreach ($total_product as $element) {
+                    $product = $element->product;
+                    unset($product->addons);
                     $total += ($product->price + $total_variation
                     ->where('product_id', $product->id)
-                    ->sum('price')) * $item->count;
+                    ->sum('price')) * $element->count;
                 }
             }
 
