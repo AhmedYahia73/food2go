@@ -25,6 +25,112 @@ class HomeController extends Controller
     private SmsIntegration $sms_integration, private SmsBalance $sms_balance,
     private TimeSittings $TimeSittings, private LogOrder $log_order){}
 
+    public function home_orders_count(){ 
+        $orders = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->count(); 
+        $pending = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_status', 'pending') 
+        ->count();
+        $confirmed = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_status', 'confirmed') 
+        ->count();
+        $processing = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_status', 'processing') 
+        ->count();
+        $out_for_delivery = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->where('order_status', 'out_for_delivery') 
+        ->count();
+        $delivered = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->where('order_status', 'delivered') 
+        ->count();
+        $returned = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_status', 'returned') 
+        ->count();
+        $faild_to_deliver = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_status', 'faild_to_deliver') 
+        ->count();
+        $canceled = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_status', 'canceled') 
+        ->count();
+        $scheduled = $this->orders 
+        ->where('pos', 0)
+        ->where('pos', 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_status', 'scheduled') 
+        ->count();
+        $orders_count = [
+            'orders' => $orders,
+            'pending' => $pending,
+            'confirmed' => $confirmed,
+            'processing' => $processing,
+            'out_for_delivery' => $out_for_delivery,
+            'delivered' => $delivered,
+            'returned' => $returned,
+            'faild_to_deliver' => $faild_to_deliver,
+            'canceled' => $canceled,
+            'scheduled' => $scheduled,
+        ];
+
+        return response()->json($orders_count);
+    }
+
     public function home(){
         // https://bcknd.food2go.online/admin/home
         
@@ -103,48 +209,6 @@ class HomeController extends Controller
         })
         ->orderByDesc('id')
         ->get();
-        
-        $orders = $all_orders
-        ->count();
-        $pending = $all_orders
-        ->where('order_status', 'pending') 
-        ->count();
-        $confirmed = $all_orders
-        ->where('order_status', 'confirmed') 
-        ->count();
-        $processing = $all_orders
-        ->where('order_status', 'processing') 
-        ->count();
-        $out_for_delivery = $all_orders 
-        ->where('order_status', 'out_for_delivery') 
-        ->count();
-        $delivered = $all_orders 
-        ->where('order_status', 'delivered') 
-        ->count();
-        $returned = $all_orders
-        ->where('order_status', 'returned') 
-        ->count();
-        $faild_to_deliver = $all_orders
-        ->where('order_status', 'faild_to_deliver') 
-        ->count();
-        $canceled = $all_orders
-        ->where('order_status', 'canceled') 
-        ->count();
-        $scheduled = $all_orders
-        ->where('order_status', 'scheduled') 
-        ->count();
-        $orders_count = [
-            'orders' => $orders,
-            'pending' => $pending,
-            'confirmed' => $confirmed,
-            'processing' => $processing,
-            'out_for_delivery' => $out_for_delivery,
-            'delivered' => $delivered,
-            'returned' => $returned,
-            'faild_to_deliver' => $faild_to_deliver,
-            'canceled' => $canceled,
-            'scheduled' => $scheduled,
-        ];
 
         $orders_jan = $all_orders
         ->where('order_date', '>=', $currentYear . '-01-01')
@@ -246,8 +310,7 @@ class HomeController extends Controller
         ->limit(10)
         ->get();
 
-        return response()->json([
-            'orders' => $orders_count,
+        return response()->json([ 
             'order_statistics' => $order_statistics,
             'earning_statistics' => $earning_statistics,
             'recent_orders' => $all_orders,
