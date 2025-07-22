@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class FinancialAccounting extends Model
+{ 
+    use HasFactory;
+
+    protected $fillable = [ 
+        'name',
+        'description',
+        'logo',
+        'status', 
+    ];
+    protected $appends = ['logo_link'];
+
+    public function getLogoLinkAttribute(){
+        return url('storage/' . $this->attributes['logo']);
+    }
+
+    
+}
