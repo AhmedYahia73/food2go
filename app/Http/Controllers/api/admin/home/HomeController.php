@@ -92,7 +92,9 @@ class HomeController extends Controller
         ->whereDate('created_at', '<=', now()->subDays(14))
         ->delete();
 
-        $orders = $this->orders 
+        $currentYear = Carbon::now()->year; 
+        $all_orders = $this->orders
+        ->select('created_at', 'amount')
         ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
@@ -100,97 +102,36 @@ class HomeController extends Controller
             ->orWhereNull('status');
         })
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        ->get();
+        
+        $orders = $all_orders
         ->count();
-        $pending = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'pending')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $pending = $all_orders
+        ->where('order_status', 'pending') 
         ->count();
-        $confirmed = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'confirmed')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $confirmed = $all_orders
+        ->where('order_status', 'confirmed') 
         ->count();
-        $processing = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'processing')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $processing = $all_orders
+        ->where('order_status', 'processing') 
         ->count();
-        $out_for_delivery = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'out_for_delivery')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $out_for_delivery = $all_orders 
+        ->where('order_status', 'out_for_delivery') 
         ->count();
-        $delivered = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'delivered')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $delivered = $all_orders 
+        ->where('order_status', 'delivered') 
         ->count();
-        $returned = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'returned')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $returned = $all_orders
+        ->where('order_status', 'returned') 
         ->count();
-        $faild_to_deliver = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'faild_to_deliver')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $faild_to_deliver = $all_orders
+        ->where('order_status', 'faild_to_deliver') 
         ->count();
-        $canceled = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'canceled')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $canceled = $all_orders
+        ->where('order_status', 'canceled') 
         ->count();
-        $scheduled = $this->orders
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where('order_status', 'scheduled')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
+        $scheduled = $all_orders
+        ->where('order_status', 'scheduled') 
         ->count();
         $orders_count = [
             'orders' => $orders,
@@ -204,17 +145,7 @@ class HomeController extends Controller
             'canceled' => $canceled,
             'scheduled' => $scheduled,
         ];
-        $currentYear = Carbon::now()->year; 
-        $all_orders = $this->orders
-        ->select('created_at', 'amount')
-        ->where('pos', 0)
-        ->where('pos', 0)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->orderByDesc('id')
-        ->get();
+
         $orders_jan = $all_orders
         ->where('order_date', '>=', $currentYear . '-01-01')
         ->where('order_date', '<', $currentYear . '-02-01');
