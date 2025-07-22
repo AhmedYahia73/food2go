@@ -38,24 +38,42 @@ class OrderController extends Controller
             $total_product = collect($item->order_details);
             $total_product = collect($total_product?->pluck('product')); 
             $total = 0;
+            $products = [];
             if ($total_product->count() > 0) {
-                $total_product = collect($total_product[0]);
+                $total_product = collect($total_product[0]); 
                 foreach ($total_product as $element) {
                     $product = $element->product;
                     unset($product->addons);
-                    $total += ($product->price + $total_variation
+                    $total = ($product->price + $total_variation
                     ->where('product_id', $product->id)
                     ->sum('price')) * $element->count;
+                    $product->total_product = $total;
+                    $product->count = $element->count;
+                    $product->note = isset($element?->notes) ? $element?->notes :  null;
+                    $products[] = $product;
                 }
             }
+            $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
+            return [
+                'id' => $item->id,
+                'date' => $item->date,
+                'amount' => $item->amount,
+                'order_status' => $item->order_status,
+                'order_type' => $item->order_type,
+                'total_discount' => $item->total_discount,
+                'notes' => $item->notes,
+                'rejected_reason' => $item->rejected_reason,
+                'customer_cancel_reason' => $item->customer_cancel_reason,
+                'admin_cancel_reason' => $item->admin_cancel_reason,
+                'delivery_price' => $item->delivery_price,
+                'products' => $products,
+                'payment_method' => $item?->payment_method?->select('id', 'name', 'description', 'logo_link'),
+                'delivery_price' => $item?->order_address?->zone?->price ?? null,
+                'branch_name' => $item?->branch?->name ?? null,
+                'address_name' => $item?->order_address?->address ?? null,
+                'addons' => $addons,
 
-            $item->delivery_price = $item?->order_address?->zone?->price ?? null;
-            $item->branch_name = $item?->branch?->name ?? null;
-            $item->address_name = $item?->order_address?->address ?? null;
-            $item->total_product = $total;
-            $item->addons = $addons;
-
-            return $item;
+            ];
         });
         $cancel_time = $this->settings
         ->where('name', 'time_cancel')
@@ -79,7 +97,7 @@ class OrderController extends Controller
         ->where('deleted_at', 0)
         ->get()
         ->map(function($item){
-           $total_variation = collect($item->order_details);  
+            $total_variation = collect($item->order_details);  
             $addons = collect($total_variation->pluck('addons'))->flatten(1); 
             $addons = collect($addons)->map(function ($item) {
                 $addon = $item->addon;
@@ -93,22 +111,41 @@ class OrderController extends Controller
             $total_product = collect($item->order_details);
             $total_product = collect($total_product?->pluck('product')); 
             $total = 0;
+            $products = [];
             if ($total_product->count() > 0) {
-                $total_product = collect($total_product[0]);
+                $total_product = collect($total_product[0]); 
                 foreach ($total_product as $element) {
                     $product = $element->product;
                     unset($product->addons);
-                    $total += ($product->price + $total_variation
+                    $total = ($product->price + $total_variation
                     ->where('product_id', $product->id)
                     ->sum('price')) * $element->count;
+                    $product->total_product = $total;
+                    $product->count = $element->count;
+                    $product->note = isset($element?->notes) ? $element?->notes :  null;
+                    $products[] = $product;
                 }
             }
-
-            $item->delivery_price = $item?->order_address?->zone?->price ?? null;
-            $item->branch_name = $item?->branch?->name ?? null;
-            $item->address_name = $item?->order_address?->address ?? null;
-            $item->total_product = $total; 
-            return $item;
+            $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
+            return [
+                'id' => $item->id,
+                'date' => $item->date,
+                'amount' => $item->amount,
+                'order_status' => $item->order_status,
+                'order_type' => $item->order_type,
+                'total_discount' => $item->total_discount,
+                'notes' => $item->notes,
+                'rejected_reason' => $item->rejected_reason,
+                'customer_cancel_reason' => $item->customer_cancel_reason,
+                'admin_cancel_reason' => $item->admin_cancel_reason,
+                'delivery_price' => $item->delivery_price,
+                'products' => $products,
+                'payment_method' => $item?->payment_method?->select('id', 'name', 'description', 'logo_link'),
+                'delivery_price' => $item?->order_address?->zone?->price ?? null,
+                'branch_name' => $item?->branch?->name ?? null,
+                'address_name' => $item?->order_address?->address ?? null,
+                'addons' => $addons,
+            ];
         });
 
         return response()->json([
