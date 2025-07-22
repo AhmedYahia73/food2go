@@ -1142,7 +1142,7 @@ class OrderController extends Controller
         $order = $this->orders
         ->where('id', $request->order_id)
         ->first();
-        if ($order->order_status != 'processing') {
+        if ($order->order_status != 'processing' && $order->order_status != 'out_for_delivery') {
             return response()->json([
                 'faild' => 'Status must be processing'
             ], 400);

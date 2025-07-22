@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Order;
 use App\Models\Setting;
+use App\Models\Product;
 
 class OrderController extends Controller
 {
@@ -24,7 +25,12 @@ class OrderController extends Controller
         ->get()
         ->map(function($item){ 
             $total_variation = collect($item->order_details);  
-            $addons = collect($total_variation->pluck('addons'))->flatten(1);
+            $addons = collect($total_variation->pluck('addons'))->flatten(1); 
+            $addons = collect($addons)->map(function ($item) {
+                $addon = $item->addon;
+                $addon->count = (int)$item->count;
+                return $addon;
+            });
             $total_variation = collect($total_variation->pluck('variations'));
             if ($total_variation->count() > 0) {
                 $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
@@ -37,7 +43,6 @@ class OrderController extends Controller
                 foreach ($total_product as $item) {
                     $product = $item->product;
                     unset($product->addons);
-                    $product->addons = $addons;
                     $total += ($product->price + $total_variation
                     ->where('product_id', $product->id)
                     ->sum('price')) * $item->count;
@@ -48,6 +53,7 @@ class OrderController extends Controller
             $item->branch_name = $item?->branch?->name ?? null;
             $item->address_name = $item?->order_address?->address ?? null;
             $item->total_product = $total;
+            $item->addons = $addons;
 
             return $item;
         });
@@ -73,8 +79,13 @@ class OrderController extends Controller
         ->where('deleted_at', 0)
         ->get()
         ->map(function($item){
-            $total_variation = collect($item->order_details);  
-            $addons = collect($total_variation->pluck('addons'))->flatten(1);
+           $total_variation = collect($item->order_details);  
+            $addons = collect($total_variation->pluck('addons'))->flatten(1); 
+            $addons = collect($addons)->map(function ($item) {
+                $addon = $item->addon;
+                $addon->count = (int)$item->count;
+                return $addon;
+            });
             $total_variation = collect($total_variation->pluck('variations'));
             if ($total_variation->count() > 0) {
                 $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
@@ -86,7 +97,8 @@ class OrderController extends Controller
                 $total_product = collect($total_product[0]);
                 foreach ($total_product as $item) {
                     $product = $item->product;
-                    unset($product->addons);
+                    unset($product->addons); 
+
                     $product->addons = $addons;
                     $total += ($product->price + $total_variation
                     ->where('product_id', $product->id)
@@ -98,6 +110,7 @@ class OrderController extends Controller
             $item->branch_name = $item?->branch?->name ?? null;
             $item->address_name = $item?->order_address?->address ?? null;
             $item->total_product = $total;
+            $item->addons = $addons;
             return $item;
         });
 
