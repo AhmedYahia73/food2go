@@ -29,7 +29,6 @@ class HomeController extends Controller
         $orders = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -38,7 +37,6 @@ class HomeController extends Controller
         $pending = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -48,7 +46,6 @@ class HomeController extends Controller
         $confirmed = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -58,7 +55,6 @@ class HomeController extends Controller
         $processing = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -68,7 +64,6 @@ class HomeController extends Controller
         $out_for_delivery = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -78,7 +73,6 @@ class HomeController extends Controller
         $delivered = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -88,7 +82,6 @@ class HomeController extends Controller
         $returned = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -98,7 +91,6 @@ class HomeController extends Controller
         $faild_to_deliver = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -108,7 +100,6 @@ class HomeController extends Controller
         $canceled = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -118,7 +109,6 @@ class HomeController extends Controller
         $scheduled = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
-        ->whereHas('user')
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
