@@ -337,23 +337,28 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-    public function dine_in_order(DineinOrderRequest $request){
+    public function dine_in_order(OrderRequest $request){
         // /cashier/dine_in_order
         // Keys
-        // amount, total_tax, total_discount, table_id
-        // notes, 
-        // financials[{id, amount}]
+        // date, amount, total_tax, total_discount, table_id
+        // notes, order_type
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-
-        // order_number, source, customer_id
+ 
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $request->merge([  
-            'branch_id' => $request->user()?->branch_id ?? null,
+            'branch_id' => $request->user()->branch_id,
             'user_id' => 'empty',
             'order_type' => 'dine_in',
             'cashier_man_id' =>$request->user()->id,
-            'shift' => $request->user()?->shift_number ?? null,
-            'pos' => 1, 
+            'shift' => $request->user()->shift_number,
         ]);
         $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
@@ -408,22 +413,15 @@ class CashierMakeOrderController extends Controller
         // Keys
         // date, amount, total_tax, total_discount
         // notes, payment_method_id, table_id
-
-        $validator = Validator::make($request->all(), [
-            'table_id' => 'required|exists:cafe_tables,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }  
-        $request->merge([
-            'branch_id' => $request->user()?->branch_id ?? null,
+  
+        $request->merge([  
+            'branch_id' => $request->user()->branch_id,
             'order_type' => 'dine_in',
             'cashier_man_id' =>$request->user()->id,
-            'shift' => $request->user()?->shift_number ?? null,
-            'pos' => 1, 
-        ]);
+            'shift' => $request->user()->shift_number,
+            'pos' => 1,
+            'status' => 1,
+        ]); 
         $order_carts = $this->order_cart
         ->where('table_id', $request->table_id)
         ->get();

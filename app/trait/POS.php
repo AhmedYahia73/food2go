@@ -413,7 +413,7 @@ trait POS
         $order->save();
 
         return [
-            'order' => $order, 
+            'payment' => $order, 
         ];
     }
     

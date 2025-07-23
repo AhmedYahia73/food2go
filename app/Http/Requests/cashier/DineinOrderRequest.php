@@ -31,16 +31,7 @@ class DineinOrderRequest extends FormRequest
             'table_id' => ['required', 'exists:cafe_tables,id'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
-            'cashier_id' => ['required', 'exists:cashiers,id'],
-            'coupon_discount' => 'sometimes',
-            'notes' => 'sometimes',
-            'products.*.product_id' => ['exists:products,id', 'required'],
-            'products.*.exclude_id.*' => ['exists:exclude_products,id'],
-            'products.*.extra_id.*' => ['exists:extra_products,id'],
-            'products.*.variation.*.variation_id' => ['exists:variation_products,id'],
-            'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
-            'products.*.count' => ['numeric', 'required'],
-            'products.*.note' => ['sometimes'],
+            'cashier_id' => ['required', 'exists:cashiers,id'], 
         ];
     }
 
