@@ -28,11 +28,11 @@ use App\Models\CafeLocation;
 use App\Models\CafeTable;
 use App\Models\OrderCart;
 use App\Models\Zone;
+use App\Models\FinantiolAcounting;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
 use App\trait\PaymentPaymob;
-use App\trait\FinantiolAcounting;
 
 class CaptainMakeOrderController extends Controller
 {
