@@ -32,6 +32,7 @@ class DineinOrderRequest extends FormRequest
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
             'cashier_id' => ['required', 'exists:cashiers,id'], 
+            'source' => 'sometimes',
         ];
     }
 

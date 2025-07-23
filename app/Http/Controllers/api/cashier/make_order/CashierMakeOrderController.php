@@ -353,7 +353,7 @@ class CashierMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $request->merge([  
+        $request->merge([
             'branch_id' => $request->user()->branch_id,
             'user_id' => 'empty',
             'order_type' => 'dine_in',
