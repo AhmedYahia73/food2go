@@ -27,7 +27,6 @@ class TakawayRequest extends FormRequest
             'amount' => ['required', 'numeric'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
-            'customer_id' => ['required', 'exists:customers,id'],
             'notes' => 'sometimes',
             'source' => 'sometimes',
             'products.*.product_id' => ['exists:products,id', 'required'],
