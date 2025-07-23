@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('financial_branch', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('financial_id')->nullable()->constrained('financial_accountings')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('branch_id')->nullable()->constrained('branches')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('branch_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('financial_id')->nullable()->constrained('finantiol_acountings')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }

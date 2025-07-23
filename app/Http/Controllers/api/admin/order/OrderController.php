@@ -510,6 +510,7 @@ class OrderController extends Controller
 			if($start >= now()){
                 $start = $start->subDay();
 			}
+
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
@@ -520,6 +521,7 @@ class OrderController extends Controller
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
+        $start = $start->subDay();
         $orders = $this->orders
         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -567,19 +569,6 @@ class OrderController extends Controller
         $refund = $orders
         ->where('order_status', 'refund')
         ->values();
-        $all_data = [
-            'orders' => $orders,
-            'pending' => $pending,
-            'confirmed' => $confirmed,
-            'processing' => $processing,
-            'out_for_delivery' => $out_for_delivery,
-            'delivered' => $delivered,
-            'returned' => $returned,
-            'faild_to_deliver' => $faild_to_deliver,
-            'canceled' => $canceled,
-            'scheduled' => $scheduled,
-            'refund' => $refund,
-        ];
         $deliveries = $this->deliveries
         ->get();
         $branches = $this->branches

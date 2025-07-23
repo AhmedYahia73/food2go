@@ -32,6 +32,7 @@ use App\Models\Zone;
 use App\trait\image;
 use App\trait\PlaceOrder;
 use App\trait\PaymentPaymob;
+use App\trait\FinantiolAcounting;
 
 class CaptainMakeOrderController extends Controller
 {
@@ -42,7 +43,8 @@ class CaptainMakeOrderController extends Controller
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, 
     private CafeLocation $cafe_location, private CafeTable $cafe_table,
-    private OrderCart $order_cart, private Zone $zone){}
+    private OrderCart $order_cart, private Zone $zone,
+    private FinantiolAcounting $financial_account){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -152,12 +154,17 @@ class CaptainMakeOrderController extends Controller
         ->get();
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products);
+        $financial_account = $this->financial_account
+        ->select('name', 'details', 'logo')
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'categories' => $categories,
             'products' => $products, 
             'cafe_location' => $cafe_location,
             'payment_methods' => $paymentMethod,
+            'financial_account' => $financial_account,
         ]);
     }
 
