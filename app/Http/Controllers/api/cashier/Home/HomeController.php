@@ -44,6 +44,20 @@ class HomeController extends Controller
         ->where('pos', 1)
         ->where('cashier_man_id', $request->user()->id)
         ->get();
-        
+        $take_away = $orders->where('order_type', 'take_away')
+        ->values();
+        $dine_in = $orders->where('order_type', 'dine_in')
+        ->values();
+        $delivery = $orders->where('order_type', 'delivery')
+        ->values();
+
+        return response()->json([
+            'take_away' => $take_away,
+            'dine_in' => $dine_in,
+            'delivery' => $delivery,
+            'take_away_count' => $take_away->count(),
+            'dine_in_count' => $dine_in->count(),
+            'delivery_count' => $delivery->count(),
+        ]);
     }
 }

@@ -33,6 +33,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(HomeController::class)
     ->prefix('/home')->group(function(){
         Route::get('/', 'view');
+        Route::get('/cashier_data', 'cashier_data');
         Route::put('/active_cashier/{id}', 'active_cashier'); 
     });
     Route::controller(CustomerController::class)
