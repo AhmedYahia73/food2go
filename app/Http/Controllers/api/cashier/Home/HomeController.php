@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Cashier;
+use App\Models\Order;
 
 class HomeController extends Controller
 {
-    public function __construct(private Cashier $cashier){}
+    public function __construct(private Cashier $cashier,
+    private Order $order){}
 
     public function view(Request $request){
         // https://bcknd.food2go.online/cashier/home
@@ -35,5 +37,13 @@ class HomeController extends Controller
         return response()->json([
             'success' => 'You activate cashier success'
         ]);
+    }
+
+    public function cashier_data(Request $request){
+        $orders = $this->order
+        ->where('pos', 1)
+        ->where('cashier_man_id', $request->user()->id)
+        ->get();
+        
     }
 }

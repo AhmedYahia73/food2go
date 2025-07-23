@@ -149,7 +149,6 @@ class OnlineOrderController extends Controller
             'scheduled' => $scheduled,
             'all_data' => $all_data,
             'deliveries' => $deliveries,
-            'branches' => $branches,
         ]);
     }
 
