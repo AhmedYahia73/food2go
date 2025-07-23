@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\customer\order\OrderRequest;
+use App\Http\Requests\cashier\DineinOrderRequest;
+use App\Http\Requests\cashier\TakawayRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use Carbon\Carbon;
@@ -34,10 +36,12 @@ use App\Models\BranchOff;
 use App\Models\CafeLocation;
 use App\Models\CafeTable;
 use App\Models\TimeSittings;
+use App\Models\OrderFinancial;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
 use App\trait\PaymentPaymob;
+use App\trait\POS;
 
 class CashierMakeOrderController extends Controller
 {
@@ -48,10 +52,11 @@ class CashierMakeOrderController extends Controller
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, private CafeTable $cafe_table,
     private CafeLocation $cafe_location, private OrderCart $order_cart,
-    private TimeSittings $TimeSittings){}
+    private TimeSittings $TimeSittings, private OrderFinancial $financial){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
+    use POS;
 
     public function pos_orders(Request $request){
         // /cashier/orders
@@ -310,58 +315,47 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-    public function take_away_order(OrderRequest $request){
+    public function take_away_order(TakawayRequest $request){
         // /cashier/take_away_order
         // Keys
         // date, amount, total_tax, total_discount
         // notes, payment_method_id, order_type
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-
+        //
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
-            'user_id' => 'empty',
             'order_type' => 'take_away',
             'cashier_man_id' =>$request->user()->id,
             'shift' => $request->user()->shift_number,
-        ]);
-        $order = $this->make_order($request);
-        if (isset($order['errors']) && !empty($order['errors'])) {
-            return response()->json($order, 400);
-        }
-        $this->order
-        ->where('id', $order['payment']->id)
-        ->update([
             'pos' => 1,
-            'status' => 1,
-        ]);
+            'status' => 1
+        ]); 
+        $order = $this->take_away_make_order($request);
+      
+        
         return response()->json([
-            'success' => $order['payment'], 
+            'success' => $order['order'], 
         ]);
     }
 
-    public function dine_in_order(OrderRequest $request){
+    public function dine_in_order(DineinOrderRequest $request){
         // /cashier/dine_in_order
         // Keys
-        // date, amount, total_tax, total_discount, table_id
-        // notes, order_type
+        // amount, total_tax, total_discount, table_id
+        // notes, 
+        // financials[{id, amount}]
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
- 
-        $validator = Validator::make($request->all(), [
-            'table_id' => 'required|exists:cafe_tables,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
+  
+        // order_number, source, customer_id
         $request->merge([  
-            'branch_id' => $request->user()->branch_id,
+            'branch_id' => $request->user()?->branch_id ?? null,
             'user_id' => 'empty',
             'order_type' => 'dine_in',
             'cashier_man_id' =>$request->user()->id,
-            'shift' => $request->user()->shift_number,
+            'shift' => $request->user()?->shift_number ?? null,
+            'pos' => 1, 
         ]);
         $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
