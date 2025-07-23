@@ -535,7 +535,6 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->whereHas('user')
         ->orderByDesc('id')
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
