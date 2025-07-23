@@ -948,7 +948,14 @@ class OrderController extends Controller
             }
         }
         $order->order_details = $order_details;
-        $order->user->count_orders = count($order?->user?->orders ?? []);
+        try {
+            $order->user->count_orders = count($order->user->orders);
+        } 
+        catch (\Throwable $th) {
+            $order->user = collect([]);
+            $order->user->count_orders = 0;
+        }
+        
         if (!empty($order->branch)) {
             $order->branch->count_orders = count($order->branch->orders);
         }
