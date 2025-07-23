@@ -948,7 +948,7 @@ class OrderController extends Controller
             }
         }
         $order->order_details = $order_details;
-        $order->user->count_orders = count($order->user->orders);
+        $order->user->count_orders = count($order?->user?->orders ?? []);
         if (!empty($order->branch)) {
             $order->branch->count_orders = count($order->branch->orders);
         }
