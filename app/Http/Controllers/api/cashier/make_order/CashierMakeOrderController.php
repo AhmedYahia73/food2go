@@ -322,7 +322,6 @@ class CashierMakeOrderController extends Controller
         // notes, payment_method_id, order_type
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-        //
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
             'order_type' => 'take_away',
@@ -332,8 +331,7 @@ class CashierMakeOrderController extends Controller
             'status' => 1
         ]); 
         $order = $this->take_away_make_order($request);
-      
-        
+
         return response()->json([
             'success' => $order['order'], 
         ]);
@@ -347,7 +345,7 @@ class CashierMakeOrderController extends Controller
         // financials[{id, amount}]
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-  
+
         // order_number, source, customer_id
         $request->merge([  
             'branch_id' => $request->user()?->branch_id ?? null,
@@ -418,12 +416,13 @@ class CashierMakeOrderController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
-        $request->merge([  
-            'branch_id' => $request->user()->branch_id,
-            'user_id' => 'empty',
+        }  
+        $request->merge([
+            'branch_id' => $request->user()?->branch_id ?? null,
             'order_type' => 'dine_in',
             'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()?->shift_number ?? null,
+            'pos' => 1, 
         ]);
         $order_carts = $this->order_cart
         ->where('table_id', $request->table_id)
@@ -458,17 +457,10 @@ class CashierMakeOrderController extends Controller
             'products' => $product, 
         ]);
         
-        $order = $this->make_order($request);
+        $order = $this->dine_in_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
-        }
-        $this->order
-        ->where('id', $order['payment']->id)
-        ->update([
-            'pos' => 1,
-            'status' => 1,
-            'shift' => $request->user()->shift_number,
-        ]);
+        } 
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']));
         $this->cafe_table

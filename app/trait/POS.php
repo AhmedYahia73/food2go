@@ -416,4 +416,5 @@ trait POS
             'order' => $order, 
         ];
     }
+    
 }
