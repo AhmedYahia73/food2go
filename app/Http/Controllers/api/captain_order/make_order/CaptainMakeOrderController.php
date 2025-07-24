@@ -153,18 +153,32 @@ class CaptainMakeOrderController extends Controller
         ->with('tables')
         ->get();
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products);
-        $financial_account = $this->financial_account
-        ->select('name', 'details', 'logo')
-        ->where('status', 1)
-        ->get();
+        $products = ProductResource::collection($products); 
 
         return response()->json([
             'categories' => $categories,
             'products' => $products, 
             'cafe_location' => $cafe_location,
-            'payment_methods' => $paymentMethod,
+            'payment_methods' => $paymentMethod, 
+        ]);
+    }
+
+    public function selection_lists(){
+        $cafe_location = $this->cafe_location
+        ->with('tables')
+        ->get(); 
+        $financial_account = $this->financial_account
+        ->select('id', 'name', 'details', 'logo')
+        ->where('status', 1)
+        ->get(); 
+        $paymentMethod = $this->paymentMethod
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'cafe_location' => $cafe_location,
             'financial_account' => $financial_account,
+            'paymentMethod' => $paymentMethod,
         ]);
     }
 

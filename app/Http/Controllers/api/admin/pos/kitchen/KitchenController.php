@@ -106,6 +106,7 @@ class KitchenController extends Controller
         // /admin/pos/kitchens/add
         $validator = Validator::make($request->all(), [
             'name' => 'required',
+            'password' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
         ]);
