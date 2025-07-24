@@ -179,7 +179,7 @@ class CaptainMakeOrderController extends Controller
         ->get(); 
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo')
-        ->where('branch_id', $request->branch_id)
+        ->whereHas('branch')
         ->where('status', 1)
         ->get(); 
         $paymentMethod = $this->paymentMethod

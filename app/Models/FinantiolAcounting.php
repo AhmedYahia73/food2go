@@ -11,8 +11,7 @@ class FinantiolAcounting extends Model
 
     protected $fillable = [
         'name',
-        'details',
-        'branch_id',
+        'details', 
         'balance',
         'status',
         'logo',
@@ -26,5 +25,9 @@ class FinantiolAcounting extends Model
         else{
             return null;
         }
+    }
+
+    public function branch(){
+        return $this->belongsToMany(Branch::class, 'financial_branch', 'financial_id', 'branch_id');
     }
 }
