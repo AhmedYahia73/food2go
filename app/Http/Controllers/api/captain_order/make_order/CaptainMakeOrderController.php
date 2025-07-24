@@ -151,6 +151,7 @@ class CaptainMakeOrderController extends Controller
         })->filter();
         $cafe_location = $this->cafe_location
         ->with('tables')
+        ->where('branch_id', $request->branch_id)
         ->get();
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products); 
@@ -163,12 +164,22 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
-    public function selection_lists(){
+    public function selection_lists(Request $request){
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $cafe_location = $this->cafe_location
         ->with('tables')
+        ->where('branch_id', $request->branch_id)
         ->get(); 
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo')
+        ->where('branch_id', $request->branch_id)
         ->where('status', 1)
         ->get(); 
         $paymentMethod = $this->paymentMethod

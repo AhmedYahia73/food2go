@@ -62,7 +62,7 @@ class FinancialAccountingController extends Controller
     public function create(FinancialRequest $request){
         // admin/financial/add
         // Keys
-        // name, details, balance, status, logo
+        // name, details, balance, status, logo, branch_id
         $financialRequest = $request->validated();
         if (!is_string($request->logo)) {
             $image_path = $this->upload($request, 'logo', 'admin/settings/financial/logo');
@@ -79,7 +79,7 @@ class FinancialAccountingController extends Controller
     public function modify(FinancialRequest $request, $id){
         // admin/financial/update/{id}
         // Keys
-        // name, details, balance, currency_id, status, logo
+        // name, details, balance, currency_id, status, logo, branch_id
         $financialRequest = $request->validated();
         $financial = $this->financial
         ->where('id', $id)

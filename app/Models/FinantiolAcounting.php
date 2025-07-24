@@ -12,6 +12,7 @@ class FinantiolAcounting extends Model
     protected $fillable = [
         'name',
         'details',
+        'branch_id',
         'balance',
         'status',
         'logo',
