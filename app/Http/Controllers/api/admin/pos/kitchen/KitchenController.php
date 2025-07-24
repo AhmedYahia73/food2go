@@ -16,10 +16,20 @@ class KitchenController extends Controller
     public function __construct(private Kitchen $kitchen,
     private Branch $branches, private Product $products){}
 
-    public function view(){
+    public function view(Request $request){
         // /admin/pos/kitchens
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                    'errors' => $validator->errors(),
+            ],400);
+        }
         $kitchens = $this->kitchen
+        ->where('branch_id', $request->branch_id)
         ->with('branch', 'products')
+        ->where('type', 'kitchen')
         ->get(); 
 
         return response()->json([
@@ -27,12 +37,39 @@ class KitchenController extends Controller
         ]);
     }
     
+    public function brista(Request $request){
+        // /admin/pos/kitchens/brista
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                    'errors' => $validator->errors(),
+            ],400);
+        }
+        $brista = $this->kitchen
+        ->where('branch_id', $request->branch_id)
+        ->with('branch', 'products')
+        ->where('type', 'brista')
+        ->get(); 
+
+        return response()->json([
+            'brista' => $brista, 
+        ]);
+    }
+    
     public function lists(){
         // /admin/pos/kitchens/lists
-        $kitchens = $this->kitchen
+        $data = $this->kitchen
         ->with('branch', 'products')
         ->where('status', 1)
         ->get();
+        $kitchens = $data
+        ->where('type', 'kitchen')
+        ->values();
+        $brista = $data
+        ->where('type', 'brista')
+        ->values();
         $branches = $this->branches
         ->get();
         $products = $this->products
@@ -41,6 +78,7 @@ class KitchenController extends Controller
 
         return response()->json([
             'kitchens' => $kitchens,
+            'brista' => $brista,
             'branches' => $branches,
             'products' => $products,
         ]);
@@ -110,12 +148,13 @@ class KitchenController extends Controller
     public function create(Request $request){
         // /admin/pos/kitchens/add
         // Keys
-        // name, password, branch_id, status
+        // name, password, branch_id, status, type[kitchen, brista]
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'password' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
+            'type' => 'required|in:kitchen,brista',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

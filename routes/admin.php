@@ -147,6 +147,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(KitchenController::class)
     ->prefix('pos/kitchens')->group(function(){
         Route::get('/', 'view')->middleware('can:view_kitchen');
+        Route::get('/brista', 'view')->middleware('can:view_kitchen');
         Route::get('/lists', 'lists')->middleware('can:view_kitchen');
         Route::get('/item/{id}', 'kitchen')->middleware('can:edit_kitchen');
         Route::post('/select_product', 'select_product')->middleware('can:view_kitchen');
