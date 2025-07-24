@@ -11,6 +11,7 @@ class Kitchen extends Model
 
     protected $fillable = [
         'name',
+        'password',
         'branch_id',
         'status',
     ];
@@ -21,5 +22,16 @@ class Kitchen extends Model
 
     public function products(){
         return $this->hasMany(Product::class);
+    }
+
+    protected $hidden = [
+        'password', 
+    ];
+
+    protected function casts(): array
+    {
+        return [ 
+            'password' => 'hashed',
+        ];
     }
 }

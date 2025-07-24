@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\pos\kitchen;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 use App\Models\Kitchen;
 use App\Models\Branch;
@@ -46,6 +47,8 @@ class KitchenController extends Controller
     }
 
     public function select_product(Request $request){
+        // /admin/pos/kitchens/select_product
+        // product_id[], kitchen_id
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|array',
             'product_id.*' => 'required|exists:products,id',
@@ -83,6 +86,8 @@ class KitchenController extends Controller
 
     public function status(Request $request, $id){
         // /admin/pos/kitchens/status/{id}
+        // Keys
+        // status
         $validator = Validator::make($request->all(), [
             'status' => 'required|boolean',
         ]);
@@ -104,6 +109,8 @@ class KitchenController extends Controller
 
     public function create(Request $request){
         // /admin/pos/kitchens/add
+        // Keys
+        // name, password, branch_id, status
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'password' => 'required',
@@ -126,6 +133,8 @@ class KitchenController extends Controller
 
     public function modify(Request $request, $id){
         // /admin/pos/kitchens/update/{id}
+        // Keys
+        // name, password, branch_id, status
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'branch_id' => 'required|exists:branches,id',
@@ -136,7 +145,10 @@ class KitchenController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $kitchenRequest = $validator->validated();
+        $kitchenRequest = $validator->validated(); 
+        if($request->password){
+            $kitchenRequest['password'] = Hash::make($request->password);
+        }
         $this->kitchen
         ->where('id', $id)
         ->update($kitchenRequest);
