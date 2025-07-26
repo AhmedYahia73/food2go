@@ -20,6 +20,7 @@ class FinancialAccountingController extends Controller
     public function view(Request $request){
         // /admin/financial
         $financial = $this->financial
+        ->with('branch')
         ->get();
         $branches = $this->branches
         ->where('status', 1)
