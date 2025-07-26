@@ -59,6 +59,7 @@ class FinancialAccountingController extends Controller
         // /admin/financial/item/{id}
         $financial = $this->financial 
         ->where('id', $id)
+        ->with('branch')
         ->first();
 
         return response()->json([
@@ -70,6 +71,14 @@ class FinancialAccountingController extends Controller
         // admin/financial/add
         // Keys
         // name, details, balance, status, logo, branch_id
+        $validation = Validator::make($request->all(), [
+            'logo' => 'required',
+        ]);
+        if ($validation->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validation->errors(),
+            ],400);
+        }
         $financialRequest = $request->validated();
         if (!is_string($request->logo)) {
             $image_path = $this->upload($request, 'logo', 'admin/settings/financial/logo');
