@@ -371,6 +371,7 @@ trait PlaceOrder
                         ];
                         $amount_product += $this->options
                         ->whereIn('id', $variation['option_id'])
+                        ->unique('id')
                         ->sum('price');
                     }
                 }
