@@ -26,6 +26,35 @@ class HomeController extends Controller
     private TimeSittings $TimeSittings, private LogOrder $log_order){}
 
     public function home_orders_count(){ 
+        
+        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+        $response = json_decode($response);
+
+        $sms_subscription_data = collect($response?->user_sms) ?? collect([]); 
+        $sms_subscription = $sms_subscription_data->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+        ->first();
+        $msg_number = $this->sms_balance
+        ->where('package_id', $sms_subscription?->id)
+        ->first();
+        $msg_package = [];
+        if (!empty($sms_subscription) && empty($msg_number)) {
+            $msg_number = $this->sms_balance
+            ->create([
+                'package_id' => $sms_subscription->id,
+                'balance' => $sms_subscription->msg_number,
+            ]);
+        }
+        $sms_subscription = $sms_subscription_data->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+			->sortByDesc('id')
+        ->values();
+        $msg_number = $this->sms_balance
+        ->whereIn('package_id', $sms_subscription?->pluck('id') ?? collect([]))
+        ->sum('balance');
+        $msg_package['msg_number'] = $msg_number;
+        $msg_package['from'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->from : null;
+        $msg_package['to'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->to : null;
         $orders = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
@@ -126,6 +155,7 @@ class HomeController extends Controller
             'faild_to_deliver' => $faild_to_deliver,
             'canceled' => $canceled,
             'scheduled' => $scheduled,
+            'msg_package' => $msg_package
         ];
 
         return response()->json($orders_count);

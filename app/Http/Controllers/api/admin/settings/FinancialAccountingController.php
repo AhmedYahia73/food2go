@@ -13,15 +13,20 @@ use App\Models\FinantiolAcounting;
 class FinancialAccountingController extends Controller
 {
     use image;
-    public function __construct(private FinantiolAcounting $financial){}
+    public function __construct(private FinantiolAcounting $financial,
+    private Branch $branches){}
 
     public function view(Request $request){
         // /admin/financial
         $financial = $this->financial
         ->get();
+        $branches = $this->branches
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'financials' => $financial,
+            'branches' => $branches,
         ]);
     }
 
