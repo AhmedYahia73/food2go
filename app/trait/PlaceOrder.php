@@ -341,6 +341,7 @@ trait PlaceOrder
                     }
                 }
                 if (isset($product['variation'])) {
+					$product['variation'] = collect($product['variation'])->unique('variation_id');
                     foreach ($product['variation'] as $variation) {
                         foreach ($variation['option_id'] as $option_id) {
                             $this->order_details
@@ -371,7 +372,6 @@ trait PlaceOrder
                         ];
                         $amount_product += $this->options
                         ->whereIn('id', $variation['option_id'])
-                        ->unique('id')
                         ->sum('price');
                     }
                 }
