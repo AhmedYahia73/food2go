@@ -77,6 +77,7 @@ class FinancialAccountingController extends Controller
         }
         $financial = $this->financial
         ->create($financialRequest);
+        $financial->branch()->attach($request->branch_id);
 
         return response()->json([
             'success' => $financial,
@@ -101,6 +102,7 @@ class FinancialAccountingController extends Controller
             $financialRequest['logo'] = $image_path;
         }
         $financial->update($financialRequest);
+        $financial->branch()->sync($request->branch_id);
 
         return response()->json([
             'success' => $financial,
