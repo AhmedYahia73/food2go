@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\trait\image;
  
 use App\Models\FinantiolAcounting;
+use App\Models\Branch;
 
 class FinancialAccountingController extends Controller
 {
