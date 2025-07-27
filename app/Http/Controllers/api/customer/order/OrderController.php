@@ -199,8 +199,10 @@ class OrderController extends Controller
         // If you want to format the final time as 'H:i:s'
         $formattedTime = $time->format('H:i:s');
         $formattedTime = Carbon::createFromFormat('H:i:s', $formattedTime)->format('h:i:s A');
-        
-        
+        $order_hours += $order_minutes % 60;
+        $order_minutes = intval($order_minutes / 60);
+        $delivery_time = $order_hours . ':' . $order_minutes;
+
         return response()->json([
             'status' => $order->order_status,
             'delivery_id' => $order->delivery_id,
