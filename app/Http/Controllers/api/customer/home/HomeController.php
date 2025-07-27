@@ -142,6 +142,8 @@ class HomeController extends Controller
 
                 $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
                         ->reject(fn($option) => $option_off->contains($option->id))
                         ->map(function ($option) {
                             $option->price = $option->option_pricing->first()?->price ?? $option->price;
@@ -181,6 +183,8 @@ class HomeController extends Controller
 
                 $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
                     $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
                         ->reject(fn($opt) => $option_off->contains($opt->id))
                         ->map(function($opt) use ($branch_id) {
                             $opt->price = $opt->option_pricing
@@ -354,8 +358,12 @@ class HomeController extends Controller
                 ->first()?->price ?? $item->price;
                 $item->setAttribute('favourite', $item->favourite_product->isNotEmpty());
                 $item->variations = $item->variations->map(function ($variation) use ($option_off, $branch_id) {
-                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                    $variation->options = $variation->options->map(function($element) use($branch_id){
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()->reject(fn($option) => $option_off->contains($option->id));
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()->map(function($element) use($branch_id){
                         $element->price = $element?->option_pricing?->where('branch_id', $branch_id)
                         ->first()?->price ?? $element->price;
                         return $element;
@@ -396,8 +404,12 @@ class HomeController extends Controller
                     return null;
                 }
                 $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
-                    $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                    $variation->options = $variation->options->map(function($element) use($branch_id){
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()->reject(fn($option) => $option_off->contains($option->id));
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()->map(function($element) use($branch_id){
                         $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                         ->first()?->price ?? $element->price;
                         return $element;
