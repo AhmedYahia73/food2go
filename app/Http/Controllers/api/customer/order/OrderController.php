@@ -189,8 +189,8 @@ class OrderController extends Controller
         if($order->order_type == 'delivery'){
             // Ensure that $hours, $minutes, and $seconds are integers
             $order_hours = (int)$hours + (int)$order_hours;
-            $order_minutes = (int)$order_minutes + (int)$order_minutes;
-            $order_seconds = (int)$order_seconds + (int)$order_seconds;
+            $order_minutes = (int)$minutes + (int)$order_minutes;
+            $order_seconds = (int)$seconds + (int)$order_seconds;
         }
         
         // Add the time to the original Carbon instance
@@ -199,9 +199,12 @@ class OrderController extends Controller
         // If you want to format the final time as 'H:i:s'
         $formattedTime = $time->format('H:i:s');
         $formattedTime = Carbon::createFromFormat('H:i:s', $formattedTime)->format('h:i:s A');
-        $order_hours += $order_minutes % 60;
-        $order_minutes = intval($order_minutes / 60);
-        $delivery_time = $order_hours . ':' . $order_minutes;
+ 		$order_hours += intval($order_minutes / 60);
+        $order_minutes = $order_minutes % 60;
+		$order_hours = str_pad($order_hours, 2, '0', STR_PAD_LEFT);
+		$order_minutes = str_pad($order_minutes, 2, '0', STR_PAD_LEFT);
+ 		$my_delivery_time = $order_hours . ':' . $order_minutes . ':00';
+		$delivery_time->setting = $my_delivery_time;
 
         return response()->json([
             'status' => $order->order_status,
