@@ -518,6 +518,7 @@ trait PlaceOrder
                 $order_details[$key]['product'][] = [
                     'product' => $product_item,
                     'count' => $product['count'],
+                    'prepration' => 0,
                     'notes' => isset($product['note']) ? $product['note'] : null,
                 ];
                 // Add product price
@@ -698,7 +699,7 @@ trait PlaceOrder
         ];
     }
 
-    public function order_format($order){
+    public function order_format($order, $key){
         $order_data = [];
         foreach ($order->cart ?? $order as $key => $item) {
             $product = $item->product[0]->product;
@@ -719,7 +720,10 @@ trait PlaceOrder
                 $addons[] = $element->addon;
             }
             $order_data[$key] = $product;
+            $order_data[$key]->cart_id = $order->id;
+            $order_data[$key]->product_index = $key;
             $order_data[$key]->count = $item->product[0]->count;
+            $order_data[$key]->prepration = $item->product[0]->prepration;
             $order_data[$key]->excludes = $item->excludes;
             $order_data[$key]->extras = $item->extras;
             $order_data[$key]->variation_selected = $variation;

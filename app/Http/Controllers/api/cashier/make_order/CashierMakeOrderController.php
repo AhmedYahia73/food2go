@@ -340,8 +340,8 @@ class CashierMakeOrderController extends Controller
     public function dine_in_order(OrderRequest $request){
         // /cashier/dine_in_order
         // Keys
-        // date, amount, total_tax, total_discount, table_id
-        // notes, order_type
+        // amount, total_tax, total_discount, table_id
+        // notes
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
  
@@ -398,8 +398,8 @@ class CashierMakeOrderController extends Controller
         ->where('table_id', $id)
         ->get();
         $orders = collect([]);
-        foreach ($order_cart as $item) {
-            $order_item = $this->order_format($item);
+        foreach ($order_cart as $key => $item) {
+            $order_item = $this->order_format($item, $key); 
             $orders = $orders->merge($order_item);
         }
 
@@ -474,6 +474,8 @@ class CashierMakeOrderController extends Controller
             'success' => $order, 
         ]);
     }
+
+    // public 
 
     public function tables_status(Request $request, $id){
         // /cashier/tables_status/{id}

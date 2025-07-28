@@ -86,24 +86,24 @@ class KitchenController extends Controller
 
     public function select_product(Request $request){
         // /admin/pos/kitchens/select_product
-        // product_id[], kitchen_id
+        // product_id[], kitchen_id, category_id[]
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|array',
             'product_id.*' => 'required|exists:products,id',
+            'category_id' => 'required|array',
+            'category_id.*' => 'required|exists:categories,id',
             'kitchen_id' => 'required|exists:kitchens,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
-        foreach ($request->product_id as $item) {
-            $this->products
-            ->where('id', $item)
-            ->update([
-                'kitchen_id' => $request->kitchen_id
-            ]);
-        }
+        }  
+        $kitchen = $this->kitchen
+        ->where('id', $request->kitchen_id)
+        ->first();
+        $kitchen->products()->sync($request->product_id);
+        $kitchen->category()->sync($request->category_id);
 
         return response()->json([
             'success' => 'You add products success'

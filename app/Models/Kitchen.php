@@ -17,12 +17,16 @@ class Kitchen extends Model
         'status',
     ];
 
-    public function branch(){
-        return $this->belongsTo(Branch::class, 'branch_id');
+    public function products(){
+        return $this->belongsToMany(Product::class, 'kitchen_products');
     }
 
-    public function products(){
-        return $this->hasMany(Product::class);
+    public function category(){
+        return $this->belongsToMany(Category::class, 'kitchen_products');
+    }
+
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
 
     protected $hidden = [
