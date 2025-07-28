@@ -230,7 +230,8 @@ class MakeOrderController extends Controller
                 ->where('transaction_id', $data['order'])
                 ->first();
                 $order->update([
-                    'status' => 1
+                    'status' => 1,
+                    'order_status' => 'confirmed'
                 ]);
                 $user = $this->user
                 ->where('id', $order->user_id)
