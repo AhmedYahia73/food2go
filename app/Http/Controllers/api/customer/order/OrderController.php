@@ -76,6 +76,7 @@ class OrderController extends Controller
                 'branch_name' => $item?->branch?->name ?? null,
                 'address_name' => $item?->order_address?->address ?? null,
                 'addons' => $addons,
+                'order_date' => $item->order_date,
 
             ];
         });
@@ -149,6 +150,7 @@ class OrderController extends Controller
                 'branch_name' => $item?->branch?->name ?? null,
                 'address_name' => $item?->order_address?->address ?? null,
                 'addons' => $addons,
+                'order_date' => $item->order_date,
             ];
         });
 

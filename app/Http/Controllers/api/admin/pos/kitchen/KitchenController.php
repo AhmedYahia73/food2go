@@ -33,13 +33,9 @@ class KitchenController extends Controller
         ->with('branch', 'products')
         ->where('type', 'kitchen')
         ->get(); 
-        $category = $this->category
-        ->where('status', 1)
-        ->get();
 
         return response()->json([
             'kitchens' => $kitchens, 
-            'category' => $category, 
         ]);
     }
     
@@ -81,12 +77,16 @@ class KitchenController extends Controller
         $products = $this->products
         ->whereNull('kitchen_id')
         ->get();
+        $category = $this->category
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'kitchens' => $kitchens,
             'brista' => $brista,
             'branches' => $branches,
             'products' => $products,
+            'category' => $category, 
         ]);
     }
 
