@@ -13,6 +13,9 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+    'firebase' => [
+        'credentials' => storage_path('app/firebase/food2go-8676e-firebase-adminsdk-fbsvc-b651bbb757.json'),
+    ],
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use App\trait\Notifications; 
+
+use App\Models\NewNotification; 
 
 use App\Models\Order;
 use App\Models\Setting;
@@ -14,7 +17,8 @@ use App\Models\Product;
 
 class OrderController extends Controller
 {
-    public function __construct(private Order $orders, private Setting $settings){}
+    public function __construct(private Order $orders, private Setting $settings,
+    private NewNotification $notification){}
 
     public function upcomming(Request $request){
         // https://bcknd.food2go.online/customer/orders
@@ -252,6 +256,11 @@ class OrderController extends Controller
         ->update([
             'customer_cancel_reason' => $request->customer_cancel_reason,
             'order_status' => 'canceled'
+        ]);
+        $notification = $this->notification
+        ->create([
+            'title' => $id,
+            'notification' => $request->customer_cancel_reason, 
         ]);
 
         return response()->json([
