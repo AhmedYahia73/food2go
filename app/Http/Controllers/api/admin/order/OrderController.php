@@ -1094,11 +1094,11 @@ class OrderController extends Controller
                     'errors' => $validator->errors(),
                 ],400);
             }
-            // $data = [
-            //     'name',
-            //     'reason',
-            // ];
-            // Mail::to($order->user->email)->send(new CancelOrderMail($data));
+            $data = [
+                'name' => $order?->user?->name,
+                'reason' => $request->admin_cancel_reason,
+            ];
+            Mail::to($order->user->email)->send(new CancelOrderMail($data));
             $order->update([
                 'order_status' => $request->order_status,
                 'admin_cancel_reason' => $request->admin_cancel_reason,

@@ -55,6 +55,7 @@ class HomeController extends Controller
         $msg_package['msg_number'] = $msg_number;
         $msg_package['from'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->from : null;
         $msg_package['to'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->to : null;
+        $lamada_status = env('APP_NAME') == 'Lamada' ? false: $lamada_status;
         $orders = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
