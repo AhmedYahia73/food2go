@@ -243,6 +243,7 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/customer/orders/cancel/{id}
         // Key
         // customer_cancel_reason
+        // composer require kreait/laravel-firebase
         $validator = Validator::make($request->all(), [
             'customer_cancel_reason' => 'required',
         ]);
