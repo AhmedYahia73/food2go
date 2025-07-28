@@ -18,6 +18,8 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 // ____________________________________________________
 
 use App\Models\Order;
+use App\Models\Kitchen;
+use App\Models\KitchenOrder;
 use App\Models\OrderCart;
 use App\Models\OrderDetail;
 use App\Models\ProductSale;
@@ -52,7 +54,8 @@ class CashierMakeOrderController extends Controller
     private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Category $category, private BranchOff $branch_off, private CafeTable $cafe_table,
     private CafeLocation $cafe_location, private OrderCart $order_cart,
-    private TimeSittings $TimeSittings, private OrderFinancial $financial){}
+    private TimeSittings $TimeSittings, private OrderFinancial $financial,
+    private Kitchen $kitchen, private KitchenOrder $kitchen_order){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -247,7 +250,7 @@ class CashierMakeOrderController extends Controller
         ->select('id', 'order_details')
         ->where('id', $id)
         ->first();
-        $data = $this->order_format($order->order_details);
+        $data = $this->order_format($order->order_details, 0);
 
         return response()->json([
             'order' => $data
@@ -369,7 +372,7 @@ class CashierMakeOrderController extends Controller
         ->update([
             'current_status' => 'not_available_with_order'
         ]);
-        $order_data = $this->order_format($order['payment']);
+        $order_data = $this->order_format($order['payment'], 0);
 
         return response()->json([
             'success' => $order_data, 
@@ -382,8 +385,8 @@ class CashierMakeOrderController extends Controller
         ->where('table_id', $id)
         ->get();
         $carts = [];
-        foreach ($order_cart as $item) {
-            $order_item = $this->order_format($item);
+        foreach ($order_cart as $key => $item) {
+            $order_item = $this->order_format($item, $key);
             $carts[] = $order_item;
         }
 
@@ -408,6 +411,63 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
+    public function preparing(Request $request){
+        $validator = Validator::make($request->all(), [
+            'preparing' => 'required',
+            'preparing.*.product_index' => 'required|numeric',
+            'preparing.*.cart_id' => 'required|exists:order_carts,id',
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        
+        $kitchen_order = [];
+        foreach ($request->preparing as $value) {
+            $order_cart = $this->order_cart
+            ->where('id', $value['cart_id'])
+            ->first();
+            $preparing = $order_cart->cart;
+            $preparing[$value['product_index']]->product[0]->prepration = 1;
+            $order_cart->cart = json_encode($preparing);
+            $order_cart->save(); 
+            $order_item = $this->order_format($order_cart);
+            $order_item = collect($order_item);
+
+            $element = $order_item[$value['product_index']];
+            $kitchen = $this->kitchen
+            ->where(function($q) use($element){
+                $q->whereHas('products', function($query) use ($element){
+                    $query->where('products.id', $element->id);
+                })
+                ->orWhereHas('category', function($query) use ($element){
+                    $query->where('categories.id', $element->category_id)
+                    ->orWhere('categories.id', $element->sub_category_id);
+                });
+            })
+            ->where('branch_id', $request->user()->branch_id)
+            ->first();
+            if(!empty($kitchen)){
+                $kitchen_order[$kitchen->id][] = $element;
+            }
+        }
+            
+        foreach ($kitchen_order as $key => $item) {
+            $this->kitchen_order
+            ->create([
+                'table_id' => $request->table_id,
+                'kitchen_id' => $key,
+                'order' => json_encode($item),
+            ]);
+        }
+
+        return response()->json([
+            'success' => 'You perpare success'
+        ]);
+    }
+
     public function dine_in_payment(OrderRequest $request){
         // /cashier/dine_in_payment
         // Keys
@@ -427,8 +487,8 @@ class CashierMakeOrderController extends Controller
         ->get();
         $orders = collect([]);
         $product = [];
-        foreach ($order_carts as $item) {
-            $order_item = $this->order_format($item);
+        foreach ($order_carts as $key => $item) {
+            $order_item = $this->order_format($item, $key);
             $orders = $orders->merge($order_item);
         }
        
@@ -460,7 +520,7 @@ class CashierMakeOrderController extends Controller
             return response()->json($order, 400);
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
-        $order = $this->order_format(($order['payment']));
+        $order = $this->order_format(($order['payment']), $key);
         $this->cafe_table
         ->where('id', $request->table_id)
         ->update([

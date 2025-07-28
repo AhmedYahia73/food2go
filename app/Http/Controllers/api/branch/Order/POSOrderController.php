@@ -190,7 +190,7 @@ class POSOrderController extends Controller
         ->select('id', 'order_details')
         ->where('id', $id)
         ->first();
-        $data = $this->order_format($order->order_details);
+        $data = $this->order_format($order->order_details, 0);
 
         return response()->json([
             'order' => $data
@@ -317,7 +317,7 @@ class POSOrderController extends Controller
         ->update([
             'current_status' => 'not_available_with_order'
         ]);
-        $order_data = $this->order_format($order['payment']);
+        $order_data = $this->order_format($order['payment'], 0);
 
         return response()->json([
             'success' => $order_data, 
@@ -330,8 +330,8 @@ class POSOrderController extends Controller
         ->where('table_id', $id)
         ->get();
         $carts = [];
-        foreach ($order_cart as $item) {
-            $order_item = $this->order_format($item);
+        foreach ($order_cart as $key => $item) {
+            $order_item = $this->order_format($item, $key);
             $carts[] = $order_item;
         }
 

@@ -699,7 +699,7 @@ trait PlaceOrder
         ];
     }
 
-    public function order_format($order, $key){
+    public function order_format($order, $key = 0){
         $order_data = [];
         foreach ($order->cart ?? $order as $key => $item) {
             $product = $item->product[0]->product;

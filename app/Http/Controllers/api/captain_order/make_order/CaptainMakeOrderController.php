@@ -235,7 +235,7 @@ class CaptainMakeOrderController extends Controller
         ->update([
             'current_status' => 'not_available_with_order'
         ]);
-        $order_data = $this->order_format($order['payment']);
+        $order_data = $this->order_format($order['payment'], 0);
 
         return response()->json([
             'success' => $order_data, 
