@@ -10,11 +10,13 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Kitchen;
 use App\Models\Branch;
 use App\Models\Product;
+use App\Models\Category;
 
 class KitchenController extends Controller
 {
     public function __construct(private Kitchen $kitchen,
-    private Branch $branches, private Product $products){}
+    private Branch $branches, private Product $products,
+    private Category $category){}
 
     public function view(Request $request){
         // /admin/pos/kitchens
@@ -31,9 +33,13 @@ class KitchenController extends Controller
         ->with('branch', 'products')
         ->where('type', 'kitchen')
         ->get(); 
+        $category = $this->category
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'kitchens' => $kitchens, 
+            'category' => $category, 
         ]);
     }
     

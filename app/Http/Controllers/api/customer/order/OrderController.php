@@ -218,6 +218,7 @@ class OrderController extends Controller
             'customer_cancel_reason' => $order->customer_cancel_reason,
             'admin_cancel_reason' => $order->admin_cancel_reason,
             'delivery_phone' => $delivery_phone,
+            'order_date' => $order->order_date,
         ]);
     }
 
