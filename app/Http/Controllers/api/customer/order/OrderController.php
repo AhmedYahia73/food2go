@@ -13,12 +13,13 @@ use App\Models\NewNotification;
 
 use App\Models\Order;
 use App\Models\Setting;
-use App\Models\Product; 
+use App\Models\Product;
+use App\Models\DeviceToken;
 
 class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Setting $settings,
-    private NewNotification $notification){}
+    private NewNotification $notification, private DeviceToken $device_token){}
 
     public function upcomming(Request $request){
         // https://bcknd.food2go.online/customer/orders
@@ -266,6 +267,11 @@ class OrderController extends Controller
             'title' => $id,
             'notification' => $request->customer_cancel_reason, 
         ]);
+        $device_token = $this->device_token
+        ->get();
+        foreach($device_token as $item){
+            $this->sendNotificationToMany($device_token, $id, $request->customer_cancel_reason);
+        }
 
         return response()->json([
             'success' => 'You cancel order success'

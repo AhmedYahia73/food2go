@@ -20,6 +20,7 @@ use App\Models\Address;
 use App\Models\CashierShift;
 use App\Models\Zone;
 use App\Models\SmsBalance;
+use App\Models\DeviceToken;
 
 class LoginController extends Controller
 {
@@ -33,6 +34,13 @@ class LoginController extends Controller
         // https://bcknd.food2go.online/api/admin/auth/login
         // Keys
         // email, password
+        $validation = Validator::make($request->all(), [
+            'fcm_token' => 'required', 
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json($validation->errors(), 422);
+        }
         $user = $this->admin
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
@@ -61,6 +69,19 @@ class LoginController extends Controller
         $user->role = $role;
         if (password_verify($request->input('password'), $user->password)) {
             $user->token = $user->createToken('admin')->plainTextToken;
+            if($role = 'branch'){
+                DeviceToken::updateOrCreate(
+                    ['branch_id' => $user->id],
+                    ['token' => $request->token]
+                );
+            }
+            elseif($role = 'admin'){
+                DeviceToken::updateOrCreate(
+                    ['admin_id' => $user->id],
+                    ['token' => $request->token]
+                ); 
+            }
+
             return response()->json([
                 'admin' => $user,
                 'token' => $user->token,
