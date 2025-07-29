@@ -574,7 +574,7 @@ class CashierMakeOrderController extends Controller
         ->first();
         $old_status = array_search($order->take_away_status, $status_arr);
         $new_status = array_search($request->take_away_status, $status_arr);
-        if($new_status < $old_status){
+        if($new_status <= $old_status){
             return response()->json([
                 'errors' => 'You can not back by status'
             ], 400);
