@@ -17,6 +17,7 @@ class OrderCart extends Model
         'total_tax',
         'total_discount',
         'notes',
+        'prepration_status',
     ];
 
     public function getcartAttribute($data){

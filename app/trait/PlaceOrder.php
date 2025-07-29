@@ -518,7 +518,7 @@ trait PlaceOrder
                 $order_details[$key]['product'][] = [
                     'product' => $product_item,
                     'count' => $product['count'],
-                    'prepration' => 0,
+                    'prepration' => 'watting',
                     'notes' => isset($product['note']) ? $product['note'] : null,
                 ];
                 // Add product price
@@ -723,7 +723,7 @@ trait PlaceOrder
             $order_data[$key]->cart_id = $order->id;
             $order_data[$key]->product_index = $key;
             $order_data[$key]->count = $item->product[0]->count;
-            $order_data[$key]->prepration = $item->product[0]->prepration;
+            $order_data[$key]->prepration = $order->prepration_status ?? $item->product[0]->prepration;
             $order_data[$key]->excludes = $item->excludes;
             $order_data[$key]->extras = $item->extras;
             $order_data[$key]->variation_selected = $variation;

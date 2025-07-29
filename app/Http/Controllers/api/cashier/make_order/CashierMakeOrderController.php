@@ -414,8 +414,8 @@ class CashierMakeOrderController extends Controller
     public function preparing(Request $request){
         $validator = Validator::make($request->all(), [
             'preparing' => 'required',
-            'preparing.*.product_index' => 'required|numeric',
             'preparing.*.cart_id' => 'required|exists:order_carts,id',
+            'preparing.*.status' => 'required|in:preparing,done,pick_up',
             'table_id' => 'required|exists:cafe_tables,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -430,13 +430,12 @@ class CashierMakeOrderController extends Controller
             ->where('id', $value['cart_id'])
             ->first();
             $preparing = $order_cart->cart;
-            $preparing[$value['product_index']]->product[0]->prepration = 1;
-            $order_cart->cart = json_encode($preparing);
-            $order_cart->save(); 
+            $order_cart->prepration_status = $value['status'];  
+            $order_cart->save();
             $order_item = $this->order_format($order_cart);
             $order_item = collect($order_item);
 
-            $element = $order_item[$value['product_index']];
+            $element = $order_item[0];
             $kitchen = $this->kitchen
             ->where(function($q) use($element){
                 $q->whereHas('products', function($query) use ($element){
@@ -449,11 +448,11 @@ class CashierMakeOrderController extends Controller
             })
             ->where('branch_id', $request->user()->branch_id)
             ->first();
-            if(!empty($kitchen)){
+            if(!empty($kitchen) && $value['status'] == 'preparing'){
                 $kitchen_order[$kitchen->id][] = $element;
             }
         }
-            
+        
         foreach ($kitchen_order as $key => $item) {
             $this->kitchen_order
             ->create([
@@ -469,7 +468,7 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-    public function dine_in_payment(OrderRequest $request){
+    public function dine_in_payment(DineinOrderRequest $request){
         // /cashier/dine_in_payment
         // Keys
         // date, amount, total_tax, total_discount
