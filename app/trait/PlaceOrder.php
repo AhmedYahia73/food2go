@@ -732,4 +732,36 @@ trait PlaceOrder
 
         return $order_data;
     }
+
+    public function takeaway_order_format($order){
+        $order_data = [];
+        foreach ($order->order_details ?? $order as $key => $item) {
+            $product = $item->product[0]->product;
+            unset($product->addons);
+            unset($product->variations);
+            $variation = [];
+            $addons = [];
+            // $item->addons->addon->count = $item->addons->count;
+            // $item->variations->variation->options = $item->variations->options;
+            foreach ($item->variations as $key => $element) {
+                $element->variation->options = $element->options;
+                unset($element->options);
+                $variation[] = $element->variation;
+            }
+            foreach ($item->addons as $key => $element) {
+                $element->addon->count = $element->count;
+                unset($element->count);
+                $addons[] = $element->addon;
+            }
+            $order_data[$key] = $product;
+            $order_data[$key]->cart_id = $order->id; 
+            $order_data[$key]->count = $item->product[0]->count; 
+            $order_data[$key]->excludes = $item->excludes;
+            $order_data[$key]->extras = $item->extras;
+            $order_data[$key]->variation_selected = $variation;
+            $order_data[$key]->addons_selected = $addons;
+        }
+
+        return $order_data;
+    }
 }

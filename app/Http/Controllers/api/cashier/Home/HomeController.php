@@ -45,6 +45,7 @@ class HomeController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->get();
         $take_away = $orders->where('order_type', 'take_away')
+        ->where('take_away_status', '!=', 'pick_up')
         ->values();
         $dine_in = $orders->where('order_type', 'dine_in')
         ->values();

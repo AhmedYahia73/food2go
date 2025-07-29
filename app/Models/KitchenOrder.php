@@ -13,5 +13,7 @@ class KitchenOrder extends Model
         'order', 
         'table_id',
         'kitchen_id',
+        'type',
+        'order_id',
     ];
 }

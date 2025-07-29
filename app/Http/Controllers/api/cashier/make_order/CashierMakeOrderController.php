@@ -460,6 +460,7 @@ class CashierMakeOrderController extends Controller
                 'table_id' => $request->table_id,
                 'kitchen_id' => $key,
                 'order' => json_encode($item),
+                'type' => 'dine_in',
             ]);
         }
 
@@ -563,12 +564,40 @@ class CashierMakeOrderController extends Controller
     public function preparing_takeaway(Request $request, $id){
         $order = $this->order
         ->where('id', $id)
-        ->first();
-        $order_cart = $order->order_details;
-        
+        ->first(); 
+        $order_items = $this->takeaway_order_format($order);
+        $order_items = collect($order_items);
         $kitchen_order = [];
-        $order_item = $this->order_format($order_cart);
-        $order_item = collect($order_item);
-        
+        foreach ($order_items as $key => $element) {
+            $kitchen = $this->kitchen
+            ->where(function($q) use($element){
+                $q->whereHas('products', function($query) use ($element){
+                    $query->where('products.id', $element->id);
+                })
+                ->orWhereHas('category', function($query) use ($element){
+                    $query->where('categories.id', $element->category_id)
+                    ->orWhere('categories.id', $element->sub_category_id);
+                });
+            })
+            ->where('branch_id', $request->user()->branch_id)
+            ->first();
+            if(!empty($kitchen)){
+                $kitchen_order[$kitchen->id][] = $element;
+            }
+        }
+            
+        foreach ($kitchen_order as $key => $item) {
+            $this->kitchen_order
+            ->create([
+                'table_id' => $request->table_id,
+                'kitchen_id' => $key,
+                'order' => json_encode($item),
+                'type' => $order->order_type,
+                'order_id' => $order->id,
+            ]);
+        }
+        return response()->json([
+            'success' => $order_items
+        ]);
     }
 }

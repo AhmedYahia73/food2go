@@ -56,7 +56,7 @@ class Order extends Model
         'customer_id',
         'deleted_at',
         'source',
-        'preparing',
+        'take_away_status',
     ];
     protected $appends = ['order_date', 'status_payment'];
 
