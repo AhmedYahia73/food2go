@@ -18,7 +18,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/orders', 'pos_orders');
         Route::post('/preparing', 'preparing');
 
-        Route::get('/preparing_takeaway/{id}', 'preparing_takeaway');
+        Route::put('/take_away_status/{id}', 'take_away_status');
 
         Route::post('/delivery_order', 'delivery_order')->middleware('can:delivery');
         

@@ -536,8 +536,6 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-    // public 
-
     public function tables_status(Request $request, $id){
         // /cashier/tables_status/{id}
         // Keys
@@ -561,7 +559,38 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-    public function preparing_takeaway(Request $request, $id){
+    public function take_away_status(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'take_away_status' => 'required|in:preparing,done,pick_up',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $status_arr = ['watting', 'preparing', 'done', 'pick_up'];
+        $order = $this->order
+        ->where('id', $id)
+        ->first();
+        $old_status = array_search($order->take_away_status, $status_arr);
+        $new_status = array_search($request->take_away_status, $status_arr);
+        if($new_status < $old_status){
+            return response()->json([
+                'errors' => 'You can not back by status'
+            ], 400);
+        }
+        if($request->take_away_status == 'preparing'){
+            $this->preparing_takeaway($request, $id);
+        }
+        $order->take_away_status = $request->take_away_status;
+        $order->save();
+
+        return response()->json([
+            'success' => 'You update status success'
+        ]);
+    }
+
+    public function preparing_takeaway($request, $id){
         $order = $this->order
         ->where('id', $id)
         ->first(); 
