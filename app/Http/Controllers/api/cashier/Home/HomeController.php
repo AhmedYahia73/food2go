@@ -51,6 +51,10 @@ class HomeController extends Controller
         ->values();
         $delivery = $orders->where('order_type', 'delivery')
         ->values();
+        if($orders->order_type == 'take_away'){
+            $orders->take_away_status = 'preparing';
+        }
+        $order->save();
 
         return response()->json([
             'take_away' => $take_away,
