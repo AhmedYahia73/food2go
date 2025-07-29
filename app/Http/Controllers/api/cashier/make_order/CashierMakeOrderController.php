@@ -208,7 +208,7 @@ class CashierMakeOrderController extends Controller
         // return response()->json(['message' => 'Receipt printed successfully']);
                 
     try {
-        $connector = new WindowsPrintConnector("XP-80C"); 
+        $connector = new WindowsPrintConnector("XPrinter"); 
         // $connector = new NetworkPrintConnector("192.168.1.15", 9100); 
         // Windows printer share name
         // OR use NetworkPrintConnector("192.168.0.100", 9100);
@@ -558,5 +558,17 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             'success' => $request->current_status
         ]);
+    }
+
+    public function preparing_takeaway(Request $request, $id){
+        $order = $this->order
+        ->where('id', $id)
+        ->first();
+        $order_cart = $order->order_details;
+        
+        $kitchen_order = [];
+        $order_item = $this->order_format($order_cart);
+        $order_item = collect($order_item);
+        
     }
 }

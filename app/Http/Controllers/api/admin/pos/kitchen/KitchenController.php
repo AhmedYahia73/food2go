@@ -30,7 +30,7 @@ class KitchenController extends Controller
         }
         $kitchens = $this->kitchen
         ->where('branch_id', $request->branch_id)
-        ->with('branch', 'products')
+        ->with('branch', 'products', 'category')
         ->where('type', 'kitchen')
         ->get(); 
 
@@ -51,7 +51,7 @@ class KitchenController extends Controller
         }
         $brista = $this->kitchen
         ->where('branch_id', $request->branch_id)
-        ->with('branch', 'products')
+        ->with('branch', 'products', 'category')
         ->where('type', 'brista')
         ->get(); 
 
