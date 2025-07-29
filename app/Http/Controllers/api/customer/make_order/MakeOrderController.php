@@ -231,7 +231,7 @@ class MakeOrderController extends Controller
                 ->first();
                 $order->update([
                     'status' => 1,
-                    // 'order_status' => 'confirmed'
+                    'order_status' => 'processing'
                 ]);
                 $user = $this->user
                 ->where('id', $order->user_id)
