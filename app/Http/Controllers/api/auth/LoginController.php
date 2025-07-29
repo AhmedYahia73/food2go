@@ -73,13 +73,13 @@ class LoginController extends Controller
             if($role = 'branch'){
                 DeviceToken::updateOrCreate(
                     ['branch_id' => $user->id],
-                    ['token' => $request->token]
+                    ['token' => $request->fcm_token]
                 );
             }
             elseif($role = 'admin'){
                 DeviceToken::updateOrCreate(
                     ['admin_id' => $user->id],
-                    ['token' => $request->token]
+                    ['token' => $request->fcm_token]
                 ); 
             }
 
