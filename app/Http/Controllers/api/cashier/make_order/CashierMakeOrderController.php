@@ -520,7 +520,7 @@ class CashierMakeOrderController extends Controller
             return response()->json($order, 400);
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
-        $order = $this->order_format(($order['payment']), $key);
+        $order = $this->order_format(($order['payment']), 0);
         $this->cafe_table
         ->where('id', $request->table_id)
         ->update([
