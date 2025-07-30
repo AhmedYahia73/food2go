@@ -70,13 +70,13 @@ class LoginController extends Controller
         $user->role = $role;
         if (password_verify($request->input('password'), $user->password)) {
             $user->token = $user->createToken('admin')->plainTextToken;
-            if($role = 'branch'){
+            if($role == 'branch'){
                 DeviceToken::updateOrCreate(
                     ['branch_id' => $user->id],
                     ['token' => $request->fcm_token]
                 );
             }
-            elseif($role = 'admin'){
+            elseif($role == 'admin'){
                 DeviceToken::updateOrCreate(
                     ['admin_id' => $user->id],
                     ['token' => $request->fcm_token]
