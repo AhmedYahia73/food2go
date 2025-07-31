@@ -13,6 +13,7 @@ class OrderController extends Controller
 
     public function kitchen_orders(Request $request){
         $kitchen_order = $this->kitchen_order
+        ->where('kitchen_id', $request->user()->id)
         ->get();
 
         return response()->json([
