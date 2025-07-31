@@ -20,4 +20,8 @@ class KitchenOrder extends Model
     public function getorderAttribute(){
         return json_decode($this->attributes['order']);
     }
+
+    public function table(){
+        return $this->belongsTo(CafeTable::class, 'table_id');
+    }
 }
