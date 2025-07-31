@@ -270,7 +270,8 @@ class OrderController extends Controller
         ]);
         $device_token = $this->device_token
         ->get()
-        ?->pluck('token');
+        ?->pluck('token')
+        ?->toArray();
         $this->sendNotificationToMany($device_token, $id, $request->customer_cancel_reason);
         
         return response()->json([
