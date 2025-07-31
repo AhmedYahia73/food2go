@@ -330,8 +330,14 @@ class CashierMakeOrderController extends Controller
         }
 
         $order = $this->order
-        ->where('id', $id) 
+        ->where('id', $id)
+        ->where('pos', 1)
         ->first();
+        if(empty($order)){
+            return response()->json([
+                'errors' => 'id is wrong'
+            ], 400);
+        }
         if($order->order_status == 'returned' || $order->order_status == 'canceled' || 
         $order->order_status == 'faild_to_deliver' || $order->order_status == 'refund'){
             $delivery = $this->delivery
@@ -344,6 +350,10 @@ class CashierMakeOrderController extends Controller
         }
         $order->order_status = $request->order_status;
         $order->save();
+
+        return response()->json([
+            'success' => 'You change status success'
+        ]);
     }
 
     public function take_away_order(TakawayRequest $request){
