@@ -21,7 +21,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::put('/take_away_status/{id}', 'take_away_status');
 
         Route::post('/delivery_order', 'delivery_order')->middleware('can:delivery');
-        
+        Route::put('/order_status/{id}', 'order_status')->middleware('can:delivery');
         Route::post('/determine_delivery/{order_id}', 'determine_delivery')->middleware('can:delivery');
         Route::post('/printReceipt', 'printReceipt')->withOutMiddleware(['auth:sanctum', 'IsCashier']);
 

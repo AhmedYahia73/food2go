@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\customer\order\OrderRequest;
 use App\Http\Requests\cashier\DineinOrderRequest;
 use App\Http\Requests\cashier\TakawayRequest;
+use App\Http\Requests\cashier\DeliveryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use Carbon\Carbon;
@@ -39,6 +40,7 @@ use App\Models\CafeLocation;
 use App\Models\CafeTable;
 use App\Models\TimeSittings;
 use App\Models\OrderFinancial;
+use App\Models\Delivery;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -55,7 +57,8 @@ class CashierMakeOrderController extends Controller
     private Category $category, private BranchOff $branch_off, private CafeTable $cafe_table,
     private CafeLocation $cafe_location, private OrderCart $order_cart,
     private TimeSittings $TimeSittings, private OrderFinancial $financial,
-    private Kitchen $kitchen, private KitchenOrder $kitchen_order){}
+    private Kitchen $kitchen, private KitchenOrder $kitchen_order,
+    private Delivery $delivery){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -257,40 +260,29 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-    public function delivery_order(OrderRequest $request){
+    public function delivery_order(DeliveryRequest $request){
         // /cashier/delivery_order
         // Keys
-        // date, amount, total_tax, total_discount
-        // notes, payment_method_id, customer_id
+        // amount, total_tax, total_discount, notes
+        // source, financials[{id, amount}], cash_with_delivery
+        // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-
-        $validator = Validator::make($request->all(), [
-            'customer_id' => 'required|exists:customers,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        $request->merge([  
-            'branch_id' => $request->user()->branch_id,
-            'user_id' => 'empty',
+        $request->merge([
+            'branch_id' => $request->user()->branch_id, 
             'order_type' => 'delivery',
             'cashier_man_id' =>$request->user()->id,
             'shift' => $request->user()->shift_number,
+            'pos' => 1,
+            'cash_with_delivery' => $request->cash_with_delivery ?? false,
         ]);
-        $order = $this->make_order($request);
+        $order = $this->delivery_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
-        $this->order
-        ->where('id', $order['payment']->id)
-        ->update([
-            'pos' => 1
-        ]);
+
         return response()->json([
-            'success' => $order['payment'], 
+            'success' => $order['order'], 
         ]);
     }
 
@@ -307,15 +299,51 @@ class CashierMakeOrderController extends Controller
             ],400);
         }
 
-        $this->order
+        $order = $this->order
         ->where('id', $order_id)
-        ->update([
+        ->first();
+
+        // if cash with delivery 
+        if($order->cash_with_delivery){
+            $delivery = $this->delivery
+            ->where('id', $order->delivery_id)
+            ->first();
+            $delivery->balance += $order->amount;
+        }
+        $order->update([
             'delivery_id' => $request->delivery_id
         ]);
 
         return response()->json([
             'success' => 'You select delivery success'
         ]);
+    }
+
+    public function order_status(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'order_status' => 'required|in:pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $order = $this->order
+        ->where('id', $id) 
+        ->first();
+        if($order->order_status == 'returned' || $order->order_status == 'canceled' || 
+        $order->order_status == 'faild_to_deliver' || $order->order_status == 'refund'){
+            $delivery = $this->delivery
+            ->where('id', $order->delivery_id)
+            ->first();
+            if(!empty($delivery)){
+                $delivery->balance -= $order->amount;
+                $delivery->save();
+            }
+        }
+        $order->order_status = $request->order_status;
+        $order->save();
     }
 
     public function take_away_order(TakawayRequest $request){
