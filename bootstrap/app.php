@@ -11,6 +11,7 @@ use App\Http\Middleware\DeliveryMiddleware;
 use App\Http\Middleware\CaptainMiddleware;
 use App\Http\Middleware\BranchMiddleware;
 use App\Http\Middleware\CashierMiddleware;
+use App\Http\Middleware\KitchenMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -52,7 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'IsKitshen' => KitchenMiddleware::class,
+            'IsKitchen' => KitchenMiddleware::class,
             'IsAdmin' => AdminMiddleware::class,
             'IsCustomer' => CustomerMiddleware::class,
             'IsDelivery' => DeliveryMiddleware::class,
