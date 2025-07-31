@@ -20,6 +20,7 @@ class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Setting $settings,
     private NewNotification $notification, private DeviceToken $device_token){}
+    use Notifications;
 
     public function upcomming(Request $request){
         // https://bcknd.food2go.online/customer/orders
