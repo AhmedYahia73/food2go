@@ -24,4 +24,8 @@ class KitchenOrder extends Model
     public function table(){
         return $this->belongsTo(CafeTable::class, 'table_id');
     }
+
+    public function order_data(){
+        return $this->belongsTo(Order::class, 'order_id');
+    }
 }
