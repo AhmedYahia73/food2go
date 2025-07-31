@@ -19,7 +19,7 @@ class OrderController extends Controller
             return [
                 'id' => $item->id,
                 'order' => $item->order,
-                'table' => $item->table->select('id', 'table_number'),
+                'table' => $item->table,
                 'type' => $item->type,
             ];
         });
