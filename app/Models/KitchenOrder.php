@@ -15,6 +15,7 @@ class KitchenOrder extends Model
         'kitchen_id',
         'type',
         'order_id',
+        'read_status',
     ];
 
     public function getorderAttribute(){

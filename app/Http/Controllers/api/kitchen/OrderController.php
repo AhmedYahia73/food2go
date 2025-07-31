@@ -63,4 +63,35 @@ class OrderController extends Controller
             'success' => 'You change status success'
         ]);
     }
+
+    public function notification(Request $request){
+        $kitchen_order = $this->kitchen_order
+        ->where('kitchen_id', $request->user()->id)
+        ->where('read_status', false)
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'order' => $item->order,
+                'table' => $item->table,
+                'type' => $item->type,
+            ];
+        });
+
+        return response()->json([
+            'kitchen_order' => $kitchen_order
+        ]);
+    }
+
+    public function read_status(Request $request, $id){
+        $kitchen_order = $this->kitchen_order
+        ->where('id', $id)
+        ->update([
+            'read_status' => true
+        ]);
+
+        return response()->json([
+            'success' => 'You update status success'
+        ]);
+    }
 }
