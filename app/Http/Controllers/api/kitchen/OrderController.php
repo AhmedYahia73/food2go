@@ -57,7 +57,7 @@ class OrderController extends Controller
                 'delivery_status' => 'done'
             ]);
         }
-        // $kitchen_order->delete();
+        $kitchen_order->delete();
 
         return response()->json([
             'success' => 'You change status success'
