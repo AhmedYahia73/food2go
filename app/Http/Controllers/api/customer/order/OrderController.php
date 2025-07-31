@@ -269,10 +269,10 @@ class OrderController extends Controller
             'notification' => $request->customer_cancel_reason, 
         ]);
         $device_token = $this->device_token
-        ->get();
-        foreach($device_token as $item){
-            $this->sendNotificationToMany($device_token, $id, $request->customer_cancel_reason);
-        }
+        ->get()
+        ?->pluck('token');
+        $this->sendNotificationToMany($device_token, $id, $request->customer_cancel_reason);
+        
 
         return response()->json([
             'success' => 'You cancel order success'
