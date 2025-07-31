@@ -18,6 +18,6 @@ class KitchenOrder extends Model
     ];
 
     public function getorderAttribute(){
-        return json_decode($this->order);
+        return json_decode($this->attributes['order']);
     }
 }

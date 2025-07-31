@@ -53,10 +53,11 @@ class LoginController extends Controller
         }
         if (password_verify($request->input('password'), $user->password)) {
             $user->token = $user->createToken('kitchen')->plainTextToken;
-
+            $role = $user->type;
             return response()->json([
                 'kitchen' => $user,
-                'token' => $user->token, 
+                'token' => $user->token,
+                'role'  => $role,
             ], 200);
         }
         else { 
