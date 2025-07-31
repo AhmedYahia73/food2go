@@ -19,6 +19,7 @@ use App\Models\Branch;
 use App\Models\Setting;
 use App\Models\Address;
 use App\Models\CashierShift;
+use App\Models\Kitchen;
 use App\Models\Zone;
 use App\Models\SmsBalance;
 use App\Models\DeviceToken;
@@ -29,7 +30,39 @@ class LoginController extends Controller
     private User $user, private Branch $branch, private Setting $settings,
     private Address $address, private Zone $zones, private CaptainOrder $captain_order,
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
-    ){} 
+    private Kitchen $kitchen,
+    ){}
+
+    public function kitchen_login(Request $request){
+        // kitchen
+        $validation = Validator::make($request->all(), [
+            'name' => 'required', 
+            'password' => 'required', 
+        ]);
+        if ($validation->fails()) {
+            return response()->json($validation->errors(), 422);
+        }
+
+        $user = $this->kitchen
+        ->where('name', $request->name)
+        ->first();
+        if (empty($user)) {
+            return response()->json([
+                'faield' => 'This Kitchen does not have the ability to login'
+            ], 405);
+        }
+        if (password_verify($request->input('password'), $user->password)) {
+            $user->token = $user->createToken('kitchen')->plainTextToken;
+
+            return response()->json([
+                'kitchen' => $user,
+                'token' => $user->token, 
+            ], 200);
+        }
+        else { 
+            return response()->json(['faield'=>'creational not Valid'],403);
+        }
+    }
 
     public function admin_login(LoginRequest $request){
         // https://bcknd.food2go.online/api/admin/auth/login

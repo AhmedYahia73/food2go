@@ -19,6 +19,10 @@ Route::prefix('welcome')->group(function(){
 	});
 });
 
+Route::prefix('kitchen/auth')->controller(LoginController::class)->group(function(){
+    Route::post('login', 'kitchen_login');
+});
+
 Route::prefix('admin/auth')->controller(LoginController::class)->group(function(){
     Route::post('login', 'admin_login');
 });
