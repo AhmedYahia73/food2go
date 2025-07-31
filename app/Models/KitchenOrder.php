@@ -16,4 +16,8 @@ class KitchenOrder extends Model
         'type',
         'order_id',
     ];
+
+    public function getOrderAttribute(){
+        return json_decode($this->order);
+    }
 }

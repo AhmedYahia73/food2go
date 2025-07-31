@@ -25,6 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ->name('admin.')
             ->group(base_path('routes/admin.php'));
             Route::middleware('api')
+            ->prefix('kitchen')
+            ->name('kitchen.')
+            ->group(base_path('routes/kitchen.php'));
+            Route::middleware('api')
             ->prefix('branch')
             ->name('branch.')
             ->group(base_path('routes/branch.php'));
@@ -48,6 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
+            'IsKitshen' => KitchenMiddleware::class,
             'IsAdmin' => AdminMiddleware::class,
             'IsCustomer' => CustomerMiddleware::class,
             'IsDelivery' => DeliveryMiddleware::class,
