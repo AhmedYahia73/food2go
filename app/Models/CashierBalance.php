@@ -11,7 +11,6 @@ class CashierBalance extends Model
 
     protected $fillable = [
         'balance',
-        'date',
         'cashier_id',
         'cashier_man_id',
     ];

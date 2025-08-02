@@ -20,9 +20,11 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
         Route::put('/take_away_status/{id}', 'take_away_status');
 
+        Route::get('/delivery_lists', 'delivery_lists')->middleware('can:delivery');
         Route::post('/delivery_order', 'delivery_order')->middleware('can:delivery');
         Route::put('/order_status/{id}', 'order_status')->middleware('can:delivery');
         Route::post('/determine_delivery/{order_id}', 'determine_delivery')->middleware('can:delivery');
+        Route::post('/delivery_cash', 'delivery_cash')->middleware('can:delivery');
         Route::post('/printReceipt', 'printReceipt')->withOutMiddleware(['auth:sanctum', 'IsCashier']);
 
         Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts')->middleware('can:dine_in');

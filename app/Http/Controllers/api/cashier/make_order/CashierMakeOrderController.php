@@ -40,6 +40,7 @@ use App\Models\CafeLocation;
 use App\Models\CafeTable;
 use App\Models\TimeSittings;
 use App\Models\OrderFinancial;
+use App\Models\CashierBalance;
 use App\Models\Delivery;
 
 use App\trait\image;
@@ -58,7 +59,7 @@ class CashierMakeOrderController extends Controller
     private CafeLocation $cafe_location, private OrderCart $order_cart,
     private TimeSittings $TimeSittings, private OrderFinancial $financial,
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
-    private Delivery $delivery){}
+    private Delivery $delivery, private CashierBalance $cashier_balance){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -260,6 +261,21 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
+    public function delivery_lists(Request $request){
+        $delivery = $this->delivery
+        ->where('status', 1)
+        ->get();
+        $users = $this->user
+        ->where('status', 1)
+        ->get()
+        ?->select('name', 'image_link', 'phone', 'phone_2');
+
+        return response()->json([
+            'deliveries' => $delivery,
+            'users' => $users,
+        ]);
+    }
+
     public function delivery_order(DeliveryRequest $request){
         // /cashier/delivery_order
         // Keys
@@ -316,6 +332,40 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => 'You select delivery success'
+        ]);
+    }
+
+    public function delivery_cash(Request $request){
+        $validator = Validator::make($request->all(), [
+            'delivery_id' => 'required|exists:deliveries,id',
+            'amount' => 'required|numeric',
+            'cashier_id' => 'required|exists:cashiers,id'
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        
+        $cashier_balance = $this->cashier_balance
+        ->where('cashier_man_id', $request->user()->id)
+        ->where('cashier_id', $request->cashier_id) 
+        ->first();
+        if(!empty($cashier_balance)){
+            $cashier_balance->balance += $request->amount;
+            $cashier_balance->save();
+        }
+        else{
+            $this->cashier_balance
+            ->create([
+                'balance' => $request->amount, 
+                'cashier_id' => $request->cashier_id,
+                'cashier_man_id' => $request->user()->id,
+            ]);
+        }
+
+        return response()->json([
+            'success' => 'You update data success'
         ]);
     }
 

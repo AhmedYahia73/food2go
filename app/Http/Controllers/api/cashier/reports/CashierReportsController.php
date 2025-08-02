@@ -17,7 +17,7 @@ class CashierReportsController extends Controller
     public function __construct(private CashierShift $cashier_shift,
     private Order $orders, private PaymentMethod $payment_methods
     , private TimeSittings $TimeSittings){}
-
+    
     public function all_cashiers(Request $request){
         $validator = Validator::make($request->all(), [
             'from_date' => 'date',
