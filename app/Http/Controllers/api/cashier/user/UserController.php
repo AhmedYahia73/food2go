@@ -41,8 +41,8 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'f_name' => 'required',
             'l_name' => 'required',
-            'phone' => 'required',
-            'phone_2' => 'sometimes',
+            'phone' => 'required|unique:users,phone',
+            'phone_2' => 'sometimes|unique:users,phone_2',
             'addresses.*.zone_id' => 'required|exists:zones,id',
             'addresses.*.address' => 'required',
             'addresses.*.street' => 'sometimes',
@@ -78,8 +78,8 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'f_name' => 'sometimes',
             'l_name' => 'sometimes',
-            'phone' => 'sometimes',
-            'phone_2' => 'sometimes',
+            'phone' => 'sometimes|unique:users,phone,' . $id,
+            'phone_2' => 'sometimes|unique:users,phone_2,' . $id,
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
