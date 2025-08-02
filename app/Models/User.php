@@ -37,6 +37,7 @@ class User extends Authenticatable
         'bio',
         'code',
         'google_id',
+        'signup_pos'
     ];
     protected $appends = ['role', 'orders_count', 'image_link', 'name', 'type', 'orders_count_branch'];
 
