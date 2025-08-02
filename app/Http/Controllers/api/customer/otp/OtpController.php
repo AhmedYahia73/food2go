@@ -213,4 +213,39 @@ class OtpController extends Controller
             'token' => $user->token,
         ], 200);
     }
+
+    public function complete_signup(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|unique:users,phone',
+            'password' => 'required',
+            'code' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $user = $this->user  
+        ->Where('phone', $request->phone)
+        ->where('code', $request->code)
+        ->orWhere('phone', '+2' . $request->phone)
+        ->where('code', $request->code)
+        ->orWhere('phone', '+20' . $request->phone)
+        ->where('code', $request->code)
+        ->first();
+        if(empty($user)){
+            return response()->json([
+                'errors' => 'code is wrong'
+            ], 400);
+        }
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->code = null;
+        $user->save();
+
+        return response()->json([
+            'success' => 'You update data success'
+        ]);
+    }
 }

@@ -281,6 +281,11 @@ class LoginController extends Controller
                 'falid' => 'user is banned'
             ], 400);
         }
+        if($user->signup_pos){
+            return response()->json([
+                'errors' => 'You must complete proccessing of signup'
+            ], 401);
+        }
         if (password_verify($request->input('password'), $user->password)) {
             $addresses = $this->user
             ->where('id', $user->id)

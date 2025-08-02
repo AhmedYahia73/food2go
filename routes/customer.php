@@ -29,6 +29,7 @@ Route::controller(OtpController::class)->prefix('otp')->group(function(){
     Route::post('/create_code', 'create_code');
     Route::post('/check_code', 'check_code');
     Route::post('/change_password', 'change_password');
+    Route::post('/complete_signup', 'complete_signup');
 });
 
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
