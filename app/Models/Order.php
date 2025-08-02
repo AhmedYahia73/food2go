@@ -116,6 +116,10 @@ class Order extends Model
         return json_decode($data);
     }
 
+    public function financial_accountigs(){
+        return $this->belongsToMany(FinantiolAcounting::class, 'order_financials', 'order_id', 'financial_id');
+    }
+
     public function delivery(){
         return $this->belongsTo(Delivery::class, 'delivery_id');
     }

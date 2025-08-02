@@ -132,27 +132,31 @@ class CashierReportsController extends Controller
 
             ];
         }
-        // $shifts_data = collect($shifts_data)->values()
-        // ->map(function($element) use($financial_account){
-        //     $financial_accounts_data = [];
-        //     $cashier_orders = $this->orders
-        //     ->where('shift', $element['shift'])
-        //     ->get();
-        //     $financial_account_total = [];
-        //     foreach ($financial_account as $item) {
-        //         $financial_account_total[] = [
-        //             'financial_account' => $item->name,
-        //             'amount' => $cashier_orders
-        //             ->where('payment_method_id', $item->id)
-        //             ->sum('amount'),
-        //             'orders' => $cashier_orders
-        //             ->where('payment_method_id', $item->id)
-        //             ->values()
-        //         ];
-        //     }
-        //     $element['financial_account_total'] = $financial_account_total;
-        //     return $element;
-        // });
+        $shifts_data = collect($shifts_data)->values()
+        ->map(function($element) use($financial_account){
+            $financial_accounts_data = [];
+            $financial_account_total = [];
+            foreach ($financial_account as $item) {
+                $cashier_orders = $this->orders
+                ->where('shift', $element['shift'])
+                ->whereHas('financial_accountigs', function($query) use($item) {
+                    $query->where('id', $item->id);
+                })
+                ->with('financial_accountigs')
+                ->get();
+                $financial_account_total[] = [
+                    'financial_account' => $item->name,
+                    'amount' => $cashier_orders
+                    ?->pluck('financial_accountigs')
+                    ?->sum('amount') ?? 0 +
+                    $cashier_balance->where('shift_number', $shift_num)->sum('balance'),
+                    'orders' => $cashier_orders 
+                    ->values()
+                ];
+            }
+            $element['financial_account_total'] = $financial_account_total;
+            return $element;
+        });
 
         return response()->json([
             'shifts_data' => array_values($shifts_data),
