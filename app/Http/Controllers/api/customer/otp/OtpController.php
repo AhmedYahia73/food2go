@@ -217,7 +217,7 @@ class OtpController extends Controller
     public function complete_signup(Request $request){
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:users,email',
-            'phone' => 'required|unique:users,phone',
+            'phone' => 'required',
             'password' => 'required',
             'code' => 'required',
         ]);
