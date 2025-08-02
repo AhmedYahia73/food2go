@@ -114,7 +114,7 @@ class CashierReportsController extends Controller
                             ->with('order')
                             ->where('financial_id', $item->id)
                             ->whereHas('order', function($query) use($shift_num) {
-                                $query->where('order.shift', $shift_num);
+                                $query->where('shift', $shift_num);
                             })
                             ->get()
                             ?->pluck('order') ?? [];
