@@ -374,6 +374,7 @@ class CashierMakeOrderController extends Controller
             ]);
         }
         $delivery->balance -= $request->amount;
+        $delivery->save();
 
         return response()->json([
             'success' => 'You update data success'
