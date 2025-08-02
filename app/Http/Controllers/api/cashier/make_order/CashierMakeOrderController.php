@@ -348,6 +348,15 @@ class CashierMakeOrderController extends Controller
             ],400);
         }
         
+        $delivery = $this->delivery
+        ->where('id', $request->delivery_id)
+        ->where('balance', '>=', $request->amount)
+        ->first();
+        if(empty($delivery)){
+            return response()->json([
+                'errors' => 'Delivery Balance only ' . $delivery->balance
+            ], 400);
+        }
         $cashier_balance = $this->cashier_balance
         ->where('cashier_man_id', $request->user()->id)
         ->where('cashier_id', $request->cashier_id) 
@@ -364,6 +373,7 @@ class CashierMakeOrderController extends Controller
                 'cashier_man_id' => $request->user()->id,
             ]);
         }
+        $delivery->balance -= $request->amount;
 
         return response()->json([
             'success' => 'You update data success'
