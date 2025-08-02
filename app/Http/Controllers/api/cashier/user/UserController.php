@@ -67,7 +67,7 @@ class UserController extends Controller
         $userRequest['email'] = $request->phone . '@gmail.com';
         $user = $this->user
         ->create($userRequest); 
-        $addresses = $request->addresses->toArray();
+        $addresses = $request->addresses;
         $user->address()
         ->createMany($addresses); 
 
