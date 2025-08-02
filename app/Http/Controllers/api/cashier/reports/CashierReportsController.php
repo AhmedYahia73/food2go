@@ -150,7 +150,7 @@ class CashierReportsController extends Controller
                     ?->pluck('financial_accountigs')
                     ?->sum('amount') ?? 0 +
                     $cashier_balance->where('shift_number', $shift_num)->sum('balance'),
-                    'orders' => array_values($cashier_orders)
+                    'orders' => $cashier_orders
                 ];
             }
             $element['financial_account_total'] = $financial_account_total;
