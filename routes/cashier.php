@@ -58,10 +58,10 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     });
     Route::controller(UserAddressController::class)
     ->prefix('user/address')->group(function(){
-        Route::get('/', 'view'); 
         Route::post('/add', 'create'); 
         Route::post('/update/{id}', 'modify'); 
         Route::delete('/delete/{id}', 'delete'); 
+        Route::get('/{id}', 'view'); 
     }); 
     Route::controller(AddressController::class)
     ->prefix('/shift_branch_reports')->group(function(){
