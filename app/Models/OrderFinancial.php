@@ -16,4 +16,8 @@ class OrderFinancial extends Model
         'cashier_man_id',
         'amount',
     ];
+
+    public function order(){
+        return $this->belongsTo(FinantiolAcounting::class, 'order_id');
+    }
 }

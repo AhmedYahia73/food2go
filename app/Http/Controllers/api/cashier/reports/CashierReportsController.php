@@ -11,13 +11,151 @@ use App\Models\Order;
 use App\Models\CashierShift;
 use App\Models\PaymentMethod;
 use App\Models\TimeSittings;
+use App\Models\FinantiolAcounting;
+use App\Models\OrderFinancial;
 
 class CashierReportsController extends Controller
 {
     public function __construct(private CashierShift $cashier_shift,
     private Order $orders, private PaymentMethod $payment_methods
-    , private TimeSittings $TimeSittings){}
+    , private TimeSittings $TimeSittings, private FinantiolAcounting $financial_account,
+    private OrderFinancial $order_financial){}
     
+    public function cashier_reports(Request $request){
+        $validator = Validator::make($request->all(), [
+            'from_date' => 'date',
+            'to_date' => 'date',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        
+        $cashier_shift = $this->cashier_shift
+        ->with('cashier_man')
+        ->get();
+        $orders = $this->orders
+        ->whereNotNull('shift')
+        ->where('order_type', '!=', 'delivery')
+        ->orderByDesc('shift')
+        ->orderBy('payment_method_id')
+        ->where('status', 1)
+        ->get();
+    //    return response()->json([
+    //     'orders' => $orders
+    //    ]);
+        $shifts_data = [];
+        foreach ($cashier_shift as $item) {
+            $orders_shift = $orders->where('shift', $item->shift)->values();
+            $products_shift = collect([]);
+            foreach ($orders_shift as $key => $element) {
+                $products_element = collect($element->order_details)->count() > 0
+                ?collect($element->order_details)[0]?->product : null;
+                $products_element = collect($products_element)
+                ->map(function($item){
+                    return [
+                        'product_id' => $item?->product?->id ?? null,
+                        'product_item' => $item?->product?->name ?? null,
+                        'count' => $item?->count ?? 0,
+                    ];
+                });
+                if ($products_element->count() > 0) {
+                    $products_shift[] = $products_element;
+                }
+            }
+            $products_shift = collect($products_shift)->flatten(1);
+            $products_items = [];
+            foreach ($products_shift as $element) {
+                if(isset($products_items[$element['product_id']])){
+                    $products_items[$element['product_id']] = [
+                        'product_id' => $element?->product?->id ?? null,
+                        'product_item' => $element?->product?->name ?? null,
+                        'count' => ($element?->count ?? 0) +( $products_items[$element['product_id']]?->count ?? 0),
+                    ];
+                }
+                else{
+                    $products_items[$element['product_id']] = [
+                        'product_id' => $element?->product?->id ?? null,
+                        'product_item' => $element?->product?->name ?? null,
+                        'count' => $element?->count ?? 0,
+                    ];
+                }
+            }
+            $products_items = collect($products_items)->sortByDesc('count');
+            $financial_account = $this->financial_account
+            ->where('status', 1)
+            ->get();
+            $shifts_data[$item->shift] = [
+                'shift' => $item,
+                'orders' => $orders_shift,
+                'cashier_men' => $cashier_shift
+                ->where('shift', $item->shift)
+                ->pluck('cashier_man'),
+                'orders_count' => count($orders_shift),
+                'avarage_order' => count($orders_shift) > 0 ?
+                 $orders_shift->sum('amount') / count($orders_shift) : 0,
+                'product_items' => $products_items->values(),
+                'products_items_count' => count($products_items),
+                'cashier_men' => $cashier_shift
+                ->where('shift', $item->shift)
+                ->values()->map(function($cashier_item) use($orders_shift, $financial_account, $item){
+                    $shift_num = $item->shift;
+                    $cashier_item->cashier_orders = 
+                    $orders_shift->where('cashier_man_id', $cashier_item->cashier_man_id)
+                    ->values();
+                    $cashier_item->total_orders = $cashier_item->cashier_orders->sum('amount');
+                    // + delivery cash
+                    $financial_accounts_data = [];
+                    foreach ($financial_account as $item) {
+                        $financial_order = $this->order_financial
+                            ->with('order')
+                            ->where('financial_id', $item->id)
+                            ->whereHas('order', function($query){
+                                $query->where('shift', $shift_num);
+                            })
+                            ->get()
+                            ?->pluck('order') ?? [];
+                        $financial_accounts_data[] = [
+                            'financial_account' => $item->name,
+                            'amount' => $financial_order?->sum('amount') ?? 0,
+                            'orders' => $financial_order
+                        ];
+                    }
+                    $cashier_item->financial_accounts_data = $financial_accounts_data;
+
+                    return $cashier_item;
+                }),
+
+            ];
+        }
+        // $shifts_data = collect($shifts_data)->values()
+        // ->map(function($element) use($financial_account){
+        //     $financial_accounts_data = [];
+        //     $cashier_orders = $this->orders
+        //     ->where('shift', $element['shift'])
+        //     ->get();
+        //     $financial_account_total = [];
+        //     foreach ($financial_account as $item) {
+        //         $financial_account_total[] = [
+        //             'financial_account' => $item->name,
+        //             'amount' => $cashier_orders
+        //             ->where('payment_method_id', $item->id)
+        //             ->sum('amount'),
+        //             'orders' => $cashier_orders
+        //             ->where('payment_method_id', $item->id)
+        //             ->values()
+        //         ];
+        //     }
+        //     $element['financial_account_total'] = $financial_account_total;
+        //     return $element;
+        // });
+
+        return response()->json([
+            'shifts_data' => $shifts_data->values(),
+        ]);
+    }
+
     public function all_cashiers(Request $request){
         $validator = Validator::make($request->all(), [
             'from_date' => 'date',
