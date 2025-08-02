@@ -140,7 +140,7 @@ class CashierReportsController extends Controller
                 $cashier_orders = $this->orders
                 ->where('shift', $element['shift'])
                 ->whereHas('financial_accountigs', function($query) use($item) {
-                    $query->where('id', $item->id);
+                    $query->where('finantiol_acountings.id', $item->id);
                 })
                 ->with('financial_accountigs')
                 ->get();
