@@ -26,7 +26,6 @@ class OtpController extends Controller
         // https://bcknd.food2go.online/customer/otp/create_code
         // Keys
         // email, phone
-
         $code = rand(10000, 99999);
         $user_codes = $this->user->get()->pluck('code')->toArray();
         while (in_array($code, $user_codes)) {
