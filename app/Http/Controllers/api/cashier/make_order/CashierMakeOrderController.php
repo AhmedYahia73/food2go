@@ -354,7 +354,7 @@ class CashierMakeOrderController extends Controller
         ->first();
         if(empty($delivery)){
             return response()->json([
-                'errors' => 'Delivery Balance only ' . $delivery->balance
+                'errors' => 'Delivery Balance less than ' . $request->amount
             ], 400);
         }
         $cashier_balance = $this->cashier_balance
