@@ -58,7 +58,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     });
     Route::controller(UserAddressController::class)
     ->prefix('user/address')->group(function(){
-        Route::post('/add', 'create'); 
+        Route::post('/add/{id}', 'create'); 
         Route::post('/update/{id}', 'modify'); 
         Route::delete('/delete/{id}', 'delete'); 
         Route::get('/{id}', 'view'); 
