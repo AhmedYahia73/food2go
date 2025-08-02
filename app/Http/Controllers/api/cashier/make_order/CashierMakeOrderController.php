@@ -359,7 +359,8 @@ class CashierMakeOrderController extends Controller
         }
         $cashier_balance = $this->cashier_balance
         ->where('cashier_man_id', $request->user()->id)
-        ->where('cashier_id', $request->cashier_id) 
+        ->where('cashier_id', $request->cashier_id)
+        ->where('shift_number', $request->user()->shift_number)
         ->first();
         if(!empty($cashier_balance)){
             $cashier_balance->balance += $request->amount;

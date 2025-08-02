@@ -106,7 +106,7 @@ class CashierReportsController extends Controller
                     $orders_shift->where('cashier_man_id', $cashier_item->cashier_man_id)
                     ->values();
                     $cashier_item->total_orders = $cashier_item->cashier_orders->sum('amount') + 
-                    $cashier_balance->where('cashier_num', $shift_num)->sum('balance');
+                    $cashier_balance->where('shift_number', $shift_num)->sum('balance');
                     // + delivery cash
                     $financial_accounts_data = [];
                     foreach ($financial_account as $item) {
@@ -121,7 +121,7 @@ class CashierReportsController extends Controller
                         $financial_accounts_data[] = [
                             'financial_account' => $item->name,
                             'amount' => ($financial_order?->sum('amount') ?? 0) + 
-                            $cashier_balance->where('cashier_num', $shift_num)->sum('balance'),
+                            $cashier_balance->where('shift_number', $shift_num)->sum('balance'),
                             'orders' => $financial_order
                         ];
                     }
