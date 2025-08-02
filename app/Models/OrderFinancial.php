@@ -18,6 +18,6 @@ class OrderFinancial extends Model
     ];
 
     public function order(){
-        return $this->belongsTo(FinantiolAcounting::class, 'order_id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 }
