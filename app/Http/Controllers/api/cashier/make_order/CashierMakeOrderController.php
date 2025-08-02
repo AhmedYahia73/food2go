@@ -264,7 +264,8 @@ class CashierMakeOrderController extends Controller
     public function delivery_lists(Request $request){
         $delivery = $this->delivery
         ->where('status', 1)
-        ->get();
+        ->get()
+        ?->select('f_name', 'l_name', 'phone', 'balance', 'image_link');
         $users = $this->user
         ->where('status', 1)
         ->get()
