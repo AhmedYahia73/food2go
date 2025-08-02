@@ -13,5 +13,6 @@ class CashierBalance extends Model
         'balance',
         'cashier_id',
         'cashier_man_id',
+        'cashier_num'
     ];
 }

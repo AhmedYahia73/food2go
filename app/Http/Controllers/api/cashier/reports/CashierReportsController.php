@@ -13,13 +13,14 @@ use App\Models\PaymentMethod;
 use App\Models\TimeSittings;
 use App\Models\FinantiolAcounting;
 use App\Models\OrderFinancial;
+use App\Models\CashierBalance;
 
 class CashierReportsController extends Controller
 {
     public function __construct(private CashierShift $cashier_shift,
     private Order $orders, private PaymentMethod $payment_methods
     , private TimeSittings $TimeSittings, private FinantiolAcounting $financial_account,
-    private OrderFinancial $order_financial){}
+    private OrderFinancial $order_financial, private CashierBalance $cashier_balance){}
     
     public function cashier_reports(Request $request){
         $validator = Validator::make($request->all(), [
@@ -31,7 +32,7 @@ class CashierReportsController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        
+        $cashier_balance = $this->cashier_balance;
         $cashier_shift = $this->cashier_shift
         ->with('cashier_man')
         ->get();
@@ -99,26 +100,28 @@ class CashierReportsController extends Controller
                 'products_items_count' => count($products_items),
                 'cashier_men' => $cashier_shift
                 ->where('shift', $item->shift)
-                ->values()->map(function($cashier_item) use($orders_shift, $financial_account, $item){
+                ->values()->map(function($cashier_item) use($orders_shift, $financial_account, $item, $cashier_balance){
                     $shift_num = $item->shift;
                     $cashier_item->cashier_orders = 
                     $orders_shift->where('cashier_man_id', $cashier_item->cashier_man_id)
                     ->values();
-                    $cashier_item->total_orders = $cashier_item->cashier_orders->sum('amount');
+                    $cashier_item->total_orders = $cashier_item->cashier_orders->sum('amount') + 
+                    $cashier_balance->where('cashier_num', $shift_num)->sum('balance');
                     // + delivery cash
                     $financial_accounts_data = [];
                     foreach ($financial_account as $item) {
                         $financial_order = $this->order_financial
                             ->with('order')
                             ->where('financial_id', $item->id)
-                            ->whereHas('order', function($query){
+                            ->whereHas('order', function($query) use($shift_num) {
                                 $query->where('shift', $shift_num);
                             })
                             ->get()
                             ?->pluck('order') ?? [];
                         $financial_accounts_data[] = [
                             'financial_account' => $item->name,
-                            'amount' => $financial_order?->sum('amount') ?? 0,
+                            'amount' => ($financial_order?->sum('amount') ?? 0) + 
+                            $cashier_balance->where('cashier_num', $shift_num)->sum('balance'),
                             'orders' => $financial_order
                         ];
                     }
