@@ -13,17 +13,6 @@ class UserController extends Controller
 {
     public function __construct(private User $user,
     private Address $address){}
-    protected $addressRequest = [
-        'zone_id',
-        'address',
-        'street',
-        'building_num',
-        'floor_num',
-        'apartment',
-        'additional_data',
-        'type',
-        'map',
-    ];
 
     public function view(Request $request){
         $users = $this->user
@@ -90,8 +79,7 @@ class UserController extends Controller
             ],400);
         }
 
-        $userRequest = $validator->validated();
-        $userRequest['signup_pos'] = 1;
+        $userRequest = $validator->validated(); 
         if($request->phone && !empty($request->phone)){
             $userRequest['password'] = bcrypt($request->phone);
             $userRequest['email'] = $request->phone . '@gmail.com';
