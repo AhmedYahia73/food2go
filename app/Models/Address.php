@@ -29,6 +29,10 @@ class Address extends Model
         return $this->belongsTo(Zone::class, 'zone_id');
     }
 
+    public function city(){
+        return $this->belongsTo(City::class, 'city_id');
+    }
+
     public function address(){
         return $this->belongsToMany(User::class ,'user_address');
     }
