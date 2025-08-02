@@ -265,11 +265,11 @@ class CashierMakeOrderController extends Controller
         $delivery = $this->delivery
         ->where('status', 1)
         ->get()
-        ?->select('f_name', 'l_name', 'phone', 'balance', 'image_link');
+        ?->select('id', 'f_name', 'l_name', 'phone', 'balance', 'image_link');
         $users = $this->user
         ->where('status', 1)
         ->get()
-        ?->select('name', 'image_link', 'phone', 'phone_2');
+        ?->select('id', 'name', 'image_link', 'phone', 'phone_2');
 
         return response()->json([
             'deliveries' => $delivery,
