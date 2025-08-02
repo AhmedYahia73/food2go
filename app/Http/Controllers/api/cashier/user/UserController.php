@@ -54,6 +54,7 @@ class UserController extends Controller
             'addresses.*.additional_data' => 'sometimes',
             'addresses.*.type' => 'sometimes',
             'addresses.*.map' => 'sometimes',
+            'addresses.*.city_id' => 'required|exists:cities,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
