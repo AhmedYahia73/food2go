@@ -158,7 +158,7 @@ class CashierReportsController extends Controller
         });
 
         return response()->json([
-            'shifts_data' => array_values($shifts_data),
+            'shifts_data' => $shifts_data,
         ]);
     }
 
