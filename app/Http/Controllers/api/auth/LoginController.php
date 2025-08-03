@@ -217,6 +217,8 @@ class LoginController extends Controller
         ->update([
             'end_time' => now()
         ]); 
+        $request->user()->shift_number = null;
+        $request->user()->save();
 
         return response()->json([
             'success' => 'You open shift success'
