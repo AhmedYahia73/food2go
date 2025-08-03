@@ -57,6 +57,7 @@ class LoginController extends Controller
             return response()->json([
                 'kitchen' => $user,
                 'token' => $user->token,
+                'branch' => $user->branch,
                 'role'  => $role,
             ], 200);
         }
