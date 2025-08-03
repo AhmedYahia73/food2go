@@ -216,8 +216,8 @@ class LoginController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->update([
             'end_time' => now()
-        ]); 
-        $request->user()->shift_number = null;
+        ]);
+        $request->user()->shift_number = $shift_number;
         $request->user()->save();
 
         return response()->json([
