@@ -62,7 +62,7 @@ class LoginController extends Controller
                 'role'  => $role,
             ], 200);
         }
-        else { 
+        else {
             return response()->json(['faield'=>'creational not Valid'],403);
         }
     }
