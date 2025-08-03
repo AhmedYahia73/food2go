@@ -116,12 +116,11 @@ class CashierReportsController extends Controller
                             ->whereHas('order', function($query) use($shift_num) {
                                 $query->where('shift', $shift_num);
                             })
-                            ->get()
-                            ?->pluck('order') ?? [];
+                            ->get();
                         $financial_accounts_data[] = [
                             'financial_account' => $item->name,
                             'amount' => ($financial_order?->sum('amount') ?? 0),
-                            'orders' => $financial_order
+                            'orders' => $financial_order?->pluck('order') ?? [],
                         ];
                     }
                     $cashier_item->financial_accounts_data = $financial_accounts_data;
