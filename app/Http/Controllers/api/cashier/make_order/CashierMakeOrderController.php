@@ -280,7 +280,7 @@ class CashierMakeOrderController extends Controller
     public function delivery_order(DeliveryRequest $request){
         // /cashier/delivery_order
         // Keys
-        // amount, total_tax, total_discount, notes
+        // amount, total_tax, total_discount, notes, address_id
         // source, financials[{id, amount}], cash_with_delivery
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
