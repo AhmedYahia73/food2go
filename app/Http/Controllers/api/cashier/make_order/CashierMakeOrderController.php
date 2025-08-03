@@ -432,9 +432,11 @@ class CashierMakeOrderController extends Controller
             'cashier_man_id' =>$request->user()->id,
             'shift' => $request->user()->shift_number,
             'pos' => 1,
-            'status' => 1
+            'status' => 1,
+            'take_away_status' => 'preparing',
         ]); 
         $order = $this->take_away_make_order($request);
+        $this->preparing_takeaway($request, $order->id);
 
         return response()->json([
             'success' => $order['order'], 
