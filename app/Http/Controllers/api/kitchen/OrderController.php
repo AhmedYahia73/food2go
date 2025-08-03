@@ -13,28 +13,48 @@ class OrderController extends Controller
 {
     public function __construct(private KitchenOrder $kitchen_order,
     private OrderCart $order_carts, private Order $order){}
-
-    public function kitchen_orders(Request $request){
-        $kitchen_order = $this->kitchen_order
+public function kitchen_orders(Request $request)
+{
+    $kitchen_order = $this->kitchen_order
         ->where('kitchen_id', $request->user()->id)
         ->get()
-        ->map(function($item){
+        ->map(function ($item) {
             $orders = [];
-            foreach ($orders as $element) {
-                $order = collect($element->order);
-                $addons_selected = collect($order->addons_selected);
-                $excludes = collect($order->excludes);
-                $extras = collect($order->extras);
-                $variation_selected = collect($order->variation_selected);
-                $optins = collect($variation_selected->options)->select('name');
-                $variation_selected = $variation_selected->select('name', 'type');
-                $variation_selected->options = $optins;
-                $extras = $extras->select('name');
-                $excludes = $excludes->select('name');
-                $addons_selected = $addons_selected->select('name', 'count');
-                $order = $order->select('name', 'id', 'count', 'price', 'price_after_discount', 'price_after_tax');
-                $orders = $orders->push($order);
+
+            foreach ($item->order as $orderItem) {
+                $orderData = collect($orderItem);
+
+                $addons_selected = collect($orderData->get('addons_selected', []))
+                    ->map(fn($addon) => collect($addon)->only(['name', 'count']));
+
+                $excludes = collect($orderData->get('excludes', []))
+                    ->map(fn($exclude) => collect($exclude)->only(['name']));
+
+                $extras = collect($orderData->get('extras', []))
+                    ->map(fn($extra) => collect($extra)->only(['name']));
+
+                $variation_selected = collect($orderData->get('variation_selected', []))
+                    ->map(function ($variation) {
+                        return [
+                            'name' => $variation->name ?? null,
+                            'type' => $variation->type ?? null,
+                            'options' => collect($variation->options ?? [])
+                                ->map(fn($opt) => ['name' => $opt->name ?? null])
+                        ];
+                    });
+
+                $order = $orderData->only([
+                    'name', 'id', 'count', 'price', 'price_after_discount', 'price_after_tax'
+                ]);
+
+                $order['addons_selected'] = $addons_selected;
+                $order['excludes'] = $excludes;
+                $order['extras'] = $extras;
+                $order['variation_selected'] = $variation_selected;
+
+                $orders[] = $order;
             }
+
             return [
                 'id' => $item->id,
                 'order' => $orders,
@@ -42,11 +62,12 @@ class OrderController extends Controller
                 'type' => $item->type,
             ];
         });
-  
-        return response()->json([
-            'kitchen_order' => $kitchen_order
-        ]);
-    }
+
+    return response()->json([
+        'kitchen_order' => $kitchen_order
+    ]);
+}
+
 
     public function done_status(Request $request, $id){
         $kitchen_order = $this->kitchen_order
