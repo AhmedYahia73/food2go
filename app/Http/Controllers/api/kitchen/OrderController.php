@@ -13,60 +13,60 @@ class OrderController extends Controller
 {
     public function __construct(private KitchenOrder $kitchen_order,
     private OrderCart $order_carts, private Order $order){}
-public function kitchen_orders(Request $request)
-{
-    $kitchen_order = $this->kitchen_order
-        ->where('kitchen_id', $request->user()->id)
-        ->get()
-        ->map(function ($item) {
-            $orders = [];
+    public function kitchen_orders(Request $request)
+    {
+        $kitchen_order = $this->kitchen_order
+            ->where('kitchen_id', $request->user()->id)
+            ->get()
+            ->map(function ($item) {
+                $orders = [];
 
-            foreach ($item->order as $orderItem) {
-                $orderData = collect($orderItem);
+                foreach ($item->order as $orderItem) {
+                    $orderData = collect($orderItem);
 
-                $addons_selected = collect($orderData->get('addons_selected', []))
-                    ->map(fn($addon) => collect($addon)->only(['name', 'count']));
+                    $addons_selected = collect($orderData->get('addons_selected', []))
+                        ->map(fn($addon) => collect($addon)->only(['name', 'count']));
 
-                $excludes = collect($orderData->get('excludes', []))
-                    ->map(fn($exclude) => collect($exclude)->only(['name']));
+                    $excludes = collect($orderData->get('excludes', []))
+                        ->map(fn($exclude) => collect($exclude)->only(['name']));
 
-                $extras = collect($orderData->get('extras', []))
-                    ->map(fn($extra) => collect($extra)->only(['name']));
+                    $extras = collect($orderData->get('extras', []))
+                        ->map(fn($extra) => collect($extra)->only(['name']));
 
-                $variation_selected = collect($orderData->get('variation_selected', []))
-                    ->map(function ($variation) {
-                        return [
-                            'name' => $variation->name ?? null,
-                            'type' => $variation->type ?? null,
-                            'options' => collect($variation->options ?? [])
-                                ->map(fn($opt) => ['name' => $opt->name ?? null])
-                        ];
-                    });
+                    $variation_selected = collect($orderData->get('variation_selected', []))
+                        ->map(function ($variation) {
+                            return [
+                                'name' => $variation->name ?? null,
+                                'type' => $variation->type ?? null,
+                                'options' => collect($variation->options ?? [])
+                                    ->map(fn($opt) => ['name' => $opt->name ?? null])
+                            ];
+                        });
 
-                $order = $orderData->only([
-                    'name', 'id', 'count', 'price', 'price_after_discount', 'price_after_tax'
-                ]);
+                    $order = $orderData->only([
+                        'name', 'id', 'count', 'price', 'price_after_discount', 'price_after_tax'
+                    ]);
 
-                $order['addons_selected'] = $addons_selected;
-                $order['excludes'] = $excludes;
-                $order['extras'] = $extras;
-                $order['variation_selected'] = $variation_selected;
+                    $order['addons_selected'] = $addons_selected;
+                    $order['excludes'] = $excludes;
+                    $order['extras'] = $extras;
+                    $order['variation_selected'] = $variation_selected;
 
-                $orders[] = $order;
-            }
+                    $orders[] = $order;
+                }
 
-            return [
-                'id' => $item->id,
-                'order' => $orders,
-                'table' => $item->table,
-                'type' => $item->type,
-            ];
-        });
+                return [
+                    'id' => $item->id,
+                    'order' => $orders,
+                    'table' => $item->table,
+                    'type' => $item->type,
+                ];
+            });
 
-    return response()->json([
-        'kitchen_order' => $kitchen_order
-    ]);
-}
+        return response()->json([
+            'kitchen_order' => $kitchen_order
+        ]);
+    }
 
 
     public function done_status(Request $request, $id){
