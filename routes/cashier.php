@@ -9,6 +9,7 @@ use App\Http\Controllers\api\cashier\customer\CustomerController;
 use App\Http\Controllers\api\cashier\user\UserController; 
 use App\Http\Controllers\api\cashier\Home\HomeController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
+use App\Http\Controllers\api\auth\LoginController;
 
 
 Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
@@ -68,6 +69,11 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/item/{id}', 'address');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
+    }); 
+    Route::controller(LoginController::class)
+    ->prefix('/shift')->group(function(){
+        Route::get('/open', 'start_shift');
+        Route::get('/close', 'end_shift');
     }); 
     Route::controller(CashierReportsController::class)
     ->prefix('/reports')->group(function(){

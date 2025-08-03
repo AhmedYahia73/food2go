@@ -178,21 +178,6 @@ class LoginController extends Controller
                 'falid' => 'cashier is banned'
             ], 400);
         }
-        if ($request->shift_number && is_numeric($request->shift_number)) {
-            $shift_number = $request->shift_number;
-        }
-        else{
-            $cashier = $this->cashier_shift
-            ->max('shift') ?? 0;
-            $shift_number = $cashier + 1;
-            $this->cashier_shift
-            ->create([
-                'shift' => $shift_number,
-                'start_time' => now(),
-                'cashier_man_id' => $user->id,
-            ]);
-        }
-        $user->shift_number = $shift_number;
         $user->save();
         if (password_verify($request->input('password'), $user->password)) {
             $user->role = 'cashier';
@@ -205,6 +190,37 @@ class LoginController extends Controller
         else { 
             return response()->json(['faield'=>'creational not Valid'],403);
         }
+    }
+
+    public function start_shift(Request $request){
+        $cashier = $this->cashier_shift
+        ->max('shift') ?? 0;
+        $shift_number = $cashier + 1;
+        $this->cashier_shift
+        ->create([
+            'shift' => $shift_number,
+            'start_time' => now(),
+            'cashier_man_id' => $request->user()->id,
+        ]);
+        $request->user()->shift_number = $shift_number;
+        $request->user()->save();
+
+        return response()->json([
+            'success' => 'You open shift success'
+        ]);
+    }
+
+    public function end_shift(Request $request){
+        $this->cashier_shift
+        ->where('shift', $request->user()->shift_number)
+        ->where('cashier_man_id', $request->user()->id)
+        ->update([
+            'end_time' => now()
+        ]); 
+
+        return response()->json([
+            'success' => 'You open shift success'
+        ]);
     }
     
     public function login(LoginRequest $request){
