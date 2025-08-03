@@ -59,7 +59,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     });
     Route::controller(UserAddressController::class)
     ->prefix('user/address')->group(function(){
-        Route::post('/add/{id}', 'create'); 
+        Route::get('/lists', 'lists');
+        Route::post('/add/{id}', 'create');
         Route::post('/update/{id}', 'modify'); 
         Route::delete('/delete/{id}', 'delete'); 
         Route::get('/{id}', 'view'); 
@@ -69,7 +70,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/item/{id}', 'address');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
-    }); 
+    }); // lists,
     Route::controller(LoginController::class)
     ->prefix('/shift')->group(function(){
         Route::get('/open', 'start_shift');

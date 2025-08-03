@@ -8,21 +8,40 @@ use Illuminate\Http\Request;
 
 use App\Models\Address;
 use App\Models\User;
+use App\Models\City;
+use App\Models\Zone;
 
 class AddressController extends Controller
 {
     public function __construct(private Address $address,
-    private User $user){}
+    private User $user, private City $cities, private Zone $zones){}
 
     public function view(Request $request, $id){
         $addresses = $this->address
         ->whereHas('users', function($query) use($id){
             $query->where('users.id', $id);
         })
+        ->with(['zone:id,zone,price', 'city:id,name'])
         ->get();
 
         return response()->json([
             'addresses' => $addresses,
+        ]);
+    }
+
+    public function lists(Request $request){
+        $cities = $this->cities
+        ->select('id', 'name')
+        ->where('status', 1)
+        ->get();
+        $zones = $this->zones
+        ->select('id', 'zone')
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'cities' => $cities,
+            'zones' => $zones,
         ]);
     }
 
