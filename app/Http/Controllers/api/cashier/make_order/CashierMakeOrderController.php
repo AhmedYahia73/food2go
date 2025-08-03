@@ -436,7 +436,7 @@ class CashierMakeOrderController extends Controller
             'take_away_status' => 'preparing',
         ]); 
         $order = $this->take_away_make_order($request);
-        $this->preparing_takeaway($request, $order->id);
+        $this->preparing_takeaway($request, $order['order']->id);
 
         return response()->json([
             'success' => $order['order'], 
