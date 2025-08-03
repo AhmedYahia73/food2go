@@ -19,14 +19,30 @@ class OrderController extends Controller
         ->where('kitchen_id', $request->user()->id)
         ->get()
         ->map(function($item){
+            $orders = [];
+            foreach ($orders as $element) {
+                $order = collect($element->order);
+                $addons_selected = collect($order->addons_selected);
+                $excludes = collect($order->excludes);
+                $extras = collect($order->extras);
+                $variation_selected = collect($order->variation_selected);
+                $optins = collect($variation_selected->options)->select('name');
+                $variation_selected = $variation_selected->select('name', 'type');
+                $variation_selected->options = $optins;
+                $extras = $extras->select('name');
+                $excludes = $excludes->select('name');
+                $addons_selected = $addons_selected->select('name', 'count');
+                $order = $order->select('name', 'id', 'count', 'price', 'price_after_discount', 'price_after_tax');
+                $orders = $orders->push($order);
+            }
             return [
                 'id' => $item->id,
-                'order' => $item->order,
+                'order' => $orders,
                 'table' => $item->table,
                 'type' => $item->type,
             ];
         });
-
+  
         return response()->json([
             'kitchen_order' => $kitchen_order
         ]);
