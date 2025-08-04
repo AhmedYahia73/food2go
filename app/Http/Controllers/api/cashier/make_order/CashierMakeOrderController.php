@@ -212,7 +212,7 @@ class CashierMakeOrderController extends Controller
         // return response()->json(['message' => 'Receipt printed successfully']);
                 
     try {
-        $connector = new WindowsPrintConnector("Xprinter XP-370B"); 
+        $connector = new WindowsPrintConnector("XP-370B"); 
         // $connector = new NetworkPrintConnector("192.168.1.15", 9100); 
         // Windows printer share name
         // OR use NetworkPrintConnector("192.168.0.100", 9100);
