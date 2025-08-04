@@ -28,6 +28,21 @@ class UserController extends Controller
         ]);
     }
 
+    public function user(Request $request, $id){
+        $user = $this->user
+        ->where('status', 1)
+        ->where('id', $id)
+        ->with(['address' => function($query){
+            return $query->with(['zone:id,zone,price', 'city:id,name']);
+        }])
+        ->get()
+        ?->select('id', 'f_name', 'l_name', 'image_link', 'phone', 'phone_2', 'address');
+
+        return response()->json([
+            'user' => $user,
+        ]);
+    }
+
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'f_name' => 'required',

@@ -48,6 +48,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(UserController::class)
     ->prefix('/user')->group(function(){
         Route::get('/', 'view');
+        Route::get('/item/{id}', 'user');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
     });
