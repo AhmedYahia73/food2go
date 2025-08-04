@@ -115,6 +115,7 @@ class BusinessSetupController extends Controller
         }
         else{
             $now = Carbon::now();
+            $open_to = null;
             foreach ($time_sitting as $item) { 
                 $resturant_time = $item;
                 $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
@@ -129,10 +130,12 @@ class BusinessSetupController extends Controller
                     $open_flag = false;
                 }
             }
+            return $open_to;
             if (!$open_flag) {
                 $open_from = Carbon::parse($time_sitting[0]->from);
                 $open_to = Carbon::parse($time_sitting[$time_sitting->count() - 1]->from);
-                $open_to = $open_to->addHours($time_sitting[$time_sitting->count() - 1]->hours);
+                $open_to = $open_to->addHours($time_sitting[$time_sitting->count() - 1]->hours)
+                ->addMinutes($time_sitting[$time_sitting->count() - 1]->minutes);
                 $open_from = $this->arabicTime($open_from);
                 $open_to = $this->arabicTime($open_to);
                 $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;

@@ -259,7 +259,13 @@ class OrderController extends Controller
         }
         $order = $this->orders
         ->where('id', $id)
-        ->update([
+        ->first();
+        if(empty($order) || $order->order_status != 'pending'){
+            return response()->json([
+                'errors' => "order is preparing ypu can't cancel it",
+            ], 400);
+        }
+        $order->update([
             'customer_cancel_reason' => $request->customer_cancel_reason,
             'order_status' => 'canceled'
         ]);
