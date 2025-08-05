@@ -384,8 +384,8 @@ class CashierMakeOrderController extends Controller
 
     public function order_status(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'order_status' => 'required|in:pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
-        ]);
+            'delivery_status' => 'required|in:preparing,done,ready_for_delivery,out_for_delivery,delivered,returned',
+        ]); 
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
@@ -401,8 +401,7 @@ class CashierMakeOrderController extends Controller
                 'errors' => 'id is wrong'
             ], 400);
         }
-        if($order->order_status == 'returned' || $order->order_status == 'canceled' || 
-        $order->order_status == 'faild_to_deliver' || $order->order_status == 'refund'){
+        if($order->delivery_status == 'returned'){
             $delivery = $this->delivery
             ->where('id', $order->delivery_id)
             ->first();
@@ -411,7 +410,7 @@ class CashierMakeOrderController extends Controller
                 $delivery->save();
             }
         }
-        $order->order_status = $request->order_status;
+        $order->delivery_status = $request->delivery_status;
         $order->save();
 
         return response()->json([
