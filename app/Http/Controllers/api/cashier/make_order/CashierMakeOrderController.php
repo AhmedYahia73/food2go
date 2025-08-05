@@ -212,7 +212,7 @@ class CashierMakeOrderController extends Controller
         // return response()->json(['message' => 'Receipt printed successfully']);
                 
     try {
-        $connector = new WindowsPrintConnector("smb://192.168.1.24/XP370B"); 
+        $connector = new WindowsPrintConnector("192.168.1.24/XP-370B"); 
         // $connector = new NetworkPrintConnector("192.168.1.15", 9100); 
         // Windows printer share name
         // OR use NetworkPrintConnector("192.168.0.100", 9100);
@@ -297,7 +297,7 @@ class CashierMakeOrderController extends Controller
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
-
+        $this->preparing_delivery($request, $order->id);
         return response()->json([
             'success' => $order['order'], 
         ]);
@@ -689,6 +689,46 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => 'You update status success'
+        ]);
+    } 
+
+    public function preparing_delivery($request, $id){
+        $order = $this->order
+        ->where('id', $id)
+        ->first(); 
+        $order_items = $this->takeaway_order_format($order);
+        $order_items = collect($order_items);
+        $kitchen_order = [];
+        foreach ($order_items as $key => $element) {
+            $kitchen = $this->kitchen
+            ->where(function($q) use($element){
+                $q->whereHas('products', function($query) use ($element){
+                    $query->where('products.id', $element->id);
+                })
+                ->orWhereHas('category', function($query) use ($element){
+                    $query->where('categories.id', $element->category_id)
+                    ->orWhere('categories.id', $element->sub_category_id);
+                });
+            })
+            ->where('branch_id', $request->user()->branch_id)
+            ->first();
+            if(!empty($kitchen)){
+                $kitchen_order[$kitchen->id][] = $element;
+            }
+        }
+            
+        foreach ($kitchen_order as $key => $item) {
+            $this->kitchen_order
+            ->create([
+                'table_id' => $request->table_id,
+                'kitchen_id' => $key,
+                'order' => json_encode($item),
+                'type' => $order->order_type,
+                'order_id' => $order->id,
+            ]);
+        } 
+        return response()->json([
+            'success' => $order_items
         ]);
     }
 
