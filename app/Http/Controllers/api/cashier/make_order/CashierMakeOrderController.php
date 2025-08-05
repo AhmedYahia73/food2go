@@ -297,7 +297,7 @@ class CashierMakeOrderController extends Controller
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
-        $this->preparing_delivery($request, $order->id);
+        $this->preparing_delivery($request, $order['order']->id);
         return response()->json([
             'success' => $order['order'], 
         ]);
