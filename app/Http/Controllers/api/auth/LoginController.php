@@ -303,8 +303,8 @@ class LoginController extends Controller
         }
         if($user->signup_pos){
             return response()->json([
-                'errors' => 'You must complete proccessing of signup'
-            ], 401);
+                'complete_signup' => 'You must complete proccessing of signup'
+            ], 400);
         }
         if (password_verify($request->input('password'), $user->password)) {
             $addresses = $this->user
