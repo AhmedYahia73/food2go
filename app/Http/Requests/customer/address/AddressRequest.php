@@ -27,6 +27,13 @@ class AddressRequest extends FormRequest
             'city_id' => ['required', 'exists:cities,id'],
             'zone_id' => ['required', 'exists:zones,id'],
             'address' => ['required'],
+            'street' => ['required'],
+            'building_num' => ['required'],
+            'floor_num' => ['required'],
+            'apartment' => ['required'],
+            'additional_data' => ['required'],
+            'type' => ['required'],
+            'map' => ['required'], 
         ];
     }
 
