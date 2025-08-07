@@ -139,15 +139,11 @@ trait PlaceOrder
         $categories_off = $branch_off->pluck('category_id')->filter()->values()->all();
         $orderRequest = $request->only($this->paymentRequest); 
         $user = auth()->user();
-        if (!empty($request->user_id) && is_numeric($request->user_id)) {
-            $orderRequest['user_id'] = $request->user_id;
+
+        if(!$request->user_id || $request->user_id != 'empty'){
+            $orderRequest['user_id'] = auth()->user()->id;
         }
-        elseif(!$request->user_id){
-            $orderRequest['user_id'] = $user->id;
-        }
-        if (!empty($request->user_id) && is_numeric($request->user_id)) {
-            $orderRequest['user_id'] = $request->user_id;
-        }
+        
         if (!empty($request->customer_id) && is_numeric($request->customer_id)) {
             $orderRequest['customer_id'] = $request->customer_id;
         }
