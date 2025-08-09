@@ -971,15 +971,42 @@ class OrderController extends Controller
         // if (empty($preparing_time)) {
         $time_parts = explode(':', $preparing_time);
 
+        // _________________________________________
+        
+        $delivery_time = $this->settings
+        ->where('name', 'delivery_time')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($delivery_time)) {
+            $delivery_time = $this->settings
+            ->create([
+                'name' => 'delivery_time',
+                'setting' => '00:30:00',
+            ]);
+        }
+        $time_to_add = $delivery_time->setting;
+        list($order_hours, $order_minutes, $order_seconds) = explode(':', $time_to_add);
         // Get hours, minutes, and seconds
         $hours = $time_parts[0];
         $minutes = $time_parts[1]; 
-            $preparing_arr = [
-                'days' => 0,
-                'hours' => $hours,
-                'minutes' => $minutes,
-                'seconds' => 0,
-            ];
+        $order_seconds = 0;
+        $hours = (int)$hours;
+        $minutes = (int)$minutes;
+        
+        if($order->order_type == 'delivery'){
+            // Ensure that $hours, $minutes, and $seconds are integers
+            $hours = (int)$hours + (int)$order_hours;
+            $minutes = (int)$minutes + (int)$order_minutes;
+            $order_seconds = '00';
+        }
+        $hours += intval($minutes / 60);
+        $minutes = $minutes % 60;
+        $preparing_arr = [
+            'days' => 0,
+            'hours' => $hours,
+            'minutes' => $minutes,
+            'seconds' => 0,
+        ];
         //     $preparing_time = $this->settings
         //     ->create([
         //         'name' => 'preparing_time',
