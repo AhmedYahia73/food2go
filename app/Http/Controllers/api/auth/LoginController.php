@@ -223,7 +223,7 @@ class LoginController extends Controller
         $request->user()->save();
 
         return response()->json([
-            'success' => 'You open shift success'
+            'success' => 'You close shift success'
         ]);
     }
     
