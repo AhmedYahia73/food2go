@@ -953,7 +953,7 @@ class OrderController extends Controller
         }
         
         if (!empty($order->branch)) {
-            $order->branch->count_orders = count($order->branch->orders);
+            $order->branch->count_orders = $order->branch->orders->count();
         }
         if (!empty($order->delivery_id)) {
             $order->delivery->count_orders = count($order->delivery->orders_items);
@@ -1018,6 +1018,7 @@ class OrderController extends Controller
         ->where('status', 1)
         ->get();
         unset($order->user->orders);
+        unset($order->branch->orders);
 
         return response()->json([
             'order' => $order,
