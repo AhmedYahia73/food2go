@@ -61,7 +61,9 @@ class Branch extends Authenticatable
     }
 
     public function getCoverImageLinkAttribute(){
-        return url('storage/' . $this->attributes['cover_image']);
+        if(isset($this->attributes['cover_image'])){
+            return url('storage/' . $this->attributes['cover_image']);
+        }
     }
 
     public function getRoleAttribute(){
