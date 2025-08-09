@@ -220,7 +220,7 @@ trait PlaceOrder
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
-                $amount_product = 0;
+                // $amount_product = 0;
                 $order_details[$key]['extras'] = [];
                 $order_details[$key]['addons'] = [];
                 $order_details[$key]['excludes'] = [];
@@ -240,7 +240,7 @@ trait PlaceOrder
                     'notes' => isset($product['note']) ? $product['note'] : null,
                 ];
                 // Add product price
-                $amount_product += $product_item->price;
+                //$amount_product += $product_item->price;
 
                 $this->order_details
                 ->create([
@@ -366,9 +366,9 @@ trait PlaceOrder
                             'variation' => $variations,
                             'options' => $options,
                         ];
-                        $amount_product += $this->options
-                        ->whereIn('id', $variation['option_id'])
-                        ->sum('price');
+                        // $amount_product += $this->options
+                        // ->whereIn('id', $variation['option_id'])
+                        // ->sum('price');
                     }
                 }
                 $discount_item = $product_item->discount;
@@ -389,21 +389,21 @@ trait PlaceOrder
                         ]);
                         $tax = $tax->setting;
                     }
-                    if ($tax_item->type == 'precentage') { 
-                        $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
-                    }
-                    else{ 
-                        $amount_product = $amount_product + $tax_item->amount;
-                    }
+                    // if ($tax_item->type == 'precentage') { 
+                    //     $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
+                    // }
+                    // else{ 
+                    //     $amount_product = $amount_product + $tax_item->amount;
+                    // }
                 }
-                if (!empty($discount_item)) {
-                    if ($discount_item->type == 'precentage') { 
-                        $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
-                    }
-                    else{ 
-                        $amount_product = $amount_product - $discount_item->amount;
-                    }
-                } 
+                // if (!empty($discount_item)) {
+                //     if ($discount_item->type == 'precentage') { 
+                //         $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
+                //     }
+                //     else{ 
+                //         $amount_product = $amount_product - $discount_item->amount;
+                //     }
+                // } 
             }
         } 
         $order->order_details = json_encode($order_details);
@@ -497,7 +497,7 @@ trait PlaceOrder
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
-                $amount_product = 0;
+                //$amount_product = 0;
                 $order_details[$key]['extras'] = [];
                 $order_details[$key]['addons'] = [];
                 $order_details[$key]['excludes'] = [];
@@ -518,7 +518,7 @@ trait PlaceOrder
                     'notes' => isset($product['note']) ? $product['note'] : null,
                 ];
                 // Add product price
-                $amount_product += $product_item->price;
+               // $amount_product += $product_item->price;
 
                 $this->order_details
                 ->create([
@@ -645,9 +645,9 @@ trait PlaceOrder
                         ];
                         // $order_details[$key]['excludes'] = [];
                         // $order_details[$key]['variations'] = [];
-                        $amount_product += $this->options
-                        ->whereIn('id', $variation['option_id'])
-                        ->sum('price');
+                        //$amount_product += $this->options
+                        // ->whereIn('id', $variation['option_id'])
+                        // ->sum('price');
                     }
                 }
                 $discount_item = $product_item->discount;
@@ -668,21 +668,21 @@ trait PlaceOrder
                         ]);
                         $tax = $tax->setting;
                     }
-                    if ($tax_item->type == 'precentage') { 
-                        $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
-                    }
-                    else{ 
-                        $amount_product = $amount_product + $tax_item->amount;
-                    }
+                    // if ($tax_item->type == 'precentage') { 
+                    //     $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
+                    // }
+                    // else{ 
+                    //     $amount_product = $amount_product + $tax_item->amount;
+                    // }
                 }
-                if (!empty($discount_item)) {
-                    if ($discount_item->type == 'precentage') { 
-                        $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
-                    }
-                    else{ 
-                        $amount_product = $amount_product - $discount_item->amount;
-                    }
-                } 
+                // if (!empty($discount_item)) {
+                //     if ($discount_item->type == 'precentage') { 
+                //         $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
+                //     }
+                //     else{ 
+                //         $amount_product = $amount_product - $discount_item->amount;
+                //     }
+                // } 
             }
         } 
         $order->cart = json_encode($order_details);
