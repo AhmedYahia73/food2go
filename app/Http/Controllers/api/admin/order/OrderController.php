@@ -930,8 +930,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
         'admin_cancel_reason', 'sechedule_slot_id')
-        ->with(['branch:id,name', 'delivery', 'payment_method:id,name,logo', 'address.zone', 
-        'admin:id,name,email,phone,image', 
+        ->with(['user', 'branch', 'delivery', 'payment_method', 'address.zone', 'admin:id,name,email,phone,image', 
         'schedule'])
         ->find($id);
         $order_details = collect($order->order_details);
