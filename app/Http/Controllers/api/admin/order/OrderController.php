@@ -930,7 +930,13 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
         'admin_cancel_reason', 'sechedule_slot_id')
-        ->with(['user', 'branch', 'delivery', 'payment_method', 'address.zone', 'admin:id,name,email,phone,image', 
+        ->with(['user.orders' => function($query){
+            $query->select('id', 'date', 'operation_status', 'user_id', 'branch_id', 'amount',
+        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id',
+        'status', 'points', 'rejected_reason', 'transaction_id');
+        }, 'branch', 'delivery', 'payment_method', 'address.zone', 'admin:id,name,email,phone,image', 
         'schedule'])
         ->find($id);
         $order_details = collect($order->order_details);
@@ -941,7 +947,6 @@ class OrderController extends Controller
                 $element->product->price += $total;
             }
         }
-        $order->user->orders = collect([]);
         $order->order_details = $order_details;
         try {
             $order->user->count_orders = count($order->user->orders);
@@ -1009,10 +1014,10 @@ class OrderController extends Controller
         //     ]);
         // }
         // $preparing_time = json_decode($preparing_time->setting);
-        // $log_order = $this->log_order
-        // ->with('admin')
-        // ->where('order_id', $id)
-        // ->get();
+        $log_order = $this->log_order
+        ->with('admin')
+        ->where('order_id', $id)
+        ->get();
         $branches = $this->branches
         ->where('status', 1)
         ->get();
@@ -1022,7 +1027,7 @@ class OrderController extends Controller
             'deliveries' => $deliveries,
             'order_status' => $order_status,
             'preparing_time' => $preparing_arr,
-            // 'log_order' => $log_order,
+            'log_order' => $log_order,
             'branches' => $branches,
         ]);
     }
