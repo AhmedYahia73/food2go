@@ -941,7 +941,7 @@ class OrderController extends Controller
                 $element->product->price += $total;
             }
         }
-        $order->user->orders = [];
+        $order->user->orders = collect([]);
         $order->order_details = $order_details;
         try {
             $order->user->count_orders = count($order->user->orders);
