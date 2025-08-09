@@ -945,8 +945,7 @@ class OrderController extends Controller
         }
         $order->order_details = $order_details;
         try {
-            $order->user->count_orders = $order->user->orders->count();
-            unset($order->user->orders);
+            $order->user->count_orders = 0; 
         } 
         catch (\Throwable $th) {
             $order->user = collect([]);
