@@ -46,7 +46,9 @@ class Branch extends Authenticatable
     }
 
     public function getMapAttribute(){
-        return "https://www.google.com/maps?q={$this->attributes['latitude']},{$this->attributes['longitude']}";
+        if(isset($this->attributes['latitude']) && isset($this->attributes['longitude'])){
+            return "https://www.google.com/maps?q={$this->attributes['latitude']},{$this->attributes['longitude']}";
+        }
     }
 
     public function zone(){
