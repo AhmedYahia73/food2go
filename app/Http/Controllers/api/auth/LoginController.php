@@ -219,7 +219,7 @@ class LoginController extends Controller
         ->update([
             'end_time' => now()
         ]);
-        $request->user()->shift_number = $shift_number;
+        $request->user()->shift_number = null;
         $request->user()->save();
 
         return response()->json([
