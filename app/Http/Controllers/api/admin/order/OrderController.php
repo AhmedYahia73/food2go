@@ -945,7 +945,7 @@ class OrderController extends Controller
         }
         $order->order_details = $order_details;
         try {
-            $order->user->count_orders = 0; 
+            $order->user->count_orders = $order->user->orders->count();
         } 
         catch (\Throwable $th) {
             $order->user = collect([]);
@@ -1017,6 +1017,7 @@ class OrderController extends Controller
         $branches = $this->branches
         ->where('status', 1)
         ->get();
+        unset($order->user->orders);
 
         return response()->json([
             'order' => $order,
