@@ -79,6 +79,7 @@ class OrderController extends Controller
                 'address_name' => $item?->order_address?->address ?? null,
                 'addons' => $addons,
                 'order_date' => $item->order_date,
+                'can_cancel' => $item->order_status == 'pending' ? true : false,
 
             ];
         });
