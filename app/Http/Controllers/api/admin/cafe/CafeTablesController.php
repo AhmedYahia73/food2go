@@ -24,16 +24,12 @@ class CafeTablesController extends Controller
         // /admin/caffe_tables
         $locations = $this->locations
         ->get();
-        $branchs = $this->branchs
-        ->where('status', 1)
-        ->get();
         $cafe_tables = $this->cafe_tables
         ->with('branch', 'location')
         ->get();
 
         return response()->json([
             'locations' => $locations,
-            'branchs' => $branchs,
             'cafe_tables' => $cafe_tables,
         ]);
     }
