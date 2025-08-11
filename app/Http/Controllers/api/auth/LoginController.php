@@ -71,13 +71,13 @@ class LoginController extends Controller
         // https://bcknd.food2go.online/api/admin/auth/login
         // Keys
         // email, password
-        $validation = Validator::make($request->all(), [
-            'fcm_token' => 'required', 
-        ]);
+        // $validation = Validator::make($request->all(), [
+        //     'fcm_token' => 'required', 
+        // ]);
 
-        if ($validation->fails()) {
-            return response()->json($validation->errors(), 422);
-        }
+        // if ($validation->fails()) {
+        //     return response()->json($validation->errors(), 422);
+        // }
         $user = $this->admin
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
@@ -106,13 +106,13 @@ class LoginController extends Controller
         $user->role = $role;
         if (password_verify($request->input('password'), $user->password)) {
             $user->token = $user->createToken('admin')->plainTextToken;
-            if($role == 'branch'){
+            if($role == 'branch' && $request->fcm_token){
                 DeviceToken::updateOrCreate(
                     ['branch_id' => $user->id],
                     ['token' => $request->fcm_token]
                 );
             }
-            elseif($role == 'admin'){
+            elseif($role == 'admin' && $request->fcm_token){
                 DeviceToken::updateOrCreate(
                     ['admin_id' => $user->id],
                     ['token' => $request->fcm_token]
