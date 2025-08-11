@@ -7,14 +7,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\CafeLocation;
+use App\Models\Branch;
 
 class CafeLocationController extends Controller
 {
-    public function __construct(private CafeLocation $locations){}
+    public function __construct(private CafeLocation $locations,
+    private Branch $branches){}
 
     public function view(){
         // /admin/caffe_location
         $locations = $this->locations
+        ->get();
+        $branches = $this->branches
+        ->select('id', 'name')
         ->get();
 
         return response()->json([
