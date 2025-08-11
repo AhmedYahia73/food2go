@@ -17,6 +17,7 @@ class CafeLocationController extends Controller
     public function view(){
         // /admin/caffe_location
         $locations = $this->locations
+        ->with(['branch:id,name'])
         ->get();
         $branches = $this->branches
         ->select('id', 'name')
@@ -31,6 +32,7 @@ class CafeLocationController extends Controller
     public function location($id){
         // /admin/caffe_location/item/{id}
         $location = $this->locations
+        ->with(['branch:id,name'])
         ->where('id', $id)
         ->first();
 

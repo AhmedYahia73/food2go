@@ -16,4 +16,8 @@ class CafeLocation extends Model
     public function tables(){
         return $this->hasMany(CafeTable::class, 'location_id');
     }
+
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
 }
