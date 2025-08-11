@@ -94,7 +94,6 @@ class BranchController extends Controller
         }
 
         $this->branches->where('id', $id)
-        ->where('main', '!=', 1)
         ->update([
             'status' => $request->status,
             'block_reason' => $request->block_reason,
