@@ -15,6 +15,7 @@ class CafeTable extends Model
         'capacity',
         'qr_code',
         'current_status',
+        'occupied',
         'status',
     ];
     protected $appends = ['qr_code_link'];
