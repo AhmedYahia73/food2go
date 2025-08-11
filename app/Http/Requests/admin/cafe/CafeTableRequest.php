@@ -25,8 +25,7 @@ class CafeTableRequest extends FormRequest
     {
         return [
             'table_number' => ['required'],
-            'location_id' => ['required', 'exists:cafe_locations,id'],
-            'branch_id' => ['required', 'exists:branches,id'],
+            'location_id' => ['required', 'exists:cafe_locations,id'], 
             'capacity' => ['required', 'numeric'],
             'occupied' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
