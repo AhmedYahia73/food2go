@@ -23,7 +23,8 @@ class CafeLocationController extends Controller
         ->get();
 
         return response()->json([
-            'locations' => $locations
+            'locations' => $locations,
+            'branches' => $branches,
         ]);
     }
     
