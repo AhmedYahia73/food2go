@@ -79,6 +79,8 @@ use App\Http\Controllers\api\admin\settings\business_setup\SMSIntegrationControl
 use App\Http\Controllers\api\admin\settings\business_setup\EmailIntegrationController;
 use App\Http\Controllers\api\admin\main_data\MainDataController;
 
+use App\Http\Controllers\api\cashier\reports\CashierReportsController;
+
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(GroupController::class)
     ->prefix('group')->group(function(){
@@ -573,5 +575,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::post('/policy/update', 'update_policy');
         });
     });
+
+    Route::controller(CashierReportsController::class)
+    ->prefix('/reports')->group(function(){
+        Route::get('shift_branch', 'shift_branch_reports');
+        Route::get('shift_all_branch', 'shift_reports');
+        Route::get('cashier_reports', 'cashier_reports');
+
+        Route::get('branch_cashiers', 'branch_cashiers');
+        Route::get('all_cashiers', 'all_cashiers');
+    }); 
 });
 
