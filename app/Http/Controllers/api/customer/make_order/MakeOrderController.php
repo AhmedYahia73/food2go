@@ -61,7 +61,7 @@ class MakeOrderController extends Controller
         if (!$company_info->order_online) {
             return response()->json([
                 'errors' => 'online order is closed'
-            ]);
+            ], 400);
         }
         if (!empty($request->address_id) && empty($request->branch_id)) {
             $address = $this->address
