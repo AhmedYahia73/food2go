@@ -934,6 +934,10 @@ class OrderController extends Controller
         'branch:id,name', 'delivery', 'payment_method:id,name,logo',
          'address.zone', 'admin:id,name,email,phone,image', 
         'schedule'])
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
         ->find($id);
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
@@ -1034,6 +1038,10 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/admin/order/invoice/{id}
         $order = $this->orders
         ->with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 'branch', 'delivery'])
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
         ->find($id);
 
         return response()->json([
