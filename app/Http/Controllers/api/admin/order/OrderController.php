@@ -1021,10 +1021,12 @@ class OrderController extends Controller
         $branches = $this->branches
         ->where('status', 1)
         ->get();
-        
-        $order->user->unsetRelation('orders');
-        $order->branch->unsetRelation('orders');
-
+        if($order->user->orders){
+            unset($order->user->orders);
+        }
+        if($order->branch->orders){
+            unset($order->branch->orders);
+        }
 
         return response()->json([
             'order' => $order,
