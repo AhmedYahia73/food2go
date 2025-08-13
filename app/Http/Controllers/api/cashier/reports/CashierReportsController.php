@@ -280,6 +280,15 @@ class CashierReportsController extends Controller
     }
 
     public function branch_cashier_reports(Request $request){
+        $validator = Validator::make($request->all(), [
+            'from_date' => 'required|date',
+            'to_date' => 'required|date',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
          $cashier_balance = $this->cashier_balance->get();
         $financial_account = $this->financial_account
         ->where('status', 1)
