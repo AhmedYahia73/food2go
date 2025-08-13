@@ -88,7 +88,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
 
     Route::controller(CashierReportsController::class)->prefix('branch_cashier_reports')
     ->group(function(){
-        Route::get('/', 'branch_cashier_reports');
+        Route::post('/', 'branch_cashier_reports');
     });
 });
 
