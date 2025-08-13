@@ -59,7 +59,7 @@ class Order extends Model
         'take_away_status',
         'delivery_status',
     ];
-    protected $appends = ['order_date', 'status_payment'];
+    protected $appends = ['order_date', 'status_payment', 'order_details_data'];
 
     public function getdateAttribute(){
         return $this->created_at->format('H:i:s');
@@ -112,7 +112,7 @@ class Order extends Model
         }
     }
 
-    public function getorderDetailsAttribute($data){
+    public function getorderDetailsDataAttribute($data){
         return json_decode($data, true);
     }
 

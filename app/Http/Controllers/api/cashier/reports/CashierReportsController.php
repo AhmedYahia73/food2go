@@ -209,7 +209,7 @@ class CashierReportsController extends Controller
         // تجميع المنتجات مرة واحدة
         $products_items = $shift_orders
             ->flatMap(function ($order) {
-                return collect($order->order_details ?? [])
+                return collect($order->order_details_data ?? [])
                     ->map(function ($item) {
                         return [
                             'product_id'   => $item['product']['id'] ?? null,
