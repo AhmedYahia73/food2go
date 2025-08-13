@@ -172,8 +172,7 @@ class CashierReportsController extends Controller
     $ordersQuery = $this->orders
         ->whereNotNull('shift')
         ->where('order_type', '!=', 'delivery')
-        ->where('status', 1)
-        ->with('order_details.product.product') // load all at once
+        ->where('status', 1)  // load all at once
         ->orderByDesc('shift')
         ->orderBy('payment_method_id');
 
