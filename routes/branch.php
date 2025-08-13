@@ -9,6 +9,7 @@ use App\Http\Controllers\api\branch\Order\OnlineOrderController;
 use App\Http\Controllers\api\branch\Order\POSOrderController;
 use App\Http\Controllers\api\cashier\address\AddressController;
 use App\Http\Controllers\api\cashier\customer\CustomerController;
+use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
@@ -83,6 +84,11 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::post('/delivery_order', 'delivery_order');
         Route::post('/determine_delivery/{order_id}', 'determine_delivery');
         Route::post('/take_away_order', 'take_away_order');
+    });
+
+    Route::controller(CashierReportsController::class)->prefix('branch_cashier_reports')
+    ->group(function(){
+        Route::get('/', 'branch_cashier_reports');
     });
 });
 

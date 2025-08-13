@@ -167,123 +167,234 @@ class CashierReportsController extends Controller
         ->where('status', 1)
         ->get();
 
-    $cashier_shifts = $this->cashier_shift
-        ->with('cashier_man')
-        ->get();
+        $cashier_shifts = $this->cashier_shift
+            ->with('cashier_man')
+            ->get();
 
-    // جلب كل الطلبات مرة واحدة وتجميعها حسب الشيفت
-    $ordersQuery = $this->orders
-        ->whereNotNull('shift')
-        ->where('order_type', '!=', 'delivery')
-        ->where('status', 1)
-        ->orderByDesc('shift')
-        ->orderBy('payment_method_id');
+        $ordersQuery = $this->orders
+            ->whereNotNull('shift')
+            ->where('order_type', '!=', 'delivery')
+            ->where('status', 1)
+            ->orderByDesc('shift')
+            ->orderBy('payment_method_id');
 
-    if ($request->from_date) {
-        $ordersQuery->whereDate('created_at', '>=', $request->from_date);
-    }
-    if ($request->to_date) {
-        $ordersQuery->whereDate('created_at', '<=', $request->to_date);
-    }
+        if ($request->from_date) {
+            $ordersQuery->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->to_date) {
+            $ordersQuery->whereDate('created_at', '<=', $request->to_date);
+        }
 
-    $orders = $ordersQuery->get()->groupBy('shift');
+        $orders = $ordersQuery->get()->groupBy('shift');
 
-    // تحميل بيانات الفينانشيال مرة واحدة وتجميعها
-    $orderFinancials = $this->order_financial
-        ->with('order')
-        ->whereIn('financial_id', $financial_account->pluck('id'))
-        ->get()
-        ->groupBy('financial_id');
+        $orderFinancials = $this->order_financial
+            ->with('order')
+            ->whereIn('financial_id', $financial_account->pluck('id'))
+            ->get()
+            ->groupBy('financial_id');
 
-    // عمل شيفت داتا
-    $shifts_data = $cashier_shifts->map(function ($shift) use (
-        $orders,
-        $cashier_shifts,
-        $cashier_balance,
-        $financial_account,
-        $orderFinancials
-    ) {
-        $shift_num = $shift->shift;
-        $shift_orders = $orders->get($shift_num, collect());
+        $shifts_data = $cashier_shifts->map(function ($shift) use (
+            $orders,
+            $cashier_shifts,
+            $cashier_balance,
+            $financial_account,
+            $orderFinancials
+        ) {
+            $shift_num = $shift->shift;
+            $shift_orders = $orders->get($shift_num, collect());
 
-        // تجميع المنتجات مرة واحدة
-        $products_items = $shift_orders
-            ->flatMap(function ($order) {
-                return collect($order->order_details_data ?? [])
-                    ->map(function ($item) {
-                        return [
-                            'product_id'   => $item['product']['id'] ?? null,
-                            'product_item' => $item['product']['name'] ?? null,
-                            'count'        => $item['count'] ?? 0,
-                        ];
-                    });
-            })
-            ->groupBy('product_id')
-            ->map(function ($group, $productId) {
-                return [
-                    'product_id'   => $productId,
-                    'product_item' => $group->first()['product_item'],
-                    'count'        => $group->sum('count'),
-                ];
-            })
-            ->sortByDesc('count')
-            ->values();
-
-        // كاشيرز داخل الشيفت
-        $cashiers_in_shift = $cashier_shifts
-            ->where('shift', $shift_num)
-            ->map(function ($cashier_item) use ($shift_orders, $cashier_balance, $financial_account, $orderFinancials, $shift_num) {
-                $cashier_orders = $shift_orders->where('cashier_man_id', $cashier_item->cashier_man_id);
-
-                $cashier_item->cashier_orders = $cashier_orders->values();
-                $cashier_item->total_orders =
-                    $cashier_orders->sum('amount') +
-                    $cashier_balance->where('shift_number', $shift_num)->sum('balance');
-
-                // بيانات الفينانشيال لكل كاشير
-                $cashier_item->financial_accounts_data = $financial_account->map(function ($fa) use ($orderFinancials, $shift_num) {
-                    $ordersForAccount = $orderFinancials->get($fa->id, collect())
-                        ->filter(fn($of) => $of->order?->shift == $shift_num);
-
+            $products_items = $shift_orders
+                ->flatMap(function ($order) {
+                    return collect($order->order_details_data ?? [])
+                        ->map(function ($item) {
+                            return [
+                                'product_id'   => $item['product']['id'] ?? null,
+                                'product_item' => $item['product']['name'] ?? null,
+                                'count'        => $item['count'] ?? 0,
+                            ];
+                        });
+                })
+                ->groupBy('product_id')
+                ->map(function ($group, $productId) {
                     return [
-                        'financial_account' => $fa->name,
-                        'amount'            => $ordersForAccount->sum('amount'),
-                        'orders'            => $ordersForAccount->pluck('order'),
+                        'product_id'   => $productId,
+                        'product_item' => $group->first()['product_item'],
+                        'count'        => $group->sum('count'),
                     ];
-                })->values();
+                })
+                ->sortByDesc('count')
+                ->values();
 
-                return $cashier_item;
-            });
+            $cashiers_in_shift = $cashier_shifts
+                ->where('shift', $shift_num)
+                ->map(function ($cashier_item) use ($shift_orders, $cashier_balance, $financial_account, $orderFinancials, $shift_num) {
+                    $cashier_orders = $shift_orders->where('cashier_man_id', $cashier_item->cashier_man_id);
 
-        // إجمالي الفينانشيال في الشيفت
-        $financial_account_total = $financial_account->map(function ($fa) use ($shift_orders) {
-            $ordersForAccount = $shift_orders->filter(function ($order) use ($fa) {
-                return $order->financial_accountigs->contains('id', $fa->id);
+                    $cashier_item->cashier_orders = $cashier_orders->values();
+                    $cashier_item->total_orders =
+                        $cashier_orders->sum('amount') +
+                        $cashier_balance->where('shift_number', $shift_num)->sum('balance');
+
+                    $cashier_item->financial_accounts_data = $financial_account->map(function ($fa) use ($orderFinancials, $shift_num) {
+                        $ordersForAccount = $orderFinancials->get($fa->id, collect())
+                            ->filter(fn($of) => $of->order?->shift == $shift_num);
+
+                        return [
+                            'financial_account' => $fa->name,
+                            'amount'            => $ordersForAccount->sum('amount'),
+                            'orders'            => $ordersForAccount->pluck('order'),
+                        ];
+                    })->values();
+
+                    return $cashier_item;
+                });
+
+            $financial_account_total = $financial_account->map(function ($fa) use ($shift_orders) {
+                $ordersForAccount = $shift_orders->filter(function ($order) use ($fa) {
+                    return $order->financial_accountigs->contains('id', $fa->id);
+                });
+
+                return [
+                    'financial_account' => $fa->name,
+                    'amount'            => $ordersForAccount->flatMap->financial_accountigs->sum('amount'),
+                    'orders'            => $ordersForAccount,
+                ];
             });
 
             return [
-                'financial_account' => $fa->name,
-                'amount'            => $ordersForAccount->flatMap->financial_accountigs->sum('amount'),
-                'orders'            => $ordersForAccount,
+                'shift'                   => $shift,
+                'orders'                  => $shift_orders,
+                'orders_count'            => $shift_orders->count(),
+                'avarage_order'           => $shift_orders->avg('amount') ?? 0,
+                'product_items'           => $products_items,
+                'products_items_count'    => $products_items->count(),
+                'cashier_men'             => $cashiers_in_shift,
+                'financial_account_total' => $financial_account_total,
             ];
-        });
+        })->values();
 
-        return [
-            'shift'                   => $shift,
-            'orders'                  => $shift_orders,
-            'orders_count'            => $shift_orders->count(),
-            'avarage_order'           => $shift_orders->avg('amount') ?? 0,
-            'product_items'           => $products_items,
-            'products_items_count'    => $products_items->count(),
-            'cashier_men'             => $cashiers_in_shift,
-            'financial_account_total' => $financial_account_total,
-        ];
-    })->values();
+        return response()->json([
+            'shifts_data' => $shifts_data,
+        ]);
 
-    return response()->json([
-        'shifts_data' => $shifts_data,
-    ]);
+    }
 
+    public function branch_cashier_reports(Request $request){
+         $cashier_balance = $this->cashier_balance->get();
+        $financial_account = $this->financial_account
+        ->where('status', 1)
+        ->get();
+
+        $cashier_shifts = $this->cashier_shift
+            ->with('cashier_man')
+            ->get();
+
+        $ordersQuery = $this->orders
+            ->whereNotNull('shift')
+            ->where('order_type', '!=', 'delivery')
+            ->where('status', 1)
+            ->where('branch_id', $request->user()->id)
+            ->orderByDesc('shift')
+            ->orderBy('payment_method_id');
+
+        if ($request->from_date) {
+            $ordersQuery->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->to_date) {
+            $ordersQuery->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        $orders = $ordersQuery->get()->groupBy('shift');
+
+        $orderFinancials = $this->order_financial
+            ->with('order')
+            ->whereIn('financial_id', $financial_account->pluck('id'))
+            ->get()
+            ->groupBy('financial_id');
+
+        $shifts_data = $cashier_shifts->map(function ($shift) use (
+            $orders,
+            $cashier_shifts,
+            $cashier_balance,
+            $financial_account,
+            $orderFinancials
+        ) {
+            $shift_num = $shift->shift;
+            $shift_orders = $orders->get($shift_num, collect());
+
+            $products_items = $shift_orders
+                ->flatMap(function ($order) {
+                    return collect($order->order_details_data ?? [])
+                        ->map(function ($item) {
+                            return [
+                                'product_id'   => $item['product']['id'] ?? null,
+                                'product_item' => $item['product']['name'] ?? null,
+                                'count'        => $item['count'] ?? 0,
+                            ];
+                        });
+                })
+                ->groupBy('product_id')
+                ->map(function ($group, $productId) {
+                    return [
+                        'product_id'   => $productId,
+                        'product_item' => $group->first()['product_item'],
+                        'count'        => $group->sum('count'),
+                    ];
+                })
+                ->sortByDesc('count')
+                ->values();
+
+            $cashiers_in_shift = $cashier_shifts
+                ->where('shift', $shift_num)
+                ->map(function ($cashier_item) use ($shift_orders, $cashier_balance, $financial_account, $orderFinancials, $shift_num) {
+                    $cashier_orders = $shift_orders->where('cashier_man_id', $cashier_item->cashier_man_id);
+
+                    $cashier_item->cashier_orders = $cashier_orders->values();
+                    $cashier_item->total_orders =
+                        $cashier_orders->sum('amount') +
+                        $cashier_balance->where('shift_number', $shift_num)->sum('balance');
+
+                    $cashier_item->financial_accounts_data = $financial_account->map(function ($fa) use ($orderFinancials, $shift_num) {
+                        $ordersForAccount = $orderFinancials->get($fa->id, collect())
+                            ->filter(fn($of) => $of->order?->shift == $shift_num);
+
+                        return [
+                            'financial_account' => $fa->name,
+                            'amount'            => $ordersForAccount->sum('amount'),
+                            'orders'            => $ordersForAccount->pluck('order'),
+                        ];
+                    })->values();
+
+                    return $cashier_item;
+                });
+
+            $financial_account_total = $financial_account->map(function ($fa) use ($shift_orders) {
+                $ordersForAccount = $shift_orders->filter(function ($order) use ($fa) {
+                    return $order->financial_accountigs->contains('id', $fa->id);
+                });
+
+                return [
+                    'financial_account' => $fa->name,
+                    'amount'            => $ordersForAccount->flatMap->financial_accountigs->sum('amount'),
+                    'orders'            => $ordersForAccount,
+                ];
+            });
+
+            return [
+                'shift'                   => $shift,
+                'orders'                  => $shift_orders,
+                'orders_count'            => $shift_orders->count(),
+                'avarage_order'           => $shift_orders->avg('amount') ?? 0,
+                'product_items'           => $products_items,
+                'products_items_count'    => $products_items->count(),
+                'cashier_men'             => $cashiers_in_shift,
+                'financial_account_total' => $financial_account_total,
+            ];
+        })->values();
+
+        return response()->json([
+            'shifts_data' => $shifts_data,
+        ]);
     }
 
     public function all_cashiers(Request $request){
