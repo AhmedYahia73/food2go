@@ -580,7 +580,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('/reports')->group(function(){
         Route::get('shift_branch', 'shift_branch_reports');
         Route::get('shift_all_branch', 'shift_reports');
-        Route::post('cashier_reports', 'cashier_reports');
+        Route::get('cashier_reports', 'cashier_reports');
         Route::post('shift_cashier_reports/{id}', 'shift_cashier_reports');
 
         Route::get('branch_cashiers', 'branch_cashiers');
