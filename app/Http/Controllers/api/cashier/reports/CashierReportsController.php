@@ -153,10 +153,24 @@ class CashierReportsController extends Controller
     //         return $element;
     //     });
     // Preload data in minimal queries 
-
+        $validator = Validator::make($request->all(), [
+            'start_date' => 'date',
+            'end_date' => 'date',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $cashier_shifts = $this->cashier_shift
-        ->with('cashier_man:id,shift_number,user_name')
-        ->get();
+        ->with('cashier_man:id,shift_number,user_name');
+        if($request->start_date){
+            $cashier_shifts = $cashier_shifts->whereDate('start_time', '>=', $request->start_date);
+        }
+        if($request->end_date){
+            $cashier_shifts = $cashier_shifts->whereDate('end_time', '<=', $request->end_date);
+        }
+        $cashier_shifts = $cashier_shifts->get();
    
 
         return response()->json([
@@ -166,9 +180,24 @@ class CashierReportsController extends Controller
     }
 
     public function branch_cashier_reports(Request $request){
+        $validator = Validator::make($request->all(), [
+            'start_date' => 'date',
+            'end_date' => 'date',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $cashier_shifts = $this->cashier_shift
-        ->with('cashier_man:id,shift_number,user_name')
-        ->get(); 
+        ->with('cashier_man:id,shift_number,user_name');
+        if($request->start_date){
+            $cashier_shifts = $cashier_shifts->whereDate('start_time', '>=', $request->start_date);
+        }
+        if($request->end_date){
+            $cashier_shifts = $cashier_shifts->whereDate('end_time', '<=', $request->end_date);
+        }
+        $cashier_shifts = $cashier_shifts->get();
 
 
         return response()->json([
