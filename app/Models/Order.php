@@ -117,7 +117,7 @@ class Order extends Model
     }
 
     public function getorderDetailsAttribute($data){
-        return json_decode($data, true);
+        return json_decode($data);
     }
 
     public function financial_accountigs(){
