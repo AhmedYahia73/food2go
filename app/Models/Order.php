@@ -112,8 +112,12 @@ class Order extends Model
         }
     }
 
-    public function getorderDetailsDataAttribute($data){
-        return json_decode($data, true);
+    public function getOrderDetailsDataAttribute($data){
+        return json_decode($this->attributes['order_details'], true);
+    }
+
+    public function getorderDetailsAttribute($data){
+        return json_decode($data);
     }
 
     public function financial_accountigs(){
