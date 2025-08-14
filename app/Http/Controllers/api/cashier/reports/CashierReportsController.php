@@ -23,15 +23,6 @@ class CashierReportsController extends Controller
     private OrderFinancial $order_financial, private CashierBalance $cashier_balance){}
     
     public function cashier_reports(Request $request){
-        $validator = Validator::make($request->all(), [
-            'from_date' => 'required|date',
-            'to_date' => 'required|date',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
     //     $cashier_balance = $this->cashier_balance;
     //     $cashier_shift = $this->cashier_shift
     //     ->with('cashier_man')
@@ -161,117 +152,12 @@ class CashierReportsController extends Controller
     //         $element['financial_account_total'] = $financial_account_total;
     //         return $element;
     //     });
-    // Preload data in minimal queries
-    $cashier_balance = $this->cashier_balance->get();
-    $financial_account = $this->financial_account
-        ->where('status', 1)
-        ->get();
+    // Preload data in minimal queries 
 
         $cashier_shifts = $this->cashier_shift
-            ->with('cashier_man')
-            ->get();
-
-        $ordersQuery = $this->orders
-            ->whereNotNull('shift')
-            ->where('order_type', '!=', 'delivery')
-            ->where('status', 1)
-            ->orderByDesc('shift')
-            ->orderBy('payment_method_id');
-
-        if ($request->from_date) {
-            $ordersQuery->whereDate('created_at', '>=', $request->from_date);
-        }
-        if ($request->to_date) {
-            $ordersQuery->whereDate('created_at', '<=', $request->to_date);
-        }
-
-        $orders = $ordersQuery->get()->groupBy('shift');
-
-        $orderFinancials = $this->order_financial
-            ->with('order')
-            ->whereIn('financial_id', $financial_account->pluck('id'))
-            ->get()
-            ->groupBy('financial_id');
-
-        $shifts_data = $cashier_shifts->map(function ($shift) use (
-            $orders,
-            $cashier_shifts,
-            $cashier_balance,
-            $financial_account,
-            $orderFinancials
-        ) {
-            $shift_num = $shift->shift;
-            $shift_orders = $orders->get($shift_num, collect());
-
-            $products_items = $shift_orders
-                ->flatMap(function ($order) {
-                    return collect($order->order_details_data ?? [])
-                        ->map(function ($item) {
-                            return [
-                                'product_id'   => $item['product']['id'] ?? null,
-                                'product_item' => $item['product']['name'] ?? null,
-                                'count'        => $item['count'] ?? 0,
-                            ];
-                        });
-                })
-                ->groupBy('product_id')
-                ->map(function ($group, $productId) {
-                    return [
-                        'product_id'   => $productId,
-                        'product_item' => $group->first()['product_item'],
-                        'count'        => $group->sum('count'),
-                    ];
-                })
-                ->sortByDesc('count')
-                ->values();
-
-            $cashiers_in_shift = $cashier_shifts
-                ->where('shift', $shift_num)
-                ->map(function ($cashier_item) use ($shift_orders, $cashier_balance, $financial_account, $orderFinancials, $shift_num) {
-                    $cashier_orders = $shift_orders->where('cashier_man_id', $cashier_item->cashier_man_id);
-
-                    $cashier_item->cashier_orders = $cashier_orders->values();
-                    $cashier_item->total_orders =
-                        $cashier_orders->sum('amount') +
-                        $cashier_balance->where('shift_number', $shift_num)->sum('balance');
-
-                    $cashier_item->financial_accounts_data = $financial_account->map(function ($fa) use ($orderFinancials, $shift_num) {
-                        $ordersForAccount = $orderFinancials->get($fa->id, collect())
-                            ->filter(fn($of) => $of->order?->shift == $shift_num);
-
-                        return [
-                            'financial_account' => $fa->name,
-                            'amount'            => $ordersForAccount->sum('amount'),
-                            'orders'            => $ordersForAccount->pluck('order'),
-                        ];
-                    })->values();
-
-                    return $cashier_item;
-                });
-
-            $financial_account_total = $financial_account->map(function ($fa) use ($shift_orders) {
-                $ordersForAccount = $shift_orders->filter(function ($order) use ($fa) {
-                    return $order->financial_accountigs->contains('id', $fa->id);
-                });
-
-                return [
-                    'financial_account' => $fa->name,
-                    'amount'            => $ordersForAccount->flatMap->financial_accountigs->sum('amount'),
-                    'orders'            => $ordersForAccount,
-                ];
-            });
-
-            return [
-                'shift'                   => $shift,
-                'orders'                  => $shift_orders,
-                'orders_count'            => $shift_orders->count(),
-                'avarage_order'           => $shift_orders->avg('amount') ?? 0,
-                'product_items'           => $products_items,
-                'products_items_count'    => $products_items->count(),
-                'cashier_men'             => $cashiers_in_shift,
-                'financial_account_total' => $financial_account_total,
-            ];
-        })->values();
+        ->with('cashier_man:id,shift_number,user_name')
+        ->get();
+   
 
         return response()->json([
             'shifts_data' => $shifts_data,
@@ -280,16 +166,6 @@ class CashierReportsController extends Controller
     }
 
     public function branch_cashier_reports(Request $request){
-        $validator = Validator::make($request->all(), [
-            'from_date' => 'required|date',
-            'to_date' => 'required|date',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        } 
-
         $cashier_shifts = $this->cashier_shift
         ->with('cashier_man:id,shift_number,user_name')
         ->get(); 
