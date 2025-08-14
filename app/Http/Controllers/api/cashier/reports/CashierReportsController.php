@@ -50,8 +50,8 @@ class CashierReportsController extends Controller
     //         $orders_shift = $orders->where('shift', $item->shift)->values();
     //         $products_shift = collect([]);
     //         foreach ($orders_shift as $key => $element) {
-    //             $products_element = collect($element->order_details)->count() > 0
-    //             ?collect($element->order_details)[0]?->product : null;
+    //             $products_element = collect($element->order_details_data_data)->count() > 0
+    //             ?collect($element->order_details_data_data)[0]?->product : null;
     //             $products_element = collect($products_element)
     //             ->map(function($item){
     //                 return [
@@ -250,7 +250,7 @@ class CashierReportsController extends Controller
 
             $products_items = $shift_orders
                 ->flatMap(function ($order) {
-                    return collect($order->order_details ?? [])
+                    return collect($order->order_details_data ?? [])
                         ->map(function ($item) {
                             return [
                                 'product_id'   => $item['product']['id'] ?? null,
@@ -510,8 +510,8 @@ class CashierReportsController extends Controller
             $orders_shift = $orders->where('shift', $item->shift)->values();
             $products_shift = collect([]);
             foreach ($orders_shift as $key => $element) {
-                $products_element = collect($element->order_details)->count() > 0
-                ?collect($element->order_details)[0]?->product : null;
+                $products_element = collect($element->order_details_data)->count() > 0
+                ?collect($element->order_details_data)[0]?->product : null;
                 $products_element = collect($products_element)
                 ->map(function($item){
                     return [
@@ -632,8 +632,8 @@ class CashierReportsController extends Controller
             $orders_shift = $orders->where('shift', $item->shift)->values();
             $products_shift = collect([]);
             foreach ($orders_shift as $key => $element) {
-                $products_element = collect($element->order_details)->count() > 0
-                ?collect($element->order_details)[0]?->product : null;
+                $products_element = collect($element->order_details_data)->count() > 0
+                ?collect($element->order_details_data)[0]?->product : null;
                 $products_element = collect($products_element)
                 ->map(function($item){
                     return [
