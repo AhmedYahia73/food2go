@@ -731,7 +731,7 @@ trait PlaceOrder
 
     public function takeaway_order_format($order){
         $order_data = [];
-        foreach (isset($order->order_details[0]) ?? $order as $key => $item) {
+        foreach ($order->order_details ?? $order as $key => $item) {
             $product = $item->product[0]->product;
             unset($product->addons);
             unset($product->variations);
