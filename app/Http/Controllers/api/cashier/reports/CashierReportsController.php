@@ -188,7 +188,7 @@ class CashierReportsController extends Controller
             ->with('cashier_man')
             ->where('id', $id)
             ->get();
-        if($cashier_shifts-> count == 0){
+        if($cashier_shifts-> count() == 0){
             return response()->json([
                 'errors' => 'id is wrong'
             ], 400);
