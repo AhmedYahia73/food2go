@@ -288,30 +288,42 @@ class CashierReportsController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
-         $cashier_balance = $this->cashier_balance->get();
+        } 
+
+        $cashier_shifts = $this->cashier_shift
+        ->with('cashier_man:id,shift_number,user_name')
+        ->get(); 
+
+
+        return response()->json([
+            'cashier_shifts' => $cashier_shifts,
+        ]);
+    }
+    
+    
+    public function shift_cashier_reports(Request $request, $id){
+ 
+        $cashier_balance = $this->cashier_balance->get();
         $financial_account = $this->financial_account
         ->where('status', 1)
         ->get();
 
         $cashier_shifts = $this->cashier_shift
             ->with('cashier_man')
+            ->where('id', $id)
             ->get();
+        if($cashier_shifts-> count == 0){
+            return response()->json([
+                'errors' => 'id is wrong'
+            ], 400);
+        }
 
         $ordersQuery = $this->orders
             ->whereNotNull('shift')
             ->where('order_type', '!=', 'delivery')
             ->where('status', 1)
-            ->where('branch_id', $request->user()->id)
-            ->orderByDesc('shift')
+            ->where('shift', $cashier_shifts[0]->shift)
             ->orderBy('payment_method_id');
-
-        if ($request->from_date) {
-            $ordersQuery->whereDate('created_at', '>=', $request->from_date);
-        }
-        if ($request->to_date) {
-            $ordersQuery->whereDate('created_at', '<=', $request->to_date);
-        }
 
         $orders = $ordersQuery->get()->groupBy('shift');
 
@@ -333,7 +345,7 @@ class CashierReportsController extends Controller
 
             $products_items = $shift_orders
                 ->flatMap(function ($order) {
-                    return collect($order->order_details_data ?? [])
+                    return collect($order->order_details ?? [])
                         ->map(function ($item) {
                             return [
                                 'product_id'   => $item['product']['id'] ?? null,
@@ -402,8 +414,9 @@ class CashierReportsController extends Controller
         })->values();
 
         return response()->json([
-            'shifts_data' => $shifts_data,
+            'shifts_data' => $shifts_data[0],
         ]);
+
     }
 
     public function all_cashiers(Request $request){
