@@ -735,7 +735,7 @@ class CashierMakeOrderController extends Controller
         $order = $this->order
         ->where('id', $id)
         ->first(); 
-        return $order->order_details;
+        return $order;
         $order_items = $this->takeaway_order_format($order);
         $order_items = collect($order_items);
         $kitchen_order = [];
