@@ -734,8 +734,7 @@ class CashierMakeOrderController extends Controller
     public function preparing_takeaway($request, $id){
         $order = $this->order
         ->where('id', $id)
-        ->first(); 
-        return $order;
+        ->first();  
         $order_items = $this->takeaway_order_format($order);
         $order_items = collect($order_items);
         $kitchen_order = [];
