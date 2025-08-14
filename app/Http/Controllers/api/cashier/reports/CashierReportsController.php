@@ -231,7 +231,7 @@ class CashierReportsController extends Controller
             ->orderBy('payment_method_id');
 
         $orders = $ordersQuery->get()->groupBy('shift');
-
+        unset($orders->order_details);
         $orderFinancials = $this->order_financial
             ->with('order')
             ->whereIn('financial_id', $financial_account->pluck('id'))
@@ -511,7 +511,7 @@ class CashierReportsController extends Controller
             $products_shift = collect([]);
             foreach ($orders_shift as $key => $element) {
                 $products_element = collect($element->order_details_data)->count() > 0
-                ?collect($element->order_details)[0]->product : null;
+                ?collect($element->order_details_data)[0]->product : null;
                 $products_element = collect($products_element)
                 ->map(function($item){
                     return [
