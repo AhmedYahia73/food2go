@@ -160,7 +160,7 @@ class CashierReportsController extends Controller
    
 
         return response()->json([
-            'shifts_data' => $shifts_data,
+            'cashier_shifts' => $cashier_shifts,
         ]);
 
     }
