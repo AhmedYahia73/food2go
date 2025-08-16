@@ -246,7 +246,9 @@ class CashierReportsController extends Controller
             $orderFinancials
         ) {
             $shift_num = $shift->shift;
-            $shift_orders = $orders->get($shift_num, collect());
+            $shift_orders = $orders->get($shift_num, collect())
+            ->select('id', 'amount', 'order_type', 'total_tax', 'total_discount',
+            'coupon_discount', 'order_number', 'order_details_data', 'source');
 
             $products_items = $shift_orders
                 ->flatMap(function ($order) {
