@@ -256,9 +256,9 @@ class CashierReportsController extends Controller
                     return collect($order->order_details_data ?? [])
                         ->map(function ($item) {
                             return [
-                                'product_id'   => $item['product']['id'] ?? null,
-                                'product_item' => $item['product']['name'] ?? null,
-                                'count'        => $item['count'] ?? 0,
+                                'product_id'   => $item['product'][0]['id'] ?? null,
+                                'product_item' => $item['product'][0]['name'] ?? null,
+                                'count'        => $item['product'][0]['count'] ?? 0,
                             ];
                         });
                 })
