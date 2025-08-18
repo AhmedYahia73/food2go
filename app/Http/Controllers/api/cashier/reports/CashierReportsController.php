@@ -165,10 +165,10 @@ class CashierReportsController extends Controller
         $cashier_shifts = $this->cashier_shift
         ->with('cashier_man:id,shift_number,user_name');
         if($request->start_date){
-            $cashier_shifts = $cashier_shifts->whereDate('start_time', '>=', $request->start_date);
+            $cashier_shifts = $cashier_shifts->whereDate('start_time', '<=', $request->start_date);
         }
         if($request->end_date){
-            $cashier_shifts = $cashier_shifts->whereDate('end_time', '<=', $request->end_date);
+            $cashier_shifts = $cashier_shifts->whereDate('end_time', '>=', $request->end_date);
         }
         $cashier_shifts = $cashier_shifts->get();
    
