@@ -165,10 +165,10 @@ class CashierReportsController extends Controller
         $cashier_shifts = $this->cashier_shift
         ->with('cashier_man:id,shift_number,user_name');
         if($request->start_date){
-            $cashier_shifts = $cashier_shifts->whereDate('start_time', '<=', $request->start_date);
+            $cashier_shifts = $cashier_shifts->whereDate('start_time', '>=', $request->start_date);
         }
         if($request->end_date){
-            $cashier_shifts = $cashier_shifts->whereDate('end_time', '>=', $request->end_date);
+            $cashier_shifts = $cashier_shifts->whereDate('end_time', '<=', $request->end_date);
         }
         $cashier_shifts = $cashier_shifts->get();
    
@@ -249,7 +249,7 @@ class CashierReportsController extends Controller
             $shift_num = $shift->shift;
            $shift_orders = collect($orders->get($shift_num, collect()))
             ->select('id', 'amount', 'order_type', 'total_tax', 'total_discount',
-            'coupon_discount', 'order_number', 'order_details_data', 'source', 'shift', 'cashier_man_id');
+            'coupon_discount', 'order_number', 'order_details_data', 'source', 'shift', 'cashier_man_id', 'financial_accountigs');
 
             $products_items = $shift_orders
                 ->flatMap(function ($order) {
@@ -296,10 +296,9 @@ class CashierReportsController extends Controller
 
                     return $cashier_item;
                 });
-
             $financial_account_total = $financial_account->map(function ($fa) use ($shift_orders) {
                 $ordersForAccount = $shift_orders->filter(function ($order) use ($fa) {
-                    return $order->financial_accountigs->contains('id', $fa->id);
+                    return collect($order['financial_accountigs'])->contains('id', $fa->id);
                 });
 
                 return [
