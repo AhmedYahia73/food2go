@@ -298,7 +298,7 @@ class CashierReportsController extends Controller
 
             $financial_account_total = $financial_account->map(function ($fa) use ($shift_orders) {
                 $ordersForAccount = $shift_orders->filter(function ($order) use ($fa) {
-                    return $order->financial_accountigs->contains('id', $fa->id);
+                    return $order?->financial_accountigs?->contains('id', $fa->id);
                 });
 
                 return [
