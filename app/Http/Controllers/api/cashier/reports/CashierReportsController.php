@@ -223,12 +223,15 @@ class CashierReportsController extends Controller
             ], 400);
         }
         $ordersQuery = $this->orders
-            ->with('financial_accountigs') // لازم عشان تشتغل
-            ->whereNotNull('shift')
-            ->where('order_type', '!=', 'delivery')
-            ->where('status', 1)
-            ->where('shift', $cashier_shifts[0]->shift)
-            ->orderBy('payment_method_id');
+        ->with('financial_accountigs')
+        ->select('id', 'amount', 'order_type', 'total_tax', 'total_discount',
+        'coupon_discount', 'order_number', 'order_details_data', 'source', 'shift', 'cashier_man_id')
+        ->whereNotNull('shift')
+        ->where('order_type', '!=', 'delivery')
+        ->where('status', 1)
+        ->where('shift', $cashier_shifts[0]->shift)
+        ->orderBy('payment_method_id');
+
 
         $orders = $ordersQuery->get()->groupBy('shift');
         unset($orders->order_details);
@@ -246,9 +249,7 @@ class CashierReportsController extends Controller
             $orderFinancials
         ) {
             $shift_num = $shift->shift;
-            $shift_orders = $orders->get($shift_num, collect())
-            ->select('id', 'amount', 'order_type', 'total_tax', 'total_discount',
-            'coupon_discount', 'order_number', 'order_details_data', 'source');
+           $shift_orders = $orders->get($shift_num, collect());
 
             $products_items = $shift_orders
                 ->flatMap(function ($order) {
