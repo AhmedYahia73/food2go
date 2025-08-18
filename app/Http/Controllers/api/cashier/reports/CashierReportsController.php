@@ -224,8 +224,6 @@ class CashierReportsController extends Controller
         }
         $ordersQuery = $this->orders
         ->with('financial_accountigs')
-        ->select('id', 'amount', 'order_type', 'total_tax', 'total_discount',
-        'coupon_discount', 'order_number', 'order_details_data', 'source', 'shift', 'cashier_man_id')
         ->whereNotNull('shift')
         ->where('order_type', '!=', 'delivery')
         ->where('status', 1)
@@ -249,7 +247,9 @@ class CashierReportsController extends Controller
             $orderFinancials
         ) {
             $shift_num = $shift->shift;
-           $shift_orders = $orders->get($shift_num, collect());
+           $shift_orders = collect($orders->get($shift_num, collect()))
+            ->select('id', 'amount', 'order_type', 'total_tax', 'total_discount',
+            'coupon_discount', 'order_number', 'order_details_data', 'source', 'shift', 'cashier_man_id');
 
             $products_items = $shift_orders
                 ->flatMap(function ($order) {
