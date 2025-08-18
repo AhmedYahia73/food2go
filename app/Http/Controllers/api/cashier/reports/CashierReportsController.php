@@ -309,8 +309,12 @@ class CashierReportsController extends Controller
             });
 
             return [
-                'shift'                   => $shift,
-                'orders'                  => $shift_orders,
+                'id'                      => $shift->id,
+                'shift'                   => $shift->shift,
+                'start_time'              => $shift->start_time,
+                'end_time'                => $shift->end_time,
+                'total_amount_orders'     => $shift->total_orders,
+                'orders'                  => $shift_orders->select('id'),
                 'orders_count'            => $shift_orders->count(),
                 'avarage_order'           => $shift_orders->avg('amount') ?? 0,
                 'product_items'           => $products_items,

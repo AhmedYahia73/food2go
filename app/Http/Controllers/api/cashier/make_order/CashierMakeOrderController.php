@@ -637,6 +637,99 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
+
+    public function dine_in_split_payment(DeliveryRequest $request){
+        // /cashier/delivery_order
+        // Keys
+        // amount, total_tax, total_discount, notes, address_id
+        // source, financials[{id, amount}], cash_with_delivery
+        // cashier_id, user_id
+        // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
+        // variation[{variation_id, option_id[]}], count}]
+        $request->merge([
+            'branch_id' => $request->user()->branch_id, 
+            'order_type' => 'delivery',
+            'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
+            'pos' => 1,
+            'cash_with_delivery' => $request->cash_with_delivery ?? false,
+        ]);
+        $order = $this->delivery_make_order($request);
+        if (isset($order['errors']) && !empty($order['errors'])) {
+            return response()->json($order, 400);
+        }
+        $this->preparing_delivery($request, $order['order']->id);
+        return response()->json([
+            'success' => $order['order'], 
+        ]);
+    }
+    public function dine_in_split_payment2(DineinOrderRequest $request){
+        // /cashier/dine_in_payment
+        // Keys
+        // date, amount, total_tax, total_discount
+        // notes, payment_method_id, table_id
+  
+        $request->merge([  
+            'branch_id' => $request->user()->branch_id,
+            'order_type' => 'dine_in',
+            'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
+            'pos' => 1,
+            'status' => 1,
+        ]); 
+        $order_carts = $this->order_cart
+        ->where('table_id', $request->table_id)
+        ->get();
+        $orders = collect([]);
+        $product = [];
+        foreach ($order_carts as $key => $item) {
+            $order_item = $this->order_format($item, $key);
+            $orders = $orders->merge($order_item);
+        }
+       
+        foreach ($orders as $key => $item) {
+            $product[$key]['exclude_id'] = collect($item->excludes)->pluck('id');
+            $product[$key]['extra_id'] = collect($item->extras)->pluck('id');
+            $product[$key]['variation'] = collect($item->variation_selected)->map(function($element){
+                return [
+                    'variation_id' => $element->id,
+                    'option_id' => collect($element->options)->pluck('id'),
+                ];
+            });
+            $product[$key]['addons'] = collect($item->addons_selected)->map(function($element){
+                return [
+                    'addon_id' => ($element->id),
+                    'count' => ($element->count),
+                ];
+            }); 
+        
+            $product[$key]['count'] = $item->count;
+            $product[$key]['product_id'] = $item->id;
+        }
+        $request->merge([  
+            'products' => $product, 
+        ]);
+        
+        $order = $this->dine_in_make_order($request);
+        if (isset($order['errors']) && !empty($order['errors'])) {
+            return response()->json($order, 400);
+        } 
+        $order['payment']['cart'] = $order['payment']['order_details'];
+        $order = $this->order_format(($order['payment']), 0);
+        $this->cafe_table
+        ->where('id', $request->table_id)
+        ->update([
+            'current_status' => 'not_available_but_checkout'
+        ]);
+        $order_cart = $this->order_cart
+        ->where('table_id', $request->table_id)
+        ->delete();
+
+        return response()->json([
+            'success' => $order, 
+        ]);
+    }
+
     public function tables_status(Request $request, $id){
         // /cashier/tables_status/{id}
         // Keys
