@@ -60,7 +60,7 @@ class CafeLocationController extends Controller
         ->create([
             'name' => $request->name,
             'branch_id' => $request->branch_id,
-            'location' => json_encode($request->location),
+            'location' => $request->location,
         ]);
 
         return response()->json([
@@ -88,7 +88,7 @@ class CafeLocationController extends Controller
         ->update([
             'name' => $request->name,
             'branch_id' => $request->branch_id,
-            'location' => json_encode($request->location),
+            'location' => $request->location,
         ]);
 
         return response()->json([
