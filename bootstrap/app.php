@@ -49,6 +49,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ->prefix('cashier')
             ->name('cashier.')
             ->group(base_path('routes/cashier.php'));
+            Route::middleware('api')
+            ->prefix('client')
+            ->name('client.')
+            ->group(base_path('routes/client.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
