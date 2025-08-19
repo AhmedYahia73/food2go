@@ -527,7 +527,7 @@ class OrderController extends Controller
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', 'order_details')
         ->where('pos', 0)
         ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')

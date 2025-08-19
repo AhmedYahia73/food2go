@@ -273,6 +273,22 @@ class ClientMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+            
+        // مثال:
+        $polygon = [
+            [24.70286055030423,46.65242090374869],
+            [24.69475077279649,46.63645372847783],
+            [24.677593734981215,46.644694851198295],
+            [24.6800894508758,46.66649948839609],
+        ];
+
+        $userLocation = ['lat' => 24.6900, 'lng' => 46.6500];
+
+        if (isPointInPolygon($userLocation, $polygon)) {
+            echo "داخل المنطقة ✅";
+        } else {
+            echo "خارج المنطقة ❌";
+        }
         $branch_id = $this->cafe_tables
         ->where('id', $request->table_id)
         ->with('location')
@@ -516,4 +532,26 @@ class ClientMakeOrderController extends Controller
             'success' => $order, 
         ]);
     }
+
+    function isPointInPolygon($point, $polygon) {
+        $x = $point['lat'];
+        $y = $point['lng'];
+        $inside = false;
+
+        $n = count($polygon);
+        for ($i = 0, $j = $n - 1; $i < $n; $j = $i++) {
+            $xi = $polygon[$i][0]; // lat
+            $yi = $polygon[$i][1]; // lng
+            $xj = $polygon[$j][0]; 
+            $yj = $polygon[$j][1];
+
+            $intersect = (($yi > $y) != ($yj > $y)) &&
+                ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi);
+
+            if ($intersect) $inside = !$inside;
+        }
+
+        return $inside;
+    }
+
 }
