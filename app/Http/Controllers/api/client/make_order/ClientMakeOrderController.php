@@ -276,8 +276,7 @@ class ClientMakeOrderController extends Controller
         $request->merge([
             'branch_id' => $request->user()->branch_id,
             'user_id' => 'empty',
-            'order_type' => 'dine_in',
-            'cashier_man_id' =>$request->user()->id,
+            'order_type' => 'dine_in', 
             'shift' => $request->user()->shift_number,
         ]);
         $order = $this->make_order_cart($request);
