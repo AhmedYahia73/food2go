@@ -28,7 +28,7 @@ class DineinSplitRequest extends FormRequest
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'], 
             'source' => 'sometimes',
-            'cart_id' => ['arrary', 'required'],
+            'cart_id' => ['array', 'required'],
             'cart_id.*' => ['exists:order_carts,id', 'required'],
         
             'financials' => ['array'],
