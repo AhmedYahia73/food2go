@@ -694,13 +694,8 @@ class CashierMakeOrderController extends Controller
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']), 0);
-        $this->cafe_table
-        ->where('id', $request->table_id)
-        ->update([
-            'current_status' => 'not_available_but_checkout'
-        ]);
         $order_cart = $this->order_cart
-        ->where('table_id', $request->table_id)
+        ->whereIn('id', $request->cart_id)
         ->delete();
 
         return response()->json([
