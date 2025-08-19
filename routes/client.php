@@ -9,7 +9,7 @@ Route::controller(ClientMakeOrderController::class)
 ->prefix('order')->group(function(){
     Route::post('/lists', 'lists');
     Route::post('/dine_in_order', 'dine_in_order');
-    Route::post('/dine_in_table_carts/{id}', 'dine_in_table_carts');
+    Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts');
     Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
 
     Route::post('/preparing', 'preparing');
