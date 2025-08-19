@@ -281,8 +281,7 @@ class ClientMakeOrderController extends Controller
         $request->merge([
             'branch_id' => $branch_id,
             'user_id' => 'empty',
-            'order_type' => 'dine_in', 
-            'shift' => $request->user()->shift_number,
+            'order_type' => 'dine_in',
         ]);
         $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
