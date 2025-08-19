@@ -345,73 +345,76 @@ class ClientMakeOrderController extends Controller
         ]);
     }
 
-    public function preparing(Request $request){
-        $validator = Validator::make($request->all(), [
-            'preparing' => 'required',
-            'preparing.*.cart_id' => 'required|exists:order_carts,id',
-            'preparing.*.status' => 'required|in:preparing,done,pick_up',
-            'table_id' => 'required|exists:cafe_tables,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
+    // public function preparing(Request $request){
+    //     $validator = Validator::make($request->all(), [
+    //         'preparing' => 'required',
+    //         'preparing.*.cart_id' => 'required|exists:order_carts,id',
+    //         'preparing.*.status' => 'required|in:preparing,done,pick_up',
+    //         'table_id' => 'required|exists:cafe_tables,id',
+    //     ]);
+    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
+    //         return response()->json([
+    //             'errors' => $validator->errors(),
+    //         ],400);
+    //     }
         
-        $kitchen_order = [];
-        foreach ($request->preparing as $value) {
-            $order_cart = $this->order_cart
-            ->where('id', $value['cart_id'])
-            ->first();
-            $preparing = $order_cart->cart;
-            $order_cart->prepration_status = $value['status'];  
-            $order_cart->save();
-            $order_item = $this->order_format($order_cart);
-            $order_item = collect($order_item);
+    //     $kitchen_order = [];
+    //     foreach ($request->preparing as $value) {
+    //         $order_cart = $this->order_cart
+    //         ->where('id', $value['cart_id'])
+    //         ->first();
+    //         $preparing = $order_cart->cart;
+    //         $order_cart->prepration_status = $value['status'];  
+    //         $order_cart->save();
+    //         $order_item = $this->order_format($order_cart);
+    //         $order_item = collect($order_item);
 
-            $element = $order_item[0];
-            $kitchen = $this->kitchen
-            ->where(function($q) use($element){
-                $q->whereHas('products', function($query) use ($element){
-                    $query->where('products.id', $element->id);
-                })
-                ->orWhereHas('category', function($query) use ($element){
-                    $query->where('categories.id', $element->category_id)
-                    ->orWhere('categories.id', $element->sub_category_id);
-                });
-            })
-            ->where('branch_id', $request->user()->branch_id)
-            ->first();
-            if(!empty($kitchen) && $value['status'] == 'preparing'){
-                $kitchen_order[$kitchen->id][] = $element;
-            }
-        }
+    //         $element = $order_item[0];
+    //         $kitchen = $this->kitchen
+    //         ->where(function($q) use($element){
+    //             $q->whereHas('products', function($query) use ($element){
+    //                 $query->where('products.id', $element->id);
+    //             })
+    //             ->orWhereHas('category', function($query) use ($element){
+    //                 $query->where('categories.id', $element->category_id)
+    //                 ->orWhere('categories.id', $element->sub_category_id);
+    //             });
+    //         })
+    //         ->where('branch_id', $request->user()->branch_id)
+    //         ->first();
+    //         if(!empty($kitchen) && $value['status'] == 'preparing'){
+    //             $kitchen_order[$kitchen->id][] = $element;
+    //         }
+    //     }
         
-        foreach ($kitchen_order as $key => $item) {
-            $this->kitchen_order
-            ->create([
-                'table_id' => $request->table_id,
-                'kitchen_id' => $key,
-                'order' => json_encode($item),
-                'type' => 'dine_in',
-            ]);
-        }
+    //     foreach ($kitchen_order as $key => $item) {
+    //         $this->kitchen_order
+    //         ->create([
+    //             'table_id' => $request->table_id,
+    //             'kitchen_id' => $key,
+    //             'order' => json_encode($item),
+    //             'type' => 'dine_in',
+    //         ]);
+    //     }
 
-        return response()->json([
-            'success' => 'You perpare success'
-        ]);
-    }
+    //     return response()->json([
+    //         'success' => 'You perpare success'
+    //     ]);
+    // }
 
     public function dine_in_payment(DineinOrderRequest $request){
         // /cashier/dine_in_payment
         // Keys
         // date, amount, total_tax, total_discount
         // notes, payment_method_id, table_id
+        $branch_id = $this->cafe_tables
+        ->where('id', $request->table_id)
+        ->with('location')
+        ->first()
+        ?->location?->branch_id; 
         $request->merge([  
-            'branch_id' => $request->user()->branch_id,
+            'branch_id' => $branch_id,
             'order_type' => 'dine_in',
-            'cashier_man_id' =>$request->user()->id,
-            'shift' => $request->user()->shift_number,
             'pos' => 1,
             'status' => 1,
         ]); 
@@ -447,8 +450,32 @@ class ClientMakeOrderController extends Controller
         $request->merge([  
             'products' => $product, 
         ]);
-        
-        $order = $this->dine_in_make_order($request);
+        // ____________________________________________
+        if ($request->payment_method_id == 1) {
+            $payment_method_auto = $this->payment_method_auto
+            ->where('payment_method_id', 1)
+            ->first();
+            $tokens = $this->getToken($payment_method_auto);
+            $user = $request->user();
+            $amount_cents = $request->amount * 100;
+            $order = $this->createOrder($request, $tokens, $user);
+            if (is_array($order) && isset($order['errors']) && !empty($order['errors'])) {
+                return response()->json($order, 400);
+            }
+            $order_id = $this->order
+            ->where('transaction_id', $order->id)
+            ->first();
+            broadcast(new OrderEvent($order_id))->toOthers();
+            // $order = $this->make_order($request);
+            // $order = $order['payment']; 
+            $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens, $payment_method_auto);
+             $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
+            return response()->json([
+                'success' => $order_id->id,
+                'paymentLink' => $paymentLink,
+            ]);
+        } 
+        $order = $this->make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         } 
@@ -550,6 +577,100 @@ class ClientMakeOrderController extends Controller
         }
 
         return $inside;
+    }
+
+    public function callback(Request $request){
+        // https://bcknd.food2go.online/customer/callback
+        $payment_method_auto = $this->payment_method_auto
+        ->where('payment_method_id', 1)
+        ->first();
+        
+        //this call back function its return the data from paymob and we show the full response and we checked if hmac is correct means successfull payment
+        $data = $request->all();
+        ksort($data);
+        $hmac = $data['hmac'];
+        $array = [
+            'amount_cents',
+            'created_at',
+            'currency',
+            'error_occured',
+            'has_parent_transaction',
+            'id',
+            'integration_id',
+            'is_3d_secure',
+            'is_auth',
+            'is_capture',
+            'is_refunded',
+            'is_standalone_payment',
+            'is_voided',
+            'order',
+            'owner',
+            'pending',
+            'source_data_pan',
+            'source_data_sub_type',
+            'source_data_type',
+            'success',
+        ];
+        $connectedString = '';
+        foreach ($data as $key => $element) {
+            if (in_array($key, $array)) {
+                $connectedString .= $element;
+            }
+        }
+        $secret = $payment_method_auto->Hmac;
+        $hased = hash_hmac('sha512', $connectedString, $secret);
+        if ($hased == $hmac) {
+            //this below data used to get the last order created by the customer and check if its exists to 
+            // $todayDate = Carbon::now();
+            // $datas = Order::where('user_id',Auth::user()->id)->whereDate('created_at',$todayDate)->orderBy('created_at','desc')->first();
+            $status = $data['success']; 
+            // $pending = $data['pending'];
+            if ($status == "true") { 
+                //here we checked that the success payment is true and we updated the data base and empty the cart and redirct the customer to thankyou page
+                $order = $this->order
+                ->where('transaction_id', $data['order'])
+                ->first();
+                $order->update([
+                    'status' => 1,
+                    'order_status' => 'processing'
+                ]);
+                $user = $this->user
+                ->where('id', $order->user_id)
+                ->first();
+                $user->points += $order->points;
+                $user->save();
+                $totalAmount = $data['amount_cents'];
+                $message = 'Your payment is being processed. Please wait...';
+                $redirectUrl = env('WEB_LINK') . '/orders/order_traking/' . $order->id;
+                $timer = 3; // 3  seconds
+
+                if($order->source == 'web'){
+                    return  view('Paymob.checkout', compact('totalAmount','message','redirectUrl','timer'));
+                }
+                else{
+                    return response()->json([
+                        'success' => 'You payment success'
+                    ]);
+                }
+            }
+            else {        
+                $order = $this->order
+                ->where('transaction_id', $data['order'])
+                ->first();
+                $order->update([
+                    'payment_status' => 'faild'
+                ]); 
+               return  view('Paymob.FaildPayment');
+            //    return redirect($appUrl . '://callback_faild');
+            }
+        }
+        else {
+               return  view('Paymob.FaildPayment');
+        }
+             
+        return response()->json([
+            'success' => 'You payment success'
+        ]);
     }
 
 }
