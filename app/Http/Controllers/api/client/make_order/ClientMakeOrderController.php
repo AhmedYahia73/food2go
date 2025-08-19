@@ -281,7 +281,7 @@ class ClientMakeOrderController extends Controller
         ->with('location')
         ->first()
         ?->location;
-        $polygon = $location?->location;
+        $polygon = $location?->location ?? [];
 
         $userLocation = ['lat' => $request->lat, 'lng' => $request->lng];
 

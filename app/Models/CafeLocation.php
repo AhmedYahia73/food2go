@@ -16,7 +16,7 @@ class CafeLocation extends Model
  
     public function getlocationAttribute(){
         if(!empty($this->attributes['location'])){
-            return json_decode($this->attributes['location']);
+            return json_decode($this->attributes['location'], true);
         }
     }
 
