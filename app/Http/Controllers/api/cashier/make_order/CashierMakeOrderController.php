@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\customer\order\OrderRequest;
+use App\Http\Requests\cashier\DineinSplitRequest;
 use App\Http\Requests\cashier\DineinOrderRequest;
 use App\Http\Requests\cashier\TakawayRequest;
 use App\Http\Requests\cashier\DeliveryRequest;
@@ -638,7 +639,8 @@ class CashierMakeOrderController extends Controller
     }
 
 
-    public function dine_in_split_payment(DeliveryRequest $request){
+
+    public function dine_in_split_payment(DineinSplitRequest $request){
         // /cashier/delivery_order
         // Keys
         // amount, total_tax, total_discount, notes, address_id
@@ -648,37 +650,13 @@ class CashierMakeOrderController extends Controller
         // variation[{variation_id, option_id[]}], count}]
         $request->merge([
             'branch_id' => $request->user()->branch_id, 
-            'order_type' => 'delivery',
-            'cashier_man_id' =>$request->user()->id,
-            'shift' => $request->user()->shift_number,
-            'pos' => 1,
-            'cash_with_delivery' => $request->cash_with_delivery ?? false,
-        ]);
-        $order = $this->delivery_make_order($request);
-        if (isset($order['errors']) && !empty($order['errors'])) {
-            return response()->json($order, 400);
-        }
-        $this->preparing_delivery($request, $order['order']->id);
-        return response()->json([
-            'success' => $order['order'], 
-        ]);
-    }
-    public function dine_in_split_payment2(DineinOrderRequest $request){
-        // /cashier/dine_in_payment
-        // Keys
-        // date, amount, total_tax, total_discount
-        // notes, payment_method_id, table_id
-  
-        $request->merge([  
-            'branch_id' => $request->user()->branch_id,
             'order_type' => 'dine_in',
             'cashier_man_id' =>$request->user()->id,
             'shift' => $request->user()->shift_number,
-            'pos' => 1,
-            'status' => 1,
-        ]); 
+            'pos' => 1, 
+        ]);
         $order_carts = $this->order_cart
-        ->where('table_id', $request->table_id)
+        ->whereIn('id', $request->cart_id)
         ->get();
         $orders = collect([]);
         $product = [];
@@ -728,7 +706,7 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             'success' => $order, 
         ]);
-    }
+    } 
 
     public function tables_status(Request $request, $id){
         // /cashier/tables_status/{id}

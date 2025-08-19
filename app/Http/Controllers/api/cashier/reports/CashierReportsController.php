@@ -214,7 +214,7 @@ class CashierReportsController extends Controller
         ->get();
 
         $cashier_shifts = $this->cashier_shift
-            ->with('cashier_man')
+            ->with('cashier_man.branch')
             ->where('id', $id)
             ->get();
         if($cashier_shifts-> count() == 0){
@@ -294,7 +294,14 @@ class CashierReportsController extends Controller
                         ];
                     })->values();
 
-                    return $cashier_item;
+                    return [
+                        'cashier_orders' => $cashier_item->cashier_orders,
+                        'total_orders' => $cashier_item->total_orders,
+                        'financial_accounts_data' => $cashier_item->financial_accounts_data,
+                        'cashier_man_id' => $cashier_item?->cashier_man?->id,
+                        'cashier_man' => $cashier_item?->cashier_man?->user_name,
+                        'branch' => $cashier_item?->cashier_man?->branch?->name,
+                    ];
                 });
             $financial_account_total = $financial_account->map(function ($fa) use ($shift_orders) {
                 $ordersForAccount = $shift_orders->filter(function ($order) use ($fa) {
