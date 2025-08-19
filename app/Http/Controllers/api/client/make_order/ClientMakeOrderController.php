@@ -322,6 +322,7 @@ class ClientMakeOrderController extends Controller
             $order_item = $this->order_format($item, $key);
             $carts[] = $order_item;
         }
+        $carts = collect($carts)->flatten(1);
 
         return response()->json([
             'carts' => $carts
