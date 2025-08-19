@@ -728,7 +728,7 @@ trait PlaceOrder
             $order_data[$key]->addons_selected = $addons;
         }
 
-        return $order_data;
+        return $order_data->values();
     }
 
     public function takeaway_order_format($order){
