@@ -13,6 +13,12 @@ class CafeLocation extends Model
         'branch_id',
         'location',
     ];
+ 
+    public function getlocationAttribute(){
+        if(!empty($this->attributes['location'])){
+            return json_decode($this->attributes['location']);
+        }
+    }
 
     public function tables(){
         return $this->hasMany(CafeTable::class, 'location_id');
