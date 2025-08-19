@@ -273,8 +273,13 @@ class ClientMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        $branch_id = $this->cafe_tables
+        ->where('id', $request->table_id)
+        ->with('location')
+        ->first()
+        ?->location?->branch_id;
         $request->merge([
-            'branch_id' => $request->user()->branch_id,
+            'branch_id' => $branch_id,
             'user_id' => 'empty',
             'order_type' => 'dine_in', 
             'shift' => $request->user()->shift_number,

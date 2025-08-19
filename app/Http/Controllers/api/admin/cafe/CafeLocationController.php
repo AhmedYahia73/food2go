@@ -44,10 +44,11 @@ class CafeLocationController extends Controller
     public function create(Request $request){
         // /admin/caffe_location/add
         // Keys
-        // name, branch_id
+        // name, branch_id, location
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'branch_id' => 'required|exists:branches,id',
+            'location' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -59,6 +60,7 @@ class CafeLocationController extends Controller
         ->create([
             'name' => $request->name,
             'branch_id' => $request->branch_id,
+            'location' => json_encode($request->location),
         ]);
 
         return response()->json([
@@ -69,10 +71,11 @@ class CafeLocationController extends Controller
     public function modify(Request $request, $id){
         // /admin/caffe_location/update/{id}
         // Keys
-        // name, branch_id
+        // name, branch_id, location
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'branch_id' => 'required|exists:branches,id',
+            'location' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -85,6 +88,7 @@ class CafeLocationController extends Controller
         ->update([
             'name' => $request->name,
             'branch_id' => $request->branch_id,
+            'location' => json_encode($request->location),
         ]);
 
         return response()->json([

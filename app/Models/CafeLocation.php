@@ -10,7 +10,8 @@ class CafeLocation extends Model
     use HasFactory;
     protected $fillable = [
         'name', 
-        'branch_id', 
+        'branch_id',
+        'location',
     ];
 
     public function tables(){
