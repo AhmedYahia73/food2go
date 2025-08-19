@@ -7,7 +7,7 @@ use App\Http\Controllers\api\client\make_order\ClientMakeOrderController;
 
 Route::controller(ClientMakeOrderController::class)
 ->prefix('order')->group(function(){
-    Route::get('/lists', 'lists');
+    Route::post('/lists', 'lists');
 
     Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts');
     Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
