@@ -285,7 +285,7 @@ class ClientMakeOrderController extends Controller
 
         $userLocation = ['lat' => $request->lat, 'lng' => $request->lng];
 
-        if (!isPointInPolygon($userLocation, $polygon)) {
+        if (!$this->isPointInPolygon($userLocation, $polygon)) {
             return response()->json([
                 'errors' => 'You must be at location'
             ], 400);
