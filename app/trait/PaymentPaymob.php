@@ -77,17 +77,17 @@ trait PaymentPaymob
         //all data we fill is required for paymob
         $billingData = [
             "apartment" => '45', //example $dataa->appartment
-            "email" => $user->email, //example $dataa->email
+            "email" => $user->email ?? '', //example $dataa->email
             "floor" => '7',
-            "first_name" => $user->f_name,
+            "first_name" => $user->f_name ?? '',
             "street" => "NA",
             "building" => "NA",
-            "phone_number" => $user->phone,
+            "phone_number" => $user->phone ?? '',
             "shipping_method" => "NA",
             "postal_code" => "NA",
             "city" => "Alexandria",
             "country" => "Egypt",
-            "last_name" => $user->l_name,
+            "last_name" => $user->l_name ?? '',
             "state" => "0"
         ];
         

@@ -12,6 +12,7 @@ use App\Http\Requests\cashier\TakawayRequest;
 use App\Http\Requests\cashier\DeliveryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
+use App\Events\OrderEvent;
 use Carbon\Carbon;
 
 // ____________________________________________________
@@ -470,29 +471,23 @@ class ClientMakeOrderController extends Controller
             // $order = $order['payment']; 
             $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens, $payment_method_auto);
              $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
+            $this->cafe_table
+            ->where('id', $request->table_id)
+            ->update([
+                'current_status' => 'not_available_but_checkout'
+            ]);
+            $order_cart = $this->order_cart
+            ->where('table_id', $request->table_id)
+            ->delete();
             return response()->json([
                 'success' => $order_id->id,
                 'paymentLink' => $paymentLink,
             ]);
-        } 
-        $order = $this->make_order($request);
-        if (isset($order['errors']) && !empty($order['errors'])) {
-            return response()->json($order, 400);
-        } 
-        $order['payment']['cart'] = $order['payment']['order_details'];
-        $order = $this->order_format(($order['payment']), 0);
-        $this->cafe_table
-        ->where('id', $request->table_id)
-        ->update([
-            'current_status' => 'not_available_but_checkout'
-        ]);
-        $order_cart = $this->order_cart
-        ->where('table_id', $request->table_id)
-        ->delete();
+        }  
 
         return response()->json([
-            'success' => $order, 
-        ]);
+            'errors' => 'You must select visa', 
+        ], 400);
     }
 
     public function dine_in_split_payment(DineinSplitRequest $request){

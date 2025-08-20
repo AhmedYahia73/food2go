@@ -216,7 +216,9 @@ trait PlaceOrder
         $orderRequest['points'] = $points;
         $order = $this->order
         ->create($orderRequest);
-        $user->save();
+        if(!empty($user)){
+            $user->save();
+        }
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
