@@ -9,6 +9,7 @@ use App\Http\Requests\customer\order\OrderRequest;
 use App\Http\Requests\cashier\DineinSplitRequest;
 use App\Http\Requests\cashier\DineinOrderRequest;
 use App\Http\Requests\cashier\TakawayRequest;
+use App\Http\Requests\client\DineinClientOrderRequest;
 use App\Http\Requests\cashier\DeliveryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
@@ -403,10 +404,10 @@ class ClientMakeOrderController extends Controller
     //     ]);
     // }
 
-    public function dine_in_payment(DineinOrderRequest $request){
+    public function dine_in_payment(DineinClientOrderRequest $request){
         // /cashier/dine_in_payment
         // Keys
-        // date, amount, total_tax, total_discount
+        // amount, total_tax, total_discount
         // notes, payment_method_id, table_id
         $branch_id = $this->cafe_tables
         ->where('id', $request->table_id)
@@ -498,11 +499,8 @@ class ClientMakeOrderController extends Controller
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-        $request->merge([
-            'branch_id' => $request->user()->branch_id, 
-            'order_type' => 'dine_in',
-            'cashier_man_id' =>$request->user()->id,
-            'shift' => $request->user()->shift_number,
+        $request->merge([ 
+            'order_type' => 'dine_in', 
             'pos' => 1, 
         ]);
         $order_carts = $this->order_cart
