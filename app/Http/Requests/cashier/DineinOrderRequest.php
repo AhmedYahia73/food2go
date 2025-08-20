@@ -24,8 +24,10 @@ class DineinOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => ['required', 'numeric'], 
-            'payment_method_id' => ['required', 'exists:payment_methods,id'], 
+            'amount' => ['required', 'numeric'],
+            'financials' => ['required', 'array'],
+            'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
+            'financials.*.amount' => ['required', 'numeric'],
             'table_id' => ['required', 'exists:cafe_tables,id'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
