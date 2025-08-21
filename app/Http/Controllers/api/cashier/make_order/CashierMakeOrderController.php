@@ -836,4 +836,27 @@ class CashierMakeOrderController extends Controller
             'success' => $order_items
         ]);
     }
+
+    public function transfer_order(Request $request){
+        $validator = Validator::make($request->all(), [
+            'cart_ids' => 'required|array',
+            'cart_ids.*' => 'exists:order_carts,id',
+            'table_id' => 'required|exists:cafe_tables,id'
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $order_cart = $this->order_cart
+        ->whereIn('id', $request->cart_ids)
+        ->update([
+            'table_id' => $request->table_id
+        ]);
+
+        return response()->json([
+            'success' => 'you transfer your table success'
+        ]);
+    }
 }

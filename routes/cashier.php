@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/dine_in_order', 'dine_in_order')->middleware('can:dine_in');
         Route::post('/dine_in_payment', 'dine_in_payment')->middleware('can:dine_in');
         Route::post('/dine_in_split_payment', 'dine_in_split_payment')->middleware('can:dine_in');
+        Route::post('/transfer_order', 'transfer_order')->middleware('can:dine_in');
 
         Route::post('/take_away_order', 'take_away_order')->middleware('can:take_away');
        
