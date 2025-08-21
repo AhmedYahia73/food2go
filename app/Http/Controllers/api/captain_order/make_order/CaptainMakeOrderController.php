@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\captain_order\make_order;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\captain\order\OrderRequest;
+use App\Http\Requests\customer\order\OrderRequest as CustomerOrderRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
@@ -204,7 +205,7 @@ class CaptainMakeOrderController extends Controller
     }
 // ________________________________________________
 
-    public function dine_in_order(OrderRequest $request){
+    public function dine_in_order(CustomerOrderRequest $request){
         // /cashier/dine_in_order
         // Keys
         // amount, total_tax, total_discount, table_id
