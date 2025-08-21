@@ -64,12 +64,12 @@ class ClientMakeOrderController extends Controller
     private TimeSittings $TimeSittings, private OrderFinancial $financial,
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
     private Delivery $delivery, private CashierBalance $cashier_balance,
-    private CafeTable $cafe_tables, private FinantiolAcounting $finantiol_accounting){}
+    private CafeTable $cafe_tables, private FinantiolAcounting $finantiol_accounting,
+    private MenueImage $menue_image){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
-    use POS;
- 
+    use POS; 
 
     public function lists(Request $request){
         // /captain/lists

@@ -34,7 +34,7 @@ class HomeController extends Controller
     private MenueImage $menue_image, private SmsBalance $sms_balance){}
 
     public function mainData(){
-        // https://bcknd.food2go.online/customer/main_data
+        // https://bcknd.food2go.online/customer/home/main_data
         $main_data = $this->main_data
         ->orderByDesc('id')
         ->first();

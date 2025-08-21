@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\client\make_order\ClientMakeOrderController;
 
+use App\Http\Controllers\api\customer\home\HomeController;
 
 Route::controller(ClientMakeOrderController::class)
 ->prefix('order')->group(function(){
@@ -15,4 +16,8 @@ Route::controller(ClientMakeOrderController::class)
  
     Route::post('/dine_in_split_payment', 'dine_in_split_payment');
 
+});
+
+Route::controller(HomeController::class)->group(function(){
+    Route::get('/menue', 'menue');
 });
