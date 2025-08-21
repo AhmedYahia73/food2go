@@ -47,7 +47,7 @@ class WaiterCallController extends Controller
         ->get()
         ?->pluck('token')
         ?->toArray();
-        $this->sendNotificationToMany($device_token, $$cafe_table->table_number, $body);
+        $this->sendNotificationToMany($device_token, $cafe_table->table_number, $body);
         
         return response()->json([
             'success' => 'You call waiter success'
