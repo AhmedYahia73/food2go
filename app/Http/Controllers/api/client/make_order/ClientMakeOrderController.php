@@ -419,6 +419,7 @@ class ClientMakeOrderController extends Controller
             'order_type' => 'dine_in',
             'pos' => 1,
             'status' => 1,
+			'user_id' => 'empty',
         ]); 
         $order_carts = $this->order_cart
         ->where('table_id', $request->table_id)
