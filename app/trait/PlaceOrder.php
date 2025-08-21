@@ -447,7 +447,6 @@ trait PlaceOrder
         if ($request->shift) { 
             $orderRequest['shift'] = $request->shift;
         }
-        return $orderRequest;
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $points = 0;
         $items = [];
