@@ -25,5 +25,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
         Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
         Route::post('/transfer_order', 'transfer_order');
         Route::post('/preparing', 'preparing');
+       
+        Route::put('/tables_status/{id}', 'tables_status');
     });
 });
