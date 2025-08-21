@@ -264,7 +264,7 @@ class CaptainMakeOrderController extends Controller
             ], 400);
         }
         $this->checkout_request_query
-        ->where('status', '!=', 'done')
+        ->where('status', 'done')
         ->delete();
         $this->checkout_request_query
         ->create([
