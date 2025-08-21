@@ -25,12 +25,12 @@ class DineinSplitClientRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'numeric'],
+            'table_id' => ['required', 'exists:cafe_tables,id'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'], 
             'source' => 'sometimes',
             'cart_id' => ['array', 'required'],
             'cart_id.*' => ['exists:order_carts,id', 'required'], 
-            'table_id' => ['required', 'exists:cafe_tables,id'],
             'cashier_id' => ['sometimes', 'exists:cashiers,id'],  
             'payment_method_id' => ['required', 'exists:payment_methods,id'], 
         ];
