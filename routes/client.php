@@ -18,7 +18,7 @@ Route::controller(ClientMakeOrderController::class)
 });
 
 Route::controller(WaiterCallController::class)->group(function(){
-    Route::get('/call_waiter', 'call_waiter');
+    Route::post('/call_waiter', 'call_waiter');
 });
 
 Route::controller(HomeController::class)->group(function(){
