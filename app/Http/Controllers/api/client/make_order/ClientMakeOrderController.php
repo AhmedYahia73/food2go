@@ -563,7 +563,7 @@ class ClientMakeOrderController extends Controller
                 'current_status' => 'not_available_but_checkout'
             ]);
             $order_cart = $this->order_cart
-            ->where('table_id', $request->table_id)
+            ->whereIn('id', $request->cart_id)
             ->delete();
             return response()->json([
                 'success' => $order_id->id,
