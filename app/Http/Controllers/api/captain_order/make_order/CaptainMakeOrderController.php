@@ -30,7 +30,7 @@ use App\Models\CafeTable;
 use App\Models\OrderCart;
 use App\Models\Zone;
 use App\Models\CheckoutRequest;
-use App\Models\FinantiolAcounting;
+use App\Models\FinantiolAcounting; 
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -47,7 +47,7 @@ class CaptainMakeOrderController extends Controller
     private CafeLocation $cafe_location, private CafeTable $cafe_table,
     private OrderCart $order_cart, private Zone $zone,
     private FinantiolAcounting $financial_account,
-    private CheckoutRequest $checkout_request){}
+    private CheckoutRequest $checkout_request_query){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -254,7 +254,7 @@ class CaptainMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $checkout_request = $this->checkout_request
+        $checkout_request = $this->checkout_request_query
         ->where('status', 'waiting')
         ->where('table_id', $request->table_id)
         ->first();
@@ -263,10 +263,10 @@ class CaptainMakeOrderController extends Controller
                 'errors' => 'This table is waiting customer to payment'
             ], 400);
         }
-        $this->checkout_request
+        $this->checkout_request_query
         ->where('status', '!=', 'done')
         ->delete();
-        $this->checkout_request
+        $this->checkout_request_query
         ->create([
             'table_id' => $request->table_id
         ]);
