@@ -29,6 +29,7 @@ use App\Models\CafeLocation;
 use App\Models\CafeTable;
 use App\Models\OrderCart;
 use App\Models\Zone;
+use App\Models\CheckoutRequest;
 use App\Models\FinantiolAcounting;
 
 use App\trait\image;
@@ -45,7 +46,8 @@ class CaptainMakeOrderController extends Controller
     private Category $category, private BranchOff $branch_off, 
     private CafeLocation $cafe_location, private CafeTable $cafe_table,
     private OrderCart $order_cart, private Zone $zone,
-    private FinantiolAcounting $financial_account){}
+    private FinantiolAcounting $financial_account,
+    private CheckoutRequest $checkout_request){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -240,6 +242,37 @@ class CaptainMakeOrderController extends Controller
 
         return response()->json([
             'success' => $order_data, 
+        ]);
+    }
+
+    public function checkout_request(Request $request){
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $checkout_request = $this->checkout_request
+        ->where('status', 'waiting')
+        ->where('table_id', $request->table_id)
+        ->first();
+        if(empty($checkout_request)){
+            return response()->json([
+                'errors' => 'This table is waiting customer to payment'
+            ], 400);
+        }
+        $this->checkout_request
+        ->where('status', '!=', 'done')
+        ->delete();
+        $this->checkout_request
+        ->create([
+            'table_id' => $request->table_id
+        ]);
+
+        return response()->json([
+            'success' => 'You send request success'
         ]);
     }
   
