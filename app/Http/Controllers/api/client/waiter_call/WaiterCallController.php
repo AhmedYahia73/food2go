@@ -36,19 +36,21 @@ class WaiterCallController extends Controller
         ->where('id', $request->table_id)
         ->with('location:id,name')
         ->first();
+        $body = 'Table ' . $cafe_table->table_number . 
+            ' at location ' . $cafe_table?->location?->name . ' Call Waiter';
         $notification = $this->notification
         ->create([
             'title' => $cafe_table->table_number,
-            'notification' => 'Table ' . $cafe_table->table_number . ' at location ' , 
+            'notification' => $body, 
         ]);
         $device_token = $this->device_token
         ->get()
         ?->pluck('token')
         ?->toArray();
-        $this->sendNotificationToMany($device_token, $id, $request->customer_cancel_reason);
+        $this->sendNotificationToMany($device_token, $$cafe_table->table_number, $body);
         
         return response()->json([
-            'success' => 'You cancel order success'
+            'success' => 'You call waiter success'
         ]);
     }
 }
