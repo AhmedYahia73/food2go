@@ -64,7 +64,7 @@ class ClientMakeOrderController extends Controller
     private TimeSittings $TimeSittings, private OrderFinancial $financial,
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
     private Delivery $delivery, private CashierBalance $cashier_balance,
-    private CafeTable $cafe_tables, private FinantiolAcounting $finantiol_accounting){}
+    private CafeTable $cafe_tables, private FinantiolAcounting $finantiol_accounting,){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -173,18 +173,14 @@ class ClientMakeOrderController extends Controller
         })->filter(); 
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products); 
-        $finantiol_accounting = $this->finantiol_accounting
-        ->select('id', 'name', 'logo')
-        ->where('status', 1)
-        ->whereHas('branch', function($query) use($branch_id){
-            $query->where('branches.id', $branch_id);
-        })
+        $paymentMethod = $this->paymentMethod
+        ->where('id', 1)
         ->get();
 
         return response()->json([
             'categories' => $categories,
             'products' => $products,
-            'finantiol_accounting' => $finantiol_accounting, 
+            'paymentMethod' => $paymentMethod, 
         ]);
     }
 
