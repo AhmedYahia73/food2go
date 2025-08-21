@@ -14,7 +14,7 @@ return [
     |
     */
     'firebase' => [
-        'credentials' => storage_path('app/firebase/mathshouse-79a6b-firebase-adminsdk-fbsvc-77c78fa6bc.json'),
+        'credentials' => storage_path('app/firebase/food2go-8676e-firebase-adminsdk-fbsvc-b651bbb757.json'),
     ],
 
     'postmark' => [
