@@ -258,7 +258,7 @@ class CaptainMakeOrderController extends Controller
         ->where('status', 'waiting')
         ->where('table_id', $request->table_id)
         ->first();
-        if(empty($checkout_request)){
+        if(!empty($checkout_request)){
             return response()->json([
                 'errors' => 'This table is waiting customer to payment'
             ], 400);
