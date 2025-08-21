@@ -18,6 +18,12 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     Route::controller(CaptainMakeOrderController::class)
     ->group(function(){
         Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
+        Route::post('/transfer_order', 'transfer_order');
+        Route::post('/preparing', 'preparing');
+    });
+     
+    Route::controller(CaptainMakeOrderController::class)
+    ->group(function(){
         Route::post('/dine_in_order', 'dine_in_order');
         Route::post('/transfer_order', 'transfer_order');
     });

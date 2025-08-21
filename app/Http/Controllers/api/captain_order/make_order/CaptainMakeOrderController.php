@@ -225,8 +225,7 @@ class CaptainMakeOrderController extends Controller
             'branch_id' => $request->user()->branch_id,
             'user_id' => 'empty',
             'order_type' => 'dine_in',
-            'cashier_man_id' =>$request->user()->id,
-            'shift' => $request->user()->shift_number,
+            'captain_id' =>$request->user()->id, 
         ]);
         $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
@@ -243,79 +242,7 @@ class CaptainMakeOrderController extends Controller
             'success' => $order_data, 
         ]);
     }
-
-    public function dine_in_table_order(Request $request, $id){
-        // /cashier/dine_in_table_order/{id}
-        $order_cart = $this->order_cart
-        ->where('table_id', $id)
-        ->get();
-        $orders = collect([]);
-        foreach ($order_cart as $key => $item) {
-            $order_item = $this->order_format($item, $key); 
-            $orders = $orders->merge($order_item);
-        }
-
-        return response()->json([
-            'success' => $orders
-        ]);
-    }
-
-    public function preparing(Request $request){
-        $validator = Validator::make($request->all(), [
-            'preparing' => 'required',
-            'preparing.*.cart_id' => 'required|exists:order_carts,id',
-            'preparing.*.status' => 'required|in:preparing,done,pick_up',
-            'table_id' => 'required|exists:cafe_tables,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        
-        $kitchen_order = [];
-        foreach ($request->preparing as $value) {
-            $order_cart = $this->order_cart
-            ->where('id', $value['cart_id'])
-            ->first();
-            $preparing = $order_cart->cart;
-            $order_cart->prepration_status = $value['status'];  
-            $order_cart->save();
-            $order_item = $this->order_format($order_cart);
-            $order_item = collect($order_item);
-
-            $element = $order_item[0];
-            $kitchen = $this->kitchen
-            ->where(function($q) use($element){
-                $q->whereHas('products', function($query) use ($element){
-                    $query->where('products.id', $element->id);
-                })
-                ->orWhereHas('category', function($query) use ($element){
-                    $query->where('categories.id', $element->category_id)
-                    ->orWhere('categories.id', $element->sub_category_id);
-                });
-            })
-            ->where('branch_id', $request->user()->branch_id)
-            ->first();
-            if(!empty($kitchen) && $value['status'] == 'preparing'){
-                $kitchen_order[$kitchen->id][] = $element;
-            }
-        }
-        
-        foreach ($kitchen_order as $key => $item) {
-            $this->kitchen_order
-            ->create([
-                'table_id' => $request->table_id,
-                'kitchen_id' => $key,
-                'order' => json_encode($item),
-                'type' => 'dine_in',
-            ]);
-        }
-
-        return response()->json([
-            'success' => 'You perpare success'
-        ]);
-    }
+  
     // ____________________________________________
 
     public function tables_status(Request $request, $id){
