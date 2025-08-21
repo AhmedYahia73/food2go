@@ -496,13 +496,14 @@ class ClientMakeOrderController extends Controller
         // /cashier/delivery_order
         // Keys
         // amount, total_tax, total_discount, notes, address_id
-        // source, financials[{id, amount}], cash_with_delivery
+        // source, payment_method_id, cash_with_delivery
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
         $request->merge([ 
             'order_type' => 'dine_in', 
             'pos' => 1, 
+			'user_id' => 'empty',
         ]);
         $order_carts = $this->order_cart
         ->whereIn('id', $request->cart_id)
@@ -536,20 +537,43 @@ class ClientMakeOrderController extends Controller
         $request->merge([  
             'products' => $product, 
         ]);
-        
-        $order = $this->dine_in_make_order($request);
-        if (isset($order['errors']) && !empty($order['errors'])) {
-            return response()->json($order, 400);
-        } 
-        $order['payment']['cart'] = $order['payment']['order_details'];
-        $order = $this->order_format(($order['payment']), 0);
-        $order_cart = $this->order_cart
-        ->whereIn('id', $request->cart_id)
-        ->delete();
+        // ____________________________________________
+        if ($request->payment_method_id == 1) {
+            $payment_method_auto = $this->payment_method_auto
+            ->where('payment_method_id', 1)
+            ->first();
+            $tokens = $this->getToken($payment_method_auto);
+            $user = $request->user();
+            $amount_cents = $request->amount * 100;
+            $order = $this->createOrder($request, $tokens, $user);
+            if (is_array($order) && isset($order['errors']) && !empty($order['errors'])) {
+                return response()->json($order, 400);
+            }
+            $order_id = $this->order
+            ->where('transaction_id', $order->id)
+            ->first();
+            broadcast(new OrderEvent($order_id))->toOthers();
+            // $order = $this->make_order($request);
+            // $order = $order['payment']; 
+            $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens, $payment_method_auto);
+             $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
+            $this->cafe_table
+            ->where('id', $request->table_id)
+            ->update([
+                'current_status' => 'not_available_but_checkout'
+            ]);
+            $order_cart = $this->order_cart
+            ->where('table_id', $request->table_id)
+            ->delete();
+            return response()->json([
+                'success' => $order_id->id,
+                'paymentLink' => $paymentLink,
+            ]);
+        }  
 
         return response()->json([
-            'success' => $order, 
-        ]);
+            'errors' => 'You must select visa', 
+        ], 400);
     }
 
     function isPointInPolygon($point, $polygon) {
