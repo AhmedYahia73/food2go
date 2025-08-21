@@ -435,7 +435,7 @@ trait PlaceOrder
             $orderRequest['table_id'] = $request->table_id;
         }
         if ($request->captain_id) {
-            $orderRequest['captain_id'] = $request->captain_id;
+           return $orderRequest['captain_id'] = $request->captain_id;
         }
         if ($request->cashier_id) {
             $orderRequest['cashier_id'] = $request->cashier_id;

@@ -226,7 +226,7 @@ class CaptainMakeOrderController extends Controller
             'order_type' => 'dine_in',
             'captain_id' =>$request->user()->id, 
         ]);
-        $order = $this->make_order_cart($request);
+        return $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
