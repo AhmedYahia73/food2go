@@ -236,8 +236,10 @@ class MakeOrderController extends Controller
                 $user = $this->user
                 ->where('id', $order->user_id)
                 ->first();
-                $user->points += $order->points;
-                $user->save();
+                if(!empty($user)){
+                    $user->points += $order->points;
+                    $user->save();
+                }
                 $totalAmount = $data['amount_cents'];
                 $message = 'Your payment is being processed. Please wait...';
                 $redirectUrl = env('WEB_LINK') . '/orders/order_traking/' . $order->id;
