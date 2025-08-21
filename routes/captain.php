@@ -13,13 +13,10 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
         Route::get('/selection_lists', 'selection_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/zones_list', 'zones_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::post('/make_order', 'order');
-    });
-     
-    Route::controller(CaptainMakeOrderController::class)
-    ->group(function(){
+
         Route::post('/dine_in_order', 'dine_in_order'); 
         Route::post('/checkout_request', 'checkout_request');
-    });
+    }); 
      
     Route::controller(CashierMakeOrderController::class)
     ->group(function(){
