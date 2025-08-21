@@ -202,12 +202,14 @@ class CaptainMakeOrderController extends Controller
             'zones' => $zones
         ]);
     }
+// ________________________________________________
+
 
     public function dine_in_order(OrderRequest $request){
         // /cashier/dine_in_order
         // Keys
-        // date, amount, total_tax, total_discount, table_id
-        // notes, order_type
+        // amount, total_tax, total_discount, table_id
+        // notes
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
  
@@ -219,10 +221,10 @@ class CaptainMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $request->merge([  
+        $request->merge([
             'branch_id' => $request->user()->branch_id,
             'user_id' => 'empty',
-            'order_type' => 'delivery',
+            'order_type' => 'dine_in',
             'cashier_man_id' =>$request->user()->id,
             'shift' => $request->user()->shift_number,
         ]);
@@ -242,30 +244,14 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
-    public function dine_in_table_carts(Request $request, $id){
-        // /cashier/dine_in_table_carts/{id}
-        $order_cart = $this->order_cart
-        ->where('table_id', $id)
-        ->get();
-        $carts = [];
-        foreach ($order_cart as $item) {
-            $order_item = $this->order_format($item);
-            $carts[] = $order_item;
-        }
-
-        return response()->json([
-            'carts' => $carts
-        ]);
-    }
-
     public function dine_in_table_order(Request $request, $id){
         // /cashier/dine_in_table_order/{id}
         $order_cart = $this->order_cart
         ->where('table_id', $id)
         ->get();
         $orders = collect([]);
-        foreach ($order_cart as $item) {
-            $order_item = $this->order_format($item);
+        foreach ($order_cart as $key => $item) {
+            $order_item = $this->order_format($item, $key); 
             $orders = $orders->merge($order_item);
         }
 
@@ -274,13 +260,11 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
-    public function dine_in_payment(OrderRequest $request){
-        // /cashier/dine_in_payment
-        // Keys
-        // date, amount, total_tax, total_discount
-        // notes, payment_method_id, table_id
-
+    public function preparing(Request $request){
         $validator = Validator::make($request->all(), [
+            'preparing' => 'required',
+            'preparing.*.cart_id' => 'required|exists:order_carts,id',
+            'preparing.*.status' => 'required|in:preparing,done,pick_up',
             'table_id' => 'required|exists:cafe_tables,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -288,71 +272,51 @@ class CaptainMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $request->merge([  
-            'branch_id' => $request->user()->branch_id,
-            'user_id' => 'empty',
-            'order_type' => 'dine_in',
-            'cashier_man_id' =>$request->user()->id,
-        ]);
-        $order_carts = $this->order_cart
-        ->where('table_id', $request->table_id)
-        ->get();
-        $orders = collect([]);
-        $product = [];
-        foreach ($order_carts as $item) {
-            $order_item = $this->order_format($item);
-            $orders = $orders->merge($order_item);
-        }
-       
-        foreach ($orders as $key => $item) {
-            $product[$key]['exclude_id'] = collect($item->excludes)->pluck('id');
-            $product[$key]['extra_id'] = collect($item->extras)->pluck('id');
-            $product[$key]['variation'] = collect($item->variations)->map(function($element){
-                return [
-                    'variation_id' => $element->variation->id,
-                    'option_id' => collect($element->options)->pluck('id'),
-                ];
-            });
-            $product[$key]['addons'] = collect($item->addons_selected)->map(function($element){
-                return [
-                    'addon_id' => ($element->id),
-                    'count' => ($element->count),
-                ];
-            }); 
         
-            $product[$key]['count'] = $item->count;
-            $product[$key]['product_id'] = $item->id;
+        $kitchen_order = [];
+        foreach ($request->preparing as $value) {
+            $order_cart = $this->order_cart
+            ->where('id', $value['cart_id'])
+            ->first();
+            $preparing = $order_cart->cart;
+            $order_cart->prepration_status = $value['status'];  
+            $order_cart->save();
+            $order_item = $this->order_format($order_cart);
+            $order_item = collect($order_item);
+
+            $element = $order_item[0];
+            $kitchen = $this->kitchen
+            ->where(function($q) use($element){
+                $q->whereHas('products', function($query) use ($element){
+                    $query->where('products.id', $element->id);
+                })
+                ->orWhereHas('category', function($query) use ($element){
+                    $query->where('categories.id', $element->category_id)
+                    ->orWhere('categories.id', $element->sub_category_id);
+                });
+            })
+            ->where('branch_id', $request->user()->branch_id)
+            ->first();
+            if(!empty($kitchen) && $value['status'] == 'preparing'){
+                $kitchen_order[$kitchen->id][] = $element;
+            }
         }
-        $request->merge([  
-            'products' => $product, 
-        ]);
         
-        $order = $this->make_order($request);
-        if (isset($order['errors']) && !empty($order['errors'])) {
-            return response()->json($order, 400);
+        foreach ($kitchen_order as $key => $item) {
+            $this->kitchen_order
+            ->create([
+                'table_id' => $request->table_id,
+                'kitchen_id' => $key,
+                'order' => json_encode($item),
+                'type' => 'dine_in',
+            ]);
         }
-        $this->order
-        ->where('id', $order['payment']->id)
-        ->update([
-            'pos' => 1,
-            'status' => 1,
-            'shift' => $request->user()->shift_number,
-        ]);
-        $order['payment']['cart'] = $order['payment']['order_details'];
-        $order = $this->order_format(($order['payment']));
-        $this->cafe_table
-        ->where('id', $request->table_id)
-        ->update([
-            'current_status' => 'not_available_but_checkout'
-        ]);
-        $order_cart = $this->order_cart
-        ->where('table_id', $request->table_id)
-        ->delete();
 
         return response()->json([
-            'success' => $order, 
+            'success' => 'You perpare success'
         ]);
     }
+    // ____________________________________________
 
     public function tables_status(Request $request, $id){
         // /cashier/tables_status/{id}

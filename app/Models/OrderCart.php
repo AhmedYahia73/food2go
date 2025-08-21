@@ -20,6 +20,7 @@ class OrderCart extends Model
         'prepration_status',
         'order_id',
         'type',
+        'captain_id',
     ];
 
     public function getcartAttribute($data){

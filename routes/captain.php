@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\captain_order\make_order\CaptainMakeOrderController;
 
+use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
+
 Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     Route::controller(CaptainMakeOrderController::class)
     ->group(function(){
@@ -11,5 +13,12 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
         Route::get('/selection_lists', 'selection_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/zones_list', 'zones_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::post('/make_order', 'order');
+    });
+     
+    Route::controller(CaptainMakeOrderController::class)
+    ->group(function(){
+        Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
+        Route::post('/dine_in_order', 'dine_in_order');
+        Route::post('/transfer_order', 'transfer_order');
     });
 });
