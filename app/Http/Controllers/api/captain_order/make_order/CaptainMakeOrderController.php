@@ -204,7 +204,6 @@ class CaptainMakeOrderController extends Controller
     }
 // ________________________________________________
 
-
     public function dine_in_order(OrderRequest $request){
         // /cashier/dine_in_order
         // Keys

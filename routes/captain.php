@@ -22,7 +22,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
         Route::post('/preparing', 'preparing');
     });
      
-    Route::controller(CaptainMakeOrderController::class)
+    Route::controller(CashierMakeOrderController::class)
     ->group(function(){
         Route::post('/dine_in_order', 'dine_in_order');
         Route::post('/transfer_order', 'transfer_order');
