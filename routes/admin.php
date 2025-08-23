@@ -78,6 +78,7 @@ use App\Http\Controllers\api\admin\settings\business_setup\OrderNotificationCont
 use App\Http\Controllers\api\admin\settings\business_setup\SMSIntegrationController;
 use App\Http\Controllers\api\admin\settings\business_setup\EmailIntegrationController;
 use App\Http\Controllers\api\admin\main_data\MainDataController;
+use App\Http\Controllers\api\admin\waiter\WaiterController;
 
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
@@ -585,6 +586,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
         Route::get('branch_cashiers', 'branch_cashiers');
         Route::get('all_cashiers', 'all_cashiers');
+    }); 
+
+    Route::controller(WaiterController::class)
+    ->prefix('/waiter')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'waiter');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     }); 
 });
 
