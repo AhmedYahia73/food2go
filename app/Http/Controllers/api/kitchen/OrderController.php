@@ -108,7 +108,13 @@ class OrderController extends Controller
             ->update([
                 'prepration_status' => 'done'
             ]);
-            $this->sendNotificationToMany($waiter_tokens, 'Order Done', 'Table Name Is : ' . $orders?->table?->table_number ?? ''); 
+            try {
+                $this->sendNotificationToMany($waiter_tokens, 'Order Done', 'Table Name Is : ' . $orders?->table?->table_number ?? ''); 
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'errors' => 'Notification does not reach'
+                ]);
+            }
         }
         elseif($kitchen_order->type == 'take_away'){
             $orders = $this->kitchen_order
