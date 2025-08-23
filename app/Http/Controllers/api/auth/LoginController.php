@@ -169,6 +169,7 @@ class LoginController extends Controller
         $validation = Validator::make($request->all(), [
             'user_name' => 'required', 
             'password' => 'required', 
+            'fcm_token' => 'required', 
         ]);
         if ($validation->fails()) {
             return response()->json($validation->errors(), 422);
@@ -187,6 +188,8 @@ class LoginController extends Controller
             ], 400);
         }
         if (password_verify($request->input('password'), $user->password)) {
+            $user->fcm_token = $request->fcm_token;
+            $user->save();
             $user->role = 'waiter';
             $user->token = $user->createToken('waiter')->plainTextToken;
             return response()->json([

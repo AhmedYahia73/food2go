@@ -26,4 +26,8 @@ class OrderCart extends Model
     public function getcartAttribute($data){
         return json_decode($data);
     }
+
+    public function table(){
+        return $this->belongsTo(CafeTable::class, 'table_id');
+    }
 }

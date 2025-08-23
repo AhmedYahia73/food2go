@@ -4,19 +4,25 @@ namespace App\Http\Controllers\api\kitchen;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\trait\Notifications; 
 
 use App\Models\KitchenOrder;
 use App\Models\OrderCart;
 use App\Models\Order;
+use App\Models\Waiter;
 
 class OrderController extends Controller
 {
     public function __construct(private KitchenOrder $kitchen_order,
-    private OrderCart $order_carts, private Order $order){}
+    private OrderCart $order_carts, private Order $order,
+    private Waiter $waiters){}
+    use Notifications;
+
     public function kitchen_orders(Request $request)
     {
         $kitchen_order = $this->kitchen_order
             ->where('kitchen_id', $request->user()->id)
+            ->where('status', 0)
             ->get()
             ->map(function ($item) {
                 $orders = [];
@@ -73,14 +79,43 @@ class OrderController extends Controller
         $kitchen_order = $this->kitchen_order
         ->where('id', $id)
         ->first();
+        $kitchen_order->update([
+            'status' => 1
+        ]);
         if($kitchen_order->type == 'dine_in'){
+            $orders = $this->kitchen_order
+            ->where('table_id', $kitchen_order->table_id)
+            ->where('status', 0)
+            ->first();
+            if(!empty($orders)){
+                return response()->json([
+                    'success' => 'You change status success'
+                ]);
+            }
+            $location_ids = $orders?->table
+            ?->pluck('location_id');
+            $waiter_tokens = $this->waiters
+            ->whereHas('locations', function($query) use($location_ids){
+                $query->whereIn('cafe_locations.id', $location_ids);
+            })
+            ->pluck('fcm_token');
             $this->order_carts
             ->where('table_id', $kitchen_order->table_id)
             ->update([
                 'prepration_status' => 'done'
             ]);
+            $this->sendNotificationToMany($waiter_tokens, 'Order Done', 'Table Name Is : ' . $orders?->table?->table_number ?? '');
         }
         elseif($kitchen_order->type == 'take_away'){
+            $orders = $this->kitchen_order
+            ->where('order_id', $kitchen_order->order_id)
+            ->where('status', 0)
+            ->first();
+            if(!empty($orders)){
+                return response()->json([
+                    'success' => 'You change status success'
+                ]);
+            }
             $this->order
             ->where('id', $kitchen_order->order_id)
             ->update([
@@ -88,13 +123,21 @@ class OrderController extends Controller
             ]);
         }
         else{
+            $orders = $this->kitchen_order
+            ->where('order_id', $kitchen_order->order_id)
+            ->where('status', 0)
+            ->first();
+            if(!empty($orders)){
+                return response()->json([
+                    'success' => 'You change status success'
+                ]);
+            }
             $this->order
             ->where('id', $kitchen_order->order_id)
             ->update([
                 'delivery_status' => 'done'
             ]);
-        }
-        $kitchen_order->delete();
+        } 
 
         return response()->json([
             'success' => 'You change status success'
@@ -105,6 +148,7 @@ class OrderController extends Controller
         $kitchen_order = $this->kitchen_order
         ->where('kitchen_id', $request->user()->id)
         ->where('read_status', false)
+        ->where('status', 0)
         ->get()
         ->map(function($item){
             return [
