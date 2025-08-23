@@ -88,23 +88,27 @@ class OrderController extends Controller
             ->where('status', 0)
             ->first();
             if(!empty($orders)){
+				return $orders;
                 return response()->json([
                     'success' => 'You change status success'
                 ]);
             }
             $location_ids = $orders?->table
-            ?->pluck('location_id');
+            ?->pluck('location_id')
+			?->toArray() ?? [];
             $waiter_tokens = $this->waiters
             ->whereHas('locations', function($query) use($location_ids){
                 $query->whereIn('cafe_locations.id', $location_ids);
             })
-            ->pluck('fcm_token');
+            ->pluck('fcm_token')->filter()
+    		->values()
+			->toArray();
             $this->order_carts
             ->where('table_id', $kitchen_order->table_id)
             ->update([
                 'prepration_status' => 'done'
             ]);
-            $this->sendNotificationToMany($waiter_tokens, 'Order Done', 'Table Name Is : ' . $orders?->table?->table_number ?? '');
+            $this->sendNotificationToMany($waiter_tokens, 'Order Done', 'Table Name Is : ' . $orders?->table?->table_number ?? ''); 
         }
         elseif($kitchen_order->type == 'take_away'){
             $orders = $this->kitchen_order
