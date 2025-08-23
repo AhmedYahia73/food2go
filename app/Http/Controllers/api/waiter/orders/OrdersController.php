@@ -35,7 +35,7 @@ class OrdersController extends Controller
             'prepration_status' => 'pick_up'
         ]);
 
-        return respone()->json([
+        return response()->json([
             'success' => 'You update status success'
         ]);
     }
