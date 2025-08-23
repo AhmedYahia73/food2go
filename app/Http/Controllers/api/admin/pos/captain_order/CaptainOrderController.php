@@ -20,7 +20,7 @@ class CaptainOrderController extends Controller
     public function view(){
         // /admin/pos/captain
         $captain_order = $this->captain_order
-        ->with('branch', 'locations')
+        ->with('branch:id,name', 'locations:id,name')
         ->get();
         $branches = $this->branches
         ->select('id', 'name')
@@ -39,7 +39,7 @@ class CaptainOrderController extends Controller
     public function captain($id){
         // /admin/pos/captain/item/{id}
         $captain_order = $this->captain_order
-        ->with('branch', 'locations')
+        ->with('branch:id,name', 'locations:id,name')
         ->where('id', $id)
         ->first();
 
