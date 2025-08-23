@@ -23,8 +23,10 @@ class CaptainOrderController extends Controller
         ->with('branch', 'locations')
         ->get();
         $branches = $this->branches
+        ->select('id', 'name')
         ->get();
         $cafe_locations = $this->cafe_locations
+        ->select('id', 'name', 'branch_id')
         ->get();
 
         return response()->json([
