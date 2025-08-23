@@ -37,7 +37,7 @@ class WaiterController extends Controller
         ]);
     }
 
-    public function captain($id){
+    public function waiter($id){
         // /admin/pos/captain/item/{id}
         $waiter = $this->waiter
         ->with('branch:id,name', 'locations:id,name')
@@ -49,19 +49,22 @@ class WaiterController extends Controller
         ]);
     }
 
-    public function create(CaptainOrderRequest $request){
+    public function create(Request $request){
         // /admin/pos/captain/add
         $validator = Validator::make($request->all(), [
-            'email' => 'unique:waiters,email',
+            'branch_id' => ['required', 'exists:branches,id'],
+            'user_name' => ['required', 'unique:waiters,user_name'],
+            'password' => ['required'],
+            'locations.*' => ['required', 'exists:cafe_locations,id']
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         }
-        $captainRequest = $request->validated();
+        $waiterRequest = $validator->validated();
         $waiter = $this->waiter
-        ->create($captainRequest);
+        ->create($waiterRequest);
         if ($request->locations) { 
             $waiter->locations()->attach($request->locations); 
         }
@@ -71,21 +74,24 @@ class WaiterController extends Controller
         ]);
     }
 
-    public function modify(CaptainOrderRequest $request, $id){
-        // /admin/pos/captain/update/{id}
+    public function modify(Request $request, $id){
+        // /admin/pos/waiter/update/{id}
         $validator = Validator::make($request->all(), [
-            'email' => Rule::unique('waiters')->ignore($id),
+            'branch_id' => ['required', 'exists:branches,id'],
+            'user_name' => ['required', 'unique:waiters,user_name,' . $id],
+            'password' => ['required'],
+            'locations.*' => ['required', 'exists:cafe_locations,id']
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         }
-        $captainRequest = $request->validated();
+        $waiterRequest = $request->validated();
         $waiter = $this->waiter
         ->where('id', $id)
         ->first();
-        $waiter->update($captainRequest);
+        $waiter->update($waiterRequest);
         if ($request->locations) { 
             $waiter->locations()->sync($request->locations); 
         }
