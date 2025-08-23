@@ -22,6 +22,7 @@ use App\Models\CashierShift;
 use App\Models\Kitchen;
 use App\Models\Zone;
 use App\Models\SmsBalance;
+use App\Models\Waiter;
 use App\Models\DeviceToken;
 
 class LoginController extends Controller
@@ -30,7 +31,7 @@ class LoginController extends Controller
     private User $user, private Branch $branch, private Setting $settings,
     private Address $address, private Zone $zones, private CaptainOrder $captain_order,
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
-    private Kitchen $kitchen,
+    private Kitchen $kitchen, private Waiter $waiter
     ){}
 
     public function kitchen_login(Request $request){
@@ -172,29 +173,29 @@ class LoginController extends Controller
         if ($validation->fails()) {
             return response()->json($validation->errors(), 422);
         }
-        $user = $this->captain_order
+        $user = $this->waiter
         ->where('user_name', $request->user_name)
         ->first();
         if (empty($user)) {
             return response()->json([
-                'faield' => 'This user does not have the ability to login'
+                'errors' => 'This user does not have the ability to login'
             ], 405);
         }
-        // if ($user->status == 0) {
-        //     return response()->json([
-        //         'falid' => 'admin is banned'
-        //     ], 400);
-        // }
-        if (password_verify($request->input('password'), $user->password)) {
-            $user->role = 'captain_order';
-            $user->token = $user->createToken('captain_order')->plainTextToken;
+        if ($user->status == 0) {
             return response()->json([
-                'captain_order' => $user,
+                'errors' => 'waiter is banned'
+            ], 400);
+        }
+        if (password_verify($request->input('password'), $user->password)) {
+            $user->role = 'waiter';
+            $user->token = $user->createToken('waiter')->plainTextToken;
+            return response()->json([
+                'waiter' => $user,
                 'token' => $user->token,
             ], 200);
         }
         else { 
-            return response()->json(['faield'=>'creational not Valid'],403);
+            return response()->json(['errors'=>'creational not Valid'],403);
         }
     }
 

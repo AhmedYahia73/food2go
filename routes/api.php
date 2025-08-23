@@ -35,6 +35,10 @@ Route::prefix('captain/auth')->controller(LoginController::class)->group(functio
     Route::post('login', 'captain_login');
 });
 
+Route::prefix('waiter/auth')->controller(LoginController::class)->group(function(){
+    Route::post('login', 'waiter_login');
+});
+
 Route::prefix('logout')->middleware('auth:sanctum')->controller(LoginController::class)->group(function(){
     Route::post('/', 'logout');
 });
