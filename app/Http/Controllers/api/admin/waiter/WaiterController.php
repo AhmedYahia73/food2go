@@ -78,8 +78,7 @@ class WaiterController extends Controller
         // /admin/pos/waiter/update/{id}
         $validator = Validator::make($request->all(), [
             'branch_id' => ['required', 'exists:branches,id'],
-            'user_name' => ['required', 'unique:waiters,user_name,' . $id],
-            'password' => ['required'],
+            'user_name' => ['required', 'unique:waiters,user_name,' . $id],  
             'locations.*' => ['required', 'exists:cafe_locations,id']
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -91,6 +90,9 @@ class WaiterController extends Controller
         $waiter = $this->waiter
         ->where('id', $id)
         ->first();
+        if(!empty($request->password)){
+            $waiterRequest['password'] = bcrypt($request->password);
+        }
         $waiter->update($waiterRequest);
         if ($request->locations) { 
             $waiter->locations()->sync($request->locations); 
