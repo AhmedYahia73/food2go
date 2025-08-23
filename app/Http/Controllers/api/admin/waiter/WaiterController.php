@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\admin\pos\captain_order;
+namespace App\Http\Controllers\api\admin\waiter;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -8,18 +8,19 @@ use App\Http\Requests\admin\pos\CaptainOrderRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-use App\Models\CaptainOrder;
+use App\Models\Waiter;
 use App\Models\CafeLocation;
 use App\Models\Branch;
 
-class CaptainOrderController extends Controller
+class WaiterController extends Controller
 {
     public function __construct(private Branch $branches, 
-    private CaptainOrder $captain_order, private CafeLocation $cafe_locations){}
+    private Waiter $waiter, private CafeLocation $cafe_locations){}
+
 
     public function view(){
         // /admin/pos/captain
-        $captain_order = $this->captain_order
+        $waiter = $this->waiter
         ->with('branch:id,name', 'locations:id,name')
         ->get();
         $branches = $this->branches
@@ -30,7 +31,7 @@ class CaptainOrderController extends Controller
         ->get();
 
         return response()->json([
-            'captain_order' => $captain_order,
+            'waiter' => $waiter,
             'branches' => $branches,
             'cafe_locations' => $cafe_locations
         ]);
@@ -38,21 +39,20 @@ class CaptainOrderController extends Controller
 
     public function captain($id){
         // /admin/pos/captain/item/{id}
-        $captain_order = $this->captain_order
+        $waiter = $this->waiter
         ->with('branch:id,name', 'locations:id,name')
         ->where('id', $id)
         ->first();
 
         return response()->json([
-            'captain_order' => $captain_order
+            'waiter' => $waiter
         ]);
     }
 
     public function create(CaptainOrderRequest $request){
         // /admin/pos/captain/add
         $validator = Validator::make($request->all(), [
-            'email' => 'unique:captain_orders,email',
-            'password' => ['required'],
+            'email' => 'unique:waiters,email',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -60,10 +60,10 @@ class CaptainOrderController extends Controller
             ],400);
         }
         $captainRequest = $request->validated();
-        $captain_order = $this->captain_order
+        $waiter = $this->waiter
         ->create($captainRequest);
         if ($request->locations) { 
-            $captain_order->locations()->attach($request->locations); 
+            $waiter->locations()->attach($request->locations); 
         }
 
         return response()->json([
@@ -74,7 +74,7 @@ class CaptainOrderController extends Controller
     public function modify(CaptainOrderRequest $request, $id){
         // /admin/pos/captain/update/{id}
         $validator = Validator::make($request->all(), [
-            'email' => Rule::unique('captain_orders')->ignore($id),
+            'email' => Rule::unique('waiters')->ignore($id),
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -82,15 +82,12 @@ class CaptainOrderController extends Controller
             ],400);
         }
         $captainRequest = $request->validated();
-        if(!empty($request->password)){
-            $captainRequest['password'] = bcrypt($request->password);
-        }
-        $captain_order = $this->captain_order
+        $waiter = $this->waiter
         ->where('id', $id)
         ->first();
-        $captain_order->update($captainRequest);
+        $waiter->update($captainRequest);
         if ($request->locations) { 
-            $captain_order->locations()->sync($request->locations); 
+            $waiter->locations()->sync($request->locations); 
         }
 
         return response()->json([
@@ -99,7 +96,7 @@ class CaptainOrderController extends Controller
     }
 
     public function delete($id){
-        $this->captain_order
+        $this->waiter
         ->where('id', $id)
         ->delete();
 
