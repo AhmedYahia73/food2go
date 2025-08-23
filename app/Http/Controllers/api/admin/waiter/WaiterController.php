@@ -86,7 +86,7 @@ class WaiterController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $waiterRequest = $request->validated();
+        $waiterRequest = $validator->validated();
         $waiter = $this->waiter
         ->where('id', $id)
         ->first();
