@@ -15,7 +15,8 @@ class Waiter extends Model
         'branch_id',
         'user_name', 
         'password', 
-        'fcm_token', 
+        'fcm_token',
+        'status',
     ];
     protected $appends = ['role'];
 

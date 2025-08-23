@@ -19,7 +19,7 @@ class WaiterController extends Controller
 
 
     public function view(){
-        // /admin/pos/captain
+        // /admin/waitern
         $waiter = $this->waiter
         ->with('branch:id,name', 'locations:id,name')
         ->get();
@@ -38,7 +38,7 @@ class WaiterController extends Controller
     }
 
     public function waiter($id){
-        // /admin/pos/captain/item/{id}
+        // /admin/waitern/item/{id}
         $waiter = $this->waiter
         ->with('branch:id,name', 'locations:id,name')
         ->where('id', $id)
@@ -49,13 +49,35 @@ class WaiterController extends Controller
         ]);
     }
 
+    public function status(Request $request, $id){
+        // /admin/waitern/status/{id}
+        $validator = Validator::make($request->all(), [ 
+            'status' => ['required', 'boolean'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $waiter = $this->waiter 
+        ->where('id', $id)
+        ->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'success' => $request->status ? 'active' : 'banned'
+        ]);
+    }
+
     public function create(Request $request){
-        // /admin/pos/captain/add
+        // /admin/waitern/add
         $validator = Validator::make($request->all(), [
             'branch_id' => ['required', 'exists:branches,id'],
             'user_name' => ['required', 'unique:waiters,user_name'],
             'password' => ['required'],
-            'locations.*' => ['required', 'exists:cafe_locations,id']
+            'locations.*' => ['required', 'exists:cafe_locations,id'],
+            'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -79,7 +101,8 @@ class WaiterController extends Controller
         $validator = Validator::make($request->all(), [
             'branch_id' => ['required', 'exists:branches,id'],
             'user_name' => ['required', 'unique:waiters,user_name,' . $id],  
-            'locations.*' => ['required', 'exists:cafe_locations,id']
+            'status' => ['required', 'boolean'],
+            'locations.*' => ['required', 'exists:cafe_locations,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

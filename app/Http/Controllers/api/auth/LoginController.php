@@ -161,6 +161,43 @@ class LoginController extends Controller
         }
     }
 
+    public function waiter_login(Request $request){
+        // /api/captain/auth/login
+        // Keys
+        // email, password
+        $validation = Validator::make($request->all(), [
+            'user_name' => 'required', 
+            'password' => 'required', 
+        ]);
+        if ($validation->fails()) {
+            return response()->json($validation->errors(), 422);
+        }
+        $user = $this->captain_order
+        ->where('user_name', $request->user_name)
+        ->first();
+        if (empty($user)) {
+            return response()->json([
+                'faield' => 'This user does not have the ability to login'
+            ], 405);
+        }
+        // if ($user->status == 0) {
+        //     return response()->json([
+        //         'falid' => 'admin is banned'
+        //     ], 400);
+        // }
+        if (password_verify($request->input('password'), $user->password)) {
+            $user->role = 'captain_order';
+            $user->token = $user->createToken('captain_order')->plainTextToken;
+            return response()->json([
+                'captain_order' => $user,
+                'token' => $user->token,
+            ], 200);
+        }
+        else { 
+            return response()->json(['faield'=>'creational not Valid'],403);
+        }
+    }
+
     public function cashier_login(Request $request){
         // /api/cashier/auth/login
         // Keys
