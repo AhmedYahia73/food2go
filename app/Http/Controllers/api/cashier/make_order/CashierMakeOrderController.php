@@ -879,9 +879,8 @@ class CashierMakeOrderController extends Controller
 
         $cashier_man = $this->cashier_man
         ->where('my_id', $request->manager_id)
-        ->where('password', bcrypt($request->password))
         ->first();
-        if(empty($cashier_man)){
+        if(empty($cashier_man) || password_verify($request->input('manager_password'), $cashier_man->password)){
             return response()->json([
                 'errors' => 'id or password is wrong'
             ], 400);
