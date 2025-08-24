@@ -54,6 +54,8 @@ use App\Http\Controllers\api\admin\ExtraGroup\ExtraGroupController;
 use App\Http\Controllers\api\admin\coupon\CouponController;
 use App\Http\Controllers\api\admin\coupon\CreateCouponController;
 
+use App\Http\Controllers\api\admin\void_order\VoidOrderController;
+
 use App\Http\Controllers\api\admin\settings\ScheduleSlotController;
 use App\Http\Controllers\api\admin\settings\ExtraController;
 use App\Http\Controllers\api\admin\settings\ExcludeController;
@@ -592,6 +594,16 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('/waiter')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'waiter');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    }); 
+
+    Route::controller(VoidOrderController::class)
+    ->prefix('/void_reason')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'void_reason');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
