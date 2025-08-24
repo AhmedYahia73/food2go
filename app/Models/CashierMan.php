@@ -22,6 +22,7 @@ class CashierMan extends Model
         'user_name',
         'password',
         'status',
+        'void_order',
     ];
     protected $appends = ['role', 'image_link'];
 

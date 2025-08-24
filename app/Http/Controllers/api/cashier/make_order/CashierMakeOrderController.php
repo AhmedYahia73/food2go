@@ -42,6 +42,7 @@ use App\Models\CafeTable;
 use App\Models\TimeSittings;
 use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
+use App\Models\CashierMan;
 use App\Models\Delivery;
 
 use App\trait\image;
@@ -60,7 +61,8 @@ class CashierMakeOrderController extends Controller
     private CafeLocation $cafe_location, private OrderCart $order_cart,
     private TimeSittings $TimeSittings, private OrderFinancial $financial,
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
-    private Delivery $delivery, private CashierBalance $cashier_balance){}
+    private Delivery $delivery, private CashierBalance $cashier_balance,
+    private CashierMan $cashier_man){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -563,6 +565,7 @@ class CashierMakeOrderController extends Controller
                 'kitchen_id' => $key,
                 'order' => json_encode($item),
                 'type' => 'dine_in',
+                'cart_id' => $value['cart_id'],
             ]);
         }
 
@@ -858,5 +861,43 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             'success' => 'you transfer your table success'
         ]);
+    } 
+
+    public function order_void(Request $request){
+        $validator = Validator::make($request->all(), [
+            'cart_ids' => 'required|array',
+            'cart_ids.*' => 'exists:order_carts,id',
+            'table_id' => 'required|exists:cafe_tables,id',
+            'manager_id' => 'required',
+            'manager_password' => 'required', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $cashier_man = $this->cashier_man
+        ->where('my_id', $request->manager_id)
+        ->where('password', bcrypt($request->password))
+        ->first();
+        if(empty($cashier_man)){
+            return response()->json([
+                'errors' => 'id or password is wrong'
+            ], 400);
+        }
+        if(!$cashier_man->void_order){
+            return response()->json([
+                'errors' => "You don't have this premission"
+            ], 400);
+        }
+        $order_cart = $this->order_cart
+        ->whereIn('id', $request->cart_ids)
+        ->delete();
+
+        return response()->json([
+            'success' => 'you void order success'
+        ]);
     }
+
 }
