@@ -66,6 +66,7 @@ class CaptainOrderController extends Controller
             $imag_path = $this->upload($request, 'image', 'admin/captain/image');
             $captainRequest['image'] = $imag_path;
         }
+        $captainRequest['password'] = $request->password;
         $captain_order = $this->captain_order
         ->create($captainRequest);
         if ($request->locations) { 
