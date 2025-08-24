@@ -131,10 +131,17 @@ class LoginController extends Controller
         }
     }
 
-    public function captain_login(LoginRequest $request){
+    public function captain_login(Request $request){
         // /api/captain/auth/login
         // Keys
-        // email, password
+        // user_name, password
+        $validation = Validator::make($request->all(), [
+            'user_name' => 'required', 
+            'password' => 'required', 
+        ]);
+        if ($validation->fails()) {
+            return response()->json($validation->errors(), 422);
+        }
         $user = $this->captain_order
         ->where('user_name', $request->user_name)
         ->orWhere('phone', $request->user_name)
