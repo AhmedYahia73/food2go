@@ -136,8 +136,8 @@ class LoginController extends Controller
         // Keys
         // email, password
         $user = $this->captain_order
-        ->where('email', $request->email)
-        ->orWhere('phone', $request->email)
+        ->where('user_name', $request->user_name)
+        ->orWhere('phone', $request->user_name)
         ->first();
         if (empty($user)) {
             return response()->json([

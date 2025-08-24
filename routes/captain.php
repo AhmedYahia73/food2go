@@ -16,7 +16,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
 
         Route::post('/dine_in_order', 'dine_in_order'); 
         Route::post('/checkout_request', 'checkout_request');
-    }); 
+    });
      
     Route::controller(CashierMakeOrderController::class)
     ->group(function(){
