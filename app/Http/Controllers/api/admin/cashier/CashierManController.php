@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\cashier_man\CasheirManRequest;
 use Illuminate\Support\Facades\Validator;
+use App\trait\image;
 
 use App\Models\Cashier;
 use App\Models\CashierMan;
@@ -18,6 +19,7 @@ class CashierManController extends Controller
     public function __construct(private Cashier $cashier,
     private CashierMan $cashier_men, private Branch $branch,
     private CashierRole $cashier_role){}
+    use image;
 
     public function view(Request $request){
         // /admin/cashier_man
@@ -81,8 +83,8 @@ class CashierManController extends Controller
     public function create(CasheirManRequest $request){
         // admin/cashier_man/add
         // Keys
-        // user_name, password, branch_id, status,
-        // take_away, dine_in, delivery, car_slow
+        // user_name, password, branch_id, status, my_id
+        // take_away, dine_in, delivery, car_slow, image,
         // roles[]
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],
@@ -95,6 +97,10 @@ class CashierManController extends Controller
         }
         $cashierRequest = $request->validated(); 
         $cashierRequest['password'] = $request->password;
+        if ($request->image) {
+            $imag_path = $this->upload($request, 'image', 'admin/cashier/image');
+            $cashierRequest['image'] = $imag_path;
+        }
         $cashier_men = $this->cashier_men
         ->create($cashierRequest);
         if ($request->roles) {
@@ -114,8 +120,8 @@ class CashierManController extends Controller
 
     public function modify(CasheirManRequest $request, $id){
         // admin/cashier_man/update/{id}
-        // user_name, password, branch_id, status
-        // take_away, dine_in, delivery, car_slow
+        // user_name, password, branch_id, status, my_id
+        // take_away, dine_in, delivery, car_slow, image,
         // roles[]
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],
@@ -126,7 +132,11 @@ class CashierManController extends Controller
                 'errors' => $validation->errors(),
             ],400);
         }
-        $cashierRequest = $request->validated(); 
+        $cashierRequest = $request->validated();
+        if ($request->image) {
+            $imag_path = $this->upload($request, 'image', 'admin/cashier/image');
+            $cashierRequest['image'] = $imag_path;
+        }
         $cashier_men = $this->cashier_men
         ->where('id', $id)
         ->first();

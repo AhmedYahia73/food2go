@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\admin\pos\CaptainOrderRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\trait\image;
 
 use App\Models\CaptainOrder;
 use App\Models\CafeLocation;
@@ -16,6 +17,7 @@ class CaptainOrderController extends Controller
 {
     public function __construct(private Branch $branches, 
     private CaptainOrder $captain_order, private CafeLocation $cafe_locations){}
+    use image;
 
     public function view(){
         // /admin/pos/captain
@@ -51,7 +53,7 @@ class CaptainOrderController extends Controller
     public function create(CaptainOrderRequest $request){
         // /admin/pos/captain/add
         $validator = Validator::make($request->all(), [
-            'email' => 'unique:captain_orders,email',
+            'user_name' => 'unique:captain_orders,user_name',
             'password' => ['required'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -60,6 +62,10 @@ class CaptainOrderController extends Controller
             ],400);
         }
         $captainRequest = $request->validated();
+        if ($request->image) {
+            $imag_path = $this->upload($request, 'image', 'admin/captain/image');
+            $captainRequest['image'] = $imag_path;
+        }
         $captain_order = $this->captain_order
         ->create($captainRequest);
         if ($request->locations) { 
@@ -74,7 +80,8 @@ class CaptainOrderController extends Controller
     public function modify(CaptainOrderRequest $request, $id){
         // /admin/pos/captain/update/{id}
         $validator = Validator::make($request->all(), [
-            'email' => Rule::unique('captain_orders')->ignore($id),
+            'user_name' => Rule::unique('captain_orders')->ignore($id),
+            'phone' => Rule::unique('captain_orders')->ignore($id),
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -82,6 +89,10 @@ class CaptainOrderController extends Controller
             ],400);
         }
         $captainRequest = $request->validated();
+        if ($request->image) {
+            $imag_path = $this->upload($request, 'image', 'admin/captain/image');
+            $captainRequest['image'] = $imag_path;
+        }
         if(!empty($request->password)){
             $captainRequest['password'] = bcrypt($request->password);
         }

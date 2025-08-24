@@ -11,6 +11,8 @@ class CashierMan extends Model
     use HasApiTokens, HasFactory;
 
     protected $fillable = [
+        'my_id',
+        'image',
         'branch_id',
         'take_away',
         'dine_in',
@@ -21,7 +23,11 @@ class CashierMan extends Model
         'password',
         'status',
     ];
-    protected $appends = ['role'];
+    protected $appends = ['role', 'image_link'];
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
+    }
 
     public function getRoleAttribute(){
         return 'cashier';

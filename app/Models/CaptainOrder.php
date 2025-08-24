@@ -13,13 +13,18 @@ class CaptainOrder extends Model
 
     protected $fillable = [
         'branch_id',
-        'name',
-        'email',
+        'image',
+        'name', 
+        'user_name',
         'phone',
         'password',
         'captain_id',
     ];
-    protected $appends = ['role'];
+    protected $appends = ['role', 'image_link'];
+
+    public function getImageLinkAttribute(){
+        return url('storage/' . $this->attributes['image']);
+    }
 
     public function getRoleAttribute(){
         return 'captain_order';

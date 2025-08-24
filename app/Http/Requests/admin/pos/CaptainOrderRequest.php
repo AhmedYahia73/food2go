@@ -26,7 +26,7 @@ class CaptainOrderRequest extends FormRequest
         return [
             'branch_id' => ['required', 'exists:branches,id'],
             'name' => ['required'],
-            'email' => ['required', 'email'],
+            'user_name' => ['required'],
             'phone' => ['required'],
             'locations.*' => ['required', 'exists:cafe_locations,id']
         ];
