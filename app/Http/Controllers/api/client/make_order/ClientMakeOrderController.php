@@ -254,7 +254,7 @@ class ClientMakeOrderController extends Controller
         }
     }
 
-    public function dine_in_order(OrderRequest $request){
+    public function dine_in_order(Request $request){
         // /cashier/dine_in_order
         // Keys
         // amount, total_tax, total_discount, table_id
