@@ -266,6 +266,22 @@ class ClientMakeOrderController extends Controller
             'table_id' => 'required|exists:cafe_tables,id',
             'lat' => 'required',
             'lng' => 'required',
+            'date' => ['regex:/^([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/'],
+            'branch_id' => ['exists:branches,id', 'nullable'],
+            'amount' => ['numeric'],
+            'payment_method_id' => ['exists:payment_methods,id'],
+            'total_tax' => ['numeric'],
+            'total_discount' => ['numeric'],
+            'address_id' => ['exists:addresses,id', 'nullable'],
+            'order_type' => ['in:take_away,dine_in,delivery,car_slow'],
+            'products.*.product_id' => ['exists:products,id', 'required'],
+            'products.*.exclude_id.*' => ['exists:exclude_products,id'],
+            'products.*.extra_id.*' => ['exists:extra_products,id'],
+            'products.*.variation.*.variation_id' => ['exists:variation_products,id'],
+            'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
+            'products.*.count' => ['numeric', 'required'],
+            'products.*.note' => ['sometimes'],
+            'sechedule_slot_id' => ['exists:schedule_slots,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -291,7 +307,7 @@ class ClientMakeOrderController extends Controller
         $request->merge([
             'branch_id' => $branch_id,
             'user_id' => 'empty',
-            'order_type' => 'dine_in',
+            'order_type' => 'dine_in', 
         ]);
         $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
