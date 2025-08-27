@@ -15,7 +15,7 @@ class AddonResource extends JsonResource
     public function toArray(Request $request): array
     {
         $locale = app()->getLocale(); // Use the application's current locale
-        if ($this->taxes->setting == 'included') {
+        if ($this?->taxes?->setting == 'included') {
             $price =  empty($this->tax) ? $this->price: 
             ($this->tax->type == 'value' ? $this->price + $this->tax->amount : $this->price + $this->tax->amount * $this->price / 100);
 
