@@ -166,7 +166,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('pos/captain')->group(function(){
         Route::get('/', 'view')->middleware('can:view_captain');
         Route::get('/item/{id}', 'captain')->middleware('can:edit_captain');
-        Route::get('/status/{id}', 'status')->middleware('can:edit_captain');
+        Route::put('/status/{id}', 'status')->middleware('can:edit_captain');
         Route::post('/add', 'create')->middleware('can:add_captain');
         Route::post('/update/{id}', 'modify')->middleware('can:edit_captain');
         Route::delete('/delete/{id}', 'delete')->middleware('can:delete_captain');
