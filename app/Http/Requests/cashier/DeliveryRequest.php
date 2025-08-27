@@ -32,6 +32,8 @@ class DeliveryRequest extends FormRequest
             'products.*.product_id' => ['exists:products,id', 'required'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],
+            'products.*.addons.*.addon_id' => ['exists:addons,id'],
+            'products.*.addons.*.count' => ['numeric'],
             'products.*.variation.*.variation_id' => ['exists:variation_products,id'],
             'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
             'products.*.count' => ['numeric', 'required'],
