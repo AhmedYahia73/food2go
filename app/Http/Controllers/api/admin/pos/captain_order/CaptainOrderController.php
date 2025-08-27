@@ -50,6 +50,26 @@ class CaptainOrderController extends Controller
         ]);
     }
 
+    public function status(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'status' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $captain_order = $this->captain_order 
+        ->where('id', $id)
+        ->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'success' => $request->status ? 'active' : 'banned'
+        ]);
+    }
+
     public function create(CaptainOrderRequest $request){
         // /admin/pos/captain/add
         $validator = Validator::make($request->all(), [
@@ -60,7 +80,7 @@ class CaptainOrderController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
+        } 
         $captainRequest = $request->validated();
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/captain/image');

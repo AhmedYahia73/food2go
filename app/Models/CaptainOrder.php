@@ -19,6 +19,7 @@ class CaptainOrder extends Model
         'phone',
         'password',
         'captain_id',
+        'status',
     ];
     protected $appends = ['role', 'image_link'];
 
