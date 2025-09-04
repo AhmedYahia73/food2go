@@ -195,6 +195,8 @@ class OtpController extends Controller
         ->where('code', $request->code)
         ->orWhere('phone', '+20' . $request->email)
         ->where('code', $request->code)
+        ->orWhere('phone', $request->email)
+        ->where('code', $request->code)
         ->first();
         if (empty($user)) {
             return response()->json([
