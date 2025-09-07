@@ -523,11 +523,11 @@ class OrderController extends Controller
         } 
         $start = $start->subDay();
         $orders = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id', 'order_details')
+        ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
+        ,'order_status',
+        'delivery_id', 'address_id', 'source',
+        'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
@@ -536,8 +536,11 @@ class OrderController extends Controller
             ->orWhereNull('status');
         }) 
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+			$query->select('id', 'zone_id')
+			->with('zone:id,zone');
+		}, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery'])
         ->get();
         $pending = $orders
         ->where('order_status', 'pending')

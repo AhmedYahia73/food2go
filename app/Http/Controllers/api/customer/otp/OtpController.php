@@ -205,7 +205,7 @@ class OtpController extends Controller
                 'faild' => 'Code is wrong'
             ], 400);
         }
-        $user->password = $request->password;
+        $user->password = bcrypt($request->password);
         $user->code = null;
         $user->save(); 
         $user->role = 'customer';
