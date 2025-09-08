@@ -176,11 +176,17 @@ class ClientMakeOrderController extends Controller
         $paymentMethod = $this->paymentMethod
         ->where('id', 1)
         ->get();
+        $financial_account = $this->finantiol_accounting
+        ->select('id', 'name', 'details', 'logo')
+        ->whereHas('branch')
+        ->where('status', 1)
+        ->get(); 
 
         return response()->json([
             'categories' => $categories,
             'products' => $products,
-            'paymentMethod' => $paymentMethod, 
+            'paymentMethod' => $paymentMethod,
+            'financial_account' => $financial_account
         ]);
     }
 
