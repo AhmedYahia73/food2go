@@ -594,10 +594,10 @@ class ClientMakeOrderController extends Controller
 
         $n = count($polygon);
         for ($i = 0, $j = $n - 1; $i < $n; $j = $i++) {
-            $xi = $polygon[$i][0]; // lat
-            $yi = $polygon[$i][1]; // lng
-            $xj = $polygon[$j][0]; 
-            $yj = $polygon[$j][1];
+            $xi = $polygon[$i]->lat; // lat
+            $yi = $polygon[$i]->lng; // lng
+            $xj = $polygon[$j]->lat; 
+            $yj = $polygon[$j]->lng;
 
             $intersect = (($yi > $y) != ($yj > $y)) &&
                 ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi);
