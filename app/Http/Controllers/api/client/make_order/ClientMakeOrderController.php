@@ -303,7 +303,7 @@ class ClientMakeOrderController extends Controller
                 'errors' => 'You must be at location'
             ], 400);
         } 
-        $location = $location?->branch_id;
+        $branch_id = $location?->branch_id;
         $request->merge([
             'branch_id' => $branch_id,
             'user_id' => 'empty',
