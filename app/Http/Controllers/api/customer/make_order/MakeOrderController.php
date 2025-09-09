@@ -27,6 +27,7 @@ use App\Models\Addon;
 use App\Models\PaymentMethodAuto;
 use App\Models\Setting;
 use App\Models\TimeSittings;
+use App\Models\Branch;
 use App\Models\Address;
 
 class MakeOrderController extends Controller
@@ -37,7 +38,7 @@ class MakeOrderController extends Controller
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings, 
     private Address $address, private TimeSittings $TimeSittings,
-    private CompanyInfo $company_info){}
+    private CompanyInfo $company_info, private Branch $branches){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -71,6 +72,16 @@ class MakeOrderController extends Controller
             $request->merge([
                 'branch_id' => $branch_id,
             ]);
+        }
+        $branche = $this->branches
+        ->where('id', $request->branch_id)
+        ->where('status', 1)
+        ->first();
+
+        if(empty($branche)){
+            return response()->json([
+                'errors' => 'this branch is locked'
+            ], 422);
         }
         // Time Slot
             // $resturant_time = $time_sitting;

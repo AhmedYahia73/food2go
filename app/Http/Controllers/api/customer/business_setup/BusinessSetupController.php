@@ -10,6 +10,7 @@ use App\Models\Maintenance;
 use App\Models\CompanyInfo;
 use App\Models\Setting;
 use App\Models\TimeSittings;
+use App\Models\Branch;
 use App\Models\Address;
 
 class BusinessSetupController extends Controller
@@ -139,6 +140,14 @@ class BusinessSetupController extends Controller
                 $open_to = $this->arabicTime($open_to);
                 $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;
             }
+        }
+        $branch = Branch::
+        where('id', $request->branch_id)
+        ->where('status', 0)
+        ->first();
+        if(!empty($branche)){
+            $open_flag = false;
+            $close_message = $branch->block_reason;
         }
         // if (empty($time_sitting)) {
         //     $open_flag = true;
