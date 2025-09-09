@@ -113,7 +113,9 @@ class Order extends Model
     }
 
     public function getOrderDetailsDataAttribute(){
-        return json_decode($this->attributes['order_details'], true);
+        if(isset($this->attributes['order_details'])){
+            return json_decode($this->attributes['order_details'], true);
+        }
     }
 
     public function getorderDetailsAttribute($data){
