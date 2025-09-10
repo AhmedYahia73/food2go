@@ -541,7 +541,32 @@ class OrderController extends Controller
 			->with('zone:id,zone');
 		}, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
         'schedule:id,name', 'delivery'])
-        ->get();
+        ->get()
+		->map(function($item){
+			return [ 
+				'id' => $item->id,
+				'order_number' => $item->order_number,
+				'created_at' => $item->created_at,
+				'amount' => $item->amount,
+				'operation_status' => $item->operation_status,
+				'order_status' => $item->order_status,
+				'source' => $item->source,
+				'status' => $item->status,
+				'points' => $item->points, 
+				'rejected_reason' => $item->rejected_reason,
+				'transaction_id' => $item->transaction_id,
+				'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+				'branch' => ['name' => $item?->branch?->name, ],
+				'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+				'admin' => ['name' => $item?->admin?->name,],
+				'payment_method' => ['name' => $item?->payment_method?->name],
+				'schedule' => ['name' => $item?->schedule?->name],
+				'delivery' => ['name' => $item?->delivery?->name], 
+			];
+		});
         $pending = $orders
         ->where('order_status', 'pending')
         ->values();
