@@ -47,8 +47,10 @@ class ProfileController extends Controller
     }
 
     public function delete_account(Request $request){
-        $request->user()->delete();
-
+        $user = $request->user();
+        $user->deleted_at = 1;
+        $user->save();
+        
         return response()->json([
             'success' => 'You delete account success'
         ]);

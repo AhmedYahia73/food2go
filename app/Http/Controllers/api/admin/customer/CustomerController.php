@@ -38,6 +38,7 @@ class CustomerController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/customer
         $customers = $this->customers
+        ->where('deleted_at', 0)
         ->withSum('orders', 'amount')
         ->withCount('orders')
         ->get();
@@ -137,9 +138,9 @@ class CustomerController extends Controller
         // https://bcknd.food2go.online/admin/customer/delete/{id}
         $user = $this->customers
         ->where('id', $id)
-        ->first(); 
-        $this->deleteImage($user->image);
-        $user->delete();
+        ->update([ 
+            'deleted_at' => 1
+        ]);
 
         return response()->json([
             'success' => 'You delete data success'
