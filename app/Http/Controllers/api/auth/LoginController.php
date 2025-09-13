@@ -138,6 +138,7 @@ class LoginController extends Controller
         $validation = Validator::make($request->all(), [
             'user_name' => 'required', 
             'password' => 'required', 
+            'fcm_token' => 'required', 
         ]);
         if ($validation->fails()) {
             return response()->json($validation->errors(), 422);
@@ -147,9 +148,33 @@ class LoginController extends Controller
         ->orWhere('phone', $request->user_name)
         ->first();
         if (empty($user)) {
-            return response()->json([
-                'faield' => 'This user does not have the ability to login'
-            ], 405);
+            
+            $user = $this->waiter
+            ->where('user_name', $request->user_name)
+            ->first();
+            if (empty($user)) {
+                return response()->json([
+                    'errors' => 'This user does not have the ability to login'
+                ], 405);
+            }
+            if ($user->status == 0) {
+                return response()->json([
+                    'errors' => 'waiter is banned'
+                ], 400);
+            }
+            if (password_verify($request->input('password'), $user->password)) {
+                $user->fcm_token = $request->fcm_token;
+                $user->save();
+                $user->role = 'waiter';
+                $user->token = $user->createToken('waiter')->plainTextToken;
+                return response()->json([
+                    'user' => $user,
+                    'token' => $user->token,
+                ], 200);
+            }
+            else { 
+                return response()->json(['errors'=>'creational not Valid'],403);
+            }
         }
         // if ($user->status == 0) {
         //     return response()->json([
@@ -160,12 +185,37 @@ class LoginController extends Controller
             $user->role = 'captain_order';
             $user->token = $user->createToken('captain_order')->plainTextToken;
             return response()->json([
-                'captain_order' => $user,
+                'user' => $user,
                 'token' => $user->token,
             ], 200);
         }
         else { 
-            return response()->json(['faield'=>'creational not Valid'],403);
+            $user = $this->waiter
+            ->where('user_name', $request->user_name)
+            ->first();
+            if (empty($user)) {
+                return response()->json([
+                    'errors' => 'This user does not have the ability to login'
+                ], 405);
+            }
+            if ($user->status == 0) {
+                return response()->json([
+                    'errors' => 'waiter is banned'
+                ], 400);
+            }
+            if (password_verify($request->input('password'), $user->password)) {
+                $user->fcm_token = $request->fcm_token;
+                $user->save();
+                $user->role = 'waiter';
+                $user->token = $user->createToken('waiter')->plainTextToken;
+                return response()->json([
+                    'user' => $user,
+                    'token' => $user->token,
+                ], 200);
+            }
+            else { 
+                return response()->json(['errors'=>'creational not Valid'],403);
+            }
         }
     }
 
