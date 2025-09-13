@@ -82,6 +82,9 @@ use App\Http\Controllers\api\admin\settings\business_setup\EmailIntegrationContr
 use App\Http\Controllers\api\admin\main_data\MainDataController;
 use App\Http\Controllers\api\admin\waiter\WaiterController;
 
+use App\Http\Controllers\api\admin\purchases\PurchaseController;
+use App\Http\Controllers\api\admin\purchases\StoreController;
+
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -90,6 +93,24 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'group');
         Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(PurchaseController::class)
+    ->prefix('purchase')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'purchase_item');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(StoreController::class)
+    ->prefix('purchase_stores')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'purchase_item');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
