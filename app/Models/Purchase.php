@@ -16,5 +16,7 @@ class Purchase extends Model
         'store_id',
         'total_coast',
         'quintity',
+        'receipt',
+        'date',
     ];
 }

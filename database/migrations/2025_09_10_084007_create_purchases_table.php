@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreignId('admin_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->float('total_coast');
             $table->integer('quintity');
+            $table->string('receipt')->nullable();
+            $table->date('date');
             $table->timestamps();
         });
     }
