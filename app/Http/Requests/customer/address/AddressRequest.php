@@ -26,7 +26,7 @@ class AddressRequest extends FormRequest
         return [
             'city_id' => ['required', 'exists:cities,id'],
             'zone_id' => ['required', 'exists:zones,id'],
-            'address' => ['required'],
+            'address' => ['sometimes'],
             'street' => ['required'],
             'building_num' => ['required'],
             'floor_num' => ['required'],

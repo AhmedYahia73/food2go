@@ -373,7 +373,9 @@ class LoginController extends Controller
         if (empty($user)) {
             $user = $this->user
             ->where('email', $request->email)
+            ->where('deleted_at', 0)
             ->orWhere('phone', $request->email)
+            ->where('deleted_at', 0)
             ->first();
             $role = 'customer';
             
