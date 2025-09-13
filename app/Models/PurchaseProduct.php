@@ -13,6 +13,6 @@ class PurchaseProduct extends Model
         'name',
         'description',
         'status',
-        'category_id', 
+        'category_id',
     ];
 }

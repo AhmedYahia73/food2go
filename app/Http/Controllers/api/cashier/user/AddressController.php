@@ -35,7 +35,7 @@ class AddressController extends Controller
         ->where('status', 1)
         ->get();
         $zones = $this->zones
-        ->select('id', 'zone')
+        ->select('id', 'zone', 'city_id')
         ->where('status', 1)
         ->get();
 

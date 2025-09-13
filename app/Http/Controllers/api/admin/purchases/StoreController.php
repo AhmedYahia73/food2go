@@ -6,28 +6,24 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-use App\Models\Purchase;
+use App\Models\PurchaseStore;
 
-class PurchaseController extends Controller
-{  
-    public function __construct(private Purchase $purchases){}
+class StoreController extends Controller
+{
+    public function __construct(private PurchaseStore $store){}
 
     public function view(Request $request){
-        $purchases = $this->purchases
-        ->select('id', 'name', 'description', 'price', 'quantity', 'created_at', 'date', 'receipt')
+        $stores = $this->store
         ->get();
 
         return response()->json([
-            'purchases' => $purchases
+            'stores' => $stores
         ]);
     }
 
-    public function create(Request $request){
+    public function status(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'name' => ['required'],
-            'description' => ['sometimes'],
-            'price' => ['required', 'numeric'],
-            'quantity' => ['required', 'numeric'],
+            'status' => ['required', 'boolean'], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -35,9 +31,32 @@ class PurchaseController extends Controller
             ],400);
         }
 
-        $purchaseRequest = $validator->validated();
-        $this->purchases
-        ->create($purchaseRequest);
+        $this->store
+        ->where('id', $id)
+        ->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'status' => $request->status ? 'active' : 'banned'
+        ]);
+    }
+
+    public function create(Request $request){
+        $validator = Validator::make($request->all(), [
+            'name' => ['required'],
+            'location' => ['required'],
+            'status' => ['required', 'boolean'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $storeRequest = $validator->validated();
+        $this->store
+        ->create($storeRequest);
 
         return response()->json([
             'success' => 'You add data success'
@@ -47,9 +66,8 @@ class PurchaseController extends Controller
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
-            'description' => ['sometimes'],
-            'price' => ['required', 'numeric'],
-            'quantity' => ['required', 'numeric'],
+            'location' => ['required'],
+            'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -57,10 +75,10 @@ class PurchaseController extends Controller
             ],400);
         }
 
-        $purchaseRequest = $validator->validated();
-        $this->purchases
+        $storeRequest = $validator->validated();
+        $this->store
         ->where('id', $id)
-        ->update($purchaseRequest);
+        ->update($storeRequest);
 
         return response()->json([
             'success' => 'You update data success'
@@ -68,7 +86,7 @@ class PurchaseController extends Controller
     }
 
     public function delete(Request $request, $id){
-          $this->purchases
+        $this->store
         ->where('id', $id)
         ->delete();
 

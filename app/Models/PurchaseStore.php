@@ -11,6 +11,7 @@ class PurchaseStore extends Model
 
     protected $fillable = [
         'location',
-        'name', 
+        'name',
+        'status',
     ];
 }

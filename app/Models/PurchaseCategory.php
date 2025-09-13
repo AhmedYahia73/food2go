@@ -12,6 +12,6 @@ class PurchaseCategory extends Model
     protected $fillable = [
         'name',
         'status',
-        'category_id',
+        'category_id', 
     ];
 }

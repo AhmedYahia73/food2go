@@ -19,4 +19,12 @@ class Purchase extends Model
         'receipt',
         'date',
     ];
+    protected $appends = ['receipt_link'];
+
+    public function getReceiptLinkAttribute(){
+        if(isset($this->attributes['receipt'])){
+            return url('storage/' . $this->attributes['receipt']);
+        }
+        return null;
+    }
 }

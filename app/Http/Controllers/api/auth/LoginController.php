@@ -264,6 +264,13 @@ class LoginController extends Controller
         // Keys
         // user_name, password
         // shift_number => sometimes
+        $validation = Validator::make($request->all(), [
+            'user_name' => 'required', 
+            'password' => 'required',  
+        ]);
+        if ($validation->fails()) {
+            return response()->json($validation->errors(), 422);
+        }
         $user = $this->cashier
         ->where('user_name', $request->user_name)
         ->with('branch')
