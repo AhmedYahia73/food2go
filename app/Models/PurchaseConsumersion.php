@@ -16,5 +16,26 @@ class PurchaseConsumersion extends Model
         'store_id',
         'admin_id',
         'quintity',
+        'date',
     ];
+
+    public function category(){
+        return $this->belongsTo(PurchaseCategory::class, 'category_id');
+    }
+
+    public function product(){
+        return $this->belongsTo(PurchaseProduct::class, 'product_id');
+    }
+
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function store(){
+        return $this->belongsTo(PurchaseStore::class, 'store_id');
+    }
+
+    public function admin(){
+        return $this->belongsTo(Admin::class, 'admin_id');
+    }
 }

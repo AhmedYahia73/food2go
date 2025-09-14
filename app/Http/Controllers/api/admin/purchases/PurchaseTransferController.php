@@ -4,17 +4,8 @@ namespace App\Http\Controllers\api\admin\purchases;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use App\trait\image;
 
-use App\Models\Purchase;
-use App\Models\PurchaseCategory;
-use App\Models\PurchaseFinancial;
-use App\Models\PurchaseProduct;
-use App\Models\PurchaseStore;
-use App\Models\Admin;
-
-class PurchaseController extends Controller
+class PurchaseTransferController extends Controller
 {
     public function __construct(private Purchase $purchases,
     private PurchaseProduct $products, private PurchaseCategory $categories,
@@ -186,23 +177,6 @@ class PurchaseController extends Controller
 
         return response()->json([
             'success' => 'You add data success'
-        ]);
-    }
-
-    public function delete(Request $request, $id){
-        $purchases = $this->purchases
-        ->where('id', $id)
-        ->first();
-        if(empty($purchases)){
-            return response()->json([
-                'errors' => 'id is wrong'
-            ], 400);
-        }
-        $this->deleteImage($purchases->receipt);
-        $purchases->delete();
-
-        return response()->json([
-            'success' => 'You delete data success'
         ]);
     }
 }

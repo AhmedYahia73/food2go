@@ -10,8 +10,8 @@ class PurchaseStore extends Model
     use HasFactory;
 
     protected $fillable = [
-        'location',
         'name',
+        'location',
         'status',
     ];
 

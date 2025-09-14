@@ -7,18 +7,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Cashier;
+use App\Models\Branch;
 
 class CashierController extends Controller
 {
-    public function __construct(private Cashier $cashier){}
+    public function __construct(private Cashier $cashier,
+    private Branch $branches){}
 
     public function view(Request $request){
         // /admin/cashier
         $cashier = $this->cashier
         ->get();
+        $branches = $this->branches
+        ->select('id', 'name')
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'cashiers' => $cashier,
+            'branches' => $branches,
         ]);
     }
 
