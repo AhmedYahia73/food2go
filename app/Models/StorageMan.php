@@ -14,5 +14,16 @@ class StorageMan extends Model
         'phone',
         'password',
         'stora_id',
+        'image',
+        'status',
     ];
+    protected $appends = ['image_link'];
+
+    public function store(){
+        return $this->belongsTo(PurchaseStore::class, 'stora_id');
+    }
+
+    public function getImageLinkAttribute(){
+
+    }
 }

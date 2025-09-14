@@ -9,6 +9,7 @@ use App\trait\image;
 
 use App\Models\Purchase;
 use App\Models\PurchaseCategory;
+use App\Models\PurchaseFinancial;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore;
 use App\Models\Admin;
@@ -17,7 +18,8 @@ class PurchaseController extends Controller
 {  
     public function __construct(private Purchase $purchases,
     private PurchaseProduct $products, private PurchaseCategory $categories,
-    private PurchaseStore $stores, private Admin $admin){}
+    private PurchaseStore $stores, private Admin $admin,
+    private PurchaseFinancial $purchase_financial){}
     use image;
 
     public function view(Request $request){
@@ -38,6 +40,14 @@ class PurchaseController extends Controller
                 'product' => $item?->product?->name,
                 'admin' => $item?->admin?->name,
                 'store' => $item?->store?->name,
+                'financial' => $item?->financial
+                ?->map(function($element){
+                    return [
+                        'id' => $element->id,
+                        'name' => $element->name,
+                        'amount' => $element?->pivot?->amount,
+                    ];
+                })
             ];
         });
         $categories = $this->categories
@@ -97,6 +107,8 @@ class PurchaseController extends Controller
             'quintity' => ['required', 'numeric'],
             'receipt' => ['required'],
             'date' => ['required', 'date'],
+            'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
+            'financial.*.amount' => ['required', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -110,8 +122,16 @@ class PurchaseController extends Controller
             $imag_path = $this->upload($request, 'receipt', 'admin/purchases/receipt');
             $purchaseRequest['receipt'] = $imag_path;
         }
-        $this->purchases
+        $purchase = $this->purchases
         ->create($purchaseRequest);
+        foreach ($request->financial as $item) {
+            $this->purchase_financial
+            ->create([
+                'purchase_id' => $purchase->id,
+                'financial_id' => $item['id'],
+                'amount' => $item['amount'],
+            ]);
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -126,6 +146,8 @@ class PurchaseController extends Controller
             'total_coast' => ['required', 'numeric'],
             'quintity' => ['required', 'numeric'],
             'date' => ['required', 'date'],
+            'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
+            'financial.*.amount' => ['required', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -150,6 +172,17 @@ class PurchaseController extends Controller
         }
         $purchases
         ->update($purchaseRequest);
+        $this->purchase_financial
+        ->where('purchase_id', $purchase->id)
+        ->delete();
+        foreach ($request->financial as $item) {
+            $this->purchase_financial
+            ->create([
+                'purchase_id' => $purchase->id,
+                'financial_id' => $item['id'],
+                'amount' => $item['amount'],
+            ]);
+        }
 
         return response()->json([
             'success' => 'You add data success'

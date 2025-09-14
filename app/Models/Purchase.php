@@ -21,6 +21,11 @@ class Purchase extends Model
     ];
     protected $appends = ['receipt_link'];
 
+    public function financial(){
+        return $this->belongsToMany(FinantiolAcounting::class, 'purchase_financials', 'financial_id', 'purchase_id')
+        ->withPivot('amount');
+    }
+
     public function getReceiptLinkAttribute(){
         if(isset($this->attributes['receipt'])){
             return url('storage/' . $this->attributes['receipt']);

@@ -14,4 +14,8 @@ class PurchaseStore extends Model
         'name',
         'status',
     ];
+
+    public function branches(){
+        return $this->belongsToMany(Branch::class);
+    }
 }
