@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('purchase_wasteds', function (Blueprint $table) {
             $table->id();
-            $table->enum('status', ['pending', 'approve', 'reject'])->default('pending');
+            $table->foreignId('category_id')->nullable()->constrained('purchase_categories')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('product_id')->nullable()->constrained('purchase_products')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('store_id')->nullable()->constrained('purchase_stores')->onUpdate('cascade')->onDelete('cascade');
+            $table->integer('quantity');
+            $table->enum('status', ['pending', 'approve', 'reject']);
             $table->timestamps();
         });
     }

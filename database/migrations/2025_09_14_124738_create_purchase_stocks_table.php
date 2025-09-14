@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('product_id')->nullable()->constrained('purchase_products')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('store_id')->nullable()->constrained('purchase_stores')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('quantity');
-            $table->enum('status', ['pending', 'approve', 'reject']);
             $table->timestamps();
         });
     }
