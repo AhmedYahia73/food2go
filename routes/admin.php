@@ -85,6 +85,7 @@ use App\Http\Controllers\api\admin\waiter\WaiterController;
 use App\Http\Controllers\api\admin\purchases\PurchaseController;
 use App\Http\Controllers\api\admin\purchases\StoreController;
 use App\Http\Controllers\api\admin\purchases\PurchaseCategoryController;
+use App\Http\Controllers\api\admin\purchases\StoreManController;
 
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
@@ -118,6 +119,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
     
     Route::controller(PurchaseCategoryController::class)
+    ->prefix('purchase_stores')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'category');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(StoreManController::class)
     ->prefix('purchase_stores')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'category');

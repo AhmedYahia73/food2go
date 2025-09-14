@@ -33,7 +33,7 @@ class AddressRequest extends FormRequest
             'apartment' => ['required'],
             'additional_data' => ['required'],
             'type' => ['required'],
-            'map' => ['required'], 
+            'map' => ['sometimes'], 
         ];
     }
 
