@@ -25,6 +25,7 @@ class OrderController extends Controller
     public function upcomming(Request $request){
         // https://bcknd.food2go.online/customer/orders
         $orders = $this->orders
+        ->orderByDesc('id')
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'scheduled'])
         ->where(function($query) {
