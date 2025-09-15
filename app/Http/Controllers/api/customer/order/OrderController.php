@@ -55,6 +55,7 @@ class OrderController extends Controller
                     $item = collect($item);
                     foreach ($item as $element) {
                         $product = $element->product;
+                        $product = collect($product);
                         unset($product->addons);
                         $total = ($product->price + $total_variation
                         ->where('product_id', $product->id)
