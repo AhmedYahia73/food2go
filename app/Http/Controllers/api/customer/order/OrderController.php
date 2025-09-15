@@ -54,6 +54,7 @@ class OrderController extends Controller
                 foreach ($total_product as $item) {
                     $item = collect($item);
                     foreach ($item as $element) {
+                        $element = collect($element);
                         $product = $element->product;
                         $product = collect($product);
                         unset($product->addons);
