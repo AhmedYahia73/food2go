@@ -7,17 +7,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\PurchaseStore;
+use App\Models\Branch;
 
 class StoreController extends Controller
 {
-    public function __construct(private PurchaseStore $store){}
+    public function __construct(private PurchaseStore $store,
+    private Branch $branches){}
 
     public function view(Request $request){
         $stores = $this->store
         ->get();
+        $branches = $this->branches
+        ->select('id', 'name')
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
-            'stores' => $stores
+            'stores' => $stores,
+            'branches' => $branches,
         ]);
     }
 

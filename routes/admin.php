@@ -86,6 +86,10 @@ use App\Http\Controllers\api\admin\purchases\PurchaseController;
 use App\Http\Controllers\api\admin\purchases\StoreController;
 use App\Http\Controllers\api\admin\purchases\PurchaseCategoryController;
 use App\Http\Controllers\api\admin\purchases\PurchaseConsumersionController;
+use App\Http\Controllers\api\admin\purchases\PurchaseProductController;
+use App\Http\Controllers\api\admin\purchases\PurchaseTransferController;
+use App\Http\Controllers\api\admin\purchases\WastedController;
+use App\Http\Controllers\api\admin\purchases\StockController;
 use App\Http\Controllers\api\admin\purchases\StoreManController;
 
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
@@ -110,8 +114,33 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
     
+    Route::controller(WastedController::class)
+    ->prefix('purchase_transfer')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'purchase_item');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify'); 
+    });
+    
+    Route::controller(PurchaseTransferController::class)
+    ->prefix('purchase_transfer')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'purchase_item');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify'); 
+    });
+    
     Route::controller(StoreController::class)
     ->prefix('purchase_stores')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'purchase_item');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(PurchaseProductController::class)
+    ->prefix('purchase_product')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'purchase_item');
         Route::post('/add', 'create');
@@ -126,15 +155,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
-    });
-    
-    Route::controller(PurchaseConsumersionController::class)
-    ->prefix('purchase_stores')->group(function(){
-        Route::get('/', 'view'); 
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
-    });
+    }); 
     
     Route::controller(PurchaseConsumersionController::class)
     ->prefix('purchase_consumersion')->group(function(){

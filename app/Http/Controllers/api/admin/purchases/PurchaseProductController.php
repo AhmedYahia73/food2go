@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\admin\purchases;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\PurchaseProduct;
 
@@ -24,9 +25,14 @@ class PurchaseProductController extends Controller
                 'category' => $item?->category?->name,
             ];
         }); 
+        $categories = $this->categories
+        ->select('id', 'name', 'category_id')
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'products' => $product,
+            'categories' => $categories,
         ]);
     }
     

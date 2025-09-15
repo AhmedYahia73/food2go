@@ -4,13 +4,16 @@ namespace App\Http\Controllers\api\admin\purchases;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\trait\image;
 
 use App\Models\StorageMan;
+use App\Models\PurchaseStore;
 
 class StoreManController extends Controller
 {
-    public function __construct(private StorageMan $store_man){}
+    public function __construct(private StorageMan $store_man,
+    private PurchaseStore $stores){}
     use image;
 
     public function view(Request $request){
@@ -21,14 +24,20 @@ class StoreManController extends Controller
             return [
                 'user_name' => $item->user_name,
                 'phone' => $item->phone, 
-                'stora_id' => $item?->stora_id,
-                'stora' => $item?->store?->name,
+                'store_id' => $item?->store_id,
+                'store' => $item?->store?->name,
                 'image' => $item->image_link,
             ];
-        }); 
+        });
+        $stores = $this->stores
+        ->select('id', 'name')
+        ->where('status', 1)
+        ->get();
+
 
         return response()->json([
             'store_men' => $store_man,
+            'stores' => $stores,
         ]);
     }
     

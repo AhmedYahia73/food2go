@@ -11,15 +11,15 @@ use App\Models\Purchase;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseFinancial;
 use App\Models\PurchaseProduct;
-use App\Models\PurchaseStore;
-use App\Models\Admin;
+use App\Models\PurchaseStore; 
+use App\Models\FinantiolAcounting;
 use App\Models\PurchaseStock;
 
 class PurchaseController extends Controller
 {
     public function __construct(private Purchase $purchases,
     private PurchaseProduct $products, private PurchaseCategory $categories,
-    private PurchaseStore $stores, private Admin $admin,
+    private PurchaseStore $stores, private FinantiolAcounting $financial,
     private PurchaseFinancial $purchase_financial,
     private PurchaseStock $stock){}
     use image;
@@ -64,8 +64,8 @@ class PurchaseController extends Controller
         ->select('id', 'name')
         ->where('status', 1)
         ->get();
-        $admins = $this->admin
-        ->select('id', 'name')
+        $financials = $this->financial
+        ->select('id', 'name', 'logo')
         ->where('status', 1)
         ->get();
 
@@ -74,7 +74,7 @@ class PurchaseController extends Controller
             'categories' => $categories,
             'products' => $products,
             'stores' => $stores,
-            'admins' => $admins,
+            'financials' => $financials,
         ]);
     }
 
@@ -225,20 +225,20 @@ class PurchaseController extends Controller
         ]);
     }
 
-    public function delete(Request $request, $id){
-        $purchases = $this->purchases
-        ->where('id', $id)
-        ->first();
-        if(empty($purchases)){
-            return response()->json([
-                'errors' => 'id is wrong'
-            ], 400);
-        }
-        $this->deleteImage($purchases->receipt);
-        $purchases->delete();
+    // public function delete(Request $request, $id){
+    //     $purchases = $this->purchases
+    //     ->where('id', $id)
+    //     ->first();
+    //     if(empty($purchases)){
+    //         return response()->json([
+    //             'errors' => 'id is wrong'
+    //         ], 400);
+    //     }
+    //     $this->deleteImage($purchases->receipt);
+    //     $purchases->delete();
 
-        return response()->json([
-            'success' => 'You delete data success'
-        ]);
-    }
+    //     return response()->json([
+    //         'success' => 'You delete data success'
+    //     ]);
+    // }
 }

@@ -8,11 +8,16 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\PurchaseConsumersion;
 use App\Models\PurchaseStock;
+use App\Models\PurchaseCategory;
+use App\Models\PurchaseProduct;
+use App\Models\PurchaseStore;
+use App\Models\Branch;
 
 class PurchaseConsumersionController extends Controller
 {
     public function __construct(private PurchaseConsumersion $consumersions,
-    private PurchaseStock $stock){}
+    private PurchaseStock $stock, private PurchaseCategory $categories,
+    private PurchaseProduct $products, private PurchaseStore $stores,){}
 
     public function view(Request $request){
         $consumersions = $this->consumersions
@@ -33,9 +38,24 @@ class PurchaseConsumersionController extends Controller
                 'date' => $item->date,
             ];
         });
+        $categories = $this->categories
+        ->select('id', 'name', 'category_id')
+        ->where('status', 1)
+        ->get();
+        $products = $this->products
+        ->select('id', 'name', 'category_id')
+        ->where('status', 1)
+        ->get();
+        $stores = $this->stores
+        ->select('id', 'name')
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
-            'consumersions' => $consumersions
+            'consumersions' => $consumersions,
+            'categories' => $categories,
+            'products' => $products,
+            'stores' => $stores,
         ]);
     }
 
@@ -123,5 +143,16 @@ class PurchaseConsumersionController extends Controller
         return response()->json([
             'success' => 'You update data success'
         ]);
-    } 
+    }
+
+    // public function delete(Request $request, $id){
+    //     $this->consumersions
+    //     ->where('id', $id)
+    //     ->delete();
+
+    //     return response()->json([
+    //         'success' => 'You delete data success'
+    //     ]);
+    // }
+
 }

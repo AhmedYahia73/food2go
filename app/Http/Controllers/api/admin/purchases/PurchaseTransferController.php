@@ -4,41 +4,38 @@ namespace App\Http\Controllers\api\admin\purchases;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+use App\Models\PurchaseTransfer;
+use App\Models\PurchaseProduct;
+use App\Models\PurchaseCategory;
+use App\Models\PurchaseStore;
+use App\Models\PurchaseStock;
 
 class PurchaseTransferController extends Controller
 {
-    public function __construct(private Purchase $purchases,
+    public function __construct(private PurchaseTransfer $purchases,
     private PurchaseProduct $products, private PurchaseCategory $categories,
-    private PurchaseStore $stores, private Admin $admin,
-    private PurchaseFinancial $purchase_financial){}
-    use image;
+    private PurchaseStore $stores, private PurchaseStock $stock){} 
 
-    public function view(Request $request){
+    public function view(Request $request){ 
         $purchases = $this->purchases
-        ->with('category', 'product', 'admin', 'store')
+        ->with('category', 'product', 'from_store', 'to_store')
         ->get()
         ->map(function($item){
             return [
-                'total_coast' => $item->total_coast,
-                'quintity' => $item->quintity,
-                'date' => $item->date,
-                'receipt_link' => $item->receipt_link,
-                'category_id' => $item->category_id,
+                'id' => $item->id,
+                'from_store_id' => $item->from_store_id,
+                'to_store_id' => $item->to_store_id,
                 'product_id' => $item->product_id,
-                'admin_id' => $item->admin_id,
-                'store_id' => $item->store_id,
+                'category_id' => $item->category_id,
+                'quantity' => $item->quantity, 
+                'to_store' => $item?->to_store?->name,
+                'from_store' => $item?->from_store?->name,
                 'category' => $item?->category?->name,
                 'product' => $item?->product?->name,
                 'admin' => $item?->admin?->name,
-                'store' => $item?->store?->name,
-                'financial' => $item?->financial
-                ?->map(function($element){
-                    return [
-                        'id' => $element->id,
-                        'name' => $element->name,
-                        'amount' => $element?->pivot?->amount,
-                    ];
-                })
+                'status' => $item->status,
             ];
         });
         $categories = $this->categories
@@ -52,131 +49,156 @@ class PurchaseTransferController extends Controller
         $stores = $this->stores
         ->select('id', 'name')
         ->where('status', 1)
-        ->get();
-        $admins = $this->admin
-        ->select('id', 'name')
-        ->where('status', 1)
-        ->get();
+        ->get(); 
 
         return response()->json([
             'purchases' => $purchases,
             'categories' => $categories,
             'products' => $products,
-            'stores' => $stores,
-            'admins' => $admins,
+            'stores' => $stores, 
         ]);
     }
 
-    public function purchase_item(Request $request, $id){
-        $purchases = $this->purchases
-        ->with('category', 'product', 'admin', 'store')
-        ->where('id', $id)
-        ->first();
-
-        return response()->json([
-            'total_coast' => $purchases->total_coast,
-            'quintity' => $purchases->quintity,
-            'date' => $purchases->date,
-            'receipt_link' => $purchases->receipt_link,
-            'category_id' => $purchases->category_id,
-            'product_id' => $purchases->product_id,
-            'admin_id' => $purchases->admin_id,
-            'store_id' => $purchases->store_id,
-            'category' => $purchases?->category?->name,
-            'product' => $purchases?->product?->name,
-            'admin' => $purchases?->admin?->name,
-            'store' => $purchases?->store?->name,
-        ]);
-    }
-
-    public function create(Request $request){
+    public function status(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'category_id' => ['required', 'exists:purchase_categories,id'],
-            'product_id' => ['required', 'exists:purchase_products,id'],
-            'store_id' => ['required', 'exists:purchase_stores,id'],
-            'total_coast' => ['required', 'numeric'],
-            'quintity' => ['required', 'numeric'],
-            'receipt' => ['required'],
-            'date' => ['required', 'date'],
-            'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
-            'financial.*.amount' => ['required', 'numeric'],
+            'status' => ['required', 'in:approve,reject'], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }// 
-
-        $purchaseRequest = $validator->validated();
-        $purchaseRequest['admin_id'] = $request->user()->id;
-        if (!empty($request->receipt)) {
-            $imag_path = $this->upload($request, 'receipt', 'admin/purchases/receipt');
-            $purchaseRequest['receipt'] = $imag_path;
         }
-        $purchase = $this->purchases
-        ->create($purchaseRequest);
-        foreach ($request->financial as $item) {
-            $this->purchase_financial
-            ->create([
-                'purchase_id' => $purchase->id,
-                'financial_id' => $item['id'],
-                'amount' => $item['amount'],
-            ]);
+
+        $purchases = $this->purchases
+        ->where('id', $id)
+        ->first();
+        if($request->status == 'approve'){
+            $from_store = $this->stock
+            ->where('store_id', $request->from_store_id)
+            ->where('product_id', $request->product_id)
+            ->first();
+            $to_store = $this->stock
+            ->where('store_id', $request->to_store_id)
+            ->where('product_id', $request->product_id)
+            ->first();
+            if(empty($from_store)){
+                $this->stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'product_id' => $request->product_id,
+                    'store_id' => $request->from_store_id,
+                    'quantity' => -$request->quintity,
+                ]);
+            }
+            else{
+                $stock = $this->stock
+                ->where('category_id', $request->category_id)
+                ->where('product_id', $request->product_id)
+                ->where('store_id', $request->from_store_id)
+                ->first();
+                $stock->quantity -= $request->quintity;
+                $stock->save();
+            }
+
+            if(empty($to_store)){
+                $this->stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'product_id' => $request->product_id,
+                    'store_id' => $request->to_store_id,
+                    'quantity' => $request->quintity,
+                ]);
+            }
+            else{
+                $stock = $this->stock
+                ->where('category_id', $request->category_id)
+                ->where('product_id', $request->product_id)
+                ->where('store_id', $request->to_store_id)
+                ->first();
+                $stock->quantity += $request->quintity;
+                $stock->save();
+            }
+            $purchases->status = $request->status;
+            $purchases->save();
         }
 
         return response()->json([
-            'success' => 'You add data success'
+            'success' => 'You update status success'
         ]);
     }
 
-    public function modify(Request $request, $id){
+    public function transfer(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'category_id' => ['required', 'exists:purchase_categories,id'],
-            'product_id' => ['required', 'exists:purchase_products,id'],
-            'store_id' => ['required', 'exists:purchase_stores,id'],
-            'total_coast' => ['required', 'numeric'],
-            'quintity' => ['required', 'numeric'],
-            'date' => ['required', 'date'],
-            'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
-            'financial.*.amount' => ['required', 'numeric'],
+            'from_store_id' => ['required', 'exists:purchase_stores,id'], 
+            'to_store_id' => ['required', 'exists:purchase_stores,id'], 
+            'category_id' => ['required', 'exists:purchase_categories,id'], 
+            'product_id' => ['required', 'exists:purchase_products,id'], 
+            'quintity' => ['required', 'numeric'], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }// 
+        }
 
-        $purchases = $this->purchases
-        ->where('id', $id)
+        $this->purchases
+        ->create([
+            'from_store_id' => $request->from_store_id,
+            'to_store_id' => $request->to_store_id,
+            'category_id' => $request->category_id,
+            'product_id' => $request->product_id,
+            'admin_id' => $request->user()->id,
+            'quintity' => $request->quintity,
+        ]);
+        // stock
+        $from_store = $this->stock
+        ->where('store_id', $request->from_store_id)
+        ->where('product_id', $request->product_id)
         ->first();
-        if(empty($purchases)){
-            return response()->json([
-                'errors' => 'id is wrong'
-            ], 400);
-        }
-        $purchaseRequest = $validator->validated();
-        $purchaseRequest['admin_id'] = $request->user()->id;
-        if (!empty($request->receipt)) {
-            $imag_path = $this->upload($request, 'receipt', 'admin/purchases/receipt');
-            $purchaseRequest['receipt'] = $imag_path;
-            $this->deleteImage($purchases->receipt);
-        }
-        $purchases
-        ->update($purchaseRequest);
-        $this->purchase_financial
-        ->where('purchase_id', $purchase->id)
-        ->delete();
-        foreach ($request->financial as $item) {
-            $this->purchase_financial
+        $to_store = $this->stock
+        ->where('store_id', $request->to_store_id)
+        ->where('product_id', $request->product_id)
+        ->first();
+        if(empty($from_store)){
+            $this->stock
             ->create([
-                'purchase_id' => $purchase->id,
-                'financial_id' => $item['id'],
-                'amount' => $item['amount'],
+                'category_id' => $request->category_id,
+                'product_id' => $request->product_id,
+                'store_id' => $request->from_store_id,
+                'quantity' => -$request->quintity,
             ]);
+        }
+        else{
+            $stock = $this->stock
+            ->where('category_id', $request->category_id)
+            ->where('product_id', $request->product_id)
+            ->where('store_id', $request->from_store_id)
+            ->first();
+            $stock->quantity -= $request->quintity;
+            $stock->save();
+        }
+
+        if(empty($to_store)){
+            $this->stock
+            ->create([
+                'category_id' => $request->category_id,
+                'product_id' => $request->product_id,
+                'store_id' => $request->to_store_id,
+                'quantity' => $request->quintity,
+            ]);
+        }
+        else{
+            $stock = $this->stock
+            ->where('category_id', $request->category_id)
+            ->where('product_id', $request->product_id)
+            ->where('store_id', $request->to_store_id)
+            ->first();
+            $stock->quantity += $request->quintity;
+            $stock->save();
         }
 
         return response()->json([
-            'success' => 'You add data success'
+            'success' => 'You update status success'
         ]);
     }
 }
