@@ -51,18 +51,15 @@ class OrderController extends Controller
             $products = [];
             if ($total_product->count() > 0) {
                 $total_product = collect($total_product);
-                foreach ($total_product as $item) {
-                    $item = collect($item);
-                    foreach ($item as $element) {
-                        $element = collect($element);
-                        $product = $element->product;
-                        $product = collect($product);
+                foreach ($total_product as $value) {
+                    foreach ($value as $element) {  
+                        $product = $element->product; 
                         unset($product->addons);
                         $total = ($product->price + $total_variation
                         ->where('product_id', $product->id)
                         ->sum('price')) * $element->count;
                         $product->total_product = $total;
-                        $product->count = $element->count;
+                        $product->count = $value[0]->count;
                         $product->note = isset($element?->notes) ? $element?->notes :  null;
                         $products[] = $product;
                     }
@@ -130,17 +127,19 @@ class OrderController extends Controller
             $total = 0;
             $products = [];
             if ($total_product->count() > 0) {
-                $total_product = collect($total_product[0]); 
-                foreach ($total_product as $element) {
-                    $product = $element->product;
-                    unset($product->addons);
-                    $total = ($product->price + $total_variation
-                    ->where('product_id', $product->id)
-                    ->sum('price')) * $element->count;
-                    $product->total_product = $total;
-                    $product->count = $element->count;
-                    $product->note = isset($element?->notes) ? $element?->notes :  null;
-                    $products[] = $product;
+                $total_product = collect($total_product);
+                foreach ($total_product as $value) {
+                    foreach ($value as $element) {  
+                        $product = $element->product; 
+                        unset($product->addons);
+                        $total = ($product->price + $total_variation
+                        ->where('product_id', $product->id)
+                        ->sum('price')) * $element->count;
+                        $product->total_product = $total;
+                        $product->count = $value[0]->count;
+                        $product->note = isset($element?->notes) ? $element?->notes :  null;
+                        $products[] = $product;
+                    }
                 }
             }
             $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
