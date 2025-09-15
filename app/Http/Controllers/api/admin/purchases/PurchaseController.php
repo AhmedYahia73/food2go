@@ -13,13 +13,15 @@ use App\Models\PurchaseFinancial;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore;
 use App\Models\Admin;
+use App\Models\PurchaseStock;
 
 class PurchaseController extends Controller
 {
     public function __construct(private Purchase $purchases,
     private PurchaseProduct $products, private PurchaseCategory $categories,
     private PurchaseStore $stores, private Admin $admin,
-    private PurchaseFinancial $purchase_financial){}
+    private PurchaseFinancial $purchase_financial,
+    private PurchaseStock $stock){}
     use image;
 
     public function view(Request $request){
@@ -132,6 +134,23 @@ class PurchaseController extends Controller
                 'amount' => $item['amount'],
             ]);
         }
+        $stock = $this->stock
+        ->where('product_id', $request->product_id)
+        ->where('store_id', $request->store_id)
+        ->first();
+        if(empty($stock)){
+            $this->stock
+            ->create([
+                'category_id' => $request->category_id,
+                'product_id' => $request->product_id,
+                'store_id' => $request->store_id,
+                'quantity' => $request->quintity,
+            ]);
+        }
+        else{
+            $stock->quantity += $request->quintity;
+            $stock->save();
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -183,9 +202,26 @@ class PurchaseController extends Controller
                 'amount' => $item['amount'],
             ]);
         }
+        $stock = $this->stock
+        ->where('product_id', $request->product_id)
+        ->where('store_id', $request->store_id)
+        ->first();
+        if(empty($stock)){
+            $this->stock
+            ->create([
+                'category_id' => $request->category_id,
+                'product_id' => $request->product_id,
+                'store_id' => $request->store_id,
+                'quantity' => $request->quintity - $purchase->quintity,
+            ]);
+        }
+        else{
+            $stock->quantity += $request->quintity - $purchase->quintity;
+            $stock->save();
+        }
 
         return response()->json([
-            'success' => 'You add data success'
+            'success' => 'You update data success'
         ]);
     }
 
