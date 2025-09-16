@@ -157,7 +157,8 @@ class CaptainMakeOrderController extends Controller
         ->where('branch_id', $branch_id)
         ->get();
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products)
+        $products = ProductResource::collection($products);
+        $products = collect($products)
         ->map(function($item){
             return [
                 'id' => $item->id,
