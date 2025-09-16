@@ -19,7 +19,11 @@ class StorageMan extends Model
         'image',
         'status',
     ];
-    protected $appends = ['image_link'];
+    protected $appends = ['role', 'image_link'];
+
+    public function getRoleAttribute(){
+        return 'store_man';
+    }
 
     public function store(){
         return $this->belongsTo(PurchaseStore::class, 'stora_id');
