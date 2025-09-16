@@ -8,6 +8,7 @@ Route::middleware(['auth:sanctum', 'IsWaiter'])->group(function(){
     Route::controller(OrdersController::class)
     ->prefix('orders')->group(function(){
         Route::get('/', 'view');
+        Route::get('/order/{id}', 'order');
         Route::put('/status/{id}', 'status');
     });
 });

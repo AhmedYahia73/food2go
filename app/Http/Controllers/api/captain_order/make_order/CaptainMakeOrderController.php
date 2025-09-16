@@ -65,7 +65,7 @@ class CaptainMakeOrderController extends Controller
             }
         }
         else{
-            
+
         }
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)
@@ -93,70 +93,56 @@ class CaptainMakeOrderController extends Controller
             return !$category_off->contains($item->id);
         });
         $products = $this->products
-        ->with(['addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        },'sub_category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'excludes' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'extra', 'discount', 
-        'variations' => function($query) use($locale){
-            $query->withLocale($locale)
-            ->with(['options' => function($query_option) use($locale){
-                $query_option->with(['extra' => function($query_extra) use($locale){
-                    $query_extra->with('parent_extra')
-                    ->withLocale($locale);
-                }])
-                ->withLocale($locale);
-            }]);
-        }, 'sales_count', 'tax'])
-        ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
-        ->where('status', 1)
-        ->get()
-        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
-            //get count of sales of product to detemine stock
-            $product->price = $product?->product_pricing->where('branch_id', $branch_id)
-            ->first()?->price ?? $product->price;
-            $product->favourite = false;
-            if ($product->stock_type == 'fixed') {
-                $product->count = $product->sales_count->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            elseif ($product->stock_type == 'daily') {
-                $product->count = $product->sales_count
-                ->where('date', date('Y-m-d'))
-                ->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            // return !$category_off->contains($item->id);
-            // $category_off, $product_off, $option_off
-            if ($category_off->contains($product->category_id) || 
-            $category_off->contains($product->sub_category_id)
-            || $product_off->contains($product->id)) {
-                return null;
-            }
-            $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product, $branch_id) {
-                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id){
-                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
-                    ->first()?->price ?? $element->price;
-                    return $element;
+            ->with([ 
+                'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+                'addons' => fn($q) => $q->withLocale($locale),
+                'category_addons' => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                'excludes' => fn($q) => $q->withLocale($locale),
+                'discount', 'extra', 'sales_count', 'tax',
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($q) => $q
+                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
+                        ->withLocale($locale),
+                ]),
+            ])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
+            ->whereNotIn('category_id', $category_off)
+            // ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('products.id', $product_off)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) { 
+
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+
+                if ($product->stock_type === 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                } elseif ($product->stock_type === 'daily') {
+                    $product->count = $product->sales_count
+                        ->where('date', date('Y-m-d'))
+                        ->sum('count');
+                }
+
+                $product->in_stock = $product->number > $product->count;
+
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
+                        ->reject(fn($option) => $option_off->contains($option->id))
+                        ->map(function ($option) {
+                            $option->price = $option->option_pricing->first()?->price ?? $option->price;
+                            return $option;
+                        });
+
+                    return $variation;
                 });
-              
-                return $variation;
+
+                return $product;
             });
-            $product->addons = $product->addons->map(function ($addon) 
-            use ($product) {
-                $addon->discount = $product->discount;
-              
-                return $addon;
-            });
-            return $product;
-        })->filter();
         $cafe_location = $this->cafe_location
         ->with('tables')
         ->where('branch_id', $request->branch_id)

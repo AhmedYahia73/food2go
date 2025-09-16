@@ -27,13 +27,26 @@ class OrdersController extends Controller
                 'id' => $item->id,
                 'notes' => $item->notes,
                 'table' => $item?->table?->table_number,
-                'location' => $item?->table?->location?->name,
-                'cart' => $item->cart,
+                'location' => $item?->table?->location?->name, 
             ];
         });
 
         return response()->json([
             'orders' => $orders,
+        ]);
+    }
+
+    public function order(Request $request, $id){
+        $orders = $this->order_carts
+        ->where('id', $id)
+        ->first();
+
+        return response()->json([
+            'id' => $item->id,
+            'notes' => $item->notes,
+            'table' => $item?->table?->table_number,
+            'location' => $item?->table?->location?->name,
+            'cart' => $item->cart
         ]);
     }
 
