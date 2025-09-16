@@ -157,21 +157,23 @@ class CaptainMakeOrderController extends Controller
         ->where('branch_id', $branch_id)
         ->get();
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products)
-        ->map(function($item){
-            return [
-                'id' => $item->id,
-                'taxes' => $item->taxes,
-                'name' => $item->name,
-                'description' => $item->description,
-                'category_id' => $item->category_id,
-                'sub_category_id' => $item->sub_category_id,
-                'price' => $item->price,
-                'price_after_discount' => $item->price_after_discount,
-                'price_after_tax' => $item->price_after_tax,
-                'image_link' => $item->image_link,
-            ];
-        }); 
+        $products = ProductResource::collection($products)->resolve();
+
+$products = collect($products)->map(function ($item) {
+    return [
+        'id' => $item['id'],
+        'taxes' => $item['taxes'],
+        'name' => $item['name'],
+        'description' => $item['description'],
+        'category_id' => $item['category_id'],
+        'sub_category_id' => $item['sub_category_id'],
+        'price' => $item['price'],
+        'price_after_discount' => $item['price_after_discount'],
+        'price_after_tax' => $item['price_after_tax'],
+        'image_link' => $item['image_link'],
+    ];
+});
+
 
         return response()->json([
             'categories' => $categories,
