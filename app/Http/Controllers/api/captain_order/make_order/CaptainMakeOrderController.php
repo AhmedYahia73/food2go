@@ -93,8 +93,7 @@ class CaptainMakeOrderController extends Controller
             return !$category_off->contains($item->id);
         });
         $products = $this->products
-            ->with([ 
-                'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+            ->with([
                 'addons' => fn($q) => $q->withLocale($locale),
                 'category_addons' => fn($q) => $q->withLocale($locale),
                 'sub_category_addons' => fn($q) => $q->withLocale($locale),
