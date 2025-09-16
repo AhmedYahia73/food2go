@@ -102,7 +102,7 @@ class StoreController extends Controller
         ->where('id', $id)
         ->first();
         $store->update($storeRequest);
-        $store->branches()->attach($request->branches);
+        $store->branches()->sync($request->branches);
 
         return response()->json([
             'success' => 'You update data success'
