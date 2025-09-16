@@ -54,7 +54,7 @@ class CaptainMakeOrderController extends Controller
 
     public function lists(Request $request){
         // /captain/lists
-        if($request->user()->branch_id){
+        if($request->user() && $request->user()->branch_id){
             $validator = Validator::make($request->all(), [
                 'branch_id' => 'required|exists:branches,id',
             ]);
@@ -159,7 +159,7 @@ class CaptainMakeOrderController extends Controller
     }
 
     public function selection_lists(Request $request){
-        if($request->user()->branch_id){
+        if($request->user() && $request->user()->branch_id){
             $validator = Validator::make($request->all(), [
                 'branch_id' => 'required|exists:branches,id',
             ]);

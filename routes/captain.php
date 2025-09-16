@@ -9,8 +9,8 @@ use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     Route::controller(CaptainMakeOrderController::class)
     ->group(function(){
-        Route::get('/lists', 'lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
-        Route::get('/selection_lists', 'selection_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/lists', 'lists');
+        Route::get('/selection_lists', 'selection_lists');
         Route::get('/zones_list', 'zones_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::post('/make_order', 'order');
 
