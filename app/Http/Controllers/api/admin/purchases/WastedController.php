@@ -49,6 +49,9 @@ class WastedController extends Controller
 
         return response()->json([
             'wested' => $wested,
+            'categories' => $categories,
+            'products' => $products,
+            'stores' => $stores,
         ]);
     }
     
