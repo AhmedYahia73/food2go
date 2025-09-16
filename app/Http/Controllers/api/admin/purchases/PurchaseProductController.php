@@ -13,8 +13,7 @@ class PurchaseProductController extends Controller
     public function __construct(private PurchaseProduct $product){}
 
     public function view(Request $request){
-        $product = $this->product
-        ->whereNotNull('product_id')
+        $product = $this->product 
         ->get()
         ->map(function($item){
             return [
@@ -38,7 +37,7 @@ class PurchaseProductController extends Controller
     
     public function product(Request $request, $id){ 
         $product = $this->product
-        ->where('product_id', $id)
+        ->where('id', $id)
         ->get()
         ->map(function($item){
             return [
