@@ -91,6 +91,16 @@ class CaptainMakeOrderController extends Controller
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
+        })
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'image_link' => $item->image_link,
+                'banner_link' => $item->banner_link,
+                'sub_categories' => $item->sub_categories
+                ->select('id', 'name', 'image_link', 'banner_link'),
+            ];
         });
         $products = $this->products
             ->with([
@@ -107,7 +117,7 @@ class CaptainMakeOrderController extends Controller
                 ]),
             ])
             ->withLocale($locale)
-            ->where('item_type', '!=', 'offline')
+            ->where('item_type', '!=', 'online')
             ->where('status', 1)
             ->whereNotIn('category_id', $category_off)
             // ->whereNotIn('sub_category_id', $category_off)
@@ -147,7 +157,24 @@ class CaptainMakeOrderController extends Controller
         ->where('branch_id', $branch_id)
         ->get();
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products); 
+        $products = ProductResource::collection($products)
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'taxes' => $item->taxes,
+                'name' => $item->name,
+                'description' => $item->description,
+                'category_id' => $item->category_id,
+                'sub_category_id' => $item->sub_category_id,
+                'price' => $item->price,
+                'price_after_discount' => $item->price_after_discount,
+                'price_after_tax' => $item->price_after_tax,
+                'image_link' => $item->image_link,
+                'sub_category_id' => $item->sub_category_id,
+                'sub_category_id' => $item->sub_category_id,
+                'sub_category_id' => $item->sub_category_id,
+            ];
+        }); 
 
         return response()->json([
             'categories' => $categories,
