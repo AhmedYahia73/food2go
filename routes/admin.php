@@ -168,7 +168,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(StoreManController::class)
     ->prefix('purchase_store_man')->group(function(){
         Route::get('/', 'view');
-        Route::get('/item/{id}', 'category');
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
