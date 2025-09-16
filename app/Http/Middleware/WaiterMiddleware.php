@@ -15,7 +15,9 @@ class WaiterMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->role == 'waiter' && auth()->user()->status == 1) {
+        if ((auth()->user()->role == 'waiter' && auth()->user()->status == 1) ||
+        (auth()->user()->role == 'captain_order' && auth()->user()->status == 1 &&
+        auth()->user()->waiter == 1)) {
             return $next($request);
         }
         return response()->json([

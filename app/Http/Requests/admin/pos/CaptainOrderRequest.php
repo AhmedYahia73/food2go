@@ -29,6 +29,7 @@ class CaptainOrderRequest extends FormRequest
             'user_name' => ['required'],
             'status' => ['required', 'boolean'],
             'phone' => ['required'],
+            'waiter' => ['required', 'boolean'],
             'locations.*' => ['required', 'exists:cafe_locations,id']
         ];
     }
