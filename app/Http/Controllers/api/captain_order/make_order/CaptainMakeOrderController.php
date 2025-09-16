@@ -55,6 +55,9 @@ class CaptainMakeOrderController extends Controller
     public function lists(Request $request){
         // /captain/lists
         if($request->user() && $request->user()->branch_id){
+            $branch_id = $request->user()->branch_id;
+        }
+        else{
             $validator = Validator::make($request->all(), [
                 'branch_id' => 'required|exists:branches,id',
             ]);
@@ -64,9 +67,6 @@ class CaptainMakeOrderController extends Controller
                 ],400);
             }
             $branch_id = $request->branch_id;
-        }
-        else{
-            $branch_id = $request->user()->branch_id;
         }
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)
@@ -159,6 +159,9 @@ class CaptainMakeOrderController extends Controller
 
     public function selection_lists(Request $request){
         if($request->user() && $request->user()->branch_id){
+            $branch_id = $request->user()->branch_id;
+        }
+        else{
             $validator = Validator::make($request->all(), [
                 'branch_id' => 'required|exists:branches,id',
             ]);
@@ -168,9 +171,6 @@ class CaptainMakeOrderController extends Controller
                 ],400);
             }
             $branch_id = $request->branch_id;
-        }
-        else{
-            $branch_id = $request->user()->branch_id;
         }
         $cafe_location = $this->cafe_location
         ->with('tables')
