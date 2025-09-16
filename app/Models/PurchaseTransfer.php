@@ -13,7 +13,7 @@ class PurchaseTransfer extends Model
         'from_store_id',
         'to_store_id',
         'product_id',
-        'quantity',
+        'quintity',
         'admin_id',
         'category_id',
         'status',
