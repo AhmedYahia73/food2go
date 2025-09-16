@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\PurchaseProduct;
+use App\Models\PurchaseCategory;
 
 class PurchaseProductController extends Controller
 {
-    public function __construct(private PurchaseProduct $product){}
+    public function __construct(private PurchaseProduct $product,
+    private PurchaseCategory $categories){}
 
     public function view(Request $request){
         $product = $this->product 
