@@ -10,8 +10,7 @@ use App\Models\PurchaseWasted;
 
 class WastedController extends Controller
 {
-    public function __construct(private PurchaseWasted $wested){}
-    use image;
+    public function __construct(private PurchaseWasted $wested){} 
 
     public function view(Request $request){
         $wested = $this->wested
