@@ -160,7 +160,7 @@ class CaptainMakeOrderController extends Controller
                 'price_after_discount' => $item->price_after_discount,
                 'price_after_tax' => $item->price_after_tax,
                 'image_link' => $item->image_link,
-                'allExtras' => $item?->allExtras->select('id', 'price_after_discount', 'price_after_tax', 'name', 'price'),
+                'allExtras' => $item?->allExtras?->select('id', 'price_after_discount', 'price_after_tax', 'name', 'price'),
                 'addons' => $item?->addons?->select('id', 'name', 'price', 'price_after_tax', 'quantity_add'),
                 'excludes' => $item?->excludes?->select('id', 'name'),
                 'variations' => $item?->variations?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
