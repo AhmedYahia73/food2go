@@ -174,10 +174,7 @@ class WastedController extends Controller
 
         $wested = $this->wested
         ->where('id', $id)
-        ->first();
-        $consumersions = $this->consumersions
-        ->where('id', $id)
-        ->first();
+        ->first(); 
         $stock = $this->stock
         ->where('product_id', $request->product_id)
         ->where('store_id', $request->store_id)
