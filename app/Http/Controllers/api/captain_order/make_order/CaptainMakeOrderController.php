@@ -54,13 +54,18 @@ class CaptainMakeOrderController extends Controller
 
     public function lists(Request $request){
         // /captain/lists
-        $validator = Validator::make($request->all(), [
-            'branch_id' => 'required|exists:branches,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
+        if($request->user()->branch_id){
+            $validator = Validator::make($request->all(), [
+                'branch_id' => 'required|exists:branches,id',
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ],400);
+            }
+        }
+        else{
+            
         }
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)

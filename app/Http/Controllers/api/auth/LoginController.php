@@ -170,6 +170,7 @@ class LoginController extends Controller
                 return response()->json([
                     'user' => $user,
                     'token' => $user->token,
+                    'role' => $user->role,
                 ], 200);
             }
             else { 
@@ -187,6 +188,7 @@ class LoginController extends Controller
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
+                'role' => $user->role,
             ], 200);
         }
         else { 
@@ -211,6 +213,7 @@ class LoginController extends Controller
                 return response()->json([
                     'user' => $user,
                     'token' => $user->token,
+                    'role' => $user->role,
                 ], 200);
             }
             else { 

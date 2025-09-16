@@ -21,7 +21,16 @@ class OrdersController extends Controller
         ->whereHas('table', function($query) use($locations){
             $query->where('location_id', $locations);
         })
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'notes' => $item->notes,
+                'table' => $item?->table?->table_number,
+                'location' => $item?->table?->location?->name,
+                'cart' => $item->cart,
+            ];
+        });
 
         return response()->json([
             'orders' => $orders,
