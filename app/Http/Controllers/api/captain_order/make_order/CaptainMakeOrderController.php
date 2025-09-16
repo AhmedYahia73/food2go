@@ -72,7 +72,6 @@ class CaptainMakeOrderController extends Controller
         ->where('status', 1)
         ->get();
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
-        $branch_id = $request->branch_id;
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();
@@ -146,7 +145,7 @@ class CaptainMakeOrderController extends Controller
             });
         $cafe_location = $this->cafe_location
         ->with('tables')
-        ->where('branch_id', $request->branch_id)
+        ->where('branch_id', $branch_id)
         ->get();
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products); 
@@ -176,7 +175,7 @@ class CaptainMakeOrderController extends Controller
         }
         $cafe_location = $this->cafe_location
         ->with('tables')
-        ->where('branch_id', $request->branch_id)
+        ->where('branch_id', $branch_id)
         ->get(); 
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo')
