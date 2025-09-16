@@ -150,8 +150,7 @@ class CaptainMakeOrderController extends Controller
 
         $products = collect($products)->map(function ($item) {
             return [
-                'id' => $item->id,
-                'taxes' => $item->taxes,
+                'id' => $item->id, 
                 'name' => $item->name,
                 'description' => $item->description,
                 'category_id' => $item->category_id,
