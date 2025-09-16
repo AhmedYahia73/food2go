@@ -192,12 +192,12 @@ class PurchaseController extends Controller
         $purchases
         ->update($purchaseRequest);
         $this->purchase_financial
-        ->where('purchase_id', $purchase->id)
+        ->where('purchase_id', $id)
         ->delete();
         foreach ($request->financial as $item) {
             $this->purchase_financial
             ->create([
-                'purchase_id' => $purchase->id,
+                'purchase_id' => $id,
                 'financial_id' => $item['id'],
                 'amount' => $item['amount'],
             ]);
@@ -212,11 +212,11 @@ class PurchaseController extends Controller
                 'category_id' => $request->category_id,
                 'product_id' => $request->product_id,
                 'store_id' => $request->store_id,
-                'quantity' => $request->quintity - $purchase->quintity,
+                'quantity' => $request->quintity - $purchases->quintity,
             ]);
         }
         else{
-            $stock->quantity += $request->quintity - $purchase->quintity;
+            $stock->quantity += $request->quintity - $purchases->quintity;
             $stock->save();
         }
 
