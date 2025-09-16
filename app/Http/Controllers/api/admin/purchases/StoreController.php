@@ -16,7 +16,17 @@ class StoreController extends Controller
 
     public function view(Request $request){
         $stores = $this->store
-        ->get();
+        ->with('branches')
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'location' => $item->location,
+                'status' => $item->status,
+                'branches' => $item?->branches?->select('id', 'name'), 
+            ];
+        });
         $branches = $this->branches
         ->select('id', 'name')
         ->where('status', 1)
