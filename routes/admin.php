@@ -166,7 +166,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
     
     Route::controller(StoreManController::class)
-    ->prefix('purchase_stores')->group(function(){
+    ->prefix('purchase_store_man')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'category');
         Route::post('/add', 'create');
