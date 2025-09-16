@@ -42,11 +42,11 @@ class OrdersController extends Controller
         ->first();
 
         return response()->json([
-            'id' => $item->id,
-            'notes' => $item->notes,
-            'table' => $item?->table?->table_number,
-            'location' => $item?->table?->location?->name,
-            'cart' => $item->cart
+            'id' => $orders->id,
+            'notes' => $orders->notes,
+            'table' => $orders?->table?->table_number,
+            'location' => $orders?->table?->location?->name,
+            'cart' => $orders->cart
         ]);
     }
 
