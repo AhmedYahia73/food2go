@@ -18,7 +18,6 @@ class StoreManController extends Controller
 
     public function view(Request $request){
         $store_man = $this->store_man
-        ->whereNotNull('store_man_id')
         ->get()
         ->map(function($item){
             return [
