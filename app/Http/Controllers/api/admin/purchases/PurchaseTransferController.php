@@ -128,7 +128,7 @@ class PurchaseTransferController extends Controller
         ]);
     }
 
-    public function transfer(Request $request, $id){
+    public function transfer(Request $request){
         $validator = Validator::make($request->all(), [
             'from_store_id' => ['required', 'exists:purchase_stores,id'], 
             'to_store_id' => ['required', 'exists:purchase_stores,id'], 
