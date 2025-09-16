@@ -7,10 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\PurchaseWasted;
+use App\Models\PurchaseCategory;
+use App\Models\PurchaseProduct;
+use App\Models\PurchaseStore; 
 
 class WastedController extends Controller
 {
-    public function __construct(private PurchaseWasted $wested){} 
+    public function __construct(private PurchaseWasted $wested,
+    private PurchaseProduct $products, private PurchaseCategory $categories,
+    private PurchaseStore $stores){} 
 
     public function view(Request $request){
         $wested = $this->wested
