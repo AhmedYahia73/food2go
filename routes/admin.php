@@ -115,10 +115,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
     
     Route::controller(WastedController::class)
-    ->prefix('purchase_transfer')->group(function(){
+    ->prefix('wasted')->group(function(){
         Route::get('/', 'view');
-        Route::get('/item/{id}', 'purchase_item');
-        Route::post('/add', 'create');
+        Route::get('/item/{id}', 'wested');
+        Route::post('/status/{id}', 'status');
+        Route::post('/add', 'create'); 
         Route::post('/update/{id}', 'modify'); 
     });
     
