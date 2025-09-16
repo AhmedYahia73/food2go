@@ -149,7 +149,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
     
     Route::controller(PurchaseCategoryController::class)
-    ->prefix('purchase_stores')->group(function(){
+    ->prefix('purchase_categories')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'category');
         Route::post('/add', 'create');
