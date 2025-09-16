@@ -133,7 +133,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(StoreController::class)
     ->prefix('purchase_stores')->group(function(){
         Route::get('/', 'view');
-        Route::get('/item/{id}', 'purchase_item');
+        Route::get('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
