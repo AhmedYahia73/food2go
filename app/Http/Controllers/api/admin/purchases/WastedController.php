@@ -10,12 +10,13 @@ use App\Models\PurchaseWasted;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore; 
+use App\Models\PurchaseStock;
 
 class WastedController extends Controller
 {
     public function __construct(private PurchaseWasted $wested,
     private PurchaseProduct $products, private PurchaseCategory $categories,
-    private PurchaseStore $stores){} 
+    private PurchaseStock $stock, private PurchaseStore $stores){} 
 
     public function view(Request $request){
         $wested = $this->wested
@@ -85,9 +86,29 @@ class WastedController extends Controller
             ],400);
         }
 
-        $this->wested
+        $wested = $this->wested
         ->where('id', $id)
-        ->update([
+        ->first();
+        if($request->status == 'approve'){
+            $stock = $this->stock
+            ->where('product_id', $wested->product_id)
+            ->where('store_id', $wested->store_id)
+            ->first();
+            if(empty($stock)){
+                $this->stock
+                ->create([
+                    'category_id' => $wested->category_id,
+                    'product_id' => $wested->product_id,
+                    'store_id' => $wested->store_id,
+                    'quantity' => -$wested->quantity,
+                ]);
+            }
+            else{
+                $stock->quantity -= $wested->quantity;
+                $stock->save();
+            }
+        }
+        $wested->update([
             'status' => $request->status
         ]);
 
@@ -113,6 +134,23 @@ class WastedController extends Controller
         $westedRequest['status'] = 'approve';
         $wested = $this->wested
         ->create($westedRequest);
+        $stock = $this->stock
+        ->where('product_id', $request->product_id)
+        ->where('store_id', $request->store_id)
+        ->first();
+        if(empty($stock)){
+            $this->stock
+            ->create([
+                'category_id' => $request->category_id,
+                'product_id' => $request->product_id,
+                'store_id' => $request->store_id,
+                'quantity' => -$request->quantity,
+            ]);
+        }
+        else{
+            $stock->quantity -= $request->quantity;
+            $stock->save();
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -137,6 +175,26 @@ class WastedController extends Controller
         $wested = $this->wested
         ->where('id', $id)
         ->first();
+        $consumersions = $this->consumersions
+        ->where('id', $id)
+        ->first();
+        $stock = $this->stock
+        ->where('product_id', $request->product_id)
+        ->where('store_id', $request->store_id)
+        ->first();
+        if(empty($stock)){
+            $this->stock
+            ->create([
+                'category_id' => $request->category_id,
+                'product_id' => $request->product_id,
+                'store_id' => $request->store_id,
+                'quantity' => $wested->quantity - $request->quantity,
+            ]);
+        }
+        else{
+            $stock->quantity += $wested->quantity - $request->quantity;
+            $stock->save();
+        }
         $wested->update($westedRequest);
 
         return response()->json([
