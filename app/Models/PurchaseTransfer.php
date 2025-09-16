@@ -34,4 +34,8 @@ class PurchaseTransfer extends Model
     public function to_store(){
         return $this->belongsTo(PurchaseStore::class, 'to_store_id');
     }
+
+    public function admin(){
+        return $this->belongsTo(Admin::class, 'admin_id');
+    }
 }
