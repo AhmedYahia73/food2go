@@ -59,6 +59,7 @@ class PurchaseTransferController extends Controller
         ]);
     }
 
+
     public function status(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'status' => ['required', 'in:approve,reject'], 
