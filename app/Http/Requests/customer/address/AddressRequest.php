@@ -26,14 +26,14 @@ class AddressRequest extends FormRequest
         return [
             'city_id' => ['required', 'exists:cities,id'],
             'zone_id' => ['required', 'exists:zones,id'],
-            'address' => ['sometimes'],
+            'address' => ['required'],
             'street' => ['required'],
             'building_num' => ['required'],
             'floor_num' => ['required'],
             'apartment' => ['required'],
             'additional_data' => ['required'],
             'type' => ['required'],
-            'map' => ['sometimes'], 
+            'map' => ['required'], 
         ];
     }
 
