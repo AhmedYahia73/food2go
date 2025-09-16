@@ -91,16 +91,6 @@ class CaptainMakeOrderController extends Controller
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
-        })
-        ->map(function($item){
-            return [
-                'id' => $item->id,
-                'name' => $item->name,
-                'image_link' => $item->image_link,
-                'banner_link' => $item->banner_link,
-                'sub_categories' => $item->sub_categories
-                ->select('id', 'name', 'image_link', 'banner_link'),
-            ];
         });
         $products = $this->products
             ->with([
