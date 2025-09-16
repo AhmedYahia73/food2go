@@ -149,7 +149,7 @@ class CaptainMakeOrderController extends Controller
         $products = ProductResource::collection($products);
 
         $products = collect($products)->map(function ($item) {
-            return $products;
+            return $item;
         });
 
 
