@@ -3,16 +3,11 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\storage\PurchaseController;
-use App\Http\Controllers\api\storage\StoreController;
-use App\Http\Controllers\api\storage\PurchaseCategoryController;
 use App\Http\Controllers\api\storage\PurchaseConsumersionController;
-use App\Http\Controllers\api\storage\PurchaseProductController;
 use App\Http\Controllers\api\storage\PurchaseTransferController;
 use App\Http\Controllers\api\storage\WastedController;
 use App\Http\Controllers\api\storage\StockController;
-use App\Http\Controllers\api\storage\StoreManController;
 
-use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
 Route::middleware(['auth:sanctum', 'IsStorage'])->group(function(){
   
