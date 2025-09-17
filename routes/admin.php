@@ -161,6 +161,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PurchaseConsumersionController::class)
     ->prefix('purchase_consumersion')->group(function(){
         Route::get('/', 'view'); 
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');

@@ -11,7 +11,7 @@ use App\Models\PurchaseStock;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore;
-use App\Models\Branch;
+use App\Models\Branch; 
 
 class PurchaseConsumersionController extends Controller
 {
@@ -72,7 +72,33 @@ class PurchaseConsumersionController extends Controller
 
         $consumersions = $this->consumersions
         ->where('id', $id)
-        ->update($consumersionsRequest);
+        ->first();
+        
+        if($request->status == 'approve'){
+            $stock = $this->stock
+            ->where('category_id', $consumersions->category_id)
+            ->where('product_id', $consumersions->product_id)
+            ->where('store_id', $consumersions->store_id)
+            ->first();
+
+            if(empty($stock)){
+                $this->stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'product_id' => $request->product_id,
+                    'store_id' => $request->to_store_id,
+                    'quantity' => -$request->quintity,
+                ]);
+            }
+            else{
+                $stock->quantity -= $request->quintity;
+                $stock->save();
+            }
+        }
+
+        $consumersions->update([
+            'status' => $request->status
+        ]);
     }
 
     public function create(Request $request){

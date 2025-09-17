@@ -73,6 +73,12 @@ class PurchaseTransferController extends Controller
         $purchases = $this->purchases
         ->where('id', $id)
         ->first();
+        $stock = $this->stock
+        ->where('category_id', $request->category_id)
+        ->where('product_id', $request->product_id)
+        ->where('store_id', $request->from_store_id)
+        ->first();
+
         if($request->status == 'approve'){
             $from_store = $this->stock
             ->where('store_id', $request->from_store_id)
@@ -92,11 +98,6 @@ class PurchaseTransferController extends Controller
                 ]);
             }
             else{
-                $stock = $this->stock
-                ->where('category_id', $request->category_id)
-                ->where('product_id', $request->product_id)
-                ->where('store_id', $request->from_store_id)
-                ->first();
                 $stock->quantity -= $request->quintity;
                 $stock->save();
             }
