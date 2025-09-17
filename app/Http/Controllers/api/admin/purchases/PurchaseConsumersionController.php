@@ -24,6 +24,7 @@ class PurchaseConsumersionController extends Controller
         ->get()
         ->map(function($item){
             return [
+                'id' => $item->id,
                 'category_id' => $item->category_id,
                 'product_id' => $item->product_id,
                 'branch_id' => $item->branch_id,
