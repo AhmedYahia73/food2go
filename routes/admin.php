@@ -105,6 +105,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
     
+    Route::controller(StockController::class)
+    ->prefix('purchase_stock')->group(function(){
+        Route::get('/store', 'view_stores');
+        Route::get('/stock', 'view_stock');
+    });
+    
     Route::controller(PurchaseController::class)
     ->prefix('purchase')->group(function(){
         Route::get('/', 'view');

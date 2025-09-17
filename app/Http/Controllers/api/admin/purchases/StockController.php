@@ -24,6 +24,7 @@ class StockController extends Controller
         ]);
     }
 
+
     public function view_stock(Request $request, $id){
         $stores = $this->stock
         ->with('category', 'product', 'store')
