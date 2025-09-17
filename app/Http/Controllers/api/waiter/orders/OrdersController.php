@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\KitchenOrder;
 use App\Models\OrderCart;
+use App\Models\Kitchen;
 
 class OrdersController extends Controller
 {
     public function __construct(private OrderCart $order_carts,
-    private KitchenOrder $kitchen_order){}
+    private KitchenOrder $kitchen_order, private Kitchen $kitchen){}
 
     public function view(Request $request){
         $locations = $request->user()?->locations?->pluck('id') ?? collect([]);
@@ -40,20 +41,34 @@ class OrdersController extends Controller
         $orders = $this->order_carts
         ->where('id', $id)
         ->first();
+        $product = $orders->cart[0]->product;
+        $product = collect($product)?->pluck('product');
+        $products_id = collect($product)?->pluck('id');
+        $categories_id = [collect($product)?->pluck('sub_category_id'),
+						 collect($product)?->pluck('category_id')];
+		$categories_id = collect($categories_id)->flatten();
+        $kitchen = $this->kitchen
+        ->select('name', 'type')
+        ->where('branch_id', $request->user()->branch_id)
+        ->whereHas('products', function($query) use($products_id){
+            $query->whereIn('products.id', $products_id);
+        })
+        ->orWhere('branch_id', $request->user()->branch_id)
+        ->whereHas('category', function($query) use($categories_id){
+            $query->whereIn('categories.id', $categories_id);
+        })
+        ->get();
         $cart = collect($orders->cart)
-        ->map(function($item){
-            $item = collect($item);
+        ->map(function($item){ 
             $extras = collect($item->extras);
             $extras = $extras->select('id', 'name');
             
             $addons = collect($item->addons);
             $addons = $addons->map(function($element){
-                $element = collect($element);
-                $addon = collect($element->addon);
-                $addon = $addon->select('id', 'name');
+                $addon = collect($element->addon); 
                 return [
-                    'addon' => $addon,
-                    'count' => $count,
+                    'addon' => ['id' => $addon['id'], 'name' => $addon['name']],
+                    'count' => $element->count,
                 ];
             });
              
@@ -62,23 +77,18 @@ class OrdersController extends Controller
              
             $product = collect($item->product);
             $product = $product->map(function($element){
-                $element = collect($element);
                 $product = collect($element->product);
-                $product = $product->select('id' ,'name');
                 return [
-                    'product' => $product,
+                    'product' => ['id' => $product['id'], 'name' => $product['name']],
                     'count' => $element->count,
                 ];
             });
              
             $variations = collect($item->variations);
             $variations = $variations->map(function($element){
-                $element = collect($element);
-                $variations = collect($element->variation);
-                $variations = $variations->select('id' ,'name', 'options');
+                $variations = collect($element->variation); 
                 return [
-                    'variations' => $variations,
-                    'count' => $element->count,
+                    'variations' => ['id' => $variations['id'], 'name' => $variations['name']], 
                 ];
             });
 
@@ -97,7 +107,8 @@ class OrdersController extends Controller
             'notes' => $orders->notes,
             'table' => $orders?->table?->table_number,
             'location' => $orders?->table?->location?->name,
-            'cart' => $cart
+            'cart' => $cart,
+            'kitchen' => $kitchen,
         ]);
     }
 
