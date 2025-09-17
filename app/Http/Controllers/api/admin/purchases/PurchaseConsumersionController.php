@@ -100,6 +100,10 @@ class PurchaseConsumersionController extends Controller
         $consumersions->update([
             'status' => $request->status
         ]);
+
+        return response()->json([
+            'success' => $request->status
+        ]);
     }
 
     public function create(Request $request){
