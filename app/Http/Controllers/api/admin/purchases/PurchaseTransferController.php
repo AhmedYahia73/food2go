@@ -20,7 +20,7 @@ class PurchaseTransferController extends Controller
 
     public function view(Request $request){ 
         $purchases = $this->purchases
-        ->with('category', 'product', 'from_store', 'to_store')
+        ->with('category', 'product', 'from_store', 'to_store', 'admin')
         ->get()
         ->map(function($item){
             return [
@@ -29,7 +29,7 @@ class PurchaseTransferController extends Controller
                 'to_store_id' => $item->to_store_id,
                 'product_id' => $item->product_id,
                 'category_id' => $item->category_id,
-                'quantity' => $item->quantity, 
+                'quintity' => $item->quintity, 
                 'to_store' => $item?->to_store?->name,
                 'from_store' => $item?->from_store?->name,
                 'category' => $item?->category?->name,
@@ -128,7 +128,7 @@ class PurchaseTransferController extends Controller
         ]);
     }
 
-    public function transfer(Request $request, $id){
+    public function transfer(Request $request){
         $validator = Validator::make($request->all(), [
             'from_store_id' => ['required', 'exists:purchase_stores,id'], 
             'to_store_id' => ['required', 'exists:purchase_stores,id'], 

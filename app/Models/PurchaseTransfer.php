@@ -13,9 +13,29 @@ class PurchaseTransfer extends Model
         'from_store_id',
         'to_store_id',
         'product_id',
-        'quantity',
+        'quintity',
         'admin_id',
         'category_id',
         'status',
     ];
+
+    public function category(){
+        return $this->belongsTo(PurchaseCategory::class, 'category_id');
+    }
+
+    public function product(){
+        return $this->belongsTo(PurchaseProduct::class, 'product_id');
+    }
+
+    public function from_store(){
+        return $this->belongsTo(PurchaseStore::class, 'from_store_id');
+    }
+
+    public function to_store(){
+        return $this->belongsTo(PurchaseStore::class, 'to_store_id');
+    }
+
+    public function admin(){
+        return $this->belongsTo(Admin::class, 'admin_id');
+    }
 }

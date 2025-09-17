@@ -15,11 +15,14 @@ class PurchaseCategoryController extends Controller
     public function view(Request $request){
         $categories = $this->category
         ->whereNotNull('category_id')
+        ->with('category')
         ->get()
         ->map(function($item){
             return [
                 'name' => $item->name,
                 'status' => $item->status,
+                'category_id' => $item->category_id,
+                'category' => $item?->category?->name,
             ];
         });
         $parent_categories = $this->category
@@ -29,8 +32,6 @@ class PurchaseCategoryController extends Controller
             return [
                 'name' => $item->name,
                 'status' => $item->status,
-                'category_id' => $item->category_id,
-                'category' => $item?->category?->name,
             ];
         });
 

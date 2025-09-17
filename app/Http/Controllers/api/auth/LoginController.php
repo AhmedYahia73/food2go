@@ -24,6 +24,7 @@ use App\Models\Zone;
 use App\Models\SmsBalance;
 use App\Models\Waiter;
 use App\Models\DeviceToken;
+use App\Models\StorageMan;
 
 class LoginController extends Controller
 {
@@ -31,8 +32,40 @@ class LoginController extends Controller
     private User $user, private Branch $branch, private Setting $settings,
     private Address $address, private Zone $zones, private CaptainOrder $captain_order,
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
-    private Kitchen $kitchen, private Waiter $waiter
+    private Kitchen $kitchen, private Waiter $waiter, private StorageMan $store_man_model
     ){}
+
+    public function store_man(Request $request){
+        // kitchen
+        $validation = Validator::make($request->all(), [
+            'user_name' => 'required', 
+            'password' => 'required', 
+        ]);
+        if ($validation->fails()) {
+            return response()->json($validation->errors(), 422);
+        }
+
+        $user = $this->store_man_model
+        ->where('user_name', $request->user_name)
+        ->first();
+        if (empty($user)) {
+            return response()->json([
+                'faield' => 'This Store Man does not have the ability to login'
+            ], 405);
+        }
+        if (password_verify($request->input('password'), $user->password)) {
+            $user->token = $user->createToken('store_man')->plainTextToken;
+            $role = $user->role;
+            return response()->json([
+                'store_man' => $user,
+                'token' => $user->token, 
+                'role'  => $role,
+            ], 200);
+        }
+        else {
+            return response()->json(['faield'=>'creational not Valid'],403);
+        }
+    }
 
     public function kitchen_login(Request $request){
         // kitchen
