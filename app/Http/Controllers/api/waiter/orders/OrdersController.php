@@ -97,7 +97,7 @@ class OrdersController extends Controller
             'notes' => $orders->notes,
             'table' => $orders?->table?->table_number,
             'location' => $orders?->table?->location?->name,
-            'cart' => $orders->cart
+            'cart' => $cart
         ]);
     }
 
