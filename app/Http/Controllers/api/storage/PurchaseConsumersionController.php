@@ -21,6 +21,7 @@ class PurchaseConsumersionController extends Controller
 
     public function view(Request $request){
         $consumersions = $this->consumersions
+        ->where('store_id', $request->user()->store_id)
         ->get()
         ->map(function($item){
             return [
@@ -63,8 +64,7 @@ class PurchaseConsumersionController extends Controller
         $validator = Validator::make($request->all(), [
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'product_id' => ['required', 'exists:purchase_products,id'],
-            'branch_id' => ['required', 'exists:branches,id'],
-            'store_id' => ['required', 'exists:purchase_stores,id'],
+            'branch_id' => ['required', 'exists:branches,id'], 
             'quintity' => ['required', 'numeric'],
             'date' => ['required', 'date'],
         ]);
@@ -76,6 +76,7 @@ class PurchaseConsumersionController extends Controller
         
         $consumersionsRequest = $validator->validated();
         $consumersionsRequest['admin_id'] = $request->user()->id; 
+        $consumersionsRequest['store_id'] = $request->user()->store_id;
         $consumersions = $this->consumersions
         ->create($consumersionsRequest);
 

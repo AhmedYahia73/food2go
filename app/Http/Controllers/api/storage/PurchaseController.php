@@ -27,6 +27,7 @@ class PurchaseController extends Controller
     public function view(Request $request){
         $purchases = $this->purchases
         ->with('category', 'product', 'admin', 'store')
+        ->where('store_id', $request->user()->store_id)
         ->get()
         ->map(function($item){
             return [
@@ -103,8 +104,7 @@ class PurchaseController extends Controller
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'category_id' => ['required', 'exists:purchase_categories,id'],
-            'product_id' => ['required', 'exists:purchase_products,id'],
-            'store_id' => ['required', 'exists:purchase_stores,id'],
+            'product_id' => ['required', 'exists:purchase_products,id'], 
             'total_coast' => ['required', 'numeric'],
             'quintity' => ['required', 'numeric'],
             'receipt' => ['required'],
@@ -136,14 +136,14 @@ class PurchaseController extends Controller
         }
         $stock = $this->stock
         ->where('product_id', $request->product_id)
-        ->where('store_id', $request->store_id)
+        ->where('store_id', $request->user()->store_id)
         ->first();
         if(empty($stock)){
             $this->stock
             ->create([
                 'category_id' => $request->category_id,
                 'product_id' => $request->product_id,
-                'store_id' => $request->store_id,
+                'store_id' => $request->user()->store_id,
                 'quantity' => $request->quintity,
             ]);
         }

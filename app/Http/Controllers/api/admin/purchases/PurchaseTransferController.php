@@ -151,6 +151,7 @@ class PurchaseTransferController extends Controller
             'product_id' => $request->product_id,
             'admin_id' => $request->user()->id,
             'quintity' => $request->quintity,
+            'status' => 'approve',
         ]);
         // stock
         $from_store = $this->stock
