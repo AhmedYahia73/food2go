@@ -40,6 +40,14 @@ class OrdersController extends Controller
         $orders = $this->order_carts
         ->where('id', $id)
         ->first();
+        $cart = collect($orders->cart)
+        ->map(function($item){
+            $item = collect($item);
+            $extras = collect($item->extras);
+            return [
+                'extras' 
+            ];
+        });
 
         return response()->json([
             'id' => $orders->id,
