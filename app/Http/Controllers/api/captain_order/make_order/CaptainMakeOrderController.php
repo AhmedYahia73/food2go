@@ -174,6 +174,20 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
+    public function get_table_status(){
+        $table_status = [
+            'available',
+            'not_available_pre_order',
+            'not_available_with_order',
+            'not_available_but_checkout',
+            'reserved',
+        ];
+
+        return response()->json([
+            'table_status' => $table_status
+        ]);
+    }
+
     public function selection_lists(Request $request){
         if($request->user() && $request->user()->branch_id){
             $branch_id = $request->user()->branch_id;

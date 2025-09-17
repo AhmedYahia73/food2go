@@ -11,6 +11,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     ->group(function(){
         Route::get('/lists', 'lists');
         Route::get('/selection_lists', 'selection_lists');
+        Route::get('/get_table_status', 'get_table_status');
         Route::get('/zones_list', 'zones_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::post('/make_order', 'order');
 
