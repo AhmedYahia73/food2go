@@ -44,8 +44,51 @@ class OrdersController extends Controller
         ->map(function($item){
             $item = collect($item);
             $extras = collect($item->extras);
+            $extras = $extras->select('id', 'name');
+            
+            $addons = collect($item->addons);
+            $addons = $addons->map(function($element){
+                $element = collect($element);
+                $addon = collect($element->addon);
+                $addon = $addon->select('id', 'name');
+                return [
+                    'addon' => $addon,
+                    'count' => $count,
+                ];
+            });
+             
+            $excludes = collect($item->excludes);
+            $excludes = $excludes->select('id', 'name');
+             
+            $product = collect($item->product);
+            $product = $product->map(function($element){
+                $element = collect($element);
+                $product = collect($element->product);
+                $product = $product->select('id' ,'name');
+                return [
+                    'product' => $product,
+                    'count' => $element->count,
+                ];
+            });
+             
+            $variations = collect($item->variations);
+            $variations = $variations->map(function($element){
+                $element = collect($element);
+                $variations = collect($element->variation);
+                $variations = $variations->select('id' ,'name', 'options');
+                return [
+                    'variations' => $variations,
+                    'count' => $element->count,
+                ];
+            });
+
+
             return [
-                'extras' 
+                'extras' => $extras,
+                'addons' => $addons,
+                'excludes' => $excludes,
+                'product' => $product,
+                'variations' => $variations
             ];
         });
 
