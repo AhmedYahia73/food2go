@@ -36,6 +36,7 @@ class PurchaseConsumersionController extends Controller
                 'admin' => $item?->admin?->name,
                 'quintity' => $item->quintity,
                 'date' => $item->date,
+                'status' => $item->status,
             ];
         });
         $categories = $this->categories
@@ -59,6 +60,21 @@ class PurchaseConsumersionController extends Controller
         ]);
     }
 
+    public function status(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'status' => ['required', 'in:approve,reject'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $consumersions = $this->consumersions
+        ->where('id', $id)
+        ->update($consumersionsRequest);
+    }
+
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'category_id' => ['required', 'exists:purchase_categories,id'],
@@ -76,6 +92,7 @@ class PurchaseConsumersionController extends Controller
         
         $consumersionsRequest = $validator->validated();
         $consumersionsRequest['admin_id'] = $request->user()->id;
+        $consumersionsRequest['status'] = 'approve';
         $consumersions = $this->consumersions
         ->create($consumersionsRequest);
         $stock = $this->stock

@@ -17,6 +17,7 @@ class PurchaseConsumersion extends Model
         'admin_id',
         'quintity',
         'date',
+        'status',
     ];
 
     public function category(){
