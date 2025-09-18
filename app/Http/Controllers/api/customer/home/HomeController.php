@@ -351,8 +351,8 @@ class HomeController extends Controller
                         'price_after_tax' => $tax,
                         'recommended' => $product->recommended,
                         'image_link' => $product->image_link,
-                        // 'discount' => $discount_val,
-                        // 'tax' => $tax_val,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
                         'favourite' => is_bool($product->favourites) ? $product->favourite : false,
                     ];
                 } 
@@ -390,8 +390,8 @@ class HomeController extends Controller
                         'price_after_tax' => $tax,
                         'recommended' => $product->recommended,
                         'image_link' => $product->image_link,
-                        // 'discount' => $discount_val,
-                        // 'tax' => $tax_val,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
                         'favourite' => is_bool($product->favourites) ? $product->favourite : false,
                     ];
                 } 
@@ -437,8 +437,8 @@ class HomeController extends Controller
                         'price_after_tax' => $tax,
                         'recommended' => $product->recommended,
                         'image_link' => $product->image_link,
-                        // 'discount' => $discount_val,
-                        // 'tax' => $tax_val,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
                     ];
                 } 
                 else {
@@ -475,8 +475,8 @@ class HomeController extends Controller
                         'price_after_tax' => $tax,
                         'recommended' => $product->recommended,
                         'image_link' => $product->image_link,
-                        // 'discount' => $discount_val,
-                        // 'tax' => $tax_val,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
                     ];
                 } 
             });
@@ -490,9 +490,41 @@ class HomeController extends Controller
     }
 
     public function recommandation_product(Request $request){
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
         $products = $this->product 
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
+        ->where('recommended', 1)
         ->where('status', 1) 
         // ->whereNotIn('sub_category_id', $category_off)
         ->whereNotIn('products.id', $product_off)
@@ -525,11 +557,10 @@ class HomeController extends Controller
                     'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
                     'price' => $price,
                     'price_after_discount' => $discount,
-                    'price_after_tax' => $tax,
-                    'recommended' => $product->recommended,
+                    'price_after_tax' => $tax, 
                     'image_link' => $product->image_link,
-                    // 'discount' => $discount_val,
-                    // 'tax' => $tax_val,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
                 ];
             } 
             else {
@@ -564,13 +595,16 @@ class HomeController extends Controller
                     'price' => $price,
                     'price_after_discount' => $discount,
                     'price_after_tax' => $tax,
-                    'recommended' => $product->recommended,
                     'image_link' => $product->image_link,
-                    // 'discount' => $discount_val,
-                    // 'tax' => $tax_val,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
                 ];
-            } 
+            }
         });
+
+        return response()->json([
+            'recommended_products' => $products
+        ]);
     }
 
     public function web_products(Request $request){
