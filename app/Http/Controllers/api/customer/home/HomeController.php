@@ -360,8 +360,9 @@ class HomeController extends Controller
         }
         $product = ProductResource::collection($products);
         $product = $product[0];
+        $product->tax;
         $cate_addons = $this->addons
-		->with('translations')
+		->with('translations', 'tax')
         ->whereHas('categories', function($query) use($product){
             $query->where('categories.id', $product->category_id)
             ->orWhere('categories.id', $product->sub_category_id);
@@ -371,12 +372,64 @@ class HomeController extends Controller
         ->merge($cate_addons)
         ->values()
 		->map(function($item){
-			return [
-				'id' => $item->id,
-                'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
-				'price' => $item->price,
-				'quantity_add' => $item->quantity_add, 
-			];
+            $locale = app()->getLocale(); // Use the application's current locale
+            if ($item?->taxes?->setting && $item?->taxes?->setting == 'included') {
+                $price =  empty($item->tax) ? $item->price: 
+                ($item->tax->type == 'value' ? $item->price + $item->tax->amount : $item->price + $item->tax->amount * $item->price / 100);
+
+                $tax = $price;
+                $discount = $price;
+                $addon_arr = [
+                    'id' => $item->id,
+                    'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
+                    'price' => $price,
+                    'price_after_tax' => $tax,
+                    'price_after_discount' => $discount,
+                    'discount_val' => $price - $discount,
+                    'tax_val' => $tax - $price,
+                    'tax_id' => $item->tax_id,
+                    'quantity_add' => $item->quantity_add,
+                    'tax' => $item->whenLoaded('tax'),
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at,
+                ];    
+                if ($item->discount && !empty($item->discount) && $item->discount->type == 'precentage') {
+                    $discount = $price - $item->discount->amount * $price / 100;
+                    $addon_arr['price_after_discount'] = $discount;
+                }   
+            }
+            else {
+                $price = $item->price;
+                
+                if (!empty($item->tax)) {
+                    if ($item->tax->type == 'precentage') {
+                        $tax = $price + $item->tax->amount * $price / 100;
+                    } else {
+                        $tax = $price + $item->tax->amount;
+                    }
+                }
+                else{
+                    $tax = $price;
+                }
+                $addon_arr = [
+                    'id' => $item->id,
+                    'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
+                    'price' => $price,
+                    'price_after_tax' => $tax,
+                    'discount_val' => 0,
+                    'tax_val' => $tax - $price,
+                    'tax_id' => $item->tax_id,
+                    'quantity_add' => $item->quantity_add,
+                    'tax' => $item->whenLoaded('tax'),
+                ];
+                if ($item->discount && !empty($item->discount) && $item->discount->type == 'precentage') {
+                    $discount = $price - $item->discount->amount * $price / 100;
+                    $addon_arr['price_after_discount'] = $discount;
+                    $addon_arr['discount_val'] = $price - $discount;
+                }
+
+            }
+            return $addon_arr;
 		});
 
         return response()->json([
