@@ -267,6 +267,23 @@ class HomeController extends Controller
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
+        })
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'image_link' => $item->image_link,
+                'banner_link' => $item->banner_link,
+                'sub_categories' => $item->sub_categories
+                ->map(function($element){
+                    return [
+                        'id' => $element->id,
+                        'name' => $element->name,
+                        'image_link' => $element->image_link,
+                        'banner_link' => $element->banner_link,
+                    ];
+                }),
+            ];
         });
 
         return response()->json([
