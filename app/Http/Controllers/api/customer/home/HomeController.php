@@ -253,10 +253,12 @@ class HomeController extends Controller
         ->get();
         $category_off = $branch_off->pluck('category_id')->filter();
         $categories = $this->categories
+        ->select('id', 'name', 'image', 'banner_image')
         ->orderBy('priority')
         ->where('status', 1)
         ->with(['sub_categories' => function($query) use($locale, $category_off){
-            $query->where('status', 1)
+            $query->select('id', 'name', 'image', 'banner_image')
+            ->where('status', 1)
             ->whereNotIn('id', $category_off->toArray())
             ->withLocale($locale);
         }])
@@ -265,20 +267,18 @@ class HomeController extends Controller
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
-        });
-        
-        $categories = CategoryResource::collection($categories);
-        $categories->map(function($item){
+        })
+        ->map(function($item){
             return [
                 'id' => $item->id,
-                'name' => $item->name,
+                'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
                 'image_link' => $item->image_link,
                 'banner_link' => $item->banner_link,
                 'sub_categories' => $item->sub_categories
                 ->map(function($element){
                     return [
                         'id' => $element->id,
-                        'name' => $element->name,
+                        'name' => $element->translations->where('key', $element->name)->first()?->value ?? $element->name,
                         'image_link' => $element->image_link,
                         'banner_link' => $element->banner_link,
                     ];
@@ -340,9 +340,8 @@ class HomeController extends Controller
             })
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
-            ->get();
-            $products = ProductResource::collection($products);
-            $products->map(function ($product) use ($option_off, $branch_id) {
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) {
                 $product->favourite = $product->favourite_product->isNotEmpty();
                 if ($product->taxes->setting == 'included') {
                     $price = empty($product->tax) ? $product->price: 
@@ -431,9 +430,8 @@ class HomeController extends Controller
             })
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
-            ->get();
-            $products = ProductResource::collection($products);
-            $products->map(function ($product) use ($option_off, $branch_id) {
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) {
                 $product->favourite = $product->favourite_product->isNotEmpty();
                 if ($product->taxes->setting == 'included') {
                     $price = empty($product->tax) ? $product->price: 
