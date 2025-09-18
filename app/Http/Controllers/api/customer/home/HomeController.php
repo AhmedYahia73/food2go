@@ -361,6 +361,7 @@ class HomeController extends Controller
         $product = ProductResource::collection($products);
         $product = $product[0];
         $cate_addons = $this->addons
+		->with('translations')
         ->whereHas('categories', function($query) use($product){
             $query->where('categories.id', $product->category_id)
             ->orWhere('categories.id', $product->sub_category_id);
@@ -368,7 +369,15 @@ class HomeController extends Controller
         ->get();
         $addons = collect($product->addons)
         ->merge($cate_addons)
-        ->values();
+        ->values()
+		->map(function($item){
+			return [
+				'id' => $item->id,
+                'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
+				'price' => $item->price,
+				'quantity_add' => $item->quantity_add, 
+			];
+		});
 
         return response()->json([
             'id' => $product->id,
@@ -381,7 +390,7 @@ class HomeController extends Controller
             'tax_val' => $product->tax_val, 
             'recommended' => $product->recommended, 
             'image_link' => $product->image_link, 
-            'allExtras' => $product->allExtras, 
+            'allExtras' => $product->allExtras,  
             'addons' => $addons, 
             'variations' => $product->variations, 
             'excludes' => $product->excludes->select('id', 'name'), 
