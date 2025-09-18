@@ -27,6 +27,8 @@ class AddonResource extends JsonResource
                 'price' => $price,
                 'price_after_tax' => $tax,
                 'price_after_discount' => $discount,
+                'discount_val' => $price - $discount,
+                'tax_val' => $tax - $price,
                 'tax_id' => $this->tax_id,
                 'quantity_add' => $this->quantity_add,
                 'tax' => $this->whenLoaded('tax'),
@@ -56,6 +58,8 @@ class AddonResource extends JsonResource
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
                 'price' => $price,
                 'price_after_tax' => $tax,
+                'discount_val' => 0,
+                'tax_val' => $tax - $price,
                 'tax_id' => $this->tax_id,
                 'quantity_add' => $this->quantity_add,
                 'tax' => $this->whenLoaded('tax'),
@@ -65,6 +69,7 @@ class AddonResource extends JsonResource
             if ($this->discount && !empty($this->discount) && $this->discount->type == 'precentage') {
                 $discount = $price - $this->discount->amount * $price / 100;
                 $addon_arr['price_after_discount'] = $discount;
+                $addon_arr['discount_val'] = $price - $discount;
             }
 
         }
