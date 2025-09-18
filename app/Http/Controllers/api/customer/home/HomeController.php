@@ -509,7 +509,6 @@ class HomeController extends Controller
 
         return response()->json([
             'products' => $products,
-            'resturant_time' => $resturant_time,
             'tax' => $tax,
         ]);
     }
