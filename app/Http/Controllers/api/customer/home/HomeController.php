@@ -336,7 +336,7 @@ class HomeController extends Controller
             ->where('status', 1)
             ->where(function($query) use($id){
                 $query->where('sub_category_id', $id)
-                ->where('category_id', $id);
+                ->orWhere('category_id', $id);
             })
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
@@ -426,7 +426,7 @@ class HomeController extends Controller
             ->where('status', 1) 
             ->where(function($query) use($id){
                 $query->where('sub_category_id', $id)
-                ->where('category_id', $id);
+                ->orWhere('category_id', $id);
             })
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
