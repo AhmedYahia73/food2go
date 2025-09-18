@@ -23,6 +23,7 @@ use App\Models\MainData;
 use App\Models\MenueImage;
 use App\Models\Policy;
 use App\Models\SmsBalance;
+use App\Models\Addon;
 
 class HomeController extends Controller
 {
@@ -31,7 +32,8 @@ class HomeController extends Controller
     private Translation $translations, private BranchOff $branch_off,
     private Address $address, private ScheduleSlot $schedule_list,
     private MainData $main_data, private Policy $policies,
-    private MenueImage $menue_image, private SmsBalance $sms_balance){}
+    private MenueImage $menue_image, private SmsBalance $sms_balance,
+    private Addon $addons){}
 
     public function mainData(){
         // https://bcknd.food2go.online/customer/home/main_data
@@ -357,12 +359,33 @@ class HomeController extends Controller
             ], 400);
         }
         $product = ProductResource::collection($products);
-
+        $product = $product[0];
+        $cate_addons = $this->addons
+        ->whereHas('categories', function($query) use($product){
+            $query->where('categories.id', $product->category_id)
+            ->orWhere('categories.id', $product->sub_category_id);
+        })
+        ->get();
+        $addons = [collect($product->addons), $cate_addons];
+        $addons = collect($addons)->flatten(1);
         return response()->json([
-            'product' => $product[0],
+            'id' => $product->id,
+            'name' => $product->name,
+            'description' => $product->description, 
+            'price' => $product->price, 
+            'price_after_discount' => $product->price_after_discount, 
+            'price_after_tax' => $product->price_after_tax, 
+            'discount_val' => $product->discount_val, 
+            'tax_val' => $product->tax_val, 
+            'recommended' => $product->recommended, 
+            'image_link' => $product->image_link, 
+            'allExtras' => $product->allExtras, 
+            'addons' => $addons, 
+            'variations' => $product->variations, 
+            'excludes' => $product->excludes->select('id', 'name'), 
         ]);
     }
-
+ 
     public function categories(Request $request){
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;

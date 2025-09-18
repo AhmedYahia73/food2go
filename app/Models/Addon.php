@@ -23,6 +23,10 @@ class Addon extends Model
         return $this->belongsTo(Tax::class, 'tax_id');
     }
 
+    public function categories(){
+        return $this->belongsToMany(Category::class, 'category_addon', 'addon_id', 'category_id');
+    }
+
     public function getTaxesAttribute(){
         return Setting::where('name', 'tax')
         ->orderByDesc('id')
