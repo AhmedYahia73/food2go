@@ -366,8 +366,10 @@ class HomeController extends Controller
             ->orWhere('categories.id', $product->sub_category_id);
         })
         ->get();
-        $addons = [collect($product->addons), $cate_addons];
-        $addons = collect($addons)->flatten(1);
+        $addons = collect($product->addons)
+        ->merge($cate_addons)
+        ->values();
+
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,
