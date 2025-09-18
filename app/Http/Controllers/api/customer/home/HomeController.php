@@ -236,6 +236,133 @@ class HomeController extends Controller
         ]);
     }
 
+    public function product_item(Request $request, $id){
+        // https://bcknd.food2go.online/customer/home
+        // Keys
+        // address_id, branch_id
+        
+        // // _______________________________________________________________________
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $option_off = $branch_off->pluck('option_id')->filter();
+
+        if ($request->user_id) {
+            $user_id = $request->user_id;
+            $products = $this->product
+            ->with([ 
+                'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+                'addons' => fn($q) => $q->withLocale($locale),
+                'category_addons' => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                'excludes' => fn($q) => $q->withLocale($locale),
+                'discount', 'extra', 'sales_count', 'tax',
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($q) => $q
+                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
+                        ->withLocale($locale),
+                ]),
+            ])
+            ->withLocale($locale)
+            ->where('id', $id)
+            ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) {
+                $product->favourite = $product->favourite_product->isNotEmpty();
+
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+
+                if ($product->stock_type === 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                } elseif ($product->stock_type === 'daily') {
+                    $product->count = $product->sales_count
+                        ->where('date', date('Y-m-d'))
+                        ->sum('count');
+                }
+
+                $product->in_stock = $product->number > $product->count;
+
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
+                        ->reject(fn($option) => $option_off->contains($option->id))
+                        ->map(function ($option) {
+                            $option->price = $option->option_pricing->first()?->price ?? $option->price;
+                            return $option;
+                        });
+
+                    return $variation;
+                });
+
+                return $product;
+            });
+
+        }
+        else{
+                $products = $this->product
+                ->with([
+                    'addons' => fn($q) => $q->withLocale($locale),
+                    'category_addons' => fn($q) => $q->withLocale($locale),
+                    'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                    'excludes' => fn($q) => $q->withLocale($locale),
+                    'discount', 'extra', 'sales_count', 'tax',
+                    'variations' => fn($q) => $q->with([
+                        'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
+                    ])->withLocale($locale),
+                ])
+                ->withLocale($locale)
+                ->where('item_type', '!=', 'offline')
+                ->where('status', 1)
+                ->where('id', $id)
+                ->get();
+
+            $products = $products->map(function($product) use ($branch_id, $option_off) {
+                $product->price = $product->product_pricing
+                    ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
+
+                $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
+                        ->reject(fn($opt) => $option_off->contains($opt->id))
+                        ->map(function($opt) use ($branch_id) {
+                            $opt->price = $opt->option_pricing
+                                ->firstWhere('branch_id', $branch_id)?->price ?? $opt->price;
+                            return $opt;
+                        });
+
+                    return $variation;
+                });
+                return $product;
+            });
+        }
+        if($products->count() == 0){
+            return response()->json([
+                'errors' => 'id is wrong'
+            ], 400);
+        }
+        $product = ProductResource::collection($products);
+
+        return response()->json([
+            'product' => $product[0],
+        ]);
+    }
+
     public function categories(Request $request){
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;
