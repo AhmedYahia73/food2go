@@ -144,23 +144,23 @@ class CaptainMakeOrderController extends Controller
         ->with('tables')
         ->where('branch_id', $branch_id)
         ->get(); 
-        $products = ProductResource::collection($products);
+        $products = ProductResource::collection($products)->toArray(request());
 
         $products = collect($products)->map(function ($item) {
             return [
-                'id' => $item->id, 
-                'name' => $item->name,
-                'description' => $item->description,
-                'category_id' => $item->category_id,
-                'sub_category_id' => $item->sub_category_id,
-                'price' => $item->price,
-                'price_after_discount' => $item->price_after_discount,
-                'price_after_tax' => $item->price_after_tax,
-                'image_link' => $item->image_link,
-                'allExtras' => $item?->allExtras?->select('id', 'price_after_discount', 'price_after_tax', 'name', 'price'),
-                'addons' => $item?->addons?->select('id', 'name', 'price', 'price_after_tax', 'quantity_add'),
-                'excludes' => $item?->excludes?->select('id', 'name'),
-                'variations' => $item?->variations?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
+                'id' => $item['id'], 
+                'name' => $item['name'],
+                'description' => $item['description'],
+                'category_id' => $item['category_id'],
+                'sub_category_id' => $item['sub_category_id'],
+                'price' => $item['price'],
+                'price_after_discount' => $item['price_after_discount'],
+                'price_after_tax' => $item['price_after_tax'],
+                'image_link' => $item['image_link'],
+                'allExtras' => collect($item['allExtras']),
+                'addons' => collect($item['addons']),
+                'excludes' => collect($item['excludes'])?->select('id', 'name'),
+                'variations' => collect($item['variations'])?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
             ];
         }); 
 
