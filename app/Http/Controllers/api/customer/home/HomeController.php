@@ -607,6 +607,124 @@ class HomeController extends Controller
         ]);
     }
 
+    public function discount_product(Request $request){
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+        $products = $this->product 
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->where('recommended', 1)
+        ->where('status', 1) 
+        // ->whereNotIn('sub_category_id', $category_off)
+        ->whereNotIn('products.id', $product_off)
+        ->get()
+        ->map(function ($product) use ($option_off, $branch_id) {
+            $product->favourite = $product->favourite_product->isNotEmpty();
+            if ($product->taxes->setting == 'included') {
+                $price = empty($product->tax) ? $product->price: 
+                ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
+                : $product->price + $product->tax->amount * $product->price / 100);
+                
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                        $discount_val = $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                        $discount_val = $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                    $discount_val = 0;
+                }
+                $tax = $price;
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax, 
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            } 
+            else {
+                $price = $product->price;
+                
+                if (!empty($product->tax)) {
+                    if ($product->tax->type == 'precentage') {
+                        $tax = $price + $product->tax->amount * $price / 100;
+                    } else {
+                        $tax = $price + $product->tax->amount;
+                    }
+                }
+                else{
+                    $tax = $price;
+                }
+
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                }
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax,
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            }
+        });
+
+        return response()->json([
+            'recommended_products' => $products
+        ]);
+    }
+
     public function web_products(Request $request){
         // https://bcknd.food2go.online/customer/home/web_products
         // Keys

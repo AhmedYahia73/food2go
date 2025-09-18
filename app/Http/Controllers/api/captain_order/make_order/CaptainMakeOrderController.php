@@ -113,9 +113,7 @@ class CaptainMakeOrderController extends Controller
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
             ->get()
-            ->map(function ($product) use ($option_off, $branch_id) { 
-
-                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+            ->map(function ($product) use ($option_off, $branch_id) {  
 
                 if ($product->stock_type === 'fixed') {
                     $product->count = $product->sales_count->sum('count');
