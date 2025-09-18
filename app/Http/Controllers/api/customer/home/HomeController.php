@@ -316,7 +316,11 @@ class HomeController extends Controller
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
-            ->where('status', 1) 
+            ->where('status', 1)
+            ->where(function($query) use($id){
+                $query->where('sub_category_id', $id)
+                ->where('category_id', $id);
+            })
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
             ->get()
@@ -403,6 +407,10 @@ class HomeController extends Controller
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1) 
+            ->where(function($query) use($id){
+                $query->where('sub_category_id', $id)
+                ->where('category_id', $id);
+            })
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
             ->get()
@@ -506,6 +514,7 @@ class HomeController extends Controller
         ->get();
         $product_off = $branch_off->pluck('product_id')->filter(); 
         $option_off = $branch_off->pluck('option_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
         $tax = $this->settings
         ->where('name', 'tax')
         ->orderByDesc('id')
@@ -527,6 +536,10 @@ class HomeController extends Controller
         ->where('recommended', 1)
         ->where('status', 1) 
         // ->whereNotIn('sub_category_id', $category_off)
+        ->where(function($query) use($category_off){
+            $query->whereNotIn('sub_category_id', $category_off)
+            ->orWhereNotIn('category_id', $category_off);
+        })
         ->whereNotIn('products.id', $product_off)
         ->get()
         ->map(function ($product) use ($option_off, $branch_id) {
@@ -624,6 +637,7 @@ class HomeController extends Controller
         ->get();
         $product_off = $branch_off->pluck('product_id')->filter(); 
         $option_off = $branch_off->pluck('option_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
         $tax = $this->settings
         ->where('name', 'tax')
         ->orderByDesc('id')
@@ -642,9 +656,13 @@ class HomeController extends Controller
         $products = $this->product 
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
-        ->where('recommended', 1)
+        ->whereHas('discount')
         ->where('status', 1) 
         // ->whereNotIn('sub_category_id', $category_off)
+        ->where(function($query) use($category_off){
+            $query->whereNotIn('sub_category_id', $category_off)
+            ->orWhereNotIn('category_id', $category_off);
+        })
         ->whereNotIn('products.id', $product_off)
         ->get()
         ->map(function ($product) use ($option_off, $branch_id) {
@@ -721,7 +739,7 @@ class HomeController extends Controller
         });
 
         return response()->json([
-            'recommended_products' => $products
+            'discount_products' => $products
         ]);
     }
 
