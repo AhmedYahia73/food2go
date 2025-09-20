@@ -44,7 +44,8 @@ class CompanyController extends Controller
         // Keys
         // name, phone, email, address, logo, fav_icon, time_zone, time_format => [24hours,am/pm],
         // currency_id, currency_position => [left,right], copy_right, logo, fav_icon, country,
-        // phone2, watts, android_link, ios_link, order_online, android_switch, ios_switch
+        // phone2, watts, android_link, ios_link, order_online, android_switch, ios_switch, cover_app_image
+        // cover_app_image
         $companyRequest = $request->validated(); 
         $companyRequest['time_zone'] = is_string($companyRequest['time_zone']) ?
         json_decode($companyRequest['time_zone']):$companyRequest['time_zone'];
@@ -55,6 +56,14 @@ class CompanyController extends Controller
         ->first();
         $maintenance = [];
         if (empty($company_info)) {
+            $validator = Validator::make($request->all(), [
+                'cover_app_image' => ['required'],
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ],400);
+            }
             if ($request->logo) {
                 $logo = $this->upload($request, 'logo', 'admin/settings/business_setup/company/logo');
                 $companyRequest['logo'] = $logo;
@@ -62,6 +71,10 @@ class CompanyController extends Controller
             if ($request->fav_icon) {
                 $fav_icon = $this->upload($request, 'fav_icon', 'admin/settings/business_setup/company/fav_icon');
                 $companyRequest['fav_icon'] = $fav_icon;
+            }
+            if ($request->cover_app_image) {
+                $cover_app_image = $this->upload($request, 'cover_app_image', 'admin/settings/business_setup/company/cover_app_image');
+                $companyRequest['cover_app_image'] = $cover_app_image;
             }
             $company_info = $this->company_info->create($companyRequest);
         }
@@ -75,6 +88,11 @@ class CompanyController extends Controller
                 $fav_icon = $this->upload($request, 'fav_icon', 'admin/settings/business_setup/company/fav_icon');
                 $this->deleteImage($company_info->fav_icon);
                 $companyRequest['fav_icon'] = $fav_icon;
+            }
+            if (!is_string($request->cover_app_image)) {
+                $cover_app_image = $this->upload($request, 'cover_app_image', 'admin/settings/business_setup/company/cover_app_image');
+                $this->deleteImage($company_info->cover_app_image);
+                $companyRequest['cover_app_image'] = $cover_app_image;
             }
             $company_info->update($companyRequest);
         }
