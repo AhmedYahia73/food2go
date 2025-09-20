@@ -14,7 +14,7 @@ class PendingOrderController extends Controller
     public function __construct(private Order $orders,
     private TimeSittings $TimeSittings){}
 
-    public function get_pending_orders(){ 
+    public function get_pending_orders(Request $request){ 
         $time_sittings = $this->TimeSittings 
         ->get();
         if ($time_sittings->count() > 0) {
@@ -44,7 +44,7 @@ class PendingOrderController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
 
-        $all_orders = $this->order
+        $all_orders = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
@@ -62,7 +62,7 @@ class PendingOrderController extends Controller
     }
 
     public function get_order(Request $request, $id){
-        $order = clone $this->order
+        $order = clone $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
