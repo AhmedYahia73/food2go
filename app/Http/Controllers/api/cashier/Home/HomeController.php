@@ -42,6 +42,7 @@ class HomeController extends Controller
     public function cashier_data(Request $request){
         $orders = $this->order
         ->where('pos', 1)
+        ->where('order_active', 1)
         ->where('cashier_man_id', $request->user()->id)
         ->get();
         $take_away = $orders->where('order_type', 'take_away')

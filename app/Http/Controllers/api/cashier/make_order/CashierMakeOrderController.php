@@ -109,6 +109,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->orderByDesc('id')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $delivery_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -120,6 +121,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'delivery')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $take_away_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -131,6 +133,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'take_away')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $dine_in_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -142,6 +145,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'dine_in')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $car_slow_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -153,6 +157,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'car_slow')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $orders = [
             'delivery' => $delivery_order,
@@ -171,6 +176,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_type', 'delivery')
         ->whereNull('delivery_id')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
 
         return response()->json([
@@ -300,7 +306,9 @@ class CashierMakeOrderController extends Controller
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
-        $this->preparing_delivery($request, $order['order']->id);
+        if(!$request->order_pending){
+            $this->preparing_delivery($request, $order['order']->id);
+        }
         return response()->json([
             'success' => $order['order'], 
         ]);
@@ -438,7 +446,9 @@ class CashierMakeOrderController extends Controller
             'take_away_status' => 'preparing',
         ]); 
         $order = $this->take_away_make_order($request);
-        $this->preparing_takeaway($request, $order['order']->id);
+        if(!$request->order_pending){
+            $this->preparing_takeaway($request, $order['order']->id);
+        }
 
         return response()->json([
             'success' => $order['order'], 

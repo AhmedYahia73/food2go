@@ -228,6 +228,7 @@ class CashierReportsController extends Controller
         ->where('order_type', '!=', 'delivery')
         ->where('status', 1)
         ->where('shift', $cashier_shifts[0]->shift)
+        ->where('order_active', 1)
         ->orderBy('payment_method_id');
 
 
@@ -379,6 +380,7 @@ class CashierReportsController extends Controller
         $orders = $this->orders
         ->select('cashier_id', 'payment_method_id', 'amount')
         ->where('pos', 1)
+        ->where('order_active', 1)
         ->whereBetween('created_at', [$start, $end])
         ->whereNotNull('cashier_id')
         ->where(function($query) {
@@ -457,6 +459,7 @@ class CashierReportsController extends Controller
         $orders = $this->orders
         ->select('cashier_id', 'payment_method_id', 'amount')
         ->where('pos', 1)
+        ->where('order_active', 1)
         ->where('branch_id', $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->whereNotNull('cashier_id')
@@ -511,6 +514,7 @@ class CashierReportsController extends Controller
         ->get();
        $orders = $this->orders
        ->whereNotNull('shift')
+        ->where('order_active', 1)
        ->orderByDesc('shift')
        ->orderBy('payment_method_id')
        ->where('status', 1)
@@ -601,6 +605,7 @@ class CashierReportsController extends Controller
             $payment_methods_data = [];
             $cashier_orders = $this->orders
             ->where('shift', $element['shift'])
+             ->where('order_active', 1)
             ->get();
             $payment_methods_total = [];
             foreach ($payment_methods as $item) {
@@ -632,6 +637,7 @@ class CashierReportsController extends Controller
         ->with('cashier_man')
         ->get();
        $orders = $this->orders
+        ->where('order_active', 1)
        ->whereNotNull('shift')
        ->orderByDesc('shift')
        ->orderBy('payment_method_id')
@@ -723,6 +729,7 @@ class CashierReportsController extends Controller
             $payment_methods_data = [];
             $cashier_orders = $this->orders
             ->where('shift', $element['shift'])
+            ->where('order_active', 1)
             ->get();
             $payment_methods_total = [];
             foreach ($payment_methods as $item) {

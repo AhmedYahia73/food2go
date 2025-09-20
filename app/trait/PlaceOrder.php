@@ -493,6 +493,9 @@ trait PlaceOrder
                 }
             }
         }
+        if($request->order_pending){
+            $orderRequest['order_active'] = 0;
+        }
         $orderRequest['points'] = $points;
         $order = $this->order_cart
         ->create($orderRequest);
