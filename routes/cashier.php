@@ -44,7 +44,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::put('/tables_status/{id}', 'tables_status')->middleware('can:table_status');
     });
 
-    Route::controller(CashierMakeOrderController::class)
+    Route::controller(PendingOrderController::class)
     ->group(function(){
         Route::get('/get_pending_orders', 'get_pending_orders')->middleware('can:take_away');
         Route::get('/get_order/{id}', 'get_order')->middleware('can:take_away');
