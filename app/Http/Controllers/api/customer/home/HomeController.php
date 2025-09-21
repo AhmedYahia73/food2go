@@ -467,12 +467,10 @@ class HomeController extends Controller
         ->get();
         $category_off = $branch_off->pluck('category_id')->filter();
         $categories = $this->categories
-        ->select('id', 'name', 'image', 'banner_image')
         ->orderBy('priority')
         ->where('status', 1)
         ->with(['sub_categories' => function($query) use($locale, $category_off){
-            $query->select('id', 'name', 'image', 'banner_image')
-            ->where('status', 1)
+            $query->where('status', 1)
             ->whereNotIn('id', $category_off->toArray())
             ->withLocale($locale);
         }])
