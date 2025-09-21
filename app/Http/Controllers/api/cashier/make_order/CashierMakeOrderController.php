@@ -867,9 +867,15 @@ class CashierMakeOrderController extends Controller
         ->update([
             'table_id' => $request->table_id
         ]);
+        $cafe_table = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->update([
+            'current_status' => 'not_available_with_order'
+        ]);
 
         return response()->json([
-            'success' => 'you transfer your table success'
+            'success' => 'you transfer your table success',
+            'status' => 'not_available_with_order'
         ]);
     } 
 
