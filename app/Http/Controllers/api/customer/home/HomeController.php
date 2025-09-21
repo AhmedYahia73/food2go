@@ -420,7 +420,7 @@ class HomeController extends Controller
                     'tax_val' => $tax - $price,
                     'tax_id' => $item->tax_id,
                     'quantity_add' => $item->quantity_add,
-                    'tax' => $item->whenLoaded('tax'),
+                    'tax' => $item->tax,
                 ];
                 if ($item->discount && !empty($item->discount) && $item->discount->type == 'precentage') {
                     $discount = $price - $item->discount->amount * $price / 100;
@@ -435,6 +435,8 @@ class HomeController extends Controller
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,
+            'category_id' => $product->category_id,
+            'sub_category_id' => $product->sub_category_id,
             'description' => $product->description, 
             'price' => $product->price, 
             'price_after_discount' => $product->price_after_discount, 
