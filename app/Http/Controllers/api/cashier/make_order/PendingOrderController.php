@@ -72,7 +72,7 @@ class PendingOrderController extends Controller
     }
 
     public function get_order(Request $request, $id){
-        $order = clone $this->orders
+        $order = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
@@ -81,9 +81,11 @@ class PendingOrderController extends Controller
         ->where('id', $id)
         ->where('order_active', 0) 
         ->first();
-        // if(){
-
-        // } 
+        if(empty($order)){
+            return response()->json([
+                'errors' => 'id is not found'
+            ], 400);
+        } 
         $this->orders
         ->where('id', $id)
         ->delete();

@@ -875,7 +875,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => 'you transfer your table success',
-            'status' => 'not_available_with_order'
+            'status' => 'not_available_with_order',
         ]);
     } 
 
