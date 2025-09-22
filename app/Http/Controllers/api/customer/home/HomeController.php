@@ -445,7 +445,7 @@ class HomeController extends Controller
             'tax_val' => $product->toArray(request())['tax_val'], 
             'recommended' => $product->recommended, 
             'image_link' => $product->image_link, 
-            'allExtras' => $product->allExtras,  
+            'allExtras' => $product->toArray(request())['allExtras'],  
             'addons' => $addons, 
             'variations' => $product->variations, 
             'excludes' => $product->excludes->select('id', 'name'), 
