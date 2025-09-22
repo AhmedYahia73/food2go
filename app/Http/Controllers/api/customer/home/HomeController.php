@@ -584,6 +584,8 @@ class HomeController extends Controller
                         'price' => $price,
                         'price_after_discount' => $discount,
                         'price_after_tax' => $tax,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
                         'recommended' => $product->recommended,
                         'image_link' => $product->image_link,
                         'discount' => $price - $discount,
