@@ -448,7 +448,8 @@ class HomeController extends Controller
             'allExtras' => $product->toArray(request())['allExtras'],  
             'addons' => $addons, 
             'variations' => $product->variations, 
-            'excludes' => $product->excludes->select('id', 'name'), 
+            'excludes' => $product->excludes->select('id', 'name'),
+            'tax_obj' => $product->tax_obj
         ]);
     }
  
