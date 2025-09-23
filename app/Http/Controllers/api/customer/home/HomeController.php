@@ -449,7 +449,7 @@ class HomeController extends Controller
             'addons' => $addons, 
             'variations' => $product->variations, 
             'excludes' => $product->excludes->select('id', 'name'),
-            'tax_obj' => $product->tax_obj
+            'tax_obj' => $product->toArray(request())['tax_obj'],
         ]);
     }
  
