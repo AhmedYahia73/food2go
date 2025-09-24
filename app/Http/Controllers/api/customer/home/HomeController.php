@@ -130,6 +130,7 @@ class HomeController extends Controller
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {
                 $product->favourite = $product->favourite_product->isNotEmpty();
+                $product->favourites = $product->favourite_product->isNotEmpty();
 
                 $product->price = $product->product_pricing->first()?->price ?? $product->price;
 
