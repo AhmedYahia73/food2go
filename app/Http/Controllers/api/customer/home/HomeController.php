@@ -606,7 +606,7 @@ class HomeController extends Controller
                         'image_link' => $product->image_link,
                         'discount' => $price - $discount,
                         'tax' => $tax - $price,
-                        'favourite' => is_bool($product->favourites) ? $product->favourite : false,
+                        'favourite' => is_bool($product->favourites) ? $product->favourites : false,
                     ];
                 } 
                 else {
@@ -647,7 +647,7 @@ class HomeController extends Controller
                         'image_link' => $product->image_link,
                         'discount' => $price - $discount,
                         'tax' => $tax - $price,
-                        'favourite' => is_bool($product->favourites) ? $product->favourite : false,
+                        'favourite' => is_bool($product->favourites) ? $product->favourites : false,
                     ];
                 } 
             });
