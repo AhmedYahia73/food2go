@@ -196,7 +196,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('order')->group(function(){
         Route::get('/', 'orders');
         Route::post('/log', 'order_log')->middleware('can:log_order');
-        Route::post('/transfer_branch', 'transfer_branch')->middleware('can:transfer_branch');
+        Route::post('/transfer_branch/{id}', 'transfer_branch')->middleware('can:transfer_branch');
         Route::get('/count', 'count_orders')->middleware('can:view_order');
         Route::post('/data', 'orders_data')->middleware('can:view_order');
         Route::post('/notification', 'notification')->middleware('can:view_order');
