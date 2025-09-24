@@ -23,6 +23,7 @@ use App\Models\MainData;
 use App\Models\MenueImage;
 use App\Models\Policy;
 use App\Models\SmsBalance;
+use App\Models\PaymentMethod; 
 use App\Models\Addon;
 
 class HomeController extends Controller
@@ -33,7 +34,7 @@ class HomeController extends Controller
     private Address $address, private ScheduleSlot $schedule_list,
     private MainData $main_data, private Policy $policies,
     private MenueImage $menue_image, private SmsBalance $sms_balance,
-    private Addon $addons){}
+    private Addon $addons, private PaymentMethod $payment_method){}
 
     public function mainData(){
         // https://bcknd.food2go.online/customer/home/main_data
@@ -452,7 +453,21 @@ class HomeController extends Controller
             'tax_obj' => $product->toArray(request())['tax_obj'],
         ]);
     }
- 
+
+    public function payment_methods(Request $request){
+        $payment_methods = $this->payment_method
+        ->select('id', 'name', 'description', 'logo')
+        ->orderBy('order')
+        ->get();
+        $schedules = $this->schedule_list
+        ->select('id', 'name')
+        ->get();
+
+        return response()->json([
+            'payment_methods' => $payment_methods,
+            'schedules' => $schedules,
+        ]);
+    }
     public function categories(Request $request){
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;

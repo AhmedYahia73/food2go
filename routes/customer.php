@@ -42,6 +42,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/main_data', 'mainData')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/policies', 'policies')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/menue', 'menue')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/payment_methods', 'payment_methods');
 
         Route::get('/categories', 'categories')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/products_in_category/{id}', 'products_in_category')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
