@@ -29,7 +29,7 @@ class OrderController extends Controller
         // keys => branch_id
         $orders = $this->orders
         ->where('id', $id)
-        -update([
+        ->update([
             'branch_id' => $request->branch_id,
             'operation_status' => 'pending',
             'admin_id' => null,
