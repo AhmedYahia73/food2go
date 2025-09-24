@@ -991,6 +991,7 @@ class OrderController extends Controller
             $order->delivery->count_orders = count($order->delivery->orders_items);
         }
         $deliveries = $this->deliveries
+        ->select('id', 'f_name', 'l_name')
         ->get();
         $order_status = ['pending', 'processing', 'out_for_delivery',
         'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
@@ -1043,10 +1044,11 @@ class OrderController extends Controller
         // }
         // $preparing_time = json_decode($preparing_time->setting);
         $log_order = $this->log_order
-        ->with('admin')
+        ->with(['admin:id,name'])
         ->where('order_id', $id)
         ->get();
         $branches = $this->branches
+        ->select('name', 'id')
         ->where('status', 1)
         ->get();
         if($order?->user?->orders){
