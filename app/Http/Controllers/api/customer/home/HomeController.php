@@ -451,7 +451,7 @@ class HomeController extends Controller
             'variations' => $product->variations, 
             'excludes' => $product->excludes->select('id', 'name'),
             'tax_obj' => $product->toArray(request())['tax_obj'],
-            'favourite' => is_bool($product->favourites) ? $product->favourites : false,
+            'favourite' => $product->favourite,
         ]);
     }
 
