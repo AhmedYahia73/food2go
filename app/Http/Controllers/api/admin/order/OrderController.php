@@ -977,7 +977,7 @@ class OrderController extends Controller
         }
         $order->order_details = $order_details;
         try {
-            $order->user->count_orders = $order->user->orders->count();
+            $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
         } 
         catch (\Throwable $th) {
             $order->user = collect([]);
@@ -985,10 +985,12 @@ class OrderController extends Controller
         }
         
         if (!empty($order->branch)) {
-            $order->branch->count_orders = $order->branch->orders->count();
+            $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
         }
         if (!empty($order->delivery_id)) {
-            $order->delivery->count_orders = count($order->delivery->orders_items);
+            $order->delivery->count_orders = $this->orders
+            ->where('delivery_id', $order->delivery_id)
+            ->count();
         }
         $deliveries = $this->deliveries
         ->select('id', 'f_name', 'l_name')
