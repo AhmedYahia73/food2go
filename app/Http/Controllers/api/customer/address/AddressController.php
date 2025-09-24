@@ -137,9 +137,13 @@ class AddressController extends Controller
             $item->block_reason = $item?->zone?->branch?->block_reason;
             return $item;
         });
+        $call_center_phone = $this->company_info
+        ->orderByDesc('id')
+        ->first()?->phone; 
 
         return response()->json([
             'addresses' => $addresses,
+            'call_center_phone' => $call_center_phone,
         ]);
     }
 
