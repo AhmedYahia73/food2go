@@ -47,7 +47,9 @@ class Delivery extends Authenticatable
     }
 
     public function getImageLinkAttribute(){
-        return url('storage/' . $this->attributes['image']);
+        if(isset( $this->attributes['image'])){
+            return url('storage/' . $this->attributes['image']);
+        }
     }
 
     /**
