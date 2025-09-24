@@ -66,6 +66,9 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
 
     Route::controller(AddressController::class)->prefix('address')->group(function(){
         Route::get('/', 'view');
+        Route::get('/addresses', 'addresses');
+        Route::get('/lists1', 'lists1')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/lists2', 'lists2')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/add', 'add');
         Route::put('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');

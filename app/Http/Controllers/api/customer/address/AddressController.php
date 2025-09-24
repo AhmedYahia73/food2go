@@ -121,6 +121,110 @@ class AddressController extends Controller
         ]);
     }
 
+    public function addresses(Request $request){
+        // https://bcknd.food2go.online/customer/address
+        $locale = $request->locale ?? 'en';
+        $addresses = $this->address
+        ->whereHas('address', function($query) use($request){
+            $query->where('users.id', $request->user()->id);
+        })
+        ->with('zone')
+        ->get()
+        ->map(function($item) use($locale){
+            $item->zone->zone = $item->zone->translations->where('key', $item->zone->zone)
+            ->where('locale', $locale)->first()?->value ?? $item->zone->zone;
+            $item->branch_status = $item?->zone?->branch?->status;
+            $item->block_reason = $item?->zone?->branch?->block_reason;
+            return $item;
+        });
+
+        return response()->json([
+            'addresses' => $addresses,
+        ]);
+    }
+
+    public function lists1(Request $request){
+        // https://bcknd.food2go.online/customer/address
+        $locale = $request->locale ?? 'en';
+       
+        $branches = $this->branch
+        ->select('id', 'name', 'address', 'cover_image', 'image', 'latitude', 'longitude', 'phone_status',
+        'phone','phone_status','food_preparion_time')
+        ->get();
+
+        $order_types = $this->settings
+        ->where('name', 'order_type')
+        ->first();  
+        if (empty($order_types)) {
+            $order_types = $this->settings
+            ->create([
+                'name' => 'order_type',
+                'setting' => json_encode([
+                    [
+                        'id' => 1,
+                        'type' => 'take_away',
+                        'status' => 1
+                    ],
+                    [
+                        'id' => 2,
+                        'type' => 'dine_in',
+                        'status' => 1
+                    ],
+                    [
+                        'id' => 3,
+                        'type' => 'delivery',
+                        'status' => 1
+                    ]
+                ]),
+            ]);
+        }
+        $order_types = $order_types->setting;
+        $order_types = json_decode($order_types);
+        $order_types = collect($order_types)
+        ->where('status', 1)
+        ->values();
+
+        return response()->json([
+            'branches' => $branches,
+            'order_types' => $order_types,
+        ]);
+    }
+
+    public function lists2(Request $request){
+        // https://bcknd.food2go.online/customer/address
+        $locale = $request->locale ?? 'en';
+        $zones = $this->zones
+        ->where('status', 1)
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                'id' => $item->id,
+                'zone' => $item->translations->where('key', $item->zone)
+                ->where('locale', $locale)->first()?->value ?? $item->zone,
+                'price' => $item->price,
+                'status' => $item->status,
+                'city_id' => $item->city_id,
+                'branch_id' => $item->branch_id,
+            ];
+        });
+        $cities = $this->city
+        ->where('status', 1)
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                'id' => $item->id,
+                'name' => $item->translations->where('key', $item->name)
+                ->where('locale', $locale)->first()?->value ?? $item->name, 
+                'status' => $item->status, 
+            ];
+        });
+
+        return response()->json([
+            'zones' => $zones,
+            'cities' => $cities,
+        ]);
+    }
+
     public function add(AddressRequest $request){
         // https://bcknd.food2go.online/customer/address/add
         // Keys
