@@ -14,8 +14,11 @@ class ProfileController extends Controller
 
     public function profile_data(Request $request){
         // https://bcknd.food2go.online/customer/profile/profile_data
+        $data = clone $request->user();
+        $addresses = $request->user()->address;
         return response()->json([
-            'data' => $request->user()
+            'data' => $data,
+            'addresses' => $addresses,
         ]);
     }
 
