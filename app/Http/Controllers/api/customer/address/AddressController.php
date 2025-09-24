@@ -183,10 +183,14 @@ class AddressController extends Controller
         $order_types = collect($order_types)
         ->where('status', 1)
         ->values();
+        $call_center_phone = $this->company_info
+        ->orderByDesc('id')
+        ->first()?->phone;
 
         return response()->json([
             'branches' => $branches,
             'order_types' => $order_types,
+            'call_center_phone' => $call_center_phone,
         ]);
     }
 
