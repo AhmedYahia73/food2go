@@ -129,7 +129,7 @@ class HomeController extends Controller
             ->whereNotIn('products.id', $product_off)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {
-                $product->favourite = $product->favourite_product->isNotEmpty();
+                $product->favourite = $product->favourite_product->count() > 0;
 
                 $product->price = $product->product_pricing->first()?->price ?? $product->price;
 
