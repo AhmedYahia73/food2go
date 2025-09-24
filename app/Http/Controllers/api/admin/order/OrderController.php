@@ -1046,11 +1046,7 @@ class OrderController extends Controller
         $log_order = $this->log_order
         ->with(['admin:id,name'])
         ->where('order_id', $id)
-        ->get();
-        $branches = $this->branches
-        ->select('name', 'id')
-        ->where('status', 1)
-        ->get();
+        ->get(); 
         if($order?->user?->orders){
             unset($order->user->orders);
         }
@@ -1063,8 +1059,7 @@ class OrderController extends Controller
             'deliveries' => $deliveries,
             'order_status' => $order_status,
             'preparing_time' => $preparing_arr,
-            'log_order' => $log_order,
-            'branches' => $branches,
+            'log_order' => $log_order, 
         ]);
     }
 
