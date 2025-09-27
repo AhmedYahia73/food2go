@@ -216,6 +216,8 @@ class LoginController extends Controller
         //     ], 400);
         // }
         if (password_verify($request->input('password'), $user->password)) {
+            $user->fcm_token = $request->fcm_token;
+            $user->save();
             $user->role = 'captain_order';
             $user->token = $user->createToken('captain_order')->plainTextToken;
             return response()->json([
@@ -302,7 +304,8 @@ class LoginController extends Controller
         // shift_number => sometimes
         $validation = Validator::make($request->all(), [
             'user_name' => 'required', 
-            'password' => 'required',  
+            'password' => 'required', 
+            'fcm_token' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json($validation->errors(), 422);
@@ -320,9 +323,10 @@ class LoginController extends Controller
             return response()->json([
                 'falid' => 'cashier is banned'
             ], 400);
-        }
-        $user->save();
+        } 
         if (password_verify($request->input('password'), $user->password)) {
+            $user->fcm_token = $request->fcm_token;
+            $user->save();
             $user->role = 'cashier';
             $user->token = $user->createToken('cashier')->plainTextToken;
             return response()->json([

@@ -20,9 +20,15 @@ class HomeController extends Controller
         ->where('cashier_active', 0)
         ->where('status', 1)
         ->get();
+        $hidden_cashiers = $this->cashier
+        ->where('branch_id', $request->user()->branch_id)
+        ->where('cashier_active', 1)
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
-            'cashiers' => $cashiers
+            'cashiers' => $cashiers,
+            'hidden_cashiers' => $hidden_cashiers,
         ]);
     }
 
