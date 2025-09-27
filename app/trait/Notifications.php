@@ -25,5 +25,6 @@ trait Notifications
 
             return $this->messaging->sendMulticast($message, $tokens);
         }
+        return null;
     }
 }
