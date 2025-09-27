@@ -430,8 +430,13 @@ class CaptainMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $this->cafe_table
+        $tables_ids = $this->cafe_table
         ->where('id', $id)
+        ->orWhere('main_table_id', $id)
+        ->pluck('id')
+        ->toArray();
+        $this->cafe_table
+        ->whereIn('id', $tables_ids)
         ->update([
             'current_status' => $request->current_status
         ]);

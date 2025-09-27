@@ -496,8 +496,13 @@ class CashierMakeOrderController extends Controller
 
     public function dine_in_table_carts(Request $request, $id){
         // /cashier/dine_in_table_carts/{id}
+        $tables_ids = $this->cafe_table
+        ->where('id', $id)
+        ->orWhere('main_table_id', $id)
+        ->pluck('id')
+        ->toArray();
         $order_cart = $this->order_cart
-        ->where('table_id', $id)
+        ->whereIn('table_id', $tables_ids)
         ->get();
         $carts = [];
         foreach ($order_cart as $key => $item) {
@@ -512,8 +517,13 @@ class CashierMakeOrderController extends Controller
 
     public function dine_in_table_order(Request $request, $id){
         // /cashier/dine_in_table_order/{id}
+        $tables_ids = $this->cafe_table
+        ->where('id', $id)
+        ->orWhere('main_table_id', $id)
+        ->pluck('id')
+        ->toArray();
         $order_cart = $this->order_cart
-        ->where('table_id', $id)
+        ->whereIn('table_id', $tables_ids)
         ->get();
         $orders = collect([]);
         foreach ($order_cart as $key => $item) {
@@ -598,8 +608,13 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'status' => 1,
         ]); 
+        $tables_ids = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->orWhere('main_table_id', $request->table_id)
+        ->pluck('id')
+        ->toArray();
         $order_carts = $this->order_cart
-        ->where('table_id', $request->table_id)
+        ->whereIn('table_id', $tables_ids)
         ->get();
         $orders = collect([]);
         $product = [];
@@ -637,13 +652,14 @@ class CashierMakeOrderController extends Controller
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']), 0);
+ 
         $this->cafe_table
-        ->where('id', $request->table_id)
+        ->whereIn('id', $tables_ids)
         ->update([
             'current_status' => 'not_available_but_checkout'
         ]);
         $order_cart = $this->order_cart
-        ->where('table_id', $request->table_id)
+        ->whereIn('table_id', $tables_ids)
         ->delete();
 
         return response()->json([
@@ -728,8 +744,13 @@ class CashierMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $this->cafe_table
+        $tables_ids = $this->cafe_table
         ->where('id', $id)
+        ->orWhere('main_table_id', $id)
+        ->pluck('id')
+        ->toArray();
+        $this->cafe_table
+        ->whereIn('id', $tables_ids)
         ->update([
             'current_status' => $request->current_status
         ]);

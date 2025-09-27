@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\captain_order\make_order\CaptainMakeOrderController;
+use App\Http\Controllers\api\captain_order\table_order\TableOrderController;
 
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 
@@ -29,5 +30,11 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
         Route::post('/preparing', 'preparing');
        
         Route::put('/tables_status/{id}', 'tables_status');
+    });
+     
+    Route::controller(TableOrderController::class)
+    ->group(function(){
+        Route::post('/merge_table', 'merge_table');
+        Route::post('/split_table', 'split_table');
     });
 });
