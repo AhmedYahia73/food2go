@@ -71,7 +71,7 @@ class WaiterCallController extends Controller
         $users_tokens2 = $this->captain_order
         ->pluck('fcm_token');
         $users_tokens = $users_tokens1->merge($users_tokens2)
-        ->toArray();
+        ->filter()->toArray();
         $cafe_table = $this->cafe_table
         ->where('id', $request->table_id)
         ->with('location:id,name')
