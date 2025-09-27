@@ -15,13 +15,15 @@ trait Notifications
 
     public function sendNotificationToMany(array $tokens, string $title, string $body, array $data = []): MulticastSendReport
     {
-        // require kreait/laravel-firebase
-        $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
-        $this->messaging = $factory->createMessaging();
-        $message = CloudMessage::new()
-        ->withNotification(Notification::create($title, $body))
-        ->withData($data);
+        if(count($tokens) > 0){
+            // require kreait/laravel-firebase
+            $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+            $this->messaging = $factory->createMessaging();
+            $message = CloudMessage::new()
+            ->withNotification(Notification::create($title, $body))
+            ->withData($data);
 
-        return $this->messaging->sendMulticast($message, $tokens);
+            return $this->messaging->sendMulticast($message, $tokens);
+        }
     }
 }
