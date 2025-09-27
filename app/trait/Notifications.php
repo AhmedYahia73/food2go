@@ -12,21 +12,24 @@ use Kreait\Firebase\Messaging\MulticastSendReport;
 trait Notifications
 {
     protected $messaging;
-
-    public function sendNotificationToMany(array $tokens, string $title, string $body, array $data = []): MulticastSendReport
-    {
-        $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
-        $this->messaging = $factory->createMessaging();
-
-        $message = CloudMessage::new()
-            ->withNotification(Notification::create($title, $body))
-            ->withData($data);
-
+    public function sendNotificationToMany(
+        array $tokens,
+        string $title,
+        string $body,
+        array $data = []
+    ): ?MulticastSendReport {
         if (count($tokens) > 0) {
+            $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+            $this->messaging = $factory->createMessaging();
+
+            $message = CloudMessage::new()
+                ->withNotification(Notification::create($title, $body))
+                ->withData($data);
+
             return $this->messaging->sendMulticast($message, $tokens);
         }
 
-        // نرجّع Report فاضي
-        return new MulticastSendReport([], $message);
+        return null; // مسموح دلوقتي
     }
+
 }
