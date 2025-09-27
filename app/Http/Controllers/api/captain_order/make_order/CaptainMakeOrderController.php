@@ -278,7 +278,12 @@ class CaptainMakeOrderController extends Controller
             return $product;
         })->filter();
         $cafe_location = $this->cafe_location
-        ->with('tables')
+        ->with(['tables' => function($query){
+            return $query
+            ->where('status', 1)
+            ->where('is_merge', 0)
+            ->with('sub_table:id,table_number,capacity,main_table_id');
+        }])
         ->where('branch_id', $request->branch_id)
         ->get();
         $categories = CategoryResource::collection($categories);
