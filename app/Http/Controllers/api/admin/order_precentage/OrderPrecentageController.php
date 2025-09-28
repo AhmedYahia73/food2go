@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\admin\order_precentage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Setting;
 
@@ -22,6 +23,14 @@ class OrderPrecentageController extends Controller
     }
 
     public function create_update(Request $request){
+        $validator = Validator::make($request->all(), [
+            'order_precentage' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $order_precentage = $this->settings
         ->where('name', 'order_precentage')
         ->first();
