@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\branch\Home;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
 use App\Models\Order;
@@ -20,121 +21,135 @@ class HomeController extends Controller
     private Deal $deals, private User $users, private Setting $settings
     , private TimeSittings $TimeSittings, private LogOrder $log_order){}
 
-    public function home(Request $request){
-        // https://bcknd.food2go.online/admin/home
-        $this->log_order
-        ->whereDate('created_at', '<=', now()->subDays(14))
-        ->delete();
+    public function home_orders_count(Request $request){ 
+        
+        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+        $response = json_decode($response);
 
+        $sms_subscription_data = collect($response?->user_sms) ?? collect([]); 
+        $sms_subscription = $sms_subscription_data->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+        ->first();
+        $msg_number = $this->sms_balance
+        ->where('package_id', $sms_subscription?->id)
+        ->first();
+        $msg_package = [];
+        if (!empty($sms_subscription) && empty($msg_number)) {
+            $msg_number = $this->sms_balance
+            ->create([
+                'package_id' => $sms_subscription->id,
+                'balance' => $sms_subscription->msg_number,
+            ]);
+        }
+        $sms_subscription = $sms_subscription_data->where('back_link', url(''))
+        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+			->sortByDesc('id')
+        ->values();
+        $msg_number = $this->sms_balance
+        ->whereIn('package_id', $sms_subscription?->pluck('id') ?? collect([]))
+        ->sum('balance');
+        $msg_package['msg_number'] = $msg_number;
+        $msg_package['from'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->from : null;
+        $msg_package['to'] = count($sms_subscription) > 0 ? $sms_subscription[0]?->to : null;
+        $msg_package = env('APP_NAME') == 'Lamada' ? false: $msg_package;
         $orders = $this->orders 
         ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
         ->where('branch_id', $request->user()->id)
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
-        ->count();
-        $pending = $this->orders
+        ->count(); 
+        $pending = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
+        ->where('order_status', 'pending') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'pending')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
-        $confirmed = $this->orders
+        $confirmed = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
+        ->where('order_status', 'confirmed') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'confirmed')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
-        $processing = $this->orders
+        $processing = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
+        ->where('order_status', 'processing') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'processing')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
-        $out_for_delivery = $this->orders
+        $out_for_delivery = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        })  
+        ->where('order_status', 'out_for_delivery') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'out_for_delivery')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
-        $delivered = $this->orders
+        $delivered = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        })  
+        ->where('order_status', 'delivered') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'delivered')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
-        $returned = $this->orders
+        $returned = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
+        ->where('order_status', 'returned') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'returned')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
-        $faild_to_deliver = $this->orders
+        $faild_to_deliver = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
+        ->where('order_status', 'faild_to_deliver') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'faild_to_deliver')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
-        $canceled = $this->orders
+        $canceled = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
+        ->where('order_status', 'canceled') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'canceled')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
-        $scheduled = $this->orders
+        $scheduled = $this->orders 
+        ->where('pos', 0)
         ->where('pos', 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
+        ->where('order_status', 'scheduled') 
         ->where('branch_id', $request->user()->id)
-        ->where('order_status', 'scheduled')
-        ->orderByDesc('id')
-        ->with(['user', 'branch', 'delivery'])
         ->count();
         $orders_count = [
             'orders' => $orders,
@@ -147,7 +162,18 @@ class HomeController extends Controller
             'faild_to_deliver' => $faild_to_deliver,
             'canceled' => $canceled,
             'scheduled' => $scheduled,
+            'msg_package' => $msg_package
         ];
+
+        return response()->json($orders_count);
+    }
+
+    public function home(Request $request){
+        // https://bcknd.food2go.online/admin/home
+        $this->log_order
+        ->whereDate('created_at', '<=', now()->subDays(14))
+        ->delete();
+
         $currentYear = Carbon::now()->year; 
         $all_orders = $this->orders 
         ->where('pos', 0)
@@ -231,14 +257,29 @@ class HomeController extends Controller
         ->get();
         $top_customers = $users
         ->sortByDesc('orders_count')->values();
+        $deals = $this->deals
+        ->with('times')
+        ->where('daily', 1)
+        ->where('status', 1)
+        ->where('start_date', '<=', date('Y-m-d'))
+        ->where('end_date', '>=', date('Y-m-d'))
+        ->orWhere('status', 1)
+        ->where('start_date', '<=', date('Y-m-d'))
+        ->where('end_date', '>=', date('Y-m-d'))
+        ->whereHas('times', function($query) use($today) {
+            $query->where('day', $today)
+            ->where('from', '<=', now()->format('H:i:s'))
+            ->where('to', '>=', now()->format('H:i:s'));
+        })
+        ->get();
 
         return response()->json([
-            'orders' => $orders_count,
             'order_statistics' => $order_statistics,
             'earning_statistics' => $earning_statistics,
             'recent_orders' => $all_orders,
             'top_selling' => $top_selling, 
             'top_customers' => $top_customers,
+            'offers' => $deals,
         ]);
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
+        Route::get('/orders_count', 'home_orders_count');
         Route::get('/', 'home');
     });
     // https://bcknd.food2go.online/branch/home
