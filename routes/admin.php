@@ -110,7 +110,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderPrecentageController::class)
     ->prefix('order_precentage')->group(function(){
         Route::get('/', 'view');
-        Route::get('/create_update', 'create_update');
+        Route::put('/create_update', 'create_update');
     });
     
     Route::controller(StockController::class)
