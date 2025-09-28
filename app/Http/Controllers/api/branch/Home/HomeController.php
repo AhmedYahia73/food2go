@@ -260,6 +260,7 @@ class HomeController extends Controller
         ->get();
         $top_customers = $users
         ->sortByDesc('orders_count')->values();
+        $today = Carbon::now()->format('l');
         $deals = $this->deals
         ->with('times')
         ->where('daily', 1)
