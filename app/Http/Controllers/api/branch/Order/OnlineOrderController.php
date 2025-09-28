@@ -41,12 +41,10 @@ class OnlineOrderController extends Controller
     public function orders(Request $request){
         // https://bcknd.food2go.online/admin/order
         
-        $time_sittings = $this->TimeSittings
-        ->orderByDesc('id')
+        $time_sittings = $this->TimeSittings 
         ->get();
         if ($time_sittings->count() > 0) {
             $from = $time_sittings[0]->from;
-            
             $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
             $hours = $time_sittings[$time_sittings->count() - 1]->hours;
             $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
@@ -60,35 +58,63 @@ class OnlineOrderController extends Controller
 			if($start >= now()){
                 $start = $start->subDay();
 			}
+
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
             // else{
             //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // }
+            // } format('Y-m-d H:i:s')
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
-
+        } 
+        $start = $start->subDay();
         $orders = $this->orders
-        ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'admin_id', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
+        ,'order_status',
+        'delivery_id', 'address_id', 'source',
+        'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 0)
         ->whereBetween('created_at', [$start, $end])
         ->whereNull('captain_id')
-        ->where('branch_id', $request->user()->id)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        })
+        }) 
         ->orderByDesc('id')
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+			$query->select('id', 'zone_id')
+			->with('zone:id,zone');
+		}, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery'])
+        ->get()
+		->map(function($item){
+			return [ 
+				'id' => $item->id,
+				'order_number' => $item->order_number,
+				'created_at' => $item->created_at,
+				'amount' => $item->amount,
+				'operation_status' => $item->operation_status,
+				'order_status' => $item->order_status,
+				'source' => $item->source,
+				'status' => $item->status,
+				'points' => $item->points, 
+				'rejected_reason' => $item->rejected_reason,
+				'transaction_id' => $item->transaction_id,
+				'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+				'branch' => ['name' => $item?->branch?->name, ],
+				'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+				'admin' => ['name' => $item?->admin?->name,],
+				'payment_method' => ['name' => $item?->payment_method?->name],
+				'schedule' => ['name' => $item?->schedule?->name],
+				'delivery' => ['name' => $item?->delivery?->name], 
+			];
+		});
         $pending = $orders
         ->where('order_status', 'pending')
         ->values();
@@ -118,20 +144,7 @@ class OnlineOrderController extends Controller
         ->values();
         $refund = $orders
         ->where('order_status', 'refund')
-        ->values();
-        $all_data = [
-            'orders' => $orders,
-            'pending' => $pending,
-            'confirmed' => $confirmed,
-            'processing' => $processing,
-            'out_for_delivery' => $out_for_delivery,
-            'delivered' => $delivered,
-            'returned' => $returned,
-            'faild_to_deliver' => $faild_to_deliver,
-            'canceled' => $canceled,
-            'scheduled' => $scheduled,
-            'refund' => $refund,
-        ];
+        ->values(); 
         $deliveries = $this->deliveries
         ->get();
 
@@ -146,8 +159,7 @@ class OnlineOrderController extends Controller
             'faild_to_deliver' => $faild_to_deliver,
             'refund' => $refund,
             'canceled' => $canceled,
-            'scheduled' => $scheduled,
-            'all_data' => $all_data,
+            'scheduled' => $scheduled, 
             'deliveries' => $deliveries,
         ]);
     }
