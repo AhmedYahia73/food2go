@@ -83,6 +83,7 @@ class OnlineOrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         }) 
+        ->where('branch_id', $request->user()->id)
         ->orderByDesc('id')
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
 			$query->select('id', 'zone_id')
