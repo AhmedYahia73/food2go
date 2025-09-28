@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\branch\Home;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Models\SmsIntegration; 
 use Carbon\Carbon;
 
 use App\Models\Order;
@@ -19,7 +20,8 @@ class HomeController extends Controller
 {
     public function __construct(private Order $orders, private Product $products,
     private Deal $deals, private User $users, private Setting $settings
-    , private TimeSittings $TimeSittings, private LogOrder $log_order){}
+    , private TimeSittings $TimeSittings, private LogOrder $log_order
+    , private SmsBalance $sms_balance){}
 
     public function home_orders_count(Request $request){ 
         
