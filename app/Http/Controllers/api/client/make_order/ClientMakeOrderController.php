@@ -72,7 +72,7 @@ class ClientMakeOrderController extends Controller
     use POS; 
 
     public function products(Request $request, $id){
-        // https://bcknd.food2go.online/customer/home
+        // https://bcknd.food2go.online/client/order/products/{id}
         // Keys
         // address_id, branch_id
         
@@ -239,6 +239,7 @@ class ClientMakeOrderController extends Controller
             'discounts' => $discounts,
             'resturant_time' => $resturant_time,
             'tax' => $tax,
+            'branch_id' => $branch_id
         ]);
     }
 
