@@ -64,11 +64,192 @@ class ClientMakeOrderController extends Controller
     private TimeSittings $TimeSittings, private OrderFinancial $financial,
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
     private Delivery $delivery, private CashierBalance $cashier_balance,
-    private CafeTable $cafe_tables, private FinantiolAcounting $finantiol_accounting,){}
+    private CafeTable $cafe_tables, private FinantiolAcounting $finantiol_accounting,
+    private Category $categories, private Product $product,){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
     use POS; 
+
+    public function products(Request $request){
+        // https://bcknd.food2go.online/customer/home
+        // Keys
+        // address_id, branch_id
+        
+        // // _______________________________________________________________________
+        
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $branch_id = $this->cafe_tables
+        ->where('id', $request->table_id)
+        ->with('location')
+        ->first()
+        ?->location?->branch_id;
+        
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $option_off = $branch_off->pluck('option_id')->filter();
+
+        $categories = $this->categories
+        ->with(['sub_categories' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 
+        'addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }])
+        ->orderBy('priority')
+        ->withLocale($locale)
+        ->where('category_id', null)
+        ->where('status', 1)
+        ->get()
+        ->filter(function($item) use($category_off){
+            return !$category_off->contains($item->id);
+        });
+        if ($request->user_id) {
+            $user_id = $request->user_id;
+            $products = $this->product
+            ->with([ 
+                'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+                'addons' => fn($q) => $q->withLocale($locale),
+                'category_addons' => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                'excludes' => fn($q) => $q->withLocale($locale),
+                'discount', 'extra', 'sales_count', 'tax',
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($q) => $q
+                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
+                        ->withLocale($locale),
+                ]),
+            ])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
+            ->whereNotIn('category_id', $category_off)
+            // ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('products.id', $product_off)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) {
+                $product->favourite = $product->favourite_product->isNotEmpty();
+                $product->favourites = $product->favourite_product->isNotEmpty();
+
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+
+                if ($product->stock_type === 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                } elseif ($product->stock_type === 'daily') {
+                    $product->count = $product->sales_count
+                        ->where('date', date('Y-m-d'))
+                        ->sum('count');
+                }
+
+                $product->in_stock = $product->number > $product->count;
+
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
+                        ->reject(fn($option) => $option_off->contains($option->id))
+                        ->map(function ($option) {
+                            $option->price = $option->option_pricing->first()?->price ?? $option->price;
+                            return $option;
+                        });
+
+                    return $variation;
+                });
+
+                return $product;
+            });
+
+        }
+        else{
+                $products = $this->product
+                ->with([
+                    'addons' => fn($q) => $q->withLocale($locale),
+                    'category_addons' => fn($q) => $q->withLocale($locale),
+                    'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                    'excludes' => fn($q) => $q->withLocale($locale),
+                    'discount', 'extra', 'sales_count', 'tax',
+                    'variations' => fn($q) => $q->with([
+                        'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
+                    ])->withLocale($locale),
+                ])
+                ->withLocale($locale)
+                ->where('item_type', '!=', 'offline')
+                ->where('status', 1)
+                ->whereNotIn('category_id', $category_off)
+                //->whereNotIn('sub_category_id', $category_off)
+                ->whereNotIn('products.id', $product_off)
+                ->get();
+
+            $products = $products->map(function($product) use ($branch_id, $option_off) {
+                $product->price = $product->product_pricing
+                    ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
+
+                $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
+                        ->reject(fn($opt) => $option_off->contains($opt->id))
+                        ->map(function($opt) use ($branch_id) {
+                            $opt->price = $opt->option_pricing
+                                ->firstWhere('branch_id', $branch_id)?->price ?? $opt->price;
+                            return $opt;
+                        });
+
+                    return $variation;
+                });
+                return $product;
+            });
+        }
+        $discounts = $this->product
+        ->with('discount')
+        ->whereHas('discount')
+        ->get();
+        $resturant_time = $this->settings
+        ->where('name', 'resturant_time')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($resturant_time)) {
+            $resturant_time = $resturant_time->setting;
+            $resturant_time = json_decode($resturant_time) ?? $resturant_time;
+        }
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+        $categories = CategoryResource::collection($categories);
+        $products = ProductResource::collection($products);
+
+        return response()->json([
+            'categories' => $categories,
+            'products' => $products,
+            'discounts' => $discounts,
+            'resturant_time' => $resturant_time,
+            'tax' => $tax,
+        ]);
+    }
 
     public function lists(Request $request){
         // /captain/lists
