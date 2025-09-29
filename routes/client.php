@@ -9,7 +9,7 @@ use App\Http\Controllers\api\customer\home\HomeController;
 
 Route::controller(ClientMakeOrderController::class)
 ->prefix('order')->group(function(){
-    Route::get('/products', 'products');
+    Route::get('/products/{id}', 'products');
     Route::post('/lists', 'lists');
     Route::post('/dine_in_order', 'dine_in_order');
     Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts');

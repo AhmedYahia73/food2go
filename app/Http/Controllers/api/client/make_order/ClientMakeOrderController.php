@@ -71,27 +71,18 @@ class ClientMakeOrderController extends Controller
     use PaymentPaymob;
     use POS; 
 
-    public function products(Request $request){
+    public function products(Request $request, $id){
         // https://bcknd.food2go.online/customer/home
         // Keys
         // address_id, branch_id
         
         // // _______________________________________________________________________
-        
-        $validator = Validator::make($request->all(), [
-            'table_id' => 'required|exists:cafe_tables,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
         $branch_id = $this->cafe_tables
-        ->where('id', $request->table_id)
+        ->where('id', $id)
         ->with('location')
         ->first()
         ?->location?->branch_id;
-        
+
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
