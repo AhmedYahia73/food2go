@@ -392,7 +392,7 @@ class HomeController extends Controller
                     'tax_val' => $tax - $price,
                     'tax_id' => $item->tax_id,
                     'quantity_add' => $item->quantity_add,
-                    'tax' => $item->whenLoaded('tax'),
+                    'tax' => $item->relationLoaded('tax') ? $item->tax : null,
                     'created_at' => $item->created_at,
                     'updated_at' => $item->updated_at,
                 ];    
