@@ -140,15 +140,6 @@ class CaptainMakeOrderController extends Controller
 
                 return $product;
             });
-        $cafe_location = $this->cafe_location
-        ->with(['tables' => function($query){
-            return $query
-            ->where('status', 1)
-            ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id');
-        }])
-        ->where('branch_id', $branch_id)
-        ->get(); 
         $products = ProductResource::collection($products)->toArray(request());
 
         $products = collect($products)->map(function ($item) {
@@ -171,8 +162,7 @@ class CaptainMakeOrderController extends Controller
 
         return response()->json([
             'categories' => $categories,
-            'products' => $products, 
-            'cafe_location' => $cafe_location,
+            'products' => $products,  
             'payment_methods' => $paymentMethod, 
         ]);
     }
@@ -277,12 +267,22 @@ class CaptainMakeOrderController extends Controller
             });
             return $product;
         })->filter();
+        $cafe_location = $this->cafe_location
+        ->with(['tables' => function($query){
+            return $query
+            ->where('status', 1)
+            ->where('is_merge', 0)
+            ->with('sub_table:id,table_number,capacity,main_table_id');
+        }])
+        ->where('branch_id', $request->branch_id)
+        ->get();
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products); 
 
         return response()->json([
             'categories' => $categories,
-            'products' => $products,  
+            'products' => $products, 
+            'cafe_location' => $cafe_location,
             'payment_methods' => $paymentMethod, 
         ]);
     }
@@ -323,8 +323,8 @@ class CaptainMakeOrderController extends Controller
             ->where('is_merge', 0)
             ->with('sub_table:id,table_number,capacity,main_table_id');
         }])
-        ->where('branch_id', $request->branch_id)
-        ->get();
+        ->where('branch_id', $branch_id)
+        ->get(); 
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo')
         ->whereHas('branch')
