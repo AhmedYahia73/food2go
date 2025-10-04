@@ -1053,11 +1053,15 @@ class OrderController extends Controller
         ->select('name', 'id')
         ->where('status', 1)
         ->get();
-        if($order?->user?->orders){
-            unset($order->user->orders);
-        }
-        if($order?->branch?->orders){
-            unset($order->branch->orders);
+        try {
+            if($order?->user?->orders){
+                unset($order->user->orders);
+            }
+            if($order?->branch?->orders){
+                unset($order->branch->orders);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
         }
 
         return response()->json([
