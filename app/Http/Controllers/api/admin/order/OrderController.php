@@ -30,7 +30,6 @@ class OrderController extends Controller
         $orders = $this->orders
         ->where('id', $id)
         ->update([
-        ->update([
             'branch_id' => $request->branch_id,
             'operation_status' => 'pending',
             'admin_id' => null,
@@ -960,7 +959,6 @@ class OrderController extends Controller
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
         'admin_cancel_reason', 'sechedule_slot_id')
         ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
-        ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
         'branch:id,name', 'delivery', 'payment_method:id,name,logo',
          'address.zone', 'admin:id,name,email,phone,image', 
         'schedule'])
@@ -980,7 +978,6 @@ class OrderController extends Controller
         $order->order_details = $order_details;
         try {
             $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
-            $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
         } 
         catch (\Throwable $th) {
             $order->user = collect([]);
@@ -988,18 +985,13 @@ class OrderController extends Controller
         }
         if (!empty($order->branch)) {
             $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
-            $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
         }
         if (!empty($order->delivery_id)) {
             $order->delivery->count_orders = $this->orders
             ->where('delivery_id', $order->delivery_id)
             ->count();
-            $order->delivery->count_orders = $this->orders
-            ->where('delivery_id', $order->delivery_id)
-            ->count();
         }
         $deliveries = $this->deliveries
-        ->select('id', 'f_name', 'l_name')
         ->select('id', 'f_name', 'l_name')
         ->get();
         $order_status = ['pending', 'processing', 'out_for_delivery',
@@ -1054,18 +1046,21 @@ class OrderController extends Controller
         // $preparing_time = json_decode($preparing_time->setting);
         $log_order = $this->log_order
         ->with(['admin:id,name'])
-        ->with(['admin:id,name'])
         ->where('order_id', $id)
         ->get();
         $branches = $this->branches
         ->select('name', 'id')
-        ->select('name', 'id')
         ->where('status', 1)
         ->get();
         try {
-            if($order?->user?->orders){
-                unset($order->user->orders);
+            if($order?->user?->orders){ 
+                unset($order->user);
+				$order->user;
             } 
+			if($order?->branch){
+                unset($order->branch);
+				$order->branch;
+            }
         } catch (\Throwable $th) {
             //throw $th;
         }
