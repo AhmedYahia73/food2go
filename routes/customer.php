@@ -42,6 +42,14 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/main_data', 'mainData')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/policies', 'policies')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/menue', 'menue')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/payment_methods', 'payment_methods');
+
+        Route::get('/categories', 'categories')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/products_in_category/{id}', 'products_in_category')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/recommandation_product', 'recommandation_product')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/discount_product', 'discount_product')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/product_item/{id}', 'product_item')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+
         Route::post('/filter_product', 'filter_product');
         Route::put('/favourite/{id}', 'favourite');
         Route::get('/fav_products', 'fav_products');
@@ -58,6 +66,9 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
 
     Route::controller(AddressController::class)->prefix('address')->group(function(){
         Route::get('/', 'view');
+        Route::get('/addresses', 'addresses');
+        Route::get('/lists1', 'lists1')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/lists2', 'lists2')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/add', 'add');
         Route::put('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');

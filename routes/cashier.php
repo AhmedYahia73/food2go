@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
+use App\Http\Controllers\api\cashier\make_order\PendingOrderController;
 use App\Http\Controllers\api\cashier\address\AddressController;
 use App\Http\Controllers\api\cashier\user\AddressController as UserAddressController;
 use App\Http\Controllers\api\cashier\customer\CustomerController;
@@ -41,7 +42,14 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/take_away_order', 'take_away_order')->middleware('can:take_away');
        
         Route::put('/tables_status/{id}', 'tables_status')->middleware('can:table_status');
-    }); 
+    });
+
+    Route::controller(PendingOrderController::class)
+    ->group(function(){
+        Route::get('/get_pending_orders', 'get_pending_orders')->middleware('can:take_away');
+        Route::get('/get_order/{id}', 'get_order')->middleware('can:take_away');
+    });
+
     Route::controller(HomeController::class)
     ->prefix('/home')->group(function(){
         Route::get('/', 'view');

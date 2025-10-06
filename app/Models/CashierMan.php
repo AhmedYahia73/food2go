@@ -23,6 +23,7 @@ class CashierMan extends Model
         'password',
         'status',
         'void_order',
+        'fcm_token',
     ];
     protected $appends = ['role', 'image_link'];
 

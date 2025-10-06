@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\admin\purchases;
+namespace App\Http\Controllers\api\storage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -14,19 +14,9 @@ class StockController extends Controller
     public function __construct(private PurchaseStock $stock,
     private PurchaseStore $store){}
 
-    public function view_stores(Request $request){
-        $stores = $this->store
-        ->select('id', 'name', 'location', 'status')
-        ->get();
-
-        return response()->json([
-            'stores' => $stores
-        ]);
-    }
-
-
     public function view_stock(Request $request, $id){
         $stores = $this->stock
+        ->where('store_id', $request->user()->store_id)
         ->with('category', 'product', 'store')
         ->get()
         ->map(function($item){

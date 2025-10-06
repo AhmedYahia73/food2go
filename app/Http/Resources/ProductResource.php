@@ -64,6 +64,8 @@ class ProductResource extends JsonResource
                 'price' => $price,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
+                'discount_val' => $price - $discount,
+                'tax_val' => $tax - $price,
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
@@ -84,6 +86,7 @@ class ProductResource extends JsonResource
                 'favourite_product' => $this->whenLoaded('favourite_product'),
                 'sales_count' => $this->whenLoaded('sales_count'),
                 'favourite' => is_bool($this->favourites) ? $this->favourite : false,
+                'tax_obj' => $this->tax,
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ];
@@ -127,6 +130,8 @@ class ProductResource extends JsonResource
                 'price' => $price,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
+                'discount_val' => $price - $discount,
+                'tax_val' => $tax - $price,
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
@@ -149,6 +154,7 @@ class ProductResource extends JsonResource
                 'favourite' => is_bool($this->favourites) ? $this->favourite : false,
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
+                'tax_obj' => $this->tax,
             ];
         }
     }

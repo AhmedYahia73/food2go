@@ -21,6 +21,7 @@ class CaptainOrder extends Model
         'captain_id',
         'status',
         'waiter',
+        'fcm_token',
     ];
     protected $appends = ['role', 'image_link'];
 

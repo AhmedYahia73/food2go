@@ -52,8 +52,8 @@ class CaptainMakeOrderController extends Controller
     use PlaceOrder;
     use PaymentPaymob;
 
-    public function lists(Request $request){
-        // /captain/lists
+    public function my_lists(Request $request){
+        // /captain/my_lists
         if($request->user() && $request->user()->branch_id){
             $branch_id = $request->user()->branch_id;
         }
@@ -113,9 +113,7 @@ class CaptainMakeOrderController extends Controller
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
             ->get()
-            ->map(function ($product) use ($option_off, $branch_id) { 
-
-                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+            ->map(function ($product) use ($option_off, $branch_id) {  
 
                 if ($product->stock_type === 'fixed') {
                     $product->count = $product->sales_count->sum('count');
@@ -142,29 +140,144 @@ class CaptainMakeOrderController extends Controller
 
                 return $product;
             });
-        $cafe_location = $this->cafe_location
-        ->with('tables')
-        ->where('branch_id', $branch_id)
-        ->get(); 
-        $products = ProductResource::collection($products);
+        $products = ProductResource::collection($products)->toArray(request());
 
         $products = collect($products)->map(function ($item) {
             return [
-                'id' => $item->id, 
-                'name' => $item->name,
-                'description' => $item->description,
-                'category_id' => $item->category_id,
-                'sub_category_id' => $item->sub_category_id,
-                'price' => $item->price,
-                'price_after_discount' => $item->price_after_discount,
-                'price_after_tax' => $item->price_after_tax,
-                'image_link' => $item->image_link,
-                'allExtras' => $item?->allExtras?->select('id', 'price_after_discount', 'price_after_tax', 'name', 'price'),
-                'addons' => $item?->addons?->select('id', 'name', 'price', 'price_after_tax', 'quantity_add'),
-                'excludes' => $item?->excludes?->select('id', 'name'),
-                'variations' => $item?->variations?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
+                'id' => $item['id'], 
+                'name' => $item['name'],
+                'description' => $item['description'],
+                'category_id' => $item['category_id'],
+                'sub_category_id' => $item['sub_category_id'],
+                'price' => $item['price'],
+                'price_after_discount' => $item['price_after_discount'],
+                'price_after_tax' => $item['price_after_tax'],
+                'image_link' => $item['image_link'],
+                'allExtras' => collect($item['allExtras']),
+                'addons' => collect($item['addons']),
+                'excludes' => collect($item['excludes'])?->select('id', 'name'),
+                'variations' => collect($item['variations'])?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
             ];
         }); 
+
+        return response()->json([
+            'categories' => $categories,
+            'products' => $products,  
+            'payment_methods' => $paymentMethod, 
+        ]);
+    }
+
+    public function lists(Request $request){
+        // /captain/lists
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $paymentMethod = $this->paymentMethod
+        ->where('status', 1)
+        ->get();
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = $request->branch_id;
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $option_off = $branch_off->pluck('option_id')->filter();
+
+        $categories = $this->category
+        ->with(['sub_categories' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 
+        'addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }])
+        ->withLocale($locale)
+        ->where('category_id', null)
+        ->get()
+        ->filter(function($item) use($category_off){
+            return !$category_off->contains($item->id);
+        });
+        $products = $this->products
+        ->with(['addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        },'sub_category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'excludes' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'extra', 'discount', 
+        'variations' => function($query) use($locale){
+            $query->withLocale($locale)
+            ->with(['options' => function($query_option) use($locale){
+                $query_option->with(['extra' => function($query_extra) use($locale){
+                    $query_extra->with('parent_extra')
+                    ->withLocale($locale);
+                }])
+                ->withLocale($locale);
+            }]);
+        }, 'sales_count', 'tax'])
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->where('status', 1)
+        ->get()
+        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
+            //get count of sales of product to detemine stock
+            $product->price = $product?->product_pricing->where('branch_id', $branch_id)
+            ->first()?->price ?? $product->price;
+            $product->favourite = false;
+            if ($product->stock_type == 'fixed') {
+                $product->count = $product->sales_count->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            elseif ($product->stock_type == 'daily') {
+                $product->count = $product->sales_count
+                ->where('date', date('Y-m-d'))
+                ->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            // return !$category_off->contains($item->id);
+            // $category_off, $product_off, $option_off
+            if ($category_off->contains($product->category_id) || 
+            $category_off->contains($product->sub_category_id)
+            || $product_off->contains($product->id)) {
+                return null;
+            }
+            $product->variations = $product->variations->map(function ($variation) 
+            use ($option_off, $product, $branch_id) {
+                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                $variation->options = $variation->options->map(function($element) use($branch_id){
+                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+                    ->first()?->price ?? $element->price;
+                    return $element;
+                });
+              
+                return $variation;
+            });
+            $product->addons = $product->addons->map(function ($addon) 
+            use ($product) {
+                $addon->discount = $product->discount;
+              
+                return $addon;
+            });
+            return $product;
+        })->filter();
+        $cafe_location = $this->cafe_location
+        ->with(['tables' => function($query){
+            return $query
+            ->where('status', 1)
+            ->where('is_merge', 0)
+            ->with('sub_table:id,table_number,capacity,main_table_id');
+        }])
+        ->where('branch_id', $request->branch_id)
+        ->get();
+        $categories = CategoryResource::collection($categories);
+        $products = ProductResource::collection($products); 
 
         return response()->json([
             'categories' => $categories,
@@ -174,7 +287,21 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
-    public function selection_lists(Request $request){
+    public function get_table_status(){
+        $table_status = [
+            'available',
+            'not_available_pre_order',
+            'not_available_with_order',
+            'not_available_but_checkout',
+            'reserved',
+        ];
+
+        return response()->json([
+            'table_status' => $table_status
+        ]);
+    }
+
+    public function my_selection_lists(Request $request){
         if($request->user() && $request->user()->branch_id){
             $branch_id = $request->user()->branch_id;
         }
@@ -190,7 +317,12 @@ class CaptainMakeOrderController extends Controller
             $branch_id = $request->branch_id;
         }
         $cafe_location = $this->cafe_location
-        ->with('tables')
+        ->with(['tables' => function($query){
+            return $query
+            ->where('status', 1)
+            ->where('is_merge', 0)
+            ->with('sub_table:id,table_number,capacity,main_table_id');
+        }])
         ->where('branch_id', $branch_id)
         ->get(); 
         $financial_account = $this->financial_account
@@ -303,8 +435,13 @@ class CaptainMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $this->cafe_table
+        $tables_ids = $this->cafe_table
         ->where('id', $id)
+        ->orWhere('main_table_id', $id)
+        ->pluck('id')
+        ->toArray();
+        $this->cafe_table
+        ->whereIn('id', $tables_ids)
         ->update([
             'current_status' => $request->current_status
         ]);

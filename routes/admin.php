@@ -56,6 +56,8 @@ use App\Http\Controllers\api\admin\coupon\CreateCouponController;
 
 use App\Http\Controllers\api\admin\void_order\VoidOrderController;
 
+use App\Http\Controllers\api\admin\order_precentage\OrderPrecentageController;
+
 use App\Http\Controllers\api\admin\settings\ScheduleSlotController;
 use App\Http\Controllers\api\admin\settings\ExtraController;
 use App\Http\Controllers\api\admin\settings\ExcludeController;
@@ -103,6 +105,18 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(OrderPrecentageController::class)
+    ->prefix('order_precentage')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/create_update', 'create_update');
+    });
+    
+    Route::controller(StockController::class)
+    ->prefix('purchase_stock')->group(function(){
+        Route::get('/store', 'view_stores');
+        Route::get('/stock/{id}', 'view_stock');
     });
     
     Route::controller(PurchaseController::class)
@@ -161,6 +175,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PurchaseConsumersionController::class)
     ->prefix('purchase_consumersion')->group(function(){
         Route::get('/', 'view'); 
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
@@ -189,7 +204,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('order')->group(function(){
         Route::get('/', 'orders');
         Route::post('/log', 'order_log')->middleware('can:log_order');
-        Route::post('/transfer_branch', 'transfer_branch')->middleware('can:transfer_branch');
+        Route::post('/transfer_branch/{id}', 'transfer_branch')->middleware('can:transfer_branch');
         Route::get('/count', 'count_orders')->middleware('can:view_order');
         Route::post('/data', 'orders_data')->middleware('can:view_order');
         Route::post('/notification', 'notification')->middleware('can:view_order');

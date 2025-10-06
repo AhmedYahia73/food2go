@@ -20,9 +20,15 @@ class HomeController extends Controller
         ->where('cashier_active', 0)
         ->where('status', 1)
         ->get();
+        $hidden_cashiers = $this->cashier
+        ->where('branch_id', $request->user()->branch_id)
+        ->where('cashier_active', 1)
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
-            'cashiers' => $cashiers
+            'cashiers' => $cashiers,
+            'hidden_cashiers' => $hidden_cashiers,
         ]);
     }
 
@@ -42,6 +48,7 @@ class HomeController extends Controller
     public function cashier_data(Request $request){
         $orders = $this->order
         ->where('pos', 1)
+        ->where('order_active', 1)
         ->where('cashier_man_id', $request->user()->id)
         ->get();
         $take_away = $orders->where('order_type', 'take_away')

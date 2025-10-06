@@ -29,14 +29,18 @@ class CompanyInfo extends Model
         'order_online',
         'android_switch',
         'ios_switch',
+        'cover_app_image',
     ];
-    protected $appends = ['logo_link', 'fav_icon_link'];
+    protected $appends = ['logo_link', 'fav_icon_link', 'cover_app_image_link'];
 
     public function getLogoLinkAttribute(){
         return url('storage/' . $this->attributes['logo']);
     }
     public function getFavIconLinkAttribute(){ 
         return url('storage/' . $this->attributes['fav_icon']);
+    }
+    public function getCoverAppImageLinkAttribute(){ 
+        return url('storage/' . $this->attributes['cover_app_image']);
     }
     public function currency(){
         return $this->belongsTo(Currency::class);

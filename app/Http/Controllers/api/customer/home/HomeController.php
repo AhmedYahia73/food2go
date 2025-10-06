@@ -23,6 +23,8 @@ use App\Models\MainData;
 use App\Models\MenueImage;
 use App\Models\Policy;
 use App\Models\SmsBalance;
+use App\Models\PaymentMethod; 
+use App\Models\Addon;
 
 class HomeController extends Controller
 {
@@ -31,7 +33,8 @@ class HomeController extends Controller
     private Translation $translations, private BranchOff $branch_off,
     private Address $address, private ScheduleSlot $schedule_list,
     private MainData $main_data, private Policy $policies,
-    private MenueImage $menue_image, private SmsBalance $sms_balance){}
+    private MenueImage $menue_image, private SmsBalance $sms_balance,
+    private Addon $addons, private PaymentMethod $payment_method){}
 
     public function mainData(){
         // https://bcknd.food2go.online/customer/home/main_data
@@ -127,6 +130,7 @@ class HomeController extends Controller
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {
                 $product->favourite = $product->favourite_product->isNotEmpty();
+                $product->favourites = $product->favourite_product->isNotEmpty();
 
                 $product->price = $product->product_pricing->first()?->price ?? $product->price;
 
@@ -233,6 +237,766 @@ class HomeController extends Controller
             'discounts' => $discounts,
             'resturant_time' => $resturant_time,
             'tax' => $tax,
+        ]);
+    }
+
+    public function product_item(Request $request, $id){
+        // https://bcknd.food2go.online/customer/home
+        // Keys
+        // address_id, branch_id
+        
+        // // _______________________________________________________________________
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $option_off = $branch_off->pluck('option_id')->filter();
+
+        if ($request->user_id) {
+            $user_id = $request->user_id;
+            $products = $this->product
+            ->with([ 
+                'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+                'addons' => fn($q) => $q->withLocale($locale),
+                'category_addons' => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                'excludes' => fn($q) => $q->withLocale($locale),
+                'discount', 'extra', 'sales_count', 'tax',
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($q) => $q
+                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
+                        ->withLocale($locale),
+                ]),
+            ])
+            ->withLocale($locale)
+            ->where('id', $id)
+            ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) {
+                $product->favourite = $product->favourite_product->isNotEmpty();
+                $product->favourites = $product->favourite_product->isNotEmpty();
+
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+
+                if ($product->stock_type === 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                } elseif ($product->stock_type === 'daily') {
+                    $product->count = $product->sales_count
+                        ->where('date', date('Y-m-d'))
+                        ->sum('count');
+                }
+
+                $product->in_stock = $product->number > $product->count;
+
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
+                        ->reject(fn($option) => $option_off->contains($option->id))
+                        ->map(function ($option) {
+                            $option->price = $option->option_pricing->first()?->price ?? $option->price;
+                            return $option;
+                        });
+
+                    return $variation;
+                });
+
+                return $product;
+            });
+
+        }
+        else{
+                $products = $this->product
+                ->with([
+                    'addons' => fn($q) => $q->withLocale($locale),
+                    'category_addons' => fn($q) => $q->withLocale($locale),
+                    'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                    'excludes' => fn($q) => $q->withLocale($locale),
+                    'discount', 'extra', 'sales_count', 'tax',
+                    'variations' => fn($q) => $q->with([
+                        'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
+                    ])->withLocale($locale),
+                ])
+                ->withLocale($locale)
+                ->where('item_type', '!=', 'offline')
+                ->where('status', 1)
+                ->where('id', $id)
+                ->get();
+
+            $products = $products->map(function($product) use ($branch_id, $option_off) {
+                $product->price = $product->product_pricing
+                    ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
+
+                $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
+                        ->reject(fn($opt) => $option_off->contains($opt->id))
+                        ->map(function($opt) use ($branch_id) {
+                            $opt->price = $opt->option_pricing
+                                ->firstWhere('branch_id', $branch_id)?->price ?? $opt->price;
+                            return $opt;
+                        });
+
+                    return $variation;
+                });
+                return $product;
+            });
+        }
+        if($products->count() == 0){
+            return response()->json([
+                'errors' => 'id is wrong'
+            ], 400);
+        }
+        $product = ProductResource::collection($products);
+        $product = $product[0];
+        $product->tax;
+        $cate_addons = $this->addons
+		->with('translations', 'tax')
+        ->whereHas('categories', function($query) use($product){
+            $query->where('categories.id', $product->category_id)
+            ->orWhere('categories.id', $product->sub_category_id);
+        })
+        ->get();
+        $addons = collect($product->addons)
+        ->merge($cate_addons)
+        ->values()
+		->map(function($item){
+            $locale = app()->getLocale(); // Use the application's current locale
+            if ($item?->taxes?->setting && $item?->taxes?->setting == 'included') {
+                $price =  empty($item->tax) ? $item->price: 
+                ($item->tax->type == 'value' ? $item->price + $item->tax->amount : $item->price + $item->tax->amount * $item->price / 100);
+
+                $tax = $price;
+                $discount = $price;
+                $addon_arr = [
+                    'id' => $item->id,
+                    'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
+                    'price' => $price,
+                    'price_after_tax' => $tax,
+                    'price_after_discount' => $discount,
+                    'discount_val' => $price - $discount,
+                    'tax_val' => $tax - $price,
+                    'tax_id' => $item->tax_id,
+                    'quantity_add' => $item->quantity_add,
+                    'tax' => $item->relationLoaded('tax') ? $item->tax : null,
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at,
+                ];    
+                if ($item->discount && !empty($item->discount) && $item->discount->type == 'precentage') {
+                    $discount = $price - $item->discount->amount * $price / 100;
+                    $addon_arr['price_after_discount'] = $discount;
+                }   
+            }
+            else {
+                $price = $item->price;
+                
+                if (!empty($item->tax)) {
+                    if ($item->tax->type == 'precentage') {
+                        $tax = $price + $item->tax->amount * $price / 100;
+                    } else {
+                        $tax = $price + $item->tax->amount;
+                    }
+                }
+                else{
+                    $tax = $price;
+                }
+                $addon_arr = [
+                    'id' => $item->id,
+                    'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
+                    'price' => $price,
+                    'price_after_tax' => $tax,
+                    'discount_val' => 0,
+                    'tax_val' => $tax - $price,
+                    'tax_id' => $item->tax_id,
+                    'quantity_add' => $item->quantity_add,
+                    'tax' => $item->tax,
+                ];
+                if ($item->discount && !empty($item->discount) && $item->discount->type == 'precentage') {
+                    $discount = $price - $item->discount->amount * $price / 100;
+                    $addon_arr['price_after_discount'] = $discount;
+                    $addon_arr['discount_val'] = $price - $discount;
+                }
+
+            }
+            return $addon_arr;
+		});
+
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'category_id' => $product->category_id,
+            'sub_category_id' => $product->sub_category_id,
+            'description' => $product->description, 
+            'price' => $product->price, 
+            'price_after_discount' => $product->toArray(request())['price_after_discount'], 
+            'price_after_tax' => $product->toArray(request())['price_after_tax'], 
+            'discount_val' => $product->toArray(request())['discount_val'], 
+            'tax_val' => $product->toArray(request())['tax_val'], 
+            'recommended' => $product->recommended, 
+            'image_link' => $product->image_link, 
+            'allExtras' => $product->toArray(request())['allExtras'],  
+            'addons' => $addons, 
+            'variations' => $product->variations, 
+            'excludes' => $product->excludes->select('id', 'name'),
+            'tax_obj' => $product->toArray(request())['tax_obj'],
+            'favourite' => $product->favourite,
+        ]);
+    }
+
+    public function payment_methods(Request $request){
+        $payment_methods = $this->payment_method
+        ->select('id', 'name', 'description', 'logo')
+        ->orderBy('order')
+        ->get();
+        $schedules = $this->schedule_list
+        ->select('id', 'name')
+        ->get();
+
+        return response()->json([
+            'payment_methods' => $payment_methods,
+            'schedules' => $schedules,
+        ]);
+    }
+    public function categories(Request $request){
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $categories = $this->categories
+        ->orderBy('priority')
+        ->where('status', 1)
+        ->with(['sub_categories' => function($query) use($locale, $category_off){
+            $query->where('status', 1)
+            ->whereNotIn('id', $category_off->toArray())
+            ->withLocale($locale);
+        }])
+        ->withLocale($locale) 
+        ->where('category_id', null)
+        ->get()
+        ->filter(function($item) use($category_off){
+            return !$category_off->contains($item->id);
+        })
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
+                'image_link' => $item->image_link,
+                'banner_link' => $item->banner_link,
+                'sub_categories' => $item->sub_categories
+                ->map(function($element){
+                    return [
+                        'id' => $element->id,
+                        'name' => $element->translations->where('key', $element->name)->first()?->value ?? $element->name,
+                        'image_link' => $element->image_link,
+                        'banner_link' => $element->banner_link,
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json([
+            'categories' => $categories
+        ]);
+    }
+
+    public function products_in_category(Request $request, $id){
+        
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+    
+        if ($request->user_id) {
+            $user_id = $request->user_id;
+            $products = $this->product
+            ->with([ 
+                'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+            ])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'offline')
+            ->where('status', 1)
+            ->where(function($query) use($id){
+                $query->where('sub_category_id', $id)
+                ->orWhere('category_id', $id);
+            })
+            // ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('products.id', $product_off)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) {
+                $product->favourites = $product->favourite_product->isNotEmpty();
+                if ($product->taxes->setting == 'included') {
+                    $price = empty($product->tax) ? $product->price: 
+                    ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
+                    : $product->price + $product->tax->amount * $product->price / 100);
+                    
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $price - $product->discount->amount * $price / 100;
+                            $discount_val = $product->discount->amount * $price / 100;
+                        } else {
+                            $discount = $price - $product->discount->amount;
+                            $discount_val = $product->discount->amount;
+                        }
+                    }
+                    else{
+                        $discount = $price;
+                        $discount_val = 0;
+                    }
+                    $tax = $price;
+                    return [
+                        'id' => $product->id,
+                        'taxes' => $product->taxes->setting,
+                        'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                        'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                        'price' => $price,
+                        'price_after_discount' => $discount,
+                        'price_after_tax' => $tax,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        'recommended' => $product->recommended,
+                        'image_link' => $product->image_link,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
+                        'favourite' => is_bool($product->favourites) ? $product->favourites : false,
+                    ];
+                } 
+                else {
+                    $price = $product->price;
+                    
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $tax = $price + $product->tax->amount * $price / 100;
+                        } else {
+                            $tax = $price + $product->tax->amount;
+                        }
+                    }
+                    else{
+                        $tax = $price;
+                    }
+
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $price - $product->discount->amount * $price / 100;
+                        } else {
+                            $discount = $price - $product->discount->amount;
+                        }
+                    }
+                    else{
+                        $discount = $price;
+                    }
+                    return [
+                        'id' => $product->id,
+                        'taxes' => $product->taxes->setting,
+                        'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                        'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                        'price' => $price,
+                        'price_after_discount' => $discount,
+                        'price_after_tax' => $tax,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        'recommended' => $product->recommended,
+                        'image_link' => $product->image_link,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
+                        'favourite' => is_bool($product->favourites) ? $product->favourites : false,
+                    ];
+                } 
+            });
+
+        }
+        else{
+            $products = $this->product 
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'offline')
+            ->where('status', 1) 
+            ->where(function($query) use($id){
+                $query->where('sub_category_id', $id)
+                ->orWhere('category_id', $id);
+            })
+            // ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('products.id', $product_off)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) {
+                $product->favourite = $product->favourite_product->isNotEmpty();
+                if ($product->taxes->setting == 'included') {
+                    $price = empty($product->tax) ? $product->price: 
+                    ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
+                    : $product->price + $product->tax->amount * $product->price / 100);
+                    
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $price - $product->discount->amount * $price / 100;
+                            $discount_val = $product->discount->amount * $price / 100;
+                        } else {
+                            $discount = $price - $product->discount->amount;
+                            $discount_val = $product->discount->amount;
+                        }
+                    }
+                    else{
+                        $discount = $price;
+                        $discount_val = 0;
+                    }
+                    $tax = $price;
+                    return [
+                        'id' => $product->id,
+                        'taxes' => $product->taxes->setting,
+                        'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                        'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                        'price' => $price,
+                        'price_after_discount' => $discount,
+                        'price_after_tax' => $tax,
+                        'recommended' => $product->recommended,
+                        'image_link' => $product->image_link,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
+                    ];
+                } 
+                else {
+                    $price = $product->price;
+                    
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $tax = $price + $product->tax->amount * $price / 100;
+                        } else {
+                            $tax = $price + $product->tax->amount;
+                        }
+                    }
+                    else{
+                        $tax = $price;
+                    }
+
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $price - $product->discount->amount * $price / 100;
+                        } else {
+                            $discount = $price - $product->discount->amount;
+                        }
+                    }
+                    else{
+                        $discount = $price;
+                    }
+                    return [
+                        'id' => $product->id,
+                        'taxes' => $product->taxes->setting,
+                        'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                        'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                        'price' => $price,
+                        'price_after_discount' => $discount,
+                        'price_after_tax' => $tax,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        'recommended' => $product->recommended,
+                        'image_link' => $product->image_link,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
+                    ];
+                } 
+            });
+        }
+
+        return response()->json([
+            'products' => $products,
+            'tax' => $tax,
+        ]);
+    }
+
+    public function recommandation_product(Request $request){
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+        $products = $this->product 
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->where('recommended', 1)
+        ->where('status', 1) 
+        // ->whereNotIn('sub_category_id', $category_off)
+        ->where(function($query) use($category_off){
+            $query->whereNotIn('sub_category_id', $category_off)
+            ->orWhereNotIn('category_id', $category_off);
+        })
+        ->whereNotIn('products.id', $product_off)
+        ->get()
+        ->map(function ($product) use ($option_off, $branch_id) {
+            $product->favourite = $product->favourite_product->isNotEmpty();
+            if ($product->taxes->setting == 'included') {
+                $price = empty($product->tax) ? $product->price: 
+                ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
+                : $product->price + $product->tax->amount * $product->price / 100);
+                
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                        $discount_val = $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                        $discount_val = $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                    $discount_val = 0;
+                }
+                $tax = $price;
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax, 
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            } 
+            else {
+                $price = $product->price;
+                
+                if (!empty($product->tax)) {
+                    if ($product->tax->type == 'precentage') {
+                        $tax = $price + $product->tax->amount * $price / 100;
+                    } else {
+                        $tax = $price + $product->tax->amount;
+                    }
+                }
+                else{
+                    $tax = $price;
+                }
+
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                }
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax,
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            }
+        });
+
+        return response()->json([
+            'recommended_products' => $products
+        ]);
+    }
+
+    public function discount_product(Request $request){
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+        $products = $this->product 
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->whereHas('discount')
+        ->where('status', 1) 
+        // ->whereNotIn('sub_category_id', $category_off)
+        ->where(function($query) use($category_off){
+            $query->whereNotIn('sub_category_id', $category_off)
+            ->orWhereNotIn('category_id', $category_off);
+        })
+        ->whereNotIn('products.id', $product_off)
+        ->get()
+        ->map(function ($product) use ($option_off, $branch_id) {
+            $product->favourite = $product->favourite_product->isNotEmpty();
+            if ($product->taxes->setting == 'included') {
+                $price = empty($product->tax) ? $product->price: 
+                ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
+                : $product->price + $product->tax->amount * $product->price / 100);
+                
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                        $discount_val = $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                        $discount_val = $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                    $discount_val = 0;
+                }
+                $tax = $price;
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax, 
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            } 
+            else {
+                $price = $product->price;
+                
+                if (!empty($product->tax)) {
+                    if ($product->tax->type == 'precentage') {
+                        $tax = $price + $product->tax->amount * $price / 100;
+                    } else {
+                        $tax = $price + $product->tax->amount;
+                    }
+                }
+                else{
+                    $tax = $price;
+                }
+
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                }
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax,
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            }
+        });
+
+        return response()->json([
+            'discount_products' => $products
         ]);
     }
 

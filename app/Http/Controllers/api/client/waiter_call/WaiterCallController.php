@@ -11,12 +11,15 @@ use App\Models\NewNotification;
 use App\Models\DeviceToken;
 use App\Models\CafeTable;
 use App\Models\CallWaiter;
+use App\Models\CashierMan;
+use App\Models\CaptainOrder;
 
 class WaiterCallController extends Controller
 {
     public function __construct(
     private NewNotification $notification, private DeviceToken $device_token,
-    private CallWaiter $call_waiter, private CafeTable $cafe_table){}
+    private CallWaiter $call_waiter, private CafeTable $cafe_table,
+    private CashierMan $cashier_man, private CaptainOrder $captain_order){}
     use Notifications;
 
     public function call_waiter(Request $request){
@@ -51,6 +54,35 @@ class WaiterCallController extends Controller
         
         return response()->json([
             'success' => 'You call waiter success'
+        ]);
+    }
+
+    public function call_payment(Request $request){
+        $validator = Validator::make($request->all(), [
+            'table_id' => ['required', 'exists:cafe_tables,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $users_tokens1 = $this->cashier_man
+        ->pluck('fcm_token');
+        $users_tokens2 = $this->captain_order
+        ->pluck('fcm_token');
+        $users_tokens = $users_tokens1->merge($users_tokens2)
+        ->filter()->toArray();
+        $cafe_table = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->with('location:id,name')
+        ->first();
+        $body = 'Table ' . $cafe_table->table_number . 
+            ' at location ' . $cafe_table?->location?->name . ' Want To Pay';
+  
+        $this->sendNotificationToMany($users_tokens, $cafe_table->table_number, $body);
+        
+        return response()->json([
+            'success' => 'You call Pay success'
         ]);
     }
 }

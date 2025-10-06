@@ -17,6 +17,8 @@ class CafeTable extends Model
         'current_status',
         'occupied',
         'status',
+        'is_merge',
+        'main_table_id',
     ];
     protected $appends = ['qr_code_link'];
 
@@ -32,5 +34,13 @@ class CafeTable extends Model
 
     public function location(){
         return $this->belongsTo(CafeLocation::class, 'location_id');
+    }
+
+    public function main_table(){
+        return $this->belongsTo(CafeTable::class, 'main_table_id');
+    }
+
+    public function sub_table(){
+        return $this->hasMany(CafeTable::class, 'main_table_id');
     }
 }

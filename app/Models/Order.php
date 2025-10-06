@@ -58,6 +58,7 @@ class Order extends Model
         'source',
         'take_away_status',
         'delivery_status',
+        'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
 

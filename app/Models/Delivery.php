@@ -39,7 +39,9 @@ class Delivery extends Authenticatable
     }
 
     public function getIdentityImageLinkAttribute(){
-        return url('storage/' . $this->attributes['identity_image']);
+        if(isset( $this->attributes['identity_image'])){
+            return url('storage/' . $this->attributes['identity_image']);
+        }
     }
 
     public function branch(){
@@ -47,7 +49,9 @@ class Delivery extends Authenticatable
     }
 
     public function getImageLinkAttribute(){
-        return url('storage/' . $this->attributes['image']);
+        if(isset( $this->attributes['image'])){
+            return url('storage/' . $this->attributes['image']);
+        }
     }
 
     /**

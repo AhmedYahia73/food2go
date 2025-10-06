@@ -109,6 +109,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->orderByDesc('id')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $delivery_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -120,6 +121,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'delivery')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $take_away_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -131,6 +133,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'take_away')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $dine_in_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -142,6 +145,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'dine_in')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $car_slow_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
@@ -153,6 +157,7 @@ class CashierMakeOrderController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'car_slow')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
         $orders = [
             'delivery' => $delivery_order,
@@ -171,6 +176,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_type', 'delivery')
         ->whereNull('delivery_id')
         ->whereBetween('created_at', [$start, $end])
+        ->where('order_active', 1)
         ->get();
 
         return response()->json([
@@ -300,7 +306,9 @@ class CashierMakeOrderController extends Controller
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
-        $this->preparing_delivery($request, $order['order']->id);
+        if(!$request->order_pending){
+            $this->preparing_delivery($request, $order['order']->id);
+        }
         return response()->json([
             'success' => $order['order'], 
         ]);
@@ -438,7 +446,9 @@ class CashierMakeOrderController extends Controller
             'take_away_status' => 'preparing',
         ]); 
         $order = $this->take_away_make_order($request);
-        $this->preparing_takeaway($request, $order['order']->id);
+        if(!$request->order_pending){
+            $this->preparing_takeaway($request, $order['order']->id);
+        }
 
         return response()->json([
             'success' => $order['order'], 
@@ -486,8 +496,13 @@ class CashierMakeOrderController extends Controller
 
     public function dine_in_table_carts(Request $request, $id){
         // /cashier/dine_in_table_carts/{id}
+        $tables_ids = $this->cafe_table
+        ->where('id', $id)
+        ->orWhere('main_table_id', $id)
+        ->pluck('id')
+        ->toArray();
         $order_cart = $this->order_cart
-        ->where('table_id', $id)
+        ->whereIn('table_id', $tables_ids)
         ->get();
         $carts = [];
         foreach ($order_cart as $key => $item) {
@@ -502,8 +517,13 @@ class CashierMakeOrderController extends Controller
 
     public function dine_in_table_order(Request $request, $id){
         // /cashier/dine_in_table_order/{id}
+        $tables_ids = $this->cafe_table
+        ->where('id', $id)
+        ->orWhere('main_table_id', $id)
+        ->pluck('id')
+        ->toArray();
         $order_cart = $this->order_cart
-        ->where('table_id', $id)
+        ->whereIn('table_id', $tables_ids)
         ->get();
         $orders = collect([]);
         foreach ($order_cart as $key => $item) {
@@ -588,8 +608,13 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'status' => 1,
         ]); 
+        $tables_ids = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->orWhere('main_table_id', $request->table_id)
+        ->pluck('id')
+        ->toArray();
         $order_carts = $this->order_cart
-        ->where('table_id', $request->table_id)
+        ->whereIn('table_id', $tables_ids)
         ->get();
         $orders = collect([]);
         $product = [];
@@ -627,13 +652,14 @@ class CashierMakeOrderController extends Controller
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']), 0);
+ 
         $this->cafe_table
-        ->where('id', $request->table_id)
+        ->whereIn('id', $tables_ids)
         ->update([
             'current_status' => 'not_available_but_checkout'
         ]);
         $order_cart = $this->order_cart
-        ->where('table_id', $request->table_id)
+        ->whereIn('table_id', $tables_ids)
         ->delete();
 
         return response()->json([
@@ -718,8 +744,13 @@ class CashierMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $this->cafe_table
+        $tables_ids = $this->cafe_table
         ->where('id', $id)
+        ->orWhere('main_table_id', $id)
+        ->pluck('id')
+        ->toArray();
+        $this->cafe_table
+        ->whereIn('id', $tables_ids)
         ->update([
             'current_status' => $request->current_status
         ]);
@@ -857,9 +888,15 @@ class CashierMakeOrderController extends Controller
         ->update([
             'table_id' => $request->table_id
         ]);
+        $cafe_table = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->update([
+            'current_status' => 'not_available_with_order'
+        ]);
 
         return response()->json([
-            'success' => 'you transfer your table success'
+            'success' => 'you transfer your table success',
+            'status' => 'not_available_with_order',
         ]);
     } 
 

@@ -60,7 +60,10 @@ trait POS
         $orderRequest['order_status'] = 'pending';
         if ($request->table_id) {
             $orderRequest['table_id'] = $request->table_id;
-        } 
+        }
+        if($request->order_pending){
+            $orderRequest['order_active'] = 0;
+        }
         
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
        // $points = 0;
@@ -434,6 +437,9 @@ trait POS
         // if ($request->table_id) {
         //     $orderRequest['table_id'] = $request->table_id;
         // } 
+        if($request->order_pending){
+            $orderRequest['order_active'] = 0;
+        }
         
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
        // $points = 0;
