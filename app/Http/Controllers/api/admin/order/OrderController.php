@@ -29,7 +29,7 @@ class OrderController extends Controller
         // keys => branch_id
         $orders = $this->orders
         ->where('id', $id)
-        -update([
+        ->update([
             'branch_id' => $request->branch_id,
             'operation_status' => 'pending',
             'admin_id' => null,
@@ -958,7 +958,7 @@ class OrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
         'admin_cancel_reason', 'sechedule_slot_id')
-        ->with(['user:id,f_name,l_name,phone,phone_2,image', 
+        ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
         'branch:id,name', 'delivery', 'payment_method:id,name,logo',
          'address.zone', 'admin:id,name,email,phone,image', 
         'schedule'])
@@ -977,20 +977,22 @@ class OrderController extends Controller
         }
         $order->order_details = $order_details;
         try {
-            $order->user->count_orders = $order->user->orders->count();
+            $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
         } 
         catch (\Throwable $th) {
             $order->user = collect([]);
             $order->user->count_orders = 0;
         }
-        
         if (!empty($order->branch)) {
-            $order->branch->count_orders = $order->branch->orders->count();
+            $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
         }
         if (!empty($order->delivery_id)) {
-            $order->delivery->count_orders = count($order->delivery->orders_items);
+            $order->delivery->count_orders = $this->orders
+            ->where('delivery_id', $order->delivery_id)
+            ->count();
         }
         $deliveries = $this->deliveries
+        ->select('id', 'f_name', 'l_name')
         ->get();
         $order_status = ['pending', 'processing', 'out_for_delivery',
         'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
@@ -1043,17 +1045,19 @@ class OrderController extends Controller
         // }
         // $preparing_time = json_decode($preparing_time->setting);
         $log_order = $this->log_order
-        ->with('admin')
+        ->with(['admin:id,name'])
         ->where('order_id', $id)
         ->get();
         $branches = $this->branches
+        ->select('name', 'id')
         ->where('status', 1)
         ->get();
-        if($order?->user?->orders){
-            unset($order->user->orders);
-        }
-        if($order?->branch?->orders){
-            unset($order->branch->orders);
+        try {
+            if($order?->user?->orders){
+                unset($order->user->orders);
+            } 
+        } catch (\Throwable $th) {
+            //throw $th;
         }
 
         return response()->json([
