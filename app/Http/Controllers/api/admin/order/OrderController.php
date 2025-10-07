@@ -625,7 +625,7 @@ class OrderController extends Controller
     public function order_details(Request $request){
         // https://bcknd.food2go.online/admin/order 
         $validator = Validator::make($request->all(), [
-            'order_status' => 'required|in:delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
+            'order_status' => 'required|in:pending,delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
