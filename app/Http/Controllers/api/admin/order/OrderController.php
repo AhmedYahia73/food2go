@@ -622,6 +622,263 @@ class OrderController extends Controller
         ]);
     }
 
+    public function order_details(Request $request){
+        // https://bcknd.food2go.online/admin/order 
+        $validator = Validator::make($request->all(), [
+            'order_status' => 'required|in:delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
+        $start = $start->subDay();
+        $orders = $this->orders
+        ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
+        ,'order_status',
+        'delivery_id', 'address_id', 'source',
+        'payment_method_id', 
+        'status', 'points', 'rejected_reason', 'transaction_id')
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->orderByDesc('id')
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+			$query->select('id', 'zone_id')
+			->with('zone:id,zone');
+		}, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery'])
+        ->where('order_status', $request->order_status)
+        ->get()
+		->map(function($item){
+			return [ 
+				'id' => $item->id,
+				'order_number' => $item->order_number,
+				'created_at' => $item->created_at,
+				'amount' => $item->amount,
+				'operation_status' => $item->operation_status,
+				'order_status' => $item->order_status,
+				'source' => $item->source,
+				'status' => $item->status,
+				'points' => $item->points, 
+				'rejected_reason' => $item->rejected_reason,
+				'transaction_id' => $item->transaction_id,
+				'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+				'branch' => ['name' => $item?->branch?->name, ],
+				'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+				'admin' => ['name' => $item?->admin?->name,],
+				'payment_method' => ['name' => $item?->payment_method?->name],
+				'schedule' => ['name' => $item?->schedule?->name],
+				'delivery' => ['name' => $item?->delivery?->name], 
+			];
+		});
+
+        return response()->json([
+            'orders' => $orders,
+        ]);
+    }
+
+    public function lists(Request $request){
+        $deliveries = $this->deliveries
+        ->select('id', 'f_name', 'l_name', 'phone')
+        ->get();
+        $branches = $this->branches
+        ->select('id', 'name')
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'deliveries' => $deliveries,
+            'branches' => $branches,
+        ]);
+    }
+
+    public function orders_count(Request $request){
+    //     // https://bcknd.food2go.online/admin/order
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // } format('Y-m-d H:i:s')
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
+        $start = $start->subDay();
+        $orders = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+		->count();
+        $pending = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'pending')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+		->count();
+        $confirmed = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'confirmed')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+		->count();
+        $processing = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'processing')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+		->count();
+        $out_for_delivery = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'out_for_delivery')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+		->count();
+        $delivered = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'delivered')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+		->count();
+        $returned = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'returned')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+		->count();
+        $faild_to_deliver = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'faild_to_deliver')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+		->count();
+        $canceled = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'canceled')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+		->count();
+        $scheduled = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'scheduled')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+		->count();
+        $refund = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where('order_status', 'refund')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+		->count(); 
+
+        return response()->json([
+            'orders' => $orders,
+            'pending' => $pending,
+            'confirmed' => $confirmed,
+            'processing' => $processing,
+            'out_for_delivery' => $out_for_delivery,
+            'delivered' => $delivered,
+            'returned' => $returned,
+            'faild_to_deliver' => $faild_to_deliver,
+            'refund' => $refund,
+            'canceled' => $canceled,
+            'scheduled' => $scheduled, 
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
+        ]);
+    }
+
     public function count_orders(){
         // https://bcknd.food2go.online/admin/order/count
         $orders = $this->orders 
