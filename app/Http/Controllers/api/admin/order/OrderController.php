@@ -1240,7 +1240,6 @@ class OrderController extends Controller
             $order->user = collect([]);
             $order->user->count_orders = 0;
         }
-        
         if (!empty($order->branch)) {
             $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
         }
@@ -1311,11 +1310,13 @@ class OrderController extends Controller
         ->where('status', 1)
         ->get();
         try {
-            if($order?->user?->orders){
-                unset($order->user->orders);
-            }
-            if($order?->branch?->orders){
-                unset($order->branch->orders);
+            if($order?->user?->orders){ 
+                unset($order->user);
+				$order->user;
+            } 
+			if($order?->branch){
+                unset($order->branch);
+				$order->branch;
             }
         } catch (\Throwable $th) {
             //throw $th;
