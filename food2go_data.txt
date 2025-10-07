@@ -1,0 +1,115 @@
+
+ 
+
+INSERT INTO `user_positions` (`id`, `name`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Super Admin', 1, '2024-11-28 08:51:26', '2024-11-28 08:52:53'),
+(4, 'sdfkj', 1, '2025-01-04 16:00:32', '2025-01-04 16:00:50');
+
+
+
+INSERT INTO `user_roles` (`id`, `user_position_id`, `role`, `action`, `created_at`, `updated_at`) VALUES
+(2, 1, 'Admin', 'all', '2024-11-28 08:21:55', '2024-11-28 08:21:55'),
+(3, 1, 'Addons', 'all', '2024-11-28 08:21:55', '2024-11-28 08:21:55'),
+(4, 1, 'AdminRoles', 'all', '2024-11-28 08:24:20', '2024-11-28 08:24:20'),
+(5, 1, 'Banner', 'all', '2024-11-28 08:24:20', '2024-11-28 08:24:20'),
+(12, 1, 'Branch', 'all', NULL, NULL),
+(13, 1, 'Category', 'all', NULL, NULL),
+(14, 1, 'Coupon', 'all', NULL, NULL),
+(15, 1, 'Customer', 'all', NULL, NULL),
+(16, 1, 'Deal', 'all', NULL, NULL),
+(17, 1, 'DealOrder', 'all', NULL, NULL),
+(18, 1, 'Delivery', 'all', NULL, NULL),
+(19, 1, 'OfferOrder', 'all', NULL, NULL),
+(20, 1, 'Order', 'all', NULL, NULL),
+(21, 1, 'Payments', 'all', NULL, NULL),
+(22, 1, 'PointOffers', 'all', NULL, NULL),
+(23, 1, 'Product', 'all', NULL, NULL),
+(24, 1, 'Settings', 'all', NULL, NULL),
+(25, 1, 'Home', 'all', NULL, NULL),
+(32, 1, 'Cashier', 'all', NULL, NULL),
+(33, 1, 'CashierMan', 'all', NULL, NULL),
+(34, 1, 'Kitchen', 'all', NULL, NULL),
+(35, 1, 'Captain', 'all', NULL, NULL),
+(36, 1, 'Translation', 'all', NULL, NULL),
+(37, 1, 'CafeLocation', 'all', NULL, NULL),
+(38, 1, 'CafeTable', 'all', NULL, NULL),
+(39, 1, 'PosCustomer', 'all', NULL, NULL),
+(40, 1, 'PosAddress', 'all', NULL, NULL),
+(41, 1, 'Extra', 'all', NULL, NULL),
+(42, 1, 'Zone', 'all', NULL, NULL),
+(43, 1, 'City', 'all', NULL, NULL),
+(44, 1, 'Tax', 'all', NULL, NULL),
+(45, 1, 'Discount', 'all', NULL, NULL),
+(46, 1, 'PaymentMethod', 'all', NULL, NULL),
+(47, 1, 'FinancialAccounting', 'all', NULL, NULL),
+(48, 1, 'Menue', 'all', NULL, NULL),
+(49, 1, 'PosReports', 'all', NULL, NULL),
+(50, 1, 'PosOrder', 'all', NULL, NULL),
+(51, 1, 'PosTable', 'all', NULL, NULL),
+(52, 1, 'OrderType', 'all', NULL, NULL),
+(53, 1, 'PaymentMethodAuto', 'all', NULL, NULL),
+(54, 1, 'CompanyInfo', 'all', NULL, NULL),
+(55, 1, 'Maintenance', 'all', NULL, NULL),
+(56, 1, 'MainBranch', 'all', NULL, NULL),
+(57, 1, 'TimeSlot', 'all', NULL, NULL),
+(58, 1, 'CustomerLogin', 'all', NULL, NULL),
+(59, 1, 'OrderSettings', 'all', NULL, NULL),
+(60, 1, 'TimeCancel', 'all', NULL, NULL),
+(61, 1, 'ResturantTime', 'all', NULL, NULL),
+(62, 1, 'TaxType', 'all', NULL, NULL),
+(63, 1, 'DeliveryTime', 'all', NULL, NULL),
+(64, 1, 'PreparingTime', 'all', NULL, NULL),
+(65, 1, 'OrderDelay', 'all', NULL, NULL),
+(66, 1, 'NotificationSound', 'all', NULL, NULL);
+
+
+
+INSERT INTO `admins` (`id`, `name`, `email`, `phone`, `image`, `password`, `user_position_id`, `status`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`) VALUES (NULL, 'admin', 'admin@gmail.com', '123', NULL, '$2y$12$gseo6HdE3gDOo1SJKETwRekRy6v037BoGCsEApK4iX7bvggNg.2eK', '1', '1', NULL, NULL, NULL, NULL);
+
+
+
+INSERT INTO `currencies` (`id`, `currancy_name`, `currancy_symbol`, `currancy_code`, `created_at`, `updated_at`) VALUES
+(1, 'Dollar', '$', '123', NULL, NULL),
+(2, 'EGP', 'EGP', '1234', NULL, NULL);
+
+
+
+INSERT INTO `company_infos` (`id`, `name`, `phone`, `email`, `address`, `logo`, `fav_icon`, `time_zone`, `time_format`, `currency_id`, `currency_position`, `copy_right`, `created_at`, `updated_at`, `country`, `phone2`, `watts`, `android_link`, `ios_link`, `order_online`, `android_switch`, `ios_switch`) VALUES
+(1, 'food2go', '01234567890', 'food2go@gmail.com', 'smouha,cotton building', 'https://bcknd.food2go.online/storage/https://bcknd.food2go.online/storage/https://bcknd.food2go.online/storage/https://bcknd.food2go.online/storage/WhatsApp Image 2025-01-29 at 11.29.49 AM.jpeg', NULL, 'Africa/Cairo', '24hours', 2, 'right', 'foos2go', NULL, '2025-01-30 11:02:20', 'Egypt', NULL, NULL, NULL, NULL, 0, 1, 1);
+
+
+
+INSERT INTO `maintenances` (`id`, `all`, `branch`, `customer`, `web`, `delivery`, `day`, `week`, `until_change`, `customize`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
+(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, '2002-05-24', '2888-07-06', 0, NULL, '2025-01-30 12:16:16');
+
+
+
+INSERT INTO `payment_methods` (`id`, `name`, `description`, `logo`, `status`, `created_at`, `updated_at`, `type`, `order`) VALUES
+(1, 'Visa Master Card', NULL, 'admin/settings/payment_methods/GjAdRpHLCAVRxSihwEuF59mFbDZMkDZpu1P8pzi5.png', 1, NULL, '2024-12-15 09:43:57', 'automatic', 2),
+(2, 'cash on delivery', 'offline', 'admin/settings/payment_methods/VtUBSBCH5iWnHxHdn9ioAjVhqAUvkeSu39pPvy9J.png', 1, '2024-12-05 10:53:23', '2024-12-17 12:09:05', 'manuel', 1),
+(11, 'vodafone cash', 'online', 'admin/settings/payment_methods/p5wn3o2FLaxPVf3KIyjkbRP3ck1mr170tCrFydpL.jpg', 1, '2024-12-05 10:58:03', '2024-12-17 09:52:26', 'manuel', 2),
+(12, 'fawry', 'online', 'admin/settings/payment_methods/1sAim8z5qM8Aw7rCfyxuXeFt5RR1CdedU1cF7q7T.png', 1, '2024-12-05 11:00:30', '2024-12-17 09:53:57', 'manuel', 2);
+
+
+
+INSERT INTO `payment_method_autos` (`id`, `title`, `type`, `callback`, `api_key`, `iframe_id`, `integration_id`, `Hmac`, `payment_method_id`, `created_at`, `updated_at`) VALUES
+(2, 'Title', 'test', 'callback', 'ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBd09EVXhOU3dpYm1GdFpTSTZJakUzTXpJMU5ERTRNakF1TnpFNU56Z3hJbjAucGpwRkc1cy1Ic1N5Q3B2WWVOWWpnVkI4blBUcHlLZzVpNTd3R2hiNWpQR21HY2g5WkJFNzFMeDU3MkEzVWFoUlFHX0lmbUtha2puRThJdV91RDR4UlE=', '883811', '4885878', '7A34C1195E7AAA0D6B04BF67B9A608F7', 1, '2024-12-12 12:44:24', '2024-12-15 09:46:47');
+
+
+
+INSERT INTO `settings` (`id`, `name`, `setting`, `created_at`, `updated_at`) VALUES
+(1, 'time_cancel', '00:15:00', '2024-10-31 10:36:29', '2024-12-25 12:56:21'),
+(3, 'resturant_time', '{\"from\":\"08:00\",\"to\":\"02:00\"}', NULL, '2024-12-25 12:56:33'),
+(4, 'tax', 'excluded', '2024-11-11 12:47:08', '2025-01-21 10:54:32'),
+(5, 'delivery_time', '00:35:00', '2024-11-20 12:27:49', '2024-12-25 12:56:13'),
+(6, 'preparing_time', '{\"days\":0,\"hours\":0,\"minutes\":30,\"seconds\":0}', '2024-12-02 08:25:37', '2024-12-02 08:25:37'),
+(7, 'notification_sound', 'admin/settings/notificatins/sound/LejZq1czojHUKDklYVQS0ORmrkRr9qKt1LrdQy0E.mp3', '2024-12-10 14:28:34', '2024-12-11 12:55:08'),
+(8, 'order_type', '[{\"id\":1,\"type\":\"take_away\",\"status\":1},{\"id\":2,\"type\":\"dine_in\",\"status\":1},{\"id\":3,\"type\":\"delivery\",\"status\":1}]', '2024-12-11 11:39:48', '2025-01-23 09:08:13'),
+(9, 'time_slot', '{\"daily\":[{\"from\":\"04:00\",\"to\":\"08:00\"}],\"custom\":[\"Wednesday\"]}', '2024-12-26 14:38:23', '2025-01-30 09:54:10'),
+(10, 'customer_login', '{\"login\":\"otp\",\"verification\":\"email\"}', '2024-12-26 14:57:47', '2024-12-28 09:45:21'),
+(11, 'order_setting', '{\"min_order\":\"4\"}', '2024-12-28 10:08:28', '2024-12-28 10:46:41');
+
+
+INSERT INTO `translations` (`id`, `name`, `created_at`, `updated_at`, `status`) VALUES
+(1, 'en', NULL, '2025-01-27 14:19:30', 1),
+(11, 'العربيه', '2025-01-23 15:36:18', '2025-01-23 15:37:29', 1);

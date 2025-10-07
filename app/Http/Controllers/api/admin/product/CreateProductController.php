@@ -128,7 +128,7 @@ class CreateProductController extends Controller
                     }
                 }
             }// add extra
-            if ($request->extra) {
+            if (is_array($request->extra)) {
                 $extra_group = $this->extra_group
                 ->whereIn('id', $request->extra)
                 ->with('translations')
@@ -203,7 +203,7 @@ class CreateProductController extends Controller
                                 ]);
                             }
                         }
-                        if (isset($element['extra']) && $element['extra']) {
+                        if (isset($element['extra']) && is_array($element['extra'])) {
                             $extra_group = $this->extra_group
                             ->whereIn('id', $element['extra'])
                             ->with('translations')
@@ -358,7 +358,7 @@ class CreateProductController extends Controller
         $this->extra
         ->where('product_id', $id)
         ->delete(); // delete old extra
-        if ($request->extra) {
+        if (is_array($request->extra)) {
             $extra_group = $this->extra_group
             ->whereIn('id', $request->extra)
             ->with('translations')
@@ -443,7 +443,7 @@ class CreateProductController extends Controller
                                 ]);
                             }
                         }
-                        if (isset($element['extra']) && $element['extra']) {
+                        if (isset($element['extra']) && is_array($element['extra'])) {
                             $extra_group = $this->extra_group
                             ->whereIn('id', $element['extra'])
                             ->with('translations')
