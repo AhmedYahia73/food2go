@@ -47,4 +47,8 @@ class OrderDetail extends Model
     public function option(){
         return $this->belongsTo(OptionProduct::class, 'option_id');
     }
+
+    public function order(){
+        return $this->belongsTo(Order::class, 'order_id');
+    }
 }

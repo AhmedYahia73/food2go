@@ -135,6 +135,13 @@ trait POS
                 $order_details[$key]['product'] = [];
                 $order_details[$key]['variations'] = [];
 
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]);
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
                 ->withLocale($locale)
@@ -320,6 +327,13 @@ trait POS
                 $order_details[$key]['product'] = [];
                 $order_details[$key]['variations'] = [];
 
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]);
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
                 ->withLocale($locale)
@@ -513,6 +527,13 @@ trait POS
                 $order_details[$key]['product'] = [];
                 $order_details[$key]['variations'] = [];
 
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]);
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
                 ->withLocale($locale)
@@ -701,6 +722,13 @@ trait POS
                 $order_details[$key]['product'] = [];
                 $order_details[$key]['variations'] = [];
 
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]);
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
                 ->withLocale($locale)
