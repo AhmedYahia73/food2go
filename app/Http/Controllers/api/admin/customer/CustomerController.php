@@ -92,6 +92,7 @@ class CustomerController extends Controller
         ->whereHas("order", function($query) use($id){
             $query->where("orders.user_id", $id);
         })
+        ->whereHas("product")
         ->groupBy('product_id')
         ->get()
         ->sortByDesc("product_count")
@@ -185,9 +186,11 @@ class CustomerController extends Controller
         $greatest_product = $this->order_details
         ->selectRaw("product_id, SUM(count) as product_count")
         ->whereIn('order_id', $orders_ids)
-        ->whereHas("order", function($query) use($id){
-            $query->where("orders.user_id", $id);
+        ->whereHas("order", function($query) use($id, $start, $end){
+            $query->where("orders.user_id", $id)
+        	->whereBetween('orders.created_at', [$start, $end]);
         })
+        ->whereHas("product")
         ->whereNull('exclude_id')
         ->whereNull('addon_id')
         ->whereNull('offer_id')
@@ -200,9 +203,8 @@ class CustomerController extends Controller
         ->get()
         ->sortByDesc("product_count")
         ->first();
-
         if ($greatest_product) {
-            $greatest_product->load('product');
+            $greatest_product->load('product'); 
             $greatest_product = $greatest_product->product;
             if($greatest_product){
                 $greatest_product = [
