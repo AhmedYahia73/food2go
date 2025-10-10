@@ -26,5 +26,9 @@ class TableOrderController extends Controller
                 "branch" => $item?->branch?->name,
             ];
         });
+
+        return response()->json([
+            "tables" => $tables
+        ]);
     }
 }
