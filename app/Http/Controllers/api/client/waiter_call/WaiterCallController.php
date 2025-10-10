@@ -12,14 +12,16 @@ use App\Models\DeviceToken;
 use App\Models\CafeTable;
 use App\Models\CallWaiter;
 use App\Models\CashierMan;
-use App\Models\CaptainOrder;
+use App\Models\CaptainOrder; 
+use App\Models\Waiter; 
 
 class WaiterCallController extends Controller
 {
     public function __construct(
     private NewNotification $notification, private DeviceToken $device_token,
     private CallWaiter $call_waiter, private CafeTable $cafe_table,
-    private CashierMan $cashier_man, private CaptainOrder $captain_order){}
+    private CashierMan $cashier_man, private CaptainOrder $captain_order,
+    private Waiter $waiter){}
     use Notifications;
 
     public function call_waiter(Request $request){
@@ -46,9 +48,14 @@ class WaiterCallController extends Controller
             'title' => $cafe_table->table_number,
             'notification' => $body, 
         ]);
-        $device_token = $this->device_token
+        // $device_token = $this->device_token
+        // ->get()
+        // ?->pluck('token')
+        // ?->toArray();
+        $device_token = $this->waiter
+        ->where('branch_id', $cafe_table->branch_id)
         ->get()
-        ?->pluck('token')
+        ?->pluck("fcm_token")
         ?->toArray();
         $this->sendNotificationToMany($device_token, $cafe_table->table_number, $body);
         
@@ -70,7 +77,11 @@ class WaiterCallController extends Controller
         ->pluck('fcm_token');
         $users_tokens2 = $this->captain_order
         ->pluck('fcm_token');
-        $users_tokens = $users_tokens1->merge($users_tokens2)
+        $device_token = $this->device_token
+        ->whereNotNull("admin_id")
+        ->get()
+        ?->pluck('token');
+        $users_tokens = $users_tokens1->merge($users_tokens2, $device_token)
         ->filter()->toArray();
         $cafe_table = $this->cafe_table
         ->where('id', $request->table_id)

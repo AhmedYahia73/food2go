@@ -21,6 +21,10 @@ use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 // ____________________________________________________
 
+use App\trait\Notifications; 
+
+use App\Models\NewNotification; 
+use App\Models\DeviceToken;
 use App\Models\Order;
 use App\Models\Kitchen;
 use App\Models\KitchenOrder;
@@ -65,7 +69,8 @@ class ClientMakeOrderController extends Controller
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CafeTable $cafe_tables, private FinantiolAcounting $finantiol_accounting,
-    private Category $categories, private Product $product,){}
+    private Category $categories, private Product $product,
+    private DeviceToken $device_token){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -476,7 +481,6 @@ class ClientMakeOrderController extends Controller
         $polygon = $location?->location ?? [];
 
         $userLocation = ['lat' => $request->lat, 'lng' => $request->lng];
-
         if (!$this->isPointInPolygon($userLocation, $polygon)) {
             return response()->json([
                 'errors' => 'You must be at location'
@@ -492,11 +496,19 @@ class ClientMakeOrderController extends Controller
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
-        $this->cafe_table
+        $cafe_table = $this->cafe_table
         ->where('id', $request->table_id)
-        ->update([
+        ->first();
+        $cafe_table->update([
             'current_status' => 'not_available_with_order'
         ]);
+        $device_token = $this->device_token
+        ->get()
+        ?->pluck('token')
+        ?->toArray();
+        $body = 'Table ' . $cafe_table->table_number . 
+        ' at location ' . $cafe_table?->location?->name . ' Make Order';
+        $this->sendNotificationToMany($device_token, $cafe_table->table_number, $body);
         $order_data = $this->order_format($order['payment'], 0);
 
         return response()->json([

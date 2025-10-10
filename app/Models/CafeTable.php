@@ -43,4 +43,8 @@ class CafeTable extends Model
     public function sub_table(){
         return $this->hasMany(CafeTable::class, 'main_table_id');
     }
+
+    public function order_cart(){
+        return $this->hasMany(OrderCart::class, 'table_id');
+    }
 }

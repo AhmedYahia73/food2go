@@ -96,6 +96,9 @@ use App\Http\Controllers\api\admin\purchases\StoreManController;
 
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
+use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
+use App\Http\Controllers\api\admin\table\TableOrderController;
+
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(GroupController::class)
     ->prefix('group')->group(function(){
@@ -107,6 +110,17 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
     
+    Route::controller(TableOrderController::class)
+    ->prefix('table_order')->group(function(){
+        Route::get('/', 'table_orders');
+    });
+    
+    Route::controller(CashierMakeOrderController::class)
+    ->prefix("table_order")->group(function(){
+        Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
+        Route::post('/preparing', 'preparing');
+    });
+
     Route::controller(OrderPrecentageController::class)
     ->prefix('order_precentage')->group(function(){
         Route::get('/', 'view');
