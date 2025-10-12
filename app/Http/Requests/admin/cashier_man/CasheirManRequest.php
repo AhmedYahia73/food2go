@@ -31,6 +31,7 @@ class CasheirManRequest extends FormRequest
             'dine_in' => ['required', 'boolean'],
             'delivery' => ['required', 'boolean'],
             'car_slow' => ['required', 'boolean'],
+            'my_id' => ['required'],
         ];
     }
 
