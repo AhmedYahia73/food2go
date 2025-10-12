@@ -57,7 +57,7 @@ class CashierController extends Controller
         // /admin/cashier/item/{id}
         $cashier = $this->cashier 
         ->where('id', $id)
-        ->with(['branch:id,name,branch_id'])
+        ->with(['branch:id,name'])
         ->first();
 
         return response()->json([

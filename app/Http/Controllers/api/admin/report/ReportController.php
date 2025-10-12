@@ -89,7 +89,6 @@ class ReportController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
 
-        // 🟢 استعلام قاعدة البيانات
         $products = OrderDetail::selectRaw("product_id, SUM(count) as product_count")
             ->whereNull('exclude_id')
             ->whereNull('addon_id')
@@ -138,10 +137,38 @@ class ReportController extends Controller
 
         return response()->json([
             "products" => $products,
-            "period" => [
-                "from" => $start->toDateTimeString(),
-                "to" => $end->toDateTimeString(),
-            ],
+        ]);
+    }
+    public function low_product(Request $request)
+    {
+        $products = OrderDetail::
+        selectRaw("product_id, sum(count) as product_count")
+        ->whereNull('exclude_id')
+        ->whereNull('addon_id')
+        ->whereNull('offer_id')
+        ->whereNull('extra_id')
+        ->whereNull('variation_id')
+        ->whereNull('option_id')
+        ->whereNull('deal_id')
+        ->whereHas("product")
+        ->whereHas("order")
+        ->get()
+        ->sortByAsc("product_count")
+        ->load(["product", "order"])
+        ->map(function($item){
+            return [
+                "id" => $item->product_id,
+                "product_name" => $item?->product?->name,
+                "product_description" => $item?->product?->description,
+                "branch" => $item?->order?->branch?->name,
+                "order_type" => $item?->order?->order_type,
+                "pos" => $item?->order?->pos,
+                "date" => $item?->created_at
+            ];
+        });
+
+        return response()->json([
+            "products" => $products
         ]);
     }
 }
