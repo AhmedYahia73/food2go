@@ -11,6 +11,7 @@ use App\Models\OrderDetail;
 use App\Models\Branch;
 use App\Models\TimeSittings;
 use App\Models\Order;
+use App\Models\Purchase;
 
 class ReportController extends Controller
 {
@@ -456,16 +457,173 @@ class ReportController extends Controller
         }
 
         $pos_order = [
-            "offline_pickup_order" => $offline_pickup_order,
-            "offline_delivery_order" => $offline_delivery_order,
-            "offline_dine_in_order" => $offline_dine_in_order,
-            "total_offline_order" => $offline_pickup_order + $online_delivery_order + $online_dine_in_order,
+            "offline_pickup_order" => $offline_pickup_order->sum("amount"),
+            "offline_delivery_order" => $offline_delivery_order->sum("amount"),
+            "offline_dine_in_order" => $offline_dine_in_order->sum("amount"),
+            "total_offline_order" => $offline_pickup_order->sum("amount") + $online_delivery_order->sum("amount") + $online_dine_in_order->sum("amount"),
         ];
         $online_order = [
-            "online_pickup_order" => $online_pickup_order,
-            "online_delivery_order" => $online_delivery_order,
-            "online_dine_in_order" => $online_dine_in_order,
-            "total_online_order" => $online_pickup_order + $online_delivery_order + $online_dine_in_order,
+            "online_pickup_order" => $online_pickup_order->sum("amount"),
+            "online_delivery_order" => $online_delivery_order->sum("amount"),
+            "online_dine_in_order" => $online_dine_in_order->sum("amount"),
+            "total_online_order" => $online_pickup_order->sum("amount") + $online_delivery_order->sum("amount") + $online_dine_in_order->sum("amount"),
+        ];
+
+        return response()->json([
+            "pos_order" => $pos_order,
+            "online_order" => $online_order,
+        ]);
+    }
+    public function purchase_product(Request $request)
+    { 
+//'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
+        $purchase = Purchase::
+        selectRaw("id ")
+        ->sum("amount");
+
+        return response()->json([
+            "purchase" => $purchase,
+        ]);
+    }
+    public function x(Request $request)
+    { 
+        $validator = Validator::make($request->all(), [
+            'branch_id' => ['exists:branches,id'], 
+            'order_type' => ['in:delivery,take_away,dine_in'], 
+            'from' => ['date'], 
+            'to' => ['date'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $time_sittings = TimeSittings::get();
+
+        if ($time_sittings->count() > 0) {
+            $first = $time_sittings->first();
+            $last = $time_sittings->last();
+
+            $fromDate = $request->from ?? date("Y-m-d");
+            $toDate = $request->to ?? date("Y-m-d");
+
+            $from = $fromDate . ' ' . $first->from;
+            $end = $toDate . ' ' . $last->from;
+
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end)->addHours($last->hours)->addMinutes($last->minutes);
+
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+
+            if ($start >= now()) {
+                $start = $start->subDay();
+            }
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+//'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
+        $online_pickup_order = Order::
+        where("pos", 0)
+        ->where("order_type", "take_away") 
+        ->where("order_status", "delivered");
+        $online_delivery_order = Order::
+        where("pos", 0)
+        ->where("order_type", "delivery")
+        ->where("order_status", "delivered");
+        $online_dine_in_order = Order::
+        where("pos", 0)
+        ->where("order_type", "dine_in")
+        ->where("order_status", "delivered");
+
+      $offline_pickup_order = Order::
+        where("pos", 1)
+        ->where("order_type", "take_away") 
+        ->where("order_status", "delivered");
+        $offline_delivery_order = Order::
+        where("pos", 1)
+        ->where("order_type", "delivery")
+        ->where("order_status", "delivered");
+        $offline_dine_in_order = Order::
+        where("pos", 1)
+        ->where("order_type", "dine_in")
+        ->where("order_status", "delivered");
+        if($request->from){
+            $online_pickup_order = $online_pickup_order
+            ->where("created_at", ">=", $start);
+            $online_delivery_order = $online_delivery_order
+            ->where("created_at", ">=", $start);
+            $online_dine_in_order = $online_dine_in_order
+            ->where("created_at", ">=", $start);
+
+            $offline_pickup_order = $offline_pickup_order
+            ->where("created_at", ">=", $start);
+            $offline_delivery_order = $offline_delivery_order
+            ->where("created_at", ">=", $start);
+            $offline_dine_in_order = $offline_dine_in_order
+            ->where("created_at", ">=", $start);
+        }
+        if($request->to){
+            $online_pickup_order = $online_pickup_order
+            ->where("created_at", "<=", $end);
+            $online_delivery_order = $online_delivery_order
+            ->where("created_at", "<=", $end);
+            $online_dine_in_order = $online_dine_in_order
+            ->where("created_at", "<=", $end);
+
+            $offline_pickup_order = $offline_pickup_order
+            ->where("created_at", "<=", $end);
+            $offline_delivery_order = $offline_delivery_order
+            ->where("created_at", "<=", $end);
+            $offline_dine_in_order = $offline_dine_in_order
+            ->where("created_at", "<=", $end);
+        }
+
+        if($request->branch_id){
+            $online_pickup_order = $online_pickup_order
+            ->where("branch_id", "<=", $request->branch_id);
+            $online_delivery_order = $online_delivery_order
+            ->where("branch_id", "<=", $request->branch_id);
+            $online_dine_in_order = $online_dine_in_order
+            ->where("branch_id", "<=", $request->branch_id);
+
+            $offline_pickup_order = $offline_pickup_order
+            ->where("branch_id", "<=", $request->branch_id);
+            $offline_delivery_order = $offline_delivery_order
+            ->where("branch_id", "<=", $request->branch_id);
+            $offline_dine_in_order = $offline_dine_in_order
+            ->where("branch_id", "<=", $request->branch_id);
+        }
+
+        if($request->order_type){
+            $online_pickup_order = $online_pickup_order
+            ->where("order_type", "<=", $request->order_type);
+            $online_delivery_order = $online_delivery_order
+            ->where("order_type", "<=", $request->order_type);
+            $online_dine_in_order = $online_dine_in_order
+            ->where("order_type", "<=", $request->order_type);
+
+            $offline_pickup_order = $offline_pickup_order
+            ->where("order_type", "<=", $request->order_type);
+            $offline_delivery_order = $offline_delivery_order
+            ->where("order_type", "<=", $request->order_type);
+            $offline_dine_in_order = $offline_dine_in_order
+            ->where("order_type", "<=", $request->order_type);
+        }
+
+        $pos_order = [
+            "offline_pickup_order" => $offline_pickup_order->sum("amount"),
+            "offline_delivery_order" => $offline_delivery_order->sum("amount"),
+            "offline_dine_in_order" => $offline_dine_in_order->sum("amount"),
+            "total_offline_order" => $offline_pickup_order->sum("amount") + $online_delivery_order->sum("amount") + $online_dine_in_order->sum("amount"),
+        ];
+        $online_order = [
+            "online_pickup_order" => $online_pickup_order->sum("amount"),
+            "online_delivery_order" => $online_delivery_order->sum("amount"),
+            "online_dine_in_order" => $online_dine_in_order->sum("amount"),
+            "total_online_order" => $online_pickup_order->sum("amount") + $online_delivery_order->sum("amount") + $online_dine_in_order->sum("amount"),
         ];
 
         return response()->json([
