@@ -17,7 +17,7 @@ class CashierController extends Controller
     public function view(Request $request){
         // /admin/cashier
         $cashier = $this->cashier
-        ->with(['branch:id,name,branch_id'])
+        ->with(['branch:id,name'])
         ->get();
         $branches = $this->branches
         ->select('id', 'name')
