@@ -71,7 +71,7 @@ class CashierManController extends Controller
     public function cashier_man(Request $request, $id){
         // /admin/cashier_man/item/{id}
         $cashier_man = $this->cashier_men
-        ->with('branch')
+        ->with('branch', 'roles')
         ->where('id', $id)
         ->first();
 

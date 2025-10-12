@@ -379,34 +379,93 @@ class ReportController extends Controller
         where("pos", 0)
         ->where("order_type", "dine_in")
         ->where("order_status", "delivered");
-        $online_order = [
-            "online_pickup_order" => $online_pickup_order,
-            "online_delivery_order" => $online_delivery_order,
-            "online_dine_in_order" => $online_dine_in_order,
-            "total_online_order" => $online_pickup_order + $online_delivery_order + $online_dine_in_order,
-        ];
-
 
       $offline_pickup_order = Order::
         where("pos", 1)
         ->where("order_type", "take_away") 
-        ->where("order_status", "delivered")
-        ->sum("amount");
+        ->where("order_status", "delivered");
         $offline_delivery_order = Order::
         where("pos", 1)
         ->where("order_type", "delivery")
-        ->where("order_status", "delivered")
-        ->sum("amount");
+        ->where("order_status", "delivered");
         $offline_dine_in_order = Order::
         where("pos", 1)
         ->where("order_type", "dine_in")
-        ->where("order_status", "delivered")
-        ->sum("amount");
+        ->where("order_status", "delivered");
+        if($request->from){
+            $online_pickup_order = $online_pickup_order
+            ->where("created_at", ">=", $start);
+            $online_delivery_order = $online_delivery_order
+            ->where("created_at", ">=", $start);
+            $online_dine_in_order = $online_dine_in_order
+            ->where("created_at", ">=", $start);
+
+            $offline_pickup_order = $offline_pickup_order
+            ->where("created_at", ">=", $start);
+            $offline_delivery_order = $offline_delivery_order
+            ->where("created_at", ">=", $start);
+            $offline_dine_in_order = $offline_dine_in_order
+            ->where("created_at", ">=", $start);
+        }
+        if($request->to){
+            $online_pickup_order = $online_pickup_order
+            ->where("created_at", "<=", $end);
+            $online_delivery_order = $online_delivery_order
+            ->where("created_at", "<=", $end);
+            $online_dine_in_order = $online_dine_in_order
+            ->where("created_at", "<=", $end);
+
+            $offline_pickup_order = $offline_pickup_order
+            ->where("created_at", "<=", $end);
+            $offline_delivery_order = $offline_delivery_order
+            ->where("created_at", "<=", $end);
+            $offline_dine_in_order = $offline_dine_in_order
+            ->where("created_at", "<=", $end);
+        }
+
+        if($request->branch_id){
+            $online_pickup_order = $online_pickup_order
+            ->where("branch_id", "<=", $request->branch_id);
+            $online_delivery_order = $online_delivery_order
+            ->where("branch_id", "<=", $request->branch_id);
+            $online_dine_in_order = $online_dine_in_order
+            ->where("branch_id", "<=", $request->branch_id);
+
+            $offline_pickup_order = $offline_pickup_order
+            ->where("branch_id", "<=", $request->branch_id);
+            $offline_delivery_order = $offline_delivery_order
+            ->where("branch_id", "<=", $request->branch_id);
+            $offline_dine_in_order = $offline_dine_in_order
+            ->where("branch_id", "<=", $request->branch_id);
+        }
+
+        if($request->order_type){
+            $online_pickup_order = $online_pickup_order
+            ->where("order_type", "<=", $request->order_type);
+            $online_delivery_order = $online_delivery_order
+            ->where("order_type", "<=", $request->order_type);
+            $online_dine_in_order = $online_dine_in_order
+            ->where("order_type", "<=", $request->order_type);
+
+            $offline_pickup_order = $offline_pickup_order
+            ->where("order_type", "<=", $request->order_type);
+            $offline_delivery_order = $offline_delivery_order
+            ->where("order_type", "<=", $request->order_type);
+            $offline_dine_in_order = $offline_dine_in_order
+            ->where("order_type", "<=", $request->order_type);
+        }
+
         $pos_order = [
             "offline_pickup_order" => $offline_pickup_order,
             "offline_delivery_order" => $offline_delivery_order,
             "offline_dine_in_order" => $offline_dine_in_order,
             "total_offline_order" => $offline_pickup_order + $online_delivery_order + $online_dine_in_order,
+        ];
+        $online_order = [
+            "online_pickup_order" => $online_pickup_order,
+            "online_delivery_order" => $online_delivery_order,
+            "online_dine_in_order" => $online_dine_in_order,
+            "total_online_order" => $online_pickup_order + $online_delivery_order + $online_dine_in_order,
         ];
 
         return response()->json([
