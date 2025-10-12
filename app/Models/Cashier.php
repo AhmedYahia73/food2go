@@ -17,6 +17,6 @@ class Cashier extends Model
     ];
 
     public function branch(){
-        return $belongsTo(Branch::class, "branch_id");
+        return $this->belongsTo(Branch::class, "branch_id");
     }
 }
