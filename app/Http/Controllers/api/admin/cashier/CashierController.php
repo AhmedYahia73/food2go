@@ -17,6 +17,7 @@ class CashierController extends Controller
     public function view(Request $request){
         // /admin/cashier
         $cashier = $this->cashier
+        ->with(['branch:id,name,branch_id'])
         ->get();
         $branches = $this->branches
         ->select('id', 'name')
@@ -56,6 +57,7 @@ class CashierController extends Controller
         // /admin/cashier/item/{id}
         $cashier = $this->cashier 
         ->where('id', $id)
+        ->with(['branch:id,name,branch_id'])
         ->first();
 
         return response()->json([

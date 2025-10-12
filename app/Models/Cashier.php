@@ -15,4 +15,8 @@ class Cashier extends Model
         'cashier_active',
         'status',
     ];
+
+    public function branch(){
+        return $belongsTo(Branch::class, "branch_id");
+    }
 }
