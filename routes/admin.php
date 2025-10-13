@@ -17,6 +17,8 @@ use App\Http\Controllers\api\admin\banner\BannerController;
 
 use App\Http\Controllers\api\admin\point_offers\PointOffersController;
 
+use App\Http\Controllers\api\admin\report\ReportController;
+
 use App\Http\Controllers\api\admin\home\HomeController;
 
 use App\Http\Controllers\api\admin\cafe\CafeTablesController;
@@ -108,6 +110,23 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(ReportController::class)
+    ->prefix('reports')->group(function(){
+        Route::get('/lists', 'lists');
+        Route::get('/view_raise_product', 'view_raise_product');
+        Route::post('/filter_raise_product', 'filter_raise_product');
+        Route::get('/low_product', 'low_product');
+        Route::post('/filter_low_product', 'filter_low_product');
+        Route::get('/sales_product', 'sales_product');
+        Route::post('/sales_product_filter', 'sales_product_filter');
+        Route::get('/purchase_product', 'purchase_product');
+        Route::post('/filter_purchase_product', 'filter_purchase_product');
+        Route::get('/purchase_raise_product', 'purchase_raise_product');
+        Route::post('/filter_purchase_raise_product', 'filter_purchase_raise_product');
+        Route::get('/purchase_low_product', 'purchase_low_product');
+        Route::post('/filter_purchase_low_product', 'filter_purchase_low_product');
     });
     
     Route::controller(TableOrderController::class)
