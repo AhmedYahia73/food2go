@@ -16,23 +16,6 @@ use App\Models\PurchaseStock;
 
 class ReportController extends Controller
 {
-    public function lists(Request $request){
-        $branches = Branch::
-        select("id", "name")
-        ->where("status", 1)
-        ->get();
-        $order_type = [
-            "delivery",
-            "take_away",
-            "dine_in",
-        ];
-
-        return response()->json([
-            "branches" => $branches,
-            "order_type" => $order_type,
-        ]);
-    }
-	
     public function view_raise_product(){
         $products = OrderDetail::
         selectRaw("product_id, sum(count) as product_count")
@@ -54,6 +37,7 @@ class ReportController extends Controller
                 "id" => $item->product_id,
                 "product_name" => $item?->product?->name,
                 "product_description" => $item?->product?->description,
+				"count" => $item->product_count,
             ];
         });
 
@@ -61,7 +45,6 @@ class ReportController extends Controller
             "products" => $products->values()
         ]);
     }
-	
     public function filter_raise_product(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -120,8 +103,7 @@ class ReportController extends Controller
                     $query->where("order_type", $request->order_type);
                 }
             })
-            ->whereBetween("created_at", [$start, $end]) // ✅ فلترة التاريخ هنا
-            ->with(["product", "order.branch"])
+            ->with(["product"])
             ->groupBy("product_id")
             ->orderByDesc("product_count");
             if($request->from){
@@ -141,10 +123,6 @@ class ReportController extends Controller
                 "id" => $item->product_id,
                 "product_name" => $item?->product?->name,
                 "product_description" => $item?->product?->description,
-                "branch" => $item?->order?->branch?->name,
-                "order_type" => $item?->order?->order_type,
-                "pos" => $item?->order?->pos,
-                "date" => optional($item?->order)->created_at?->format('Y-m-d H:i:s'),
                 "count" => $item->product_count,
             ];
         });
@@ -166,23 +144,21 @@ class ReportController extends Controller
         ->whereNull('deal_id')
         ->whereHas("product")
         ->whereHas("order")
+        ->groupBy('product_id')
         ->get()
-        ->sortByAsc("product_count")
+        ->sortBy("product_count")
         ->load(["product", "order"])
         ->map(function($item){
             return [
                 "id" => $item->product_id,
                 "product_name" => $item?->product?->name,
                 "product_description" => $item?->product?->description,
-                "branch" => $item?->order?->branch?->name,
-                "order_type" => $item?->order?->order_type,
-                "pos" => $item?->order?->pos,
-                "date" => $item?->created_at
+                "count" => $item->product_count,
             ];
         });
 
         return response()->json([
-            "products" => $products
+            "products" => $products->values()
         ]);
     }
     public function filter_low_product(Request $request)
@@ -243,10 +219,9 @@ class ReportController extends Controller
                     $query->where("order_type", $request->order_type);
                 }
             })
-            ->whereBetween("created_at", [$start, $end]) // ✅ فلترة التاريخ هنا
-            ->with(["product", "order.branch"])
+            ->with(["product"])
             ->groupBy("product_id")
-            ->orderByAsc("product_count");
+            ->orderBy("product_count");
             if($request->from){
                 $products = $products->where("created_at", ">=", $start);
             }
@@ -263,11 +238,7 @@ class ReportController extends Controller
             return [
                 "id" => $item->product_id,
                 "product_name" => $item?->product?->name,
-                "product_description" => $item?->product?->description,
-                "branch" => $item?->order?->branch?->name,
-                "order_type" => $item?->order?->order_type,
-                "pos" => $item?->order?->pos,
-                "date" => optional($item?->order)->created_at?->format('Y-m-d H:i:s'),
+                "product_description" => $item?->product?->description, 
                 "count" => $item->product_count,
             ];
         });
@@ -321,7 +292,7 @@ class ReportController extends Controller
             "offline_pickup_order" => $offline_pickup_order,
             "offline_delivery_order" => $offline_delivery_order,
             "offline_dine_in_order" => $offline_dine_in_order,
-            "total_offline_order" => $offline_pickup_order + $online_delivery_order + $online_dine_in_order,
+            "total_offline_order" => $offline_pickup_order + $offline_delivery_order + $offline_dine_in_order,
         ];
 
         return response()->json([
@@ -461,7 +432,7 @@ class ReportController extends Controller
             "offline_pickup_order" => $offline_pickup_order->sum("amount"),
             "offline_delivery_order" => $offline_delivery_order->sum("amount"),
             "offline_dine_in_order" => $offline_dine_in_order->sum("amount"),
-            "total_offline_order" => $offline_pickup_order->sum("amount") + $online_delivery_order->sum("amount") + $online_dine_in_order->sum("amount"),
+            "total_offline_order" => $offline_pickup_order->sum("amount") + $offline_delivery_order->sum("amount") + $offline_dine_in_order->sum("amount"),
         ];
         $online_order = [
             "online_pickup_order" => $online_pickup_order->sum("amount"),
@@ -550,40 +521,30 @@ class ReportController extends Controller
             ],400);
         }
         $products = Purchase::
-        selectRaw("sum(quantity) as stock, product_id")
+        selectRaw("sum(quintity) as stock, product_id")
         ->groupBy("product_id")
         ->orderByDesc("stock");
+  
         if($request->from){
-            $products = $products
-            ->where("date", ">=", $request->from);
+            $products = $products->where("date", '>=', $request->from);
         }
         if($request->to){
             $products = $products
             ->where("date", "<=", $request->to);
         }
-        if($request->from){
-            $products = $products
-            ->where("date", ">=", $request->from);
-        }  
- 
         if($request->store_id){
-            $purchase = $purchase->where("store_id", $request->store_id);
-        }
-        if($request->from){
-            $purchase = $purchase->where("date", '>=', $request->from);
-        }
-        if($request->store_id){
-            $purchase = $purchase->where("store_id", $request->store_id);
+            $products = $products->where("store_id", $request->store_id);
         }
         if ($request->limit) {
-            $purchase = $purchase->take($request->limit);
+            $products = $products->take($request->limit);
         }
-        $purchase = $purchase
+        $products = $products
         ->get()
         ->load("product:id,name,description");
 
+
         return response()->json([
-            "purchase" => $purchase,
+            "purchase" => $products,
         ]);
     }
     
