@@ -28,6 +28,7 @@ class ReportController extends Controller
         ->whereNull('deal_id')
         ->whereHas("product")
         ->whereHas("order")
+        ->groupBy('product_id')
         ->get()
         ->sortByDesc("product_count")
         ->load(["product", "order"])
