@@ -11,6 +11,7 @@ use App\Http\Controllers\api\cashier\user\UserController;
 use App\Http\Controllers\api\cashier\Home\HomeController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 use App\Http\Controllers\api\admin\deal_order\DealOrderController;
+use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
 use App\Http\Controllers\api\auth\LoginController;
 
 
@@ -47,8 +48,14 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
     Route::controller(DealOrderController::class)
     ->group(function(){
-        Route::post('/deal_order', 'deal_order');
-        Route::post('/add', 'add');
+        Route::post('/deal/deal_order', 'deal_order');
+        Route::post('/deal/add', 'add');
+    });
+
+    Route::controller(OfferOrderController::class)
+    ->group(function(){
+        Route::post('/offer/check_order', 'check_order');
+        Route::post('/offer/approve_offer', 'approve_offer');
     });
 
     Route::controller(PendingOrderController::class)
