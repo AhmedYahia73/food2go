@@ -73,7 +73,7 @@ class OfferOrderController extends Controller
         $user = $this->user
         ->where('id', $offer_order->user_id )
         ->first();
-        if ($user->points < $offer_order->offer->points) {
+        if (!$offer_order->offer || $user->points < $offer_order->offer->points) {
             return response()->json([
                 'faild' => 'Your points is not enough'
             ], 400);
