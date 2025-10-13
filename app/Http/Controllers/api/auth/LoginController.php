@@ -305,7 +305,7 @@ class LoginController extends Controller
         $validation = Validator::make($request->all(), [
             'user_name' => 'required', 
             'password' => 'required', 
-            'fcm_token' => 'required',
+            // 'fcm_token' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json($validation->errors(), 422);
