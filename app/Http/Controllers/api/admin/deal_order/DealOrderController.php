@@ -153,6 +153,10 @@ class DealOrderController extends Controller
                 "deal_price" => $item->deal?->price,
             ];
         });
+
+        return response()->json([
+            "orders" => $orders
+        ]);
     }
 
     public function order_status(Request $request, $id){
@@ -171,7 +175,7 @@ class DealOrderController extends Controller
         ]);
 
         return response()->json([
-            "success" => "You add data success"
+            "success" => "You update data success"
         ]);
     }
 }
