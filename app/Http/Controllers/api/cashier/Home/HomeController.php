@@ -63,11 +63,9 @@ class HomeController extends Controller
                 "id" => $item->id,
                 "order_number" => $item->order_number,
                 "created_at" => $item->created_at,
-                "order_details" => $item->order_details, 
-                "take_away_status" => $item->take_away_status, 
+                "order_details" => $item->order_details,  
                 "order_type" => $item->order_type, 
-                "order_status" => $order_status, 
-                "order_details" => $item->order_details, 
+                "order_status" => $order_status,  
             ];
         });
         $take_away = $orders->where('order_type', 'take_away')
