@@ -52,10 +52,21 @@ class HomeController extends Controller
         ->where('cashier_man_id', $request->user()->id)
         ->get()
         ->map(function($item){
+            $order_status = null;
+            if($item->order_type == "take_away"){
+                $order_status = $item->take_away_status;
+            }
+            elseif($item->order_type == "delivery"){
+                $order_status = $item->delivery_status;
+            }
             return [
                 "id" => $item->id,
                 "order_number" => $item->order_number,
                 "created_at" => $item->created_at,
+                "order_details" => $item->order_details, 
+                "take_away_status" => $item->take_away_status, 
+                "order_type" => $item->order_type, 
+                "order_status" => $order_status, 
                 "order_details" => $item->order_details, 
             ];
         });
