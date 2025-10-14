@@ -99,7 +99,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     }); // lists,
     Route::controller(LoginController::class)
     ->prefix('/shift')->group(function(){
-        Route::get('/open', 'start_shift');
+        Route::post('/open', 'start_shift');
         Route::get('/close', 'end_shift');
     }); 
     Route::controller(CashierReportsController::class)
