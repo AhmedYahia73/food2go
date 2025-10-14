@@ -373,6 +373,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('dealOrder')->group(function(){
         Route::post('/', 'deal_order')->middleware('can:view_deal_order');
         Route::post('/add', 'add')->middleware('can:add_deal_order');
+        Route::put('/order_status/{id}', 'order_status')->middleware('can:add_deal_order');
+        Route::get('/orders', 'orders')->middleware('can:view_deal_order');
     });
 
     Route::controller(OfferOrderController::class)
