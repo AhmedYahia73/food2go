@@ -73,7 +73,7 @@ class DealOrderController extends Controller
             'user_id' => 'required|exists:users,id',
             'financials' => 'required|array',
             'financials.*.id' => 'required|exists:finantiol_acountings,id',
-            'financials.*.amount' => 'required|amount',
+            'financials.*.amount' => 'required|numeric',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
