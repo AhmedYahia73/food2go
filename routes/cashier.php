@@ -50,6 +50,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->group(function(){
         Route::post('/deal/deal_order', 'deal_order');
         Route::post('/deal/add', 'add');
+        Route::post('/deal/orders', 'orders');
+        Route::put('/deal/order_status/{id}', 'order_status');
     });
 
     Route::controller(OfferOrderController::class)
