@@ -12,11 +12,13 @@ use App\Models\Deal;
 use App\Models\DealUser;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\TimeSittings; 
 
 class DealOrderController extends Controller
 {
     public function __construct(private Deal $deals, private DealUser $deal_user,
-    private Order $orders, private OrderDetail $order_details){}
+    private Order $orders, private OrderDetail $order_details, 
+    private TimeSittings $TimeSittings){}
 
     public function deal_order(Request $request){
         // https://bcknd.food2go.online/admin/dealOrder
