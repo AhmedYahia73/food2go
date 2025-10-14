@@ -50,7 +50,15 @@ class HomeController extends Controller
         ->where('pos', 1)
         ->where('order_active', 1)
         ->where('cashier_man_id', $request->user()->id)
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "order_number" => $item->order_number,
+                "created_at" => $item->created_at,
+                "order_details" => $item->order_details, 
+            ];
+        });
         $take_away = $orders->where('order_type', 'take_away')
         ->where('take_away_status', '!=', 'pick_up')
         ->values();
