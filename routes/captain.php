@@ -12,7 +12,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     ->group(function(){
         Route::get('/my_lists', 'my_lists');
         Route::get('/my_selection_lists', 'my_selection_lists');
-        Route::get('/product_in_category/{id}', 'product_in_category');
+        Route::get('/product_in_category/{id}', 'product_in_category')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
 
         Route::get('/lists', 'lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/selection_lists', 'my_selection_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
