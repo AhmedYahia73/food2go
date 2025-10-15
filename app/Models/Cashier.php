@@ -13,6 +13,7 @@ class Cashier extends Model
         'name',
         'branch_id',
         'cashier_active',
+        'cashier_id',
         'status',
     ];
 

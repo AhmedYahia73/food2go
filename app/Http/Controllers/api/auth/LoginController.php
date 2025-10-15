@@ -14,6 +14,7 @@ use App\Models\Admin;
 use App\Models\Delivery;
 use App\Models\CaptainOrder;
 use App\Models\CashierMan;
+use App\Models\Cashier;
 use App\Models\User;
 use App\Models\Branch;
 use App\Models\Setting;
@@ -32,7 +33,8 @@ class LoginController extends Controller
     private User $user, private Branch $branch, private Setting $settings,
     private Address $address, private Zone $zones, private CaptainOrder $captain_order,
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
-    private Kitchen $kitchen, private Waiter $waiter, private StorageMan $store_man_model
+    private Kitchen $kitchen, private Waiter $waiter, private StorageMan $store_man_model,
+    private Cashier $cashier_machine
     ){}
 
     public function store_man(Request $request){
@@ -304,7 +306,8 @@ class LoginController extends Controller
         // shift_number => sometimes
         $validation = Validator::make($request->all(), [
             'user_name' => 'required', 
-            'password' => 'required', 
+            'password' => 'required',
+            "cashier_id" => "exists:cashiers,id",
             // 'fcm_token' => 'required',
         ]);
         if ($validation->fails()) {
@@ -325,6 +328,30 @@ class LoginController extends Controller
             ], 400);
         } 
         if (password_verify($request->input('password'), $user->password)) {
+            $cashier = $this->cashier
+            ->where("cashier_id", $request->cashier_id)
+            ->where("id", "!=", $user->id)
+            ->whereHas("tokens", function ($q) {
+                $q->whereNull('expires_at'); 
+            })
+            ->first();
+            $start_shift = false;
+            if(!empty($cashier)){
+                return response()->json([
+                    'errors' => 'Another Cashier man login at this cashier'
+                ]);
+            }
+            if($request->cashier_id){
+                $cashier_shift = $this->cashier_shift
+                ->where("cashier_id", $request->cashier_id)
+                ->whereNull("end_time")
+                ->first();
+                if(!empty($cashier_shift)){
+                    $start_shift = true;
+                }
+                $user->cashier_id = $request->cashier_id;
+            }
+        // $user->tokens()->delete(); 
             $user->fcm_token = $request->fcm_token;
             $user->save();
             $user->role = 'cashier';
@@ -332,6 +359,7 @@ class LoginController extends Controller
             return response()->json([
                 'cashier' => $user,
                 'token' => $user->token,
+                'start_shift' => $start_shift
             ], 200);
         }
         else { 
@@ -340,6 +368,13 @@ class LoginController extends Controller
     }
 
     public function start_shift(Request $request){
+        $validation = Validator::make($request->all(), [
+            "cashier_id" => "exists:cashiers,id",
+            // 'fcm_token' => 'required',
+        ]);
+        if ($validation->fails()) {
+            return response()->json($validation->errors(), 422);
+        }
         $cashier = $this->cashier_shift
         ->max('shift') ?? 0;
         $shift_number = $cashier + 1;
@@ -348,6 +383,7 @@ class LoginController extends Controller
             'shift' => $shift_number,
             'start_time' => now(),
             'cashier_man_id' => $request->user()->id,
+            'cashier_id' => $request->cashier_id,
         ]);
         $request->user()->shift_number = $shift_number;
         $request->user()->save();

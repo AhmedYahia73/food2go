@@ -50,6 +50,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->group(function(){
         Route::post('/deal/deal_order', 'deal_order');
         Route::post('/deal/add', 'add');
+        Route::get('/deal/orders', 'orders');
+        Route::put('/deal/order_status/{id}', 'order_status');
     });
 
     Route::controller(OfferOrderController::class)
@@ -99,7 +101,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     }); // lists,
     Route::controller(LoginController::class)
     ->prefix('/shift')->group(function(){
-        Route::get('/open', 'start_shift');
+        Route::post('/open', 'start_shift');
         Route::get('/close', 'end_shift');
     }); 
     Route::controller(CashierReportsController::class)
