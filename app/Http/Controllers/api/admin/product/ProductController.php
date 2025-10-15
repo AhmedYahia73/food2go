@@ -13,13 +13,14 @@ use App\Models\Tax;
 use App\Models\ProductReview;
 use App\Models\Translation;
 use App\Models\TranslationTbl;
+use App\Models\UpsalingGroup;
 
 class ProductController extends Controller
 {
     public function __construct(private Product $products,
     private Discount $discounts, private Tax $taxes, private ProductReview $reviews,
     private Translation $translations, private TranslationTbl $translation_tbl,
-    private Group $group){}
+    private Group $group, private UpsalingGroup $upsaling_groups){}
 
     public function view(Request $request){
         // https://bcknd.food2go.online/admin/product
@@ -44,12 +45,17 @@ class ProductController extends Controller
         ->where('status', 1)
         ->with('extra')
         ->get();
+        $upsaling_groups = $this->upsaling_groups
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
 
         return response()->json([
             'products' => $products,
             'discounts' => $discounts,
             'taxes' => $taxes,
             'group' => $group,
+            'upsaling_groups' => $upsaling_groups,
         ]);
     }
 
