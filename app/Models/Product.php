@@ -47,7 +47,7 @@ class Product extends Model
     }
 
     public function group_products(){
-        return $this->belongTo(UpsalingGroup::class, 'upsaling_group_id');
+        return $this->belongsTo(UpsalingGroup::class, 'upsaling_group_id');
     }
 
     public function product_pricing(){
