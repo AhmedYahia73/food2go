@@ -488,7 +488,7 @@ class CaptainMakeOrderController extends Controller
 
         $validator = Validator::make($request->all(), [
             'table_id' => 'required|exists:cafe_tables,id',
-            'order_status' => 'required|in:waitting,preparing,done,pick_up'
+            'order_status' => 'required|in:watting,preparing,done,pick_up'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
