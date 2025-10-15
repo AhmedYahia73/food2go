@@ -276,10 +276,8 @@ class CaptainMakeOrderController extends Controller
             ];
         }); 
 
-        return response()->json([
-            'categories' => $categories,
-            'products' => $products,  
-            'payment_methods' => $paymentMethod, 
+        return response()->json([ 
+            'products' => $products,
         ]);
     }
 
