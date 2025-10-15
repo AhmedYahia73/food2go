@@ -175,7 +175,7 @@ class CaptainMakeOrderController extends Controller
     }
 
     public function product_in_category(Request $request, $id){
-        // /captain/my_lists
+        // /captain/product_in_category/{id}
         if($request->user() && $request->user()->branch_id){
             $branch_id = $request->user()->branch_id;
         }
@@ -195,22 +195,9 @@ class CaptainMakeOrderController extends Controller
         ->where('branch_id', $branch_id)
         ->get();
         $product_off = $branch_off->pluck('product_id')->filter();
-        $category_off = $branch_off->pluck('category_id')->filter();
+        $category_off = $branch_off->where("category_id", $id)->pluck('category_id')->filter();
         $option_off = $branch_off->pluck('option_id')->filter();
 
-        $categories = $this->category
-        ->with(['sub_categories' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 
-        'addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }])
-        ->withLocale($locale)
-        ->where('category_id', null)
-        ->get()
-        ->filter(function($item) use($category_off){
-            return !$category_off->contains($item->id);
-        });
         $products = $this->products
             ->with([
                 'addons' => fn($q) => $q->withLocale($locale),
@@ -236,7 +223,10 @@ class CaptainMakeOrderController extends Controller
             ->whereNotIn('category_id', $category_off)
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
-            ->where("category_id", $id)
+            ->where(function($query) use($id){
+                $query->where("category_id", $id)
+                ->orWhere("sub_category_id", $id);
+            })
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {  
 
