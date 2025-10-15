@@ -106,6 +106,7 @@ class CaptainMakeOrderController extends Controller
                         ->withLocale($locale),
                 ]),
                 'group_products' => fn($q) => $q
+                ->select("id", "name")
                 ->with(['products' => fn($q) => $q
                 ->select("id", "name")
                 ])
