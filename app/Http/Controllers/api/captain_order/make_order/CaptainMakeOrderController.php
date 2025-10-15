@@ -105,6 +105,11 @@ class CaptainMakeOrderController extends Controller
                         ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
                         ->withLocale($locale),
                 ]),
+                'group_products' => fn($q) => $q
+                ->select("id", "name")
+                ->with(['products' => fn($q) => $q
+                ->select("id", "name")
+                ])
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'online')
@@ -358,10 +363,11 @@ class CaptainMakeOrderController extends Controller
         // amount, total_tax, total_discount, table_id
         // notes
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
-        // variation[{variation_id, option_id[]}], count}]
- 
+        // variation[{variation_id, option_id[]}], count}], order_status
+
         $validator = Validator::make($request->all(), [
             'table_id' => 'required|exists:cafe_tables,id',
+            'order_status' => 'required|in:preparing,done,pick_up'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

@@ -694,6 +694,9 @@ trait PlaceOrder
             }
         } 
         $order->cart = json_encode($order_details);
+        if($request->order_status){
+            $order->prepration_status = $request->order_status;
+        }
         $order->save();
 
         return [

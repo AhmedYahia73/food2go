@@ -36,6 +36,7 @@ class Product extends Model
         'recommended',
         'points',
         'kitchen_id',
+        'upsaling_group_id',
     ];
     protected $appends = ['image_link', 'orders_count', 'taxes', 'orders_count_branch'];
 
@@ -43,6 +44,10 @@ class Product extends Model
         return Setting::where('name', 'tax')
         ->orderByDesc('id')
         ->first();
+    }
+
+    public function group_products(){
+        return $this->belongTo(UpsalingGroup::class, 'upsaling_group_id');
     }
 
     public function product_pricing(){
