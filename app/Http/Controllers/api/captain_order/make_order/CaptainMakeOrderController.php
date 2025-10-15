@@ -117,6 +117,129 @@ class CaptainMakeOrderController extends Controller
             ->whereNotIn('category_id', $category_off)
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
+            ->where("favourite", 0)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id) {  
+
+                if ($product->stock_type === 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                } elseif ($product->stock_type === 'daily') {
+                    $product->count = $product->sales_count
+                        ->where('date', date('Y-m-d'))
+                        ->sum('count');
+                }
+
+                $product->in_stock = $product->number > $product->count;
+
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
+                    $variation->options = $variation->options
+                        ->where('status', 1)
+                        ->values()
+                        ->reject(fn($option) => $option_off->contains($option->id))
+                        ->map(function ($option) {
+                            $option->price = $option->option_pricing->first()?->price ?? $option->price;
+                            return $option;
+                        });
+
+                    return $variation;
+                });
+
+                return $product;
+            });
+        $products = ProductResource::collection($products)->toArray(request());
+
+        $products = collect($products)->map(function ($item) {
+            return [
+                'id' => $item['id'], 
+                'name' => $item['name'],
+                'description' => $item['description'],
+                'category_id' => $item['category_id'],
+                'sub_category_id' => $item['sub_category_id'],
+                'price' => $item['price'],
+                'price_after_discount' => $item['price_after_discount'],
+                'price_after_tax' => $item['price_after_tax'],
+                'image_link' => $item['image_link'],
+                'allExtras' => collect($item['allExtras']),
+                'addons' => collect($item['addons']),
+                'excludes' => collect($item['excludes'])?->select('id', 'name'),
+                'group_products' => collect($item['group_products']),
+                'variations' => collect($item['variations'])?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
+            ];
+        }); 
+
+        return response()->json([
+            'categories' => $categories,
+            'products' => $products,  
+            'payment_methods' => $paymentMethod, 
+        ]);
+    }
+
+    public function product_in_category(Request $request, $id){
+        // /captain/my_lists
+        if($request->user() && $request->user()->branch_id){
+            $branch_id = $request->user()->branch_id;
+        }
+        else{
+            $validator = Validator::make($request->all(), [
+                'branch_id' => 'required|exists:branches,id',
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ],400);
+            }
+            $branch_id = $request->branch_id;
+        }
+        $paymentMethod = $this->paymentMethod
+        ->where('status', 1)
+        ->get();
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $option_off = $branch_off->pluck('option_id')->filter();
+
+        $categories = $this->category
+        ->with(['sub_categories' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 
+        'addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }])
+        ->withLocale($locale)
+        ->where('category_id', null)
+        ->get()
+        ->filter(function($item) use($category_off){
+            return !$category_off->contains($item->id);
+        });
+        $products = $this->products
+            ->with([
+                'addons' => fn($q) => $q->withLocale($locale),
+                'category_addons' => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                'excludes' => fn($q) => $q->withLocale($locale),
+                'discount', 'extra', 'sales_count', 'tax',
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($q) => $q
+                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
+                        ->withLocale($locale),
+                ]),
+                'group_products' => fn($q) => $q
+                ->select("id", "name")
+                ->with(['products' => fn($q) => $q
+                ->select("id", "name")
+                ])
+            ])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'online')
+            ->where('status', 1)
+            ->whereNotIn('category_id', $category_off)
+            // ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('products.id', $product_off)
+            ->where("favourite", 0)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {  
 
@@ -368,7 +491,7 @@ class CaptainMakeOrderController extends Controller
 
         $validator = Validator::make($request->all(), [
             'table_id' => 'required|exists:cafe_tables,id',
-            'order_status' => 'required|in:preparing,done,pick_up'
+            'order_status' => 'required|in:wating,preparing,done,pick_up'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
