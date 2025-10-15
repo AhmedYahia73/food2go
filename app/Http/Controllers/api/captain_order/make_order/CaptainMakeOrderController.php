@@ -161,6 +161,7 @@ class CaptainMakeOrderController extends Controller
                 'allExtras' => collect($item['allExtras']),
                 'addons' => collect($item['addons']),
                 'excludes' => collect($item['excludes'])?->select('id', 'name'),
+                'group_products' => $this->whenLoaded('group_products'),
                 'variations' => collect($item['variations'])?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
             ];
         }); 
