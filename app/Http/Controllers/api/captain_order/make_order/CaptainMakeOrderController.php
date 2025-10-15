@@ -190,9 +190,6 @@ class CaptainMakeOrderController extends Controller
             }
             $branch_id = $request->branch_id;
         }
-        $paymentMethod = $this->paymentMethod
-        ->where('status', 1)
-        ->get();
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
@@ -239,7 +236,7 @@ class CaptainMakeOrderController extends Controller
             ->whereNotIn('category_id', $category_off)
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
-            ->where("favourite", 0)
+            ->where("category_id", $id)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {  
 
@@ -491,7 +488,7 @@ class CaptainMakeOrderController extends Controller
 
         $validator = Validator::make($request->all(), [
             'table_id' => 'required|exists:cafe_tables,id',
-            'order_status' => 'required|in:waiting,preparing,done,pick_up'
+            'order_status' => 'required|in:waitting,preparing,done,pick_up'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
