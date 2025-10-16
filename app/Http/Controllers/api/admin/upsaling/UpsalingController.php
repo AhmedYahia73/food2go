@@ -61,8 +61,8 @@ class UpsalingController extends Controller
             "id" => $upsaling->id,
             "name" => $upsaling->name,
             "status" => $upsaling->status,
-            "products" => $upsaling->products
-            ->select("id", "name"),
+            "products" => $upsaling?->products
+            ?->select("id", "name"),
         ]);
     }
 
