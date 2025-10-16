@@ -18,7 +18,15 @@ class UpsalingController extends Controller
         $upsaling = $this->upsaling
         ->select("id", "name", "status")
         ->with(['products:id,name'])
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "status" => $item->status,
+                "products" => $item->products->select("id", "name"),
+            ];
+        });
 
         return response()->json([
             "upsaling" => $upsaling
