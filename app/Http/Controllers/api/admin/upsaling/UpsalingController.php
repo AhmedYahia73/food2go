@@ -40,8 +40,8 @@ class UpsalingController extends Controller
         ->get()
         ->map(function($item){
             return [
-                "id" => $id,
-                "name" => $name,
+                "id" => $item->id,
+                "name" => $item->name,
             ];
         });
 
