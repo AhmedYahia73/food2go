@@ -41,8 +41,7 @@ class CreateProductController extends Controller
         'tax_id',
         'status',
         'recommended',
-        'points',
-        'upsaling_group_id', 
+        'points', 
     ];
     use image;
     use translaion;
@@ -87,6 +86,7 @@ class CreateProductController extends Controller
                 $productRequest['image'] = $imag_path;
             } // if send image upload it
             $product = $this->products->create($productRequest); // create product
+            $product->group_products()->attach($request->upsaling_group_id ?? []);
             $product_id = $product->id;
             foreach ($request->product_names as $item) {
                 if (!empty($item['product_name'])) {
@@ -290,6 +290,7 @@ class CreateProductController extends Controller
         $product = $this->products->
         where('id', $id)
         ->first(); // get product
+        $product->group_products()->sync($request->upsaling_group_id ?? []);
         if (!empty($product->translations)) {
         $product->translations()->delete();            # code...
         }
