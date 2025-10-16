@@ -35,6 +35,7 @@ class ProductRequest extends FormRequest
             'status' => ['required', 'boolean'],
             'recommended' => ['required', 'boolean'],
             'points' => ['required', 'numeric'],
+            'upsaling_group_id' => ['exists:upsaling_groups,id'],
             'addons.*' => ['exists:addons,id'],
             'excludes.*.names.*.exclude_name' => ['required'],
             'excludes.*.names.*.tranlation_id' => ['required', 'exists:translations,id'],

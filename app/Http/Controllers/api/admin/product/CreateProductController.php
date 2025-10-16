@@ -42,7 +42,7 @@ class CreateProductController extends Controller
         'status',
         'recommended',
         'points',
-        'upsaling_group_id'
+        'upsaling_group_id', 
     ];
     use image;
     use translaion;
