@@ -51,7 +51,8 @@ class MakeOrderController extends Controller
         // order_type[take_away,dine_in,delivery]
         // deal[{deal_id, count}], c, receipt
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
-        // variation[{variation_id, option_id[]}], count, note}], sechedule_slot_id
+        // variation[{variation_id, option_id[]}], count, note}], sechedule_slot_id,
+        // coupon_id
         if ($request->user()->status == 0) {
             return response()->json([
                 'errors' => "You are blocked you can't make order"

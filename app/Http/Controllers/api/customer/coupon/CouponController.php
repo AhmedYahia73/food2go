@@ -92,7 +92,8 @@ class CouponController extends Controller
         
 
         return response()->json([
-            'discount' => $discount
+            "discount" => $discount,
+            "coupon" => $coupon->id
         ]);
     }
 }

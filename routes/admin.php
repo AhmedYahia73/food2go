@@ -21,6 +21,8 @@ use App\Http\Controllers\api\admin\report\ReportController;
 
 use App\Http\Controllers\api\admin\home\HomeController;
 
+use App\Http\Controllers\api\admin\upsaling\UpsalingController;
+
 use App\Http\Controllers\api\admin\cafe\CafeTablesController;
 use App\Http\Controllers\api\admin\cafe\CafeLocationController;
 
@@ -127,6 +129,16 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/filter_purchase_raise_product', 'filter_purchase_raise_product');
         Route::get('/purchase_low_product', 'purchase_low_product');
         Route::post('/filter_purchase_low_product', 'filter_purchase_low_product');
+    });
+    
+    Route::controller(UpsalingController::class)
+    ->prefix('upsaling')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');
+        Route::get('/item/{id}', 'upsaling_item');
+        Route::post('/add', 'create');
+        Route::put('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
     
     Route::controller(TableOrderController::class)
