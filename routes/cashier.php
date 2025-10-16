@@ -20,9 +20,6 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->group(function(){
         Route::get('/lists', 'lists');
 
-        Route::get('/cashier_lists', 'cashier_lists');
-        Route::get('/product_category_lists/{id}', 'product_category_lists');
-
         Route::get('/get_order/{id}', 'get_order');
         Route::get('/orders', 'pos_orders');
         Route::post('/preparing', 'preparing');
