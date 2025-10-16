@@ -66,10 +66,7 @@ class ProductController extends Controller
         ->with(['addons', 'excludes', 'extra' => function($query){
             $query->with('pricing', 'group');
         }, 'variations.options.extra.group', 'category', 'subCategory', 'discount', 'tax',
-        'group_products' => function($query){
-            $query->select("name")
-            ->wiht(['products:id,name']);
-        }])
+        'group_products:id,name'])
         ->where('id', $id)
         ->first();//extra_id
         $translations = $this->translations
