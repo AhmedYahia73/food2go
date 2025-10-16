@@ -94,8 +94,8 @@ class UpsalingController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes',
-            'status' => 'sometimes|boolean',
+            'name' => 'required',
+            'status' => 'required|boolean',
             'product_ids' => 'required|array',
             'product_ids.*' => 'required|exists:products,id',
         ]);
