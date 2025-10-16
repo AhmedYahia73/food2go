@@ -37,7 +37,13 @@ class UpsalingController extends Controller
         $products = $this->products
         ->select("id", "name")
         ->where("status", 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $id,
+                "name" => $name,
+            ];
+        });
 
         return response()->json([
             "products" => $products
@@ -52,7 +58,11 @@ class UpsalingController extends Controller
         ->first();
 
         return response()->json([
-            "upsaling" => $upsaling
+            "id" => $upsaling->id,
+            "name" => $upsaling->name,
+            "status" => $upsaling->status,
+            "products" => $upsaling->products
+            ->select("id", "name"),
         ]);
     }
 
