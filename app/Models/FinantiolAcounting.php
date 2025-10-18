@@ -10,8 +10,7 @@ class FinantiolAcounting extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'description',
+        'name', 
         'description_status',
         'details', 
         'balance',
