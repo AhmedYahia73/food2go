@@ -16,6 +16,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
 
         Route::get('/lists', 'cashier_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/product_category_lists/{id}', 'product_category_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/product_item/{id}', 'product_item')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
 
         Route::get('/selection_lists', 'my_selection_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/get_table_status', 'get_table_status');
