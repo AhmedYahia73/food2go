@@ -12,6 +12,7 @@ use App\Http\Controllers\api\cashier\Home\HomeController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 use App\Http\Controllers\api\admin\deal_order\DealOrderController;
 use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
+use App\Http\Controllers\api\cashier\profile\ProfileController;
 use App\Http\Controllers\api\auth\LoginController;
 
 
@@ -44,6 +45,12 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/take_away_order', 'take_away_order')->middleware('can:take_away');
        
         Route::put('/tables_status/{id}', 'tables_status')->middleware('can:table_status');
+    });
+
+    Route::controller(ProfileController::class)
+    ->group(function(){
+        Route::get('/profile', 'view');
+        Route::post('/profile/update', 'update');
     });
 
     Route::controller(DealOrderController::class)

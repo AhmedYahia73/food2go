@@ -36,7 +36,7 @@ class ProfileController extends Controller
 
         $user = $request->user();
         $user->user_name = $request->user_name ?? $user->user_name;
-        $user->password = bcrypt($request->password) ?? $user->password;
+        $user->password = $request->password ? bcrypt($request->password) : $user->password;
         $user->status = $request->status ?? $user->status;
         if($request->image){
             $imag_path = $this->upload($request, 'image', 'cashier/profile_image');
