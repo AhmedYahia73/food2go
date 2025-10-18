@@ -41,6 +41,7 @@ class TakawayRequest extends FormRequest
             'financials' => ['required', 'array'],
             'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
             'financials.*.amount' => ['required', 'numeric'], 
+            'financials.*.description' => ['sometimes'], 
             'cashier_id' => ['required', 'exists:cashiers,id'],
         ];
     }

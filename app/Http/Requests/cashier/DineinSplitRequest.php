@@ -32,7 +32,8 @@ class DineinSplitRequest extends FormRequest
             'cart_id.*' => ['exists:order_carts,id', 'required'],
             'financials' => ['array'],
             'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
-            'financials.*.amount' => ['required', 'numeric'], 
+            'financials.*.amount' => ['required', 'numeric'],
+            'financials.*.description' => ['sometimes'], 
             'table_id' => ['required', 'exists:cafe_tables,id'],
             'cashier_id' => ['sometimes', 'exists:cashiers,id'], 
         ];

@@ -290,7 +290,7 @@ class CashierMakeOrderController extends Controller
         // /cashier/delivery_order
         // Keys
         // amount, total_tax, total_discount, notes, address_id
-        // source, financials[{id, amount}], cash_with_delivery
+        // source, financials[{id, amount, description}], cash_with_delivery
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
@@ -674,7 +674,7 @@ class CashierMakeOrderController extends Controller
         // /cashier/delivery_order
         // Keys
         // amount, total_tax, total_discount, notes, address_id
-        // source, financials[{id, amount}], cash_with_delivery
+        // source, financials[{id, amount, description}], cash_with_delivery
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]

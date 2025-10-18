@@ -28,6 +28,7 @@ class DineinOrderRequest extends FormRequest
             'financials' => ['required', 'array'],
             'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
             'financials.*.amount' => ['required', 'numeric'],
+            'financials.*.description' => ['sometimes'], 
             'table_id' => ['required', 'exists:cafe_tables,id'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],

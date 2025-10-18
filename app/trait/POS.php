@@ -123,6 +123,7 @@ trait POS
                 'cashier_id' => $request->cashier_id,
                 'cashier_man_id' => $request->cashier_man_id,
                 'amount' => $element['amount'],
+                'description' => $element['description'],
             ]);
         }
         if (isset($request->products)) {
@@ -314,6 +315,7 @@ trait POS
                     'cashier_id' => $request->cashier_id,
                     'cashier_man_id' => $request->cashier_man_id,
                     'amount' => $element['amount'],
+                    'description' => $element['description'],
                 ]);
             }
         }
@@ -514,6 +516,7 @@ trait POS
                     'cashier_id' => $request->cashier_id,
                     'cashier_man_id' => $request->cashier_man_id,
                     'amount' => $element['amount'],
+                    'description' => $element['description'],
                 ]);
             }
         }
@@ -710,6 +713,7 @@ trait POS
                 'cashier_id' => $request->cashier_id,
                 'cashier_man_id' => $request->cashier_man_id,
                 'amount' => $element['amount'],
+                'description' => $element['description'],
             ]);
         }
         if (isset($request->products)) {
