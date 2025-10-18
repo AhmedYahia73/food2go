@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('discount_modules', function (Blueprint $table) {
             $table->id();
+            $table->float("discount");
+            $table->boolean("status")->default(1);
             $table->timestamps();
         });
     }
