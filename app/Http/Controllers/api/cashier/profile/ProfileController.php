@@ -12,6 +12,7 @@ use App\Models\CashierMan;
 class ProfileController extends Controller
 {
     public function __construct(private CashierMan $cashier_man){}
+    use image;
 
     public function view(Request $request){
         return response()->json([
