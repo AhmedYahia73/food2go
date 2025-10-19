@@ -103,6 +103,8 @@ use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 use App\Http\Controllers\api\admin\table\TableOrderController;
 
+use App\Http\Controllers\api\admin\discount_module\DiscountModuleController;
+
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(GroupController::class)
     ->prefix('group')->group(function(){
@@ -129,6 +131,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/filter_purchase_raise_product', 'filter_purchase_raise_product');
         Route::get('/purchase_low_product', 'purchase_low_product');
         Route::post('/filter_purchase_low_product', 'filter_purchase_low_product');
+    });
+    
+    Route::controller(DiscountModuleController::class)
+    ->prefix('discount_module')->group(function(){
+        Route::get('/', 'view'); 
+        Route::get('/item/{id}', 'discount_item');
+        Route::post('/add', 'create');
+        Route::put('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
     
     Route::controller(UpsalingController::class)

@@ -36,10 +36,16 @@ class DiscountModuleController extends Controller
         $branches = $this->branches
         ->get()
         ->select("id", "name");
+        $modules = [
+            "take_away",
+            "dine_in",
+            "delivery",
+        ];
 
         return response()->json([
             "discounts" => $discounts,
             "branches" => $branches,
+            "modules" => $modules,
         ]);
     }
 
@@ -70,14 +76,51 @@ class DiscountModuleController extends Controller
             "discount" => $request->discount,
             "status" => $request->status,
         ]);
+        foreach ($request->branch_modules as $item) {
+            $this->discount_module_branch
+            ->create([
+                'discount_module_id' => $discount_module->id,
+                'branch_id' => $item['branch_id'],
+                'module' => $item['module'],
+            ]);
+        }
 
+        return response()->json([
+            "success" => "You add data success"
+        ]);
     }
 
     public function modify(Request $request, $id){
-        
+        $discount_module = $this->discount_module
+        ->where("id", $id)
+        ->update([
+            "discount" => $request->discount,
+            "status" => $request->status,
+        ]);
+        $this->discount_module_branch
+        ->where("discount_module_id", $discount_module->id)
+        ->delete();
+        foreach ($request->branch_modules as $item) {
+            $this->discount_module_branch
+            ->create([
+                'discount_module_id' => $discount_module->id,
+                'branch_id' => $item['branch_id'],
+                'module' => $item['module'],
+            ]);
+        }
+
+        return response()->json([
+            "success" => "You update data success"
+        ]);
     }
 
     public function delete(Request $request, $id){
-        
+        $this->discount_module
+        ->where("id", $id)
+        ->delete();
+
+        return response()->json([
+            "success" => "You delete data success"
+        ]);
     }
 }
