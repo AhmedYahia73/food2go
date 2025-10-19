@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\admin\discount_module;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\DiscountModuleBranch;
 use App\Models\DiscountModule;
@@ -71,6 +72,18 @@ class DiscountModuleController extends Controller
     }
 
     public function create(Request $request){
+        $validator = Validator::make($request->all(), [
+            'discount' => 'required|numeric',
+            'status' => 'required|boolean',
+            'branch_modules' => 'required|array',
+            'branch_modules.*.branch_id' => 'required|exists:branches,id',
+            'branch_modules.*.module' => 'required|in:take_away,dine_in,delivery',
+        ]); 
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $discount_module = $this->discount_module
         ->create([
             "discount" => $request->discount,
@@ -91,6 +104,18 @@ class DiscountModuleController extends Controller
     }
 
     public function modify(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'discount' => 'required|numeric',
+            'status' => 'required|boolean',
+            'branch_modules' => 'required|array',
+            'branch_modules.*.branch_id' => 'required|exists:branches,id',
+            'branch_modules.*.module' => 'required|in:take_away,dine_in,delivery',
+        ]); 
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $discount_module = $this->discount_module
         ->where("id", $id)
         ->update([
