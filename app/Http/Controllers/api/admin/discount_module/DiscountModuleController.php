@@ -123,12 +123,12 @@ class DiscountModuleController extends Controller
             "status" => $request->status,
         ]);
         $this->discount_module_branch
-        ->where("discount_module_id", $discount_module->id)
+        ->where("discount_module_id", $id)
         ->delete();
         foreach ($request->branch_modules as $item) {
             $this->discount_module_branch
             ->create([
-                'discount_module_id' => $discount_module->id,
+                'discount_module_id' => $id,
                 'branch_id' => $item['branch_id'],
                 'module' => $item['module'],
             ]);
