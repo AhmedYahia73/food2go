@@ -191,6 +191,7 @@ class PosOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where("branch_id", $request->branch_id)
+        ->whereBetween('created_at', [$start, $end])
         ->orderByDesc('id')
         ->with(['table', 'captain'])
         ->get()
