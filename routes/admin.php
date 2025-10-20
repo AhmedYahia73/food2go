@@ -23,6 +23,8 @@ use App\Http\Controllers\api\admin\home\HomeController;
 
 use App\Http\Controllers\api\admin\upsaling\UpsalingController;
 
+use App\Http\Controllers\api\admin\unit\UnitController;
+
 use App\Http\Controllers\api\admin\cafe\CafeTablesController;
 use App\Http\Controllers\api\admin\cafe\CafeLocationController;
 
@@ -110,6 +112,16 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('group')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'group');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(UnitController::class)
+    ->prefix('unit')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'unit_item');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
