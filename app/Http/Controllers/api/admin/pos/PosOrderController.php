@@ -207,7 +207,7 @@ class PosOrderController extends Controller
                 "order_number" => $item->order_number,
                 "table" => $item?->table?->table_number,
                 "captain" => $item?->captain?->name,
-                "type" => empty($item->captain_id) ? 'table_order' : 'captain',
+                "type" => $item->from_table_order ? 'table_order' : 'captain',
             ];
         });
         $tables = $this->tables

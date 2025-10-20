@@ -670,6 +670,8 @@ class ClientMakeOrderController extends Controller
             $order_id = $this->order
             ->where('transaction_id', $order->id)
             ->first();
+            $order_id->from_table_order = 1;
+            $order_id->save();
             broadcast(new OrderEvent($order_id))->toOthers();
             // $order = $this->make_order($request);
             // $order = $order['payment']; 
@@ -754,6 +756,8 @@ class ClientMakeOrderController extends Controller
             $order_id = $this->order
             ->where('transaction_id', $order->id)
             ->first();
+            $order_id->from_table_order = 1;
+            $order_id->save();
             broadcast(new OrderEvent($order_id))->toOthers();
             // $order = $this->make_order($request);
             // $order = $order['payment']; 
