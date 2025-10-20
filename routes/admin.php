@@ -506,6 +506,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         ->prefix('order')->group(function(){
             Route::get('/lists', 'lists')->middleware('can:view_pos_order');
             Route::get('/orders', 'pos_orders')->middleware('can:view_pos_order'); 
+            Route::get('/pos_orders', 'view_orders')->middleware('can:view_pos_order'); 
             Route::put('/tables_status/{id}', 'tables_status')->middleware('can:status_pos_table');
         });
     });

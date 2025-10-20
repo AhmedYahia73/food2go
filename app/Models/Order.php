@@ -128,8 +128,16 @@ class Order extends Model
         return $this->belongsToMany(FinantiolAcounting::class, 'order_financials', 'order_id', 'financial_id');
     }
 
+    public function captain(){
+        return $this->belongsToMany(CaptainOrder::class, 'captain_id');
+    }
+
     public function delivery(){
         return $this->belongsTo(Delivery::class, 'delivery_id');
+    }
+
+    public function table(){
+        return $this->belongsTo(CafeTable::class, 'table_id');
     }
 
     public function payment_method(){

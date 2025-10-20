@@ -152,6 +152,86 @@ class PosOrderController extends Controller
     //         'payment_methods' => $payment_methods,
     //     ]);
     // }
+    public function view_orders(Request $request){
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                    'errors' => $validator->errors(),
+            ],400);
+        }
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			} 
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
+        
+        $orders = $this->order
+        ->where('pos', 1)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where("branch_id", $request->branch_id)
+        ->orderByDesc('id')
+        ->with(['table', 'captain'])
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "branch_id" => $item->branch_id,
+                "amount" => $item->amount,
+                "order_status" => $item->order_status,
+                "order_type" => $item->order_type,
+                "total_tax" => $item->total_tax,
+                "total_discount" => $item->total_discount,
+                "order_number" => $item->order_number,
+                "table" => $item?->table?->table_number,
+                "captain" => $item?->captain?->name,
+                "type" => empty($item->captain_id) ? 'table_order' : 'captain',
+            ];
+        });
+        $tables = $this->tables
+        ->with('location')
+        ->where("branch_id", $request->branch_id)
+        ->whereNull("main_table_id")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "table_number" => $item->table_number,
+                "capacity" => $item->capacity,
+                "branch_id" => $item->branch_id,
+                "is_merge" => $item->is_merge,
+                "sub_table" => $item->sub_table->select("id", "table_number"),
+                "location" => $item?->location?->name,
+            ];
+        });
+
+        return response()->json([
+            'orders' => $orders,
+            'tables' =>$tables,
+        ]);
+
+    }
 
     public function pos_orders(){
         // /admin/pos/order/orders
