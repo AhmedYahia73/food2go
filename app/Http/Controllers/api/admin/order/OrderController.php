@@ -1065,7 +1065,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function count_orders(){
+    public function count_orders(Request $request){
         // https://bcknd.food2go.online/admin/order/count
         
         if ($request->role == "admin") {
