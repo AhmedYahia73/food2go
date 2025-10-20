@@ -129,7 +129,7 @@ class Order extends Model
     }
 
     public function captain(){
-        return $this->belongsToMany(CaptainOrder::class, 'captain_id');
+        return $this->belongsTo(CaptainOrder::class, 'captain_id');
     }
 
     public function delivery(){
