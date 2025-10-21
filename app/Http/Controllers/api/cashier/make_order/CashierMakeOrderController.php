@@ -302,7 +302,7 @@ class CashierMakeOrderController extends Controller
             'shift' => $request->user()->shift_number,
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
-        ]);
+        ]); 
         if($request->due){
             if(!$request->user_id){
                 return response()->json([
@@ -334,6 +334,12 @@ class CashierMakeOrderController extends Controller
                 "cashier_id" => $request->user()->id,
                 "amount" => $request->amount,
             ]); 
+            $user = $this->user
+            ->where("id", $request->user_id)
+            ->first();
+            $user->update([
+                "due" => $user->due + $request->amount
+            ]);
         }
         return response()->json([
             'success' => $order['order'], 
@@ -499,6 +505,12 @@ class CashierMakeOrderController extends Controller
                 "cashier_id" => $request->user()->id,
                 "amount" => $request->amount,
             ]); 
+            $user = $this->user
+            ->where("id", $request->user_id)
+            ->first();
+            $user->update([
+                "due" => $user->due + $request->amount
+            ]);
         }
 
         return response()->json([
