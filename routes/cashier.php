@@ -12,7 +12,8 @@ use App\Http\Controllers\api\cashier\Home\HomeController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 use App\Http\Controllers\api\admin\deal_order\DealOrderController;
 use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
-use App\Http\Controllers\api\cashier\profile\ProfileController;
+use App\Http\Controllers\api\cashier\profile\ProfileController; 
+
 use App\Http\Controllers\api\auth\LoginController;
 
 
@@ -89,6 +90,9 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CustomerController::class)
     ->prefix('/customer')->group(function(){
         Route::get('/', 'view');
+        Route::get('/customer_singl_page/{id}', 'single_page');
+        Route::post('/single_page_filter/{id}', 'single_page_filter');
+        Route::post('/pay_debit', 'pay_debit');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
     });
