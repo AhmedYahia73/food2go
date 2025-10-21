@@ -90,10 +90,11 @@ class WaiterCallController extends Controller
         $body = 'Table ' . $cafe_table->table_number . 
             ' at location ' . $cafe_table?->location?->name . ' Want To Pay';
   
-        $this->sendNotificationToMany($users_tokens, $cafe_table->table_number, $body);
+        $notifications = $this->sendNotificationToMany($users_tokens, $cafe_table->table_number, $body);
         
         return response()->json([
-            'success' => 'You call Pay success'
+            'success' => 'You call Pay success',
+            "notifications" => $notifications
         ]);
     }
 }
