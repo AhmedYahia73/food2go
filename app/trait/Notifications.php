@@ -25,7 +25,7 @@ trait Notifications
             $message = CloudMessage::new()
                 ->withNotification(Notification::create($title, $body))
                 ->withData($data);
-
+            $tokens = array_filter($tokens); 
             return $this->messaging->sendMulticast($message, $tokens);
         }
 

@@ -444,7 +444,10 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'status' => 1,
             'take_away_status' => 'preparing',
-        ]); 
+        ]);
+        if($request->due){
+            
+        }
         $order = $this->take_away_make_order($request);
         if(!$request->order_pending){
             $this->preparing_takeaway($request, $order['order']->id);

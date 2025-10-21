@@ -41,6 +41,7 @@ trait POS
         'status',
         'cash_with_delivery',
         'balance',
+        'due',
     ];
 
     public function take_away_make_order($request, $paymob = 0){

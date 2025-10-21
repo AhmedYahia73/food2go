@@ -60,6 +60,7 @@ class Order extends Model
         'delivery_status',
         'coupon_id',
         'from_table_order',
+        'due',
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];

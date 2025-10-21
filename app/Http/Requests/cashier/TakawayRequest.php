@@ -43,6 +43,7 @@ class TakawayRequest extends FormRequest
             'financials.*.amount' => ['required', 'numeric'], 
             'financials.*.description' => ['sometimes'], 
             'cashier_id' => ['required', 'exists:cashiers,id'],
+            'due' => 'required|boolean',
         ];
     }
 
