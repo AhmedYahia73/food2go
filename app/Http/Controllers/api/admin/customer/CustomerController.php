@@ -197,6 +197,12 @@ class CustomerController extends Controller
             'admin_id' =>  $request->user()->role == "admin" ? $request->user()->id : null,
             'amount' => $request->amount,
         ]);
+        $user = $this->user
+        ->where("id", $request->user_id)
+        ->first();
+        $user->update([
+            "due" => $user->due - $request->amount
+        ]);
 
         foreach ($request->financials as $item) {
             $user_debt->financial()
