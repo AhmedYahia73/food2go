@@ -54,6 +54,7 @@ class CaptainMakeOrderController extends Controller
 
     public function my_lists(Request $request){
         // /captain/my_lists
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); 
         if($request->user() && $request->user()->branch_id){
             $branch_id = $request->user()->branch_id;
         }
@@ -173,6 +174,7 @@ class CaptainMakeOrderController extends Controller
 
     public function product_item(Request $request, $id){
         // /captain/product_item/{id}  
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); 
         if($request->user() && $request->user()->branch_id){
             $branch_id = $request->user()->branch_id;
         }
@@ -266,6 +268,7 @@ class CaptainMakeOrderController extends Controller
 
     public function product_in_category(Request $request, $id){
         // /captain/product_in_category/{id}
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); 
         if($request->user() && $request->user()->branch_id){
             $branch_id = $request->user()->branch_id;
         }
@@ -378,6 +381,7 @@ class CaptainMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); 
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)
         ->get();
@@ -499,6 +503,7 @@ class CaptainMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); 
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)
         ->get();
@@ -597,6 +602,7 @@ class CaptainMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); 
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)
         ->get();

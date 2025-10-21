@@ -14,6 +14,7 @@ class PurchaseStock extends Model
         'product_id',
         'store_id',
         'quantity',
+        'unit_id',
     ];
 
     public function category(){
@@ -26,5 +27,9 @@ class PurchaseStock extends Model
 
     public function store(){
         return $this->belongsTo(PurchaseStore::class, 'store_id');
+    }
+
+    public function unit(){
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 }

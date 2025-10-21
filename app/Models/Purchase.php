@@ -18,6 +18,7 @@ class Purchase extends Model
         'quintity',
         'receipt',
         'date',
+        'unit_id',
     ];
     protected $appends = ['receipt_link'];
 
@@ -47,5 +48,9 @@ class Purchase extends Model
 
     public function store(){
         return $this->belongsTo(PurchaseStore::class, 'store_id');
+    }
+
+    public function unit(){
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 }

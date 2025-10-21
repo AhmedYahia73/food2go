@@ -27,7 +27,7 @@ class StockController extends Controller
 
     public function view_stock(Request $request, $id){
         $stores = $this->stock
-        ->with('category', 'product', 'store')
+        ->with('category', 'product', 'store', 'unit')
         ->get()
         ->map(function($item){
             return [
@@ -36,6 +36,8 @@ class StockController extends Controller
                 'product' => $item?->product?->name,
                 'store' => $item?->store?->name,
                 'quantity' => $item->quantity,
+                'unit' => $item?->unit?->name,
+                'unit_id' => $item->unit_id,
             ];
         });
 

@@ -14,6 +14,7 @@ use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore; 
 use App\Models\FinantiolAcounting;
 use App\Models\PurchaseStock;
+use App\Models\Unit;
 
 class PurchaseController extends Controller
 {
@@ -21,7 +22,7 @@ class PurchaseController extends Controller
     private PurchaseProduct $products, private PurchaseCategory $categories,
     private PurchaseStore $stores, private FinantiolAcounting $financial,
     private PurchaseFinancial $purchase_financial,
-    private PurchaseStock $stock){}
+    private PurchaseStock $stock, private Unit $units){}
     use image;
 
     public function view(Request $request){
@@ -69,6 +70,10 @@ class PurchaseController extends Controller
         ->select('id', 'name', 'logo')
         ->where('status', 1)
         ->get();
+        $units = $this->units
+        ->select("name", "status")
+        ->where("status", 1)
+        ->get();
 
         return response()->json([
             'purchases' => $purchases,
@@ -76,6 +81,7 @@ class PurchaseController extends Controller
             'products' => $products,
             'stores' => $stores,
             'financials' => $financials,
+            'units' => $units,
         ]);
     }
 
@@ -107,6 +113,7 @@ class PurchaseController extends Controller
             'product_id' => ['required', 'exists:purchase_products,id'], 
             'total_coast' => ['required', 'numeric'],
             'quintity' => ['required', 'numeric'],
+            'unit_id' => ['required', 'exists:units,id'],
             'receipt' => ['required'],
             'date' => ['required', 'date'],
             'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],

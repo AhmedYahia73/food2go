@@ -14,6 +14,7 @@ use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore; 
 use App\Models\FinantiolAcounting;
 use App\Models\PurchaseStock;
+use App\Models\Unit;
 
 class PurchaseController extends Controller
 {
@@ -21,17 +22,19 @@ class PurchaseController extends Controller
     private PurchaseProduct $products, private PurchaseCategory $categories,
     private PurchaseStore $stores, private FinantiolAcounting $financial,
     private PurchaseFinancial $purchase_financial,
-    private PurchaseStock $stock){}
+    private PurchaseStock $stock, private Unit $units){}
     use image;
 
     public function view(Request $request){
         $purchases = $this->purchases
-        ->with('category', 'product', 'admin', 'store')
+        ->with('category', 'product', 'admin', 'store', 'unit')
         ->get()
         ->map(function($item){
             return [
                 'total_coast' => $item->total_coast,
                 'quintity' => $item->quintity,
+                'unit' => $item?->unit?->name,
+                'unit_id' => $item?->unit_id,
                 'date' => $item->date,
                 'receipt_link' => $item->receipt_link,
                 'category_id' => $item->category_id,
@@ -68,6 +71,10 @@ class PurchaseController extends Controller
         ->select('id', 'name', 'logo')
         ->where('status', 1)
         ->get();
+        $units = $this->units
+        ->select("name", "status")
+        ->where("status", 1)
+        ->get();
 
         return response()->json([
             'purchases' => $purchases,
@@ -75,12 +82,13 @@ class PurchaseController extends Controller
             'products' => $products,
             'stores' => $stores,
             'financials' => $financials,
+            'units' => $units,
         ]);
     }
 
     public function purchase_item(Request $request, $id){
         $purchases = $this->purchases
-        ->with('category', 'product', 'admin', 'store')
+        ->with('category', 'product', 'admin', 'store', 'unit')
         ->where('id', $id)
         ->first();
 
@@ -94,7 +102,9 @@ class PurchaseController extends Controller
             'admin_id' => $purchases->admin_id,
             'store_id' => $purchases->store_id,
             'category' => $purchases?->category?->name,
-            'product' => $purchases?->product?->name,
+            'store_id' => $purchases->store_id,
+            'unit_id' => $purchases?->unit_id,
+            'unit' => $purchases?->unit?->name,
             'admin' => $purchases?->admin?->name,
             'store' => $purchases?->store?->name,
         ]);
@@ -105,6 +115,7 @@ class PurchaseController extends Controller
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'product_id' => ['required', 'exists:purchase_products,id'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
+            'unit_id' => ['required', 'exists:units,id'],
             'total_coast' => ['required', 'numeric'],
             'quintity' => ['required', 'numeric'],
             'receipt' => ['required'],
@@ -162,6 +173,7 @@ class PurchaseController extends Controller
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'product_id' => ['required', 'exists:purchase_products,id'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
+            'unit_id' => ['required', 'exists:units,id'],
             'total_coast' => ['required', 'numeric'],
             'quintity' => ['required', 'numeric'],
             'date' => ['required', 'date'],

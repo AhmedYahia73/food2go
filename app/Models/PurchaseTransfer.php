@@ -17,6 +17,7 @@ class PurchaseTransfer extends Model
         'admin_id',
         'category_id',
         'status',
+        'unit_id',
     ];
 
     public function category(){
