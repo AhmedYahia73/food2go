@@ -7,6 +7,7 @@ use App\Http\Controllers\api\cashier\make_order\PendingOrderController;
 use App\Http\Controllers\api\cashier\address\AddressController;
 use App\Http\Controllers\api\cashier\user\AddressController as UserAddressController;
 use App\Http\Controllers\api\cashier\customer\CustomerController;
+use App\Http\Controllers\api\admin\customer\CustomerController as CustomerAdminController;
 use App\Http\Controllers\api\cashier\user\UserController; 
 use App\Http\Controllers\api\cashier\Home\HomeController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
@@ -90,11 +91,15 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CustomerController::class)
     ->prefix('/customer')->group(function(){
         Route::get('/', 'view');
-        Route::get('/customer_singl_page/{id}', 'single_page');
-        Route::post('/single_page_filter/{id}', 'single_page_filter');
-        Route::post('/pay_debit', 'pay_debit');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
+    });
+
+    Route::controller(CustomerAdminController::class)
+    ->prefix('customer')->group(function(){
+        Route::get('/customer_singl_page/{id}', 'single_page')->middleware('can:view_customer');
+        Route::post('/single_page_filter/{id}', 'single_page_filter')->middleware('can:view_customer');
+        Route::post('/pay_debit', 'pay_debit');
     });
     Route::controller(UserAddressController::class)
     ->prefix('user/address')->group(function(){
