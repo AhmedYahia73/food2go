@@ -94,7 +94,7 @@ class WaiterCallController extends Controller
         
         return response()->json([
             'success' => 'You call Pay success',
-            "notifications" => $notifications
+            "notifications" => $notifications->count()
         ]);
     }
 }
