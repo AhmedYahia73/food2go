@@ -97,8 +97,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
     Route::controller(CustomerAdminController::class)
     ->prefix('customer')->group(function(){
-        Route::get('/customer_singl_page/{id}', 'single_page')->middleware('can:view_customer');
-        Route::post('/single_page_filter/{id}', 'single_page_filter')->middleware('can:view_customer');
+        Route::get('/customer_singl_page/{id}', 'single_page');
+        Route::post('/single_page_filter/{id}', 'single_page_filter');
         Route::post('/pay_debit', 'pay_debit');
     });
     Route::controller(UserAddressController::class)
