@@ -20,6 +20,7 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 // ____________________________________________________
 
 use App\Models\Order;
+use App\Models\UserDue;
 use App\Models\Kitchen;
 use App\Models\KitchenOrder;
 use App\Models\OrderCart;
@@ -62,7 +63,7 @@ class CashierMakeOrderController extends Controller
     private TimeSittings $TimeSittings, private OrderFinancial $financial,
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
     private Delivery $delivery, private CashierBalance $cashier_balance,
-    private CashierMan $cashier_man){}
+    private CashierMan $cashier_man, private UserDue $user_due){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -302,12 +303,26 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
         ]);
+        if($request->due && !$request->user_id){ 
+            return response()->json([
+                "errors" => "user_id is required"
+            ], 400); 
+        }
         $order = $this->delivery_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
         if(!$request->order_pending){
             $this->preparing_delivery($request, $order['order']->id);
+        }
+        if($request->due){
+            $user_due = $this->user_due
+            ->create([
+                "user_id" => $request->user_id,
+                "order_id" => $order["order"]->id,
+                "cashier_id" => $request->user()->id,
+                "amount" => $request->amount,
+            ]); 
         }
         return response()->json([
             'success' => $order['order'], 
@@ -445,12 +460,34 @@ class CashierMakeOrderController extends Controller
             'status' => 1,
             'take_away_status' => 'preparing',
         ]);
+        if($request->due && !$request->user_id){ 
+            return response()->json([
+                "errors" => "user_id is required"
+            ], 400); 
+        }
         if($request->due){
-            
+            $user = $this->user
+            ->where("id", $request->user_id)
+            ->first();
+            $due = $user->due + $request->due;
+            if($user->max_due < $due){
+                return response()->json([
+                    "errors" => "user is exceed the alloed limit"
+                ], 400); 
+            }
         }
         $order = $this->take_away_make_order($request);
         if(!$request->order_pending){
             $this->preparing_takeaway($request, $order['order']->id);
+        }
+        if($request->due){
+            $user_due = $this->user_due
+            ->create([
+                "user_id" => $request->user_id,
+                "order_id" => $order["order"]->id,
+                "cashier_id" => $request->user()->id,
+                "amount" => $request->amount,
+            ]); 
         }
 
         return response()->json([

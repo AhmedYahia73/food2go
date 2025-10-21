@@ -15,13 +15,16 @@ use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderDetail;
-use App\Models\TimeSittings; 
+use App\Models\TimeSittings;
+use App\Models\UserPaidDebt;
+use App\Models\UserDue;
 
 class CustomerController extends Controller
 {
     public function __construct(private User $customers,
     private Order $orders, private OrderDetail $order_details
-    , private TimeSittings $TimeSittings){}
+    , private TimeSittings $TimeSittings, 
+    private UserDue $user_due, private UserPaidDebt $user_debt){}
     protected $customerRequest = [
         'f_name',
         'l_name',
@@ -101,6 +104,19 @@ class CustomerController extends Controller
         ->get()
         ->sortByDesc("product_count")
         ->first();
+        $user = $this->customers
+        ->where("id", $id)
+        ->first();
+        $user_info = [
+            "id" => $id,
+            "f_name" => $user->f_name,
+            "l_name" => $user->l_name,
+            "email" => $user->email,
+            "phone" => $user->phone,
+            "phone_2" => $user->phone_2,
+            "points" => $user->points,
+            "image_link" => $user->image_link, 
+        ];
 
         if ($greatest_product) {
             $greatest_product->load('product');
@@ -117,11 +133,78 @@ class CustomerController extends Controller
         else{
            $greatest_product = null; 
         }
+        $paid_debt = $this->user_debt
+        ->where("user_id", $id)
+        ->with(["cashier", "financial", "admin"])
+        ->get()
+        ->map(function($item){
+            return [
+                "amount" => $item->amount,
+                "cashier" => $item?->cashier?->user_name,
+                "admin" => $item?->admin?->name,
+                "date" => $item->created_at,
+                "financial" => $item?->financial?->map(function($element){
+                    return [
+                        "financial" => $element->name,
+                        "amount" => $element?->pivot?->amount,
+                    ];
+                }),
+            ];
+        });
+        $order_due = $this->user_due
+        ->where("user_id", $id)
+        ->get()
+        ->map(function($item){
+            return [
+                "amount" => $item->amount,
+                "order_id" => $item->order_id,
+                "cashier" => $item?->cashier?->user_name,
+                "order_number" => $item?->order?->order_number,
+            ];
+        });
+         
+        // user_debt user_due
 
         return response()->json([
             "orders" => $orders,
             "total_amount" => $total_amount,
-            'greatest_product' => $greatest_product
+            'greatest_product' => $greatest_product,
+            'user_info' => $user_info,
+            'due' => $user->due,
+            'paid_debt' => $paid_debt,
+            "order_due" => $order_due
+        ]);
+    }
+
+    public function pay_debit(Request $request){
+        $validator = Validator::make($request->all(), [
+            'financials' => 'required|array',
+            'financials.*.id' => 'required|exists:finantiol_acountings,id',
+            'financials.*.amount' => 'required|numeric',
+            'amount' => 'required|numeric',
+            'user_id' => 'required|exists:users,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $user_debt = $this->user_debt
+        ->create([
+            'user_id' => $request->user_id , 
+            'cashier_id' =>  $request->user()->role == "cashier" ? $request->user()->id : null ,
+            'admin_id' =>  $request->user()->role == "admin" ? $request->user()->id : null,
+            'amount' => $request->amount,
+        ]);
+
+        foreach ($request->financials as $item) {
+            $user_debt->financial()
+            ->attach($item['id'], ["amount" => $item['amount']]);
+        }
+
+        return response()->json([
+            'success' => 'You pament success'
         ]);
     }
 
