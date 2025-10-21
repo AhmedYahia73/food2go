@@ -17,7 +17,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\TimeSittings;
 use App\Models\UserPaidDebt;
-use App\Models\UserDue;
+use App\Models\UserDue; 
 
 class CustomerController extends Controller
 {
@@ -197,7 +197,7 @@ class CustomerController extends Controller
             'admin_id' =>  $request->user()->role == "admin" ? $request->user()->id : null,
             'amount' => $request->amount,
         ]);
-        $user = $this->user
+        $user = $this->customers
         ->where("id", $request->user_id)
         ->first();
         $user->update([
