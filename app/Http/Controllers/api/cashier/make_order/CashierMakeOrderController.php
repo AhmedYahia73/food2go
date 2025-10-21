@@ -303,10 +303,21 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
         ]);
-        if($request->due && !$request->user_id){ 
-            return response()->json([
-                "errors" => "user_id is required"
-            ], 400); 
+        if($request->due){
+            if(!$request->user_id){
+                return response()->json([
+                    "errors" => "user_id is  required"
+                ], 400); 
+            }
+            $user = $this->user
+            ->where("id", $request->user_id)
+            ->first();
+            $due = $user->due + $request->due;
+            if($user->max_due < $due){
+                return response()->json([
+                    "errors" => "user is exceed the alloed limit"
+                ], 400); 
+            }
         }
         $order = $this->delivery_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
