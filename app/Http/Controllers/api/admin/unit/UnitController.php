@@ -85,7 +85,8 @@ class UnitController extends Controller
 
         $unitRequest = $validator->validated();
         $unit = $this->unit
-        ->create($unitRequest);
+        ->where("id", $id)
+        ->update($unitRequest);
 
         return response()->json([
             "success" => "You update unit success"

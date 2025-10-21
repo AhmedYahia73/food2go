@@ -29,6 +29,8 @@ class CustomerController extends Controller
         'phone',
         'phone_2',
         'password',
+        'due_status',
+        'max_due', 
         'status',
     ];
     protected $customerUpdateRequest = [
@@ -37,6 +39,8 @@ class CustomerController extends Controller
         'email',
         'phone',
         'phone_2',
+        'due_status',
+        'max_due', 
         'status',
     ];
     use image;

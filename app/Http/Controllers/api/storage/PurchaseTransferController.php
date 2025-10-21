@@ -11,12 +11,14 @@ use App\Models\PurchaseProduct;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseStore;
 use App\Models\PurchaseStock;
+use App\Models\Unit;
 
 class PurchaseTransferController extends Controller
 {
     public function __construct(private PurchaseTransfer $purchases,
     private PurchaseProduct $products, private PurchaseCategory $categories,
-    private PurchaseStore $stores, private PurchaseStock $stock){} 
+    private PurchaseStore $stores, private PurchaseStock $stock,
+    private Unit $units){} 
 
     public function view(Request $request){ 
         $purchases = $this->purchases
@@ -52,12 +54,17 @@ class PurchaseTransferController extends Controller
         ->select('id', 'name')
         ->where('status', 1)
         ->get(); 
+        $units = $this->units
+        ->select("name", "status")
+        ->where("status", 1)
+        ->get();
 
         return response()->json([
             'purchases' => $purchases,
             'categories' => $categories,
             'products' => $products,
             'stores' => $stores, 
+            'units' => $units, 
         ]);
     }
 
@@ -67,6 +74,7 @@ class PurchaseTransferController extends Controller
             'category_id' => ['required', 'exists:purchase_categories,id'], 
             'product_id' => ['required', 'exists:purchase_products,id'], 
             'quintity' => ['required', 'numeric'], 
+            'unit_id' => ['required', 'exists:units,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -82,6 +90,7 @@ class PurchaseTransferController extends Controller
             'product_id' => $request->product_id,
             'admin_id' => $request->user()->id,
             'quintity' => $request->quintity,
+            'unit_id' => $request->unit_id,
             'status' => 'pending',
         ]);
 

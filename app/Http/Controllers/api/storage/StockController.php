@@ -26,6 +26,7 @@ class StockController extends Controller
                 'product' => $item?->product?->name,
                 'store' => $item?->store?->name,
                 'quantity' => $item->quantity,
+                'unit' => $item?->unit?->name,
             ];
         });
 
