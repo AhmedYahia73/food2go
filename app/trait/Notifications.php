@@ -18,6 +18,7 @@ trait Notifications
         string $body,
         array $data = []
     ): ?MulticastSendReport {
+        $tokens = array_filter($tokens); 
         if (count($tokens) > 0) {
             $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
             $this->messaging = $factory->createMessaging();
@@ -25,7 +26,6 @@ trait Notifications
             $message = CloudMessage::new()
                 ->withNotification(Notification::create($title, $body))
                 ->withData($data);
-            $tokens = array_filter($tokens); 
             return $this->messaging->sendMulticast($message, $tokens);
         }
 
