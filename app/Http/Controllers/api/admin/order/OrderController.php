@@ -27,7 +27,7 @@ class OrderController extends Controller
     public function transfer_branch(Request $request, $id){
         // admin/order/transfer_branch
         // keys => branch_id
-        if ($request->role == "admin") {
+        if ($request->user()->role == "admin") {
             $orders = $this->orders
             ->where('id', $id)
             ->update([
@@ -534,7 +534,7 @@ class OrderController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
         $start = $start->subDay();
-        if ($request->role == "admin") {
+        if ($request->user()->role == "admin") {
             $orders = $this->orders
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
             ,'order_status',
@@ -814,7 +814,7 @@ class OrderController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
         $start = $start->subDay();
-        if ($request->role == "admin") {
+        if ($request->user()->role == "admin") {
             $orders = $this->orders
             ->where('pos', 0)
             ->whereBetween('created_at', [$start, $end])
@@ -1068,7 +1068,7 @@ class OrderController extends Controller
     public function count_orders(Request $request){
         // https://bcknd.food2go.online/admin/order/count
         
-        if ($request->role == "admin") {
+        if ($request->user()->role == "admin") {
             $orders = $this->orders 
             ->where('pos', 0)
             ->whereNull('captain_id')
@@ -1419,7 +1419,7 @@ class OrderController extends Controller
         // Key
         // orders
         $total = 0;
-        if ($request->role == "admin") {
+        if ($request->user()->role == "admin") {
             if ($request->orders) {
                 $old_orders = $request->orders;
                 $new_orders = $this->orders
@@ -1721,7 +1721,7 @@ class OrderController extends Controller
             ],400);
         }
 
-        if ($request->role == "admin") {
+        if ($request->user()->role == "admin") {
             $order = $this->orders
             ->where('id', $id)
             ->first();

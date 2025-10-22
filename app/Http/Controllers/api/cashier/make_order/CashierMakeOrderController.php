@@ -45,6 +45,7 @@ use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
 use App\Models\CashierMan;
 use App\Models\Delivery;
+use App\Models\DiscountModule;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -63,7 +64,8 @@ class CashierMakeOrderController extends Controller
     private TimeSittings $TimeSittings, private OrderFinancial $financial,
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
     private Delivery $delivery, private CashierBalance $cashier_balance,
-    private CashierMan $cashier_man, private UserDue $user_due){}
+    private CashierMan $cashier_man, private UserDue $user_due,
+    private DiscountModule $discount_module){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -731,8 +733,6 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-
-
     public function dine_in_split_payment(DineinSplitRequest $request){
         // /cashier/delivery_order
         // Keys
@@ -997,6 +997,30 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => 'you void order success'
+        ]);
+    }
+
+    public function discount_module(Request $request){
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $discount_module = $this->discount_module
+        ->select("discount")
+        ->whereHas("module", function($query) use($request){
+            $query->where("branch_id", $request->branch_id);
+        })
+        ->where("status", 1)
+        ->first();
+
+        return response()->json([
+            "discount" => $discount_module?->discount,
+            "module" => $discount_module?->module?->select("module"),
         ]);
     }
 
