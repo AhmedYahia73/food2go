@@ -53,11 +53,11 @@ class WaiterCallController extends Controller
         // ?->pluck('token')
         // ?->toArray();
         $users_tokens1 = $this->waiter
-        ->where("branch_id", $branch_id)
+        ->where("branch_id", $cafe_table->branch_id)
         ->get()
         ?->pluck("fcm_token");
         $users_tokens2 = $this->captain_order
-        ->where("branch_id", $branch_id)
+        ->where("branch_id", $cafe_table->branch_id)
         ->pluck('fcm_token');
         $device_token = $users_tokens1->merge($users_tokens2);
         $body = 'Table ' . $cafe_table->table_number . 
