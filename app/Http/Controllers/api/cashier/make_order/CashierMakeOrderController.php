@@ -1012,6 +1012,7 @@ class CashierMakeOrderController extends Controller
 
         $discount_module = $this->discount_module
         ->select("discount")
+        ->with('module')
         ->whereHas("module", function($query) use($request){
             $query->where("branch_id", $request->branch_id);
         })
