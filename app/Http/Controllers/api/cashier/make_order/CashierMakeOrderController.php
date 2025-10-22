@@ -1020,7 +1020,7 @@ class CashierMakeOrderController extends Controller
         ->first();
 
         return response()->json([
-            "discount" => $discount_module?->discount,
+            "discount" => $discount_module,
             "module" => $discount_module?->module?->pluck("module"),
         ]);
     }
