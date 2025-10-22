@@ -52,11 +52,16 @@ class WaiterCallController extends Controller
         // ->get()
         // ?->pluck('token')
         // ?->toArray();
-        $device_token = $this->waiter
-        ->where('branch_id', $cafe_table->branch_id)
+        $users_tokens1 = $this->waiter
+        ->where("branch_id", $branch_id)
         ->get()
-        ?->pluck("fcm_token")
-        ?->toArray();
+        ?->pluck("fcm_token");
+        $users_tokens2 = $this->captain_order
+        ->where("branch_id", $branch_id)
+        ->pluck('fcm_token');
+        $device_token = $users_tokens1->merge($users_tokens2);
+        $body = 'Table ' . $cafe_table->table_number . 
+            ' at location ' . $cafe_table?->location?->name . ' Want Waiter';
         $this->sendNotificationToMany($device_token, $cafe_table->table_number, $body);
         
         return response()->json([
@@ -73,9 +78,16 @@ class WaiterCallController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        $cafe_table = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->with('location:id,name')
+        ->first();
+        $branch_id = $cafe_table->branch_id;
         $users_tokens1 = $this->cashier_man
+        ->where("branch_id", $branch_id)
         ->pluck('fcm_token');
         $users_tokens2 = $this->captain_order
+        ->where("branch_id", $branch_id)
         ->pluck('fcm_token');
         $device_token = $this->device_token
         ->whereNotNull("admin_id")
@@ -83,10 +95,6 @@ class WaiterCallController extends Controller
         ?->pluck('token');
         $users_tokens = $users_tokens1->merge($users_tokens2, $device_token)
         ->filter()->toArray();
-        $cafe_table = $this->cafe_table
-        ->where('id', $request->table_id)
-        ->with('location:id,name')
-        ->first();
         $body = 'Table ' . $cafe_table->table_number . 
             ' at location ' . $cafe_table?->location?->name . ' Want To Pay';
   
