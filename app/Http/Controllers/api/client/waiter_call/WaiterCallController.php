@@ -60,6 +60,7 @@ class WaiterCallController extends Controller
         ->where("branch_id", $cafe_table->branch_id)
         ->pluck('fcm_token');
         $device_token = $users_tokens1->merge($users_tokens2);
+        $device_token = $device_token->toArray();
         $body = 'Table ' . $cafe_table->table_number . 
             ' at location ' . $cafe_table?->location?->name . ' Want Waiter';
         $this->sendNotificationToMany($device_token, $cafe_table->table_number, $body);
