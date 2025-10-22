@@ -105,9 +105,17 @@ use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 use App\Http\Controllers\api\admin\table\TableOrderController;
 
+use App\Http\Controllers\api\admin\profile\ProfileController;
+
 use App\Http\Controllers\api\admin\discount_module\DiscountModuleController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
+    Route::controller(ProfileController::class)
+    ->prefix('profile')->group(function(){
+        Route::get('/', 'profile');
+        Route::post('/update', 'update');
+    });
+
     Route::controller(GroupController::class)
     ->prefix('group')->group(function(){
         Route::get('/', 'view');
