@@ -54,6 +54,10 @@ class Product extends Model
         return $this->belongsToMany(UpsalingGroup::class, 'product_its_upsaling', 'product_id', 'upsaling_id');
     }
 
+    public function unit(){
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
+
     public function product_pricing(){
         return $this->hasMany(ProductPricing::class, 'product_id');
     }

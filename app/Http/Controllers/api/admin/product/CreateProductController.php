@@ -41,7 +41,10 @@ class CreateProductController extends Controller
         'tax_id',
         'status',
         'recommended',
-        'points', 
+        'points',
+        'unit_id',
+        'weight_point',
+        'weight_status',
     ];
     use image;
     use translaion;

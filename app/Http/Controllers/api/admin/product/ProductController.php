@@ -27,7 +27,8 @@ class ProductController extends Controller
         $locale = $request->locale ?? 'en';
         $products = $this->products
         ->with(['addons', 'excludes', 'extra', 'variations.options.extra',
-        'category', 'subCategory', 'discount', 'tax', 'group_products:id,name'])
+        'category', 'subCategory', 'discount', 'tax', 'group_products:id,name'
+        , 'unit:id,name'])
         ->get()
         ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
@@ -66,7 +67,7 @@ class ProductController extends Controller
         ->with(['addons', 'excludes', 'extra' => function($query){
             $query->with('pricing', 'group');
         }, 'variations.options.extra.group', 'category', 'subCategory', 'discount', 'tax',
-        'group_products:id,name'])
+        'group_products:id,name', 'unit:id,name'])
         ->where('id', $id)
         ->first();//extra_id
         $translations = $this->translations
