@@ -1011,7 +1011,6 @@ class CashierMakeOrderController extends Controller
         }
 
         $discount_module = $this->discount_module
-        ->select("discount")
         ->with('module')
         ->whereHas("module", function($query) use($request){
             $query->where("branch_id", $request->branch_id);
@@ -1020,7 +1019,7 @@ class CashierMakeOrderController extends Controller
         ->first();
 
         return response()->json([
-            "discount" => $discount_module,
+            "discount" => $discount_module->discount,
             "module" => $discount_module?->module?->pluck("module"),
         ]);
     }
