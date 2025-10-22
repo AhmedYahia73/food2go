@@ -11,6 +11,7 @@ use App\trait\PlaceOrder;
 use App\trait\PaymentPaymob;
 use Carbon\Carbon;
 use App\Events\OrderEvent;
+use App\trait\Notifications; 
 
 use App\Models\CompanyInfo;
 use App\Models\Order;
@@ -29,6 +30,8 @@ use App\Models\Setting;
 use App\Models\TimeSittings;
 use App\Models\Branch;
 use App\Models\Address;
+use App\Models\DeviceToken;
+use App\Models\NewNotification;
 
 class MakeOrderController extends Controller
 {
@@ -38,10 +41,12 @@ class MakeOrderController extends Controller
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
     private PaymentMethodAuto $payment_method_auto,private Setting $settings, 
     private Address $address, private TimeSittings $TimeSittings,
-    private CompanyInfo $company_info, private Branch $branches){}
+    private CompanyInfo $company_info, private Branch $branches,
+    private DeviceToken $device_tokens){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
+    use Notifications;
 
     public function order(OrderRequest $request){
         // https://bcknd.food2go.online/customer/make_order
@@ -171,6 +176,15 @@ class MakeOrderController extends Controller
             // $order = $order['payment']; 
             $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens, $payment_method_auto);
              $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
+
+            $body = 'New Order #' . $order_id->order_number;
+            $device_token = $this->device_tokens
+            ->whereNotNull('admin_id')
+            ->get()
+            ?->pluck("fcm_token")
+            ?->toArray();
+            $this->sendNotificationToMany($device_token, $order_id->order_number, $body);
+            
             return response()->json([
                 'success' => $order_id->id,
                 'paymentLink' => $paymentLink,
@@ -182,6 +196,14 @@ class MakeOrderController extends Controller
                 return response()->json($order, 400);
             } // new_order
             broadcast(new OrderEvent($order['payment']))->toOthers();
+
+            $body = 'New Order #' . $order->order_number;
+            $device_token = $this->device_tokens
+            ->whereNotNull('admin_id')
+            ->get()
+            ?->pluck("fcm_token")
+            ?->toArray();
+            $this->sendNotificationToMany($device_token, $order->order_number, $body);
             return response()->json([
                 'success' => $order['payment']->id, 
             ]);

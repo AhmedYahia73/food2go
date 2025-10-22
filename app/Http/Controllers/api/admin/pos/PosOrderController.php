@@ -183,6 +183,7 @@ class PosOrderController extends Controller
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
+        $start = $start->subDay();
         
         $orders = $this->order
         ->where('pos', 1)

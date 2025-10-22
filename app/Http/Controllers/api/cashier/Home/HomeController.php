@@ -50,6 +50,7 @@ class HomeController extends Controller
         ->where('pos', 1)
         ->where('order_active', 1)
         ->where('cashier_man_id', $request->user()->id)
+        ->orderByDesc("id")
         ->get()
         ->map(function($item){
             $order_status = null;
