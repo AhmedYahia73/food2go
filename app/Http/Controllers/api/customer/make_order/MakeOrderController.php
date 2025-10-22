@@ -197,13 +197,13 @@ class MakeOrderController extends Controller
             } // new_order
             broadcast(new OrderEvent($order['payment']))->toOthers();
 
-            $body = 'New Order #' . $order->order_number;
+            $body = 'New Order #' . $order['payment']->order_number;
             $device_token = $this->device_tokens
             ->whereNotNull('admin_id')
             ->get()
             ?->pluck("fcm_token")
             ?->toArray();
-            $this->sendNotificationToMany($device_token, $order->order_number, $body);
+            $this->sendNotificationToMany($device_token, $order['payment']->order_number, $body);
             return response()->json([
                 'success' => $order['payment']->id, 
             ]);

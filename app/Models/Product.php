@@ -37,7 +37,10 @@ class Product extends Model
         'points',
         'kitchen_id',
         'upsaling_group_id',
-        'favourite', 
+        'favourite',
+        'unit_id',
+        'weight_point',
+        'weight_status',
     ];
     protected $appends = ['image_link', 'orders_count', 'taxes', 'orders_count_branch'];
 
