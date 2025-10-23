@@ -127,6 +127,12 @@ class ClientMakeOrderController extends Controller
                         ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
                         ->withLocale($locale),
                 ]),
+                'group_products' => fn($q) => $q
+                ->withLocale($locale)
+                ->with([
+                    fn($q)=> $q->select("id", "name")
+                        ->withLocale($locale),
+                ])
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
@@ -179,6 +185,12 @@ class ClientMakeOrderController extends Controller
                     'variations' => fn($q) => $q->with([
                         'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
                     ])->withLocale($locale),
+                'group_products' => fn($q) => $q
+                ->withLocale($locale)
+                ->with([
+                    fn($q)=> $q->select("id", "name")
+                        ->withLocale($locale),
+                ])
                 ])
                 ->withLocale($locale)
                 ->where('item_type', '!=', 'offline')
