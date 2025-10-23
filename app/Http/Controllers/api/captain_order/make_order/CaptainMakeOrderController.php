@@ -117,7 +117,7 @@ class CaptainMakeOrderController extends Controller
             ->whereNotIn('category_id', $category_off)
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
-            ->where("favourite", 1)
+            ->where("favourite", 0)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {  
 
@@ -430,7 +430,7 @@ class CaptainMakeOrderController extends Controller
         }, 'sales_count', 'tax'])
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
-        ->where("favourite", 1)
+        ->where("favourite", 0)
         ->where('status', 1)
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
@@ -649,7 +649,7 @@ class CaptainMakeOrderController extends Controller
         }, 'sales_count', 'tax'])
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
-        ->where("favourite", 1)
+        ->where("favourite", 0)
         ->where('status', 1)
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
