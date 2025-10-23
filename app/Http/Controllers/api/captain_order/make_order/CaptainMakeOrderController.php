@@ -109,7 +109,7 @@ class CaptainMakeOrderController extends Controller
                 ]),
                   'group_products' => fn($q) => $q
                     ->with(['products' => fn($q) => $q
-                    ->select("id", "name")->withLocale($locale)]),
+                    ->select("products.id", "products.name")->withLocale($locale)]),
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'online')
