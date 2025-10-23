@@ -56,10 +56,11 @@ class UpsalingController extends Controller
         ->with(['products:id,name'])
         ->where("id", $id)
         ->first();
+        $names = $upsaling->translations()->select("id", "locale", "value");
 
         return response()->json([
             "id" => $upsaling->id,
-            "name" => $upsaling->name,
+            "names" => $names,
             "status" => $upsaling->status,
             "products" => $upsaling?->products
             ?->select("id", "name"),
