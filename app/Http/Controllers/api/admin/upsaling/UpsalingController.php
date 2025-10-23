@@ -8,11 +8,14 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\UpsalingGroup;
 use App\Models\Product;
+use App\Models\TranslationTbl;
+use App\Models\Translation;
 
 class UpsalingController extends Controller
 {
     public function __construct(private UpsalingGroup $upsaling,
-    private Product $products){}
+    private Product $products, private Translation $translations, 
+    private TranslationTbl $translation_tbl){}
 
     public function view(Request $request){
         $upsaling = $this->upsaling
@@ -56,7 +59,20 @@ class UpsalingController extends Controller
         ->with(['products:id,name'])
         ->where("id", $id)
         ->first();
-        $names = $upsaling->translations()->select("id", "locale", "value");
+        $translations = $this->translations
+        ->where('status', 1)
+        ->get();
+        foreach ($translations as $key => $item) {
+            $translation = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->get();
+            $names[] = [
+                'tranlation_id' => $item->id,
+                'tranlation_name' => $item->name,
+                'product_name' => $translation->where('key', $upsaling->name)
+                ->first()->value ?? null
+            ];
+        }
 
         return response()->json([
             "id" => $upsaling->id,
