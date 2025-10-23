@@ -142,7 +142,7 @@ class UpsalingController extends Controller
         ->where("id", $id)
         ->first();
         $upsaling->update([
-            "name" => $request->name ?? $upsaling->name,
+            "name" => $group_name ?? $upsaling->name,
             "status" => $request->status ?? $upsaling->status,
         ]);
         $upsaling->products()->sync($request->product_ids);
