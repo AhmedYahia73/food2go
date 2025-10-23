@@ -161,6 +161,7 @@ class KitchenController extends Controller
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
             'type' => 'required|in:kitchen,brista',
+            'preparing_time' => 'required|date_format:H:i:s',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -184,6 +185,7 @@ class KitchenController extends Controller
             'name' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
+            'preparing_time' => 'required|date_format:H:i:s',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

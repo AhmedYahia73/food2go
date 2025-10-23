@@ -16,6 +16,7 @@ class Kitchen extends Model
         'password',
         'branch_id',
         'type',
+        'preparing_time',
         'status',
     ];
 
