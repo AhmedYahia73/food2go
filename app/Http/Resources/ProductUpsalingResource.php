@@ -18,6 +18,7 @@ class ProductUpsalingResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
+            'products' => ProductUpsalingResource::collection($this->whenLoaded('products')),
         ];
     }
 }

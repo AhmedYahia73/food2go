@@ -71,7 +71,7 @@ class CaptainMakeOrderController extends Controller
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)
         ->get();
-        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        app()->setLocale($request->locale ?? 'en');
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();

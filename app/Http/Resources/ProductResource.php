@@ -56,8 +56,10 @@ class ProductResource extends JsonResource
                     'locale' => app()->getLocale()
                 ]),
                 'taxes' => $this->taxes->setting,
-                'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
-                'description' => $this->translations->where('key', $this->description)->first()?->value ?? $this->description,
+                'name' => $this->translations
+            ->where('locale', $locale)->where('key', $this->name)->first()?->value ?? $this->name,
+                'description' => $this->translations
+            ->where('locale', $locale)->where('key', $this->description)->first()?->value ?? $this->description,
                 'image' => $this->image,
                 'category_id' => $this->category_id,
                 'sub_category_id' => $this->sub_category_id,
@@ -141,8 +143,10 @@ class ProductResource extends JsonResource
                     'locale' => app()->getLocale()
                 ]),
                 'taxes' => $this->taxes->setting,
-                'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
-                'description' => $this->translations->where('key', $this->description)->first()?->value ?? $this->description,
+                'name' => $this->translations
+            ->where('locale', $locale)->where('key', $this->name)->first()?->value ?? $this->name,
+                'description' => $this->translations
+            ->where('locale', $locale)->where('key', $this->description)->first()?->value ?? $this->description,
                 'image' => $this->image,
                 'category_id' => $this->category_id,
                 'sub_category_id' => $this->sub_category_id,
