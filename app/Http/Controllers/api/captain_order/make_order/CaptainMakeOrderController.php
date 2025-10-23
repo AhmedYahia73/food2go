@@ -70,8 +70,8 @@ class CaptainMakeOrderController extends Controller
         }
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)
-        ->get();
-        app()->setLocale($request->locale ?? 'en');
+        ->get();$locale = $request->locale ?? $request->query('locale', app()->getLocale());
+        app()->setLocale($locale); 
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();

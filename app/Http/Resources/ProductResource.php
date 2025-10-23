@@ -32,7 +32,7 @@ class ProductResource extends JsonResource
             $addons = AddonResource::collection($this->whenLoaded('addons'));
         }
     
-        $locale = app()->getLocale(); // Use the application's current locale
+        $locale = $this->locale ?? app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
             $price = empty($this->tax) ? $this->price: 
             ($this->tax->type == 'value' ? $this->price + $this->tax->amount 
