@@ -117,7 +117,6 @@ class CaptainMakeOrderController extends Controller
             ->whereNotIn('category_id', $category_off)
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
-            ->where("favourite", 1)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {  
 
@@ -165,7 +164,9 @@ class CaptainMakeOrderController extends Controller
                 'group_products' => collect($item['group_products']),
                 'variations' => collect($item['variations'])?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
             ];
-        }); 
+        })
+        ->where("favourite", 1)
+        ->values(); 
 
         return response()->json([
             'categories' => $categories,
