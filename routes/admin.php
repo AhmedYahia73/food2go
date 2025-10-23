@@ -485,6 +485,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/', 'view')->middleware('can:view_customer');
         Route::get('/customer_singl_page/{id}', 'single_page')->middleware('can:view_customer');
         Route::post('/single_page_filter/{id}', 'single_page_filter')->middleware('can:view_customer');
+        Route::get('/due_user', 'due_user');
         Route::post('/pay_debit', 'pay_debit');
         Route::get('/item/{id}', 'customer')->middleware('can:edit_customer');
         Route::post('/add', 'create')->middleware('can:add_customer');

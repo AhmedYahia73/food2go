@@ -319,6 +319,17 @@ class CustomerController extends Controller
         ]);
     }
 
+    public function due_user(Request $request){
+        $users = User::
+        where("due", ">", 0)
+        ->get()
+        ->select("id", "due", "name", "image_link", "phone", "phone_2", "email");
+
+        return response()->json([
+            "users" => $users
+        ]);
+    }
+
     public function status(Request $request, $id){
         // https://bcknd.food2go.online/admin/customer/status/{id}
         // Keys
@@ -417,4 +428,5 @@ class CustomerController extends Controller
             'success' => 'You delete data success'
         ]);
     }
+    
 }
