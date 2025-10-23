@@ -208,8 +208,9 @@ class CaptainMakeOrderController extends Controller
                         ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
                         ->withLocale($locale),
                 ]),
-                'group_products' => fn($q) => $q
-                ->with(['products:id,name'])
+                  'group_products' => fn($q) => $q
+                    ->with(['products' => fn($q) => $q
+                    ->select("products.id", "products.name")->withLocale($locale)]),
             ])
             ->withLocale($locale)
             ->where('id', $id)
@@ -304,8 +305,9 @@ class CaptainMakeOrderController extends Controller
                         ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
                         ->withLocale($locale),
                 ]),
-                'group_products' => fn($q) => $q
-                ->with(['products:id,name'])
+                  'group_products' => fn($q) => $q
+                    ->with(['products' => fn($q) => $q
+                    ->select("products.id", "products.name")->withLocale($locale)]),
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'online')
