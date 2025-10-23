@@ -16,7 +16,8 @@ class GroupProductResource extends JsonResource
     { 
         return [
             'id' => $this->id,
-            'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
+            'name' => $this->translations->where('key', $this->name)
+            ->where('locale', $locale)->first()?->value ?? $this->name,
             'status' => $this->status,
             'products' => ProductUpsalingResource::collection($this->whenLoaded('products'))
             ->additional([
