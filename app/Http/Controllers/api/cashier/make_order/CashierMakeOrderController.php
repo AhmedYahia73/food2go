@@ -71,6 +71,18 @@ class CashierMakeOrderController extends Controller
     use PaymentPaymob;
     use POS;
 
+    public function list_due_users(Request $request){
+        $users =$this->user
+        ->where("due_status", 1)
+        ->where("status", 1)
+        ->get()
+        ->select("phone", "name", "can_debit", "phone_2", "id");
+
+        return response()->json([
+            "users" => $users
+        ]);
+    }
+
     public function pos_orders(Request $request){
         // /cashier/orders
         

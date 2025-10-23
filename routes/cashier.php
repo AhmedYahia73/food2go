@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
         Route::get('/get_order/{id}', 'get_order');
         Route::get('/orders', 'pos_orders');
+        Route::get('/list_due_users', 'list_due_users');
         Route::post('/preparing', 'preparing');
 
         Route::put('/take_away_status/{id}', 'take_away_status');

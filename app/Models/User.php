@@ -43,10 +43,16 @@ class User extends Authenticatable
         'due',
         'deleted_at',
     ];
-    protected $appends = ['role', 'orders_count', 'image_link', 'name', 'type', 'orders_count_branch'];
+    protected $appends = ['role', 'orders_count', 'image_link', 'name', 'type', 'orders_count_branch', "can_debit"];
 
     public function getNameAttribute(){
         return $this->attributes['f_name'] . ' ' . $this->attributes['l_name'];
+    }
+    
+    public function getCanDebitAttribute(){
+        if(isset($this->attributes['max_due']) && isset($this->attributes['due'])){
+            return $this->attributes['max_due'] - $this->attributes['due'];
+        }
     }
 
     public function getTypeAttribute(){
