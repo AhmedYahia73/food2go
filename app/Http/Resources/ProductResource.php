@@ -32,7 +32,7 @@ class ProductResource extends JsonResource
             $addons = AddonResource::collection($this->whenLoaded('addons'));
         }
     
-        $locale = $this->locale ?? app()->getLocale(); // Use the application's current locale
+        $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
             $price = empty($this->tax) ? $this->price: 
             ($this->tax->type == 'value' ? $this->price + $this->tax->amount 
@@ -51,15 +51,10 @@ class ProductResource extends JsonResource
             $tax = $price;
             return [
                 'id' => $this->id,
-                'allExtras' => ExtraResource::collection($this->whenLoaded('extra'))  
-                ->additional([
-                    'locale' => app()->getLocale()
-                ]),
+                'allExtras' => ExtraResource::collection($this->whenLoaded('extra')),
                 'taxes' => $this->taxes->setting,
-                'name' => $this->translations
-            ->where('locale', $locale)->where('key', $this->name)->first()?->value ?? $this->name,
-                'description' => $this->translations
-            ->where('locale', $locale)->where('key', $this->description)->first()?->value ?? $this->description,
+                'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
+                'description' => $this->translations->where('key', $this->description)->first()?->value ?? $this->description,
                 'image' => $this->image,
                 'category_id' => $this->category_id,
                 'sub_category_id' => $this->sub_category_id,
@@ -81,29 +76,14 @@ class ProductResource extends JsonResource
                 'points' => $this->points,
                 'image_link' => $this->image_link,
                 'orders_count' => $this->orders_count,
-                'category' => CategoryResource::collection($this->whenLoaded('category'))  
-                ->additional([
-                    'locale' => app()->getLocale()
-                ]),
-                'subCategory' => CategoryResource::collection($this->whenLoaded('subCategory'))
-                ->additional([
-                    'locale' => app()->getLocale()
-                ]),
+                'category' => CategoryResource::collection($this->whenLoaded('category')),
+                'subCategory' => CategoryResource::collection($this->whenLoaded('subCategory')),
                 'discount' => $this->whenLoaded('discount'),
                 'tax' => $this->whenLoaded('tax'),
-                'group_products' => GroupProductResource::collection($this->whenLoaded('group_products'))
-                ->additional([
-                    'locale' => app()->getLocale()
-                ]),
+                'group_products' => GroupProductResource::collection($this->whenLoaded('group_products')),
                 'addons' => $addons, 
-                'excludes' => ExcludeResource::collection($this->whenLoaded('excludes'))
-                ->additional([
-                    'locale' => app()->getLocale()
-                ]),
-                'variations' => VariationResource::collection($this->whenLoaded('variations'))  
-                ->additional([
-                    'locale' => app()->getLocale()
-                ]),
+                'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')), 
+                'variations' => VariationResource::collection($this->whenLoaded('variations')),
                 'favourite_product' => $this->whenLoaded('favourite_product'),
                 'sales_count' => $this->whenLoaded('sales_count'),
                 'favourite' => is_bool($this->favourites) ? $this->favourite : false,
@@ -138,24 +118,16 @@ class ProductResource extends JsonResource
             }
             return [
                 'id' => $this->id,
-                'allExtras' => ExtraResource::collection($this->whenLoaded('extra'))
-                  ->additional([
-                    'locale' => app()->getLocale()
-                ]),
+                'allExtras' => ExtraResource::collection($this->whenLoaded('extra')),
                 'taxes' => $this->taxes->setting,
-                'name' => $this->translations
-            ->where('locale', $locale)->where('key', $this->name)->first()?->value ?? $this->name,
-                'description' => $this->translations
-            ->where('locale', $locale)->where('key', $this->description)->first()?->value ?? $this->description,
+                'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
+                'description' => $this->translations->where('key', $this->description)->first()?->value ?? $this->description,
                 'image' => $this->image,
                 'category_id' => $this->category_id,
                 'sub_category_id' => $this->sub_category_id,
                 'item_type' => $this->item_type,
                 'stock_type' => $this->stock_type,
-                'group_products' => GroupProductResource::collection($this->whenLoaded('group_products'))
-                  ->additional([
-                    'locale' => app()->getLocale()
-                ]),
+                'group_products' => GroupProductResource::collection($this->whenLoaded('group_products')),
                 'number' => $this->number,
                 'price' => $price,
                 'price_after_discount' => $discount,
