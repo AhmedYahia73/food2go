@@ -68,7 +68,10 @@ class UpsalingController extends Controller
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'names' => 'required|array',
+            'names.*.name' => 'required',
+            'names.*.tranlation_id' => 'required',
+            'names.*.tranlation_name' => 'required',
             'status' => 'required|boolean',
             'product_ids' => 'required|array',
             'product_ids.*' => 'required|exists:products,id',
@@ -79,13 +82,21 @@ class UpsalingController extends Controller
             ],400);
         }
 
-        $upsalingRequest = $validator->validated();
+        $names = $request->names;
+        $group_name = $names[0]['name'];
         $upsaling = $this->upsaling
         ->create([
-            "name" => $request->name,
+            "name" => $group_name,
             "status" => $request->status,
         ]);
         $upsaling->products()->attach($request->product_ids);
+        foreach ($names as $item) {
+            $upsaling->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $group_name,
+                'value' => $item['name']
+            ]);
+        }
 
         return response()->json([
             "success" => "You add upsaling"
@@ -94,7 +105,10 @@ class UpsalingController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'names' => 'required|array',
+            'names.*.name' => 'required',
+            'names.*.tranlation_id' => 'required',
+            'names.*.tranlation_name' => 'required',
             'status' => 'required|boolean',
             'product_ids' => 'required|array',
             'product_ids.*' => 'required|exists:products,id',
@@ -104,6 +118,9 @@ class UpsalingController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+
+        $names = $request->names;
+        $group_name = $names[0]['name'];
         $upsaling = $this->upsaling
         ->where("id", $id)
         ->first();
@@ -112,6 +129,13 @@ class UpsalingController extends Controller
             "status" => $request->status ?? $upsaling->status,
         ]);
         $upsaling->products()->sync($request->product_ids);
+        foreach ($names as $item) {
+            $upsaling->translations()->create([
+                'locale' => $item['tranlation_name'],
+                'key' => $group_name,
+                'value' => $item['name']
+            ]);
+        }
 
         return response()->json([
             "success" => "You update upsaling"

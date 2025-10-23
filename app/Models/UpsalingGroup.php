@@ -17,4 +17,9 @@ class UpsalingGroup extends Model
     public function products(){
         return $this->belongsToMany(Product::class, "upsaling_group_product", "upsaling_group_id", "product_id");
     }
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }
