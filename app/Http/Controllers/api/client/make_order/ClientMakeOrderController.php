@@ -301,6 +301,9 @@ class ClientMakeOrderController extends Controller
         }, 'excludes' => function($query) use($locale){
             $query->withLocale($locale);
         }, 'extra', 'discount', 
+        'group_products' => fn($q) => $q
+        ->with(['products' => fn($q) => $q
+        ->select("products.id", "products.name")->withLocale($locale)]),
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options' => function($query_option) use($locale){
