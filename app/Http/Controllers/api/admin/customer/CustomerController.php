@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\TimeSittings;
+use App\Models\FinantiolAcounting;
 use App\Models\UserPaidDebt;
 use App\Models\UserDue; 
 
@@ -324,9 +325,13 @@ class CustomerController extends Controller
         where("due", ">", 0)
         ->get()
         ->select("id", "due", "name", "image_link", "phone", "phone_2", "email");
-
+        $financials = FinantiolAcounting::
+        select("id", "name")
+        ->where("status", 1)
+        ->get();
         return response()->json([
-            "users" => $users
+            "users" => $users,
+            "financials" => $financials
         ]);
     }
 
