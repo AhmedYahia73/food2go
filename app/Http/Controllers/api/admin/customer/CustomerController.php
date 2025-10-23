@@ -326,7 +326,7 @@ class CustomerController extends Controller
         ->get()
         ->select("id", "due", "name", "image_link", "phone", "phone_2", "email");
         $financials = FinantiolAcounting::
-        select("id", "name")
+        select("products.id", "products.name")
         ->where("status", 1)
         ->get();
         return response()->json([
