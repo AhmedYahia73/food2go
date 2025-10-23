@@ -130,6 +130,7 @@ class UpsalingController extends Controller
             "status" => $request->status ?? $upsaling->status,
         ]);
         $upsaling->products()->sync($request->product_ids);
+        $upsaling->translations()->delete();
         foreach ($names as $item) {
             $upsaling->translations()->create([
                 'locale' => $item['tranlation_name'],
