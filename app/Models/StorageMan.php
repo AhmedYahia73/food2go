@@ -26,7 +26,7 @@ class StorageMan extends Model
     }
 
     public function store(){
-        return $this->belongsTo(PurchaseStore::class, 'stora_id');
+        return $this->belongsTo(PurchaseStore::class, 'store_id');
     }
 
     public function getImageLinkAttribute(){
