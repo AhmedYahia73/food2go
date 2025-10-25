@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\notification_sound;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\trait\image;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Setting;
 
@@ -26,6 +27,14 @@ class NotificationSoundController extends Controller
     }
 
     public function update_captain(Request $request){
+        $validator = Validator::make($request->all(), [
+            'sound' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $sound = $this->settings
         ->where("name", "captain_notification_sound")
         ->first();
@@ -58,6 +67,14 @@ class NotificationSoundController extends Controller
     }
 
     public function update_cashier(Request $request){
+        $validator = Validator::make($request->all(), [
+            'sound' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $sound = $this->settings
         ->where("name", "cashier_notification_sound")
         ->first();
