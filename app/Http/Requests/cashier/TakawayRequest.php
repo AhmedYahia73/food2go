@@ -29,6 +29,7 @@ class TakawayRequest extends FormRequest
             'total_discount' => ['required', 'numeric'],
             'notes' => 'sometimes',
             'source' => 'sometimes',
+            'products' => ['required', 'array'],
             'products.*.product_id' => ['exists:products,id', 'required'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],

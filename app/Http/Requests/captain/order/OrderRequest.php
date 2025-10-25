@@ -31,6 +31,7 @@ class OrderRequest extends FormRequest
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
             'table_id' => ['exists:cafe_tables,id', 'required'],
+            'products' => ['required', 'array'],
             'products.*.product_id' => ['exists:products,id', 'required'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],
