@@ -25,9 +25,8 @@ class DiscountCodeController extends Controller
 
     public function generated_codes(Request $request, $id){
         $generated_codes = $this->generated_codes
-        ->select("code")
         ->where("discount_code_id", $id)
-        ->get();
+        ->pluck("code");
 
         return response()->json([
             "generated_codes" => $generated_codes
