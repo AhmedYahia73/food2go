@@ -468,6 +468,7 @@ class ClientMakeOrderController extends Controller
             'total_discount' => ['numeric'],
             'address_id' => ['exists:addresses,id', 'nullable'],
             'order_type' => ['in:take_away,dine_in,delivery,car_slow'],
+            'products' => ['required'],
             'products.*.product_id' => ['exists:products,id', 'required'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],
