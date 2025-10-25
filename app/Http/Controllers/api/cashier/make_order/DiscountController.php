@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\cashier\make_order;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\GeneratedDiscountCode;
 
@@ -12,6 +13,15 @@ class DiscountController extends Controller
     public function __construct(private GeneratedDiscountCode $discount_code){}
 
     public function check_discount_code(Request $request){
+        $validator = Validator::make($request->all(), [
+            'code' => ['required'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
         $discount_code = $this->discount_code
         ->where("code", $request->code)
         ->with("group")
