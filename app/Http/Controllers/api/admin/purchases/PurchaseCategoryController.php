@@ -31,6 +31,7 @@ class PurchaseCategoryController extends Controller
         ->get()
         ->map(function($item){
             return [
+                'id' => $item->id,
                 'name' => $item->name,
                 'status' => $item->status,
             ];
