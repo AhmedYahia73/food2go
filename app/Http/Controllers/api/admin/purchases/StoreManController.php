@@ -50,7 +50,7 @@ class StoreManController extends Controller
             return [
                 'user_name' => $item->user_name,
                 'phone' => $item->phone, 
-                'stora_id' => $item?->stora_id,
+                'store_id' => $item?->store_id,
                 'stora' => $item?->store?->name,
                 'image' => $item->image_link,
             ];
@@ -88,7 +88,7 @@ class StoreManController extends Controller
             'phone' => ['required', 'unique:storage_men,phone'],
             'password' => ['required'], 
             'status' => ['required', 'boolean'],
-            'stora_id' => ['required', 'exists:purchase_stores,id'],
+            'store_id' => ['required', 'exists:purchase_stores,id'],
             // image
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -115,7 +115,7 @@ class StoreManController extends Controller
             'user_name' => ['required'],
             'phone' => ['required', 'unique:storage_men,phone,' . $id],
             'status' => ['required', 'boolean'],
-            'stora_id' => ['required', 'exists:purchase_stores,id'],
+            'store_id' => ['required', 'exists:purchase_stores,id'],
             // image, password
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
