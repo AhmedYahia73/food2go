@@ -109,6 +109,8 @@ use App\Http\Controllers\api\admin\profile\ProfileController;
 
 use App\Http\Controllers\api\admin\discount_module\DiscountModuleController;
 
+use App\Http\Controllers\api\admin\discount_code\DiscountCodeController;
+
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
     ->prefix('profile')->group(function(){
@@ -123,6 +125,14 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(DiscountCodeController::class)
+    ->prefix('discount_code')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/generated_codes/{id}', 'generated_codes');
+        Route::post('/add', 'create');
         Route::delete('/delete/{id}', 'delete');
     });
 
