@@ -111,11 +111,21 @@ use App\Http\Controllers\api\admin\discount_module\DiscountModuleController;
 
 use App\Http\Controllers\api\admin\discount_code\DiscountCodeController;
 
+use App\Http\Controllers\api\admin\notification_sound\NotificationSoundController;
+
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
     ->prefix('profile')->group(function(){
         Route::get('/', 'profile');
         Route::post('/update', 'update');
+    });
+
+    Route::controller(NotificationSoundController::class)
+    ->prefix('notification_sound')->group(function(){
+        Route::get('/captain', 'view_captain');
+        Route::post('/update_captain', 'update_captain');
+        Route::get('/cashier', 'view_cashier');
+        Route::post('/update_cashier', 'update_cashier');
     });
 
     Route::controller(GroupController::class)
