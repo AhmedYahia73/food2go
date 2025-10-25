@@ -543,6 +543,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::post('/add', 'create')->middleware('can:add_product'); 
             Route::post('/import_excel', 'import_excel')->middleware('can:edit_product'); 
             Route::post('/update/{id}', 'modify')->middleware('can:edit_product'); 
+            Route::put('/update_price/{id}', 'update_price')->middleware('can:edit_product'); 
             Route::delete('/delete/{id}', 'delete')->middleware('can:delete_product'); 
         });
     });

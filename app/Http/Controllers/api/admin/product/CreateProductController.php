@@ -477,6 +477,27 @@ class CreateProductController extends Controller
         ]);
     }
 
+    public function update_price(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'price' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $this->products
+        ->where("id", $id)
+        ->update([
+            'price' => $request->price
+        ]);
+
+        return response()->json([
+            "success" => "You update price success"
+        ]);
+    }
+
     public function delete($id){
         // https://bcknd.food2go.online/admin/product/delete/{id}
         $product = $this->products
