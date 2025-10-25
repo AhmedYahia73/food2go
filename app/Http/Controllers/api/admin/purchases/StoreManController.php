@@ -21,11 +21,13 @@ class StoreManController extends Controller
         ->get()
         ->map(function($item){
             return [
+                'id' => $item->id,
                 'user_name' => $item->user_name,
                 'phone' => $item->phone, 
                 'store_id' => $item?->store_id,
                 'store' => $item?->store?->name,
                 'image' => $item->image_link,
+                'status' => $item->status,
             ];
         });
         $stores = $this->stores
