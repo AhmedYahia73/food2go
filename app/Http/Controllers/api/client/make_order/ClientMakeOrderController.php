@@ -50,6 +50,8 @@ use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
 use App\Models\FinantiolAcounting;
 use App\Models\Delivery;
+use App\Models\CashierMan;
+use App\Models\CaptainOrder;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -70,7 +72,8 @@ class ClientMakeOrderController extends Controller
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CafeTable $cafe_tables, private FinantiolAcounting $finantiol_accounting,
     private Category $categories, private Product $product,
-    private DeviceToken $device_token){}
+    private DeviceToken $device_token, private CashierMan $cashier_man,
+    private CaptainOrder $captain_order){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -513,10 +516,19 @@ class ClientMakeOrderController extends Controller
         $cafe_table->update([
             'current_status' => 'not_available_with_order'
         ]);
-        $device_token = $this->device_token
-        ->get()
-        ?->pluck('token')
-        ?->toArray();
+        $device_token1 = $this->cashier_man
+        ->where("branch_id", $cafe_table->branch_id)
+        ->pluck("fcm_token")
+        ->filter();
+        $device_token2 = $this->captain_order
+        ->where("branch_id", $cafe_table->branch_id)
+        ->pluck("fcm_token")
+        ->filter();
+        $device_token3 = $this->device_token
+        ->where("branch_id", $cafe_table->branch_id)
+        ->pluck('token');
+        $device_token = $device_token1->merge($device_token2)->merge($device_token3);
+        $device_token = $device_token->filter()->toArray();
         $body = 'Table ' . $cafe_table->table_number . 
         ' at location ' . $cafe_table?->location?->name . ' Make Order';
         $this->sendNotificationToMany($device_token, $cafe_table->table_number, $body);

@@ -95,7 +95,8 @@ class WaiterCallController extends Controller
         ->whereNotNull("admin_id")
         ->get()
         ?->pluck('token');
-        $users_tokens = $users_tokens1->merge($users_tokens2, $device_token)
+        $users_tokens = $users_tokens1->merge($users_tokens2)
+        ->merge($device_token)
         ->filter()->toArray();
         $body = 'Table ' . $cafe_table->table_number . 
             ' at location ' . $cafe_table?->location?->name . ' Want To Pay';
