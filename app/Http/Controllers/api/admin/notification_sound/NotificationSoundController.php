@@ -52,6 +52,10 @@ class NotificationSoundController extends Controller
                 "setting" => $sound_path,
             ]);
         }
+
+        return response()->json([
+            "success" => 'You change sound success'
+        ]);
     }
 
     public function view_cashier(Request $request){
@@ -92,5 +96,9 @@ class NotificationSoundController extends Controller
                 "setting" => $sound_path,
             ]);
         }
+
+        return response()->json([
+            "success" => 'You change sound success'
+        ]);
     } 
 }
