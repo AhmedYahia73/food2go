@@ -42,6 +42,8 @@ class DiscountController extends Controller
                 "errors" => "code is expired"
             ], 400);
         }
+        $discount_code->usage += 1;
+        $discount_code->save();
 
         return response()->json([
             "success" => true,
