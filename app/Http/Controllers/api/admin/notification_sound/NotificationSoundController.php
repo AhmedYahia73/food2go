@@ -69,7 +69,7 @@ class NotificationSoundController extends Controller
             "sound" => $sound
         ]);
     }
-
+    
     public function update_cashier(Request $request){
         $validator = Validator::make($request->all(), [
             'sound' => 'required',

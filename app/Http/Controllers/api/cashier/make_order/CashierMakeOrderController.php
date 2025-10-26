@@ -507,24 +507,29 @@ class CashierMakeOrderController extends Controller
                 ], 400); 
             }
         }
-        $order = $this->take_away_make_order($request);
-        if(!$request->order_pending){
-            $this->preparing_takeaway($request, $order['order']->id);
+        if($request->order_pending){
+            $order = $this->take_away_make_order($request);
         }
-        if($request->due){
-            $user_due = $this->user_due
-            ->create([
-                "user_id" => $request->user_id,
-                "order_id" => $order["order"]->id,
-                "cashier_id" => $request->user()->id,
-                "amount" => $request->amount,
-            ]); 
-            $user = $this->user
-            ->where("id", $request->user_id)
-            ->first();
-            $user->update([
-                "due" => $user->due + $request->amount
-            ]);
+        else{
+            $order = $this->take_away_make_order($request);
+            if(!$request->order_pending){
+                $this->preparing_takeaway($request, $order['order']->id);
+            }
+            if($request->due){
+                $user_due = $this->user_due
+                ->create([
+                    "user_id" => $request->user_id,
+                    "order_id" => $order["order"]->id,
+                    "cashier_id" => $request->user()->id,
+                    "amount" => $request->amount,
+                ]); 
+                $user = $this->user
+                ->where("id", $request->user_id)
+                ->first();
+                $user->update([
+                    "due" => $user->due + $request->amount
+                ]);
+            }
         }
 
         return response()->json([

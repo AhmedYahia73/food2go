@@ -116,16 +116,18 @@ trait POS
         $order = $this->order
         ->create($orderRequest);
         // payment using financial
-        foreach ($request->financials as $element ) {
-            $this->financial
-            ->create([
-                'order_id' => $order->id,
-                'financial_id' => $element['id'],
-                'cashier_id' => $request->cashier_id,
-                'cashier_man_id' => $request->cashier_man_id,
-                'amount' => $element['amount'],
-                'description' => isset($element['description']) ? $element['description'] : null,
-            ]);
+        if(isset($request->financials)){
+            foreach ($request->financials as $element ) {
+                $this->financial
+                ->create([
+                    'order_id' => $order->id,
+                    'financial_id' => $element['id'],
+                    'cashier_id' => $request->cashier_id,
+                    'cashier_man_id' => $request->cashier_man_id,
+                    'amount' => $element['amount'],
+                    'description' => isset($element['description']) ? $element['description'] : null,
+                ]);
+            }
         }
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
@@ -466,7 +468,7 @@ trait POS
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $product) {
                 $item = $this->products
-                ->where('id', $product['product_id'])
+                ->where('id', $product['product_id'] ?? null)
                 ->first();
                 if (in_array($item->id, $products_off) || 
                 in_array($item->category_id, $categories_off) ||
@@ -480,7 +482,7 @@ trait POS
                     $items[] = [ "name"=> $item->name,
                             "amount_cents"=> $item->price,
                             "description"=> $item->description,
-                            "quantity"=> $product['count']
+                            "quantity"=> $product['count'] ?? 0
                         ];
                     // $points += $item->points * $product['count'];
                     if (isset($product['variation'])) {
@@ -513,10 +515,10 @@ trait POS
                 $this->financial
                 ->create([
                     'order_id' => $order->id,
-                    'financial_id' => $element['id'],
+                    'financial_id' => $element['id'] ?? null,
                     'cashier_id' => $request->cashier_id,
                     'cashier_man_id' => $request->cashier_man_id,
-                    'amount' => $element['amount'],
+                    'amount' => $element['amount'] ?? null,
                     'description' => isset($element['description']) ? $element['description'] : null,
                 ]);
             }
@@ -531,15 +533,17 @@ trait POS
                 $order_details[$key]['product'] = [];
                 $order_details[$key]['variations'] = [];
 
-                $this->order_details
-                ->create([
-                    'order_id' => $order->id,
-                    'product_id' => $product['product_id'],
-                    'count' => $product['count'],
-                    'product_index' => $key,
-                ]);
+                if(isset($request->order_pending) && !$request->order_pending){
+                    $this->order_details
+                    ->create([
+                        'order_id' => $order->id,
+                        'product_id' => $product['product_id'],
+                        'count' => $product['count'],
+                        'product_index' => $key,
+                    ]);
+                }
                 $product_item = $this->products
-                ->where('id', $product['product_id'])
+                ->where('id', $product['product_id'] ?? null)
                 ->withLocale($locale)
                 ->first();
                 $product_item = collect([$product_item]);
@@ -547,11 +551,11 @@ trait POS
                 $product_item = count($product_item) > 0 ? $product_item[0] : null;
                 $order_details[$key]['product'][] = [
                     'product' => $product_item,
-                    'count' => $product['count'],
+                    'count' => $product['count'] ?? null,
                     'notes' => isset($product['note']) ? $product['note'] : null,
                 ];
                 // Add product price
-                $amount_product += $product_item->price; 
+                $amount_product += $product_item->price ?? 0; 
                 if (isset($product['exclude_id'])) {
                     foreach ($product['exclude_id'] as $exclude) {                       
                         $exclude = $this->excludes
