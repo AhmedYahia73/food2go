@@ -11,7 +11,28 @@ use App\Http\Controllers\api\cashier\address\AddressController;
 use App\Http\Controllers\api\cashier\customer\CustomerController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
+use App\Http\Controllers\api\admin\cashier\CashierController;
+use App\Http\Controllers\api\admin\cashier\CashierManController;
+
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
+    // 
+    Route::controller(CashierController::class)->prefix('cashier')->group(function(){
+        Route::get('/', 'view'); 
+        Route::put('/status/{id}', 'status'); 
+        Route::get('/item/{id}', 'cashier'); 
+        Route::post('/add', 'create'); 
+        Route::put('/update/{id}', 'modify'); 
+        Route::delete('/delete/{id}', 'delete'); 
+    });
+    Route::controller(CashierManController::class)->prefix('cashier_man')->group(function(){
+        Route::get('/', 'view'); 
+        Route::put('/status/{id}', 'status'); 
+        Route::get('/item/{id}', 'cashier'); 
+        Route::post('/add', 'create'); 
+        Route::put('/update/{id}', 'modify'); 
+        Route::delete('/delete/{id}', 'delete'); 
+    });
+    
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::get('/orders_count', 'home_orders_count');
         Route::get('/', 'home');
