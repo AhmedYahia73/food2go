@@ -113,6 +113,7 @@ use App\Http\Controllers\api\admin\discount_code\DiscountCodeController;
 
 use App\Http\Controllers\api\admin\notification_sound\NotificationSoundController;
 
+
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
     ->prefix('profile')->group(function(){
@@ -298,19 +299,19 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(OrderController::class)
     ->prefix('order')->group(function(){
-        Route::get('/', 'orders');
-        Route::get('/orders_count', 'orders_count');
-        Route::get('/order_details', 'order_details');
-        Route::get('/lists', 'lists');
-        Route::post('/log', 'order_log')->middleware('can:log_order');
-        Route::post('/transfer_branch/{id}', 'transfer_branch')->middleware('can:transfer_branch');
-        Route::get('/count', 'count_orders')->middleware('can:view_order');
-        Route::post('/data', 'orders_data')->middleware('can:view_order');
-        Route::post('/notification', 'notification')->middleware('can:view_order');
-        Route::post('/filter', 'order_filter')->middleware('can:view_order');
-        Route::get('/branches', 'branches')->middleware('can:view_order');
-        Route::get('/order/{id}', 'order')->middleware('can:view_order');
-        Route::get('/invoice/{id}', 'invoice')->middleware('can:view_order');
+        Route::get('/', 'orders')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/orders_count', 'orders_count')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/order_details', 'order_details')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/lists', 'lists')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::post('/log', 'order_log')->middleware('can:log_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::post('/transfer_branch/{id}', 'transfer_branch')->middleware('can:transfer_branch')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/count', 'count_orders')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::post('/data', 'orders_data')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::post('/notification', 'notification')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::post('/filter', 'order_filter')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/branches', 'branches')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/order/{id}', 'order')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/invoice/{id}', 'invoice')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::put('/status/{id}', 'status')->middleware('can:edit_order');
         Route::post('/delivery', 'delivery')->middleware('can:edit_order');
         Route::get('/user_details/{id}', 'user_details')->middleware('can:view_order');

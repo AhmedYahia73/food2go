@@ -14,6 +14,7 @@ use App\Http\Middleware\CashierMiddleware;
 use App\Http\Middleware\KitchenMiddleware;
 use App\Http\Middleware\WaiterMiddleware;
 use App\Http\Middleware\StorageMiddleware;
+use App\Http\Middleware\AdmiOrBranchMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -75,6 +76,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'IsCashier' => CashierMiddleware::class,
             'IsBranch' => BranchMiddleware::class,
             'IsWaiter' => WaiterMiddleware::class,
+            'IsAdminOrBranch' => AdmiOrBranchMiddleware::class,
             'IsStorage' => StorageMiddleware::class,
         ]);
          $middleware->redirectGuestsTo(function (Request $request) {
