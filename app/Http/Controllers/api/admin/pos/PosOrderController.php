@@ -153,14 +153,6 @@ class PosOrderController extends Controller
     //     ]);
     // }
     public function view_orders(Request $request){
-        $validator = Validator::make($request->all(), [
-            'branch_id' => 'required|exists:branches,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                    'errors' => $validator->errors(),
-            ],400);
-        }
         $time_sittings = $this->TimeSittings 
         ->get();
         if ($time_sittings->count() > 0) {
@@ -185,48 +177,102 @@ class PosOrderController extends Controller
         } 
         $start = $start->subDay();
         
-        $orders = $this->order
-        ->where('pos', 1)
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->where("branch_id", $request->branch_id)
-        ->whereBetween('created_at', [$start, $end])
-        ->orderByDesc('id')
-        ->with(['table', 'captain'])
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "branch_id" => $item->branch_id,
-                "amount" => $item->amount,
-                "order_status" => $item->order_status,
-                "order_type" => $item->order_type,
-                "total_tax" => $item->total_tax,
-                "total_discount" => $item->total_discount,
-                "order_number" => $item->order_number,
-                "table" => $item?->table?->table_number,
-                "captain" => $item?->captain?->name,
-                "type" => $item->from_table_order ? 'table_order' : 'captain',
-            ];
-        });
-        $tables = $this->tables
-        ->with('location')
-        ->where("branch_id", $request->branch_id)
-        ->whereNull("main_table_id")
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "table_number" => $item->table_number,
-                "capacity" => $item->capacity,
-                "branch_id" => $item->branch_id,
-                "is_merge" => $item->is_merge,
-                "sub_table" => $item->sub_table->select("id", "table_number"),
-                "location" => $item?->location?->name,
-            ];
-        });
+        if($request->user()->role == 'admin'){
+            $validator = Validator::make($request->all(), [
+                'branch_id' => 'required|exists:branches,id',
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                        'errors' => $validator->errors(),
+                ],400);
+            }
+            $orders = $this->order
+            ->where('pos', 1)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            })
+            ->where("branch_id", $request->branch_id)
+            ->whereBetween('created_at', [$start, $end])
+            ->orderByDesc('id')
+            ->with(['table', 'captain'])
+            ->get()
+            ->map(function($item){
+                return [
+                    "id" => $item->id,
+                    "branch_id" => $item->branch_id,
+                    "amount" => $item->amount,
+                    "order_status" => $item->order_status,
+                    "order_type" => $item->order_type,
+                    "total_tax" => $item->total_tax,
+                    "total_discount" => $item->total_discount,
+                    "order_number" => $item->order_number,
+                    "table" => $item?->table?->table_number,
+                    "captain" => $item?->captain?->name,
+                    "type" => $item->from_table_order ? 'table_order' : 'captain',
+                ];
+            });
+            $tables = $this->tables
+            ->with('location')
+            ->where("branch_id", $request->branch_id)
+            ->whereNull("main_table_id")
+            ->get()
+            ->map(function($item){
+                return [
+                    "id" => $item->id,
+                    "table_number" => $item->table_number,
+                    "capacity" => $item->capacity,
+                    "branch_id" => $item->branch_id,
+                    "is_merge" => $item->is_merge,
+                    "sub_table" => $item->sub_table->select("id", "table_number"),
+                    "location" => $item?->location?->name,
+                ];
+            });
+        }
+        else{
+            $orders = $this->order
+            ->where('pos', 1)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            })
+            ->where("branch_id", $request->user()->id)
+            ->whereBetween('created_at', [$start, $end])
+            ->orderByDesc('id')
+            ->with(['table', 'captain'])
+            ->get()
+            ->map(function($item){
+                return [
+                    "id" => $item->id,
+                    "branch_id" => $item->branch_id,
+                    "amount" => $item->amount,
+                    "order_status" => $item->order_status,
+                    "order_type" => $item->order_type,
+                    "total_tax" => $item->total_tax,
+                    "total_discount" => $item->total_discount,
+                    "order_number" => $item->order_number,
+                    "table" => $item?->table?->table_number,
+                    "captain" => $item?->captain?->name,
+                    "type" => $item->from_table_order ? 'table_order' : 'captain',
+                ];
+            });
+            $tables = $this->tables
+            ->with('location')
+            ->where("branch_id", $request->user()->id)
+            ->whereNull("main_table_id")
+            ->get()
+            ->map(function($item){
+                return [
+                    "id" => $item->id,
+                    "table_number" => $item->table_number,
+                    "capacity" => $item->capacity,
+                    "branch_id" => $item->branch_id,
+                    "is_merge" => $item->is_merge,
+                    "sub_table" => $item->sub_table->select("id", "table_number"),
+                    "location" => $item?->location?->name,
+                ];
+            });
+        }
 
         return response()->json([
             'orders' => $orders,
