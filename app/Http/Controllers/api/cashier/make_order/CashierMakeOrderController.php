@@ -354,7 +354,25 @@ class CashierMakeOrderController extends Controller
             $user->update([
                 "due" => $user->due + $request->amount
             ]);
+        }      
+        // Pull Pecipe
+        $order_details = $order['order']->order_details;
+        $products = [];
+        foreach ($order_details as $item) {
+            $product_item = collect($order_details)->product[0];
+            $product_item = collect($product_item);
+            $products[] = [
+                "id" => collect($product_item->product)->id,
+                "count" => $product_item->count,
+            ];
         }
+        $errors = $this->pull_recipe($products, $branch_id);
+        if(!$errors->success){
+            return response()->json([
+                "errors" => $errors->msg
+            ], 400);
+        }
+        // _________________________________
         return response()->json([
             'success' => $order['order'], 
         ]);
@@ -457,7 +475,7 @@ class CashierMakeOrderController extends Controller
             return response()->json([
                 'errors' => 'id is wrong'
             ], 400);
-        }
+        } 
         if($order->delivery_status == 'returned'){
             $delivery = $this->delivery
             ->where('id', $order->delivery_id)
@@ -531,7 +549,24 @@ class CashierMakeOrderController extends Controller
                 ]);
             }
         }
-
+      // Pull Pecipe
+        $order_details = $order["order"]->order_details;
+        $products = [];
+        foreach ($order_details as $item) {
+            $product_item = collect($order_details)->product[0];
+            $product_item = collect($product_item);
+            $products[] = [
+                "id" => collect($product_item->product)->id,
+                "count" => $product_item->count,
+            ];
+        }
+        $errors = $this->pull_recipe($products, $branch_id);
+        if(!$errors->success){
+            return response()->json([
+                "errors" => $errors->msg
+            ], 400);
+        }
+        // _________________________________
         return response()->json([
             'success' => $order['order'], 
             'request' => $request->all()
@@ -735,7 +770,24 @@ class CashierMakeOrderController extends Controller
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']), 0);
- 
+        // Pull Pecipe
+        $order_details = $order['payment']['order_details'];
+        $products = [];
+        foreach ($order_details as $item) {
+            $product_item = collect($order_details)->product[0];
+            $product_item = collect($product_item);
+            $products[] = [
+                "id" => collect($product_item->product)->id,
+                "count" => $product_item->count,
+            ];
+        }
+        $errors = $this->pull_recipe($products, $branch_id);
+        if(!$errors->success){
+            return response()->json([
+                "errors" => $errors->msg
+            ], 400);
+        }
+        // _________________________________
         $this->cafe_table
         ->whereIn('id', $tables_ids)
         ->update([
@@ -804,6 +856,24 @@ class CashierMakeOrderController extends Controller
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']), 0);
+      // Pull Pecipe
+        $order_details = $order['payment']['order_details'];
+        $products = [];
+        foreach ($order_details as $item) {
+            $product_item = collect($order_details)->product[0];
+            $product_item = collect($product_item);
+            $products[] = [
+                "id" => collect($product_item->product)->id,
+                "count" => $product_item->count,
+            ];
+        }
+        $errors = $this->pull_recipe($products, $branch_id);
+        if(!$errors->success){
+            return response()->json([
+                "errors" => $errors->msg
+            ], 400);
+        }
+        // _________________________________
         $order_cart = $this->order_cart
         ->whereIn('id', $request->cart_id)
         ->delete();
@@ -862,6 +932,22 @@ class CashierMakeOrderController extends Controller
             ], 400);
         }
         if($request->take_away_status == 'preparing'){
+            $order_details = $order->order_details;
+            $products = [];
+            foreach ($order_details as $item) {
+                $product_item = collect($order_details)->product[0];
+                $product_item = collect($product_item);
+                $products[] = [
+                    "id" => collect($product_item->product)->id,
+                    "count" => $product_item->count,
+                ];
+            }
+            $errors = $this->pull_recipe($products, $branch_id);
+            if(!$errors->success){
+                return response()->json([
+                    "errors" => $errors->msg
+                ], 400);
+            }
             $this->preparing_takeaway($request, $id);
         }
         $order->take_away_status = $request->take_away_status;

@@ -1790,6 +1790,11 @@ class OrderController extends Controller
                 ];
             }
             $errors = $this->pull_recipe($products, $branch_id);
+            if(!$errors->success){
+                return response()->json([
+                    "errors" => $errors->msg
+                ], 400);
+            }
         }
 
         if ($request->order_status == 'processing') { 
