@@ -118,10 +118,9 @@ use App\Http\Controllers\api\admin\recipe\RecipeController;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
-    ->prefix('profile')->withOutMiddleware(['IsAdmin'])
-    ->middleware(['IsAdminOrBranch'])->group(function(){
-        Route::get('/', 'profile');
-        Route::post('/update', 'update');
+    ->prefix('profile')->group(function(){
+        Route::get('/', 'profile')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::post('/update', 'update')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
     });
 
     Route::controller(RecipeController::class)
