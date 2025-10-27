@@ -18,11 +18,14 @@ use App\Models\LogOrder;
 use App\Models\User;
 use App\Models\TimeSittings; 
 
+use App\trait\Recipe;
+
 class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Delivery $deliveries, 
     private Branch $branches, private Setting $settings, private User $user,
     private LogOrder $log_order, private TimeSittings $TimeSittings){}
+    use Recipe;
 
     public function transfer_branch(Request $request, $id){
         // admin/order/transfer_branch
@@ -1773,6 +1776,20 @@ class OrderController extends Controller
                     'errors' => "You can't change status"
                 ], 400);
             }
+        }
+
+        if($old_status == "pending"){
+            $order_details = $order->order_details;
+            $products = [];
+            foreach ($order_details as $item) {
+                $product_item = collect($order_details)->product[0];
+                $product_item = collect($product_item);
+                $products[] = [
+                    "id" => collect($product_item->product)->id,
+                    "count" => $product_item->count,
+                ];
+            }
+            $errors = $this->pull_recipe($products, $branch_id);
         }
 
         if ($request->order_status == 'processing') { 
