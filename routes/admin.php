@@ -113,12 +113,23 @@ use App\Http\Controllers\api\admin\discount_code\DiscountCodeController;
 
 use App\Http\Controllers\api\admin\notification_sound\NotificationSoundController;
 
+use App\Http\Controllers\api\admin\recipe\RecipeController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
-    ->prefix('profile')->group(function(){
+    ->prefix('profile')->withOutMiddleware(['IsAdmin'])
+    ->middleware(['IsAdminOrBranch'])->group(function(){
         Route::get('/', 'profile');
         Route::post('/update', 'update');
+    });
+
+    Route::controller(RecipeController::class)
+    ->prefix('recipe')->group(function(){
+        Route::get('/{id}', 'view');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(NotificationSoundController::class)

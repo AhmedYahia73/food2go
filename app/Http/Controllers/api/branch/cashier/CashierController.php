@@ -18,15 +18,11 @@ class CashierController extends Controller
         // /admin/cashier
         $cashier = $this->cashier
         ->with(['branch:id,name'])
-        ->get();
-        $branches = $this->branches
-        ->select('id', 'name')
-        ->where('status', 1)
+        ->where("branch_id", $request->user()->id)
         ->get();
 
         return response()->json([
             'cashiers' => $cashier,
-            'branches' => $branches,
         ]);
     }
 
@@ -43,6 +39,7 @@ class CashierController extends Controller
             ],400);
         }
         $cashier = $this->cashier
+        ->where("branch_id", $request->user()->id)
         ->where('id', $id)
         ->update([
             'status' => $request->status
@@ -71,7 +68,6 @@ class CashierController extends Controller
         // name, branch_id, status
         $validation = Validator::make($request->all(), [
             'name' => 'required',
-            'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
@@ -80,6 +76,7 @@ class CashierController extends Controller
             ],400);
         }
         $cashierRequest = $validation->validated();
+        $cashierRequest['branch_id'] = $request->user()->id;
         $cashier = $this->cashier
         ->create($cashierRequest);
 
@@ -94,7 +91,6 @@ class CashierController extends Controller
         // name, branch_id, status
         $validation = Validator::make($request->all(), [
             'name' => 'required',
-            'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error

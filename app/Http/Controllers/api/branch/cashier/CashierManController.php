@@ -24,12 +24,11 @@ class CashierManController extends Controller
     public function view(Request $request){
         // /admin/cashier_man
         $cashier = $this->cashier
+        ->where("branch_id", $request->user()->id)
         ->get();
         $cashier_men = $this->cashier_men
+        ->where("branch_id", $request->user()->id)
         ->with('branch', 'roles')
-        ->get();
-        $branches = $this->branch
-        ->where('status', 1)
         ->get();
         $roles = [
             'branch_reports',
@@ -40,7 +39,6 @@ class CashierManController extends Controller
         return response()->json([
             'cashiers' => $cashier,
             'cashier_men' => $cashier_men,
-            'branches' => $branches,
             'roles' => $roles,
         ]);
     }
@@ -58,6 +56,7 @@ class CashierManController extends Controller
             ],400);
         }
         $cashier_men = $this->cashier_men
+        ->where("branch_id", $request->user()->id)
         ->where('id', $id)
         ->update([
             'status' => $request->status
@@ -71,6 +70,7 @@ class CashierManController extends Controller
     public function cashier_man(Request $request, $id){
         // /admin/cashier_man/item/{id}
         $cashier_man = $this->cashier_men
+        ->where("branch_id", $request->user()->id)
         ->with('branch', 'roles')
         ->where('id', $id)
         ->first();
@@ -80,7 +80,7 @@ class CashierManController extends Controller
         ]);
     }
 
-    public function create(CasheirManRequest $request){
+    public function create(Request $request){
         // admin/cashier_man/add
         // Keys
         // user_name, password, branch_id, status, my_id
@@ -89,14 +89,26 @@ class CashierManController extends Controller
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],
             'password' => ['required'],
+            'user_name' => ['required'],
+            'status' => ['required', 'boolean'],
+            'take_away' => ['required', 'boolean'],
+            'dine_in' => ['required', 'boolean'],
+            'delivery' => ['required', 'boolean'],
+            'car_slow' => ['required', 'boolean'],
+            'my_id' => ['required'],
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validation->errors(),
             ],400);
         }
-        $cashierRequest = $request->validated(); 
+        $cashierRequest = $validation->validated(); 
+        $cashierRequest = collect($cashierRequest)->only([
+            'password', 'user_name', 'status', 'take_away', 
+            'dine_in', 'delivery', 'car_slow', 'my_id'
+        ])->toArray();
         $cashierRequest['password'] = $request->password;
+        $cashierRequest['branch_id'] = $request->user()->id;
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/cashier/image');
             $cashierRequest['image'] = $imag_path;
@@ -118,21 +130,31 @@ class CashierManController extends Controller
         ]);
     }
 
-    public function modify(CasheirManRequest $request, $id){
+    public function modify(Request $request, $id){
         // admin/cashier_man/update/{id}
         // user_name, password, branch_id, status, my_id
         // take_away, dine_in, delivery, car_slow, image,
         // roles[]
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],
-            'password' => ['nullable', 'min:8'],
+            'user_name' => ['required'],
+            'status' => ['required', 'boolean'],
+            'take_away' => ['required', 'boolean'],
+            'dine_in' => ['required', 'boolean'],
+            'delivery' => ['required', 'boolean'],
+            'car_slow' => ['required', 'boolean'],
+            'my_id' => ['required'],
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validation->errors(),
             ],400);
         }
-        $cashierRequest = $request->validated();
+        $cashierRequest = $validation->validated(); 
+        $cashierRequest = collect($cashierRequest)->only([
+            'password', 'user_name', 'status', 'take_away', 
+            'dine_in', 'delivery', 'car_slow', 'my_id'
+        ])->toArray();
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/cashier/image');
             $cashierRequest['image'] = $imag_path;
