@@ -22,7 +22,7 @@ class GroupProductController extends Controller
         ]);
     }
     
-    public function group_item(Request $request){
+    public function group_item(Request $request, $id){
         $group_product = $this->group_product
         ->select("id", "name", "increase_precentage", "decrease_precentage", "status")
         ->where("id", $id)
