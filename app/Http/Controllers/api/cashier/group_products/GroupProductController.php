@@ -13,14 +13,15 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\GroupProduct;
 use App\Models\GroupPrice;
+use App\Models\CafeLocation;
 
 class GroupProductController extends Controller
 {
     public function __construct(
         private BranchOff $branch_off, 
         private Category $category, private GroupPrice $group_price,
-        private Product $products, private GroupProduct $group_product
-    ){}
+        private Product $products, private GroupProduct $group_product,
+        private CafeLocation $cafe_location,){}
 
     public function groups_product(Request $request){
         $group_product = $this->group_product
