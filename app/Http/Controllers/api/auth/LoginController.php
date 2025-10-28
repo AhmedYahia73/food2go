@@ -329,7 +329,7 @@ class LoginController extends Controller
         } 
         if (password_verify($request->input('password'), $user->password)) {
             $cashier = $this->cashier
-            ->where("cashier_id", $request->cashier_id)
+            ->where("cashier_id", $request->cashier_id ?? 0)
             ->where("id", "!=", $user->id)
             ->whereHas("tokens", function ($q) {
                 $q->whereNull('expires_at'); 
