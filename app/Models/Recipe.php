@@ -13,6 +13,8 @@ class Recipe extends Model
         'product_id',
         'unit_id',
         'weight',
+        'store_category_id',
+        'store_product_id',
         'status',
     ];
 }

@@ -7,24 +7,45 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Recipe;
+use App\Models\PurchaseCategory;
+use App\Models\Unit;
+use App\Models\PurchaseProduct;
 
 class RecipeController extends Controller
 {
-    public function __construct(private Recipe $recipe){}
+    public function __construct(private Recipe $recipe, private PurchaseCategory $category,
+    private PurchaseProduct $product, private Unit $units){}
 
     public function view(Request $request, $id){
         $recipe = $this->recipe
         ->where("product_id", $id)
         ->get();
+        $categories = $this->category
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
+        $products = $this->product
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
+        $units = $this->units
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
 
         return response()->json([
-            "recipe" => $recipe
+            "recipe" => $recipe,
+            "store_categories" => $categories,
+            "store_products" => $products,
+            "units" => $units,
         ]);
     }
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'product_id' => ['required', 'exists:products,id'],
+            'store_product_id' => ["required", "exists:purchase_products,id"],
+            'store_category_id' => ["required", "exists:purchase_categories,id"],
             'unit_id' => ['required', 'exists:units,id'],
             'weight' => ['required', 'numeric'],
             'status' => ['required', 'boolean'],
@@ -36,7 +57,7 @@ class RecipeController extends Controller
         }
 
         $recipeRequest = $validator->validated();
-         $this->recipe
+        $this->recipe
         ->create($recipeRequest);
 
         return response()->json([
@@ -46,9 +67,11 @@ class RecipeController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'unit_id' => ['sometimes', 'exists:units,id'],
-            'weight' => ['sometimes', 'numeric'],
-            'status' => ['sometimes', 'boolean'],
+            'store_product_id' => ["required", "exists:purchase_products,id"],
+            'store_category_id' => ["required", "exists:purchase_categories,id"],
+            'unit_id' => ['required', 'exists:units,id'],
+            'weight' => ['required', 'numeric'],
+            'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -67,6 +90,8 @@ class RecipeController extends Controller
         $recipe->update([
             "unit_id" => $request->unit_id ?? $recipe->unit_id,
             "weight" => $request->weight ?? $recipe->weight,
+            "store_product_id" => $request->store_product_id ?? $recipe->store_product_id,
+            "store_category_id" => $request->store_category_id ?? $recipe->store_category_id,
             "status" => $request->status ?? $recipe->status,
         ]);
 
