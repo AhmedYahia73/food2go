@@ -7,11 +7,12 @@ use Illuminate\Http\Request;
 
 use App\Models\Cashier;
 use App\Models\Order;
+use App\Models\Setting;
 
 class HomeController extends Controller
 {
     public function __construct(private Cashier $cashier,
-    private Order $order){}
+    private Order $order, private Setting $settings){}
 
     public function view(Request $request){
         // https://bcknd.food2go.online/cashier/home
@@ -31,6 +32,11 @@ class HomeController extends Controller
             'hidden_cashiers' => $hidden_cashiers,
         ]);
     }
+
+    // public function notification_sound(Request $request){
+    //     $notification_sound = $this->settings
+    //     ->
+    // }
 
     public function active_cashier(Request $request, $id){
         // https://bcknd.food2go.online/cashier/home/active_cashier/{id}

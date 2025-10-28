@@ -16,12 +16,12 @@ class UserController extends Controller
 
     public function view(Request $request){
         $users = $this->user
+		->select("id", "f_name", "l_name", "image", "phone", "phone_2")
         ->where('status', 1)
         ->with(['address' => function($query){
             return $query->with(['zone:id,zone,price', 'city:id,name']);
         }])
-        ->get()
-        ?->select('id', 'f_name', 'l_name', 'image_link', 'phone', 'phone_2', 'address');
+        ->get();
 
         return response()->json([
             'users' => $users,
