@@ -27,8 +27,10 @@ class GroupPriceController extends Controller
         $products = $this->products 
         ->with(["group_price", "group_product_status"])
         ->get()
-        ->map(function($item) use($group_product) {
-            $price = $item?->group_price?->price ?? null;
+        ->map(function($item) use($group_product, $id) {
+            $price = $item?->group_price
+            ?->where("group_product_id", $id)
+            ?->first()?->price ?? null;
             if(empty($price)){
                 $price = $group_product->increase_precentage - $group_product->decrease_precentage;
                 $price = $item->price + $price * $item->price / 100;
@@ -37,8 +39,8 @@ class GroupPriceController extends Controller
             ->where("id", $group_product->id)->count()
             > 0;
             return [
-                "product_id" => $item->product_id,
-                "group_product_id" => $item->group_product_id,
+                "product_id" => $item->id,
+                "group_product_id" => $id,
                 "product_name" => $item->name,
                 "price" => $price,
                 'status' => $status
