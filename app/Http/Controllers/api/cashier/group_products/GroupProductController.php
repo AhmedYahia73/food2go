@@ -46,7 +46,7 @@ class GroupProductController extends Controller
         }
         // Group Product
         $group_product = $this->group_product
-        ->where("id", $id)
+        ->where("id", $request->group_id)
         ->first();
         // ___________________________
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
@@ -186,7 +186,7 @@ class GroupProductController extends Controller
         }
         // Group Product
         $group_product = $this->group_product
-        ->where("id", $id)
+        ->where("id", $request->group_id)
         ->first();
         // ___________________________
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
