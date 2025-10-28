@@ -115,12 +115,32 @@ use App\Http\Controllers\api\admin\notification_sound\NotificationSoundControlle
 
 use App\Http\Controllers\api\admin\recipe\RecipeController;
 
+use App\Http\Controllers\api\admin\group_price\GroupProductController;
+use App\Http\Controllers\api\admin\group_price\GroupPriceController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
     ->prefix('profile')->group(function(){
         Route::get('/', 'profile')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::post('/update', 'update')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+    });
+
+    Route::controller(GroupProductController::class)
+    ->prefix('group_product')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'group_item');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(GroupPriceController::class)
+    ->prefix('group_price')->group(function(){
+        Route::get('/{id}', 'view');
+        Route::put('/status', 'status');
+        Route::put('/price', 'price');
     });
 
     Route::controller(RecipeController::class)

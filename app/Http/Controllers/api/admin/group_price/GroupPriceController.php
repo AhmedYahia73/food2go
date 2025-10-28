@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\admin\group_price;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\GroupProduct;
 use App\Models\GroupPrice;
@@ -49,11 +50,62 @@ class GroupPriceController extends Controller
         ]);
     }
 
-    public function status(Request $request, $id){
-        
+    public function status(Request $request){
+        $validator = Validator::make($request->all(), [
+            'product_id' => ['required', 'exists:products,id'], 
+            'group_product_id' => ['required', 'exists:group_products,id'], 
+            'status' => ['required', 'boolean'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $product = $this->products 
+        ->where("id", $request->product_id)
+        ->first();
+            $product->group_product_status()->detach($request->group_product_id);
+        if($request->status){
+            $product->group_product_status()->attach($request->group_product_id);
+        }
+
+        return response()->json([
+            "success" => "You update status success"
+        ]);
     }
 
-    public function price(Request $request, $id){
-        
+    public function price(Request $request){
+        $validator = Validator::make($request->all(), [
+            'product_id' => ['required', 'exists:products,id'], 
+            'group_product_id' => ['required', 'exists:group_products,id'], 
+            'price' => ['required', 'numeric'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $group_price = $this->group_price
+        ->where('product_id', $request->product_id)
+        ->where('group_product_id', $request->group_product_id)
+        ->first();
+        if(empty($group_price)){
+            $this->group_price
+            ->create([
+                "product_id" => $request->product_id,
+                "group_product_id" => $request->group_product_id,
+                "price" => $request->price,
+            ]);
+        }
+        else{
+            $group_price->price = $request->price;
+            $group_price->save();
+        }
+
+        return response()->json([
+            "success" => "You update prices success"
+        ]);
     }
 }

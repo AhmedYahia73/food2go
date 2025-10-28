@@ -21,6 +21,17 @@ class GroupProductController extends Controller
             "group_products" => $group_products
         ]);
     }
+    
+    public function group_item(Request $request){
+        $group_product = $this->group_product
+        ->select("id", "name", "increase_precentage", "decrease_precentage", "status")
+        ->where("id", $id)
+        ->first();
+
+        return response()->json([
+            "group_product" => $group_product
+        ]);
+    }
 
     public function status(Request $request, $id){
         $validator = Validator::make($request->all(), [
