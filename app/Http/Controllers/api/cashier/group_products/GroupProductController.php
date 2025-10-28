@@ -168,9 +168,8 @@ class GroupProductController extends Controller
 
         return response()->json([
             'categories' => $categories,
-            'products' => $products, 
-            'cafe_location' => $cafe_location,
-            'payment_methods' => $paymentMethod, 
+            'favourite_products' => $products, 
+            'cafe_location' => $cafe_location, 
         ]);
     }
 
