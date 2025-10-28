@@ -67,8 +67,8 @@ trait Recipe
             }
         } 
 
-        return response()->json([
+        return [
             "success" => true,
-        ]); 
+        ]; 
     }
 }

@@ -1781,16 +1781,15 @@ class OrderController extends Controller
         if($old_status == "pending"){
             $order_details = $order->order_details;
             $products = [];
-            foreach ($order_details as $item) {
-                $product_item = $item['product'][0];
-                $product_item = collect($product_item);
+            foreach ($order_details as $item) { 
+                $product_item = $item->product[0]; 
                 $products[] = [
-                    "id" => collect($product_item->product)->id,
+                    "id" => $product_item->product->id,
                     "count" => $product_item->count,
                 ];
             }
-            $errors = $this->pull_recipe($products, $branch_id);
-            if(!$errors->success){
+            $errors = $this->pull_recipe($products, $order->branch_id); 
+            if(!$errors['success']){
                 return response()->json([
                     "errors" => $errors->msg
                 ], 400);

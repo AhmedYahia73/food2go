@@ -552,20 +552,19 @@ class CashierMakeOrderController extends Controller
       // Pull Pecipe
         $order_details = $order["order"]->order_details;
         $products = [];
-        foreach ($order_details as $item) {
-            $product_item = collect($item)->product[0];
-            $product_item = collect($product_item);
+        foreach ($order_details as $item) { 
+            $product_item = $item->product[0]; 
             $products[] = [
-                "id" => collect($product_item->product)->id,
+                "id" => $product_item->product->id,
                 "count" => $product_item->count,
             ];
         }
-        $errors = $this->pull_recipe($products, $branch_id);
-        if(!$errors->success){
+        $errors = $this->pull_recipe($products, $request->user()->branch_id); 
+        if(!$errors['success']){
             return response()->json([
                 "errors" => $errors->msg
             ], 400);
-        }
+        } 
         // _________________________________
         return response()->json([
             'success' => $order['order'], 
@@ -773,20 +772,20 @@ class CashierMakeOrderController extends Controller
         // Pull Pecipe
         $order_details = $order['payment']['order_details'];
         $products = [];
-        foreach ($order_details as $item) {
-            $product_item = collect($item)->product[0];
-            $product_item = collect($product_item);
+         
+        foreach ($order_details as $item) { 
+            $product_item = $item->product[0]; 
             $products[] = [
-                "id" => collect($product_item->product)->id,
+                "id" => $product_item->product->id,
                 "count" => $product_item->count,
             ];
         }
-        $errors = $this->pull_recipe($products, $branch_id);
-        if(!$errors->success){
+        $errors = $this->pull_recipe($products, $request->user()->branch_id); 
+        if(!$errors['success']){
             return response()->json([
                 "errors" => $errors->msg
             ], 400);
-        }
+        } 
         // _________________________________
         $this->cafe_table
         ->whereIn('id', $tables_ids)
@@ -859,20 +858,20 @@ class CashierMakeOrderController extends Controller
       // Pull Pecipe
         $order_details = $order['payment']['order_details'];
         $products = [];
-        foreach ($order_details as $item) {
-            $product_item = collect($item)->product[0];
-            $product_item = collect($product_item);
+         
+        foreach ($order_details as $item) { 
+            $product_item = $item->product[0]; 
             $products[] = [
-                "id" => collect($product_item->product)->id,
+                "id" => $product_item->product->id,
                 "count" => $product_item->count,
             ];
         }
-        $errors = $this->pull_recipe($products, $branch_id);
-        if(!$errors->success){
+        $errors = $this->pull_recipe($products, $request->user()->branch_id); 
+        if(!$errors['success']){
             return response()->json([
                 "errors" => $errors->msg
             ], 400);
-        }
+        } 
         // _________________________________
         $order_cart = $this->order_cart
         ->whereIn('id', $request->cart_id)
@@ -934,20 +933,20 @@ class CashierMakeOrderController extends Controller
         if($request->take_away_status == 'preparing'){
             $order_details = $order->order_details;
             $products = [];
-            foreach ($order_details as $item) {
-                $product_item = collect($item)->product[0];
-                $product_item = collect($product_item);
+         
+            foreach ($order_details as $item) { 
+                $product_item = $item->product[0]; 
                 $products[] = [
-                    "id" => collect($product_item->product)->id,
+                    "id" => $product_item->product->id,
                     "count" => $product_item->count,
                 ];
             }
-            $errors = $this->pull_recipe($products, $branch_id);
-            if(!$errors->success){
+            $errors = $this->pull_recipe($products, $request->user()->branch_id); 
+            if(!$errors['success']){
                 return response()->json([
                     "errors" => $errors->msg
                 ], 400);
-            }
+        } 
             $this->preparing_takeaway($request, $id);
         }
         $order->take_away_status = $request->take_away_status;
