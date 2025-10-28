@@ -20,8 +20,21 @@ class RecipeController extends Controller
         $recipe = $this->recipe
         ->where("product_id", $id)
         ->with(["product:id,name", "store_category:id,name", 
-        "store_product:id,name"])
-        ->get();
+        "store_product:id,name", "unit:id,name"])
+        ->get()
+        ->map(function($item){
+            return [         
+                "id" => $item->id,
+                "weight" => $item->weight,
+                "status" => $item->status,
+                "product" => $item->product ? [
+                    "id" => $item->product->id,
+                    "name" => $item->product->name,
+                ]: null, 
+                "store_category" => $item->store_category,
+                "store_product" => $item->store_product,
+            ];
+        });
         $categories = $this->category
         ->select("id", "name")
         ->where("status", 1)
