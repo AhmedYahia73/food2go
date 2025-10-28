@@ -483,20 +483,14 @@ class CaptainMakeOrderController extends Controller
         }])
         ->where('branch_id', $request->branch_id)
         ->get();
-        $products_count = $products->where("weight_status", 0)
-        ->values();
-        $products_weight = $products->where("weight_status", 1)
-        ->values();
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products_count); 
-        $products_weight = ProductResource::collection($products_weight); 
+        $products = ProductResource::collection($products); 
 
         return response()->json([
             'categories' => $categories,
             'products' => $products, 
             'cafe_location' => $cafe_location,
             'payment_methods' => $paymentMethod, 
-            'products_weight' => $products_weight, 
         ]);
     }
 
@@ -708,14 +702,20 @@ class CaptainMakeOrderController extends Controller
         }])
         ->where('branch_id', $request->branch_id)
         ->get();
+        $products_count = $products->where("weight_status", 0)
+        ->values();
+        $products_weight = $products->where("weight_status", 1)
+        ->values();
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products); 
+        $products = ProductResource::collection($products_count); 
+        $products_weight = ProductResource::collection($products_weight); 
 
         return response()->json([
             'categories' => $categories,
             'products' => $products, 
             'cafe_location' => $cafe_location,
             'payment_methods' => $paymentMethod, 
+            'products_weight' => $products_weight, 
         ]);
     }
 
