@@ -19,6 +19,8 @@ class RecipeController extends Controller
     public function view(Request $request, $id){
         $recipe = $this->recipe
         ->where("product_id", $id)
+        ->with(["product:id,name", "store_category:id,name", 
+        "store_product:id,name"])
         ->get();
         $categories = $this->category
         ->select("id", "name")

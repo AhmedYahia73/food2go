@@ -17,4 +17,16 @@ class Recipe extends Model
         'store_product_id',
         'status',
     ];
+
+    public function product(){
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function store_category(){
+        return $this->belongsTo(PurchaseCategory::class, 'store_category_id');
+    }
+
+    public function store_product(){
+        return $this->belongsTo(PurchaseProduct::class, 'store_product_id');
+    }
 }
