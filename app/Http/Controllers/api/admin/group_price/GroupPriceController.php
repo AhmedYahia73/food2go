@@ -37,7 +37,7 @@ class GroupPriceController extends Controller
             }
             $status = $item->group_product_status
             ->where("id", $group_product->id)->count()
-            > 0;
+            <= 0; 
             return [
                 "product_id" => $item->id,
                 "group_product_id" => $id,
