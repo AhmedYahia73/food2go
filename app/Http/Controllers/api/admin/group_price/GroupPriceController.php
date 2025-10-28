@@ -67,8 +67,8 @@ class GroupPriceController extends Controller
         $product = $this->products 
         ->where("id", $request->product_id)
         ->first();
-            $product->group_product_status()->detach($request->group_product_id);
-        if($request->status){
+        $product->group_product_status()->detach($request->group_product_id);
+        if(!$request->status){
             $product->group_product_status()->attach($request->group_product_id);
         }
 
