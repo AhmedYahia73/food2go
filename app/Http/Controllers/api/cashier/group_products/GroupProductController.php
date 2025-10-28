@@ -102,15 +102,15 @@ class GroupProductController extends Controller
             //get count of sales of product to detemine stock
             // Price of group
             $price = $product->price;
-            $new_price = $item?->group_price
+            $new_price = $product?->group_price
             ?->where("group_product_id", $request->group_id)
             ?->first()?->price ?? null;
             if(empty($new_price)){
                 $new_price = $group_product->increase_precentage - $group_product->decrease_precentage;
                 $new_price = $price + $new_price * $price / 100;
             }
-            $item->price = $new_price;
-            $status = $item->group_product_status
+            $product->price = $new_price;
+            $status = $product->group_product_status
             ->where("id", $group_product->id)->count()
             <= 0;
             if(!$status){
@@ -232,15 +232,15 @@ class GroupProductController extends Controller
             //get count of sales of product to detemine stock
             // Price of group
             $price = $product->price;
-            $new_price = $item?->group_price
+            $new_price = $product?->group_price
             ?->where("group_product_id", $request->group_id)
             ?->first()?->price ?? null;
             if(empty($new_price)){
                 $new_price = $group_product->increase_precentage - $group_product->decrease_precentage;
                 $new_price = $price + $new_price * $price / 100;
             }
-            $item->price = $new_price;
-            $status = $item->group_product_status
+            $product->price = $new_price;
+            $status = $product->group_product_status
             ->where("id", $group_product->id)->count()
             <= 0;
             if(!$status){
