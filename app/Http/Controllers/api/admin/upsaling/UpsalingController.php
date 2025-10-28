@@ -36,6 +36,27 @@ class UpsalingController extends Controller
         ]);
     }
 
+    public function status(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $upsaling = $this->upsaling
+        ->where("id", $id)
+        ->update([
+            "status" => $request->status
+        ]);
+
+        return response()->json([
+            "success" => $request->status ? "active" : "banned"
+        ]);
+    }
+
     public function lists(Request $request){
         $products = $this->products
         ->select("id", "name")

@@ -51,6 +51,14 @@ class Product extends Model
         ->first();
     }
 
+    public function group_price(){
+        return $this->hasMany(GroupPrice::class, "product_id");
+    }
+
+    public function group_product_status(){
+        return $this->belongsToMany(GroupProduct::class, "product_group_product", "product_id", "group_product_id");
+    }
+
     public function group_products(){
         return $this->belongsToMany(UpsalingGroup::class, 'product_its_upsaling', 'product_id', 'upsaling_id');
     }

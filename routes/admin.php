@@ -198,6 +198,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/', 'view');
         Route::get('/lists', 'lists');
         Route::get('/item/{id}', 'upsaling_item');
+        Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::put('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
