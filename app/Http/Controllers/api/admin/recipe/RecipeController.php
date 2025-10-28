@@ -33,6 +33,7 @@ class RecipeController extends Controller
                 ]: null, 
                 "store_category" => $item->store_category,
                 "store_product" => $item->store_product,
+                "unit" => $item->unit,
             ];
         });
         $categories = $this->category
