@@ -14,7 +14,9 @@ use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 use App\Http\Controllers\api\admin\deal_order\DealOrderController;
 use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
 use App\Http\Controllers\api\cashier\profile\ProfileController; 
-use App\Http\Controllers\api\cashier\make_order\DiscountController; 
+use App\Http\Controllers\api\cashier\make_order\DiscountController;
+
+use App\Http\Controllers\api\cashier\group_products\GroupProductController;
 
 use App\Http\Controllers\api\auth\LoginController;
 
@@ -51,6 +53,13 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/take_away_order', 'take_away_order')->middleware('can:take_away');
        
         Route::put('/tables_status/{id}', 'tables_status')->middleware('can:table_status');
+    });
+
+    Route::controller(GroupProductController::class)
+    ->prefix("group_product")->group(function(){
+        Route::get('/', 'groups_product');
+        Route::post('/favourite', 'lists');
+        Route::post('/product_in_category/{id}', 'product_category_lists');
     });
 
     Route::controller(DiscountController::class)
