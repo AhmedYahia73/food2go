@@ -1782,7 +1782,7 @@ class OrderController extends Controller
             $order_details = $order->order_details;
             $products = [];
             foreach ($order_details as $item) {
-                $product_item = collect($item)->product[0];
+                $product_item = $item['product'][0];
                 $product_item = collect($product_item);
                 $products[] = [
                     "id" => collect($product_item->product)->id,
