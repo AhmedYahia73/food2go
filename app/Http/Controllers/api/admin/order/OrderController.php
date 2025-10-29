@@ -565,6 +565,7 @@ class OrderController extends Controller
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
                     'order_status' => $item->order_status,
                     'source' => $item->source,
                     'status' => $item->status,
@@ -589,7 +590,7 @@ class OrderController extends Controller
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
             ,'order_status',
             'delivery_id', 'address_id', 'source',
-            'payment_method_id', 
+            'payment_method_id', 'order_type',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
             ->where("branch_id", $request->user()->id)
@@ -613,6 +614,7 @@ class OrderController extends Controller
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
                     'order_status' => $item->order_status,
                     'source' => $item->source,
                     'status' => $item->status,
