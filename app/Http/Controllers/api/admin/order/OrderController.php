@@ -540,7 +540,7 @@ class OrderController extends Controller
         if ($request->user()->role == "admin") {
             $orders = $this->orders
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-            ,'order_status',
+            ,'order_status', 'order_type',
             'delivery_id', 'address_id', 'source',
             'payment_method_id', 
             'status', 'points', 'rejected_reason', 'transaction_id')
@@ -1587,6 +1587,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->find($id);
+        $order->makeHidden('order_details_data');
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
             foreach ($item->product as $element) {
@@ -1674,7 +1675,7 @@ class OrderController extends Controller
         ->get();
         try {
             if($order?->user?->orders){ 
-                unset($order->user);
+                $order->user->makeHidden("count_orders");
 				$order->user;
             } 
 			if($order?->branch){
