@@ -1675,7 +1675,7 @@ class OrderController extends Controller
         ->get();
         try {
             if($order?->user?->orders){ 
-                $order->user->makeHidden("count_orders");
+                $order->user->makeHidden("orders");
 				$order->user;
             } 
 			if($order?->branch){
