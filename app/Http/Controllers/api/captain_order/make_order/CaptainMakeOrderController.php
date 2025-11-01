@@ -835,12 +835,7 @@ class CaptainMakeOrderController extends Controller
         $checkout_request = $this->checkout_request_query
         ->where('status', 'waiting')
         ->where('table_id', $request->table_id)
-        ->first();
-        if(!empty($checkout_request)){
-            return response()->json([
-                'errors' => 'This table is waiting customer to payment'
-            ], 400);
-        }
+        ->first(); 
         $this->checkout_request_query
         ->where('status', 'done')
         ->delete();

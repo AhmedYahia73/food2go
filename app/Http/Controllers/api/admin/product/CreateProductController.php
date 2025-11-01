@@ -498,6 +498,27 @@ class CreateProductController extends Controller
         ]);
     }
 
+    public function favourite(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'favourite' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $this->products
+        ->where("id", $id)
+        ->update([
+            'favourite' => $request->favourite
+        ]);
+
+        return response()->json([
+            "success" => "You update favourite success"
+        ]);
+    }
+
     public function delete($id){
         // https://bcknd.food2go.online/admin/product/delete/{id}
         $product = $this->products

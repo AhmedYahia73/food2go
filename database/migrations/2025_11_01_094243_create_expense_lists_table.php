@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_fees_branch', function (Blueprint $table) {
+        Schema::create('expense_lists', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')->nullable()->constrained('expense_categories')->onUpdate('cascade')->onDelete('cascade');
+            $table->string("name");
+            $table->boolean("status")->default(1);
             $table->timestamps();
         });
     }
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_fees_branch');
+        Schema::dropIfExists('expense_lists');
     }
 };

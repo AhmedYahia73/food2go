@@ -51,6 +51,7 @@ use App\trait\image;
 use App\trait\PlaceOrder;
 use App\trait\PaymentPaymob;
 use App\trait\POS;
+use App\trait\Recipe;
 
 class CashierMakeOrderController extends Controller
 {
@@ -70,6 +71,7 @@ class CashierMakeOrderController extends Controller
     use PlaceOrder;
     use PaymentPaymob;
     use POS;
+    use Recipe;
 
     public function list_due_users(Request $request){
         $users =$this->user

@@ -13,4 +13,8 @@ class ServiceFees extends Model
         'type',
         'amount',
     ];
+
+    public function branch(){
+        return $this->belongsToMany(Branch::class, 'service_fees_branch', 'fees_id', 'branch_id');
+    }
 }
