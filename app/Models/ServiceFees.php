@@ -14,7 +14,9 @@ class ServiceFees extends Model
         'amount',
     ];
 
-    public function branch(){
+    protected $hidden = array('pivot');
+    
+    public function branches(){
         return $this->belongsToMany(Branch::class, 'service_fees_branch', 'fees_id', 'branch_id');
     }
 }

@@ -8,9 +8,19 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Expense;
 
+use App\Models\ExpenseList;
+use App\Models\Branch;
+use App\Models\Cashier;
+use App\Models\CashierMan;
+use App\Models\ExpenseCategory;
+use App\Models\FinantiolAcounting;
+
 class ExpenseController extends Controller
 {
-    public function __construct(private Expense $expenses){}
+    public function __construct(private Expense $expenses
+    , private ExpenseList $expenses_list ,private Branch $branches
+    , private Cashier $cashiers ,private CashierMan $cashier_man
+    , private FinantiolAcounting $financial ,private ExpenseCategory $category){}
 
     public function view(Request $request){
         $expenses = $this->expenses
@@ -35,6 +45,42 @@ class ExpenseController extends Controller
 
         return response()->json([
             "expenses" => $expenses, 
+        ]);
+    }
+
+    public function lists(Request $request){
+        $expenses = $this->expenses_list
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
+        $branches = $this->branches
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
+        $cashiers = $this->cashiers
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
+        $cashier_man = $this->cashier_man
+        ->select("id", "user_name")
+        ->where("status", 1)
+        ->get();  
+        $financial = $this->financial
+        ->select("id", "user_name")
+        ->where("status", 1)
+        ->get();  
+        $categories = $this->category
+        ->select("id", "user_name")
+        ->where("status", 1)
+        ->get();
+
+        return response()->json([
+            'expenses' => $expenses,
+            'branches' => $branches, 
+            'cashiers' => $cashiers, 
+            'cashier_man' => $cashier_man, 
+            'financial' => $financial, 
+            'categories' => $categories, 
         ]);
     }
 
