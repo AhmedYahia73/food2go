@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\GeneratedDiscountCode;
+use App\Models\ServiceFees;
 
 class DiscountController extends Controller
 {
-    public function __construct(private GeneratedDiscountCode $discount_code){}
+    public function __construct(private GeneratedDiscountCode $discount_code,
+    private ServiceFees $service_fees_model){}
 
     public function check_discount_code(Request $request){
         $validator = Validator::make($request->all(), [
@@ -48,6 +50,20 @@ class DiscountController extends Controller
         return response()->json([
             "success" => true,
             "discount" => $discount_code->group->discount,
+        ]);
+    }
+
+    public function service_fees(Request $request){
+        $service_fees_model = $this->service_fees_model
+        ->whereHas("branches", function($query) use($request){
+            $query->where("branches.id", $request->user()->branch_id);
+        })
+        ->orderByDesc("id")
+        ->first();
+
+        return response()->json([
+            "type" => $service_fees_model?->type ?? "value",
+            "amount" => $service_fees_model?->amount ?? 0,
         ]);
     }
 }

@@ -36,7 +36,17 @@ class UserController extends Controller
             return $query->with(['zone:id,zone,price', 'city:id,name']);
         }])
         ->get()
-        ?->select('id', 'f_name', 'l_name', 'image_link', 'phone', 'phone_2', 'address');
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "f_name" => $item->f_name,
+                "l_name" => $item->l_name,
+                "image_link" => $item->image_link,
+                "phone" => $item->phone,
+                "phone_2" => $item->phone_2,
+                "address" => $item->address,
+            ];
+        });
 
         return response()->json([
             'user' => $user,

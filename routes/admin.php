@@ -118,12 +118,44 @@ use App\Http\Controllers\api\admin\recipe\RecipeController;
 use App\Http\Controllers\api\admin\group_price\GroupProductController;
 use App\Http\Controllers\api\admin\group_price\GroupPriceController;
 
+use App\Http\Controllers\api\admin\expenses\ExpenseCategoryController;
+use App\Http\Controllers\api\admin\expenses\ExpenseController;
+use App\Http\Controllers\api\admin\expenses\ExpenseListController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
     ->prefix('profile')->group(function(){
         Route::get('/', 'profile')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::post('/update', 'update')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+    });
+    // جديد تحت التجربة
+    Route::controller(ExpenseCategoryController::class)
+    ->prefix('expenses_category')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'category_item');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(ExpenseListController::class)
+    ->prefix('expenses')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');
+        Route::get('/item/{id}', 'expense_item');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
+    Route::controller(ExpenseController::class)
+    ->prefix('expenses_list')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');  
+        Route::post('/add', 'create'); 
     });
 
     Route::controller(GroupProductController::class)
