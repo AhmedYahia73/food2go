@@ -686,9 +686,10 @@ class OrderController extends Controller
             'branches' => $branches,
             'start' => $start->format('Y-m-d H:i:s'),
             'end' => $end->format('Y-m-d H:i:s'),
-        ]);
+            'role' => $request->user()->role
+        ]);  
     }
-
+ 
     public function order_details(Request $request){
         // https://bcknd.food2go.online/admin/order 
         $validator = Validator::make($request->all(), [
