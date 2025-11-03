@@ -773,9 +773,9 @@ class CashierMakeOrderController extends Controller
             return response()->json($order, 400);
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
-        $order = $this->order_format(($order['payment']), 0);
+        $this->order_format(($order['payment']), 0);
         // Pull Pecipe
-        $order_details = $order['payment']->order_details;
+        $order_details = $order['payment']['order_details'];
         $products = [];
          
         foreach ($order_details as $item) { 
