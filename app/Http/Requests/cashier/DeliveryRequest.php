@@ -47,7 +47,6 @@ class DeliveryRequest extends FormRequest
             'cashier_id' => ['required', 'exists:cashiers,id'],
             'user_id' => 'required|exists:users,id',
             'address_id' => 'required|exists:addresses,id',
-            'due' => ['required', 'boolean'],
             'user_id' => ['exists:users,id'],
         ];
     }
