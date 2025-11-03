@@ -369,7 +369,7 @@ class CashierMakeOrderController extends Controller
                 "count" => $product_item->count,
             ]; 
         }
-        $errors = $this->pull_recipe($products, $branch_id);
+        $errors = $this->pull_recipe($products, $request->branch_id);
         if(!$errors->success){
             return response()->json([
                 "errors" => $errors->msg
