@@ -335,12 +335,14 @@ class CashierMakeOrderController extends Controller
                 ], 400); 
             }
         }
+        $kitchen_items = [];
         $order = $this->delivery_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
         }
         if(!$request->order_pending){
-            $this->preparing_delivery($request, $order['order']->id);
+            $kitchen_items = $this->preparing_delivery($request, $order['order']->id);
+            $kitchen_items = $kitchen_items['kitchen_items'];
         }
         if($request->due){
             $user_due = $this->user_due
@@ -376,7 +378,8 @@ class CashierMakeOrderController extends Controller
         }
         // _________________________________
         return response()->json([
-            'success' => $order['order'], 
+            'success' => $order['order'],
+            'kitchen_items' => $kitchen_items,
         ]);
     }
 
@@ -928,6 +931,7 @@ class CashierMakeOrderController extends Controller
         $order = $this->order
         ->where('id', $id)
         ->first();
+        $kitchen_items = [];
         $old_status = array_search($order->take_away_status, $status_arr);
         $new_status = array_search($request->take_away_status, $status_arr);
         if($new_status <= $old_status){
@@ -951,14 +955,16 @@ class CashierMakeOrderController extends Controller
                 return response()->json([
                     "errors" => $errors->msg
                 ], 400);
-        } 
-            $this->preparing_takeaway($request, $id);
+        }    
+            $kitchen_items = $this->preparing_takeaway($request, $id);
+            $kitchen_items = $kitchen_items['kitchen_items'];
         }
         $order->take_away_status = $request->take_away_status;
         $order->save();
 
         return response()->json([
-            'success' => 'You update status success'
+            'success' => 'You update status success',
+            'kitchen_items' => $kitchen_items
         ]);
     } 
 
@@ -988,6 +994,15 @@ class CashierMakeOrderController extends Controller
         }
             
         foreach ($kitchen_order as $key => $item) {
+            $kitchen_items[$key] = [
+                "id" => $kitchen_items[$key]->id,
+                "name" => $kitchen_items[$key]->name,
+                "print_name" => $kitchen_items[$key]->print_name,
+                "print_ip" => $kitchen_items[$key]->print_ip,
+                "print_status" => $kitchen_items[$key]->print_status,
+                "order" => json_encode($item),
+                "order_type" => $order->order_type,
+            ];
             $this->kitchen_order
             ->create([
                 'table_id' => $request->table_id,
@@ -997,9 +1012,12 @@ class CashierMakeOrderController extends Controller
                 'order_id' => $order->id,
             ]);
         } 
-        return response()->json([
-            'success' => $order_items
-        ]);
+        $kitchen_items = array_values($kitchen_items);
+
+        return [
+            'success' => $order_items,
+            'kitchen_items' => $kitchen_items,
+        ];
     }
 
     public function preparing_takeaway($request, $id){
