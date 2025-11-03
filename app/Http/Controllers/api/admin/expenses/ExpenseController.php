@@ -25,7 +25,7 @@ class ExpenseController extends Controller
     public function view(Request $request){
         $expenses = $this->expenses
         ->with(["expense:id,name", "admin:id,name"
-        ,"branch:id,name", "cashier:id,name", "cahier_man:id,name",
+        ,"branch:id,name", "cashier:id,name", "cahier_man:id,user_name",
         "financial_account:id,name", "category:id,name"])
         ->get()
         ->map(function($item){
