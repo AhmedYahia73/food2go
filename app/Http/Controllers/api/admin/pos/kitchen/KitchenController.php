@@ -155,10 +155,14 @@ class KitchenController extends Controller
         // /admin/pos/kitchens/add
         // Keys
         // name, password, branch_id, status, type[kitchen, brista]
+        // print_status, print_name, print_ip
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'password' => 'required',
             'branch_id' => 'required|exists:branches,id',
+            'print_status' => 'required|boolean',
+            'print_name' => 'required',
+            'print_ip' => 'required',
             'status' => 'required|boolean',
             'type' => 'required|in:kitchen,brista',
             'preparing_time' => 'required|date_format:H:i:s',
@@ -184,6 +188,9 @@ class KitchenController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'branch_id' => 'required|exists:branches,id',
+            'print_status' => 'required|boolean',
+            'print_name' => 'required',
+            'print_ip' => 'required',
             'status' => 'required|boolean',
             'preparing_time' => 'required|date_format:H:i:s',
         ]);
