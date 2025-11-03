@@ -1046,7 +1046,7 @@ class CashierMakeOrderController extends Controller
                 'order_id' => $order->id,
             ]);
         }
-        $kitchen_items = $kitchen_items->values();
+        $kitchen_items = array_values($kitchen_items);
 
         return response()->json([
             'success' => $order_items,
