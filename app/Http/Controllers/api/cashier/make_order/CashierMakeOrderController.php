@@ -533,7 +533,7 @@ class CashierMakeOrderController extends Controller
         else{
             $order = $this->take_away_make_order($request);
             if(!$request->order_pending){
-                $this->preparing_takeaway($request, $order['order']->id);
+                $kitchen_items = $this->preparing_takeaway($request, $order['order']->id);
             }
             if($request->due){
                 $user_due = $this->user_due
@@ -570,7 +570,8 @@ class CashierMakeOrderController extends Controller
         // _________________________________
         return response()->json([
             'success' => $order['order'], 
-            'request' => $request->all()
+            'request' => $request->all(),
+            "kitchen_items" => $kitchen_items,
         ]);
     }
 
@@ -1006,6 +1007,7 @@ class CashierMakeOrderController extends Controller
         $order_items = $this->takeaway_order_format($order);
         $order_items = collect($order_items);
         $kitchen_order = [];
+        $kitchen_items = [];
         foreach ($order_items as $key => $element) {
             $kitchen = $this->kitchen
             ->where(function($q) use($element){
@@ -1020,11 +1022,21 @@ class CashierMakeOrderController extends Controller
             ->where('branch_id', $request->user()->branch_id)
             ->first();
             if(!empty($kitchen)){
+                $kitchen_items[$kitchen->id][] = $kitchen;
                 $kitchen_order[$kitchen->id][] = $element;
             }
         }
             
         foreach ($kitchen_order as $key => $item) {
+            $kitchen_items[$key] = [
+                "id" => $kitchen_items[$key]->id,
+                "name" => $kitchen_items[$key]->name,
+                "print_name" => $kitchen_items[$key]->print_name,
+                "print_ip" => $kitchen_items[$key]->print_ip,
+                "print_status" => $kitchen_items[$key]->print_status,
+                "order" => json_encode($item),
+                "order_type" => $order->order_type,
+            ];
             $this->kitchen_order
             ->create([
                 'table_id' => $request->table_id,
@@ -1034,8 +1046,11 @@ class CashierMakeOrderController extends Controller
                 'order_id' => $order->id,
             ]);
         }
+        $kitchen_items = $kitchen_items->values();
+
         return response()->json([
-            'success' => $order_items
+            'success' => $order_items,
+            'kitchen_items' => $kitchen_items,
         ]);
     }
 
