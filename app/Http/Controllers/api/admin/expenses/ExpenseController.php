@@ -66,11 +66,11 @@ class ExpenseController extends Controller
         ->where("status", 1)
         ->get();  
         $financial = $this->financial
-        ->select("id", "user_name")
+        ->select("id", "name")
         ->where("status", 1)
         ->get();  
         $categories = $this->category
-        ->select("id", "user_name")
+        ->select("id", "name")
         ->where("status", 1)
         ->get();
 
