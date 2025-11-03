@@ -363,12 +363,11 @@ class CashierMakeOrderController extends Controller
         $order_details = $order['order']->order_details;
         $products = [];
         foreach ($order_details as $item) {
-            $product_item = collect($order_details)->product[0];
-            $product_item = collect($product_item);
+            $product_item = $item->product[0]; 
             $products[] = [
-                "id" => collect($product_item->product)->id,
+                "id" => $product_item->product->id,
                 "count" => $product_item->count,
-            ];
+            ]; 
         }
         $errors = $this->pull_recipe($products, $branch_id);
         if(!$errors->success){
