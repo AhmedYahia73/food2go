@@ -527,6 +527,7 @@ class CashierMakeOrderController extends Controller
                 ], 400); 
             }
         }
+        $kitchen_items = [];
         if($request->order_pending){
             $order = $this->take_away_make_order($request);
         }
@@ -534,6 +535,7 @@ class CashierMakeOrderController extends Controller
             $order = $this->take_away_make_order($request);
             if(!$request->order_pending){
                 $kitchen_items = $this->preparing_takeaway($request, $order['order']->id);
+                $kitchen_items = $kitchen_items['kitchen_items'];
             }
             if($request->due){
                 $user_due = $this->user_due
@@ -1048,10 +1050,10 @@ class CashierMakeOrderController extends Controller
         }
         $kitchen_items = array_values($kitchen_items);
 
-        return response()->json([
+        return [
             'success' => $order_items,
             'kitchen_items' => $kitchen_items,
-        ]);
+        ];
     }
 
     public function transfer_order(Request $request){
