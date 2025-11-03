@@ -773,7 +773,7 @@ class CashierMakeOrderController extends Controller
             return response()->json($order, 400);
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
-        $this->order_format(($order['payment']), 0);
+        $order_items = $this->order_format(($order['payment']), 0);
         // Pull Pecipe
         $order_details = $order['payment']['order_details'];
         $products = [];
@@ -802,7 +802,7 @@ class CashierMakeOrderController extends Controller
         ->delete();
 
         return response()->json([
-            'success' => $order, 
+            'success' => $order_items, 
         ]);
     }
 
