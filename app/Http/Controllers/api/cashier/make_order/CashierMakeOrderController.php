@@ -370,9 +370,9 @@ class CashierMakeOrderController extends Controller
             ]; 
         }
         $errors = $this->pull_recipe($products, $request->branch_id);
-        if(!$errors->success){
+        if(!$errors['success']){
             return response()->json([
-                "errors" => $errors->msg
+                "errors" => $errors['msg']
             ], 400);
         }
         // _________________________________
@@ -568,7 +568,7 @@ class CashierMakeOrderController extends Controller
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
             return response()->json([
-                "errors" => $errors->msg
+                "errors" => $errors['msg']
             ], 400);
         } 
         // _________________________________
@@ -790,7 +790,7 @@ class CashierMakeOrderController extends Controller
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
             return response()->json([
-                "errors" => $errors->msg
+                "errors" => $errors['msg']
             ], 400);
         } 
         // _________________________________
@@ -876,7 +876,7 @@ class CashierMakeOrderController extends Controller
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
             return response()->json([
-                "errors" => $errors->msg
+                "errors" => $errors['msg']
             ], 400);
         } 
         // _________________________________
@@ -952,7 +952,7 @@ class CashierMakeOrderController extends Controller
             $errors = $this->pull_recipe($products, $request->user()->branch_id); 
             if(!$errors['success']){
                 return response()->json([
-                    "errors" => $errors->msg
+                    "errors" => $errors['msg']
                 ], 400);
         }    
             $kitchen_items = $this->preparing_takeaway($request, $id);
