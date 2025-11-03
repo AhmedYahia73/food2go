@@ -16,6 +16,6 @@ class ExpenseList extends Model
     ];
 
     public function category(){
-        return $this->belongsTo(ExpenseCategory::class, 'expense_categories');
+        return $this->belongsTo(ExpenseCategory::class, 'category_id');
     }
 }

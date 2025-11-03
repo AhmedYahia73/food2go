@@ -64,6 +64,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
     Route::controller(DiscountController::class)
     ->group(function(){
+        Route::get('/service_fees', 'check_discount_code');
         Route::post('/check_discount_code', 'check_discount_code');
     });
 
