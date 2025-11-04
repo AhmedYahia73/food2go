@@ -18,6 +18,9 @@ class FinantiolAcounting extends Model
         'logo',
     ];
     protected $appends = ['logo_link'];
+    protected $hidden = [
+        'pivot', 
+    ];
 
     public function getLogoLinkAttribute(){
         if (isset($this->attributes['logo'])) {
