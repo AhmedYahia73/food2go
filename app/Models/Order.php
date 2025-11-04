@@ -65,6 +65,9 @@ class Order extends Model
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
 
+    protected $hidden = [
+        'pivot', 
+    ];
     public function getdateAttribute(){
         return $this->created_at->format('H:i:s');
     }
