@@ -13,6 +13,7 @@ class GroupProduct extends Model
         'name',
         'increase_precentage',
         'decrease_precentage',
+        'module',
         'status', 
     ];
 

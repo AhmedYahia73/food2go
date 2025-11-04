@@ -14,17 +14,23 @@ class GroupProductController extends Controller
 
     public function view(Request $request){
         $group_products = $this->group_product
-        ->select("id", "name", "increase_precentage", "decrease_precentage", "status")
+        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status")
         ->get();
+        $modules = [
+            "take_away",
+            "delivery",
+            "dine_in",
+        ];
 
         return response()->json([
-            "group_products" => $group_products
+            "group_products" => $group_products,
+            "modules" => $modules,
         ]);
     }
     
     public function group_item(Request $request, $id){
         $group_product = $this->group_product
-        ->select("id", "name", "increase_precentage", "decrease_precentage", "status")
+        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status")
         ->where("id", $id)
         ->first();
 
@@ -57,9 +63,10 @@ class GroupProductController extends Controller
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'name' => ['required'], 
+            'module' => ['required', "in:take_away,delivery,dine_in"], 
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
-            'status' => ['required', 'boolean'], 
+            'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -79,6 +86,7 @@ class GroupProductController extends Controller
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'name' => ['required'], 
+            'module' => ['required', "in:take_away,delivery,dine_in"], 
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
             'status' => ['required', 'boolean'], 
