@@ -154,7 +154,8 @@ class OrderController extends Controller
                 'delivery' => ['name' => $item?->delivery?->name], 
             ];
         });
-        $orders = $orders->merge($orders2);
+        $orders = $orders->merge($orders2)
+        ->sortByDesc("id");
         $order_type = [
             "dine_in",
             "take_away",
