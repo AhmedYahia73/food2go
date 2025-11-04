@@ -26,11 +26,6 @@ class OrderController extends Controller
         ->where("name", "order_precentage")
         ->first()?->setting ?? 100; 
         $orders = $this->orders
-        ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-        ,'order_status', 'order_type',
-        'delivery_id', 'address_id', 'source',
-        'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 1)
         ->where(function($query){
             $query->where("take_away_status", "pick_up")
@@ -56,7 +51,7 @@ class OrderController extends Controller
         ->map(function($item){
             $order_type = "";
             if ($item->order_type == "dine_in") {
-                $order_type = "done";
+                $order_type = "pickup";
             }
             elseif ($item->order_type == "take_away") {
                 $order_type = $item->take_away_status;
@@ -93,11 +88,6 @@ class OrderController extends Controller
             return $positionInBlock < ($order_recentage / 10);
         });
         $orders2 = $this->orders
-        ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-        ,'order_status', 'order_type',
-        'delivery_id', 'address_id', 'source',
-        'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
         ->where('pos', 1)
         ->where(function($query){
             $query->where("take_away_status", "!=", "pick_up")
@@ -121,7 +111,7 @@ class OrderController extends Controller
         ->map(function($item){
             $order_type = "";
             if ($item->order_type == "dine_in") {
-                $order_type = "done";
+                $order_type = "pickup";
             }
             elseif ($item->order_type == "take_away") {
                 $order_type = $item->take_away_status;
