@@ -714,7 +714,7 @@ class ReportController extends Controller
             $query->select('id', 'zone_id')
             ->with('zone:id,zone');
         }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-        'schedule:id,name', 'delivery'])
+        'schedule:id,name', 'delivery', "financial_accountigs:id,name"])
         ->get()
         ->map(function($item){
         return [ 
@@ -727,6 +727,7 @@ class ReportController extends Controller
             'order_status' => $item->order_status,
             'source' => $item->source,
             'status' => $item->status,
+            "type" => $item->pos ? "point of sale" : "online order",
             'points' => $item->points, 
             'rejected_reason' => $item->rejected_reason,
             'transaction_id' => $item->transaction_id,
@@ -740,6 +741,7 @@ class ReportController extends Controller
             'payment_method' => ['name' => $item?->payment_method?->name],
             'schedule' => ['name' => $item?->schedule?->name],
             'delivery' => ['name' => $item?->delivery?->name], 
+            'financial_accountigs' => ['name' => $item?->financial_accountigs?->name], 
         ];
     });
 
@@ -817,7 +819,7 @@ class ReportController extends Controller
         }
         
         $expenses = $this->expenses;
-        $orders = $orders
+        $orders = $orders 
         ->get()
         ?->pluck("id")?->toArray() ?? [];
         $financial_accounts = OrderFinancial::
