@@ -741,7 +741,7 @@ class ReportController extends Controller
             'payment_method' => ['name' => $item?->payment_method?->name],
             'schedule' => ['name' => $item?->schedule?->name],
             'delivery' => ['name' => $item?->delivery?->name], 
-            'financial_accountigs' => ['name' => $item?->financial_accountigs?->name], 
+            'financial_accountigs' => $item?->financial_accountigs, 
         ];
     });
 
