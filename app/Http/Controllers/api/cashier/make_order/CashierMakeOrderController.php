@@ -1043,6 +1043,7 @@ class CashierMakeOrderController extends Controller
             ->first();
             if(!empty($kitchen)){
                 $kitchen_items[$kitchen->id] = $kitchen;
+                $kitchen_order[$kitchen->id][] = $element;
             }
         }
             
