@@ -818,11 +818,6 @@ class ReportController extends Controller
         
         $expenses = $this->expenses;
         $orders = $orders
-        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
-            $query->select('id', 'zone_id')
-            ->with('zone:id,zone');
-        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-        'schedule:id,name', 'delivery'])
         ?->pluck("id")?->toArray() ?? [];
         $financial_accounts = OrderFinancial::
         selectRaw("financial_id, SUM(amount) as total_amount")
