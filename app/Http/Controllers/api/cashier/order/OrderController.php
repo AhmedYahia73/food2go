@@ -22,142 +22,216 @@ class OrderController extends Controller
     use Recipe;
 
     public function pos_orders(Request $request){
-        $order_recentage = $this->settings
-        ->where("name", "order_precentage")
-        ->first()?->setting ?? 100;
-        $order_recentage = intval($order_recentage);
-        $orders = $this->orders
-        ->where('pos', 1)
-        ->where(function($query){
-            $query->where("take_away_status", "pick_up")
-            ->where("order_type", "take_away")
-            ->orWhere("delivery_status", "done")
-            ->where("order_type", "delivery")
-            ->orWhere("order_type", "dine_in");
+        $password = $this->settings
+        ->where('name', 'password')
+        ->first()?->setting ?? null;
+        if($request->password == $password){
+            $order_recentage = $this->settings
+            ->where("name", "order_precentage")
+            ->first()?->setting ?? 100;
+            $order_recentage = intval($order_recentage);
+            $orders = $this->orders
+            ->where('pos', 1)
+            ->where(function($query){
+                $query->where("take_away_status", "pick_up")
+                ->where("order_type", "take_away")
+                ->orWhere("delivery_status", "done")
+                ->where("order_type", "delivery")
+                ->orWhere("order_type", "dine_in");
 
-        })
-        ->where("shift", $request->user()->shift_number) 
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        }) 
-        ->where('order_active', 1)
-        ->orderByDesc('id')
-        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
-            $query->select('id', 'zone_id')
-            ->with('zone:id,zone');
-        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-        'schedule:id,name', 'delivery'])
-        ->get()
-        ->map(function($item){
-            $order_type = "";
-            if ($item->order_type == "dine_in") {
-                $order_type = "pickup";
-            }
-            elseif ($item->order_type == "take_away") {
-                $order_type = $item->take_away_status;
-            }
-            elseif ($item->order_type == "delivery") {
-                $order_type = $item->delivery_status;
-            }
-            return [ 
-                'id' => $item->id,
-                'order_number' => $item->order_number,
-                'created_at' => $item->created_at,
-                'amount' => $item->amount,
-                'operation_status' => $item->operation_status,
-                'order_type' => $item->order_type,
-                'order_status' => $order_type,
-                'source' => $item->source,
-                'status' => $item->status,
-                'points' => $item->points, 
-                'rejected_reason' => $item->rejected_reason,
-                'transaction_id' => $item->transaction_id,
-                'user' => [
-                    'f_name' => $item?->user?->f_name,
-                    'l_name' => $item?->user?->l_name,
-                    'phone' => $item?->user?->phone],
-                'branch' => ['name' => $item?->branch?->name, ],
-                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                'admin' => ['name' => $item?->admin?->name,],
-                'payment_method' => ['name' => $item?->payment_method?->name],
-                'schedule' => ['name' => $item?->schedule?->name],
-                'delivery' => ['name' => $item?->delivery?->name], 
-            ];
-        })->filter(function ($order, $index) use($order_recentage) {
-            $positionInBlock = $index % 10;
-            return $positionInBlock < ($order_recentage / 10);
-        });
-        $orders2 = $this->orders
-        ->where('pos', 1)
-        ->where(function($query){
-            $query->where("take_away_status", "!=", "pick_up")
-            ->where("order_type", "take_away")
-            ->orWhere("delivery_status", "!=", "done")
-            ->where("order_type", "delivery");
+            })
+            ->where("shift", $request->user()->shift_number) 
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            }) 
+            ->where('order_active', 1)
+            ->orderByDesc('id')
+            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+                $query->select('id', 'zone_id')
+                ->with('zone:id,zone');
+            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+            'schedule:id,name', 'delivery'])
+            ->get()
+            ->map(function($item){
+                $order_type = "";
+                if ($item->order_type == "dine_in") {
+                    $order_type = "pickup";
+                }
+                elseif ($item->order_type == "take_away") {
+                    $order_type = $item->take_away_status;
+                }
+                elseif ($item->order_type == "delivery") {
+                    $order_type = $item->delivery_status;
+                }
+                return [ 
+                    'id' => $item->id,
+                    'order_number' => $item->order_number,
+                    'created_at' => $item->created_at,
+                    'amount' => $item->amount,
+                    'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
+                    'order_status' => $order_type,
+                    'source' => $item->source,
+                    'status' => $item->status,
+                    'points' => $item->points, 
+                    'rejected_reason' => $item->rejected_reason,
+                    'transaction_id' => $item->transaction_id,
+                    'user' => [
+                        'f_name' => $item?->user?->f_name,
+                        'l_name' => $item?->user?->l_name,
+                        'phone' => $item?->user?->phone],
+                    'branch' => ['name' => $item?->branch?->name, ],
+                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                    'admin' => ['name' => $item?->admin?->name,],
+                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'schedule' => ['name' => $item?->schedule?->name],
+                    'delivery' => ['name' => $item?->delivery?->name], 
+                ];
+            })->filter(function ($order, $index) use($order_recentage) {
+                $positionInBlock = $index % 10;
+                return $positionInBlock < ($order_recentage / 10);
+            });
+            $orders2 = $this->orders
+            ->where('pos', 1)
+            ->where(function($query){
+                $query->where("take_away_status", "!=", "pick_up")
+                ->where("order_type", "take_away")
+                ->orWhere("delivery_status", "!=", "done")
+                ->where("order_type", "delivery");
 
-        })
-        ->where("shift", $request->user()->shift_number) 
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        }) 
-        ->orderByDesc('id')
-        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
-            $query->select('id', 'zone_id')
-            ->with('zone:id,zone');
-        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-        'schedule:id,name', 'delivery'])
-        ->get()
-        ->map(function($item){
-            $order_type = "";
-            if ($item->order_type == "dine_in") {
-                $order_type = "pickup";
-            }
-            elseif ($item->order_type == "take_away") {
-                $order_type = $item->take_away_status;
-            }
-            elseif ($item->order_type == "delivery") {
-                $order_type = $item->delivery_status;
-            }
-            return [ 
-                'id' => $item->id,
-                'order_number' => $item->order_number,
-                'created_at' => $item->created_at,
-                'amount' => $item->amount,
-                'operation_status' => $item->operation_status,
-                'order_type' => $item->order_type,
-                'order_status' => $order_type,
-                'source' => $item->source,
-                'status' => $item->status,
-                'points' => $item->points, 
-                'rejected_reason' => $item->rejected_reason,
-                'transaction_id' => $item->transaction_id,
-                'user' => [
-                    'f_name' => $item?->user?->f_name,
-                    'l_name' => $item?->user?->l_name,
-                    'phone' => $item?->user?->phone],
-                'branch' => ['name' => $item?->branch?->name, ],
-                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                'admin' => ['name' => $item?->admin?->name,],
-                'payment_method' => ['name' => $item?->payment_method?->name],
-                'schedule' => ['name' => $item?->schedule?->name],
-                'delivery' => ['name' => $item?->delivery?->name], 
+            })
+            ->where("shift", $request->user()->shift_number) 
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            }) 
+            ->orderByDesc('id')
+            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+                $query->select('id', 'zone_id')
+                ->with('zone:id,zone');
+            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+            'schedule:id,name', 'delivery'])
+            ->get()
+            ->map(function($item){
+                $order_type = "";
+                if ($item->order_type == "dine_in") {
+                    $order_type = "pickup";
+                }
+                elseif ($item->order_type == "take_away") {
+                    $order_type = $item->take_away_status;
+                }
+                elseif ($item->order_type == "delivery") {
+                    $order_type = $item->delivery_status;
+                }
+                return [ 
+                    'id' => $item->id,
+                    'order_number' => $item->order_number,
+                    'created_at' => $item->created_at,
+                    'amount' => $item->amount,
+                    'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
+                    'order_status' => $order_type,
+                    'source' => $item->source,
+                    'status' => $item->status,
+                    'points' => $item->points, 
+                    'rejected_reason' => $item->rejected_reason,
+                    'transaction_id' => $item->transaction_id,
+                    'user' => [
+                        'f_name' => $item?->user?->f_name,
+                        'l_name' => $item?->user?->l_name,
+                        'phone' => $item?->user?->phone],
+                    'branch' => ['name' => $item?->branch?->name, ],
+                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                    'admin' => ['name' => $item?->admin?->name,],
+                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'schedule' => ['name' => $item?->schedule?->name],
+                    'delivery' => ['name' => $item?->delivery?->name], 
+                ];
+            });
+            $orders = $orders->merge($orders2)
+            ->sortByDesc("id")
+            ->values();
+            $order_type = [
+                "dine_in",
+                "take_away",
+                "delivery",
             ];
-        });
-        $orders = $orders->merge($orders2)
-        ->sortByDesc("id")
-        ->values();
-        $order_type = [
-            "dine_in",
-            "take_away",
-            "delivery",
-        ];
+            return response()->json([
+                "orders" => $orders,
+                "order_type" => $order_type, 
+            ]);
+        }
+        elseif(password_verify($request->input('password'), $request->user()->password) && $request->user()->real_orders){
+           $order_recentage = $this->settings
+            ->where("name", "order_precentage")
+            ->first()?->setting ?? 100;
+            $order_recentage = intval($order_recentage);
+            $orders = $this->orders
+            ->where('pos', 1) 
+            ->where("shift", $request->user()->shift_number) 
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            }) 
+            ->where('order_active', 1)
+            ->orderByDesc('id')
+            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+                $query->select('id', 'zone_id')
+                ->with('zone:id,zone');
+            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+            'schedule:id,name', 'delivery'])
+            ->get()
+            ->map(function($item){
+                $order_type = "";
+                if ($item->order_type == "dine_in") {
+                    $order_type = "pickup";
+                }
+                elseif ($item->order_type == "take_away") {
+                    $order_type = $item->take_away_status;
+                }
+                elseif ($item->order_type == "delivery") {
+                    $order_type = $item->delivery_status;
+                }
+                return [ 
+                    'id' => $item->id,
+                    'order_number' => $item->order_number,
+                    'created_at' => $item->created_at,
+                    'amount' => $item->amount,
+                    'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
+                    'order_status' => $order_type,
+                    'source' => $item->source,
+                    'status' => $item->status,
+                    'points' => $item->points, 
+                    'rejected_reason' => $item->rejected_reason,
+                    'transaction_id' => $item->transaction_id,
+                    'user' => [
+                        'f_name' => $item?->user?->f_name,
+                        'l_name' => $item?->user?->l_name,
+                        'phone' => $item?->user?->phone],
+                    'branch' => ['name' => $item?->branch?->name, ],
+                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                    'admin' => ['name' => $item?->admin?->name,],
+                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'schedule' => ['name' => $item?->schedule?->name],
+                    'delivery' => ['name' => $item?->delivery?->name], 
+                ];
+            });
+            $order_type = [
+                "dine_in",
+                "take_away",
+                "delivery",
+            ];
+            return response()->json([
+                "orders" => $orders,
+                "order_type" => $order_type, 
+            ]);
+        }
+
         return response()->json([
-            "orders" => $orders,
-            "order_type" => $order_type,
-            "order_recentage" => $order_recentage
-        ]);
+            "errors" => "password is wrong"
+        ], 400);
     }
 
     public function online_orders(Request $request){

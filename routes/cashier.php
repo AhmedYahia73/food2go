@@ -58,7 +58,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
     Route::controller(OrderController::class)
     ->prefix("orders")->group(function(){
-        Route::get('/point_of_sale', 'pos_orders');
+        Route::post('/point_of_sale', 'pos_orders');
         Route::get('/online_orders', 'online_orders');
         Route::get('/order_item', 'order_item');
         Route::put('/transfer_branch/{id}', 'transfer_branch');

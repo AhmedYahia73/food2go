@@ -16,9 +16,13 @@ class OrderPrecentageController extends Controller
         $order_precentage = $this->settings
         ->where('name', 'order_precentage')
         ->first()?->setting ?? 100;
+        $password = $this->settings
+        ->where('name', 'password')
+        ->first()?->setting ?? null;
 
         return response()->json([
-            'order_precentage' => $order_precentage
+            'order_precentage' => $order_precentage,
+            "password" => $password
         ]);
     }
 
