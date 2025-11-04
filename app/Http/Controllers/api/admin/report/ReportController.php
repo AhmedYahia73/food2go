@@ -765,7 +765,7 @@ class ReportController extends Controller
 
         // Order
         $orders = Order::
-        selectRaw("");
+        select("id");
 
         if($request->from || $request->to){
             $time_sittings = TimeSittings::get();
