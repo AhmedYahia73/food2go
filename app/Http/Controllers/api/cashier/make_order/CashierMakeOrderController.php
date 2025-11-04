@@ -573,8 +573,7 @@ class CashierMakeOrderController extends Controller
         } 
         // _________________________________
         return response()->json([
-            'success' => $order['order'], 
-            'request' => $request->all(),
+            'success' => $order['order'],  
             "kitchen_items" => $kitchen_items,
         ]);
     }
@@ -1028,6 +1027,7 @@ class CashierMakeOrderController extends Controller
         $order_items = collect($order_items);
         $kitchen_order = [];
         $kitchen_items = [];
+        $order_kitchen = [];
         foreach ($order_items as $key => $element) {
             $kitchen = $this->kitchen
             ->where(function($q) use($element){
@@ -1047,7 +1047,7 @@ class CashierMakeOrderController extends Controller
         }
             
         foreach ($kitchen_order as $key => $item) {
-            $kitchen_items[$key] = [
+            $order_kitchen[$key] = [
                 "id" => $kitchen_items[$key]->id,
                 "name" => $kitchen_items[$key]->name,
                 "print_name" => $kitchen_items[$key]->print_name,
@@ -1065,11 +1065,11 @@ class CashierMakeOrderController extends Controller
                 'order_id' => $order->id,
             ]);
         }
-        $kitchen_items = array_values($kitchen_items);
+        $order_kitchen = array_values($order_kitchen);
 
         return [
             'success' => $order_items,
-            'kitchen_items' => $kitchen_items,
+            'kitchen_items' => $order_kitchen,
         ];
     }
 
