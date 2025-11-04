@@ -19,10 +19,10 @@ trait Recipe
             ->with("unit:id,name")
             ->first();
             if(empty($product)){ 
-                return response()->json([
+                return [
                     "success" => false,
                     "msg" => $item["id"] . " id is wrong"
-                ]);
+                ];
             }
             $stock = PurchaseStock::
             where("product_id", $item["id"])
@@ -34,10 +34,10 @@ trait Recipe
             ->with("unit")
             ->first();
             if($product->recipe && empty($stock)){
-                return response()->json([
+                return [
                     "success" => false,
                     "msg" => $product->name . " is out of stock"
-                ]);
+                ];
             }
             elseif($product->recipe){
                 if($product->weight_status){
