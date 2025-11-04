@@ -818,9 +818,11 @@ class ReportController extends Controller
         
         $expenses = $this->expenses;
         $orders = $orders
+        ->get()
         ?->pluck("id")?->toArray() ?? [];
         $financial_accounts = OrderFinancial::
         selectRaw("financial_id, SUM(amount) as total_amount")
+        ->whereIn("order_id", $orders)
         ->with("financials")
         ->groupBy("financial_id")
         ->get()
