@@ -24,7 +24,8 @@ class OrderController extends Controller
     public function pos_orders(Request $request){
         $order_recentage = $this->settings
         ->where("name", "order_precentage")
-        ->first()?->setting ?? 100; 
+        ->first()?->setting ?? 100;
+        $order_recentage = intval($order_recentage);
         $orders = $this->orders
         ->where('pos', 1)
         ->where(function($query){
