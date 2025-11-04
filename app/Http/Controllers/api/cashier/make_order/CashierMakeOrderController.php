@@ -988,7 +988,7 @@ class CashierMakeOrderController extends Controller
             ->where('branch_id', $request->user()->branch_id)
             ->first();
             if(!empty($kitchen)){
-                $kitchen_items[$kitchen->id][] = $kitchen;
+                $kitchen_items[$kitchen->id] = $kitchen;
                 $kitchen_order[$kitchen->id][] = $element;
             }
         }
@@ -1000,7 +1000,7 @@ class CashierMakeOrderController extends Controller
                 "print_name" => $kitchen_items[$key]->print_name,
                 "print_ip" => $kitchen_items[$key]->print_ip,
                 "print_status" => $kitchen_items[$key]->print_status,
-                "order" => json_encode($item),
+                "order" => $item,
                 "order_type" => $order->order_type,
             ];
             $this->kitchen_order
