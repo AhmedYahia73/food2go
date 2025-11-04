@@ -25,6 +25,7 @@ class OrderPrecentageController extends Controller
     public function create_update(Request $request){
         $validator = Validator::make($request->all(), [
             'order_precentage' => 'required|numeric',
+            'password' => 'required',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -46,6 +47,23 @@ class OrderPrecentageController extends Controller
             ->where('name', 'order_precentage')
             ->update([
                 'setting' => $request->order_precentage,
+            ]); 
+        }
+        $password = $this->settings
+        ->where('name', 'password')
+        ->first();
+        if(empty($password)){
+            $this->settings
+            ->create([
+                'name' => 'password',
+                'setting' => $request->password,
+            ]);
+        }
+        else{
+            $this->settings
+            ->where('name', 'password')
+            ->update([
+                'setting' => $request->password,
             ]); 
         }
 
