@@ -22,6 +22,14 @@ class OrderController extends Controller
     use Recipe;
 
     public function pos_orders(Request $request){
+        $validator = Validator::make($request->all(), [
+            'password' => 'required',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $password = $this->settings
         ->where('name', 'password')
         ->first()?->setting ?? null;
