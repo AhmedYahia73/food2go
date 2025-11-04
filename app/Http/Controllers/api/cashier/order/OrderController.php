@@ -356,6 +356,11 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->find($id);
+        if(!$order){
+            return response()->json([
+                "errors" => "id wrong"
+            ], 400);
+        }
         $order->makeHidden('order_details_data');
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
@@ -629,14 +634,7 @@ class OrderController extends Controller
             $order->update([
                 'order_status' => $request->order_status, 
             ]);
-        }
-        $this->log_order
-        ->create([
-            'order_id' => $id,
-            'admin_id' => $request->user()->id,
-            'from_status' => $old_status,
-            'to_status' => $request->order_status,
-        ]); 
+        } 
 
         return response()->json([
             'order_status' => $request->order_status
