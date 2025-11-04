@@ -234,6 +234,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/filter_purchase_raise_product', 'filter_purchase_raise_product');
         Route::get('/purchase_low_product', 'purchase_low_product');
         Route::post('/filter_purchase_low_product', 'filter_purchase_low_product');
+        Route::get('/lists_report', 'lists_report');
         Route::post('/orders_report', 'orders_report');
     });
     

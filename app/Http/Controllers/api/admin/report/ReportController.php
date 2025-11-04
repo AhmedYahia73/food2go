@@ -7,13 +7,14 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
-use App\Models\OrderDetail;
+use App\Models\CashierMan;
+use App\Models\Cashier; 
 use App\Models\FinantiolAcounting;
 use App\Models\Branch;
 use App\Models\TimeSittings;
 use App\Models\Order;
 use App\Models\Purchase;
-use App\Models\PurchaseStock;  
+use App\Models\PurchaseStock;
 
 class ReportController extends Controller
 {
@@ -614,6 +615,27 @@ class ReportController extends Controller
         ]);
     }
 
+    public function lists_report(Request $request){
+        $cashier_man = CashierMan::
+        select("id", "user_name")
+        ->get();
+        $cashier = Cashier::
+        select("id", "name")
+        ->get();
+        $financial_account = FinantiolAcounting::
+        select("id", "name")
+        ->get(); 
+        $branches = Branch::
+        select("id", "name")
+        ->get();  
+
+        return response()->json([
+            "cashier_man" => $cashier_man,
+            "cashier" => $cashier,
+            "financial_account" => $financial_account,
+            "branches" => $branches,
+        ]);
+    }
     public function orders_report(Request $request){
         $validator = Validator::make($request->all(), [
             'from' => ['date'],
