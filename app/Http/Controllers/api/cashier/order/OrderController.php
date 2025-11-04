@@ -566,23 +566,6 @@ class OrderController extends Controller
             ,'faild_to_deliver','canceled','scheduled','refund'];
             $new_index = array_search($request->order_status, $arr);
             $old_index = array_search($order->order_status, $arr);
-            $user = $request->user();
-            $roles = $user?->user_positions?->roles?->where('role', 'Order')->pluck('action')->values();
-            $hasAllPermission = $roles->contains('all');
-            $hasBackStatus = $roles->contains('back_status');
-            $hasStatusPermission = $roles->contains('change_status');
-            $hasRequiredPermission = $hasAllPermission || $hasStatusPermission;
-            if (!$hasAllPermission && !$hasBackStatus && $new_index < $old_index) {
-                return response()->json([
-                    'errors' => "You can't back by status"
-                ], 400);
-            }
-
-            if ($order->admin_id !== $user->id && !$hasRequiredPermission) {
-                return response()->json([
-                    'errors' => "You can't change status"
-                ], 400);
-            }
         }
 
         if($old_status == "pending"){
