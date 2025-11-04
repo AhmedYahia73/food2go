@@ -155,7 +155,8 @@ class OrderController extends Controller
             ];
         });
         $orders = $orders->merge($orders2)
-        ->sortByDesc("id");
+        ->sortByDesc("id")
+        ->values();
         $order_type = [
             "dine_in",
             "take_away",
