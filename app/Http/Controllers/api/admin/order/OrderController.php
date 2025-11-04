@@ -1303,10 +1303,17 @@ class OrderController extends Controller
             ]);
         }
        if ($order->operation_status == 'pending') {
-            $order->update([
-                'admin_id' => $request->user()->id,
-                'operation_status' => 'opened',
-            ]);
+            if ($request->user()->role == "admin") {
+                $order->update([
+                    'admin_id' => $request->user()->id,
+                    'operation_status' => 'opened',
+                ]);
+            }
+            else{
+                $order->update([
+                    'operation_status' => 'opened',
+                ]);
+            }
         }
         else{
             $arr =  ['pending','processing','confirmed','out_for_delivery','delivered','returned'
@@ -1345,7 +1352,7 @@ class OrderController extends Controller
             $errors = $this->pull_recipe($products, $order->branch_id); 
             if(!$errors['success']){
                 return response()->json([
-                    "errors" => $errors->msg
+                    "errors" => $errors['msg']
                 ], 400);
             }
         }

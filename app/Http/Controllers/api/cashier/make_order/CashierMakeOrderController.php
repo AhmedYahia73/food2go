@@ -1042,8 +1042,7 @@ class CashierMakeOrderController extends Controller
             ->where('branch_id', $request->user()->branch_id)
             ->first();
             if(!empty($kitchen)){
-                $kitchen_items[$kitchen->id][] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $element;
+                $kitchen_items[$kitchen->id] = $kitchen;
             }
         }
             
