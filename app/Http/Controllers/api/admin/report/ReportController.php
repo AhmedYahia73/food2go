@@ -9,15 +9,19 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\CashierMan;
 use App\Models\Cashier; 
+use App\Models\OrderFinancial;
 use App\Models\FinantiolAcounting;
 use App\Models\Branch;
 use App\Models\TimeSittings;
 use App\Models\Order;
 use App\Models\Purchase;
 use App\Models\PurchaseStock;
+use App\Models\Expense;
 
 class ReportController extends Controller
 {
+    public function __construct(private Expense $expenses){}
+
     public function view_raise_product(){
         $products = OrderDetail::
         selectRaw("product_id, sum(count) as product_count")
@@ -636,6 +640,7 @@ class ReportController extends Controller
             "branches" => $branches,
         ]);
     }
+
     public function orders_report(Request $request){
         $validator = Validator::make($request->all(), [
             'from' => ['date'],
@@ -740,6 +745,103 @@ class ReportController extends Controller
 
         return response()->json([
             'orders' => $orders
+        ]);
+    }
+    
+    public function financial_report(Request $request){
+        $validator = Validator::make($request->all(), [
+            'from' => ['date'],
+            'to' => ['date'],
+            'cashier_id' => ['exists:cashiers,id'],
+            'branch_id' => ['exists:branches,id'],
+            'cashier_man_id' => ['exists:cashier_men,id'],
+            'financial_id' => ['exists:	finantiol_acountings,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        // Order
+        $orders = Order::
+        selectRaw("");
+
+        if($request->from || $request->to){
+            $time_sittings = TimeSittings::get();
+            if ($time_sittings->count() > 0) {
+                $from = $time_sittings[0]->from;
+                $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+                $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+                $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+                $from = date('Y-m-d') . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                $start_date = ($request->from ?? '1999-05-05') . ' ' . $start->format("H:i:s");
+                $end_date = ($request->to ?? date("Y-m-d")) . ' ' . $end->format("H:i:s");
+                $start_date = Carbon::parse($start);
+                $end_date = Carbon::parse($end);
+                if ($start >= $end) {
+                    $end_date = $end_date->addDay();
+                }
+                if($start >= now()){
+                    $start_date = $start_date->subDay();
+                }
+            } else {
+                $start = Carbon::parse($request->from);
+                $end = Carbon::parse($request->to ?? date("Y-m-d"));
+            } 
+            $start = $start->subDay();
+            $orders = $orders
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+        }
+        if($request->cashier_id){
+            $orders = $orders
+            ->where("cashier_id", $request->cashier_id);
+        }
+        if($request->branch_id){
+            $orders = $orders
+            ->where("branch_id", $request->branch_id);
+        }
+        if($request->cashier_man_id){
+            $orders = $orders
+            ->where("cashier_man_id", $request->cashier_man_id);
+        }
+        if($request->financial_id){
+            $orders = $orders
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
+        }
+        
+        $expenses = $this->expenses;
+        $orders = $orders
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+            $query->select('id', 'zone_id')
+            ->with('zone:id,zone');
+        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery'])
+        ?->pluck("id")?->toArray() ?? [];
+        $financial_accounts = OrderFinancial::
+        selectRaw("financial_id, SUM(amount) as total_amount")
+        ->with("financials")
+        ->groupBy("financial_id")
+        ->get()
+        ->map(function($item) use($expenses) {
+            $expenses_amount = $expenses
+            ->where("financial_account_id", $item->financial_id)
+            ->sum("amount") ?? 0;
+            return [
+                "total_amount" => $item->total_amount - $expenses_amount,
+                "financial_id" => $item->financial_id,
+                "financial_name" => $item?->financials?->name,
+            ];
+        });
+
+        return response()->json([
+            'financial_accounts' => $financial_accounts
         ]);
     }
 }

@@ -236,6 +236,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/filter_purchase_low_product', 'filter_purchase_low_product');
         Route::get('/lists_report', 'lists_report');
         Route::post('/orders_report', 'orders_report');
+        Route::post('/financial_report', 'financial_report');
     });
     
     Route::controller(DiscountModuleController::class)
