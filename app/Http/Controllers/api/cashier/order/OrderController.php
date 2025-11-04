@@ -109,6 +109,16 @@ class OrderController extends Controller
         'schedule:id,name', 'delivery'])
         ->get()
         ->map(function($item){
+            $order_type = "";
+            if ($item->order_type == "dine_in") {
+                $order_type = "done";
+            }
+            elseif ($item->order_type == "take_away") {
+                $order_type = $item->take_away_status;
+            }
+            elseif ($item->order_type == "delivery") {
+                $order_type = $item->delivery_status;
+            }
             return [ 
                 'id' => $item->id,
                 'order_number' => $item->order_number,
@@ -116,7 +126,7 @@ class OrderController extends Controller
                 'amount' => $item->amount,
                 'operation_status' => $item->operation_status,
                 'order_type' => $item->order_type,
-                'order_status' => $item->order_status,
+                'order_status' => $order_type,
                 'source' => $item->source,
                 'status' => $item->status,
                 'points' => $item->points, 
@@ -135,9 +145,14 @@ class OrderController extends Controller
             ];
         });
         $orders = $orders->merge($orders2);
-
+        $order_type = [
+            "dine_in",
+            "take_away",
+            "delivery",
+        ];
         return response()->json([
             "orders" => $orders,
+            "order_type" => $order_type,
         ]);
     }
 
