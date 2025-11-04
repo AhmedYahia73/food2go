@@ -46,6 +46,7 @@ use App\Models\CashierBalance;
 use App\Models\CashierMan;
 use App\Models\Delivery;
 use App\Models\DiscountModule;
+use App\Models\CheckoutRequest;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -66,7 +67,8 @@ class CashierMakeOrderController extends Controller
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CashierMan $cashier_man, private UserDue $user_due,
-    private DiscountModule $discount_module){}
+    private DiscountModule $discount_module,
+    private CheckoutRequest $checkout_request_quer){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -801,6 +803,9 @@ class CashierMakeOrderController extends Controller
         $order_cart = $this->order_cart
         ->whereIn('table_id', $tables_ids)
         ->delete();
+        $this->checkout_request_query
+        ->where("table_id", $request->table_id)
+        ->delete();
 
         return response()->json([
             'success' => $order_items, 
@@ -881,6 +886,9 @@ class CashierMakeOrderController extends Controller
         // _________________________________
         $order_cart = $this->order_cart
         ->whereIn('id', $request->cart_id)
+        ->delete();
+        $this->checkout_request_query
+        ->where("table_id", $request->table_id)
         ->delete();
 
         return response()->json([

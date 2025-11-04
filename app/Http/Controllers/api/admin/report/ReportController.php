@@ -648,7 +648,7 @@ class ReportController extends Controller
             'cashier_id' => ['exists:cashiers,id'],
             'branch_id' => ['exists:branches,id'],
             'cashier_man_id' => ['exists:cashier_men,id'],
-            'financial_id' => ['exists:	finantiol_acountings,id'],
+            'financial_id' => ['exists:finantiol_acountings,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -757,7 +757,7 @@ class ReportController extends Controller
             'cashier_id' => ['exists:cashiers,id'],
             'branch_id' => ['exists:branches,id'],
             'cashier_man_id' => ['exists:cashier_men,id'],
-            'financial_id' => ['exists:	finantiol_acountings,id'],
+            'financial_id' => ['exists:finantiol_acountings,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

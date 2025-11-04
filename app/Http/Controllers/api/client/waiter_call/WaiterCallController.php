@@ -13,7 +13,8 @@ use App\Models\CafeTable;
 use App\Models\CallWaiter;
 use App\Models\CashierMan;
 use App\Models\CaptainOrder; 
-use App\Models\Waiter; 
+use App\Models\Waiter;
+use App\Models\CheckoutRequest;
 
 class WaiterCallController extends Controller
 {
@@ -21,7 +22,7 @@ class WaiterCallController extends Controller
     private NewNotification $notification, private DeviceToken $device_token,
     private CallWaiter $call_waiter, private CafeTable $cafe_table,
     private CashierMan $cashier_man, private CaptainOrder $captain_order,
-    private Waiter $waiter){}
+    private Waiter $waiter, private CheckoutRequest $checkout_request_query){}
     use Notifications;
 
     public function call_waiter(Request $request){
@@ -102,10 +103,24 @@ class WaiterCallController extends Controller
             ' at location ' . $cafe_table?->location?->name . ' Want To Pay';
   
         $notifications = $this->sendNotificationToMany($users_tokens, $cafe_table->table_number, $body);
-        
+        $this->checkout_request_query
+        ->create([
+            'table_id' => $request->table_id
+        ]);
+
         return response()->json([
             'success' => 'You call Pay success',
             "notifications" => $notifications->count()
+        ]);
+    }
+
+    public function cancel_call_pyment(Request $request){
+        $this->checkout_request_query
+        ->where("table_id", $request->table_id)
+        ->delete();
+
+        return response()->json([
+            'success' => 'You cancel Pay success', 
         ]);
     }
 }
