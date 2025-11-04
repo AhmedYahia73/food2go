@@ -30,7 +30,7 @@ class CasheirManRequest extends FormRequest
             'take_away' => ['required', 'boolean'],
             'dine_in' => ['required', 'boolean'],
             'delivery' => ['required', 'boolean'],
-            'car_slow' => ['required', 'boolean'],
+            'real_order' => ['required', 'boolean'],
             'my_id' => ['required'],
         ];
     }

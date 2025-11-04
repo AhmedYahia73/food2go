@@ -16,7 +16,7 @@ class CashierMan extends Model
         'branch_id',
         'take_away',
         'dine_in',
-        'car_slow',
+        'real_order',
         'take_away',
         'shift_number',
         'user_name',
