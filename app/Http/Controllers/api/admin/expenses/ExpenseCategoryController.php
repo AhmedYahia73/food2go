@@ -14,7 +14,7 @@ class ExpenseCategoryController extends Controller
 
     public function view(Request $request){
         $categories = $this->category
-        ->select("name", "status")
+        ->select("id", "name", "status")
         ->get();
 
         return response()->json([
