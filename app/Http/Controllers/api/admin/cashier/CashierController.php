@@ -153,7 +153,11 @@ class CashierController extends Controller
                 'errors' => 'cashier is not found'
             ], 400);
         }
-        $cashier->update($cashierRequest);
+        $cashier->update([
+            "branch_id" => $default,
+            "branch_id" => $request->branch_id,
+            "status" => $request->status,
+        ]);
         $cashier->translations()->delete();
         foreach ($cashier_names as $item) {
             if (!empty($item['name'])) {
