@@ -799,11 +799,11 @@ class CaptainMakeOrderController extends Controller
         return response()->json([
             'categories' => $categories,
             'products' => $products, 
+            'products_weight' => $products_weight, 
             'favourite_products' => $favourite_products, 
             'favourite_products_weight' => $favourite_products_weight, 
             'cafe_location' => $cafe_location,
             'payment_methods' => $paymentMethod, 
-            'products_weight' => $products_weight, 
         ]);
     }
 
