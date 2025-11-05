@@ -1175,7 +1175,7 @@ class CashierMakeOrderController extends Controller
     public function view_user_order(Request $request){
         $orders = $this->order
         ->where("user_id", $request->user_id)
-        ->orderByDesc()
+        ->orderByDesc("id")
         ->limit(3)
         ->map(function($item){
             return [
