@@ -1184,6 +1184,8 @@ class CashierMakeOrderController extends Controller
 
         $orders = $this->order
         ->where("user_id", $request->user_id)
+        ->where("pos", 1)
+        ->where("order_type", "delivery")
         ->orderByDesc("id")
         ->limit(3)
         ->get()
