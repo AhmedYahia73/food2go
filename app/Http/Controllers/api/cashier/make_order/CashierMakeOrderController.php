@@ -1173,10 +1173,20 @@ class CashierMakeOrderController extends Controller
     }
 
     public function view_user_order(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
         $orders = $this->order
         ->where("user_id", $request->user_id)
         ->orderByDesc("id")
         ->limit(3)
+        ->get()
         ->map(function($item){
             return [
                 "id" => $item->id,
