@@ -10,7 +10,7 @@ class KitchenOrder extends Model
     use HasFactory;
 
     protected $fillable = [
-        'order', 
+        'order',  
         'table_id',
         'kitchen_id',
         'type',
