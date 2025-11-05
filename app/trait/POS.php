@@ -41,6 +41,7 @@ trait POS
         'status',
         'cash_with_delivery',
         'balance',
+        'user_id',
         'due',
     ];
 
