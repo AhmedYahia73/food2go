@@ -3,53 +3,49 @@
 namespace App\Http\Controllers\api\admin\material;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\MaterialCategory;
+use App\Models\Material;
 
-class MaterialCategoryController extends Controller
+class MaterialController extends Controller
 {
-    public function __construct(private MaterialCategory $category){}
+    public function __construct(private Material $product,
+    private MaterialCategory $categories){}
 
     public function view(Request $request){
-        $categories = $this->category
-        ->whereNotNull('category_id')
-        ->with('category')
+        $product = $this->product 
         ->get()
         ->map(function($item){
             return [
                 'id' => $item->id,
                 'name' => $item->name,
+                'description' => $item->description,
                 'status' => $item->status,
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
             ];
-        });
-        $parent_categories = $this->category
-        ->whereNull('category_id')
-        ->get()
-        ->map(function($item){
-            return [
-                'id' => $item->id,
-                'name' => $item->name,
-                'status' => $item->status,
-            ];
-        });
+        }); 
+        $categories = $this->categories
+        ->select('id', 'name', 'category_id')
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
-            'parent_categories' => $parent_categories,
-            'sub_categories' => $categories,
+            'materials' => $product,
+            'categories' => $categories,
         ]);
     }
     
-    public function category(Request $request, $id){ 
-        $category = $this->category
-        ->where('category_id', $id)
+    public function product(Request $request, $id){ 
+        $product = $this->product
+        ->where('id', $id)
         ->get()
         ->map(function($item){
             return [
                 'name' => $item->name,
+                'description' => $item->description,
                 'status' => $item->status,
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
@@ -57,7 +53,7 @@ class MaterialCategoryController extends Controller
         });
 
         return response()->json([
-            'category' => $category,
+            'material' => $product,
         ]);
     }
 
@@ -71,7 +67,7 @@ class MaterialCategoryController extends Controller
             ],400);
         }
 
-        $this->category
+        $this->product
         ->where('id', $id)
         ->update([
             'status' => $request->status
@@ -85,8 +81,9 @@ class MaterialCategoryController extends Controller
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
+            'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
-            'category_id' => ['exists:purchase_categories,id'],
+            'category_id' => ['required', 'exists:purchase_categories,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -94,9 +91,9 @@ class MaterialCategoryController extends Controller
             ],400);
         }
 
-        $categoryRequest = $validator->validated();
-        $category = $this->category
-        ->create($categoryRequest);
+        $productRequest = $validator->validated();
+        $product = $this->product
+        ->create($productRequest);
 
         return response()->json([
             'success' => 'You add data success'
@@ -106,8 +103,9 @@ class MaterialCategoryController extends Controller
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
+            'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
-            'category_id' => ['exists:purchase_categories,id'],
+            'category_id' => ['required', 'exists:purchase_categories,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -115,11 +113,11 @@ class MaterialCategoryController extends Controller
             ],400);
         }
 
-        $categoryRequest = $validator->validated();
-        $category = $this->category
+        $productRequest = $validator->validated();
+        $product = $this->product
         ->where('id', $id)
         ->first();
-        $category->update($categoryRequest);
+        $product->update($productRequest);
 
         return response()->json([
             'success' => 'You update data success'
@@ -127,7 +125,7 @@ class MaterialCategoryController extends Controller
     }
 
     public function delete(Request $request, $id){
-        $this->category
+        $this->product
         ->where('id', $id)
         ->delete();
 

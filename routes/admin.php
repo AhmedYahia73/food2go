@@ -118,6 +118,9 @@ use App\Http\Controllers\api\admin\recipe\RecipeController;
 use App\Http\Controllers\api\admin\group_price\GroupProductController;
 use App\Http\Controllers\api\admin\group_price\GroupPriceController;
 
+use App\Http\Controllers\api\admin\material\MaterialCategoryController;
+use App\Http\Controllers\api\admin\material\MaterialController;
+
 use App\Http\Controllers\api\admin\expenses\ExpenseCategoryController;
 use App\Http\Controllers\api\admin\expenses\ExpenseController;
 use App\Http\Controllers\api\admin\expenses\ExpenseListController;
@@ -129,7 +132,27 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/', 'profile')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::post('/update', 'update')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
     });
+
     // جديد تحت التجربة
+    Route::controller(MaterialController::class)
+    ->prefix('material_product')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(MaterialCategoryController::class)
+    ->prefix('material_categories')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'category');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    }); 
+    // _____________________________________
     Route::controller(ExpenseCategoryController::class)
     ->prefix('expenses_category')->group(function(){
         Route::get('/', 'view');
