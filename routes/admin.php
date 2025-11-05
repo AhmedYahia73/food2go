@@ -137,7 +137,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     Route::controller(PurchaseRecipeController::class)
     ->prefix('purchase_recipe')->group(function(){
-        Route::get('/', 'view');
+        Route::get('/{id}', 'view');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
