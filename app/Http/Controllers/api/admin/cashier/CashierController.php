@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Cashier;
 use App\Models\Branch;
+use App\Models\Translation;
 
 class CashierController extends Controller
 {
     public function __construct(private Cashier $cashier,
-    private Branch $branches){}
+    private Branch $branches, private Translation $translations){}
 
     public function view(Request $request){
         // /admin/cashier
@@ -59,6 +60,9 @@ class CashierController extends Controller
         ->where('id', $id)
         ->with(['branch:id,name'])
         ->first();
+        $translations = $this->translations
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
             'cashier' => $cashier,
