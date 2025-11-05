@@ -90,6 +90,7 @@ class CaptainMakeOrderController extends Controller
         }])
         ->withLocale($locale)
         ->where('category_id', null)
+        ->orderBy("priority")
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
@@ -403,6 +404,7 @@ class CaptainMakeOrderController extends Controller
             $query->withLocale($locale);
         }])
         ->withLocale($locale)
+        ->orderBy("priority")
         ->where('category_id', null)
         ->get()
         ->filter(function($item) use($category_off){
@@ -622,6 +624,7 @@ class CaptainMakeOrderController extends Controller
             $query->withLocale($locale);
         }])
         ->withLocale($locale)
+        ->orderBy("priority")
         ->where('category_id', null)
         ->get()
         ->filter(function($item) use($category_off){
