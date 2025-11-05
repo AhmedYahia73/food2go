@@ -344,6 +344,7 @@ class LoginController extends Controller
             if($request->cashier_id){
                 $cashier_shift = $this->cashier_shift
                 ->where("cashier_id", $request->cashier_id)
+                ->where("cashier_man_id", $request->user()->id)
                 ->whereNull("end_time")
                 ->first();
                 if(!empty($cashier_shift)){
@@ -351,7 +352,12 @@ class LoginController extends Controller
                 }
                 $user->cashier_id = $request->cashier_id;
             }
-        // $user->tokens()->delete(); 
+            if ($user->tokens()->exists()) {
+                return response()->json([
+                    'errors' => 'You are already logged in from another device.'
+                ], 400);
+            }
+
             $user->fcm_token = $request->fcm_token;
             $user->save();
             $user->role = 'cashier';
