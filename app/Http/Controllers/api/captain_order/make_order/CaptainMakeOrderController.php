@@ -758,15 +758,11 @@ class CaptainMakeOrderController extends Controller
         ->where('branch_id', $branch_id)
         ->get()
         ->map(function($item){
-            return [
-                "id" => $item->id,
-                "name" => $item->name,
-                "location" => $item->location,
-                "tables" => $item?->tables?->map(function($element){
-                    $element->call_payment = $element->call_payment->count() > 0 ? true: false;
-                    return $element; 
-                })
-            ];
+            $item->tables =  $item?->tables?->map(function($element){
+                $element->call_payment = $element->call_payment->count() > 0 ? true: false;
+                return $element; 
+            });
+            return $item;
         });
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo', 'description_status')
