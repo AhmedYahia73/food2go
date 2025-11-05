@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Http\Controllers\api\admin\purchases;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+use App\Models\PurchaseRecipe;
+use App\Models\PurchaseProduct;
+use App\Models\PurchaseCategory;
+
+class ManufacturingController extends Controller
+{
+    public function __construct(private PurchaseRecipe $recipe,
+    private PurchaseProduct $products, private PurchaseCategory $category){}
+
+    public function lists(Request $request){
+        $products = $this->products
+        ->select("id", "name", "category_id") 
+        ->where("status", 1)
+        ->get();
+        $categories = $this->category
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
+
+        return response()->json([
+            "products" => $products,
+            "categories" => $categories,
+        ]);
+    }
+
+    public function recipes(Request $request, $id){
+        $recipes = $this->recipe 
+        ->with(["material_category:id,name", "material:id,name",
+        "unit:id,name"])
+        ->where('status', 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "weight" => $item->weight,
+                "material_category" => $item->material_category,
+                "material" => $item->material,
+                "unit" => $item->unit,
+            ];
+        });
+
+        return response()->json([
+            "recipes" => $recipes
+        ]);
+    }
+
+    public function manufacturing(Request $request){
+        $validator = Validator::make($request->all(), [
+            'materials' => ['required', 'array'],
+            'materials.*.id' => ['required', 'exists:materials,id'],
+            'materials.*.weight' => ['required', 'numeric'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+    }
+}

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Google_Client;
 
+use App\Models\MainData; 
 use App\Models\Admin;
 use App\Models\Delivery;
 use App\Models\CaptainOrder;
@@ -90,12 +91,37 @@ class LoginController extends Controller
         if (password_verify($request->input('password'), $user->password)) {
             $user->token = $user->createToken('kitchen')->plainTextToken;
             $role = $user->type;
+            $app_setup = MainData::
+            first();
+            $app_setup = [
+                "name" => $app_setup?->name ?? null,
+                "ar_name" => $app_setup?->translations()
+                ?->where("locale", "ar")->where("key", $app_setup?->name)
+                ->first()?->value ?? null,
+                "first_color" => $app_setup?->first_color ?? null,
+                "second_color" => $app_setup?->second_color ?? null,
+                "third_color" => $app_setup?->third_color ?? null,
+                "instagram" => $app_setup?->instagram ?? null,
+                "facebook" => $app_setup?->facebook ?? null,
+                "logo" => $app_setup?->logo_link ?? null,
+                'image_1' => $app_setup?->image1_link ?? null,
+                'image_2' => $app_setup?->image2_link ?? null,
+                'image_3' => $app_setup?->image3_link ?? null,
+                'image_4' => $app_setup?->image4_link ?? null,
+                'image_5' => $app_setup?->image5_link ?? null,
+                'image_6' => $app_setup?->image6_link ?? null,
+            ];
+            $notification = Setting::where("name", "notification_sound")
+            ->first()?->setting;
+            $notification = url("storage/" . $notification);
             return response()->json([
                 'kitchen' => $user,
                 'token' => $user->token,
                 'branch_name' => $user->branch->name,
                 'branch_phone' => $user->branch->phone,
                 'role'  => $role,
+                'app_setup'  => $app_setup,
+                "notification" => $notification
             ], 200);
         }
         else {
