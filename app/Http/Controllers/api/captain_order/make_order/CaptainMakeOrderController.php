@@ -759,7 +759,8 @@ class CaptainMakeOrderController extends Controller
         ->get()
         ->map(function($item){
             $item->tables =  $item?->tables?->map(function($element){
-                $element->call_payment = $element->call_payment->count() > 0 ? true: false;
+                $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
+                $element->makeHidden(['call_payment']);
                 return $element; 
             });
             return $item;
