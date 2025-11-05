@@ -1172,4 +1172,26 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
+    public function view_user_order(Request $request){
+        $orders = $this->order
+        ->where("user_id", $request->user_id)
+        ->orderByDesc()
+        ->limit(3)
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "amount" => $item->amount,
+                "total_discount" => $item->total_discount,
+                "coupon_discount" => $item->coupon_discount,
+                "order_number" => $item->order_number,
+                "order_details" => $item->order_details,
+                "date" => $item->created_at->format("Y-m-d"),
+                "time" => $item->created_at->format("H:i:s"),
+            ];
+        });
+
+        return response()->json([
+            "orders" => $orders
+        ]);
+    }
 }

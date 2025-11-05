@@ -25,6 +25,8 @@ use App\Http\Controllers\api\auth\LoginController;
 Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CashierMakeOrderController::class)
     ->group(function(){
+        Route::post('/view_user_order', 'view_user_order');
+
         Route::get('/lists', 'lists');
 
         Route::post('/discount_module', 'discount_module');
