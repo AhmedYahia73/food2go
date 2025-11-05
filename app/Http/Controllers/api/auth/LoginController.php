@@ -97,7 +97,7 @@ class LoginController extends Controller
                 "name" => $app_setup?->name ?? null,
                 "ar_name" => $app_setup?->translations()
                 ?->where("locale", "ar")->where("key", $app_setup?->name)
-                ->first()?->value ?? null,
+                ->first()?->value ?? $app_setup?->name ,
                 "first_color" => $app_setup?->first_color ?? null,
                 "second_color" => $app_setup?->second_color ?? null,
                 "third_color" => $app_setup?->third_color ?? null,
