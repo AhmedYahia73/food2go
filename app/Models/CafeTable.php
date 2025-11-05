@@ -28,6 +28,10 @@ class CafeTable extends Model
         }
     }
 
+    public function call_payment(){
+        return $this->hasMany(CheckoutRequest::class, 'table_id');
+    }
+
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');
     }

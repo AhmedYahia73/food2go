@@ -115,6 +115,14 @@ class WaiterCallController extends Controller
     }
 
     public function cancel_call_pyment(Request $request){
+        $validator = Validator::make($request->all(), [
+            'table_id' => ['required', 'exists:cafe_tables,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $this->checkout_request_query
         ->where("table_id", $request->table_id)
         ->delete();

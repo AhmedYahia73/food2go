@@ -753,10 +753,29 @@ class CaptainMakeOrderController extends Controller
             return $query
             ->where('status', 1)
             ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id');
+            ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
         }])
         ->where('branch_id', $branch_id)
-        ->get(); 
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "tables" => $item?->tables?->map(function($element){
+                    return [
+                        "id" => $element->id,
+                        "table_number" => $element->table_number,
+                        "capacity" => $element->capacity,
+                        "qr_code_link" => $element->qr_code_link,
+                        "current_status" => $element->current_status,
+                        "occupied" => $element->occupied,
+                        "is_merge" => $element->is_merge,
+                        "sub_table" => $element->sub_table,
+                        "call_payment" => $element->call_payment->count() > 0 ? true: false,
+                    ];
+                })
+            ];
+        });
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo', 'description_status')
         ->whereHas('branch')
