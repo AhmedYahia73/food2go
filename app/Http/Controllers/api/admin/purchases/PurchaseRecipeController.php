@@ -19,8 +19,8 @@ class PurchaseRecipeController extends Controller
     public function view(Request $request, $id){
         $recipe = $this->recipe
         ->where("product_id", $id)
-        ->with(["product:id,name", "store_category:id,name", 
-        "store_product:id,name", "unit:id,name"])
+        ->with(["product:id,name", "material:id,name", 
+        "material_category:id,name", "unit:id,name"])
         ->get()
         ->map(function($item){
             return [         
@@ -31,8 +31,8 @@ class PurchaseRecipeController extends Controller
                     "id" => $item->product->id,
                     "name" => $item->product->name,
                 ]: null, 
-                "store_category" => $item->store_category,
-                "store_product" => $item->store_product,
+                "material" => $item->material,
+                "material_category" => $item->material_category,
                 "unit" => $item->unit,
             ];
         });
@@ -51,17 +51,43 @@ class PurchaseRecipeController extends Controller
 
         return response()->json([
             "recipe" => $recipe,
-            "store_categories" => $categories,
-            "store_products" => $products,
+            "material_categories" => $categories,
+            "material_products" => $products,
             "units" => $units,
+        ]);
+    }
+
+    public function status(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'status' => ['required', 'boolean'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $recipe = $this->recipe
+         ->where("id", $id)
+         ->first();
+         if(!$recipe){
+            return response()->json([
+                "errors" => "Recipe is not found"
+            ], 400);
+         }
+        $recipe->update([
+            "status" => $request->status ?? $recipe->status,
+        ]);
+
+        return response()->json([
+            "success" => "You update status success"
         ]);
     }
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
-            'product_id' => ['required', 'exists:products,id'],
-            'store_product_id' => ["required", "exists:purchase_products,id"],
-            'store_category_id' => ["required", "exists:purchase_categories,id"],
+            'material_product_id' => ["required", "exists:materials,id"],
+            'material_category_id' => ["required", "exists:material_categories,id"],
             'unit_id' => ['required', 'exists:units,id'],
             'weight' => ['required', 'numeric'],
             'status' => ['required', 'boolean'],
@@ -73,6 +99,7 @@ class PurchaseRecipeController extends Controller
         }
 
         $recipeRequest = $validator->validated();
+        $recipeRequest['product_id'] = $id;
         $this->recipe
         ->create($recipeRequest);
 
@@ -83,8 +110,8 @@ class PurchaseRecipeController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'store_product_id' => ["required", "exists:purchase_products,id"],
-            'store_category_id' => ["required", "exists:purchase_categories,id"],
+            'material_product_id' => ["required", "exists:materials,id"],
+            'material_category_id' => ["required", "exists:material_categories,id"],
             'unit_id' => ['required', 'exists:units,id'],
             'weight' => ['required', 'numeric'],
             'status' => ['required', 'boolean'],
@@ -106,8 +133,8 @@ class PurchaseRecipeController extends Controller
         $recipe->update([
             "unit_id" => $request->unit_id ?? $recipe->unit_id,
             "weight" => $request->weight ?? $recipe->weight,
-            "store_product_id" => $request->store_product_id ?? $recipe->store_product_id,
-            "store_category_id" => $request->store_category_id ?? $recipe->store_category_id,
+            "material_category_id" => $request->material_category_id ?? $recipe->material_category_id,
+            "material_product_id" => $request->material_product_id ?? $recipe->material_product_id,
             "status" => $request->status ?? $recipe->status,
         ]);
 

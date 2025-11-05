@@ -120,6 +120,7 @@ use App\Http\Controllers\api\admin\group_price\GroupPriceController;
 
 use App\Http\Controllers\api\admin\material\MaterialCategoryController;
 use App\Http\Controllers\api\admin\material\MaterialController;
+use App\Http\Controllers\api\admin\purchases\PurchaseRecipeController;
 
 use App\Http\Controllers\api\admin\expenses\ExpenseCategoryController;
 use App\Http\Controllers\api\admin\expenses\ExpenseController;
@@ -133,7 +134,16 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/update', 'update')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
     });
 
-    // جديد تحت التجربة
+    // جديد تحت التجربة 
+    Route::controller(PurchaseRecipeController::class)
+    ->prefix('material_product')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
     Route::controller(MaterialController::class)
     ->prefix('material_product')->group(function(){
         Route::get('/', 'view');
