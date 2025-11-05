@@ -16,16 +16,46 @@ class HomeController extends Controller
 
     public function view(Request $request){
         // https://bcknd.food2go.online/cashier/home
+        $locale = $request->locale ?? 'en';
         $cashiers = $this->cashier
         ->where('branch_id', $request->user()->branch_id)
         ->where('cashier_active', 0)
         ->where('status', 1)
-        ->get();
+        ->with("translations")
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "name" => $item->translations->where("locale", $locale)
+                ->where("key", $item->name)
+                ->first()?->value ?? $item->name,
+                "branch_id" => $item->branch_id,
+                "cashier_active" => $item->cashier_active,
+                "created_at" => $item->created_at,
+                "status" => $item->status,
+                "updated_at" => $item->updated_at,
+            ];
+        });
+ 
+  
         $hidden_cashiers = $this->cashier
         ->where('branch_id', $request->user()->branch_id)
         ->where('cashier_active', 1)
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "name" => $item->translations->where("locale", $locale)
+                ->where("key", $item->name)
+                ->first()?->value ?? $item->name,
+                "branch_id" => $item->branch_id,
+                "cashier_active" => $item->cashier_active,
+                "created_at" => $item->created_at,
+                "status" => $item->status,
+                "updated_at" => $item->updated_at,
+            ];
+        });
 
         return response()->json([
             'cashiers' => $cashiers,
