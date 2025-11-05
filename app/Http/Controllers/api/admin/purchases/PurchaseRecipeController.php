@@ -86,6 +86,7 @@ class PurchaseRecipeController extends Controller
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
+            'product_id' => ["required", "exists:purchase_products,id"],
             'material_product_id' => ["required", "exists:materials,id"],
             'material_category_id' => ["required", "exists:material_categories,id"],
             'unit_id' => ['required', 'exists:units,id'],
@@ -99,7 +100,6 @@ class PurchaseRecipeController extends Controller
         }
 
         $recipeRequest = $validator->validated();
-        $recipeRequest['product_id'] = $id;
         $this->recipe
         ->create($recipeRequest);
 
