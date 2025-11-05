@@ -654,6 +654,80 @@ class CaptainMakeOrderController extends Controller
             }]);
         }, 'sales_count', 'tax'])
         ->withLocale($locale)
+        ->where('item_type', '!=', 'offline') 
+        ->where('status', 1)
+        ->get()
+        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
+            //get count of sales of product to detemine stock
+            $product->price = $product?->product_pricing->where('branch_id', $branch_id)
+            ->first()?->price ?? $product->price;
+            $product->favourite = false;
+            if ($product->stock_type == 'fixed') {
+                $product->count = $product->sales_count->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            elseif ($product->stock_type == 'daily') {
+                $product->count = $product->sales_count
+                ->where('date', date('Y-m-d'))
+                ->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            // return !$category_off->contains($item->id);
+            // $category_off, $product_off, $option_off
+            if ($category_off->contains($product->category_id) || 
+            $category_off->contains($product->sub_category_id)
+            || $product_off->contains($product->id)) {
+                return null;
+            }
+            $product->variations = $product->variations->map(function ($variation) 
+            use ($option_off, $product, $branch_id) {
+                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                $variation->options = $variation->options->map(function($element) use($branch_id){
+                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+                    ->first()?->price ?? $element->price;
+                    return $element;
+                });
+              
+                return $variation;
+            });
+            $product->addons = $product->addons->map(function ($addon) 
+            use ($product) {
+                $addon->discount = $product->discount;
+              
+                return $addon;
+            });
+            return $product;
+        })->filter();
+        $cafe_location = $this->cafe_location
+        ->with(['tables' => function($query){
+            return $query
+            ->where('status', 1)
+            ->where('is_merge', 0)
+            ->with('sub_table:id,table_number,capacity,main_table_id');
+        }])
+        ->where('branch_id', $request->branch_id)
+        ->get();
+        $favourite_products = $this->products
+        ->with(['addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        },'sub_category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'excludes' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'extra', 'discount', 
+        'variations' => function($query) use($locale){
+            $query->withLocale($locale)
+            ->with(['options' => function($query_option) use($locale){
+                $query_option->with(['extra' => function($query_extra) use($locale){
+                    $query_extra->with('parent_extra')
+                    ->withLocale($locale);
+                }])
+                ->withLocale($locale);
+            }]);
+        }, 'sales_count', 'tax'])
+        ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
         ->where("favourite", 1)
         ->where('status', 1)
@@ -712,13 +786,21 @@ class CaptainMakeOrderController extends Controller
         ->values();
         $products_weight = $products->where("weight_status", 1)
         ->values();
+        $favourite_products_count = $favourite_products->where("weight_status", 0)
+        ->values();
+        $favourite_products_weight = $favourite_products->where("weight_status", 1)
+        ->values();
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products_count); 
+        $favourite_products = ProductResource::collection($favourite_products_count); 
+        $favourite_products_weight = ProductResource::collection($favourite_products_weight); 
         $products_weight = ProductResource::collection($products_weight); 
 
         return response()->json([
             'categories' => $categories,
             'products' => $products, 
+            'favourite_products' => $favourite_products, 
+            'favourite_products_weight' => $favourite_products_weight, 
             'cafe_location' => $cafe_location,
             'payment_methods' => $paymentMethod, 
             'products_weight' => $products_weight, 
