@@ -66,6 +66,7 @@ class OrderController extends Controller
                     'order' => $orders,
                     'table' => $item->table,
                     'type' => $item->type,
+                    'created_at' => $item->created_at,
                 ];
             });
 
@@ -166,6 +167,7 @@ class OrderController extends Controller
                 'order' => $item->order,
                 'table' => $item->table,
                 'type' => $item->type,
+                'created_at' => $item->created_at,
             ];
         });
 
