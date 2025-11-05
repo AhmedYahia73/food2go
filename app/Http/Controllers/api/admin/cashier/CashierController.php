@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Cashier;
 use App\Models\Branch;
 use App\Models\Translation;
+use App\Models\TranslationTbl;
 
 class CashierController extends Controller
 {
     public function __construct(private Cashier $cashier,
-    private Branch $branches, private Translation $translations){}
+    private Branch $branches, private Translation $translations
+    , private TranslationTbl $translation_tbl){}
 
     public function view(Request $request){
         // /admin/cashier
@@ -63,9 +65,22 @@ class CashierController extends Controller
         $translations = $this->translations
         ->where('status', 1)
         ->get();
+        $cashier_names = [];
+        foreach ($translations as $item) {
+            $cashier_name = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->where('key', $cashier->name)
+            ->first();
+           $cashier_names[] = [
+               'tranlation_id' => $item->id,
+               'tranlation_name' => $item->name,
+               'cashier_name' => $cashier_name->value ?? null,
+           ]; 
+        }
 
         return response()->json([
             'cashier' => $cashier,
+            "cashier_names" => $cashier_names
         ]);
     }
 
@@ -74,7 +89,10 @@ class CashierController extends Controller
         // Keys
         // name, branch_id, status
         $validation = Validator::make($request->all(), [
-            'name' => 'required',
+            'cashier_names' => 'required|array',
+            'cashier_names.*.tranlation_name' => 'required',
+            'cashier_names.*.tranlation_id' => 'required',
+            'cashier_names.*.name' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
         ]);
@@ -84,8 +102,23 @@ class CashierController extends Controller
             ],400);
         }
         $cashierRequest = $validation->validated();
+        $cashier_names = $request->cashier_names;
+        $default = $cashier_names[0]["name"];
         $cashier = $this->cashier
-        ->create($cashierRequest);
+        ->create([
+            "name" => $default,
+            "branch_id" => $request->branch_id,
+            "status" => $request->status,
+        ]);
+        foreach ($cashier_names as $item) {
+            if (!empty($item['name'])) {
+                $cashier->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default,
+                    'value' => $item['name']
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => $cashier,
@@ -97,7 +130,10 @@ class CashierController extends Controller
         // Keys
         // name, branch_id, status
         $validation = Validator::make($request->all(), [
-            'name' => 'required',
+            'cashier_names' => 'required|array',
+            'cashier_names.*.tranlation_name' => 'required',
+            'cashier_names.*.tranlation_id' => 'required',
+            'cashier_names.*.name' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
         ]);
@@ -107,6 +143,8 @@ class CashierController extends Controller
             ],400);
         }
         $cashierRequest = $validation->validated();
+        $cashier_names = $request->cashier_names;
+        $default = $cashier_names[0]["name"];
         $cashier = $this->cashier
         ->where('id', $id)
         ->first();
@@ -116,7 +154,16 @@ class CashierController extends Controller
             ], 400);
         }
         $cashier->update($cashierRequest);
-
+        $cashier->translations()->delete();
+        foreach ($cashier_names as $item) {
+            if (!empty($item['name'])) {
+                $cashier->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default,
+                    'value' => $item['name']
+                ]);
+            }
+        }
         return response()->json([
             'success' => $cashier,
         ]);
