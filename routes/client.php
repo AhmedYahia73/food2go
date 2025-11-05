@@ -21,6 +21,7 @@ Route::controller(ClientMakeOrderController::class)
 Route::controller(WaiterCallController::class)->group(function(){
     Route::post('/call_waiter', 'call_waiter');
     Route::post('/call_payment', 'call_payment');
+    Route::post('/cancel_call_pyment', 'cancel_call_pyment');
 });
 
 Route::controller(HomeController::class)->group(function(){
