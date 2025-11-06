@@ -807,17 +807,17 @@ trait POS
                 }
                 if (isset($product['variation'])) {
                     foreach ($product['variation'] as $variation) {
-                        $variations = $this->variation
+                        $variation_items = $this->variation
                         ->where('id', $variation['variation_id'])
                         ->withLocale($locale)
                         ->first();
-                        $variations = collect([$variations]);
+                        $variations = collect([$variation_items]);
                         $options = $this->options
                         ->whereIn('id', $variation['option_id'])
                         ->withLocale($locale)
                         ->get();
-                        if(count($variations) > 0 && count($options) > 0){
-                            $variations = VariationResource::collection($variations[0]);
+                        if($variation_items && count($options) > 0){
+                            $variations = VariationResource::collection($variations);
                             $variations = count($variations) > 0 ? $variations[0] : null;
                         
                             $options = OptionResource::collection($options);
