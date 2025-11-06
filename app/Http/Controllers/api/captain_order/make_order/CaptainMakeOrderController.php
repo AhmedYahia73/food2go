@@ -242,7 +242,7 @@ class CaptainMakeOrderController extends Controller
             ->where('is_merge', 0)
             ->with('sub_table:id,table_number,capacity,main_table_id');
         }])
-        ->where('branch_id', $request->branch_id)
+        ->where('branch_id', $branch_id)
         ->get();
         $products_count = $products->where("weight_status", 0)
         ->values();
