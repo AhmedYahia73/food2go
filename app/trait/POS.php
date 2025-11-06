@@ -761,10 +761,12 @@ trait POS
                         ->where('id', $exclude)
                         ->withLocale($locale)
                         ->first();
-                        $exclude = collect([$exclude]);
-                        $exclude = ExcludeResource::collection($exclude);
-                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
-                        $order_details[$key]['excludes'][] = $exclude;
+                        if($exclude){
+                            $exclude = collect([$exclude]);
+                            $exclude = ExcludeResource::collection($exclude);
+                            $exclude = count($exclude) > 0 ? $exclude[0] : null;
+                            $order_details[$key]['excludes'][] = $exclude;
+                        }
                     }
                 } 
                 if (isset($product['addons'])) {
@@ -774,13 +776,15 @@ trait POS
                         ->where('id', $addon['addon_id'])
                         ->withLocale($locale)
                         ->first();
-                        $addon_item = collect([$addon_item]);
-                        $addon_item = AddonResource::collection($addon_item);
-                        $addon_item = count($addon_item) > 0 ? $addon_item[0] : null;
-                        $order_details[$key]['addons'][] = [
-                            'addon' => $addon_item,
-                            'count' => $addon['count']
-                        ]; 
+                        if($addon_item){
+                            $addon_item = collect([$addon_item]);
+                            $addon_item = AddonResource::collection($addon_item);
+                            $addon_item = count($addon_item) > 0 ? $addon_item[0] : null;
+                            $order_details[$key]['addons'][] = [
+                                'addon' => $addon_item,
+                                'count' => $addon['count']
+                            ]; 
+                        }
                     }
                 } 
                 if (isset($product['extra_id'])) {
@@ -789,10 +793,12 @@ trait POS
                         ->where('id', $extra)
                         ->withLocale($locale)
                         ->first();
-                        $extra_item = collect([$extra_item]);
-                        $extra_item = ExtraResource::collection($extra_item);
-                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
-                        $order_details[$key]['extras'][] = $extra_item; 
+                        if($extra_item){
+                            $extra_item = collect([$extra_item]);
+                            $extra_item = ExtraResource::collection($extra_item);
+                            $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
+                            $order_details[$key]['extras'][] = $extra_item; 
+                        }
                     }
                 }
                 if (isset($product['product_extra_id'])) {
@@ -801,10 +807,12 @@ trait POS
                         ->where('id', $extra)
                         ->withLocale($locale)
                         ->first();
-                        $extra_item = collect([$extra_item]);
-                        $extra_item = ExtraResource::collection($extra_item);
-                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
-                        $order_details[$key]['extras'][] = $extra_item; 
+                        if($extra_item){
+                            $extra_item = collect([$extra_item]);
+                            $extra_item = ExtraResource::collection($extra_item);
+                            $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
+                            $order_details[$key]['extras'][] = $extra_item; 
+                        }
                     }
                 }
                 if (isset($product['variation'])) {
