@@ -817,7 +817,7 @@ trait POS
                         ->withLocale($locale)
                         ->get();
                         if(count($variations) > 0 && count($options) > 0){
-                            $variations = VariationResource::collection($variations);
+                            $variations = VariationResource::collection($variations[0]);
                             $variations = count($variations) > 0 ? $variations[0] : null;
                         
                             $options = OptionResource::collection($options);
