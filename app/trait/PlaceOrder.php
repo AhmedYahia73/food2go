@@ -784,33 +784,33 @@ trait PlaceOrder
                 "kitchen_order_id" => $kitchen_order->id,
                 "product_id" => $element->id,
             ]);
-            foreach ($element['extras'] as $value) {
+            foreach ($element->extras as $value) {
                 KItemExtra::create([
                     "kitchen_item_id" => $kitchen_item->id,
-                    "extra_id" => $value['id'],
+                    "extra_id" => $value->id,
                 ]);
             }
-            foreach ($element['excludes'] as $value) {
+            foreach ($element->excludes as $value) {
                 KItemExclude::create([
                     "kitchen_item_id" => $kitchen_item->id,
-                    "exclude_id" => $value['id'],
+                    "exclude_id" => $value->id,
                 ]);
             }
-            foreach ($element['addons_selected'] as $value) {
+            foreach ($element->addons_selected as $value) {
                 KItemAddon::create([
                     "kitchen_item_id" => $kitchen_item->id,
-                    "addon_id" => $value['id'],
+                    "addon_id" => $value->id,
                 ]);
             }
-            foreach ($element['variation_selected'] as $value) {
+            foreach ($element->variation_selected as $value) {
                 $variation = KItemVriation::create([
                     "kitchen_item_id" => $kitchen_item->id,
-                    "variation_id" => $value['id'],
+                    "variation_id" => $value->id,
                 ]);
-                foreach ($variation['options'] as $value_item) {
+                foreach ($variation->options as $value_item) {
                     KItemOption::create([
                         "kitchen_variation_id" => $variation->id,
-                        "option_id" => $value_item['id'],
+                        "option_id" => $value_item->id,
                     ]);
                 }
             }
