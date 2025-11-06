@@ -19,6 +19,7 @@ use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 // ____________________________________________________
 
+
 use App\Models\Order;
 use App\Models\UserDue;
 use App\Models\Kitchen;
@@ -704,7 +705,7 @@ class CashierMakeOrderController extends Controller
         }
         
         foreach ($kitchen_order as $key => $item) {
-            $this->kitchen_order
+            $kitchen_order = $this->kitchen_order
             ->create([
                 'table_id' => $request->table_id,
                 'kitchen_id' => $key,
@@ -712,6 +713,7 @@ class CashierMakeOrderController extends Controller
                 'type' => 'dine_in',
                 'cart_id' => $value['cart_id'],
             ]);
+            $this->kitechen_cart($item, $kitchen_order );
         }
 
         return response()->json([
@@ -1011,7 +1013,7 @@ class CashierMakeOrderController extends Controller
                 "order" => $item,
                 "order_type" => $order->order_type,
             ];
-            $this->kitchen_order
+            $order_kitchen =$this->kitchen_order
             ->create([
                 'table_id' => $request->table_id,
                 'kitchen_id' => $key,
@@ -1019,6 +1021,7 @@ class CashierMakeOrderController extends Controller
                 'type' => $order->order_type,
                 'order_id' => $order->id,
             ]);
+            $order_kitchen = array_values($order_kitchen);
         } 
         $kitchen_items = array_values($kitchen_items);
 
@@ -1066,7 +1069,7 @@ class CashierMakeOrderController extends Controller
                 "order" => $item,
                 "order_type" => $order->order_type,
             ];
-            $this->kitchen_order
+            $kitchen_order = $this->kitchen_order
             ->create([
                 'table_id' => $request->table_id,
                 'kitchen_id' => $key,
@@ -1074,6 +1077,7 @@ class CashierMakeOrderController extends Controller
                 'type' => $order->order_type,
                 'order_id' => $order->id,
             ]);
+            $this->kitechen_cart($item, $kitchen_order );
         }
         $order_kitchen = array_values($order_kitchen);
 
