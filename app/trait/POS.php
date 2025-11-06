@@ -818,14 +818,16 @@ trait POS
                         ->get();
                         $variations = VariationResource::collection($variations);
                         $variations = count($variations) > 0 ? $variations[0] : null;
-                        $options = OptionResource::collection($options);
-                        $order_details[$key]['variations'][] = [
-                            'variation' => $variations,
-                            'options' => $options,
-                        ];
-                        $amount_product += $this->options
-                        ->whereIn('id', $variation['option_id'])
-                        ->sum('price');
+                        if($variations && count($options) > 0){
+                            $options = OptionResource::collection($options);
+                            $order_details[$key]['variations'][] = [
+                                'variation' => $variations,
+                                'options' => $options,
+                            ];
+                            $amount_product += $this->options
+                            ->whereIn('id', $variation['option_id'])
+                            ->sum('price');
+                        }
                     }
                 } 
             }
