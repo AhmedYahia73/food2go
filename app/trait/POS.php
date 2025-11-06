@@ -671,15 +671,15 @@ trait POS
                 $item = $this->products
                 ->where('id', $product['product_id'])
                 ->first();
-                if (in_array($product['product_id'], $products_off) || 
-                in_array($item->category_id, $categories_off) ||
-                in_array($item->sub_category_id, $categories_off)) {
-                    return [
-                        'errors' => 'Product ' . $item->name . 
-                        ' is not found at this branch you can change branch or order'
-                    ];
-                }
                 if (!empty($item)) {
+                    if (in_array($item->id, $products_off) || 
+                    in_array($item->category_id, $categories_off) ||
+                    in_array($item->sub_category_id, $categories_off)) {
+                        return [
+                            'errors' => 'Product ' . $item->name . 
+                            ' is not found at this branch you can change branch or order'
+                        ];
+                    }
                     $items[] = [ "name"=> $item->name,
                             "amount_cents"=> $item->price,
                             "description"=> $item->description,
