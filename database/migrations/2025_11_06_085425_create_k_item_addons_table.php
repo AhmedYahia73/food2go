@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('k_item_addons', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('kitchen_item_id')->nullable()->constrained('kitchen_items')->onUpdate('cascade')->onDelete('cascade'); 
+            $table->foreignId('addon_id')->nullable()->constrained('addons')->onUpdate('cascade')->onDelete('cascade'); 
             $table->timestamps();
         });
     }

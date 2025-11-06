@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('k_item_options', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('kitchen_variation_id')->nullable()->constrained('k_item_vriations')->onUpdate('cascade')->onDelete('cascade'); 
+            $table->foreignId('option_id')->nullable()->constrained('option_products')->onUpdate('cascade')->onDelete('cascade'); 
             $table->timestamps();
         });
     }

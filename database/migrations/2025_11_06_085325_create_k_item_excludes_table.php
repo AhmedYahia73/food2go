@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('k_item_excludes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('kitchen_item_id')->nullable()->constrained('kitchen_items')->onUpdate('cascade')->onDelete('cascade'); 
+            $table->foreignId('exclude_id')->nullable()->constrained('exclude_products')->onUpdate('cascade')->onDelete('cascade'); 
             $table->timestamps();
         });
     }
