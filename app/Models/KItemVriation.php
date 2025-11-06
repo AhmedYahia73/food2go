@@ -15,7 +15,7 @@ class KItemVriation extends Model
         return $this->belongsTo(VariationProduct::class, "variation_id");
     }
 
-    public function options(){
+    public function option_items(){
         return $this->hasMany(OptionProduct::class, "kitchen_variation_id");
     }
 }
