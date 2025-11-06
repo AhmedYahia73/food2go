@@ -69,7 +69,7 @@ class CashierMakeOrderController extends Controller
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CashierMan $cashier_man, private UserDue $user_due,
     private DiscountModule $discount_module,
-    private CheckoutRequest $checkout_request_quer){}
+    private CheckoutRequest $checkout_request_query){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
