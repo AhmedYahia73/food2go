@@ -615,13 +615,14 @@ class ClientMakeOrderController extends Controller
     //     }
         
     //     foreach ($kitchen_order as $key => $item) {
-    //         $this->kitchen_order
+    //         $kitechen_cart = $this->kitchen_order
     //         ->create([
     //             'table_id' => $request->table_id,
     //             'kitchen_id' => $key,
     //             'order' => json_encode($item),
     //             'type' => 'dine_in',
     //         ]);
+            // $this->kitechen_cart($item, $kitchen_order );
     //     }
 
     //     return response()->json([

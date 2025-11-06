@@ -671,7 +671,7 @@ trait POS
                 $item = $this->products
                 ->where('id', $product['product_id'])
                 ->first();
-                if (in_array($item->id, $products_off) || 
+                if (in_array($product['product_id'], $products_off) || 
                 in_array($item->category_id, $categories_off) ||
                 in_array($item->sub_category_id, $categories_off)) {
                     return [
