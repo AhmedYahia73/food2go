@@ -362,11 +362,11 @@ class LoginController extends Controller
             })
             ->first();
             $start_shift = false;
-            if(!empty($cashier)){
-                return response()->json([
-                    'errors' => 'Another Cashier man login at this cashier'
-                ]);
-            }
+            // if(!empty($cashier)){
+            //     return response()->json([
+            //         'errors' => 'Another Cashier man login at this cashier'
+            //     ]);
+            // }
             if($request->cashier_id){
                 $cashier_shift = $this->cashier_shift
                 ->where("cashier_id", $request->cashier_id)
@@ -378,11 +378,11 @@ class LoginController extends Controller
                 }
                 $user->cashier_id = $request->cashier_id;
             }
-            if ($user->tokens()->exists()) {
-                return response()->json([
-                    'errors' => 'You are already logged in from another device.'
-                ], 400);
-            }
+            // if ($user->tokens()->exists()) {
+            //     return response()->json([
+            //         'errors' => 'You are already logged in from another device.'
+            //     ], 400);
+            // }
 
             $user->fcm_token = $request->fcm_token;
             $user->save();
