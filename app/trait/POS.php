@@ -816,9 +816,10 @@ trait POS
                         ->whereIn('id', $variation['option_id'])
                         ->withLocale($locale)
                         ->get();
-                        $variations = VariationResource::collection($variations);
-                        $variations = count($variations) > 0 ? $variations[0] : null;
-                        if($variations && count($options) > 0){
+                        if(count($variations) > 0 && count($options) > 0){
+                            $variations = VariationResource::collection($variations);
+                            $variations = count($variations) > 0 ? $variations[0] : null;
+                        
                             $options = OptionResource::collection($options);
                             $order_details[$key]['variations'][] = [
                                 'variation' => $variations,
