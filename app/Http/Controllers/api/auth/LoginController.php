@@ -370,7 +370,7 @@ class LoginController extends Controller
             if($request->cashier_id){
                 $cashier_shift = $this->cashier_shift
                 ->where("cashier_id", $request->cashier_id)
-                ->where("cashier_man_id", $request->user()->id)
+                ->where("cashier_man_id", $user->id)
                 ->whereNull("end_time")
                 ->first();
                 if(!empty($cashier_shift)){
