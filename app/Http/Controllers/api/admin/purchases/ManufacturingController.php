@@ -10,10 +10,16 @@ use App\Models\PurchaseRecipe;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseCategory;
 
+use App\Models\Manufaturing;
+use App\Models\ManufaturingRecipe;
+use App\Models\MaterialStock;
+
 class ManufacturingController extends Controller
 {
     public function __construct(private PurchaseRecipe $recipe,
-    private PurchaseProduct $products, private PurchaseCategory $category){}
+    private PurchaseProduct $products, private PurchaseCategory $category,
+    private Manufaturing $maufaturing, private ManufaturingRecipe $maufaturing_recipe, 
+    private MaterialStock $stock){}
 
     public function lists(Request $request){
         $products = $this->products
@@ -57,6 +63,9 @@ class ManufacturingController extends Controller
             'materials' => ['required', 'array'],
             'materials.*.id' => ['required', 'exists:materials,id'],
             'materials.*.weight' => ['required', 'numeric'],
+            'store_id' => ["required", "exists:purchase_stores,id"],
+            'product_id' => ["required", "exists:purchase_products,id"],
+            'quantity' => ['required', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
