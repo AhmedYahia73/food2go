@@ -71,9 +71,8 @@ class CaptainMakeOrderController extends Controller
         $paymentMethod = $this->paymentMethod
         ->where('status', 1)
         ->get();
-        $locale = $request->locale ?? $request->query('locale', app()->getLocale());
-        app()->setLocale($locale);
-        // Get Local Translation
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();
@@ -89,89 +88,183 @@ class CaptainMakeOrderController extends Controller
             $query->withLocale($locale);
         }])
         ->withLocale($locale)
-        ->where('category_id', null)
         ->where('status', 1)
         ->orderBy("priority")
+        ->where('category_id', null)
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
         });
         $products = $this->products
-            ->with([
-                'addons' => fn($q) => $q->withLocale($locale),
-                'category_addons' => fn($q) => $q->withLocale($locale),
-                'sub_category_addons' => fn($q) => $q->withLocale($locale),
-                'excludes' => fn($q) => $q->withLocale($locale),
-                'discount', 'extra', 'sales_count', 'tax',
-                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-                'variations' => fn($q) => $q->withLocale($locale)->with([
-                    'options' => fn($q) => $q
-                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
-                        ->withLocale($locale),
-                ]),
-                  'group_products' => fn($q) => $q
-                    ->with(['products' => fn($q) => $q
-                    ->select("products.id", "products.name")->withLocale($locale)]),
-            ])
-            ->withLocale($locale)
-            ->where('item_type', '!=', 'online')
-            ->where('status', 1)
-            ->whereNotIn('category_id', $category_off)
-            // ->whereNotIn('sub_category_id', $category_off)
-            ->whereNotIn('products.id', $product_off)
-            ->where("favourite", 1)
-            ->get()
-            ->map(function ($product) use ($option_off, $branch_id) {  
-
-                if ($product->stock_type === 'fixed') {
-                    $product->count = $product->sales_count->sum('count');
-                } elseif ($product->stock_type === 'daily') {
-                    $product->count = $product->sales_count
-                        ->where('date', date('Y-m-d'))
-                        ->sum('count');
-                }
-
-                $product->in_stock = $product->number > $product->count;
-
-                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
-                    $variation->options = $variation->options
-                        ->where('status', 1)
-                        ->values()
-                        ->reject(fn($option) => $option_off->contains($option->id))
-                        ->map(function ($option) {
-                            $option->price = $option->option_pricing->first()?->price ?? $option->price;
-                            return $option;
-                        });
-
-                    return $variation;
+        ->with(['addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        },'sub_category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'excludes' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'extra', 'discount', 
+        'variations' => function($query) use($locale){
+            $query->withLocale($locale)
+            ->with(['options' => function($query_option) use($locale){
+                $query_option->with(['extra' => function($query_extra) use($locale){
+                    $query_extra->with('parent_extra')
+                    ->withLocale($locale);
+                }])
+                ->withLocale($locale);
+            }]);
+        }, 'sales_count', 'tax'])
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline') 
+        ->where('status', 1)
+        ->get()
+        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
+            //get count of sales of product to detemine stock
+            $product->price = $product?->product_pricing->where('branch_id', $branch_id)
+            ->first()?->price ?? $product->price;
+            $product->favourite = false;
+            if ($product->stock_type == 'fixed') {
+                $product->count = $product->sales_count->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            elseif ($product->stock_type == 'daily') {
+                $product->count = $product->sales_count
+                ->where('date', date('Y-m-d'))
+                ->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            // return !$category_off->contains($item->id);
+            // $category_off, $product_off, $option_off
+            if ($category_off->contains($product->category_id) || 
+            $category_off->contains($product->sub_category_id)
+            || $product_off->contains($product->id)) {
+                return null;
+            }
+            $product->variations = $product->variations->map(function ($variation) 
+            use ($option_off, $product, $branch_id) {
+                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                $variation->options = $variation->options->map(function($element) use($branch_id){
+                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+                    ->first()?->price ?? $element->price;
+                    return $element;
                 });
-
-                return $product;
+              
+                return $variation;
             });
-        $products = ProductResource::collection($products)->toArray(request());
-
-        $products = collect($products)->map(function ($item) {
-            return [
-                'id' => $item['id'], 
-                'name' => $item['name'],
-                'description' => $item['description'],
-                'category_id' => $item['category_id'],
-                'sub_category_id' => $item['sub_category_id'],
-                'price' => $item['price'],
-                'price_after_discount' => $item['price_after_discount'],
-                'price_after_tax' => $item['price_after_tax'],
-                'image_link' => $item['image_link'],
-                'allExtras' => collect($item['allExtras']),
-                'addons' => collect($item['addons']),
-                'excludes' => collect($item['excludes'])?->select('id', 'name'),
-                'group_products' => collect($item['group_products']),
-                'variations' => collect($item['variations'])?->select('id', 'name', 'type', 'min', 'max', 'required', 'options')
-            ];
-        }); 
+            $product->addons = $product->addons->map(function ($addon) 
+            use ($product) {
+                $addon->discount = $product->discount;
+              
+                return $addon;
+            });
+            return $product;
+        })->filter();
+        $cafe_location = $this->cafe_location
+        ->with(['tables' => function($query){
+            return $query
+            ->where('status', 1)
+            ->where('is_merge', 0)
+            ->with('sub_table:id,table_number,capacity,main_table_id');
+        }])
+        ->where('branch_id', $request->branch_id)
+        ->get();
+        $favourite_products = $this->products
+        ->with(['addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        },'sub_category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'category_addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'excludes' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 'extra', 'discount', 
+        'variations' => function($query) use($locale){
+            $query->withLocale($locale)
+            ->with(['options' => function($query_option) use($locale){
+                $query_option->with(['extra' => function($query_extra) use($locale){
+                    $query_extra->with('parent_extra')
+                    ->withLocale($locale);
+                }])
+                ->withLocale($locale);
+            }]);
+        }, 'sales_count', 'tax'])
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->where("favourite", 1)
+        ->where('status', 1)
+        ->get()
+        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
+            //get count of sales of product to detemine stock
+            $product->price = $product?->product_pricing->where('branch_id', $branch_id)
+            ->first()?->price ?? $product->price;
+            $product->favourite = false;
+            if ($product->stock_type == 'fixed') {
+                $product->count = $product->sales_count->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            elseif ($product->stock_type == 'daily') {
+                $product->count = $product->sales_count
+                ->where('date', date('Y-m-d'))
+                ->sum('count');
+                $product->in_stock = $product->number > $product->count ? true : false;
+            }
+            // return !$category_off->contains($item->id);
+            // $category_off, $product_off, $option_off
+            if ($category_off->contains($product->category_id) || 
+            $category_off->contains($product->sub_category_id)
+            || $product_off->contains($product->id)) {
+                return null;
+            }
+            $product->variations = $product->variations->map(function ($variation) 
+            use ($option_off, $product, $branch_id) {
+                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                $variation->options = $variation->options->map(function($element) use($branch_id){
+                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+                    ->first()?->price ?? $element->price;
+                    return $element;
+                });
+              
+                return $variation;
+            });
+            $product->addons = $product->addons->map(function ($addon) 
+            use ($product) {
+                $addon->discount = $product->discount;
+              
+                return $addon;
+            });
+            return $product;
+        })->filter();
+        $cafe_location = $this->cafe_location
+        ->with(['tables' => function($query){
+            return $query
+            ->where('status', 1)
+            ->where('is_merge', 0)
+            ->with('sub_table:id,table_number,capacity,main_table_id');
+        }])
+        ->where('branch_id', $request->branch_id)
+        ->get();
+        $products_count = $products->where("weight_status", 0)
+        ->values();
+        $products_weight = $products->where("weight_status", 1)
+        ->values();
+        $favourite_products_count = $favourite_products->where("weight_status", 0)
+        ->values();
+        $favourite_products_weight = $favourite_products->where("weight_status", 1)
+        ->values();
+        $categories = CategoryResource::collection($categories);
+        $products = ProductResource::collection($products_count); 
+        $favourite_products = ProductResource::collection($favourite_products_count); 
+        $favourite_products_weight = ProductResource::collection($favourite_products_weight); 
+        $products_weight = ProductResource::collection($products_weight); 
 
         return response()->json([
             'categories' => $categories,
-            'products' => $products,  
+            'products' => $products, 
+            'products_weight' => $products_weight, 
+            'favourite_products' => $favourite_products, 
+            'favourite_products_weight' => $favourite_products_weight, 
+            'cafe_location' => $cafe_location,
             'payment_methods' => $paymentMethod, 
         ]);
     }
