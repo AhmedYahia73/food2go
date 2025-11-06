@@ -703,7 +703,6 @@ class CashierMakeOrderController extends Controller
                 $kitchen_order[$kitchen->id][] = $element;
             }
         }
-        
         foreach ($kitchen_order as $key => $item) {
             $kitchen_order = $this->kitchen_order
             ->create([
@@ -717,7 +716,7 @@ class CashierMakeOrderController extends Controller
         }
 
         return response()->json([
-            'success' => 'You perpare success'
+            'success' => 'You perpare success',
         ]);
     }
 
