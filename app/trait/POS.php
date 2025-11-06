@@ -743,16 +743,18 @@ trait POS
                 ->where('id', $product['product_id'])
                 ->withLocale($locale)
                 ->first();
-                $product_item = collect([$product_item]);
-                $product_item = ProductResource::collection($product_item);
-                $product_item = count($product_item) > 0 ? $product_item[0] : null;
-                $order_details[$key]['product'][] = [
-                    'product' => $product_item,
-                    'count' => $product['count'],
-                    'notes' => isset($product['note']) ? $product['note'] : null,
-                ];
-                // Add product price
-                $amount_product += $product_item->price; 
+                if($product_item){
+                    $product_item = collect([$product_item]);
+                    $product_item = ProductResource::collection($product_item);
+                    $product_item = count($product_item) > 0 ? $product_item[0] : null;
+                    $order_details[$key]['product'][] = [
+                        'product' => $product_item,
+                        'count' => $product['count'],
+                        'notes' => isset($product['note']) ? $product['note'] : null,
+                    ];
+                    // Add product price
+                    $amount_product += $product_item->price; 
+                }
                 if (isset($product['exclude_id'])) {
                     foreach ($product['exclude_id'] as $exclude) {                       
                         $exclude = $this->excludes
