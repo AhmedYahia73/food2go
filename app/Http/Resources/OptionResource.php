@@ -17,14 +17,14 @@ class OptionResource extends JsonResource
         
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
-            $price = empty($this->product->tax) ? $this->price: 
-            ($this->product->tax->type == 'value' ? $this->price 
-            : $this->price + $this->product->tax->amount * $this->price / 100);
-            $total_option_price = $price + $this->product->price;
+            $price = empty($this?->product?->tax) ? $this->price: 
+            ($this?->product?->tax->type == 'value' ? $this->price 
+            : $this->price + $this?->product?->tax->amount * $this->price / 100);
+            $total_option_price = $price + $this?->product?->price;
             
-            if (!empty($this->product->discount)) {
-                if ($this->product->discount->type == 'precentage') {
-                    $discount = $total_option_price - $this->product->discount->amount * $total_option_price / 100;
+            if (!empty($this?->product?->discount)) {
+                if ($this?->product?->discount->type == 'precentage') {
+                    $discount = $total_option_price - $this?->product?->discount->amount * $total_option_price / 100;
                 } else {
                     $discount = $total_option_price;
                 }
@@ -42,7 +42,7 @@ class OptionResource extends JsonResource
                 'price_after_tax' => $tax,
                 'discount_val' => $price - $discount,
                 'tax_val' => $tax - $price,
-                'product_id' => $this->product_id,
+                'product_id' => $this?->product_id,
                 'variation_id' => $this->variation_id,
                 'status' => $this->status,
                 'points' => $this->points, 
@@ -53,12 +53,12 @@ class OptionResource extends JsonResource
         }
         else{
             $price = $this->price;
-            $total_option_price = $price + $this->product->price;
+            $total_option_price = $price + $this?->product?->price;
             
             
-            if (!empty($this->product->tax)) {
-                if ($this->product->tax->type == 'precentage') {
-                    $tax = $price + $this->product->tax->amount * $price / 100;
+            if (!empty($this?->product?->tax)) {
+                if ($this?->product?->tax->type == 'precentage') {
+                    $tax = $price + $this?->product?->tax->amount * $price / 100;
                 } else {
                     $tax = $price;
                 }
@@ -66,9 +66,9 @@ class OptionResource extends JsonResource
             else{
                 $tax = $price;
             }
-            if (!empty($this->product->discount)) {
-                if ($this->product->discount->type == 'precentage') {
-                    $discount = $total_option_price - $this->product->discount->amount * $total_option_price / 100;
+            if (!empty($this?->product?->discount)) {
+                if ($this?->product?->discount->type == 'precentage') {
+                    $discount = $total_option_price - $this?->product?->discount->amount * $total_option_price / 100;
                 } else {
                     $discount = $total_option_price;
                 }
@@ -85,7 +85,7 @@ class OptionResource extends JsonResource
                 'price_after_tax' => $tax,
                 'discount_val' => $price - $discount,
                 'tax_val' => $tax - $price,
-                'product_id' => $this->product_id,
+                'product_id' => $this?->product_id,
                 'variation_id' => $this->variation_id,
                 'status' => $this->status,
                 'points' => $this->points, 
