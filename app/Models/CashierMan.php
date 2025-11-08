@@ -53,6 +53,10 @@ class CashierMan extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    public function cashier(){
+        return $this->belongsTo(Cashier::class, "cashier_id");
+    }
+
     protected $hidden = [
         'password',
     ];

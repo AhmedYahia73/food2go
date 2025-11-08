@@ -26,8 +26,25 @@ class CashierManController extends Controller
         $cashier = $this->cashier
         ->get();
         $cashier_men = $this->cashier_men
-        ->with('branch', 'roles')
-        ->get();
+        ->with('branch:id,name', 'roles', "cashier:id,name")
+        ->get()
+        ->map(function($item){
+            return [
+                'user_name' => $item->user_name,
+                'branch' => $item->branch,
+                'delivery' => $item->delivery,
+                'image_link' => $item->image_link,
+                'shift_number' => $item->shift_number,
+                'take_away' => $item->take_away,
+                'dine_in' => $item->dine_in,
+                'delivery' => $item->delivery,
+                'void_order' => $item->void_order,
+                'real_order' => $item->real_order,
+                'my_id' => $item->my_id,
+                'cashier' => $item->cashier,
+                'login' => $item->tokens()->exists(),
+            ];
+        });
         $branches = $this->branch
         ->where('status', 1)
         ->get();
