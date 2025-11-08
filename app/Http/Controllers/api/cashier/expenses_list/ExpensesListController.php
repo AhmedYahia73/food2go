@@ -22,6 +22,7 @@ class ExpensesListController extends Controller
         $expenses = $this->expenses
         ->with(["expense:id,name", "admin:id,name", "cashier:id,name", 
         "financial_account:id,name", "category:id,name"])
+        ->where("cahier_man_id", $request->user()->id)
         ->get()
         ->map(function($item){
             return [
