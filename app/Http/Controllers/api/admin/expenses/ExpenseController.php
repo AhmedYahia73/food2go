@@ -161,7 +161,7 @@ class ExpenseController extends Controller
             ];
         });
         $financials = $expenses
-        ->selectRaw("SUM(amount) AS TotalAmount")
+        ->selectRaw("SUM(amount) AS TotalAmount, financial_account_id")
         ->with(["financial_account:id,name"])
         ->groupBy("financial_account_id")
         ->get();
