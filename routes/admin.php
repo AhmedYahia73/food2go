@@ -127,6 +127,7 @@ use App\Http\Controllers\api\admin\expenses\ExpenseController;
 use App\Http\Controllers\api\admin\expenses\ExpenseListController;
 
 use App\Http\Controllers\api\admin\service_fees\ServiceFeesController;
+use App\Http\Controllers\api\admin\website_qr\WebsiteQrController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -137,6 +138,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    Route::controller(WebsiteQrController::class)
+    ->prefix('landing_page')->group(function(){
+        Route::get('/', 'view'); 
+        Route::post('/update', 'createUpdate'); 
+    });
+
     Route::controller(ServiceFeesController::class)
     ->prefix('service_fees')->group(function(){
         Route::get('/', 'view');
