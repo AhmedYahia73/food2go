@@ -368,7 +368,7 @@ class ClientMakeOrderController extends Controller
         ->where('id', 1)
         ->get();
         $financial_account = $this->finantiol_accounting
-        ->select('id', 'name', 'details', 'logo')
+        ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
         ->whereHas('branch')
         ->where('status', 1)
         ->get(); 
