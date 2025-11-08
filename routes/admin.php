@@ -126,6 +126,8 @@ use App\Http\Controllers\api\admin\expenses\ExpenseCategoryController;
 use App\Http\Controllers\api\admin\expenses\ExpenseController;
 use App\Http\Controllers\api\admin\expenses\ExpenseListController;
 
+use App\Http\Controllers\api\admin\expenses\ServiceFeesController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
@@ -135,6 +137,17 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    Route::controller(ServiceFeesController::class)
+    ->prefix('service_fees')->group(function(){
+        Route::get('/{id}', 'view');
+        Route::get('/item/{id}', 'service_fees_item');
+        Route::put('/lists', 'lists');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
     Route::controller(PurchaseRecipeController::class)
     ->prefix('purchase_recipe')->group(function(){
         Route::get('/{id}', 'view');
