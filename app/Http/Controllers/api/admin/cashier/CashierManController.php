@@ -10,6 +10,7 @@ use App\trait\image;
 
 use App\Models\Cashier;
 use App\Models\CashierMan;
+use App\Models\CashierShift;
 use App\Models\CashierRole;
 use App\Models\PersonalAccessToken;
 use App\Models\Branch;
@@ -18,7 +19,7 @@ class CashierManController extends Controller
 {
     public function __construct(private Cashier $cashier,
     private CashierMan $cashier_men, private Branch $branch,
-    private CashierRole $cashier_role){}
+    private CashierRole $cashier_role, private CashierShift $shift){}
     use image;
 
     public function view(Request $request){
@@ -59,6 +60,28 @@ class CashierManController extends Controller
             'cashier_men' => $cashier_men,
             'branches' => $branches,
             'roles' => $roles,
+        ]);
+    }
+
+    public function logout_cashier(Request $request, $id){
+        $cashier_man = $this->cashier_men
+        ->where("id", $id)
+        ->first();
+        if(!$cashier_man){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+        $this->shift
+        ->where("cashier_man_id", $id)
+        ->whereNull("end_time")
+        ->update([
+            "end_time" => now()
+        ]);
+        $cashier_man->tokens()->delete();
+
+        return response()->json([
+            "success" => "You logout cashier man success"
         ]);
     }
 
