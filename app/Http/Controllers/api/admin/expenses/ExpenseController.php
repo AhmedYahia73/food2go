@@ -111,4 +111,64 @@ class ExpenseController extends Controller
             "success" => "You add expense success"
         ]);
     }
+
+    public function expenses_report(Request $request){
+        $validator = Validator::make($request->all(), [
+            'from' => ['date'],
+            'to' => ['date'],
+            'cashier_id' => ['exists:cashiers,id'],
+            'cahier_man_id' => ['exists:cashier_men,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $expenses = $this->expenses;
+        if($request->from){
+            $expenses = $expenses
+            ->whereDate("created_at", ">=", $request->from);
+        }
+        if($request->to){
+            $expenses = $expenses
+            ->whereDate("created_at", "<=", $request->to);
+        }
+        if($request->cashier_id){
+            $expenses = $expenses
+            ->where("cashier_id", $request->cashier_id);
+        }
+        if($request->cahier_man_id){
+            $expenses = $expenses
+            ->where("cahier_man_id", $request->cahier_man_id);
+        }
+        $expenses_lists = $expenses
+        ->with(["expense:id,name", "admin:id,name"
+        ,"branch:id,name", "cashier:id,name", "cahier_man:id,user_name",
+        "financial_account:id,name", "category:id,name"])
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "amount" => $item->amount,
+                "note" => $item->note,
+                "expense" => $item->expense,
+                "admin" => $item->admin,
+                "branch" => $item->branch,
+                "cashier" => $item->cashier,
+                "cahier_man" => $item->cahier_man,
+                "financial_account" => $item->financial_account,
+                "category" => $item->category,
+            ];
+        });
+        $financials = $expenses
+        ->selectRaw("SUM(amount) AS TotalAmount")
+        ->with(["financial_account:id,name"])
+        ->groupBy("financial_account_id")
+        ->get();
+
+        return response()->json([
+            "expenses_lists" => $expenses_lists,
+            "financials" => $financials,
+        ]);
+    }
 }

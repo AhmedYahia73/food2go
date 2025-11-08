@@ -187,6 +187,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ExpenseController::class)
     ->prefix('expenses_list')->group(function(){
         Route::get('/', 'view');
+        Route::post('/expenses_report', 'expenses_report');
         Route::get('/lists', 'lists');  
         Route::post('/add', 'create'); 
     });
