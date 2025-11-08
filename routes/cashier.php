@@ -16,6 +16,7 @@ use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
 use App\Http\Controllers\api\cashier\profile\ProfileController; 
 use App\Http\Controllers\api\cashier\make_order\DiscountController;
 use App\Http\Controllers\api\cashier\order\OrderController;
+use App\Http\Controllers\api\cashier\expenses_list\ExpensesListController;
 
 use App\Http\Controllers\api\cashier\group_products\GroupProductController;
 
@@ -56,6 +57,13 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/take_away_order', 'take_away_order')->middleware('can:take_away');
        
         Route::put('/tables_status/{id}', 'tables_status')->middleware('can:table_status');
+    });
+
+    Route::controller(ExpensesListController::class)
+    ->prefix("expenses_list")->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');
+        Route::post('/add', 'create');
     });
 
     Route::controller(OrderController::class)
