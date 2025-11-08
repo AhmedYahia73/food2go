@@ -8,11 +8,14 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\ExpenseList;
 use App\Models\ExpenseCategory;
+use App\Models\Translation;
+use App\Models\TranslationTbl;
 
 class ExpenseListController extends Controller
 {
     public function __construct(private ExpenseList $expense,
-    private ExpenseCategory $categories){}
+    private ExpenseCategory $categories, private Translation $translations, 
+    private TranslationTbl $translation_tbl){}
 
     public function view(Request $request){
         $expenses = $this->expense
@@ -40,9 +43,25 @@ class ExpenseListController extends Controller
         ->where("id", $id)
         ->with("category:id,name")
         ->first();
+        $translations = $this->translations
+        ->where('status', 1)
+        ->get();
+        $expense_names = [];
+        foreach ($translations as $item) {
+             $expense_name = $this->translation_tbl
+             ->where('locale', $item->name)
+             ->where('key', $expense->name)
+             ->first();
+            $expense_names[] = [
+                'tranlation_id' => $item->id,
+                'tranlation_name' => $item->name,
+                'expense_name' => $expense_name->value ?? null,
+            ]; 
+        }
 
         return response()->json([
             "expense" => $expense, 
+            'expense_names' => $expense_names,
         ]);
     }
 
@@ -70,7 +89,10 @@ class ExpenseListController extends Controller
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'category_id' => ['required', 'exists:expense_categories,id'],
-            'name' => ['required'],
+            'names' => ['required', 'array'],
+            'names.*.name' => ['required'],
+            'names.*.tranlation_name' => ['required'],
+            'names.*.tranlation_id' => ['required'],
             'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -79,9 +101,22 @@ class ExpenseListController extends Controller
             ],400);
         }
 
+        $names = $request->names;
+        $default = $names[0]['name'];
         $expenseRequest = $validator->validated();
-        $this->expense
+        $expenseRequest['name'] = $default;
+        $expense = $this->expense
         ->create($expenseRequest);
+
+        foreach ($names as $item) {
+            if (!empty($item['name'])) {
+                $expense->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default,
+                    'value' => $item['name']
+                ]); 
+            }
+        } 
 
         return response()->json([
             "success" => "You add expense success"
@@ -91,7 +126,10 @@ class ExpenseListController extends Controller
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
            'category_id' => ['required', 'exists:expense_categories,id'],
-            'name' => ['required'],
+            'names' => ['required', 'array'],
+            'names.*.name' => ['required'],
+            'names.*.tranlation_name' => ['required'],
+            'names.*.tranlation_id' => ['required'],
             'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -100,10 +138,30 @@ class ExpenseListController extends Controller
             ],400);
         }
 
+        $names = $request->names;
+        $default = $names[0]['name'];
         $expenseRequest = $validator->validated();
-        $this->expense
+        $expenseRequest['name'] = $default;
+        $expense = $this->expense
         ->where("id", $id)
-        ->update($expenseRequest);
+        ->first();
+        if(!$expense){
+            return response()->json([
+                "errors" => "id is wrong"
+            ]);
+        }
+        $expense->update($expenseRequest);
+
+        $expense->translations()->delete();
+        foreach ($names as $item) {
+            if (!empty($item['name'])) {
+                $expense->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $default,
+                    'value' => $item['name']
+                ]); 
+            }
+        } 
 
         return response()->json([
             "success" => "You update expense success"
