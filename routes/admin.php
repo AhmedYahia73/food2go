@@ -141,7 +141,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('service_fees')->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'service_fees_item');
-        Route::put('/lists', 'lists');
+        Route::get('/lists', 'lists');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
