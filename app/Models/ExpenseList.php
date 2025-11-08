@@ -14,6 +14,11 @@ class ExpenseList extends Model
         'name',
         'status',
     ];
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 
     public function category(){
         return $this->belongsTo(ExpenseCategory::class, 'category_id');

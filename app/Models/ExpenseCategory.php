@@ -13,4 +13,9 @@ class ExpenseCategory extends Model
         'name',
         'status'
     ];
+    
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
 }
