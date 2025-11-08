@@ -139,7 +139,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     Route::controller(ServiceFeesController::class)
     ->prefix('service_fees')->group(function(){
-        Route::get('/{id}', 'view');
+        Route::get('/', 'view');
         Route::get('/item/{id}', 'service_fees_item');
         Route::put('/lists', 'lists');
         Route::put('/status/{id}', 'status');
