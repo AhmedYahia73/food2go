@@ -25,4 +25,9 @@ class Cashier extends Model
     {
         return $this->morphMany(TranslationTbl::class, 'translatable');
     }
+    
+    public function cashier_man()
+    {
+        return $this->belongsToMany(CashierMan::class, 'cashier_shifts', 'cashier_id', 'cashier_man_id');
+    }
 }

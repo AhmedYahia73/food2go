@@ -21,7 +21,22 @@ class CashierController extends Controller
         // /admin/cashier
         $cashier = $this->cashier
         ->with(['branch:id,name'])
-        ->get();
+        ->get()
+        ->map(function($item){
+            $cashier_man = $item->cashier_man->sortByDesc("id")->first();
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "cashier_active" => $item->cashier_active,
+                "status" => $item->status,
+                "branch" => $item->branch,
+                "cashier_man" => [
+                    "id" => $cashier_man?->id,
+                    "user_name" => $cashier_man?->user_name,
+                    "image_link" => $cashier_man?->image_link,
+                ],
+            ];
+        });
         $branches = $this->branches
         ->select('id', 'name')
         ->where('status', 1)

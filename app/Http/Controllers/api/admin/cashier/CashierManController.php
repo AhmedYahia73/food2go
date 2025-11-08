@@ -31,6 +31,7 @@ class CashierManController extends Controller
         ->get()
         ->map(function($item){
             return [
+                'id' => $item->id,
                 'user_name' => $item->user_name,
                 'branch' => $item->branch,
                 'delivery' => $item->delivery,
@@ -42,6 +43,7 @@ class CashierManController extends Controller
                 'void_order' => $item->void_order,
                 'real_order' => $item->real_order,
                 'my_id' => $item->my_id,
+                'status' => $item->status,
                 'cashier' => $item->cashier,
                 'login' => $item->tokens()->exists(),
             ];

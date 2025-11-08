@@ -59,6 +59,7 @@ class CashierMan extends Model
 
     protected $hidden = [
         'password',
+        'pivot',
     ];
     protected function casts(): array
     {
