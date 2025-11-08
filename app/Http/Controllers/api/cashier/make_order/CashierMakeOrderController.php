@@ -653,12 +653,7 @@ class CashierMakeOrderController extends Controller
         ->get();
         $orders = collect([]);
         foreach ($order_cart as $key => $item) {
-            $order_item = $this->order_format($item, $key);
-            foreach ($order_item as $value) {
-                $amount = $value->price_after_discount + $value->price_after_tax - $value->price;
-                $amount *= floatval($value->count);
-                $value->amount = $amount;
-            } 
+            $order_item = $this->order_format($item, $key); 
             $orders = $orders->merge($order_item);
         }
 

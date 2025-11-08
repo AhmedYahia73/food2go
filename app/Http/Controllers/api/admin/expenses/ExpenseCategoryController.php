@@ -30,6 +30,11 @@ class ExpenseCategoryController extends Controller
         ->select("name", "status")
         ->where("id", $id)
         ->first();
+        if(!$category){
+            return response()->json([
+                'errors' => "id is wrong"
+            ], 400);
+        }
         $translations = $this->translations
         ->where('status', 1)
         ->get();
