@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Storage;
+use App\trait\image;
 
 use App\Models\Setting;
 
 class WebsiteQrController extends Controller
 {
     public function __construct(private Setting $settings){}
+    use image;
 
     public function view(Request $request){
         $website = $this->settings
@@ -44,10 +46,10 @@ class WebsiteQrController extends Controller
         }
         $website = $this->settings
         ->where("name", "web_site")
-        ->first()?->setting;
+        ->first();
         $qr_code = $this->settings
         ->where("name", "web_site_qr")
-        ->first()?->setting;
+        ->first();
         if($website){
             $website
             ->update([
@@ -66,6 +68,8 @@ class WebsiteQrController extends Controller
         Storage::disk('public')->put($fileName, $qrImage);
 
         if($qr_code){
+
+            $this->deleteImage($qr_code->setting);
             $qr_code
             ->update([
                 "setting" => $fileName
