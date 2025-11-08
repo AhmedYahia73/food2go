@@ -108,11 +108,17 @@ class ServiceFeesController extends Controller
         $serviceFeesRequest = $validator->validated();
         $service_fees = $this->service_fees
         ->where("id", $id)
-        ->update([
+        ->first();
+        if(!$service_fees){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+        $service_fees->branches()->sync($request->branches);
+        $service_fees->update([
             "type" => $request->type,
             "amount" => $request->amount,
         ]);
-        $service_fees->branches()->sync($request->branches);
 
         return response()->json([
             "success" => "You add service fees success"
