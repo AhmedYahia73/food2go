@@ -55,7 +55,7 @@ class WebsiteQrController extends Controller
             ]);
         }
         else{
-            $this->website
+            $this->settings
             ->create([
                 'name' => "web_site",
                 "setting" => $web_site
@@ -72,7 +72,7 @@ class WebsiteQrController extends Controller
             ]);
         }
         else{
-            $this->qr_code
+            $this->settings
             ->create([
                 'name' => "web_site_qr",
                 "setting" => $fileName
