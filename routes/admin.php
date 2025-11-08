@@ -126,7 +126,7 @@ use App\Http\Controllers\api\admin\expenses\ExpenseCategoryController;
 use App\Http\Controllers\api\admin\expenses\ExpenseController;
 use App\Http\Controllers\api\admin\expenses\ExpenseListController;
 
-use App\Http\Controllers\api\admin\expenses\ServiceFeesController;
+use App\Http\Controllers\api\admin\service_fees\ServiceFeesController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
