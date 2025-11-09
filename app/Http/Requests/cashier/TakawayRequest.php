@@ -43,6 +43,7 @@ class TakawayRequest extends FormRequest
             'financials.*.id' => ['required_if:order_pending,false', 'exists:finantiol_acountings,id'],
             'financials.*.amount' => ['required_if:order_pending,false', 'numeric'], 
             'financials.*.description' => ['sometimes'], 
+            'financials.*.transition_id' => ['sometimes'], 
             'cashier_id' => ['required_if:order_pending,false', 'exists:cashiers,id'],
             'due' => ['required_if:order_pending,false', 'boolean'],
             'user_id' => ['exists:users,id'],
