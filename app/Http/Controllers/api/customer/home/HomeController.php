@@ -364,7 +364,7 @@ class HomeController extends Controller
             ], 400);
         }
         return response()->json([
-            'product' => $product
+            'product' => $products
         ]);
         $product = ProductResource::collection($products);
         $product = $product[0];
