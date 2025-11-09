@@ -437,8 +437,8 @@ class HomeController extends Controller
             }
             return $addon_arr;
 		});
+        $addons = AddonResource::collection(collect($addons));
 
-        $addons = AddonResource::collection($addons);
         return response()->json([
             'id' => $product->id,
             'name' => $product->toArray(request())['name'],
