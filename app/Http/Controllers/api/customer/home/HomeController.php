@@ -8,6 +8,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\AddonResource;
 use Illuminate\Support\Facades\Http;
 
 use App\Models\Category;
@@ -327,7 +328,8 @@ class HomeController extends Controller
                     'excludes' => fn($q) => $q->withLocale($locale),
                     'discount', 'extra', 'sales_count', 'tax',
                     'variations' => fn($q) => $q->with([
-                        'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
+                        'options' => fn($oq) => $oq->with(['option_pricing'])
+                        ->withLocale($locale) // تأكد دي مطلوبة
                     ])->withLocale($locale),
                 ])
                 ->withLocale($locale)
@@ -366,11 +368,13 @@ class HomeController extends Controller
         $product->tax;
         $cate_addons = $this->addons
 		->with('translations', 'tax')
+        ->withLocale($locale)
         ->whereHas('categories', function($query) use($product){
             $query->where('categories.id', $product->category_id)
             ->orWhere('categories.id', $product->sub_category_id);
         })
         ->get();
+        $cate_addons = AddonResource::collection($cate_addons);
         $addons = collect($product->addons)
         ->merge($cate_addons)
         ->values()
