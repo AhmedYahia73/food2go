@@ -247,7 +247,7 @@ class HomeController extends Controller
         // address_id, branch_id
         
         // // _______________________________________________________________________
-        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $locale = 'ar'; // Get Local Translation
         
         $branch_id = 0;
         if ($request->branch_id && !empty($request->branch_id)) {
