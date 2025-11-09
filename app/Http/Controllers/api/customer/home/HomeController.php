@@ -247,7 +247,7 @@ class HomeController extends Controller
         // address_id, branch_id
         
         // // _______________________________________________________________________
-        $locale = 'ar'; // Get Local Translation
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         
         $branch_id = 0;
         if ($request->branch_id && !empty($request->branch_id)) {
@@ -363,6 +363,9 @@ class HomeController extends Controller
                 'errors' => 'id is wrong'
             ], 400);
         }
+        return response()->json([
+            'product' => $product
+        ]);
         $product = ProductResource::collection($products);
         $product = $product[0];
         $product->tax;
