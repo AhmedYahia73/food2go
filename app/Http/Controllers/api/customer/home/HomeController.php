@@ -364,9 +364,6 @@ class HomeController extends Controller
             ], 400);
         }
         $product = ProductResource::collection($products);
-        return response()->json([
-            'product' => $product
-        ]);
         $product = $product[0];
         $product->tax;
         $cate_addons = $this->addons
@@ -442,6 +439,9 @@ class HomeController extends Controller
             return $addon_arr;
 		});
 
+        return response()->json([
+            'product' => $product
+        ]);
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,
