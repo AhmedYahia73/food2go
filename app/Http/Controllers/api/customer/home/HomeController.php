@@ -363,10 +363,10 @@ class HomeController extends Controller
                 'errors' => 'id is wrong'
             ], 400);
         }
-        return response()->json([
-            'product' => $products
-        ]);
         $product = ProductResource::collection($products);
+        return response()->json([
+            'product' => $product
+        ]);
         $product = $product[0];
         $product->tax;
         $cate_addons = $this->addons
