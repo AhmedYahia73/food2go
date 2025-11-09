@@ -438,10 +438,7 @@ class HomeController extends Controller
             }
             return $addon_arr;
 		});
-
-        return response()->json([
-            'product' => $product
-        ]);
+ 
         return response()->json([
             'id' => $product->id,
             'name' => $product->name,
