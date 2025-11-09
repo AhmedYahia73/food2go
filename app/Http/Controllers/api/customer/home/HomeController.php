@@ -374,8 +374,9 @@ class HomeController extends Controller
             ->orWhere('categories.id', $product->sub_category_id);
         })
         ->get();
+        $cate_addons = AddonResource::collection($cate_addons);
         $addons = collect($product->toArray(request())['addons'])
-        ->merge($cate_addons)
+        ->merge($cate_addons->toArray(request()))
         ->values()
 		->map(function($item){
             $locale = app()->getLocale(); // Use the application's current locale
@@ -437,7 +438,6 @@ class HomeController extends Controller
             }
             return $addon_arr;
 		});
-        $addons = AddonResource::collection(collect($addons));
 
         return response()->json([
             'id' => $product->id,
