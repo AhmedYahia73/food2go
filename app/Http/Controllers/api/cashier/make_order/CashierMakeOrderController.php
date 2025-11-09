@@ -1019,8 +1019,7 @@ class CashierMakeOrderController extends Controller
                 'order' => json_encode($item),
                 'type' => $order->order_type,
                 'order_id' => $order->id,
-            ]);
-            $order_kitchen = array_values($order_kitchen);
+            ]); 
         } 
         $kitchen_items = array_values($kitchen_items);
 
