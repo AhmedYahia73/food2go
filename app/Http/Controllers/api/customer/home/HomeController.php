@@ -374,8 +374,7 @@ class HomeController extends Controller
             ->orWhere('categories.id', $product->sub_category_id);
         })
         ->get();
-        $cate_addons = AddonResource::collection($cate_addons);
-        $addons = collect($product->addons)
+        $addons = collect($product->toArray(request())['addons'])
         ->merge($cate_addons)
         ->values()
 		->map(function($item){
@@ -438,13 +437,14 @@ class HomeController extends Controller
             }
             return $addon_arr;
 		});
- 
+
+        $addons = AddonResource::collection($addons);
         return response()->json([
             'id' => $product->id,
             'name' => $product->toArray(request())['name'],
             'category_id' => $product->category_id,
             'sub_category_id' => $product->sub_category_id,
-            'description' => $product->description, 
+            'description' => $product->toArray(request())['description'], 
             'price' => $product->price, 
             'price_after_discount' => $product->toArray(request())['price_after_discount'], 
             'price_after_tax' => $product->toArray(request())['price_after_tax'], 
@@ -454,8 +454,8 @@ class HomeController extends Controller
             'image_link' => $product->image_link, 
             'allExtras' => $product->toArray(request())['allExtras'],  
             'addons' => $addons, 
-            'variations' => $product->variations, 
-            'excludes' => $product->excludes->select('id', 'name'),
+            'variations' => $product->toArray(request())['variations'], 
+            'excludes' => collect($product->toArray(request())['excludes'])->select('id', 'name'),
             'tax_obj' => $product->toArray(request())['tax_obj'],
             'favourite' => $product->favourite,
         ]);
