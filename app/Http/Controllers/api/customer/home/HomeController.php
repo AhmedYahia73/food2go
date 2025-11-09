@@ -440,8 +440,8 @@ class HomeController extends Controller
 		});
  
         return response()->json([
-            'id' => $product->id,
-            'name' => $product->name,
+            'id' => $product['id'],
+            'name' => $product['name'],
             'category_id' => $product->category_id,
             'sub_category_id' => $product->sub_category_id,
             'description' => $product->description, 
