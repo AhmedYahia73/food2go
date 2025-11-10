@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('manufaturings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->nullable()->constrained('purchase_products')->onUpdate('cascade')->onDelete('cascade'); 
+            $table->foreignId('product_id')->nullable()->constrained('purchase_products')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('store_id')->nullable()->constrained('purchase_stores')->onUpdate('cascade')->onDelete('cascade');
             $table->float("quantity"); 
             $table->timestamps();

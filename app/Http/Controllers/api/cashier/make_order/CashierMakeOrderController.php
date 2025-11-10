@@ -47,7 +47,8 @@ use App\Models\CashierBalance;
 use App\Models\CashierMan;
 use App\Models\Delivery;
 use App\Models\DiscountModule;
-use App\Models\CheckoutRequest;
+use App\Models\Discount;
+use App\Models\CheckoutRequest;// dicount_id
 use App\Models\FinantiolAcounting;
 
 use App\trait\image;
@@ -70,12 +71,29 @@ class CashierMakeOrderController extends Controller
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CashierMan $cashier_man, private UserDue $user_due,
     private DiscountModule $discount_module, private FinantiolAcounting $financial_account,
-    private CheckoutRequest $checkout_request_query){}
+    private CheckoutRequest $checkout_request_query, private Discount $discount){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
     use POS;
     use Recipe;
+
+    public function lists(){
+        $discounts = $this->discount
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "type" => $item->type,
+                "amount" => $item->amount,
+            ];
+        });
+
+        return response()->json([
+            'discounts' => $discounts
+        ]);
+    }
 
     public function list_due_users(Request $request){
         $users =$this->user

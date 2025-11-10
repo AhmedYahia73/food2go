@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('manufacturing_recipes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('orders', function (Blueprint $table) {
+            $table->foreignId('dicount_id')->nullable()->constrained('discounts')->onUpdate('cascade')->onDelete('set null');
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('manufacturing_recipes');
+        Schema::table('orders', function (Blueprint $table) {
+            //
+        });
     }
 };
