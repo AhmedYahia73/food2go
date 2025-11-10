@@ -15,6 +15,8 @@ class OrderFinancial extends Model
         'cashier_id',
         'cashier_man_id',
         'amount',
+        'transition_id',
+        'description',
     ];
 
     public function order(){

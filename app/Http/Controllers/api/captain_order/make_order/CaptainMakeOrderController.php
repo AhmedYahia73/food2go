@@ -664,10 +664,7 @@ class CaptainMakeOrderController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
-        $paymentMethod = $this->paymentMethod
-        ->where('status', 1)
-        ->get();
+        } 
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = $request->branch_id;
         $branch_off = $this->branch_off
@@ -861,8 +858,7 @@ class CaptainMakeOrderController extends Controller
             'products_weight' => $products_weight, 
             'favourite_products' => $favourite_products, 
             'favourite_products_weight' => $favourite_products_weight, 
-            'cafe_location' => $cafe_location,
-            'payment_methods' => $paymentMethod, 
+            'cafe_location' => $cafe_location, 
         ]);
     }
 
@@ -911,20 +907,10 @@ class CaptainMakeOrderController extends Controller
                 return $element; 
             });
             return $item;
-        });
-        $financial_account = $this->financial_account
-        ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
-        ->whereHas('branch')
-        ->where('status', 1)
-        ->get(); 
-        $paymentMethod = $this->paymentMethod
-        ->where('status', 1)
-        ->get();
+        }); 
 
         return response()->json([
-            'cafe_location' => $cafe_location,
-            'financial_account' => $financial_account,
-            'paymentMethod' => $paymentMethod,
+            'cafe_location' => $cafe_location, 
         ]);
     }
 

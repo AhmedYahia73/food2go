@@ -43,6 +43,7 @@ class DeliveryRequest extends FormRequest
             'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
             'financials.*.amount' => ['required', 'numeric'],
             'financials.*.description' => ['sometimes'],  
+            'financials.*.transition_id' => ['sometimes'], 
             'cash_with_delivery' => ['boolean'],
             'cashier_id' => ['required', 'exists:cashiers,id'],
             'user_id' => 'required|exists:users,id',

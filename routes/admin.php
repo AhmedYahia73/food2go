@@ -128,6 +128,7 @@ use App\Http\Controllers\api\admin\expenses\ExpenseListController;
 
 use App\Http\Controllers\api\admin\service_fees\ServiceFeesController;
 use App\Http\Controllers\api\admin\website_qr\WebsiteQrController;
+use App\Http\Controllers\api\admin\purchases\ManufacturingController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -138,6 +139,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    Route::controller(ManufacturingController::class)
+    ->prefix('manufacturing')->group(function(){
+        Route::get('/lists', 'lists'); 
+        Route::post('/product_recipe', 'product_recipe'); 
+        Route::post('/manufacturing', 'manufacturing'); 
+        Route::get('/manufacturing_history', 'manufacturing_history'); 
+        Route::get('/manufacturing_recipe/{id}', 'manufacturing_recipe'); 
+    });
+    
     Route::controller(WebsiteQrController::class)
     ->prefix('landing_page')->group(function(){
         Route::get('/', 'view'); 
@@ -499,7 +509,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(TranslationController::class)
     ->prefix('translation')->group(function(){
-        Route::get('/', 'view')->middleware('can:view_translation');
+        Route::get('/', 'view');
         Route::put('/status/{id}', 'status')->middleware('can:edit_translation');
         Route::post('/add', 'create')->middleware('can:add_translation');
         Route::delete('/delete/{id}', 'delete')->middleware('can:delete_translation');
@@ -887,7 +897,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/preparing_time', 'preparing_time')->middleware('can:view_preparing_time');
             Route::post('/preparing_time_update', 'preparing_time_update')->middleware('can:edit_preparing_time');
             
-            Route::get('/notification_sound', 'notification_sound')->middleware('can:view_notification_sound');
+            Route::get('/notification_sound', 'notification_sound');
             Route::post('/notification_sound_update', 'notification_sound_update')->middleware('can:edit_notification_sound');
 
             Route::get('/cancelation_notification', 'cancelation_notification');

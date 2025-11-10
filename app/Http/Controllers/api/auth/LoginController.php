@@ -27,6 +27,7 @@ use App\Models\SmsBalance;
 use App\Models\Waiter;
 use App\Models\DeviceToken;
 use App\Models\StorageMan;
+use App\Models\FinantiolAcounting; 
 
 class LoginController extends Controller
 {
@@ -35,7 +36,7 @@ class LoginController extends Controller
     private Address $address, private Zone $zones, private CaptainOrder $captain_order,
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
     private Kitchen $kitchen, private Waiter $waiter, private StorageMan $store_man_model,
-    private Cashier $cashier_machine
+    private Cashier $cashier_machine, private FinantiolAcounting $financial_account,
     ){}
 
     public function store_man(Request $request){
@@ -339,6 +340,11 @@ class LoginController extends Controller
         if ($validation->fails()) {
             return response()->json($validation->errors(), 422);
         }
+        $financial_account = $this->financial_account
+        ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
+        ->whereHas('branch')
+        ->where('status', 1)
+        ->get(); 
         $user = $this->cashier
         ->where('user_name', $request->user_name)
         ->with('branch')
@@ -391,7 +397,8 @@ class LoginController extends Controller
             return response()->json([
                 'cashier' => $user,
                 'token' => $user->token,
-                'start_shift' => $start_shift
+                'start_shift' => $start_shift,
+                'financial_account' => $financial_account
             ], 200);
         }
         else { 

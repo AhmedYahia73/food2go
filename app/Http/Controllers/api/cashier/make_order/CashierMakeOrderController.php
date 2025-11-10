@@ -48,6 +48,7 @@ use App\Models\CashierMan;
 use App\Models\Delivery;
 use App\Models\DiscountModule;
 use App\Models\CheckoutRequest;
+use App\Models\FinantiolAcounting;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -68,7 +69,7 @@ class CashierMakeOrderController extends Controller
     private Kitchen $kitchen, private KitchenOrder $kitchen_order,
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CashierMan $cashier_man, private UserDue $user_due,
-    private DiscountModule $discount_module,
+    private DiscountModule $discount_module, private FinantiolAcounting $financial_account,
     private CheckoutRequest $checkout_request_query){}
     use image;
     use PlaceOrder;
@@ -516,6 +517,12 @@ class CashierMakeOrderController extends Controller
             'status' => 1,
             'take_away_status' => 'preparing',
         ]);
+        $errors = $this->finantion_validation($request);
+        if(isset($errors['errors'])){
+            return response()->json([
+                'errors' => $errors,
+            ], 400);
+        }
         if($request->due && !$request->user_id){ 
             return response()->json([
                 "errors" => "user_id is required"
@@ -734,6 +741,12 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'status' => 1,
         ]); 
+        $errors = $this->finantion_validation($request);
+        if(isset($errors['errors'])){
+            return response()->json([
+                'errors' => $errors,
+            ], 400);
+        }
         $tables_ids = $this->cafe_table
         ->where('id', $request->table_id)
         ->orWhere('main_table_id', $request->table_id)
@@ -828,6 +841,12 @@ class CashierMakeOrderController extends Controller
             'shift' => $request->user()->shift_number,
             'pos' => 1, 
         ]);
+        $errors = $this->finantion_validation($request);
+        if(isset($errors['errors'])){
+            return response()->json([
+                'errors' => $errors,
+            ], 400);
+        }
         $order_carts = $this->order_cart
         ->whereIn('id', $request->cart_id)
         ->get();
@@ -1019,8 +1038,7 @@ class CashierMakeOrderController extends Controller
                 'order' => json_encode($item),
                 'type' => $order->order_type,
                 'order_id' => $order->id,
-            ]);
-            $order_kitchen = array_values($order_kitchen);
+            ]); 
         } 
         $kitchen_items = array_values($kitchen_items);
 
@@ -1208,5 +1226,32 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             "orders" => $orders
         ]);
+    }
+
+    public function finantion_validation($request){
+        $financial_ids = array_column($request->financials, 'id');
+        $financial_account = $this->financial_account
+        ->whereIn("id", $financial_ids)
+        ->get();
+        foreach ($financial_account as $item) { 
+            $result = array_filter($request->financials, function($element) use($item) {
+                return $element['id'] == $item->id;
+            }); 
+            $result = reset($result);
+            if($item->description_status){
+                if (!isset($result['description'])) {
+                    return [
+                        "errors" => 'Description is required at financial ' . $item->name
+                    ];
+                }
+                if (!isset($result['transition_id'])) {
+                    return [
+                        "errors" => 'transition_id is required at financial ' . $item->name
+                    ];
+                }
+            }
+        }
+
+        return ["success" => true];
     }
 }
