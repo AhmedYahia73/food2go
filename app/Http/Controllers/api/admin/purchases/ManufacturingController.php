@@ -77,7 +77,7 @@ class ManufacturingController extends Controller
                 "material" => $item->material,
                 "unit" => $item->unit,
                 "available_quantity" => $available_quantity->quantity ?? 0,
-                'available' => $available_quantity->quantity >= ($item->weight * $request->quantity),
+                'available' => ($available_quantity->quantity ?? 0) >= ($item->weight * $request->quantity),
             ];
         });
 
