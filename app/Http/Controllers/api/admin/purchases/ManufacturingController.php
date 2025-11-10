@@ -13,13 +13,16 @@ use App\Models\PurchaseCategory;
 use App\Models\Manufaturing;
 use App\Models\ManufaturingRecipe;
 use App\Models\MaterialStock;
+use App\Models\PurchaseStore;
+use App\Models\Material;
 
 class ManufacturingController extends Controller
 {
     public function __construct(private PurchaseRecipe $recipe,
     private PurchaseProduct $products, private PurchaseCategory $category,
     private Manufaturing $maufaturing, private ManufaturingRecipe $maufaturing_recipe, 
-    private MaterialStock $stock){}
+    private MaterialStock $stock, private Material $materials,
+    private PurchaseStore $stores){}
 
     public function lists(Request $request){
         $products = $this->products
@@ -30,23 +33,41 @@ class ManufacturingController extends Controller
         ->select("id", "name")
         ->where("status", 1)
         ->get();
+        $stores = $this->stores
+        ->select("id", "name")
+        ->get();
 
         return response()->json([
             "products" => $products,
             "categories" => $categories,
+            "stores" => $stores,
         ]);
     }
 
     public function recipes(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'store_id' => ["required", "exists:purchase_stores,id"],
+            'product_id' => ["required", "exists:purchase_products,id"],
+            'quantity' => ["required", "numeric"],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
         $recipes = $this->recipe 
         ->with(["material_category:id,name", "material:id,name",
         "unit:id,name"])
-        ->where('status', 1)
+        ->where("product_id", $id)
+        ->whereHas('material', function($query){
+            $query->where('status', 1);
+        })
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($request){
             return [
                 "id" => $item->id,
-                "weight" => $item->weight,
+                "weight" => $item->weight * $request->quantity,
                 "material_category" => $item->material_category,
                 "material" => $item->material,
                 "unit" => $item->unit,
@@ -72,5 +93,33 @@ class ManufacturingController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        
+        foreach ($request->materials as $item) {
+            $stock = $this->stock
+            ->where('store_id', $request->store_id)
+            ->where("material_id", $item['id'])
+            ->where("quantity", '>=', $item['weight'])
+            ->first();
+            if(empty($stock)){
+                $material = $this->materials
+                ->where('id', $item['id'])
+                ->first();
+                return response()->json([
+                    'errors' => $material->name . ' is not in stock'
+                ], 400);
+            }
+        }
+        foreach ($request->materials as $item) {
+            $stock = $this->stock
+            ->where('store_id', $request->store_id)
+            ->where("material_id", $item['id'])
+            ->first();
+            $stock->quantity -= $item['weight'];
+            $stock->save();
+        }
+        // manufactring history
+        return response()->json([
+            'success' => 'You moke Product success'
+        ]);
     }
 }

@@ -375,7 +375,7 @@ class HomeController extends Controller
         })
         ->get();
         $cate_addons = AddonResource::collection($cate_addons);
-        $addons = collect($product->toArray(request())['addons'])
+        $addons = collect($product->addons)
         ->merge($cate_addons->toArray(request()))
         ->values()
 		->map(function($item){
