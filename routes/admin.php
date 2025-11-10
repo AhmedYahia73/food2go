@@ -142,7 +142,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ManufacturingController::class)
     ->prefix('manufacturing')->group(function(){
         Route::get('/lists', 'lists'); 
-        Route::post('/product_recipe', 'recipes'); 
+        Route::post('/product_recipe', 'product_recipe'); 
         Route::post('/manufacturing', 'manufacturing'); 
         Route::get('/manufacturing_history', 'manufacturing_history'); 
         Route::get('/manufacturing_recipe/{id}', 'manufacturing_recipe'); 
