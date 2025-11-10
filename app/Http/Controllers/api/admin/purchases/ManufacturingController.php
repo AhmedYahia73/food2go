@@ -44,7 +44,7 @@ class ManufacturingController extends Controller
         ]);
     }
 
-    public function recipes(Request $request, $id){
+    public function product_recipe(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => ["required", "exists:purchase_stores,id"],
             'product_id' => ["required", "exists:purchase_products,id"],
@@ -56,21 +56,28 @@ class ManufacturingController extends Controller
             ],400);
         }
 
+        $stock = $this->stock;
         $recipes = $this->recipe 
         ->with(["material_category:id,name", "material:id,name",
         "unit:id,name"])
-        ->where("product_id", $id)
+        ->where("product_id", $request->product_id)
         ->whereHas('material', function($query){
             $query->where('status', 1);
         })
         ->get()
-        ->map(function($item) use($request){
+        ->map(function($item) use($request, $stock){
+            $available_quantity = $stock
+            ->where('store_id', $request->store_id)
+            ->where('material_id', $item->material)
+            ->first();
             return [
                 "id" => $item->id,
                 "weight" => $item->weight * $request->quantity,
                 "material_category" => $item->material_category,
                 "material" => $item->material,
                 "unit" => $item->unit,
+                "available_quantity" => $available_quantity->quantity ?? 0,
+                'available' => $available_quantity->quantity >= ($item->weight * $request->quantity),
             ];
         });
 
@@ -109,17 +116,67 @@ class ManufacturingController extends Controller
                 ], 400);
             }
         }
+        // manufactring history
+        $maufaturing = $this->maufaturing
+        ->create([
+            'product_id' => $request->product_id,
+            'store_id' => $request->store_id,
+            'quantity' => $request->quantity,
+        ]);
         foreach ($request->materials as $item) {
+            $this->maufaturing_recipe
+            ->create([
+                'manufaturing_id' => $maufaturing->id,
+                'material_id' => $item['id'],
+                'quantity' => $item['weight'],
+            ]);
             $stock = $this->stock
             ->where('store_id', $request->store_id)
             ->where("material_id", $item['id'])
             ->first();
             $stock->quantity -= $item['weight'];
             $stock->save();
-        }
-        // manufactring history
+        } 
+
         return response()->json([
             'success' => 'You moke Product success'
+        ]);
+    }
+
+    public function manufacturing_history(Request $request){
+        $maufaturing = $this->maufaturing
+        ->with(['product:id,name', 'store:id,name'])
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'product' => $item?->product?->name,
+                'store' => $item?->store?->name,
+                'quantity' => $item->quantity,
+                'date' => $item->created_at,
+            ];
+        });
+
+        return response()->json([
+            'maufaturing' => $maufaturing
+        ]);
+    }
+
+    public function manufacturing_recipe(Request $request, $id){
+        $maufaturing_recipe = $this->maufaturing_recipe
+        ->where('manufaturing_id', $id)
+        ->with(['material:id,name'])
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'material' => $item?->material?->name,
+                'quantity' => $item->quantity, 
+            ];
+        });
+
+        return response()->json([
+            'maufaturing_recipe' => $maufaturing_recipe
         ]);
     }
 }

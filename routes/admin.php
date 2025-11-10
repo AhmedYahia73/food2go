@@ -128,6 +128,7 @@ use App\Http\Controllers\api\admin\expenses\ExpenseListController;
 
 use App\Http\Controllers\api\admin\service_fees\ServiceFeesController;
 use App\Http\Controllers\api\admin\website_qr\WebsiteQrController;
+use App\Http\Controllers\api\admin\website_qr\ManufacturingController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -138,6 +139,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    Route::controller(ManufacturingController::class)
+    ->prefix('manufacturing')->group(function(){
+        Route::get('/lists', 'lists'); 
+        Route::post('/product_recipe', 'recipes'); 
+        Route::post('/manufacturing', 'manufacturing'); 
+        Route::get('/manufacturing_history', 'manufacturing_history'); 
+        Route::get('/manufacturing_recipe/{id}', 'manufacturing_recipe'); 
+    });
+    
     Route::controller(WebsiteQrController::class)
     ->prefix('landing_page')->group(function(){
         Route::get('/', 'view'); 
