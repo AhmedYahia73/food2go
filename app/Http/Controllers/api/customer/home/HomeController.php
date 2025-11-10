@@ -377,11 +377,8 @@ class HomeController extends Controller
         $cate_addons = AddonResource::collection($cate_addons);
         $addons = collect($product->toArray(request())['addons'])
         ->merge(collect($cate_addons->toArray(request())))
-        ->values();
-        return response()->json([
-            'addons' => $addons
-        ]);
-		$addons->map(function($item){
+        ->values()
+		->map(function($item){
             $locale = app()->getLocale(); // Use the application's current locale
             if ($item?->taxes?->setting && $item?->taxes?->setting == 'included') {
                 $price =  empty($item->tax) ? $item->price: 
