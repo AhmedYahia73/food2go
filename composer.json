@@ -9,7 +9,7 @@
         "google/apiclient": "^2.18",
         "kreait/firebase-php": "^7.23",
         "laravel/framework": "^11.9",
-        "laravel/reverb": "*",
+        "laravel/reverb": "^1.6",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1",

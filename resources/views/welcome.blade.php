@@ -6,17 +6,17 @@
     <title>Web Socket</title>
 </head>
 <body>
-   @vite('resources/js/app.js') 
+    @vite('resources/js/app.js')
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        window.Echo.channel('new_order')
+        .listen('OrderEvent', (e) => {
+            console.log(e);
+        });
+    });
+    </script>
 </body>
 
-<script>
-    setTimeout(()=>{
-
-    window.Echo.channel('new_order')
-    .listen('OrderEvent', (e) => {
-        console.log(e);
-        
-    })
-    }, 2000)
-</script>
+  
 </html>
