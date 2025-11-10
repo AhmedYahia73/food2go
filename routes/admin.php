@@ -128,7 +128,7 @@ use App\Http\Controllers\api\admin\expenses\ExpenseListController;
 
 use App\Http\Controllers\api\admin\service_fees\ServiceFeesController;
 use App\Http\Controllers\api\admin\website_qr\WebsiteQrController;
-use App\Http\Controllers\api\admin\website_qr\ManufacturingController;
+use App\Http\Controllers\api\admin\purchases\ManufacturingController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
