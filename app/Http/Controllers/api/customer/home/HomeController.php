@@ -376,7 +376,7 @@ class HomeController extends Controller
         ->get();
         $cate_addons = AddonResource::collection($cate_addons);
         $addons = collect($product->addons)
-        ->merge($cate_addons->toArray(request()))
+        ->merge($cate_addons)
         ->values()
 		->map(function($item){
             $locale = app()->getLocale(); // Use the application's current locale
