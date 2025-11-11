@@ -27,6 +27,7 @@ class CashierManController extends Controller
         ->get();
         $cashier_men = $this->cashier_men
         ->with('roles', "cashier:id,name")
+        ->where('branch_id', $request->user()->id)
         ->get()
         ->map(function($item){
             return [
@@ -63,6 +64,7 @@ class CashierManController extends Controller
     public function logout_cashier(Request $request, $id){
         $cashier_man = $this->cashier_men
         ->where("id", $id)
+        ->where('branch_id', $request->user()->id)
         ->first();
         if(!$cashier_man){
             return response()->json([
@@ -96,6 +98,7 @@ class CashierManController extends Controller
         }
         $cashier_men = $this->cashier_men
         ->where('id', $id)
+        ->where('branch_id', $request->user()->id)
         ->update([
             'status' => $request->status
         ]); 
@@ -108,7 +111,7 @@ class CashierManController extends Controller
     public function cashier_man(Request $request, $id){
         // /admin/cashier_man/item/{id}
         $cashier_man = $this->cashier_men
-        ->with('branch', 'roles')
+        ->with('roles')
         ->where('id', $id)
         ->first();
 
@@ -134,6 +137,7 @@ class CashierManController extends Controller
         }
         $cashierRequest = $request->validated(); 
         $cashierRequest['password'] = $request->password;
+        $cashierRequest['branch_id'] = $request->user()->id;
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/cashier/image');
             $cashierRequest['image'] = $imag_path;
@@ -176,6 +180,7 @@ class CashierManController extends Controller
         }
         $cashier_men = $this->cashier_men
         ->where('id', $id)
+        ->where('branch_id', $request->user()->id)
         ->first();
         if (empty($cashier_men)) {
             return response()->json([
@@ -212,6 +217,7 @@ class CashierManController extends Controller
         // admin/cashier_man/delete/{id}   
         $cashier = $this->cashier_men
         ->where('id', $id)
+        ->where('branch_id', $request->user()->id)
         ->first();
         if (empty($cashier)) {
             return response()->json([

@@ -19,6 +19,7 @@ use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 // ____________________________________________________
 
+use App\Events\PrintOrder;
 
 use App\Models\Order;
 use App\Models\UserDue;
@@ -392,6 +393,7 @@ class CashierMakeOrderController extends Controller
                 "errors" => $errors['msg']
             ], 400);
         }
+        event(new PrintOrder($order['order']));
         // _________________________________
         return response()->json([
             'success' => $order['order'],

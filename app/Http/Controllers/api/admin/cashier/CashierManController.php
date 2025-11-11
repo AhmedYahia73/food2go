@@ -132,13 +132,15 @@ class CashierManController extends Controller
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],
             'password' => ['required'],
+            'branch_id' => ['exists:branches,id'],
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validation->errors(),
             ],400);
         }
-        $cashierRequest = $request->validated(); 
+        $cashierRequest = $request->validated();
+        $cashierRequest['branch_id'] = $request->branch_id; 
         $cashierRequest['password'] = $request->password;
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/cashier/image');
@@ -169,6 +171,7 @@ class CashierManController extends Controller
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],
             'password' => ['nullable', 'min:8'],
+            'branch_id' => ['exists:branches,id'],
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -176,6 +179,7 @@ class CashierManController extends Controller
             ],400);
         }
         $cashierRequest = $request->validated();
+        $cashierRequest['branch_id'] = $request->branch_id; 
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'admin/cashier/image');
             $cashierRequest['image'] = $imag_path;
