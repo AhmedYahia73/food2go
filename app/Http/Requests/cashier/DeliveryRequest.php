@@ -49,6 +49,7 @@ class DeliveryRequest extends FormRequest
             'user_id' => 'required|exists:users,id',
             'address_id' => 'required|exists:addresses,id',
             'user_id' => ['exists:users,id'],
+            'dicount_id' => ['exists:discounts,id'],
         ];
     }
 

@@ -23,6 +23,7 @@ class CashierMan extends Model
         'password',
         'status',
         'void_order',
+        'discount_perimission',
         'fcm_token',
         'cashier_id',
     ];

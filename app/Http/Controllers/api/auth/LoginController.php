@@ -332,7 +332,7 @@ class LoginController extends Controller
         // user_name, password
         // shift_number => sometimes
         $validation = Validator::make($request->all(), [
-            'user_name' => 'required', 
+            'my_id' => 'required', 
             'password' => 'required',
             "cashier_id" => "exists:cashiers,id",
             // 'fcm_token' => 'required',
@@ -346,7 +346,7 @@ class LoginController extends Controller
         ->where('status', 1)
         ->get(); 
         $user = $this->cashier
-        ->where('user_name', $request->user_name)
+        ->where('my_id', $request->my_id)
         ->with('branch')
         ->first();
         if (empty($user)) {

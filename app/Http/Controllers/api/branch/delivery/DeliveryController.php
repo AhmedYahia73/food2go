@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\admin\delivery;
+namespace App\Http\Controllers\api\branch\delivery;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -11,13 +11,12 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Delivery;
-use App\Models\Branch;
 use App\Models\PersonalAccessToken;
 use App\Models\Order;
 
 class DeliveryController extends Controller
 {
-    public function __construct(private Delivery $deliveries, private Branch $branches,
+    public function __construct(private Delivery $deliveries,
     private Order $orders){}
     protected $deliveryRequest = [
         'f_name',
@@ -26,7 +25,6 @@ class DeliveryController extends Controller
         'identity_number',
         'email',
         'phone',
-        'branch_id',
         'status',
         'phone_status',
         'chat_status',
@@ -36,19 +34,17 @@ class DeliveryController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/delivery
         $deliveries = $this->deliveries
+        ->where('branch_id', $request->user()->id)
         ->get();
-        $branches = $this->branches->get();
 
         return response()->json([
             'deliveries' => $deliveries,
-            'branches' => $branches,
         ]);
     }
 
     public function delivery($id){
         // https://bcknd.food2go.online/admin/delivery/item/{id}
         $delivery = $this->deliveries
-        ->with('branch')
         ->where('id', $id)
         ->first(); 
 
@@ -62,9 +58,8 @@ class DeliveryController extends Controller
         $orders = $this->orders
         ->where('delivery_id', $id)
         ->whereIn('order_status', ['confirmed', 'delivered', 'returned', 'faild_to_deliver', 'canceled'])
-        ->with(['address.zone' => function($query){
-            $query->with(['city', 'branch']);
-        }])
+        ->with(['address.zone.city'])
+        ->where('branch_id', $request->user()->id)
         ->get();
 
         return response()->json([
@@ -87,6 +82,7 @@ class DeliveryController extends Controller
         }
         $orders = $this->orders
         ->where('delivery_id', $id)
+        ->where('branch_id', $request->user()->id)
         ->whereIn('order_status', ['confirmed', 'delivered', 'returned', 'faild_to_deliver', 'canceled'])
         ->where('updated_at', '>=', $request->from)
         ->where('updated_at', '<=', $request->to)
@@ -114,6 +110,7 @@ class DeliveryController extends Controller
         }
 
         $this->deliveries->where('id', $id)
+        ->where('branch_id', $request->user()->id)
         ->update([
             'status' => $request->status
         ]);
@@ -134,16 +131,9 @@ class DeliveryController extends Controller
         // Keys
         // f_name, l_name, identity_type, identity_number, email, phone
         // password, branch_id, status, image, identity_image
-        $validator = Validator::make($request->all(), [
-            'branch_id' => ['nullable', 'exists:branches,id'],
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
         $deliveryRequest = $request->only($this->deliveryRequest);
         $deliveryRequest['password'] = $request->password;
+        $deliveryRequest['branch_id'] = $request->user()->id;
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/delivery/image');
             $deliveryRequest['image'] = $imag_path;
@@ -164,18 +154,16 @@ class DeliveryController extends Controller
         // Keys
         // f_name, l_name, identity_type, identity_number, email, phone
         // password, branch_id, status, image, identity_image
-        $validator = Validator::make($request->all(), [
-            'branch_id' => ['nullable', 'exists:branches,id'],
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
         $deliveryRequest = $request->only($this->deliveryRequest);
         $delivery = $this->deliveries
         ->where('id', $id)
+        ->where('branch_id', $request->user()->id)
         ->first();
+        if(!$delivery){
+            return response()->json([
+                'errors' => "id is wrong"
+            ], 400); 
+        }
         if (is_file($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/delivery/image');
             $deliveryRequest['image'] = $imag_path;
@@ -204,7 +192,13 @@ class DeliveryController extends Controller
         // https://bcknd.food2go.online/admin/delivery/delete/{id}
         $delivery = $this->deliveries
         ->where('id', $id)
+        ->where('branch_id', $request->user()->id)
         ->first();
+        if(!$delivery){
+            return response()->json([
+                'errors' => "id is wrong"
+            ], 400); 
+        }
         $this->deleteImage($delivery->image);
         $this->deleteImage($delivery->identity_image);
         $delivery->delete();

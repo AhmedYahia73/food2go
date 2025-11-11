@@ -43,6 +43,7 @@ trait POS
         'balance',
         'user_id',
         'due',
+        'dicount_id',
     ];
 
     public function take_away_make_order($request, $paymob = 0){

@@ -37,6 +37,7 @@ class DineinSplitRequest extends FormRequest
             'financials.*.transition_id' => ['sometimes'], 
             'table_id' => ['required', 'exists:cafe_tables,id'],
             'cashier_id' => ['sometimes', 'exists:cashiers,id'], 
+            'dicount_id' => ['exists:discounts,id'],
         ];
     }
 

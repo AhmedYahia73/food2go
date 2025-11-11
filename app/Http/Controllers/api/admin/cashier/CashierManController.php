@@ -46,6 +46,7 @@ class CashierManController extends Controller
                 'status' => $item->status,
                 'cashier' => $item->cashier,
                 'login' => $item->tokens()->exists(),
+                'discount_perimission' => $item->discount_perimission,
             ];
         });
         $branches = $this->branch
@@ -126,7 +127,7 @@ class CashierManController extends Controller
         // admin/cashier_man/add
         // Keys
         // user_name, password, branch_id, status, my_id
-        // take_away, dine_in, delivery, car_slow, image,
+        // take_away, dine_in, delivery, car_slow, image, dicount_id
         // roles[]
         $validation = Validator::make($request->all(), [
             'roles.*' => ['in:branch_reports,all_reports,table_status'],

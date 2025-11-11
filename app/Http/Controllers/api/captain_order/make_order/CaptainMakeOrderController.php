@@ -30,7 +30,8 @@ use App\Models\CafeTable;
 use App\Models\OrderCart;
 use App\Models\Zone;
 use App\Models\CheckoutRequest;
-use App\Models\FinantiolAcounting; 
+use App\Models\FinantiolAcounting;
+use App\Models\Discount;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -46,7 +47,7 @@ class CaptainMakeOrderController extends Controller
     private Category $category, private BranchOff $branch_off, 
     private CafeLocation $cafe_location, private CafeTable $cafe_table,
     private OrderCart $order_cart, private Zone $zone,
-    private FinantiolAcounting $financial_account,
+    private FinantiolAcounting $financial_account, private Discount $discount,
     private CheckoutRequest $checkout_request_query){}
     use image;
     use PlaceOrder;
@@ -851,6 +852,16 @@ class CaptainMakeOrderController extends Controller
         $favourite_products = ProductResource::collection($favourite_products_count); 
         $favourite_products_weight = ProductResource::collection($favourite_products_weight); 
         $products_weight = ProductResource::collection($products_weight); 
+        $discounts = $this->discount
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "type" => $item->type,
+                "amount" => $item->amount,
+            ];
+        });
 
         return response()->json([
             'categories' => $categories,
@@ -858,7 +869,8 @@ class CaptainMakeOrderController extends Controller
             'products_weight' => $products_weight, 
             'favourite_products' => $favourite_products, 
             'favourite_products_weight' => $favourite_products_weight, 
-            'cafe_location' => $cafe_location, 
+            'cafe_location' => $cafe_location,
+            'discounts' => $discounts,
         ]);
     }
 

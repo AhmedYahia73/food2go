@@ -47,7 +47,6 @@ use App\Models\CashierBalance;
 use App\Models\CashierMan;
 use App\Models\Delivery;
 use App\Models\DiscountModule;
-use App\Models\Discount;
 use App\Models\CheckoutRequest;// dicount_id
 use App\Models\FinantiolAcounting;
 
@@ -71,29 +70,12 @@ class CashierMakeOrderController extends Controller
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CashierMan $cashier_man, private UserDue $user_due,
     private DiscountModule $discount_module, private FinantiolAcounting $financial_account,
-    private CheckoutRequest $checkout_request_query, private Discount $discount){}
+    private CheckoutRequest $checkout_request_query){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
     use POS;
-    use Recipe;
-
-    public function lists(){
-        $discounts = $this->discount
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "name" => $item->name,
-                "type" => $item->type,
-                "amount" => $item->amount,
-            ];
-        });
-
-        return response()->json([
-            'discounts' => $discounts
-        ]);
-    }
+    use Recipe; 
 
     public function list_due_users(Request $request){
         $users =$this->user
@@ -341,6 +323,19 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
         ]); 
+        if($request->dicount_id){
+            if(!$request->user()->discount_perimission){
+                return response()->json([
+                    'errors' => "You don't have perimission to make discount"
+                ], 400);
+            }
+            if (!$request->password || 
+            !password_verify($request->input('password'), $request->user()->password)) {
+                return response()->json([
+                    'errors' => 'Password is wrong'
+                ], 400);
+            }
+        }
         if($request->due){
             if(!$request->user_id){
                 return response()->json([
@@ -545,6 +540,19 @@ class CashierMakeOrderController extends Controller
             return response()->json([
                 "errors" => "user_id is required"
             ], 400); 
+        }
+        if($request->dicount_id){
+            if(!$request->user()->discount_perimission){
+                return response()->json([
+                    'errors' => "You don't have perimission to make discount"
+                ], 400);
+            }
+            if (!$request->password || 
+            !password_verify($request->input('password'), $request->user()->password)) {
+                return response()->json([
+                    'errors' => 'Password is wrong'
+                ], 400);
+            }
         }
         if($request->due){
             $user = $this->user
@@ -765,6 +773,19 @@ class CashierMakeOrderController extends Controller
                 'errors' => $errors,
             ], 400);
         }
+        if($request->dicount_id){
+            if(!$request->user()->discount_perimission){
+                return response()->json([
+                    'errors' => "You don't have perimission to make discount"
+                ], 400);
+            }
+            if (!$request->password || 
+            !password_verify($request->input('password'), $request->user()->password)) {
+                return response()->json([
+                    'errors' => 'Password is wrong'
+                ], 400);
+            }
+        }
         $tables_ids = $this->cafe_table
         ->where('id', $request->table_id)
         ->orWhere('main_table_id', $request->table_id)
@@ -864,6 +885,19 @@ class CashierMakeOrderController extends Controller
             return response()->json([
                 'errors' => $errors,
             ], 400);
+        }
+        if($request->dicount_id){
+            if(!$request->user()->discount_perimission){
+                return response()->json([
+                    'errors' => "You don't have perimission to make discount"
+                ], 400);
+            }
+            if (!$request->password || 
+            !password_verify($request->input('password'), $request->user()->password)) {
+                return response()->json([
+                    'errors' => 'Password is wrong'
+                ], 400);
+            }
         }
         $order_carts = $this->order_cart
         ->whereIn('id', $request->cart_id)

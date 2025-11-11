@@ -32,7 +32,6 @@ class UpdateDeliveryRequest extends FormRequest
             'identity_number' => ['required'],
             'email' => ['email', 'required', Rule::unique('deliveries')->ignore($userId)],
             'phone' => ['required', Rule::unique('deliveries')->ignore($userId)],
-            'branch_id' => ['nullable', 'exists:branches,id'],
             'phone_status' => ['required', 'boolean'],
             'chat_status' => ['required', 'boolean'],
         ];

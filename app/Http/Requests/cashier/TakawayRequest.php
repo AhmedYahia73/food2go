@@ -47,6 +47,7 @@ class TakawayRequest extends FormRequest
             'cashier_id' => ['required_if:order_pending,false', 'exists:cashiers,id'],
             'due' => ['required_if:order_pending,false', 'boolean'],
             'user_id' => ['exists:users,id'],
+            'dicount_id' => ['exists:discounts,id'],
         ];
     }
 

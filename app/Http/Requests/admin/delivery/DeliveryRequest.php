@@ -31,7 +31,6 @@ class DeliveryRequest extends FormRequest
             'email' => ['required', 'email', 'unique:deliveries'],
             'phone' => ['required', 'unique:deliveries'],
             'password' => ['required'],
-            'branch_id' => ['nullable', 'exists:branches,id'],
             'phone_status' => ['required', 'boolean'],
             'chat_status' => ['required', 'boolean'],
         ];
