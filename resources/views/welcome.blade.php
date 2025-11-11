@@ -1,23 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Socket</title>
-    @vite('resources/js/app.js') {{-- مهم جداً يكون فوق أي كود JS --}}
-</head>
-<body>
-    @vite('resources/js/app.js')
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@latest/dist/echo.iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pusher-js@latest/dist/web/pusher.min.js"></script>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        window.Echo.channel('new_order')
-        .listen('OrderEvent', (e) => {
-            console.log(e);
-        });
-    });
-    </script>
-</body>
+<script>
+const echo = new Echo({
+    broadcaster: 'reverb',
+    key: 'app-key', // نفس الموجود في .env
+    wsHost: window.location.hostname,
+    wsPort: 6001,
+    forceTLS: false,
+    disableStats: true,
+});
 
-  
-</html>
+echo.channel('print_order').listen('.print_order.printed', (data) => {
+    console.log("Received:", data);
+});
+</script>
