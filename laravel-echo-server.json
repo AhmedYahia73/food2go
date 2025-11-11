@@ -1,0 +1,40 @@
+{
+    "authHost": "https://bcknd.food2go.online",
+    "authEndpoint": "/broadcasting/auth",
+    "clients": [
+        {
+            "appId": "3410f9bf8d5dbea4",
+            "key": "1cb2acd36572e1bd81e661804d045f89"
+        }
+    ],
+    "database": "redis",
+    "databaseConfig": {
+        "redis": {
+            "host": "127.0.0.1",
+            "port": "6379"
+        },
+        "sqlite": {
+            "databasePath": "/database/laravel-echo-server.sqlite"
+        }
+    },
+    "devMode": false,
+    "host": null,
+    "port": "6001",
+    "protocol": "https",
+    "socketio": {},
+    "secureOptions": 67108864,
+    "sslCertPath": "/usr/local/psa/var/modules/letsencrypt/etc/live/bcknd.food2go.online/fullchain.pem",
+    "sslKeyPath": "/usr/local/psa/var/modules/letsencrypt/etc/live/bcknd.food2go.online/privkey.pem",
+    "sslCertChainPath": "",
+    "sslPassphrase": "",
+    "subscribers": {
+        "http": true,
+        "redis": true
+    },
+    "apiOriginAllow": {
+        "allowCors": true,
+        "allowOrigin": "*",
+        "allowMethods": "GET, POST, PUT, DELETE, OPTIONS",
+        "allowHeaders": "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
+    }
+}

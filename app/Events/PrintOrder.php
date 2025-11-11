@@ -26,6 +26,6 @@ class PrintOrder
 
     public function broadcastAs()
     {
-        return 'print_order.printed';
+        return 'printed';
     }
 }
