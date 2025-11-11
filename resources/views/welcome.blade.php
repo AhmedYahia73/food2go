@@ -15,10 +15,15 @@
 <script>
 const echo = new Echo({
     broadcaster: 'pusher',
-    key: 'foo2go123', // نفس المفتاح في .env
-    wsHost: window.location.hostname,
+    key: 'foo2go123',
+    // **غيّر هذا ليكون النطاق/الـ IP حيث يعمل Reverb**
+    wsHost: 'bcknd.food2go.online', 
+    // إذا كنت تستخدم HTTPS/WSS، استخدم 443 أو المنفذ الخاص بك
     wsPort: 443,
-    forceTLS: false,
+    // يجب أن تكون 'true' إذا كنت تتصل بـ WSS
+    forceTLS: true, 
+    // المنفذ البديل لـ WSS إذا كان المنفذ 443 لا يعمل بشكل صحيح
+    // wssPort: 443, 
     disableStats: true,
     enabledTransports: ['ws', 'wss'],
 });
