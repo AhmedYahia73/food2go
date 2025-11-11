@@ -919,10 +919,16 @@ class CaptainMakeOrderController extends Controller
                 return $element; 
             });
             return $item;
-        }); 
+        });
+        $financial_account = $this->financial_account
+        ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
+        ->whereHas('branch')
+        ->where('status', 1)
+        ->get(); 
 
         return response()->json([
-            'cafe_location' => $cafe_location, 
+            'cafe_location' => $cafe_location,
+            'financial_account' => $financial_account,
         ]);
     }
 
