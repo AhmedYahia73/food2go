@@ -4,7 +4,7 @@
 <script>
 const echo = new Echo({
     broadcaster: 'reverb',
-    key: 'app-key', // نفس الموجود في .env
+    key: foo2go123, // نفس الموجود في .env
     wsHost: window.location.hostname,
     wsPort: 6001,
     forceTLS: false,
