@@ -7,22 +7,17 @@
     @vite('resources/js/app.js') {{-- مهم جداً يكون فوق أي كود JS --}}
 </head>
 <body>
-   
+    @vite('resources/js/app.js')
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        window.Echo.channel('new_order')
+        .listen('OrderEvent', (e) => {
+            console.log(e);
+        });
+    });
+    </script>
 </body>
 
-<script>
-    const listenOrder = () => {
-        if (window.Echo) {
-            window.Echo.channel('new_order')
-                .listen('OrderEvent', (e) => {
-                    console.log("📦 New Order Received:", e);
-                });
-        } else {
-            console.log('⏳ Waiting for Echo to load...');
-            setTimeout(listenOrder, 500); // إعادة التجربة بعد نصف ثانية
-        }
-    };
-
-    listenOrder();
-</script>
+  
 </html>

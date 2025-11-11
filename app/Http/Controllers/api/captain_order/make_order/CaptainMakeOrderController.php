@@ -711,7 +711,7 @@ class CaptainMakeOrderController extends Controller
             }]);
         }, 'sales_count', 'tax'])
         ->withLocale($locale)
-        ->where('item_type', '!=', 'offline') 
+        ->where('item_type', '!=', 'online') 
         ->where('status', 1)
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
