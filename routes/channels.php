@@ -13,3 +13,7 @@ Broadcast::channel('chatChannel', function ($chat) {
 Broadcast::channel('new_order', function ($user) {
     return true;
 });
+
+Broadcast::channel('print_order', function ($user) {
+    return true;
+});
