@@ -17,7 +17,7 @@ const echo = new Echo({
     broadcaster: 'pusher',
     key: 'foo2go123', // نفس المفتاح في .env
     wsHost: window.location.hostname,
-    wsPort: 6001,
+    wsPort: 443,
     forceTLS: false,
     disableStats: true,
     enabledTransports: ['ws', 'wss'],
