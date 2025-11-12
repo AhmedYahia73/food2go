@@ -188,9 +188,8 @@ class KitchenConroller extends Controller
         // name, password, branch_id, status, type[kitchen, brista]
         // print_status, print_name, print_ip
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'password' => 'required',
-            'branch_id' => 'required|exists:branches,id',
+            'name' => 'required|unique:kitchens',
+            'password' => 'required', 
             'print_status' => 'required|boolean',
             'print_name' => 'sometimes',
             'print_ip' => 'sometimes',
@@ -218,7 +217,7 @@ class KitchenConroller extends Controller
         // Keys
         // name, password, branch_id, status
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => "required|unique:kitchens,name,$id",
             'print_status' => 'required|boolean',
             'print_name' => 'sometimes',
             'print_ip' => 'sometimes',
