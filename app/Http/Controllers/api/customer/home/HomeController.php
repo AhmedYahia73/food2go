@@ -389,7 +389,7 @@ class HomeController extends Controller
                 $discount = $price;
                 $addon_arr = [
                     'id' => $item->id,
-                    'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
+                    'name' => $item->name,
                     'price' => $price,
                     'price_after_tax' => $tax,
                     'price_after_discount' => $discount,
@@ -421,7 +421,7 @@ class HomeController extends Controller
                 }
                 $addon_arr = [
                     'id' => $item->id,
-                    'name' => $item->translations->where('key', $item->name)->first()?->value ?? $item->name,
+                    'name' => $item->name,
                     'price' => $price,
                     'price_after_tax' => $tax,
                     'discount_val' => 0,
