@@ -45,6 +45,7 @@ class CreateProductController extends Controller
         'unit_id',
         'weight_point',
         'weight_status',
+        'recipe',
     ];
     use image;
     use translaion;

@@ -12,14 +12,17 @@ use App\trait\image;
 use App\Models\CompanyInfo;
 use App\Models\Maintenance;
 use App\Models\Currency;
+use App\Models\Setting;
 use Carbon\Carbon;
 
 class CompanyController extends Controller
 {
     public function __construct(private CompanyInfo $company_info, 
-    private Currency $currency, private Maintenance $maintenance){}
+    private Currency $currency, private Maintenance $maintenance, 
+    private Setting $settings){}
     use image;
-    
+     
+  
     public function view(){
         // https://bcknd.food2go.online/admin/settings/business_setup/company
         $company_info = $this->company_info
@@ -30,12 +33,21 @@ class CompanyController extends Controller
         ->get();
         $maintenance = $this->maintenance
         ->orderByDesc('id')
-        ->first();
+        ->first(); 
+        $website = $this->settings
+        ->where("name", "web_site")
+        ->first()?->setting;
+        $qr_code = $this->settings
+        ->where("name", "web_site_qr")
+        ->first()?->setting;
+        $qr_code = url('storage/' . $qr_code);
 
         return response()->json([
             'company_info' => $company_info,
             'currency' => $currency,
             'maintenance' => $maintenance,
+            'website' => $website,
+            'qr_code' => $qr_code,
         ]);
     }
 
@@ -138,6 +150,50 @@ class CompanyController extends Controller
             }
         }
 
+        // __________________________
+         
+        $web_site = $request->web_site;
+        if (substr($web_site, 0, 8) !== 'https://') {
+            $web_site = 'https://' . ltrim($web_site, '/'); // نتأكد مفيش // في الأول
+        }
+        $website = $this->settings
+        ->where("name", "web_site")
+        ->first();
+        $qr_code = $this->settings
+        ->where("name", "web_site_qr")
+        ->first();
+        if($website){
+            $website
+            ->update([
+                "setting" => $web_site
+            ]);
+        }
+        else{
+            $this->settings
+            ->create([
+                'name' => "web_site",
+                "setting" => $web_site
+            ]);
+        }
+        $qrImage = QrCode::format('png')->size(300)->generate($web_site);
+        $fileName = 'admin/website/qr/'. time() . rand(0, 10000) .'.png';
+        Storage::disk('public')->put($fileName, $qrImage);
+
+        if($qr_code){
+
+            $this->deleteImage($qr_code->setting);
+            $qr_code
+            ->update([
+                "setting" => $fileName
+            ]);
+        }
+        else{
+            $this->settings
+            ->create([
+                'name' => "web_site_qr",
+                "setting" => $fileName
+            ]);
+        }
         return response()->json([
             'company_info' => $company_info,
             'maintenance' => $maintenance,
