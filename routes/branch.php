@@ -11,7 +11,8 @@ use App\Http\Controllers\api\cashier\address\AddressController;
 use App\Http\Controllers\api\cashier\customer\CustomerController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
-use App\Http\Controllers\api\admin\cashier\CashierController;
+use App\Http\Controllers\api\branch\cashier\CashierController;
+ 
 use App\Http\Controllers\api\admin\cashier\CashierManController;
 
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){

@@ -467,7 +467,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(CashierManController::class) 
     ->prefix('cashier_man')->group(function(){
         Route::get('/', 'view')->middleware('can:view_cashier_man');
-        Route::get('/logout/{id}', 'logout_cashier');
+        Route::put('/logout/{id}', 'logout_cashier');
         Route::get('/item/{id}', 'cashier_man')->middleware('can:edit_cashier_man');
         Route::put('/status/{id}', 'status')->middleware('can:edit_cashier_man');
         Route::post('/add', 'create')->middleware('can:add_cashier_man');
