@@ -31,7 +31,7 @@ class DeliveryController extends Controller
     ];
     use image;
 
-    public function view(){
+    public function view(Request $request){
         // https://bcknd.food2go.online/admin/delivery
         $deliveries = $this->deliveries
         ->where('branch_id', $request->user()->id)
@@ -53,7 +53,7 @@ class DeliveryController extends Controller
         ]);
     }
 
-    public function history($id){
+    public function history(Request $request, $id){
         // https://bcknd.food2go.online/admin/delivery/history/{id}
         $orders = $this->orders
         ->where('delivery_id', $id)
