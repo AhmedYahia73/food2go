@@ -34,6 +34,7 @@ class CasheirManRequest extends FormRequest
             'my_id' => ['required'],
             'discount_perimission' => ['required', 'boolean'],
             'online_order' => ['required', 'boolean'],
+            'void_order' => ['required', 'boolean'],
         ];
     }
 
