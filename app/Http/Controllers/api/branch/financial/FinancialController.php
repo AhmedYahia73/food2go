@@ -19,6 +19,8 @@ class FinancialController extends Controller
     public function view(Request $request){
         // /admin/financial
         $financial = $this->financial
+        ->select('id', 'name', 'description_status', 'details', 
+        'status', 'logo', 'discount')
         ->whereHas('branch', function($query) use($request){
             $query->where('branches.id', $request->user()->id);
         })
