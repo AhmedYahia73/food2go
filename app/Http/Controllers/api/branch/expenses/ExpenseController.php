@@ -17,7 +17,7 @@ use App\Models\FinantiolAcounting;
 class ExpenseController extends Controller
 {
     public function __construct(private Expense $expenses
-    , private ExpenseList $expenses_list ,private Branch $branches
+    , private ExpenseList $expenses_list 
     , private Cashier $cashiers ,private CashierMan $cashier_man
     , private FinantiolAcounting $financial ,private ExpenseCategory $category){}
 
@@ -26,6 +26,7 @@ class ExpenseController extends Controller
         ->with(["expense:id,name", "admin:id,name"
         , "cashier:id,name", "cahier_man:id,user_name",
         "financial_account:id,name", "category:id,name"])
+        ->where('branch_id', $request->user()->id)
         ->get()
         ->map(function($item){
             return [
@@ -33,8 +34,7 @@ class ExpenseController extends Controller
                 "amount" => $item->amount,
                 "note" => $item->note,
                 "expense" => $item->expense,
-                "admin" => $item->admin,
-                "branch" => $item->branch,
+                "admin" => $item->admin, 
                 "cashier" => $item->cashier,
                 "cahier_man" => $item->cahier_man,
                 "financial_account" => $item->financial_account,
@@ -142,8 +142,9 @@ class ExpenseController extends Controller
         }
         $expenses_lists = $expenses
         ->with(["expense:id,name", "admin:id,name"
-        ,"branch:id,name", "cashier:id,name", "cahier_man:id,user_name",
+        , "cashier:id,name", "cahier_man:id,user_name",
         "financial_account:id,name", "category:id,name"])
+        ->where('branch_id', $request->user()->id)
         ->get()
         ->map(function($item){
             return [
@@ -151,8 +152,7 @@ class ExpenseController extends Controller
                 "amount" => $item->amount,
                 "note" => $item->note,
                 "expense" => $item->expense,
-                "admin" => $item->admin,
-                "branch" => $item->branch,
+                "admin" => $item->admin, 
                 "cashier" => $item->cashier,
                 "cahier_man" => $item->cahier_man,
                 "financial_account" => $item->financial_account,
