@@ -12,8 +12,12 @@ use App\Http\Controllers\api\cashier\customer\CustomerController;
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
 use App\Http\Controllers\api\branch\cashier\CashierController;
- 
-use App\Http\Controllers\api\admin\cashier\CashierManController;
+use App\Http\Controllers\api\branch\cashier\CashierManController;
+use App\Http\Controllers\api\branch\delivery\DeliveryController;
+use App\Http\Controllers\api\branch\expenses\ExpenseController;
+use App\Http\Controllers\api\branch\financial\FinancialController;
+use App\Http\Controllers\api\branch\kitchen\KitchenConroller;
+use App\Http\Controllers\api\branch\profile\ProfileController;
 
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     // 
@@ -25,15 +29,66 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::put('/update/{id}', 'modify'); 
         Route::delete('/delete/{id}', 'delete'); 
     });
-    Route::controller(CashierManController::class)->prefix('cashier_man')->group(function(){
-        Route::get('/', 'view'); 
-        Route::put('/status/{id}', 'status'); 
-        Route::get('/item/{id}', 'cashier'); 
-        Route::post('/add', 'create'); 
-        Route::put('/update/{id}', 'modify'); 
-        Route::delete('/delete/{id}', 'delete'); 
+
+    Route::controller(CashierManController::class) 
+    ->prefix('cashier_man')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/logout/{id}', 'logout_cashier');
+        Route::get('/item/{id}', 'cashier_man');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
     
+    Route::controller(DeliveryController::class) 
+    ->prefix('delivery')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'delivery');
+        Route::get('/history', 'history');
+        Route::post('/filter_history', 'filter_history');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(ExpenseController::class) 
+    ->prefix('expense')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');
+        Route::post('/add', 'create');
+        Route::post('/expenses_report', 'expenses_report');
+    });
+    
+    Route::controller(FinancialController::class) 
+    ->prefix('financial')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/status/{id}', 'status');
+        Route::get('/item/{id}', 'financial');
+        Route::post('/add', 'create');
+        Route::delete('/delete/{id}', 'delete');
+    });
+    
+    Route::controller(KitchenConroller::class) 
+    ->group(function(){
+        Route::get('/kitchen', 'view');
+        Route::get('/brista', 'brista');
+        Route::get('/kitchen/lists', 'lists');
+        Route::post('/kitchen/select_product', 'select_product');
+        Route::get('/kitchen/item/{id}', 'kitchen');
+        Route::put('/kitchen/status/{id}', 'status');
+        Route::post('/kitchen/add', 'create');
+        Route::post('/kitchen/update/{id}', 'modify');
+        Route::delete('/kitchen/delete/{id}', 'delete');
+    });
+    
+    Route::controller(ProfileController::class) 
+    ->prefix('profile')->group(function(){
+        Route::get('/', 'profile');
+        Route::post('/update', 'update');
+    });
+    //_______________________________________________________________________________
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::get('/orders_count', 'home_orders_count');
         Route::get('/', 'home');
