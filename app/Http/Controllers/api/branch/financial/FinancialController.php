@@ -59,7 +59,9 @@ class FinancialController extends Controller
     
     public function financial(Request $request, $id){
         // /admin/financial/item/{id}
-        $financial = $this->financial 
+        $financial = $this->financial
+        ->select('id', 'name', 'description_status', 'details', 
+        'status', 'logo', 'discount') 
         ->where('id', $id)
         ->whereHas('branch', function($query) use($request){
             $query->where('branches.id', $request->user()->id);
