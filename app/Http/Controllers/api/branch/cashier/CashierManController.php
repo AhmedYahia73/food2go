@@ -46,6 +46,7 @@ class CashierManController extends Controller
                 'cashier' => $item->cashier,
                 'login' => $item->tokens()->exists(),
                 'discount_perimission' => $item->discount_perimission,
+                'online_order' => $item->online_order,
             ];
         });
         $roles = [
