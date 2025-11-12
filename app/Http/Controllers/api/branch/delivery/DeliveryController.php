@@ -188,7 +188,7 @@ class DeliveryController extends Controller
         ]);
     }
 
-    public function delete($id){
+    public function delete(Request $request, $id){
         // https://bcknd.food2go.online/admin/delivery/delete/{id}
         $delivery = $this->deliveries
         ->where('id', $id)
