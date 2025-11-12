@@ -73,7 +73,7 @@ class FinancialController extends Controller
         ]);
     }
 
-    public function create(FinancialRequest $request){
+    public function create(Request $request){
         // admin/financial/add
         // Keys
         // name, details, balance, status, logo, branch_id
