@@ -7,6 +7,8 @@ use App\Http\Requests\admin\settings\bussiness_setup\CompanyRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage;
 use App\trait\image;
 
 use App\Models\CompanyInfo;
