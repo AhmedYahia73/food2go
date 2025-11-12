@@ -381,6 +381,7 @@ class HomeController extends Controller
 		->map(function($item){
             $locale = app()->getLocale(); // Use the application's current locale
             $item = (object) $item;
+            return $item;
             if (isset($item->taxes) && $item?->taxes?->setting && $item?->taxes?->setting == 'included') {
                 $price =  empty($item->tax) ? $item->price: 
                 ($item->tax->type == 'value' ? $item->price + $item->tax->amount : $item->price + $item->tax->amount * $item->price / 100);
