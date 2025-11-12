@@ -76,7 +76,7 @@ class KitchenConroller extends Controller
         });
 
         return response()->json([
-            'categories' => $category
+            'categories' => $categories
         ]);
     }
     
