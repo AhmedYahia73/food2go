@@ -80,10 +80,9 @@ class KitchenConroller extends Controller
         ]);
     }
     
-    public function lists(){
+    public function lists(Request $request){
         // /admin/pos/kitchens/lists
         $data = $this->kitchen
-        ->with('products')
         ->where('branch_id', $request->user()->id)
         ->where('status', 1)
         ->get();
@@ -94,11 +93,24 @@ class KitchenConroller extends Controller
         ->where('type', 'brista')
         ->values();
         $products = $this->products
-        ->whereNull('kitchen_id')
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'image' => $item->image_link,
+            ];
+        });
         $category = $this->category
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'image' => $item->image_link,
+            ];
+        });
 
         return response()->json([
             'kitchens' => $kitchens,
@@ -135,7 +147,7 @@ class KitchenConroller extends Controller
         ]);
     }
 
-    public function kitchen($id){
+    public function kitchen(Request $request, $id){
         // /admin/pos/kitchens/item/{id}
         $kitchen = $this->kitchen
         ->with('products')
@@ -233,7 +245,7 @@ class KitchenConroller extends Controller
         ]);
     }
 
-    public function delete($id){
+    public function delete(Request $request, $id){
         // /admin/pos/kitchens/delete/{id}
         $this->kitchen
         ->where('id', $id)
