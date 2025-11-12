@@ -25,8 +25,7 @@ class ProfileController extends Controller
     public function update(Request $request){
         $validator = Validator::make($request->all(), [
             'user_name' => 'sometimes',
-            'password' => 'sometimes',
-            'status' => 'sometimes|boolean',
+            'password' => 'sometimes', 
             'image' => 'sometimes',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -37,8 +36,7 @@ class ProfileController extends Controller
 
         $user = $request->user();
         $user->user_name = $request->user_name ?? $user->user_name;
-        $user->password = $request->password ? bcrypt($request->password) : $user->password;
-        $user->status = $request->status ?? $user->status;
+        $user->password = $request->password ? bcrypt($request->password) : $user->password; 
         if($request->image){
             $imag_path = $this->upload($request, 'image', 'cashier/profile_image');
             $user->image = $imag_path;
