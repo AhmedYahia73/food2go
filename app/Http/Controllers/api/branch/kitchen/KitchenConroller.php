@@ -46,7 +46,14 @@ class KitchenConroller extends Controller
         ->whereHas('kitchen', fn($query) => $query
             ->where('kitchens.id', $id)
         )
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'image' => $item->image_link,
+            ];
+        });
 
         return response()->json([
             'products' => $products
@@ -59,7 +66,14 @@ class KitchenConroller extends Controller
         ->whereHas('kitchen', fn($query) => $query
             ->where('kitchens.id', $id)
         )
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'image' => $item->image_link,
+            ];
+        });
 
         return response()->json([
             'categories' => $category
