@@ -20,7 +20,6 @@ class KitchenConroller extends Controller
         // /admin/pos/kitchens 
         $kitchens = $this->kitchen
         ->where('branch_id', $request->user()->id)
-        ->with('branch', 'products', 'category')
         ->where('type', 'kitchen')
         ->get(); 
 
@@ -33,12 +32,37 @@ class KitchenConroller extends Controller
         // /admin/pos/kitchens/brista 
         $brista = $this->kitchen
         ->where('branch_id', $request->user()->id)
-        ->with('branch', 'products', 'category')
         ->where('type', 'brista')
         ->get(); 
 
         return response()->json([
             'brista' => $brista, 
+        ]);
+    }
+
+    public function products_in_kitchen(Request $request, $id){
+        $products = $this->products
+        ->select('name', 'id', 'image')
+        ->whereHas('kitchen', fn($query) => $query
+            ->where('kitchens.id', $id)
+        )
+        ->get();
+
+        return response()->json([
+            'products' => $products
+        ]);
+    }
+
+    public function categories_in_kitchen(Request $request, $id){
+        $categories = $this->category
+        ->select('name', 'id', 'image')
+        ->whereHas('kitchen', fn($query) => $query
+            ->where('kitchens.id', $id)
+        )
+        ->get();
+
+        return response()->json([
+            'categories' => $category
         ]);
     }
     

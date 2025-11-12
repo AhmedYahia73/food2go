@@ -53,6 +53,21 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::delete('/delete/{id}', 'delete');
     });
     
+    Route::controller(KitchenConroller::class) 
+    ->group(function(){
+        Route::get('/kitchen', 'view');
+        Route::get('/brista', 'brista');
+        Route::get('/kitchen/products_in_kitchen/{id}', 'products_in_kitchen');
+        Route::get('/kitchen/categories_in_kitchen/{id}', 'categories_in_kitchen');
+        Route::get('/kitchen/lists', 'lists');
+        Route::post('/kitchen/select_product', 'select_product');
+        Route::get('/kitchen/item/{id}', 'kitchen');
+        Route::put('/kitchen/status/{id}', 'status');
+        Route::post('/kitchen/add', 'create');
+        Route::post('/kitchen/update/{id}', 'modify');
+        Route::delete('/kitchen/delete/{id}', 'delete');
+    });
+    
     Route::controller(ExpenseController::class) 
     ->prefix('expense')->group(function(){
         Route::get('/', 'view');
@@ -68,19 +83,6 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::get('/item/{id}', 'financial');
         Route::post('/add', 'create');
         Route::delete('/delete/{id}', 'delete');
-    });
-    
-    Route::controller(KitchenConroller::class) 
-    ->group(function(){
-        Route::get('/kitchen', 'view');
-        Route::get('/brista', 'brista');
-        Route::get('/kitchen/lists', 'lists');
-        Route::post('/kitchen/select_product', 'select_product');
-        Route::get('/kitchen/item/{id}', 'kitchen');
-        Route::put('/kitchen/status/{id}', 'status');
-        Route::post('/kitchen/add', 'create');
-        Route::post('/kitchen/update/{id}', 'modify');
-        Route::delete('/kitchen/delete/{id}', 'delete');
     });
     
     Route::controller(ProfileController::class) 

@@ -56,6 +56,10 @@ class Category extends Model
     public function addons(){
         return $this->belongsToMany(Addon::class, 'category_addon', 'category_id', 'addon_id');
     }
+
+    public function kitchen(){
+        return $this->belongsToMany(Kitchen::class, 'kitchen_products');
+    }
     
     public function translations()
     {
