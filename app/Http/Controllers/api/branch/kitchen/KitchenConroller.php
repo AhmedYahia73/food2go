@@ -149,8 +149,7 @@ class KitchenConroller extends Controller
 
     public function kitchen(Request $request, $id){
         // /admin/pos/kitchens/item/{id}
-        $kitchen = $this->kitchen
-        ->with('products')
+        $kitchen = $this->kitchen 
         ->where('id', $id)
         ->first();
 
