@@ -66,7 +66,7 @@ class ManufacturingController extends Controller
         })
         ->get()
         ->map(function($item) use($request, $stock){
-            $available_quantity = $stock
+            $available_quantity = clone $stock
             ->where('store_id', $request->store_id)
             ->where('material_id', $item->material)
             ->first();
