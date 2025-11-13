@@ -67,7 +67,7 @@ class ManufacturingController extends Controller
         ->map(function($item) use($request){
             $available_quantity = \App\Models\MaterialStock::query()
             ->where('store_id', $request->store_id)
-            ->where('material_id', $item->material)
+            ->where('material_id', $item->material_product_id)
             ->first();
             return [
                 "id" => $item->id,
