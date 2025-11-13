@@ -55,15 +55,7 @@ class ManufacturingController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-
-        $stock = $this->stock;
-        $available_quantity = clone $stock; 
-        $available_quantity = $available_quantity
-        ->where('store_id', $request->store_id)
-        ->first();
-        return response()->json([
-            'stock' => $available_quantity
-        ]);
+ 
         $recipes = $this->recipe 
         ->with(["material_category:id,name", "material:id,name",
         "unit:id,name"])
