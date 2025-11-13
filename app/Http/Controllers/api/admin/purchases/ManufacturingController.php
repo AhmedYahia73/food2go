@@ -60,7 +60,6 @@ class ManufacturingController extends Controller
         $available_quantity = clone $stock; 
         $available_quantity = $available_quantity
         ->where('store_id', $request->store_id)
-        ->where('material_id', $item->material)
         ->first();
         return response()->json([
             'stock' => $stock
