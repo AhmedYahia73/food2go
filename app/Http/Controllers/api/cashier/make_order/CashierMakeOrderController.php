@@ -1314,7 +1314,7 @@ class CashierMakeOrderController extends Controller
     public function certificate_sign(Request $request)
     {
         // 1. بناخد الداتا اللي جاية من الرياكت (من اللينك)
-        $toSign = $request->request;
+        $toSign = $request->input('request');;
 
         if (!$toSign) {
             return response('No data to sign.', 400)->header('Content-Type', 'text/plain');
