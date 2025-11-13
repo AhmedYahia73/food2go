@@ -39,8 +39,7 @@ class CompanyRequest extends FormRequest
             'android_link' => ['sometimes'],
             'ios_link' => ['sometimes'],
             'order_online' => ['required', 'boolean'],
-            'android_switch' => ['boolean'],
-            'web_site' => ['required'],
+            'android_switch' => ['boolean'], 
             'ios_switch' => ['boolean'],
         ];
     }
