@@ -73,20 +73,7 @@ class OrderController extends Controller
                 elseif ($item->order_type == "delivery") {
                     $order_type = $item->delivery_status;
                 }
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number,
-                    'created_at' => $item->created_at,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'order_type' => $item->order_type,
-                    'order_status' => $order_type,
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                ];
+                return $item;
             })->filter(function ($order, $index) use($order_recentage) {
                 $positionInBlock = $index % 10;
                 return $positionInBlock < ($order_recentage / 10);
@@ -123,20 +110,7 @@ class OrderController extends Controller
                 elseif ($item->order_type == "delivery") {
                     $order_type = $item->delivery_status;
                 }
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number,
-                    'created_at' => $item->created_at,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'order_type' => $item->order_type,
-                    'order_status' => $order_type,
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                ];
+                return $item;
             });
             $orders = collect($orders);
             $orders2 = collect($orders2);
