@@ -1324,6 +1324,9 @@ class CashierMakeOrderController extends Controller
         $keyPath = 'qz/private-key.pem'; // المسار اللي جوه storage/app/
 
         try {
+            return response()->json([
+                'key' => Storage::get($keyPath)
+            ], 400);
             if (!Storage::exists($keyPath)) {
                 // اتأكد إن الملف موجود
                 return response('Private key not found.', 500)->header('Content-Type', 'text/plain');
