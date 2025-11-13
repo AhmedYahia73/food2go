@@ -1321,16 +1321,16 @@ class CashierMakeOrderController extends Controller
         }
 
         // 2. بنحدد مكان المفتاح السري بتاعنا
-        $keyPath = '/private-key.pem'; // المسار اللي جوه storage/app/
+        $keyPath = 'qz/private-key.pem'; // المسار اللي جوه storage/app/
 
         try {
-            if (!Storage::exists($keyPath)) {
+            if (!Storage::disk('public')->exists($keyPath)) {
                 // اتأكد إن الملف موجود
                 return response('Private key not found.', 500)->header('Content-Type', 'text/plain');
             }
 
             // 3. بنقرأ محتويات المفتاح السري
-            $privateKeyContents = Storage::get($keyPath);
+            $privateKeyContents = Storage::disk('public')->get($keyPath);
             $privateKey = openssl_get_privatekey($privateKeyContents);
 
             if ($privateKey === false) {
