@@ -62,7 +62,7 @@ class ManufacturingController extends Controller
         ->where('store_id', $request->store_id)
         ->first();
         return response()->json([
-            'stock' => $stock
+            'stock' => $available_quantity
         ]);
         $recipes = $this->recipe 
         ->with(["material_category:id,name", "material:id,name",
