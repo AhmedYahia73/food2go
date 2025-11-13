@@ -57,6 +57,14 @@ class ManufacturingController extends Controller
         }
 
         $stock = $this->stock;
+        $available_quantity = clone $stock; 
+        $available_quantity = $available_quantity
+        ->where('store_id', $request->store_id)
+        ->where('material_id', $item->material)
+        ->first();
+        return response()->json([
+            'stock' => $stock
+        ]);
         $recipes = $this->recipe 
         ->with(["material_category:id,name", "material:id,name",
         "unit:id,name"])
