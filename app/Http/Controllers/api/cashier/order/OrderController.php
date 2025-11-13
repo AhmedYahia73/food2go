@@ -86,16 +86,6 @@ class OrderController extends Controller
                     'points' => $item->points, 
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
                 ];
             })->filter(function ($order, $index) use($order_recentage) {
                 $positionInBlock = $index % 10;
@@ -146,18 +136,14 @@ class OrderController extends Controller
                     'points' => $item->points, 
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
                 ];
-            }); 
+            });
+            $orders = collect($orders);
+            $orders2 = collect($orders2);
+
+            $orders = $orders->merge($orders2)
+            ->sortByDesc('id')
+            ->values();
             $order_type = [
                 "dine_in",
                 "take_away",
