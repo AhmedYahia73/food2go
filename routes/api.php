@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\auth\LoginController;
 use App\Http\Controllers\api\auth\SignupController;
+use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 
 use App\Events\OrderEvent;
 use App\Http\Controllers\api\customer\business_setup\BusinessSetupController;
@@ -17,6 +18,10 @@ Route::prefix('welcome')->group(function(){
         event(new OrderEvent('Hello'));
 		return view('welcome');
 	});
+});
+
+Route::controller(CashierMakeOrderController::class)->group(function(){
+    Route::get('sign-qz-request', 'certificate_sign');
 });
 
 Route::prefix('store_man/auth')->controller(LoginController::class)->group(function(){
