@@ -157,10 +157,7 @@ class OrderController extends Controller
                     'schedule' => ['name' => $item?->schedule?->name],
                     'delivery' => ['name' => $item?->delivery?->name], 
                 ];
-            });
-            $orders = collect($orders);
-            $orders2 = collect($orders2);
-
+            }); 
             $order_type = [
                 "dine_in",
                 "take_away",
