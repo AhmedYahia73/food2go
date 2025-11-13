@@ -73,7 +73,30 @@ class OrderController extends Controller
                 elseif ($item->order_type == "delivery") {
                     $order_type = $item->delivery_status;
                 }
-                return $item;
+                return [ 
+                    'id' => $item->id,
+                    'order_number' => $item->order_number,
+                    'created_at' => $item->created_at,
+                    'amount' => $item->amount,
+                    'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
+                    'order_status' => $order_type,
+                    'source' => $item->source,
+                    'status' => $item->status,
+                    'points' => $item->points, 
+                    'rejected_reason' => $item->rejected_reason,
+                    'transaction_id' => $item->transaction_id,
+                    'user' => [
+                        'f_name' => $item?->user?->f_name,
+                        'l_name' => $item?->user?->l_name,
+                        'phone' => $item?->user?->phone],
+                    'branch' => ['name' => $item?->branch?->name, ],
+                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                    'admin' => ['name' => $item?->admin?->name,],
+                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'schedule' => ['name' => $item?->schedule?->name],
+                    'delivery' => ['name' => $item?->delivery?->name], 
+                ];
             })->filter(function ($order, $index) use($order_recentage) {
                 $positionInBlock = $index % 10;
                 return $positionInBlock < ($order_recentage / 10);
@@ -110,7 +133,30 @@ class OrderController extends Controller
                 elseif ($item->order_type == "delivery") {
                     $order_type = $item->delivery_status;
                 }
-                return $item;
+                return [ 
+                    'id' => $item->id,
+                    'order_number' => $item->order_number,
+                    'created_at' => $item->created_at,
+                    'amount' => $item->amount,
+                    'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
+                    'order_status' => $order_type,
+                    'source' => $item->source,
+                    'status' => $item->status,
+                    'points' => $item->points, 
+                    'rejected_reason' => $item->rejected_reason,
+                    'transaction_id' => $item->transaction_id,
+                    'user' => [
+                        'f_name' => $item?->user?->f_name,
+                        'l_name' => $item?->user?->l_name,
+                        'phone' => $item?->user?->phone],
+                    'branch' => ['name' => $item?->branch?->name, ],
+                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                    'admin' => ['name' => $item?->admin?->name,],
+                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'schedule' => ['name' => $item?->schedule?->name],
+                    'delivery' => ['name' => $item?->delivery?->name], 
+                ];
             });
             $orders = collect($orders);
             $orders2 = collect($orders2);
