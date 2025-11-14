@@ -153,49 +153,51 @@ class CompanyController extends Controller
         }
 
         // __________________________
-         
-        $web_site = $request->web_site;
-        if (substr($web_site, 0, 8) !== 'https://') {
-            $web_site = 'https://' . ltrim($web_site, '/'); // نتأكد مفيش // في الأول
-        }
-        $website = $this->settings
-        ->where("name", "web_site")
-        ->first();
-        $qr_code = $this->settings
-        ->where("name", "web_site_qr")
-        ->first();
-        if($website){
-            $website
-            ->update([
-                "setting" => $web_site
-            ]);
-        }
-        else{
-            $this->settings
-            ->create([
-                'name' => "web_site",
-                "setting" => $web_site
-            ]);
-        }
-        $qrImage = QrCode::format('png')->size(300)->generate($web_site);
-        $fileName = 'admin/website/qr/'. time() . rand(0, 10000) .'.png';
-        Storage::disk('public')->put($fileName, $qrImage);
+        if(!empty($request->web_site)){ 
+            $web_site = $request->web_site;
+            if (substr($web_site, 0, 8) !== 'https://') {
+                $web_site = 'https://' . ltrim($web_site, '/'); // نتأكد مفيش // في الأول
+            }
+            $website = $this->settings
+            ->where("name", "web_site")
+            ->first();
+            $qr_code = $this->settings
+            ->where("name", "web_site_qr")
+            ->first();
+            if($website){
+                $website
+                ->update([
+                    "setting" => $web_site
+                ]);
+            }
+            else{
+                $this->settings
+                ->create([
+                    'name' => "web_site",
+                    "setting" => $web_site
+                ]);
+            }
+            $qrImage = QrCode::format('png')->size(300)->generate($web_site);
+            $fileName = 'admin/website/qr/'. time() . rand(0, 10000) .'.png';
+            Storage::disk('public')->put($fileName, $qrImage);
 
-        if($qr_code){
+            if($qr_code){
 
-            $this->deleteImage($qr_code->setting);
-            $qr_code
-            ->update([
-                "setting" => $fileName
-            ]);
+                $this->deleteImage($qr_code->setting);
+                $qr_code
+                ->update([
+                    "setting" => $fileName
+                ]);
+            }
+            else{
+                $this->settings
+                ->create([
+                    'name' => "web_site_qr",
+                    "setting" => $fileName
+                ]);
+            }
         }
-        else{
-            $this->settings
-            ->create([
-                'name' => "web_site_qr",
-                "setting" => $fileName
-            ]);
-        }
+        
         return response()->json([
             'company_info' => $company_info,
             'maintenance' => $maintenance,

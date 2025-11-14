@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\trait\Recipe;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator; 
+use Illuminate\Support\Collection;
 
 use App\Models\Order;
 use App\Models\Setting;
@@ -157,8 +158,11 @@ class OrderController extends Controller
                     'delivery' => ['name' => $item?->delivery?->name], 
                 ];
             });
+            $orders = collect($orders);
+            $orders2 = collect($orders2);
+
             $orders = $orders->merge($orders2)
-            ->sortByDesc("id")
+            ->sortByDesc('id')
             ->values();
             $order_type = [
                 "dine_in",

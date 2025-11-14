@@ -9,6 +9,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\AddonResource;
@@ -855,5 +856,4 @@ trait POS
             'payment' => $order, 
         ];
     }
-    
 }

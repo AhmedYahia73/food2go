@@ -177,6 +177,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(MaterialController::class)
     ->prefix('material_product')->group(function(){
         Route::get('/', 'view');
+        Route::get('/product/{id}', 'product');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');

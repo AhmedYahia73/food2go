@@ -50,6 +50,7 @@ use App\Models\Delivery;
 use App\Models\DiscountModule;
 use App\Models\CheckoutRequest;// dicount_id
 use App\Models\FinantiolAcounting;
+use Illuminate\Support\Facades\Storage;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -1307,5 +1308,56 @@ class CashierMakeOrderController extends Controller
         }
 
         return ["success" => true];
+    }
+    
+
+    public function certificate_sign(Request $request)
+    {
+        // 1. بناخد الداتا اللي جاية من الرياكت (من اللينك)
+        $toSign = $request->input('request');;
+
+        if (!$toSign) {
+            return response('No data to sign.', 400)->header('Content-Type', 'text/plain');
+        }
+
+        // 2. بنحدد مكان المفتاح السري بتاعنا
+        $keyPath = 'qz/private-key.pem'; // المسار اللي جوه storage/app/
+
+        try {
+            if (!Storage::disk('public')->exists($keyPath)) {
+                // اتأكد إن الملف موجود
+                return response('Private key not found.', 500)->header('Content-Type', 'text/plain');
+            }
+
+            // 3. بنقرأ محتويات المفتاح السري
+            $privateKeyContents = Storage::disk('public')->get($keyPath);
+            $privateKey = openssl_get_privatekey($privateKeyContents);
+
+            if ($privateKey === false) {
+                return response('Could not read private key.', 500)->header('Content-Type', 'text/plain');
+            }
+
+            $signature = null;
+
+            // 4. بنعمل التوقيع! بنستخدم المفتاح السري عشان نوقّع على الداتا
+            //    ده الـ algorithm. لازم نتأكد إنه SHA512
+            openssl_sign($toSign, $signature, $privateKey, OPENSSL_ALGO_SHA512);
+
+            // 5. بنمسح المفتاح من الـ memory عشان الأمان
+            openssl_free_key($privateKey);
+
+            if ($signature) {
+                // 6. بنرجع التوقيع (متشفّر) للرياكت
+                //    مهم جدا نرجعه كـ text/plain مش JSON
+                return response(base64_encode($signature), 200)
+                          ->header('Content-Type', 'text/plain');
+            }
+
+            return response('Failed to generate signature.', 500)->header('Content-Type', 'text/plain');
+
+        } catch (\Exception $e) {
+            // لو حصل أي ايرور، رجعه
+            return response($e->getMessage(), 500)->header('Content-Type', 'text/plain');
+        }
     }
 }

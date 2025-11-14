@@ -55,8 +55,7 @@ class ManufacturingController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-
-        $stock = $this->stock;
+ 
         $recipes = $this->recipe 
         ->with(["material_category:id,name", "material:id,name",
         "unit:id,name"])
@@ -65,10 +64,10 @@ class ManufacturingController extends Controller
             $query->where('status', 1);
         })
         ->get()
-        ->map(function($item) use($request, $stock){
-            $available_quantity = $stock
+        ->map(function($item) use($request){
+            $available_quantity = \App\Models\MaterialStock::query()
             ->where('store_id', $request->store_id)
-            ->where('material_id', $item->material)
+            ->where('material_id', $item->material_product_id)
             ->first();
             return [
                 "id" => $item->id,
