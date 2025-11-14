@@ -501,17 +501,17 @@ class LoginController extends Controller
             ->first();
             $role = 'customer';
             
-            $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_domain_package')->body();
-            $response = json_decode($response);
-            $subscription = collect($response?->user_subscription) ?? collect([]); 
-            $subscription = $subscription->where('back_link', url(''))
-			->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
-			->first();  
-            if (empty($subscription)) {
-                return response()->json([
-                    'errors' => 'Application is stoping now'
-                ], 400);
-            } 
+            // $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_domain_package')->body();
+            // $response = json_decode($response);
+            // $subscription = collect($response?->user_subscription) ?? collect([]); 
+            // $subscription = $subscription->where('back_link', url(''))
+			// ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+			// ->first();  
+            // if (empty($subscription)) {
+            //     return response()->json([
+            //         'errors' => 'Application is stoping now'
+            //     ], 400);
+            // } 
         }
         if (empty($user)) {
             return response()->json([
