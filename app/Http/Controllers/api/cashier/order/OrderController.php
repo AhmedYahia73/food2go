@@ -407,6 +407,9 @@ class OrderController extends Controller
         $order->type = $order->pos ? 'Point of Sale' : 'Online Order';
         $order->makeHidden('order_details_data');
         $order_details = collect($order->order_details);
+            return response()->json([
+                $order_details
+            ]);
         foreach ($order_details as $item) {
             return response()->json([
                 $item
@@ -756,7 +759,7 @@ class OrderController extends Controller
             ]);
         }
 
-        return response()->json(['order' => $order_details]);
+        return response()->json(['success' => 'You update order success']);
     }
 
     public function finantion_validation($request){
