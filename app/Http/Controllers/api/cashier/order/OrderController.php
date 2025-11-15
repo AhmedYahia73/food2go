@@ -17,6 +17,7 @@ use App\Models\Setting;
 use App\Models\TimeSittings;
 use App\Models\Delivery;
 use App\Models\FinantiolAcounting;
+use App\Models\OrderDetail;
 use App\Models\Branch;
 
 class OrderController extends Controller
@@ -24,7 +25,7 @@ class OrderController extends Controller
     public function __construct(private Order $orders,
     private Setting $settings, private TimeSittings $TimeSittings,
     private Delivery $deliveries, private Branch $branches,
-    private OrderFinancial $order_financial,
+    private OrderFinancial $order_financial, private OrderDetail $order_details,
     private FinantiolAcounting $financial_account){}
     use Recipe;
     use POS;
