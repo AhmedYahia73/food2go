@@ -755,6 +755,8 @@ class OrderController extends Controller
                 'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
             ]);
         }
+
+        return response()->json(['order' => $order_details]);
     }
 
     public function finantion_validation($request){
