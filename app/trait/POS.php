@@ -134,7 +134,7 @@ trait POS
             }
         }
         $order_details = $this->order_details($request, $order, $locale);
-        $order->order_details = json_encode($order_details);
+        $order->order_details = json_encode($order_details['order_details']);
         $order->save();
 
         return [
@@ -251,7 +251,9 @@ trait POS
                     }
                 } 
             }
-        } 
+        }
+
+        return ['order_details' => $order_details];
     }
 
     public function dine_in_split_payment($request, $paymob = 0){
