@@ -19,6 +19,12 @@ use App\Models\Delivery;
 use App\Models\FinantiolAcounting;
 use App\Models\OrderDetail;
 use App\Models\Branch;
+use App\Models\Product;
+use App\Models\ExcludeProduct;
+use App\Models\Addon;
+use App\Models\ExtraProduct;
+use App\Models\VariationProduct;
+use App\Models\OptionProduct;
 
 class OrderController extends Controller
 {
@@ -26,7 +32,10 @@ class OrderController extends Controller
     private Setting $settings, private TimeSittings $TimeSittings,
     private Delivery $deliveries, private Branch $branches,
     private OrderFinancial $order_financial, private OrderDetail $order_details,
-    private FinantiolAcounting $financial_account){}
+    private FinantiolAcounting $financial_account, private Product $products,
+    private ExcludeProduct $excludes, private Addon $addons,
+    private ExtraProduct $extras, private VariationProduct $variation,
+    private OptionProduct $options){}
     use Recipe;
     use POS;
 
