@@ -4,9 +4,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-
-use Illuminate\Auth\AuthenticationException;
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CustomerMiddleware;
@@ -26,53 +23,43 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         channels: __DIR__.'/../routes/channels.php',
         health: '/up',
-        then: function () {
-
+        then: function(){
             Route::middleware('api')
             ->prefix('admin')
             ->name('admin.')
             ->group(base_path('routes/admin.php'));
-
             Route::middleware('api')
             ->prefix('kitchen')
             ->name('kitchen.')
             ->group(base_path('routes/kitchen.php'));
-
             Route::middleware('api')
             ->prefix('branch')
             ->name('branch.')
             ->group(base_path('routes/branch.php'));
-
             Route::middleware('api')
             ->prefix('customer')
             ->name('customer.')
             ->group(base_path('routes/customer.php'));
-
             Route::middleware('api')
             ->prefix('delivery')
             ->name('delivery.')
             ->group(base_path('routes/delivery.php'));
-
             Route::middleware('api')
             ->prefix('captain')
             ->name('captain.')
             ->group(base_path('routes/captain.php'));
-
             Route::middleware('api')
             ->prefix('cashier')
             ->name('cashier.')
             ->group(base_path('routes/cashier.php'));
-
             Route::middleware('api')
             ->prefix('client')
             ->name('client.')
             ->group(base_path('routes/client.php'));
-
             Route::middleware('api')
             ->prefix('waiter')
             ->name('waiter.')
             ->group(base_path('routes/waiter.php'));
-
             Route::middleware('api')
             ->prefix('storage')
             ->name('storage.')
@@ -80,7 +67,6 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
-
         $middleware->alias([
             'IsKitchen' => KitchenMiddleware::class,
             'IsAdmin' => AdminMiddleware::class,
@@ -93,31 +79,19 @@ return Application::configure(basePath: dirname(__DIR__))
             'IsAdminOrBranch' => AdmiOrBranchMiddleware::class,
             'IsStorage' => StorageMiddleware::class,
         ]);
-
-        // Fix redirectGuestsTo
-        $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
-
-            // Allow API to continue without redirect
-            if ($request->is('api/*')) {
-                return null;
-            }
-
-            // Non-API requests
-            return response()->json(['errors' => 'you must login'], 400);
+         $middleware->redirectGuestsTo(function (Request $request) {
+            if (!$request->is('api/*')) {
+                return response()->json(['errors' => 'you must login', 400]);
+            } 
         });
     })
     ->withExceptions(function (Exceptions $exceptions) {
-
-        // Fix API unauthorized handling
-        $exceptions->render(function (
-            \Illuminate\Auth\AuthenticationException $e,
-            \Illuminate\Http\Request $request
-        ) {
+        //
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'message' => $e->getMessage(),
                 ], 401);
             }
         });
-    })
-    ->create();
+    })->create();
