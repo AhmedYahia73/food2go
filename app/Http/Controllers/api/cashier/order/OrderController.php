@@ -407,9 +407,6 @@ class OrderController extends Controller
         $order->type = $order->pos ? 'Point of Sale' : 'Online Order';
         $order->makeHidden('order_details_data');
         $order_details = collect($order->order_details);
-            return response()->json([
-                $order_details
-            ]);
         foreach ($order_details as $item) {
             return response()->json([
                 $item
@@ -737,7 +734,7 @@ class OrderController extends Controller
 
         $locale = $request->locale ?? $request->query('locale', app()->getLocale());
         $order_details = $this->order_details($request, $order, $locale);
-        $order->order_details = json_encode($order_details);
+        $order->order_details = json_encode($order_details['order_details']);
         $order->amount = $request->amount;
         $order->total_tax = $request->total_tax;
         $order->total_discount = $request->total_discount;
@@ -759,7 +756,9 @@ class OrderController extends Controller
             ]);
         }
 
-        return response()->json(['success' => 'You update order success']);
+        return response()->json([
+            "success" => "You update order success"
+        ]);
     }
 
     public function finantion_validation($request){
