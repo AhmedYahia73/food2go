@@ -408,7 +408,9 @@ class OrderController extends Controller
         $order->makeHidden('order_details_data');
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
-            $item = collect($item);
+            return response()->json([
+                $item
+            ]);
             foreach ($item->product as $element) {
                 $total = collect($item->variations)->pluck('options')->flatten(1)
                 ->where('product_id', $element->product->id)->sum('price');
