@@ -133,6 +133,17 @@ trait POS
                 ]);
             }
         }
+        $order_details = $this->order_details($request, $order, $locale);
+        $order->order_details = json_encode($order_details);
+        $order->save();
+
+        return [
+            'order' => $order, 
+        ];
+    }
+
+    public function order_details($request, $order, $locale){
+        $order_details = [];
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
@@ -241,14 +252,7 @@ trait POS
                 } 
             }
         } 
-        $order->order_details = json_encode($order_details);
-        $order->save();
-
-        return [
-            'order' => $order, 
-        ];
     }
-
 
     public function dine_in_split_payment($request, $paymob = 0){
         $orderRequest = $request->only($this->orderDataRequest); 
