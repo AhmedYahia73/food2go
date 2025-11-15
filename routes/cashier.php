@@ -164,11 +164,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     }); 
     Route::controller(CashierReportsController::class)
     ->prefix('/reports')->group(function(){
-        Route::get('shift_branch', 'shift_branch_reports')->middleware('can:branch_reports');
-        Route::get('shift_all_branch', 'shift_reports')->middleware('can:all_reports');
-        Route::get('cashier_reports', 'cashier_reports')->middleware('can:all_reports');
+        
 
-        Route::get('branch_cashiers', 'branch_cashiers')->middleware('can:branch_reports');
-        Route::get('all_cashiers', 'all_cashiers')->middleware('can:all_reports');
+        Route::get('end_shift_report', 'financial_report');
     }); 
 });

@@ -35,6 +35,7 @@ class CasheirManRequest extends FormRequest
             'discount_perimission' => ['required', 'boolean'],
             'online_order' => ['required', 'boolean'],
             'void_order' => ['required', 'boolean'],
+            'report' => ['required', 'boolean'],
         ];
     }
 
