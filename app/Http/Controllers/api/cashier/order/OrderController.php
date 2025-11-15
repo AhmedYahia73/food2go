@@ -671,7 +671,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function update_order(Request $request, $id){
+    public function update_order(UpdateOrderRequest $request, $id){
         $errors = $this->finantion_validation($request);
         if(isset($errors['errors'])){
             return response()->json([
