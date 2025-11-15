@@ -16,6 +16,7 @@ use App\Models\OrderFinancial;
 use App\Models\Setting;
 use App\Models\TimeSittings;
 use App\Models\Delivery;
+use App\Models\FinantiolAcounting;
 use App\Models\Branch;
 
 class OrderController extends Controller
@@ -23,7 +24,8 @@ class OrderController extends Controller
     public function __construct(private Order $orders,
     private Setting $settings, private TimeSittings $TimeSittings,
     private Delivery $deliveries, private Branch $branches,
-    private OrderFinancial $order_financial){}
+    private OrderFinancial $order_financial,
+    private FinantiolAcounting $financial_account){}
     use Recipe;
     use POS;
 
@@ -676,7 +678,7 @@ class OrderController extends Controller
             'amount' => ['required', 'numeric'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
-            'products' => ['required_if:order_pending,false', 'array'],
+            'products' => ['required', 'array'],
             'products.*.product_id' => ['exists:products,id', 'required_if:order_pending,false'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],
@@ -686,7 +688,7 @@ class OrderController extends Controller
             'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
             'products.*.count' => ['numeric', 'required_if:order_pending,false'],
             'products.*.note' => ['sometimes'],
-            'financials' => ['required_if:order_pending,false', 'array'],
+            'financials' => ['required:order_pending,false', 'array'],
             'financials.*.id' => ['required_if:order_pending,false', 'exists:finantiol_acountings,id'],
             'financials.*.amount' => ['required_if:order_pending,false', 'numeric'], 
             'financials.*.description' => ['sometimes'], 
