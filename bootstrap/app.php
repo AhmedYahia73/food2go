@@ -80,19 +80,27 @@ return Application::configure(basePath: dirname(__DIR__))
             'IsAdminOrBranch' => AdmiOrBranchMiddleware::class,
             'IsStorage' => StorageMiddleware::class,
         ]);
-         $middleware->redirectGuestsTo(function (Request $request) {
-            if (!$request->is('api/*')) {
-                return response()->json(['errors' => 'you must login', 400]);
-            } 
+      $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
+            // للسماح للـ API Requests بدون Redirect
+            if ($request->is('api/*')) {
+                return null;
+            }
+
+            // Web Requests: رجّع Response JSON أو Redirect حسب ما تريد
+            return response()->json(['errors' => 'you must login'], 400);
         });
+
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-        $exceptions->render(function (AuthenticationException $e, Request $request) {
+       $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'message' => $e->getMessage(),
                 ], 401);
             }
         });
+
     })->create();
+    
