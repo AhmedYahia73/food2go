@@ -377,7 +377,7 @@ class OrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
-        'admin_cancel_reason', 'sechedule_slot_id')
+        'admin_cancel_reason', 'sechedule_slot_id', 'pos')
         ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
         'branch:id,name', 'delivery', 'payment_method:id,name,logo',
          'address.zone', 'admin:id,name,email,phone,image', 
@@ -392,6 +392,7 @@ class OrderController extends Controller
                 "errors" => "id wrong"
             ], 400);
         }
+        $order->type = $order->pos ? 'Point of Sale' : 'Online Order';
         $order->makeHidden('order_details_data');
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
