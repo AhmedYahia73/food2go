@@ -144,7 +144,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(FilterController::class)
     ->prefix('save_filter')->group(function(){
         Route::get('/lists', 'lists'); 
-        Route::get('/', 'view'); 
+        Route::post('/', 'view'); 
         Route::get('/item/{id}', 'filter_item'); 
         Route::post('/add', 'create'); 
         Route::post('/update/{id}', 'modify'); 
