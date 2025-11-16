@@ -13,7 +13,7 @@ class DiscountModuleBranch extends Model
         'discount_module_id',
         'branch_id',
         'module',
-        'tpye',
+        'type',
     ];
 
     public function branch(){

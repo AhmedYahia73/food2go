@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('discount_module_branches', function (Blueprint $table) {
-            $table->enum('tpye', ['all', 'app', 'web'])->default('all');
+            $table->enum('type', ['all', 'app', 'web'])->default('all');
         });
     }
 
