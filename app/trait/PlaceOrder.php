@@ -428,7 +428,7 @@ trait PlaceOrder
         ];
     }
 
-    public function make_order_cart($request, $orders, $paymob = 0){
+    public function make_order_cart($request, $paymob = 0){
         $branch_off = BranchOff::
         where('branch_id', $request->branch_id)
         ->get();
