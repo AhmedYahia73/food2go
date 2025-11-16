@@ -754,7 +754,7 @@ class CashierReportsController extends Controller
 
     public function financial_report(Request $request){
         // Order
-        if($request->report){
+        if($request->user()->report){
             $orders = Order::
             select("id")
             ->where('cashier_man_id', $request->user()->id)

@@ -163,9 +163,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/close', 'end_shift');
     }); 
     Route::controller(CashierReportsController::class)
-    ->prefix('/reports')->group(function(){
-        
-
+    ->prefix('/reports')->group(function(){ 
         Route::get('end_shift_report', 'financial_report');
     }); 
 });
