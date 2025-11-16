@@ -395,11 +395,11 @@ class CashierMakeOrderController extends Controller
             ], 400);
         }
         event(new PrintOrder($order['order']));
+        $order['order']['order_number'] = $order['order']->order_number;
         // _________________________________
         return response()->json([
             'success' => $order['order'],
-            'kitchen_items' => $kitchen_items,
-            'order_number' => $order['order']->order_number,
+            'kitchen_items' => $kitchen_items, 
         ]);
     }
 
@@ -611,11 +611,11 @@ class CashierMakeOrderController extends Controller
                 "errors" => $errors['msg']
             ], 400);
         } 
+        $order['order']['order_number'] = $order['order']->order_number;
         // _________________________________
         return response()->json([
             'success' => $order['order'],  
-            "kitchen_items" => $kitchen_items,
-            'order_number' => $order['order']['order_number'],
+            "kitchen_items" => $kitchen_items,  
         ]);
     }
 
@@ -866,6 +866,7 @@ class CashierMakeOrderController extends Controller
         ->where("table_id", $request->table_id)
         ->delete();
 
+        $order_items['order_number'] = $order['order']->order_number;
         return response()->json([
             'success' => $order_items,
             'order_number' => $order['payment']['order_number']
@@ -971,9 +972,9 @@ class CashierMakeOrderController extends Controller
         ->where("table_id", $request->table_id)
         ->delete();
 
+        $order['order_number'] = $order['order']->order_number;
         return response()->json([
-            'success' => $order, 
-            'order_number' => $order_number,
+            'success' => $order,  
         ]);
     } 
 

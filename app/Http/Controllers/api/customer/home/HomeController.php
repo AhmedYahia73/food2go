@@ -393,7 +393,7 @@ class HomeController extends Controller
             'recommended' => $product->recommended, 
             'image_link' => $product->image_link, 
             'allExtras' => $product->toArray(request())['allExtras'],  
-            'addons' => $addons, 
+            'addons' => $addons->unique('id'), 
             'variations' => $product->toArray(request())['variations'], 
             'excludes' => collect($product->toArray(request())['excludes'])->select('id', 'name'),
             'tax_obj' => $product->toArray(request())['tax_obj'],
