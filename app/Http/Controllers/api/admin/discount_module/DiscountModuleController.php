@@ -23,6 +23,7 @@ class DiscountModuleController extends Controller
             $modules = $item->module
             ->map(function($element){
                 return [
+                    "tpye" => $element->tpye,
                     "module" => $element->module,
                     "branch" => $element?->branch?->name,
                 ];
@@ -60,6 +61,7 @@ class DiscountModuleController extends Controller
             return [
                 "module" => $element->module,
                 "branch" => $element?->branch?->name,
+                "tpye" => $element->tpye,
             ];
         });
 
@@ -71,9 +73,10 @@ class DiscountModuleController extends Controller
         ]);
     }
 
-    public function create(Request $request){
+    public function create(Request $request){ 
         $validator = Validator::make($request->all(), [
             'discount' => 'required|numeric',
+            'tpye' => 'required|in:all,app,web',
             'status' => 'required|boolean',
             'branch_modules' => 'required|array',
             'branch_modules.*.branch_id' => 'required|exists:branches,id',
@@ -95,6 +98,7 @@ class DiscountModuleController extends Controller
                 'discount_module_id' => $discount_module->id,
                 'branch_id' => $item['branch_id'],
                 'module' => $item['module'],
+                'tpye' => $item['tpye'],
             ]);
         }
 
@@ -107,6 +111,7 @@ class DiscountModuleController extends Controller
         $validator = Validator::make($request->all(), [
             'discount' => 'required|numeric',
             'status' => 'required|boolean',
+            'tpye' => 'required|in:all,app,web',
             'branch_modules' => 'required|array',
             'branch_modules.*.branch_id' => 'required|exists:branches,id',
             'branch_modules.*.module' => 'required|in:take_away,dine_in,delivery',
@@ -131,6 +136,7 @@ class DiscountModuleController extends Controller
                 'discount_module_id' => $id,
                 'branch_id' => $item['branch_id'],
                 'module' => $item['module'],
+                'tpye' => $item['tpye'],
             ]);
         }
 

@@ -84,7 +84,8 @@ class ManufacturingController extends Controller
             "recipes" => $recipes
         ]);
     }
-
+// food2go290@gmail.com
+// Food2go@2020
     public function manufacturing(Request $request){
         $validator = Validator::make($request->all(), [
             'materials' => ['required', 'array'],
