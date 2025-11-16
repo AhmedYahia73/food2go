@@ -868,8 +868,7 @@ class CashierMakeOrderController extends Controller
 
         $order_items['order_number'] = $order['order']->order_number;
         return response()->json([
-            'success' => $order_items,
-            'order_number' => $order['payment']['order_number']
+            'success' => $order_items, 
         ]);
     }
 
