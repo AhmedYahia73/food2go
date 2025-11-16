@@ -769,6 +769,8 @@ trait PlaceOrder
         $order_data = [];
         foreach ($order->order_details ?? $order as $key => $item) {
             $product = $item->product[0]->product;
+            $product->notes = $item->product[0]->notes;
+            $product->count = $item->product[0]->count;
             unset($product->addons);
             unset($product->variations);
             $variation = [];

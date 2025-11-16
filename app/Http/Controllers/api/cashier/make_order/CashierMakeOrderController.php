@@ -739,6 +739,7 @@ class CashierMakeOrderController extends Controller
             })
             ->where('branch_id', $request->user()->branch_id)
             ->first();
+            $element->note = $order_cart->notes;
             if(!empty($kitchen) && $value['status'] == 'preparing'){
                 $kitchen_order[$kitchen->id][] = $element;
             }
