@@ -27,6 +27,7 @@ class CashierMan extends Model
         'fcm_token',
         'cashier_id',
         'online_order',
+        'report',
     ];
     protected $appends = ['role', 'image_link'];
 

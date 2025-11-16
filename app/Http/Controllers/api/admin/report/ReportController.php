@@ -768,6 +768,7 @@ class ReportController extends Controller
         // Order
         $orders = Order::
         select("id");
+        $expenses = $this->expenses;
 
         if($request->from || $request->to){
             $time_sittings = TimeSittings::get();
@@ -798,27 +799,37 @@ class ReportController extends Controller
             $orders = $orders
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end);
+            $expenses = $expenses
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
         }
         if($request->cashier_id){
             $orders = $orders
+            ->where("cashier_id", $request->cashier_id);
+            $expenses = $expenses
             ->where("cashier_id", $request->cashier_id);
         }
         if($request->branch_id){
             $orders = $orders
             ->where("branch_id", $request->branch_id);
+            $expenses = $expenses
+            ->where("branch_id", $request->branch_id);
         }
         if($request->cashier_man_id){
             $orders = $orders
             ->where("cashier_man_id", $request->cashier_man_id);
+            $expenses = $expenses
+            ->where("cahier_man_id", $request->cashier_man_id);
         }
         if($request->financial_id){
             $orders = $orders
             ->whereHas("financial_accountigs", function($query) use($request){
                 $query->where("finantiol_acountings.id", $request->financial_id);
             });
+            $expenses = $expenses
+            ->where("financial_account_id", $request->financial_id);
         }
         
-        $expenses = $this->expenses;
         $orders = $orders 
         ->get()
         ?->pluck("id")?->toArray() ?? [];

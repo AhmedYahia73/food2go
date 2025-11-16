@@ -13,14 +13,14 @@ use App\Models\PaymentMethod;
 use App\Models\TimeSittings;
 use App\Models\FinantiolAcounting;
 use App\Models\OrderFinancial;
-use App\Models\CashierBalance;
+use App\Models\CashierBalance; 
 
 class CashierReportsController extends Controller
 {
     public function __construct(private CashierShift $cashier_shift,
     private Order $orders, private PaymentMethod $payment_methods
     , private TimeSittings $TimeSittings, private FinantiolAcounting $financial_account,
-    private OrderFinancial $order_financial, private CashierBalance $cashier_balance){}
+    private OrderFinancial $order_financial, private CashierBalance $cashier_balance,){}
     
     public function cashier_reports(Request $request){
     //     $cashier_balance = $this->cashier_balance;
@@ -750,5 +750,53 @@ class CashierReportsController extends Controller
         return response()->json([
             'shifts_data' => $shifts_data,
         ]);
+    }
+
+    public function financial_report(Request $request){
+        // Order
+        if($request->report){
+            $orders = Order::
+            select("id")
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->get();
+            $orders = $orders 
+            ?->pluck("id")?->toArray() ?? [];
+            
+            $shift = $this->cashier_shift
+            ->where('shift', $request->user()->shift_number)
+            ->where('cashier_man_id', $request->user()->id)
+            ->first();
+            $expenses = $this->expenses
+            ->where('created_at', '>=', $shift->start_time ?? now())
+            ->where('created_at', '<=', $shift->end_time ?? now());
+            
+            $financial_accounts = OrderFinancial::
+            selectRaw("financial_id, SUM(amount) as total_amount")
+            ->whereIn("order_id", $orders)
+            ->with("financials")
+            ->groupBy("financial_id")
+            ->get()
+            ->map(function($item) use($expenses) {
+                $expenses_amount = $expenses
+                ->where("financial_account_id", $item->financial_id)
+                ->sum("amount") ?? 0;
+                return [
+                    "total_amount" => $item->total_amount - $expenses_amount,
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name,
+                ];
+            });
+
+            return response()->json([
+                'perimission' => true,
+                'financial_accounts' => $financial_accounts
+            ]);
+        }
+
+        return response()->json([
+            'perimission' => false,
+            'financial_accounts' => null
+        ], 400);
     }
 }

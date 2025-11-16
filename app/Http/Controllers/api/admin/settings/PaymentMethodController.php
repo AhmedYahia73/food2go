@@ -114,7 +114,14 @@ class PaymentMethodController extends Controller
         $paymentMethodRequest = $request->only($this->paymentMethodRequest);
         $payment_method = $this->payment_methods
         ->where('id', $id)
+        ->where('id', '!=', 1)
+        ->where('id', '!=', 2)
         ->first();
+        if(empty($payment_method)){
+            return response()->json([
+                'errors' => "This payment method cannot be deleted"
+            ], 400);
+        }
         if (!is_string($request->logo)) {
             $image_path = $this->upload($request, 'logo', 'admin/settings/payment_methods');
             $paymentMethodRequest['logo'] = $image_path;
@@ -132,7 +139,14 @@ class PaymentMethodController extends Controller
         // https://bcknd.food2go.online/admin/settings/payment_methods/delete/{id}
         $payment_method = $this->payment_methods
         ->where('id', $id)
+        ->where('id', '!=', 1)
+        ->where('id', '!=', 2)
         ->first();
+        if(empty($payment_method)){
+            return response()->json([
+                'errors' => "This payment method cannot be deleted"
+            ], 400);
+        }
         $this->deleteImage($payment_method->logo);
         $payment_method->delete();
 

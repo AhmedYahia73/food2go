@@ -8,19 +8,36 @@ use App\trait\Recipe;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator; 
 use Illuminate\Support\Collection;
+use App\Http\Requests\cashier\UpdateOrderRequest;
+use App\trait\POS;
 
 use App\Models\Order;
+use App\Models\OrderFinancial;
 use App\Models\Setting;
 use App\Models\TimeSittings;
 use App\Models\Delivery;
+use App\Models\FinantiolAcounting;
+use App\Models\OrderDetail;
 use App\Models\Branch;
+use App\Models\Product;
+use App\Models\ExcludeProduct;
+use App\Models\Addon;
+use App\Models\ExtraProduct;
+use App\Models\VariationProduct;
+use App\Models\OptionProduct;
 
 class OrderController extends Controller
 {
     public function __construct(private Order $orders,
     private Setting $settings, private TimeSittings $TimeSittings,
-    private Delivery $deliveries, private Branch $branches){}
+    private Delivery $deliveries, private Branch $branches,
+    private OrderFinancial $order_financial, private OrderDetail $order_details,
+    private FinantiolAcounting $financial_account, private Product $products,
+    private ExcludeProduct $excludes, private Addon $addons,
+    private ExtraProduct $extras, private VariationProduct $variation,
+    private OptionProduct $options){}
     use Recipe;
+    use POS;
 
     public function pos_orders(Request $request){
         $validator = Validator::make($request->all(), [
@@ -40,7 +57,11 @@ class OrderController extends Controller
             ->first()?->setting ?? 100;
             $order_recentage = intval($order_recentage);
             $orders = $this->orders
-            ->where('pos', 1)
+            ->where(function($query){
+                $query->where('pos', 1)
+                ->orWhere('pos', 0)
+                ->where('order_status', '!=', 'pending');
+            })
             ->where(function($query){
                 $query->where("take_away_status", "pick_up")
                 ->where("order_type", "take_away")
@@ -60,7 +81,7 @@ class OrderController extends Controller
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery'])
+            'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
             ->map(function($item){
                 $order_type = "";
@@ -81,6 +102,7 @@ class OrderController extends Controller
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
                     'order_status' => $order_type,
+                    'type' => $item->pos ? 'Point of Sale' : "Online Order",
                     'source' => $item->source,
                     'status' => $item->status,
                     'points' => $item->points, 
@@ -93,7 +115,9 @@ class OrderController extends Controller
                     'branch' => ['name' => $item?->branch?->name, ],
                     'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
                     'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'payment_method' => ['id' => $item?->payment_method?->id,
+                                        'name' => $item?->payment_method?->name],
+                    'financial_accountigs' => $item->financial_accountigs,
                     'schedule' => ['name' => $item?->schedule?->name],
                     'delivery' => ['name' => $item?->delivery?->name], 
                 ];
@@ -102,7 +126,11 @@ class OrderController extends Controller
                 return $positionInBlock < ($order_recentage / 10);
             });
             $orders2 = $this->orders
-            ->where('pos', 1)
+            ->where(function($query){
+                $query->where('pos', 1)
+                ->orWhere('pos', 0)
+                ->where('order_status', '!=', 'pending');
+            })
             ->where(function($query){
                 $query->where("take_away_status", "!=", "pick_up")
                 ->where("order_type", "take_away")
@@ -120,7 +148,7 @@ class OrderController extends Controller
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery'])
+            'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
             ->map(function($item){
                 $order_type = "";
@@ -140,6 +168,7 @@ class OrderController extends Controller
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
+                    'type' => $item->pos ? 'Point of Sale' : "Online Order",
                     'order_status' => $order_type,
                     'source' => $item->source,
                     'status' => $item->status,
@@ -153,7 +182,9 @@ class OrderController extends Controller
                     'branch' => ['name' => $item?->branch?->name, ],
                     'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
                     'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'payment_method' => ['id' => $item?->payment_method?->id,
+                                        'name' => $item?->payment_method?->name],
+                    'financial_accountigs' => $item->financial_accountigs,
                     'schedule' => ['name' => $item?->schedule?->name],
                     'delivery' => ['name' => $item?->delivery?->name], 
                 ];
@@ -180,7 +211,11 @@ class OrderController extends Controller
             ->first()?->setting ?? 100;
             $order_recentage = intval($order_recentage);
             $orders = $this->orders
-            ->where('pos', 1) 
+            ->where(function($query){
+                $query->where('pos', 1)
+                ->orWhere('pos', 0)
+                ->where('order_status', '!=', 'pending');
+            })
             ->where("shift", $request->user()->shift_number) 
             ->where(function($query) {
                 $query->where('status', 1)
@@ -192,7 +227,7 @@ class OrderController extends Controller
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery'])
+            'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
             ->map(function($item){
                 $order_type = "";
@@ -213,6 +248,7 @@ class OrderController extends Controller
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
                     'order_status' => $order_type,
+                    'type' => $item->pos ? 'Point of Sale' : "Online Order",
                     'source' => $item->source,
                     'status' => $item->status,
                     'points' => $item->points, 
@@ -225,7 +261,9 @@ class OrderController extends Controller
                     'branch' => ['name' => $item?->branch?->name, ],
                     'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
                     'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'payment_method' => ['id' => $item?->payment_method?->id,
+                                        'name' => $item?->payment_method?->name],
+                    'financial_accountigs' => $item->financial_accountigs,
                     'schedule' => ['name' => $item?->schedule?->name],
                     'delivery' => ['name' => $item?->delivery?->name], 
                 ];
@@ -300,6 +338,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         }) 
         ->orderByDesc('id')
+        ->where('order_status', 'pending')
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
             $query->select('id', 'zone_id')
             ->with('zone:id,zone');
@@ -350,11 +389,11 @@ class OrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
         'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
-        'admin_cancel_reason', 'sechedule_slot_id')
+        'admin_cancel_reason', 'sechedule_slot_id', 'pos')
         ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
         'branch:id,name', 'delivery', 'payment_method:id,name,logo',
          'address.zone', 'admin:id,name,email,phone,image', 
-        'schedule'])
+        'schedule', 'financial_accountigs:id,name'])
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
@@ -365,9 +404,11 @@ class OrderController extends Controller
                 "errors" => "id wrong"
             ], 400);
         }
+        $order->type = $order->pos ? 'Point of Sale' : 'Online Order';
         $order->makeHidden('order_details_data');
         $order_details = collect($order->order_details);
         foreach ($order_details as $item) {
+        
             foreach ($item->product as $element) {
                 $total = collect($item->variations)->pluck('options')->flatten(1)
                 ->where('product_id', $element->product->id)->sum('price');
@@ -544,7 +585,16 @@ class OrderController extends Controller
         $order = $this->orders
         ->where('id', $id)
         ->where("branch_id", $request->user()->branch_id)
+        ->where(function($query) use($request){
+            $query->where('cashier_man_id', $request->user()->id)
+            ->orWhereNull('cashier_man_id');
+        })
         ->first();
+        if(empty($order)){
+            return response()->json([
+                'errors' => "order not found"
+            ], 400);
+        }
         
         $old_status = $order->order_status;
         if (empty($order)) {
@@ -594,6 +644,8 @@ class OrderController extends Controller
             $order->update([
                 'order_status' => $request->order_status,
                 'order_number' => $request->order_number ?? null,
+                'cashier_man_id' => $request->user()->id,
+                'cashier_id' => $request->user()->cashier_id,
             ]);
         }
         elseif($request->order_status == 'canceled'){
@@ -615,16 +667,122 @@ class OrderController extends Controller
             $order->update([
                 'order_status' => $request->order_status,
                 'admin_cancel_reason' => $request->admin_cancel_reason,
+                'cashier_man_id' => $request->user()->id,
+                'cashier_id' => $request->user()->cashier_id,
             ]);
         }
         else {
             $order->update([
                 'order_status' => $request->order_status, 
+                'cashier_man_id' => $request->user()->id,
+                'cashier_id' => $request->user()->cashier_id,
             ]);
         } 
 
         return response()->json([
             'order_status' => $request->order_status
         ]);
+    }
+
+    public function update_order(Request $request, $id){ 
+        $validator = Validator::make($request->all(), [
+            'amount' => ['required', 'numeric'],
+            'total_tax' => ['required', 'numeric'],
+            'total_discount' => ['required', 'numeric'],
+            'products' => ['required', 'array'],
+            'products.*.product_id' => ['exists:products,id', 'required'],
+            'products.*.exclude_id.*' => ['exists:exclude_products,id'],
+            'products.*.extra_id.*' => ['exists:extra_products,id'],
+            'products.*.addons.*.addon_id' => ['exists:addons,id'],
+            'products.*.addons.*.count' => ['numeric'],
+            'products.*.variation.*.variation_id' => ['exists:variation_products,id'],
+            'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
+            'products.*.count' => ['numeric', 'required'],
+            'products.*.note' => ['sometimes'],
+            'financials' => ['required:order_pending,false', 'array'],
+            'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
+            'financials.*.amount' => ['required', 'numeric'], 
+            'financials.*.description' => ['sometimes'], 
+            'financials.*.transition_id' => ['sometimes'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        } 
+        $errors = $this->finantion_validation($request);
+        if(isset($errors['errors'])){
+            return response()->json([
+                'errors' => $errors,
+            ], 400);
+        }
+        $order = $this->orders
+        ->where('id', $id)
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('payment_method_id', 2);
+        })
+        ->first();
+        if(empty($order)){
+            return response()->json([
+                'errors' => 'You can not update this order'
+            ], 400);
+        }
+
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale());
+        $order_details = $this->order_details($request, $order, $locale);
+        $order->order_details = json_encode($order_details['order_details']);
+        $order->amount = $request->amount;
+        $order->total_tax = $request->total_tax;
+        $order->total_discount = $request->total_discount;
+        $order->notes = $request->notes; 
+        $order->save();
+        $order_financial = $this->order_financial
+        ->where('order_id', $id)
+        ->delete();
+        foreach ($request->financials as $element) {
+            $this->order_financial
+            ->create([
+                'order_id' => $order->id,
+                'financial_id' => $element['id'],
+                'cashier_id' => $request->user()->cashier_id,
+                'cashier_man_id' => $request->user()->cashier_man_id,
+                'amount' => $element['amount'],
+                'description' => isset($element['description']) ? $element['description'] : null,
+                'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
+            ]);
+        }
+
+        return response()->json([
+            "success" => "You update order success"
+        ]);
+    }
+
+    public function finantion_validation($request){
+        $financial_ids = array_column($request->financials, 'id');
+        $financial_account = $this->financial_account
+        ->whereIn("id", $financial_ids)
+        ->get();
+        foreach ($financial_account as $item) { 
+            $result = array_filter($request->financials, function($element) use($item) {
+                return $element['id'] == $item->id;
+            }); 
+            $result = reset($result);
+            if($item->description_status){
+                if (!isset($result['description'])) {
+                    return [
+                        "errors" => 'Description is required at financial ' . $item->name
+                    ];
+                }
+                if (!isset($result['transition_id'])) {
+                    return [
+                        "errors" => 'transition_id is required at financial ' . $item->name
+                    ];
+                }
+            }
+        }
+
+        return ["success" => true];
     }
 }
