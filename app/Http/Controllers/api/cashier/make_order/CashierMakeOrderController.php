@@ -394,12 +394,12 @@ class CashierMakeOrderController extends Controller
                 "errors" => $errors['msg']
             ], 400);
         }
-        event(new PrintOrder($order['order']));
-        $order['order']['order_number'] = $order['order']->order_number;
+        event(new PrintOrder($order['order'])); 
         // _________________________________
         return response()->json([
             'success' => $order['order'],
-            'kitchen_items' => $kitchen_items, 
+            'kitchen_items' => $kitchen_items,
+            'order_number' => $order['order']->order_number,
         ]);
     }
 
