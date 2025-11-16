@@ -972,7 +972,7 @@ class CashierMakeOrderController extends Controller
         ->where("table_id", $request->table_id)
         ->delete();
 
-        $order_number = $order['order']->order_number;
+        $order_number = $order['payment']->order_number;
         return response()->json([
             'success' => $order, 
             'order_number' => $order_number,
