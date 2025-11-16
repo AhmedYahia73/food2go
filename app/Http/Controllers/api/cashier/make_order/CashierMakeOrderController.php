@@ -865,7 +865,8 @@ class CashierMakeOrderController extends Controller
         ->delete();
 
         return response()->json([
-            'success' => $order_items, 
+            'success' => $order_items,
+            'order_number' => $order['payment']['order_number']
         ]);
     }
 
