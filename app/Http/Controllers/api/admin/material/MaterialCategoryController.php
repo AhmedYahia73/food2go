@@ -108,6 +108,9 @@ class MaterialCategoryController extends Controller
         }
 
         $categoryRequest = $validator->validated();
+        if(empty($request->category_id)){
+            $categoryRequest['category_id'] = null;
+        }
         $category = $this->category
         ->where('id', $id)
         ->first();
