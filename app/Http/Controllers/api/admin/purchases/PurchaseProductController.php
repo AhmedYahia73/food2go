@@ -41,6 +41,7 @@ class PurchaseProductController extends Controller
     public function product_item(Request $request, $id){ 
         $product = $this->product
         ->where('id', $id)
+        ->with('category:id,name')
         ->get()
         ->map(function($item){
             return [

@@ -45,6 +45,7 @@ class PurchaseCategoryController extends Controller
     public function category(Request $request, $id){ 
         $category = $this->category
         ->where('id', $id)
+        ->with('category:id,name')
         ->first();
 
         return response()->json([
