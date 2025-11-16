@@ -42,16 +42,7 @@ class MaterialController extends Controller
         $product = $this->product
         ->where('id', $id)
         ->with('category:id,name')
-        ->get()
-        ->map(function($item){
-            return [
-                'name' => $item->name,
-                'description' => $item->description,
-                'status' => $item->status,
-                'category_id' => $item->category_id,
-                'category' => $item?->category?->name,
-            ];
-        });
+        ->first();
 
         return response()->json([
             'material' => $product,
