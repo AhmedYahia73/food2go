@@ -44,7 +44,7 @@ class PurchaseCategoryController extends Controller
     
     public function category(Request $request, $id){ 
         $category = $this->category
-        ->where('category_id', $id)
+        ->where('id', $id)
         ->first();
 
         return response()->json([
