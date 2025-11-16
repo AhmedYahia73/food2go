@@ -28,6 +28,7 @@ use App\Models\Waiter;
 use App\Models\DeviceToken;
 use App\Models\StorageMan;
 use App\Models\FinantiolAcounting; 
+use App\Models\CompanyInfo; 
 
 class LoginController extends Controller
 {
@@ -37,6 +38,7 @@ class LoginController extends Controller
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
     private Kitchen $kitchen, private Waiter $waiter, private StorageMan $store_man_model,
     private Cashier $cashier_machine, private FinantiolAcounting $financial_account,
+    private CompanyInfo $company_info,
     ){}
 
     public function store_man(Request $request){
@@ -394,11 +396,14 @@ class LoginController extends Controller
             $user->save();
             $user->role = 'cashier';
             $user->token = $user->createToken('cashier')->plainTextToken;
+            $resturant_name = $this->company_info
+            ->first();
             return response()->json([
                 'cashier' => $user,
                 'token' => $user->token,
                 'start_shift' => $start_shift,
-                'financial_account' => $financial_account
+                'financial_account' => $financial_account,
+                "resturant_name" => $resturant_name?->name
             ], 200);
         }
         else { 
