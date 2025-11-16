@@ -45,15 +45,7 @@ class PurchaseCategoryController extends Controller
     public function category(Request $request, $id){ 
         $category = $this->category
         ->where('category_id', $id)
-        ->get()
-        ->map(function($item){
-            return [
-                'name' => $item->name,
-                'status' => $item->status,
-                'category_id' => $item->category_id,
-                'category' => $item?->category?->name,
-            ];
-        });
+        ->first();
 
         return response()->json([
             'category' => $category,
