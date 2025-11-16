@@ -117,8 +117,8 @@ class DiscountModuleController extends Controller
         $validator = Validator::make($request->all(), [
             'discount' => 'required|numeric',
             'status' => 'required|boolean',
-            'type' => 'required|in:all,app,web',
             'branch_modules' => 'required|array',
+            'branch_modules.*.type' => 'required|in:all,app,web',
             'branch_modules.*.branch_id' => 'required|exists:branches,id',
             'branch_modules.*.module' => 'required|in:take_away,dine_in,delivery',
         ]); 
