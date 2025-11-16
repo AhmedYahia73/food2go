@@ -9,6 +9,7 @@ class KitchenItem extends Model
     protected $fillable = [
         'kitchen_order_id',
         'product_id',
+        'note',
     ];
 
     public function product(){

@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('discount_module_branches', function (Blueprint $table) {
-            $table->enum('type', ['all', 'app', 'web'])->default('all');
+        Schema::table('kitchen_items', function (Blueprint $table) {
+            $table->string("note")->nullable();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('discount_module_branches', function (Blueprint $table) {
-            // 
+        Schema::table('kitchen_items', function (Blueprint $table) {
+            //
         });
     }
 };

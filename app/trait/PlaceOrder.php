@@ -804,6 +804,7 @@ trait PlaceOrder
             $kitchen_item = KitchenItem::create([
                 "kitchen_order_id" => $kitchen_order->id,
                 "product_id" => $element->id,
+                'note' => $element->note,
             ]);
             foreach ($element->extras as $value) {
                 KItemExtra::create([
