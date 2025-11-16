@@ -1244,7 +1244,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             "discount" => $discount_module->discount,
-            "module" => $discount_module?->module?->pluck("module"),
+            "module" => $discount_module?->module?->select("module", "type"),
         ]);
     }
 
