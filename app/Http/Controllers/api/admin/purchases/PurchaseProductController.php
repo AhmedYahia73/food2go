@@ -38,7 +38,7 @@ class PurchaseProductController extends Controller
         ]);
     }
     
-    public function product(Request $request, $id){ 
+    public function product_item(Request $request, $id){ 
         $product = $this->product
         ->where('id', $id)
         ->get()
