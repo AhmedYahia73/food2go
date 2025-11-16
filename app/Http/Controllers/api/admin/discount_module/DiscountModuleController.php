@@ -43,11 +43,17 @@ class DiscountModuleController extends Controller
             "dine_in",
             "delivery",
         ];
+        $tpye = [
+            'all',
+            'app',
+            'web',
+        ];
 
         return response()->json([
             "discounts" => $discounts,
             "branches" => $branches,
             "modules" => $modules,
+            "tpye" => $tpye,
         ]);
     }
 
