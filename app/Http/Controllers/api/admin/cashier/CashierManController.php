@@ -48,6 +48,7 @@ class CashierManController extends Controller
                 'login' => $item->tokens()->exists(),
                 'discount_perimission' => $item->discount_perimission,
                 'online_order' => $item->online_order,
+                'report' => $item->report,
             ];
         });
         $branches = $this->branch
