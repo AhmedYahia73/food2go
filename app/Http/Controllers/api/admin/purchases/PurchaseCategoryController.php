@@ -13,9 +13,8 @@ class PurchaseCategoryController extends Controller
     public function __construct(private PurchaseCategory $category){}
 
     public function view(Request $request){
-        $categories = $this->category
-        ->whereNotNull('category_id')
-        ->with('category')
+        $categories = $this->category  
+        ->with(['category:id,name'])
         ->get()
         ->map(function($item){
             return [
@@ -39,7 +38,7 @@ class PurchaseCategoryController extends Controller
 
         return response()->json([
             'parent_categories' => $parent_categories,
-            'sub_categories' => $categories,
+            'categories' => $categories,
         ]);
     }
     
