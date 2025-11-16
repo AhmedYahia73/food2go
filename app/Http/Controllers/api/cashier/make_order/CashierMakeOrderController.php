@@ -399,6 +399,7 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             'success' => $order['order'],
             'kitchen_items' => $kitchen_items,
+            'order_number' => $order['order']->order_number,
         ]);
     }
 
@@ -614,6 +615,7 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             'success' => $order['order'],  
             "kitchen_items" => $kitchen_items,
+            'order_number' => $order['order']['order_number'],
         ]);
     }
 
@@ -940,7 +942,8 @@ class CashierMakeOrderController extends Controller
         $order = $this->dine_in_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
-        } 
+        }
+        $order_number = $order['payment']['order_number'];
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order = $this->order_format(($order['payment']), 0);
       // Pull Pecipe
@@ -970,6 +973,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => $order, 
+            'order_number' => $order_number,
         ]);
     } 
 
