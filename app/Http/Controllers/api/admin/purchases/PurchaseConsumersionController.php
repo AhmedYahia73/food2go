@@ -89,8 +89,7 @@ class PurchaseConsumersionController extends Controller
         });
 
         return response()->json([
-            'branches' => $branches,
-            'consumersions' => $consumersions,
+            'branches' => $branches, 
             'categories' => $categories,
             'products' => $products,
             'stores' => $stores,
