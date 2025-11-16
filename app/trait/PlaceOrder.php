@@ -428,7 +428,7 @@ trait PlaceOrder
         ];
     }
 
-    public function make_order_cart($request, $paymob = 0){
+    public function make_order_cart($request, $orders, $paymob = 0){
         $branch_off = BranchOff::
         where('branch_id', $request->branch_id)
         ->get();
@@ -436,8 +436,7 @@ trait PlaceOrder
         $options_off = $branch_off->pluck('option_id')->filter()->values()->all();
         $categories_off = $branch_off->pluck('category_id')->filter()->values()->all();
         $orderRequest = $request->only($this->paymentRequest); 
-        $user = auth()->user();
-        
+        $user = auth()->user(); 
         if ($request->table_id) {
             $orderRequest['table_id'] = $request->table_id;
         }
@@ -502,6 +501,26 @@ trait PlaceOrder
         if($request->order_pending){
             $orderRequest['order_active'] = 0;
         }
+        // Check if product is found
+        // if($request->table_id){
+        //     $order_carts = $this->order_cart
+        //     ->where('table_id', $request->table_id)
+        //     ->get();
+        //     foreach ($order_carts as $item) {
+        //         $carts = $item->cart;
+        //         foreach ($carts as $element) {
+        //             $old_product_id = $element->product[0]->product->id;
+        //             $new_product_id = $request->products[0]->product_id;
+        //             $old_product_notes = $element->product[0]->notes;
+        //             $new_product_notes = $request->products[0]->note;
+        //             if(count($element->product) > 0 && $old_product_id == $new_product_id
+        //             && $old_product_notes == $new_product_notes){
+        //                 $old_addons = $element->addons;
+        //                 $new_addons = $request->products[0]->addons;
+        //             }
+        //         }
+        //     }
+        // }
         $orderRequest['points'] = $points;
         $order = $this->order_cart
         ->create($orderRequest);
