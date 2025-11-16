@@ -17,7 +17,8 @@ class PurchaseConsumersionController extends Controller
 {
     public function __construct(private PurchaseConsumersion $consumersions,
     private PurchaseStock $stock, private PurchaseCategory $categories,
-    private PurchaseProduct $products, private PurchaseStore $stores,){}
+    private PurchaseProduct $products, private PurchaseStore $stores,
+    private Branch $branches){}
 
     public function view(Request $request){
         $consumersions = $this->consumersions
@@ -39,21 +40,56 @@ class PurchaseConsumersionController extends Controller
                 'date' => $item->date,
                 'status' => $item->status,
             ];
+        }); 
+
+        return response()->json([
+            'consumersions' => $consumersions, 
+        ]);
+    }
+
+    public function lists(Request $request){
+        $branches = $this->branches
+        ->where('status', 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
         });
         $categories = $this->categories
         ->select('id', 'name', 'category_id')
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
         $products = $this->products
         ->select('id', 'name', 'category_id')
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
         $stores = $this->stores
         ->select('id', 'name')
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
 
         return response()->json([
+            'branches' => $branches,
             'consumersions' => $consumersions,
             'categories' => $categories,
             'products' => $products,
