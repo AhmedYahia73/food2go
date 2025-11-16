@@ -16,8 +16,10 @@ class FilterController extends Controller
 
     public function public_info(Request $request){
         $month = now()->startOfMonth()->toDateString();
-        Carbon::setWeekStartsAt(Carbon::SATURDAY);
-        $week = now()->startOfWeek()->toDateString();
+        $today = Carbon::today(); // أو use now() لو عايز الوقت مع التاريخ
+        // Carbon::SATURDAY = 6 (ثابت داخل Carbon)
+        $diff = ($today->dayOfWeek - Carbon::SATURDAY + 7) % 7;
+        $week = $today->copy()->subDays($diff)->toDateString();
         $today = date("Y-m-d");
 
         return response()->json([
