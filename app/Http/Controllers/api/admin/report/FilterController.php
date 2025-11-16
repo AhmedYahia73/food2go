@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\report;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 use App\Models\FilterSaved;
 
@@ -12,6 +13,19 @@ class FilterController extends Controller
 {
 
     public function __construct(private FilterSaved $filter_saved){}
+
+    public function public_info(Request $request){
+        $month = now()->startOfMonth()->toDateString();
+        Carbon::setWeekStartsAt(Carbon::SATURDAY);
+        $week = now()->startOfWeek()->toDateString();
+        $today = date("Y-m-d");
+
+        return response()->json([
+            'month' => $month,
+            'week' => $week,
+            'today' => $today,
+        ]);
+    }
 
     public function lists(Request $request){
         $filter_types = [

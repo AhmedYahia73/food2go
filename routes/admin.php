@@ -143,6 +143,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     Route::controller(FilterController::class)
     ->prefix('save_filter')->group(function(){
+        Route::get('/public_info', 'public_info'); 
         Route::get('/lists', 'lists'); 
         Route::post('/', 'view'); 
         Route::get('/item/{id}', 'filter_item'); 
