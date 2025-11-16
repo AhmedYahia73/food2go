@@ -149,10 +149,18 @@ class CaptainMakeOrderController extends Controller
             return $query
             ->where('status', 1)
             ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id');
+            ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
         }])
         ->where('branch_id', $branch_id)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->tables =  $item?->tables?->map(function($element){
+                $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
+                $element->makeHidden(['call_payment']);
+                return $element; 
+            });
+            return $item;
+        });
         $favourite_products = $this->products 
         ->with([
             'addons' => fn($q) => $q->withLocale($locale),
@@ -207,10 +215,18 @@ class CaptainMakeOrderController extends Controller
             return $query
             ->where('status', 1)
             ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id');
+            ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
         }])
         ->where('branch_id', $branch_id)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->tables =  $item?->tables?->map(function($element){
+                $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
+                $element->makeHidden(['call_payment']);
+                return $element; 
+            });
+            return $item;
+        });
         $products_count = $products->where("weight_status", 0)
         ->values();
         $products_weight = $products->where("weight_status", 1)
@@ -543,10 +559,18 @@ class CaptainMakeOrderController extends Controller
             return $query
             ->where('status', 1)
             ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id');
+            ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
         }])
         ->where('branch_id', $request->branch_id)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->tables =  $item?->tables?->map(function($element){
+                $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
+                $element->makeHidden(['call_payment']);
+                return $element; 
+            });
+            return $item;
+        });
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products); 
 
@@ -760,10 +784,18 @@ class CaptainMakeOrderController extends Controller
             return $query
             ->where('status', 1)
             ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id');
+            ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
         }])
         ->where('branch_id', $request->branch_id)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->tables =  $item?->tables?->map(function($element){
+                $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
+                $element->makeHidden(['call_payment']);
+                return $element; 
+            });
+            return $item;
+        });
         $favourite_products = $this->products
         ->with(['addons' => function($query) use($locale){
             $query->withLocale($locale);
@@ -835,10 +867,18 @@ class CaptainMakeOrderController extends Controller
             return $query
             ->where('status', 1)
             ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id');
+            ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
         }])
         ->where('branch_id', $request->branch_id)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->tables =  $item?->tables?->map(function($element){
+                $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
+                $element->makeHidden(['call_payment']);
+                return $element; 
+            });
+            return $item;
+        });
         $products_count = $products->where("weight_status", 0)
         ->values();
         $products_weight = $products->where("weight_status", 1)
