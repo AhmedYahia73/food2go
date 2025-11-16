@@ -13,14 +13,16 @@ use App\Models\PaymentMethod;
 use App\Models\TimeSittings;
 use App\Models\FinantiolAcounting;
 use App\Models\OrderFinancial;
-use App\Models\CashierBalance; 
+use App\Models\CashierBalance;
+use App\Models\Expense;
 
 class CashierReportsController extends Controller
 {
     public function __construct(private CashierShift $cashier_shift,
     private Order $orders, private PaymentMethod $payment_methods
     , private TimeSittings $TimeSittings, private FinantiolAcounting $financial_account,
-    private OrderFinancial $order_financial, private CashierBalance $cashier_balance,){}
+    private OrderFinancial $order_financial, private CashierBalance $cashier_balance,
+    private Expense $expenses){}
     
     public function cashier_reports(Request $request){
     //     $cashier_balance = $this->cashier_balance;
