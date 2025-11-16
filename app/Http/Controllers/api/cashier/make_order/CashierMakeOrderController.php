@@ -865,8 +865,7 @@ class CashierMakeOrderController extends Controller
         $this->checkout_request_query
         ->where("table_id", $request->table_id)
         ->delete();
-
-        $order_items['order_number'] = $order['order']->order_number;
+ 
         return response()->json([
             'success' => $order_items,
             'order_number' => $order['payment']['order_number']
