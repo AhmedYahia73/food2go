@@ -1227,6 +1227,7 @@ class CashierMakeOrderController extends Controller
     public function discount_module(Request $request){
         $validator = Validator::make($request->all(), [
             'branch_id' => 'required|exists:branches,id',
+            'type' => 'required|in:web,app',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -1237,7 +1238,8 @@ class CashierMakeOrderController extends Controller
         $discount_module = $this->discount_module
         ->with('module')
         ->whereHas("module", function($query) use($request){
-            $query->where("branch_id", $request->branch_id);
+            $query->where("branch_id", $request->branch_id)
+            ->whereIn("type", [$request->type, "all"]);
         })
         ->where("status", 1)
         ->first();
