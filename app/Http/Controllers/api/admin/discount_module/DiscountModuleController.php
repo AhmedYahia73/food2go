@@ -82,9 +82,9 @@ class DiscountModuleController extends Controller
     public function create(Request $request){ 
         $validator = Validator::make($request->all(), [
             'discount' => 'required|numeric',
-            'tpye' => 'required|in:all,app,web',
             'status' => 'required|boolean',
             'branch_modules' => 'required|array',
+            'branch_modules.*.tpye' => 'required|in:all,app,web',
             'branch_modules.*.branch_id' => 'required|exists:branches,id',
             'branch_modules.*.module' => 'required|in:take_away,dine_in,delivery',
         ]); 
