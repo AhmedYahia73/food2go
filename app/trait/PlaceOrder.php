@@ -803,12 +803,12 @@ trait PlaceOrder
         $order_data = []; 
         foreach ($order->order_details ?? $order as $key => $item) {
             $product = collect([]);
-            $product->id = $item->product[0]->product->id;
-            $product->name = $item->product[0]->product->name;
-            $product->category_id = $item->product[0]->product->category_id;
-            $product->sub_category_id = $item->product[0]->product->sub_category_id;
-            $product->notes = $item->product[0]->notes;
-            $product->count = $item->product[0]->count; 
+            $product['id'] = $item->product[0]->product->id;
+            $product['name'] = $item->product[0]->product->name;
+            $product['category_id'] = $item->product[0]->product->category_id;
+            $product['sub_category_id'] = $item->product[0]->product->sub_category_id;
+            $product['notes'] = $item->product[0]->notes;
+            $product['count'] = $item->product[0]->count; 
             $variation = [];
             $addons = [];
             $excludes = [];
@@ -847,14 +847,14 @@ trait PlaceOrder
 					"id" => $element->id,
 					'name' => $element->name,
 				];
-            }
+            } 
             $order_data[$key] = $product;
-            $order_data[$key]->cart_id = $order->id; 
-            $order_data[$key]->count = $item->product[0]->count; 
-            $order_data[$key]->excludes = $excludes;
-            $order_data[$key]->extras = $extras;
-            $order_data[$key]->variation_selected = $variation;
-            $order_data[$key]->addons_selected = $addons;
+            $order_data[$key]['cart_id'] = $order->id; 
+            $order_data[$key]['count'] = $item->product[0]->count; 
+            $order_data[$key]['excludes'] = $excludes;
+            $order_data[$key]['extras'] = $extras;
+            $order_data[$key]['variation_selected'] = $variation;
+            $order_data[$key]['addons_selected'] = $addons;
         }
 
         return $order_data;
