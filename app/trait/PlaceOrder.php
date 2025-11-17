@@ -890,10 +890,10 @@ trait PlaceOrder
                     "kitchen_item_id" => $kitchen_item->id,
                     "variation_id" => $value->id,
                 ]);
-                foreach ($value->options as $value_item) {
+                foreach ($value['options'] as $value_item) {
                     KItemOption::create([
                         "kitchen_variation_id" => $variation->id,
-                        "option_id" => $value_item->id,
+                        "option_id" => $value_item['id'],
                     ]);
                 }
             }
