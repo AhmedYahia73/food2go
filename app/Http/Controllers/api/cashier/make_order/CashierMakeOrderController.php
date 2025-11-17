@@ -1086,11 +1086,11 @@ class CashierMakeOrderController extends Controller
             $kitchen = $this->kitchen
             ->where(function($q) use($element){
                 $q->whereHas('products', function($query) use ($element){
-                    $query->where('products.id', $element->id);
+                    $query->where('products.id', $element['id']);
                 })
                 ->orWhereHas('category', function($query) use ($element){
-                    $query->where('categories.id', $element->category_id)
-                    ->orWhere('categories.id', $element->sub_category_id);
+                    $query->where('categories.id', $element['category_id'])
+                    ->orWhere('categories.id', $element['sub_category_id']);
                 });
             })
             ->where('branch_id', $request->user()->branch_id)
