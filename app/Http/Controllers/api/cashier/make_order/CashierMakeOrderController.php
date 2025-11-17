@@ -1402,7 +1402,7 @@ class CashierMakeOrderController extends Controller
                 $addons[] = [
                     'count' => $count,
                     'price' => $price,
-                    'name' => $name,
+                    'name' => $addon_name,
                     'total' => $total,
                 ];
             }
