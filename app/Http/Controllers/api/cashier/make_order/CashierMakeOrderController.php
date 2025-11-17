@@ -1160,7 +1160,7 @@ class CashierMakeOrderController extends Controller
             ]);
             $this->kitechen_cart($item, $kitchen_order );
         }
-        $order_kitchen = array_values($order_kitchen);
+        $order_kitchen = $order_kitchen;
 
         return [
             'success' => $order_items,
