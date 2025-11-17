@@ -151,13 +151,13 @@ class AddressController extends Controller
         // https://bcknd.food2go.online/customer/address
         $locale = $request->locale ?? 'en';
        
-        $branches = $this->branch 
+        $branches = $this->branch
+        ->withLocale($request->locale)
         ->get()
         ->map(function($item) use($request){
             return [
                 "id" => $item->id,
-                "name" => $item?->translations()
-                ?->where("locale", $request->locale)
+                "name" => $item?->translations
                 ?->where("key", $item->name)
                 ?->first()?->value ?? $item->name,
                 "address" => $item->address,
