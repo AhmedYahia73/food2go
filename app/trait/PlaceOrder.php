@@ -800,8 +800,7 @@ trait PlaceOrder
     }
 
     public function takeaway_kitchen_format($order){
-        $order_data = [];
-        return $order->order_details;
+        $order_data = []; 
         foreach ($order->order_details ?? $order as $key => $item) {
             $product = collect([]);
             $product->id = $item->product[0]->product->id;
