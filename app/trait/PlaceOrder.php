@@ -820,7 +820,7 @@ trait PlaceOrder
                     $options[] = ["name" => $item->name];
                 } 
                 $variation[] = [
-                    'name' => $element['name'],
+                    'name' => $element,
                     'options' => $options,
                 ]; 
             }
