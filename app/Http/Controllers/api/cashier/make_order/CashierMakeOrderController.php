@@ -1136,7 +1136,7 @@ class CashierMakeOrderController extends Controller
             ->first();
             if(!empty($kitchen)){
                 $kitchen_items[$kitchen->id] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $element;
+                $order_kitchen[$kitchen->id][] = $element;
             }
         }
             
@@ -1160,7 +1160,7 @@ class CashierMakeOrderController extends Controller
             ]);
             $this->kitechen_cart($item, $kitchen_order );
         }
-        $order_kitchen = $order_kitchen;
+        $order_kitchen = array_values($order_kitchen);
 
         return [
             'success' => $order_items,
