@@ -828,15 +828,23 @@ trait PlaceOrder
                 $element->addon->count = $element->count;
                 unset($element->count);
                 $addons[] = [
-                    'name' => $element->addon->name,
+                    'name' => $element->addon,
                     'count' => $element->addon->count,
                 ];
+            }
+            $excludes = [];
+            $extras = [];
+            foreach ($item->excludes as $item) {
+                $excludes[] = ['name' => $item->name];
+            }
+            foreach ($item->extras as $item) {
+                $extras[] = ['name' => $item->name];
             }
             $order_data[$key] = $product;
             $order_data[$key]->cart_id = $order->id; 
             $order_data[$key]->count = $item->product[0]->count; 
-            $order_data[$key]->excludes = ['name' => $item->excludes->name];
-            $order_data[$key]->extras = ['name' => $item->extras->name];
+            $order_data[$key]->excludes = $excludes;
+            $order_data[$key]->extras = $extras;
             $order_data[$key]->variation_selected = $variation;
             $order_data[$key]->addons_selected = $addons;
         }
