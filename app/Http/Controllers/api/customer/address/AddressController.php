@@ -156,8 +156,9 @@ class AddressController extends Controller
         ->map(function($item) use($request){
             return [
                 "id" => $item->id,
-                "name" => $item->name?->translations()
+                "name" => $item?->translations()
                 ?->where("locale", $request->locale)
+                ?->where("key", $item->name)
                 ?->first()?->value ?? $item->name,
                 "address" => $item->address,
                 "latitude" => $item->latitude,
