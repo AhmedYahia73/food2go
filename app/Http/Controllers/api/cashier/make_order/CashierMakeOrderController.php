@@ -40,6 +40,7 @@ use App\Models\PaymentMethodAuto;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Models\BranchOff;
+use App\Models\Branch;
 use App\Models\CafeLocation;
 use App\Models\CafeTable;
 use App\Models\TimeSittings;
@@ -612,12 +613,19 @@ class CashierMakeOrderController extends Controller
             ], 400);
         } 
         $order['order']['order_number'] = $order['order']->order_number;
+        $type = "تيك اواى";
+        $caheir_name = $request->user()->user_name;
+        $address = Branch::where("id", $request->user()->branch_id)
+        ->first()?->address;
          
         // _________________________________
-        return response()->json([
-            'success' => $order['order'],  
+        return response()->json([ 
             "kitchen_items" => $kitchen_items,  
-            "order_number" => $order['order']->order_number
+            "order_number" => $order['order']->order_number,
+            'type' => $type,
+            'caheir_name' => $caheir_name,
+            'address' => $address,
+            'date' => now(),
         ]);
     }
 
