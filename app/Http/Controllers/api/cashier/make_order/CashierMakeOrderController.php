@@ -626,7 +626,7 @@ class CashierMakeOrderController extends Controller
          
         // _________________________________
         return response()->json([ 
-            "success" => checkout_data($request),
+            "success" => $this->checkout_data($request),
             "kitchen_items" => $kitchen_items,  
             "order_number" => $order['order']->order_number,
             'type' => $type,
