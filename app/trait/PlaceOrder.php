@@ -802,13 +802,13 @@ trait PlaceOrder
     public function takeaway_kitchen_format($order){
         $order_data = []; 
         foreach ($order->order_details ?? $order as $key => $item) {
-            $product = collect([]);
-            $product->id = $item->product[0]->product->id;
-            $product->name = $item->product[0]->product->name;
-            $product->category_id = $item->product[0]->product->category_id;
-            $product->sub_category_id = $item->product[0]->product->sub_category_id;
-            $product->notes = $item->product[0]->notes;
-            $product->count = $item->product[0]->count; 
+            $product = [];
+            $product['id'] = $item->product[0]->product->id;
+            $product['name'] = $item->product[0]->product->name;
+            $product['category_id'] = $item->product[0]->product->category_id;
+            $product['sub_category_id'] = $item->product[0]->product->sub_category_id;
+            $product['notes'] = $item->product[0]->notes;
+            $product['count'] = $item->product[0]->count; 
             $variation = [];
             $addons = [];
             $excludes = [];
