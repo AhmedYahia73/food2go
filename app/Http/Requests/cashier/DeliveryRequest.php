@@ -39,6 +39,10 @@ class DeliveryRequest extends FormRequest
             'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
             'products.*.count' => ['numeric', 'required'],
             'products.*.note' => ['sometimes'],
+
+            'products.*.price' => ['numeric', 'required_if:order_pending,false'],
+            'products.*.addons.*.price' => ['numeric', 'required_if:order_pending,false'],
+
             'financials' => ['array'],
             'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
             'financials.*.amount' => ['required', 'numeric'],

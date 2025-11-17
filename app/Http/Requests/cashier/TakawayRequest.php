@@ -39,8 +39,8 @@ class TakawayRequest extends FormRequest
             'products.*.addons.*.addon_id' => ['exists:addons,id'],
             'products.*.addons.*.count' => ['numeric'],
 
-            'products.*.addons.*.price' => ['numeric'],
-            
+            'products.*.addons.*.price' => ['numeric', 'required_if:order_pending,false'],
+
             'products.*.variation.*.variation_id' => ['exists:variation_products,id'],
             'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
             'products.*.count' => ['numeric', 'required_if:order_pending,false'],

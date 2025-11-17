@@ -398,7 +398,7 @@ class CashierMakeOrderController extends Controller
         event(new PrintOrder($order['order'])); 
         // _________________________________
         return response()->json([
-            'success' => $order['order'],
+            "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
             'order_number' => $order['order']->order_number,
         ]);
@@ -991,7 +991,7 @@ class CashierMakeOrderController extends Controller
         ->delete();
 
         return response()->json([
-            'success' => $order, 
+            "success" => $this->checkout_data($request),
             'order_number' => $order_number,
         ]);
     } 
@@ -1079,7 +1079,7 @@ class CashierMakeOrderController extends Controller
         ->where('id', $id)
         ->first(); 
         $kitchen_items = [];
-        $order_items = $this->takeaway_order_format($order);
+        $order_items = $this->takeaway_kitchen_format($order);
         $order_items = collect($order_items);
         $kitchen_order = [];
         foreach ($order_items as $key => $element) {
