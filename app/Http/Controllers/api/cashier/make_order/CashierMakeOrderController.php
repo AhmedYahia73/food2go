@@ -617,6 +617,11 @@ class CashierMakeOrderController extends Controller
         $caheir_name = $request->user()->user_name;
         $address = Branch::where("id", $request->user()->branch_id)
         ->first()?->address;
+        $financial_ids = array_column($request->financials, 'id');
+        $financial_accounts = $this->financial_account
+        ->whereIn('id', $financial_ids)
+        ->get()
+        ->pluck("name");
          
         // _________________________________
         return response()->json([ 
@@ -625,6 +630,7 @@ class CashierMakeOrderController extends Controller
             'type' => $type,
             'caheir_name' => $caheir_name,
             'address' => $address,
+            'financial_accounts' => $financial_accounts,
             'date' => now(),
         ]);
     }
