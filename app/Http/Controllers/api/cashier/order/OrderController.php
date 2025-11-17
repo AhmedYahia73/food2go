@@ -752,6 +752,13 @@ class OrderController extends Controller
                 'description' => isset($element['description']) ? $element['description'] : null,
                 'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
             ]); 
+            $financial = FinantiolAcounting::
+            where("id", $element['id'])
+            ->first();
+            if($financial){
+                $financial->balance += $element['amount'];
+                $financial->save();
+            }
         }
 
         return response()->json([

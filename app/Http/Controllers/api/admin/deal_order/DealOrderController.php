@@ -12,6 +12,7 @@ use App\Models\Deal;
 use App\Models\DealUser;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\FinantiolAcounting; 
 use App\Models\TimeSittings; 
 
 class DealOrderController extends Controller
@@ -99,6 +100,15 @@ class DealOrderController extends Controller
         $deals->save();
         foreach ($request->financials as $item) {
             $deals->financials()->attach($item["id"], ["amount" => $item['amount']]);
+
+            $financial = FinantiolAcounting::
+            where("id", $item['id'])
+            ->first();
+            if($financial){
+                $financial->balance += $item['amount'];
+                $financial->save();
+            }
+            
         }
 
         return response()->json([

@@ -140,6 +140,13 @@ class PurchaseController extends Controller
                 'financial_id' => $item['id'],
                 'amount' => $item['amount'],
             ]);
+            $financial = FinantiolAcounting::
+            where("id", $item['id'])
+            ->first();
+            if($financial){
+                $financial->balance -= $item['amount'];
+                $financial->save();
+            }
         }
         $stock = $this->stock
         ->where('product_id', $request->product_id)

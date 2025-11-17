@@ -3,6 +3,7 @@
 namespace App\trait;
 
 use App\Models\Payment;
+use App\Models\FinantiolAcounting;
 use App\Models\BranchOff; 
 
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -131,6 +132,13 @@ trait POS
                     'description' => isset($element['description']) ? $element['description'] : null,
                     'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
                 ]); 
+                $financial = FinantiolAcounting::
+                where("id", $element['id'])
+                ->first();
+                if($financial){
+                    $financial->balance += $element['amount'];
+                    $financial->save();
+                }
             }
         }
         $order_details = $this->order_details($request, $order, $locale);
@@ -330,7 +338,14 @@ trait POS
                     'amount' => $element['amount'],
                     'description' => isset($element['description']) ? $element['description'] : null,
                     'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
-                ]); 
+                ]);
+                $financial = FinantiolAcounting::
+                where("id", $element['id'])
+                ->first();
+                if($financial){
+                    $financial->balance += $element['amount'];
+                    $financial->save();
+                }
             }
         }
         if (isset($request->products)) {
@@ -532,7 +547,14 @@ trait POS
                     'amount' => $element['amount'] ?? null,
                     'description' => isset($element['description']) ? $element['description'] : null,
                     'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
-                ]); 
+                ]);
+                $financial = FinantiolAcounting::
+                where("id", $element['id'])
+                ->first();
+                if($financial){
+                    $financial->balance += $element['amount'];
+                    $financial->save();
+                }
             }
         }
         if (isset($request->products)) {
@@ -732,7 +754,15 @@ trait POS
                 'amount' => $element['amount'],
                 'description' => isset($element['description']) ? $element['description'] : null,
                 'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
-            ]); 
+            ]);
+
+            $financial = FinantiolAcounting::
+            where("id", $element['id'])
+            ->first();
+            if($financial){
+                $financial->balance += $element['amount'];
+                $financial->save();
+            }
         }
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;

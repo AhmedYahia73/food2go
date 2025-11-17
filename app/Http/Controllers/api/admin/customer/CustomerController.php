@@ -208,6 +208,14 @@ class CustomerController extends Controller
         foreach ($request->financials as $item) {
             $user_debt->financial()
             ->attach($item['id'], ["amount" => $item['amount']]);
+
+            $financial = FinantiolAcounting::
+            where("id", $item['id'])
+            ->first();
+            if($financial){
+                $financial->balance += $item['amount'];
+                $financial->save();
+            }
         }
 
         return response()->json([

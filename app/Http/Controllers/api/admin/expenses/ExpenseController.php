@@ -106,6 +106,13 @@ class ExpenseController extends Controller
         $expenseRequest['admin_id'] = $request->user()->id;
         $this->expenses
         ->create($expenseRequest);
+        $financial = FinantiolAcounting::
+        where("id", $request->id)
+        ->first();
+        if($financial){
+            $financial->balance -= $request->amount;
+            $financial->save();
+        }
 
         return response()->json([
             "success" => "You add expense success"

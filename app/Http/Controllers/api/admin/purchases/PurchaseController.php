@@ -144,6 +144,14 @@ class PurchaseController extends Controller
                 'financial_id' => $item['id'],
                 'amount' => $item['amount'],
             ]);
+
+            $financial = FinantiolAcounting::
+            where("id", $element['id'])
+            ->first();
+            if($financial){
+                $financial->balance -= $element['amount'];
+                $financial->save();
+            }
         }
         $stock = $this->stock
         ->where('product_id', $request->product_id)
@@ -203,6 +211,18 @@ class PurchaseController extends Controller
         }
         $purchases
         ->update($purchaseRequest);
+        $purchase_financial = $this->purchase_financial
+        ->where('purchase_id', $id)
+        ->get();
+        foreach ($purchase_financial as $item) {
+            $financial = FinantiolAcounting::
+            where("id", $item->financial_id)
+            ->first();
+            if($financial){
+                $financial->balance += $item->amount;
+                $financial->save();
+            }
+        }
         $this->purchase_financial
         ->where('purchase_id', $id)
         ->delete();
@@ -213,6 +233,14 @@ class PurchaseController extends Controller
                 'financial_id' => $item['id'],
                 'amount' => $item['amount'],
             ]);
+
+            $financial = FinantiolAcounting::
+            where("id", $element['id'])
+            ->first();
+            if($financial){
+                $financial->balance -= $element['amount'];
+                $financial->save();
+            }
         }
         $stock = $this->stock
         ->where('product_id', $request->product_id)
