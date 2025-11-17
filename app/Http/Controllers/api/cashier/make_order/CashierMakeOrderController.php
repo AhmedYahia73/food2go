@@ -672,7 +672,7 @@ class CashierMakeOrderController extends Controller
         $order_data = $this->order_format($order['payment'], 0);
 
         return response()->json([
-            'success' => $order_data, 
+            'success' => $this->checkout_data($request), 
             'request' => $request->all()
         ]);
     }

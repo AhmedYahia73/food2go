@@ -25,6 +25,21 @@ class DineinOrderRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'numeric'],
+            
+            'products' => ['required_if:order_pending,false', 'array'],
+            'products.*.product_id' => ['exists:products,id', 'required_if:order_pending,false'],
+
+            'products.*.price' => ['numeric', 'required'],
+            'products.*.exclude_id.*' => ['exists:exclude_products,id', 'required'],
+            'products.*.extra_id.*' => ['exists:extra_products,id', 'required'],
+            'products.*.addons.*.addon_id' => ['exists:addons,id', 'required'],
+            'products.*.addons.*.count' => ['numeric', 'required'],
+            'products.*.addons.*.price' => ['numeric', 'required'],
+            'products.*.variation.*.variation_id' => ['exists:variation_products,id', 'required'],
+            'products.*.variation.*.option_id.*' => ['exists:option_products,id', 'required'],
+            'products.*.count' => ['numeric', 'required'],
+            'products.*.note' => ['sometimes'],
+
             'financials' => ['required', 'array'],
             'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
             'financials.*.amount' => ['required', 'numeric'],
