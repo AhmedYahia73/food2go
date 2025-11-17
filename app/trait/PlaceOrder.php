@@ -817,10 +817,10 @@ trait PlaceOrder
                 $options_items = $element->options;
                 $options = [];
                 foreach ($options_items as $item) {
-                    $options[] = ["name" => $item->name];
+                    $options[] = ["name" => $item['name']];
                 } 
                 $variation[] = [
-                    'name' => $element->name,
+                    'name' => $element['name'],
                     'options' => $options,
                 ]; 
             }
