@@ -751,7 +751,7 @@ class OrderController extends Controller
                 'amount' => $element['amount'],
                 'description' => isset($element['description']) ? $element['description'] : null,
                 'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
-            ]);
+            ]); 
         }
 
         return response()->json([

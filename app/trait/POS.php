@@ -3,7 +3,7 @@
 namespace App\trait;
 
 use App\Models\Payment;
-use App\Models\BranchOff;
+use App\Models\BranchOff; 
 
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -130,7 +130,7 @@ trait POS
                     'amount' => $element['amount'],
                     'description' => isset($element['description']) ? $element['description'] : null,
                     'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
-                ]);
+                ]); 
             }
         }
         $order_details = $this->order_details($request, $order, $locale);
@@ -330,7 +330,7 @@ trait POS
                     'amount' => $element['amount'],
                     'description' => isset($element['description']) ? $element['description'] : null,
                     'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
-                ]);
+                ]); 
             }
         }
         if (isset($request->products)) {
@@ -532,7 +532,7 @@ trait POS
                     'amount' => $element['amount'] ?? null,
                     'description' => isset($element['description']) ? $element['description'] : null,
                     'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
-                ]);
+                ]); 
             }
         }
         if (isset($request->products)) {
@@ -732,7 +732,7 @@ trait POS
                 'amount' => $element['amount'],
                 'description' => isset($element['description']) ? $element['description'] : null,
                 'transition_id' => isset($element['transition_id']) ? $element['transition_id'] : null,
-            ]);
+            ]); 
         }
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;

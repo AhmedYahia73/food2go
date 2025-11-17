@@ -152,9 +152,26 @@ class AddressController extends Controller
         $locale = $request->locale ?? 'en';
        
         $branches = $this->branch
-        ->select('id', 'name', 'address', 'cover_image', 'image', 'latitude', 'longitude', 'phone_status',
-        'phone','phone_status','food_preparion_time')
-        ->get();
+        ->select('', '', '', 'cover_image', 'image', '', '', '',
+        '','','')
+        ->get()
+        ->map(function($item) use($request){
+            return [
+                "id" => $item->id,
+                "name" => $item->name?->translations()
+                ?->where("locale", $request->locale)
+                ?->first()?->value ?? $item->name,
+                "address" => $item->address,
+                "latitude" => $item->latitude,
+                "longitude" => $item->longitude,
+                "phone_status" => $item->phone_status,
+                "phone" => $item->phone,
+                "food_preparion_time" => $item->food_preparion_time,
+                "image_link" => $item->image_link,
+                "cover_image_link" => $item->cover_image_link,
+                "map" => $item->map,
+            ];
+        });
 
         $order_types = $this->settings
         ->where('name', 'order_type')
