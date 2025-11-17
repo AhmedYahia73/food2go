@@ -1392,19 +1392,21 @@ class CashierMakeOrderController extends Controller
         $products = [];
         foreach ($request->products as $item) {
             $addons = [];
-            foreach ($item['addons'] as $element) {
-                $count = $element['count'];
-                $addon_name = $this->addons
-                ->where('id', $element['addon_id'])
-                ->first()?->name;
-                $price = $element['price'];
-                $total = $count * $price;
-                $addons[] = [
-                    'count' => $count,
-                    'price' => $price,
-                    'name' => $addon_name,
-                    'total' => $total,
-                ];
+            if(isset($item['addons'])){
+                foreach ($item['addons'] as $element) {
+                    $count = $element['count'];
+                    $addon_name = $this->addons
+                    ->where('id', $element['addon_id'])
+                    ->first()?->name;
+                    $price = $element['price'];
+                    $total = $count * $price;
+                    $addons[] = [
+                        'count' => $count,
+                        'price' => $price,
+                        'name' => $addon_name,
+                        'total' => $total,
+                    ];
+                }
             }
 
             $count = $item['count'];
