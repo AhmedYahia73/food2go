@@ -811,6 +811,8 @@ trait PlaceOrder
             $product->count = $item->product[0]->count; 
             $variation = [];
             $addons = [];
+            $excludes = [];
+            $extras = [];
             // $item->addons->addon->count = $item->addons->count;
             // $item->variations->variation->options = $item->variations->options;
             foreach ($item->variations as $key => $element) {
@@ -832,8 +834,6 @@ trait PlaceOrder
                     'count' => $element->addon->count,
                 ];
             }
-            $excludes = [];
-            $extras = [];
             foreach ($item->excludes as $item) {
                 $excludes[] = ['name' => $item->name];
             }
