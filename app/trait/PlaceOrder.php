@@ -818,15 +818,14 @@ trait PlaceOrder
             foreach ($item->variations as $key => $element) {
                 $options_items = $element->options;
                 $options = [];
-                foreach ($options_items as $item) {
-                    $options[] = ["name" => $item->name];
+                foreach ($options_items as $value) {
+                    $options[] = ["name" => $value->name];
                 } 
                 $variation[] = [
-                    'name' => $element,
+                    'name' => $element?->name,
                     'options' => $options,
                 ]; 
-            }
-            dd($item);
+            } 
             foreach ($item->addons as $key => $element) {
                 $element->addon->count = $element->count;
                 unset($element->count);
