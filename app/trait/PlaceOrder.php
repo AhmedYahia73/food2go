@@ -864,22 +864,22 @@ trait PlaceOrder
         foreach ($item as $element) {
             $kitchen_item = KitchenItem::create([
                 "kitchen_order_id" => $kitchen_order->id,
-                "product_id" => $element->id,
+                "product_id" => $element['id'],
                // 'note' => $element->note,
             ]);
-            foreach ($element->extras as $value) {
+            foreach ($element['extras'] as $value) {
                 KItemExtra::create([
                     "kitchen_item_id" => $kitchen_item->id,
                     "extra_id" => $value['id'],
                 ]);
             }
-            foreach ($element->excludes as $value) {
+            foreach ($element['excludes'] as $value) {
                 KItemExclude::create([
                     "kitchen_item_id" => $kitchen_item->id,
                     "exclude_id" => $value['id'],
                 ]);
             }
-            foreach ($element->addons_selected as $value) {
+            foreach ($element['addons_selected'] as $value) {
                 KItemAddon::create([
                     "kitchen_item_id" => $kitchen_item->id,
                     "addon_id" => $value['id'],
