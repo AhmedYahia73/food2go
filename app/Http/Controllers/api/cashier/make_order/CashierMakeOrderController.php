@@ -622,9 +622,11 @@ class CashierMakeOrderController extends Controller
         ->whereIn('id', $financial_ids)
         ->get()
         ->pluck("name");
+        //_________________________________
          
         // _________________________________
         return response()->json([ 
+            "success" => checkout_data($request),
             "kitchen_items" => $kitchen_items,  
             "order_number" => $order['order']->order_number,
             'type' => $type,
@@ -1384,5 +1386,42 @@ class CashierMakeOrderController extends Controller
             // لو حصل أي ايرور، رجعه
             return response($e->getMessage(), 500)->header('Content-Type', 'text/plain');
         }
+    }
+
+    public function checkout_data($request){ 
+        $products = [];
+        foreach ($request->products as $item) {
+            $addons = [];
+            foreach ($item['addons'] as $element) {
+                $count = $element['count'];
+                $addon_name = $this->addons
+                ->where('id', $element['addon_id'])
+                ->first()?->name;
+                $price = $element['price'];
+                $total = $count * $price;
+                $addons[] = [
+                    'count' => $count,
+                    'price' => $price,
+                    'name' => $name,
+                    'total' => $total,
+                ];
+            }
+
+            $count = $item['count'];
+            $price = $item['price'];
+            $name = $this->products
+            ->where('id', $item['product_id'])
+            ->first()?->name;
+            $total = $count * $price;
+            $products[] = [
+                'count' => $count,
+                'price' => $price,
+                'name' => $name,
+                'total' => $total,
+                "addons" => $addons
+            ];
+        }
+
+        return $products;
     }
 }
