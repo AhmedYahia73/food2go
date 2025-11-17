@@ -799,6 +799,51 @@ trait PlaceOrder
         return $order_data;
     }
 
+    public function takeaway_kitchen_format($order){
+        $order_data = [];
+        foreach ($order->order_details ?? $order as $key => $item) {
+            $product = collect([]);
+            $product->id = $item->product[0]->product->id;
+            $product->name = $item->product[0]->product->name;
+            $product->category_id = $item->product[0]->product->category_id;
+            $product->sub_category_id = $item->product[0]->product->sub_category_id;
+            $product->notes = $item->product[0]->notes;
+            $product->count = $item->product[0]->count; 
+            $variation = [];
+            $addons = [];
+            // $item->addons->addon->count = $item->addons->count;
+            // $item->variations->variation->options = $item->variations->options;
+            foreach ($item->variations as $key => $element) {
+                $options_items = $element->options;
+                $options = [];
+                foreach ($options_items as $item) {
+                    $options[] = ["name" => $item->name];
+                } 
+                $variation[] = [
+                    'name' => $element->name,
+                    'options' => $options,
+                ]; 
+            }
+            foreach ($item->addons as $key => $element) {
+                $element->addon->count = $element->count;
+                unset($element->count);
+                $addons[] = [
+                    'name' => $element->addon->name,
+                    'count' => $element->addon->count,
+                ];
+            }
+            $order_data[$key] = $product;
+            $order_data[$key]->cart_id = $order->id; 
+            $order_data[$key]->count = $item->product[0]->count; 
+            $order_data[$key]->excludes = ['name' => $item->excludes->name];
+            $order_data[$key]->extras = ['name' => $item->extras->name];
+            $order_data[$key]->variation_selected = $variation;
+            $order_data[$key]->addons_selected = $addons;
+        }
+
+        return $order_data;
+    }
+
     public function kitechen_cart($item, $kitchen_order){ 
         foreach ($item as $element) {
             $kitchen_item = KitchenItem::create([

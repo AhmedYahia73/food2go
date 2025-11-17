@@ -612,6 +612,7 @@ class CashierMakeOrderController extends Controller
             ], 400);
         } 
         $order['order']['order_number'] = $order['order']->order_number;
+         
         // _________________________________
         return response()->json([
             'success' => $order['order'],  
@@ -1115,7 +1116,7 @@ class CashierMakeOrderController extends Controller
         $order = $this->order
         ->where('id', $id)
         ->first();  
-        $order_items = $this->takeaway_order_format($order);
+        $order_items = $this->takeaway_kitchen_format($order);
         $order_items = collect($order_items);
         $kitchen_order = [];
         $kitchen_items = [];
