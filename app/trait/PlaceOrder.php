@@ -834,11 +834,11 @@ trait PlaceOrder
                     'count' => $element->addon->count,
                 ];
             }
-            foreach ($item->excludes as $item) {
-                $excludes[] = ['name' => $item->name];
+            foreach ($item->excludes as $element) {
+                $excludes[] = ['name' => $element->name];
             }
-            foreach ($item->extras as $item) {
-                $extras[] = ['name' => $item->name];
+            foreach ($item->extras as $element) {
+                $extras[] = ['name' => $element->name];
             }
             $order_data[$key] = $product;
             $order_data[$key]->cart_id = $order->id; 
