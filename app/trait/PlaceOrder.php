@@ -826,6 +826,7 @@ trait PlaceOrder
                     'options' => $options,
                 ]; 
             }
+            dd($item);
             foreach ($item->addons as $key => $element) {
                 $element->addon->count = $element->count;
                 unset($element->count);
