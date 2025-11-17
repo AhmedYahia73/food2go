@@ -151,9 +151,7 @@ class AddressController extends Controller
         // https://bcknd.food2go.online/customer/address
         $locale = $request->locale ?? 'en';
        
-        $branches = $this->branch
-        ->select('', '', '', 'cover_image', 'image', '', '', '',
-        '','','')
+        $branches = $this->branch 
         ->get()
         ->map(function($item) use($request){
             return [
