@@ -861,10 +861,9 @@ class ReportController extends Controller
             ->first()->total;
             $total = $to_financial - $from_financial + $start_balance;
             return [
-                "total_amount" => $item->total_amount - $expenses_amount,
+                "total_amount" => $item->total_amount - $expenses_amount + $total,
                 "financial_id" => $item->financial_id,
                 "financial_name" => $item?->financials?->name,
-                "total" => $total,
             ];
         });
 
