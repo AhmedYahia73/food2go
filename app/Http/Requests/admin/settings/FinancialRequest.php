@@ -27,7 +27,6 @@ class FinancialRequest extends FormRequest
             'name' => ['required'],
             'details' => ['required'],
             'discount' => ['required', 'boolean'],
-            'balance' => ['required', 'numeric'],
             'description_status' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
             'branch_id' => ['required', 'array'],

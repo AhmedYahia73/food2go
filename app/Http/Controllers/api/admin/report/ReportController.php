@@ -836,13 +836,16 @@ class ReportController extends Controller
         ?->pluck("id")?->toArray() ?? [];
         $financial = FinancialHistory::
         selectRaw("SUM(amount) as total");
+        $start_balance = FinantiolAcounting::
+        where("id", $item->financial_id)
+        ->first()?->start_balance;
         $financial_accounts = OrderFinancial::
         selectRaw("financial_id, SUM(amount) as total_amount")
         ->whereIn("order_id", $orders)
         ->with("financials")
         ->groupBy("financial_id")
         ->get()
-        ->map(function($item) use($expenses, $financial, $start, $end) {
+        ->map(function($item) use($expenses, $financial, $start, $end, $start_balance) {
             $expenses_amount = $expenses
             ->where("financial_account_id", $item->financial_id)
             ->sum("amount") ?? 0;
@@ -856,7 +859,7 @@ class ReportController extends Controller
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end)
             ->first()->total;
-            $total = $to_financial - $from_financial;
+            $total = $to_financial - $from_financial + $start_balance;
             return [
                 "total_amount" => $item->total_amount - $expenses_amount,
                 "financial_id" => $item->financial_id,

@@ -73,6 +73,7 @@ class FinancialAccountingController extends Controller
         // name, details, balance, status, logo, branch_id
         $validation = Validator::make($request->all(), [
             'logo' => 'required',
+            'balance' => 'required|numeric',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -84,6 +85,8 @@ class FinancialAccountingController extends Controller
             $image_path = $this->upload($request, 'logo', 'admin/settings/financial/logo');
             $financialRequest['logo'] = $image_path;
         }
+        $financialRequest['start_balance'] = $request->balance;
+        $financialRequest['balance'] = $request->balance;
         $financial = $this->financial
         ->create($financialRequest);
         $financial->branch()->attach($request->branch_id);
