@@ -837,7 +837,7 @@ class ReportController extends Controller
         $financial = FinancialHistory::
         selectRaw("SUM(amount) as total");
         $start_balance = FinantiolAcounting::
-        where("id", $item->financial_id)
+        where("id", $request->financial_id)
         ->first()?->start_balance;
         $financial_accounts = OrderFinancial::
         selectRaw("financial_id, SUM(amount) as total_amount")
