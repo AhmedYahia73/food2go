@@ -248,7 +248,8 @@ class HomeController extends Controller
         
         // // _______________________________________________________________________
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
-        
+        app()->setLocale($locale);
+
         $branch_id = 0;
         if ($request->branch_id && !empty($request->branch_id)) {
             $branch_id = $request->branch_id;
