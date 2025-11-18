@@ -5,6 +5,8 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+use App\Models\TranslationTbl;
+
 class ExtraResource extends JsonResource
 {
     /**
@@ -31,7 +33,8 @@ class ExtraResource extends JsonResource
                 'id' => $this->id,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
-                'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
+                'name' => TranslationTbl::where('key', $this->name)
+                ->where('locale', $locale)->first()?->value ?? $this->name,
                 'product_id' => $this->product_id,
                 'variation_id' => $this->variation_id,
                 'option_id' => $this->option_id,
@@ -63,7 +66,8 @@ class ExtraResource extends JsonResource
                 'id' => $this->id,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
-                'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
+                'name' => TranslationTbl::where('key', $this->name)
+                ->where('locale', $locale)->first()?->value ?? $this->name,
                 'product_id' => $this->product_id,
                 'variation_id' => $this->variation_id,
                 'option_id' => $this->option_id,
