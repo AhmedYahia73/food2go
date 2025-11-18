@@ -661,9 +661,10 @@ class ReportController extends Controller
         $orders = Order::
         orderByDesc("id");
 
-        if($request->from || $request->to){
-            $time_sittings = TimeSittings::get();
-            if ($time_sittings->count() > 0) {
+        if($request->from || $request->to){ 
+            $time_sittings = TimeSittings:: 
+            get();
+            if ($time_sittings->count() > 0) { 
                 $from = $time_sittings[0]->from;
                 $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
                 $hours = $time_sittings[$time_sittings->count() - 1]->hours;
@@ -672,21 +673,25 @@ class ReportController extends Controller
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                $start_date = ($request->from ?? '1999-05-05') . ' ' . $start->format("H:i:s");
-                $end_date = ($request->to ?? date("Y-m-d")) . ' ' . $end->format("H:i:s");
-                $start_date = Carbon::parse($start);
-                $end_date = Carbon::parse($end);
                 if ($start >= $end) {
-                    $end_date = $end_date->addDay();
+                    $end = $end->addDay();
                 }
                 if($start >= now()){
-                    $start_date = $start_date->subDay();
+                    $start = $start->subDay();
                 }
+
+                // if ($start > $end) {
+                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+                // }
+                // else{
+                //     $end = Carbon::parse($from)->addHours(intval($hours));
+                // } format('Y-m-d H:i:s')
             } else {
-                $start = Carbon::parse($request->from);
-                $end = Carbon::parse($request->to ?? date("Y-m-d"));
+                $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
             } 
-            $start = $start->subDay();
+            $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
+            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
             $orders = $orders
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end);
