@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Collection;
 use App\Http\Requests\cashier\UpdateOrderRequest;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\CancelOrderMail;
 use App\trait\POS;
 
 use App\Models\Order;

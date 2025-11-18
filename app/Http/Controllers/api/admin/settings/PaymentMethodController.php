@@ -20,6 +20,8 @@ class PaymentMethodController extends Controller
         'name',
         'description', 
         'status',
+        'feez_status',
+        'feez_amount',
     ];
     use image;
 
