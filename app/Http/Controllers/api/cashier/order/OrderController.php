@@ -575,6 +575,7 @@ class OrderController extends Controller
         // if canceled => key admin_cancel_reason
         $validator = Validator::make($request->all(), [
             'order_status' => 'required|in:delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
+            'admin_cancel_reason' => 'required_if:order_status,canceled'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -679,6 +680,10 @@ class OrderController extends Controller
                 'cashier_id' => $request->user()->cashier_id,
             ]);
         } 
+        if($request->order_status == 'canceled'){
+            $order->admin_cancel_reason = $request->admin_cancel_reason;
+            $order->save();
+        }
 
         return response()->json([
             'order_status' => $request->order_status
