@@ -1161,9 +1161,10 @@ class OrderController extends Controller
             $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
         }
         if (!empty($order->delivery_id)) {
-            $order->delivery->count_orders = $this->orders
+            $count_orders = $this->orders
             ->where('delivery_id', $order->delivery_id)
             ->count();
+            $order->delivery->setAttribute('count_orders', $count_orders);
         }
         $deliveries = $this->deliveries
         ->select('id', 'f_name', 'l_name')
