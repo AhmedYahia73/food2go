@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\customer\order\OrderRequest;
 use App\Http\Requests\cashier\DineinSplitRequest;
+use App\Http\Requests\cashier\DineinItemRequest;
 use App\Http\Requests\cashier\DineinOrderRequest;
 use App\Http\Requests\cashier\TakawayRequest;
 use App\Http\Requests\cashier\DeliveryRequest;
@@ -651,7 +652,7 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-    public function dine_in_order(OrderRequest $request){
+    public function dine_in_order(DineinItemRequest $request){
         // /cashier/dine_in_order
         // Keys
         // amount, total_tax, total_discount, table_id
