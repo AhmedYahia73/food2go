@@ -846,15 +846,15 @@ class ReportController extends Controller
         ->groupBy("financial_id")
         ->get()
         ->map(function($item) use($expenses, $financial, $start, $end, $start_balance) {
-            $expenses_amount = $expenses
+            $expenses_amount = clone $expenses
             ->where("financial_account_id", $item->financial_id)
             ->sum("amount") ?? 0;
-            $from_financial = $financial
+            $from_financial = clone $financial
             ->where('from_financial_id', $item->financial_id)
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end)
             ->first()->total;
-            $to_financial = $financial
+            $to_financial = clone $financial
             ->where('to_financial_id', $item->financial_id)
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end)
