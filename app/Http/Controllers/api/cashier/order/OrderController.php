@@ -611,7 +611,8 @@ class OrderController extends Controller
         }
        if ($order->operation_status == 'pending') {
             $order->update([
-                'admin_id' => $request->user()->id,
+                'cashier_man_id' => $request->user()->id,
+                'cashier_id' => $request->user()->cashier_id,
                 'operation_status' => 'opened',
             ]);
         }
