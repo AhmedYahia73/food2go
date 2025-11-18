@@ -1528,7 +1528,7 @@ class OrderController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
         } 
         $start = Carbon::parse($request->date . ' ' . $start->format('H:i:s'));
-        $end = Carbon::parse($request->date_to . ' ' . $start->format('H:i:s'));
+        $end = Carbon::parse($request->date_to . ' ' . $end->format('H:i:s'));
         // ___________________________________________________
         // settings     
             // if ($start > date('H:i:s')) {
