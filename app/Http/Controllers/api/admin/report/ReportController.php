@@ -17,6 +17,7 @@ use App\Models\Order;
 use App\Models\Purchase;
 use App\Models\PurchaseStock;
 use App\Models\Expense;
+use App\Models\FinancialHistory;
 
 class ReportController extends Controller
 {
@@ -833,20 +834,34 @@ class ReportController extends Controller
         $orders = $orders 
         ->get()
         ?->pluck("id")?->toArray() ?? [];
+        $financial = FinancialHistory::
+        selectRaw("SUM(amount) as total");
         $financial_accounts = OrderFinancial::
         selectRaw("financial_id, SUM(amount) as total_amount")
         ->whereIn("order_id", $orders)
         ->with("financials")
         ->groupBy("financial_id")
         ->get()
-        ->map(function($item) use($expenses) {
+        ->map(function($item) use($expenses, $financial, $start, $end) {
             $expenses_amount = $expenses
             ->where("financial_account_id", $item->financial_id)
             ->sum("amount") ?? 0;
+            $from_financial = $financial
+            ->where('from_financial_id', $item->financial_id)
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end)
+            ->first()->total;
+            $to_financial = $financial
+            ->where('to_financial_id', $item->financial_id)
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end)
+            ->first()->total;
+            $total = $to_financial - $from_financial;
             return [
                 "total_amount" => $item->total_amount - $expenses_amount,
                 "financial_id" => $item->financial_id,
                 "financial_name" => $item?->financials?->name,
+                "total" => $total,
             ];
         });
 

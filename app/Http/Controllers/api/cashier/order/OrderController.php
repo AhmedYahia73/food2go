@@ -369,7 +369,7 @@ class OrderController extends Controller
                 'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
                 'admin' => ['name' => $item?->admin?->name,],
                 'payment_method' => ['name' => $item?->payment_method?->name],
-                'paid' => $item->payment_method_id == 2,
+                'paid' => !$item->payment_method_id == 2,
                 'schedule' => ['name' => $item?->schedule?->name],
                 'delivery' => ['name' => $item?->delivery?->name], 
             ];
