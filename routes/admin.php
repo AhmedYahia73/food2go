@@ -843,6 +843,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(TransferFinancialController::class)
         ->prefix('financial_transfer')->group(function(){
             Route::get('/', 'view');
+            Route::get('/history', 'history');
             Route::post('/transfer', 'transfer');
         });
         

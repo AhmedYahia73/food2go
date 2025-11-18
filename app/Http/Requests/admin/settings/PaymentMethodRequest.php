@@ -26,7 +26,7 @@ class PaymentMethodRequest extends FormRequest
         return [
             'name' => ['required'],
             'logo' => ['required'],
-            'feez_amount' => ['required', 'numeric'],
+            'feez_amount' => ['sometimes', 'numeric'],
             'feez_status' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
         ];

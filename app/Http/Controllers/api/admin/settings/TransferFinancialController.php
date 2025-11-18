@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\FinantiolAcounting;
+use App\Models\FinancialHistory;
 
 class TransferFinancialController extends Controller
 {
-    public function __construct(private FinantiolAcounting $financial){}
+    public function __construct(private FinantiolAcounting $financial,
+    private FinancialHistory $financial_history){}
 
     public function view(Request $request){
         $financials = $this->financial
@@ -58,9 +60,38 @@ class TransferFinancialController extends Controller
         $to_financial->balance += $request->amount;
         $from_financial->save();
         $to_financial->save();
+        $this->financial_history
+        ->create([
+            'from_financial_id' => $request->from_financial_id,
+            'to_financial_id' => $request->to_financial_id,
+            'admin_id' => $request->user()->id,
+            'amount' => $request->amount,
+        ]);
 
         return response()->json([
             'success' => 'You transfere balance success'
+        ]);
+    }
+
+    public function history(Request $request){
+        $financial_history = $this->financial_history
+        ->with(['from_financial', 'to_financial', 'admin'])
+        ->get()
+        ->map(function($item){
+            return [
+                'id' => $item->id,
+                'amount' => $item->amount,
+                'from_financial' => $item?->from_financial?->name,
+                'to_financial' => $item?->to_financial?->name,
+                'amount' => $item->amount,
+                'admin' => $item?->admin?->name,
+                "date" => $item->created_at->format('Y-m-d'),
+                "time" => $item->created_at->format('h:i A'),
+            ];
+        });
+
+        return response()->json([
+            "financial_history" => $financial_history
         ]);
     }
 }
