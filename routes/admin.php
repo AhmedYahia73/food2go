@@ -131,6 +131,7 @@ use App\Http\Controllers\api\admin\website_qr\WebsiteQrController;
 use App\Http\Controllers\api\admin\purchases\ManufacturingController;
 
 use App\Http\Controllers\api\admin\report\FilterController;
+use App\Http\Controllers\api\admin\settings\TransferFinancialController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -837,6 +838,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::post('/add', 'create')->middleware('can:add_payment_method');
             Route::post('/update/{id}', 'modify')->middleware('can:edit_payment_method');
             Route::delete('/delete/{id}', 'delete')->middleware('can:delete_payment_method');
+        });
+        
+        Route::controller(TransferFinancialController::class)
+        ->prefix('financial_transfer')->group(function(){
+            Route::get('/', 'view');
+            Route::post('/transfer', 'transfer');
         });
         
         Route::controller(PaymentMethodAutoController::class)
