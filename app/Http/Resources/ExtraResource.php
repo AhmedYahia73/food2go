@@ -36,7 +36,6 @@ class ExtraResource extends JsonResource
                 'name' => TranslationTbl::where('key', $this->name)
                 ->where('locale', $locale)->first()?->value ?? $this->name,
                 'product_id' => $this->product_id,
-                'locale' => $locale,
                 'variation_id' => $this->variation_id,
                 'option_id' => $this->option_id,
                 'min' => $this->min,
@@ -69,7 +68,6 @@ class ExtraResource extends JsonResource
                 'price_after_tax' => $tax,
                 'name' => TranslationTbl::where('key', $this->name)
                 ->where('locale', $locale)->first()?->value ?? $this->name,
-                'locale' => $locale,
                 'product_id' => $this->product_id,
                 'variation_id' => $this->variation_id,
                 'option_id' => $this->option_id,
