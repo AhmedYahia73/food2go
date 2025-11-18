@@ -36,8 +36,8 @@ class TakawayRequest extends FormRequest
 
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],
-            'products.*.addons.*.addon_id' => ['exists:addons,id'],
-            'products.*.addons.*.count' => ['numeric'],
+            'products.*.addons.*.addon_id' => ['exists:addons,id', 'required_unless:order_pending,1,true'],
+            'products.*.addons.*.count' => ['numeric', 'required_unless:order_pending,1,true'],
 
             'products.*.addons.*.price' => ['numeric', 'required_unless:order_pending,1,true'],
 
@@ -45,9 +45,9 @@ class TakawayRequest extends FormRequest
             'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
             'products.*.count' => ['numeric', 'required_unless:order_pending,1,true'],
             'products.*.note' => ['sometimes'],
-            'financials' => ['required_unless:order_pending,1,true', 'array'],
-            'financials.*.id' => ['required_unless:order_pending,1,true', 'exists:finantiol_acountings,id'],
-            'financials.*.amount' => ['required_unless:order_pending,1,true', 'numeric'],  
+            'financials' => ['array'],
+            'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
+            'financials.*.amount' => ['required', 'numeric'],  
             'financials.*.description' => ['sometimes'], 
             'financials.*.transition_id' => ['sometimes'], 
             'cashier_id' => ['required_unless:order_pending,1,true', 'exists:cashiers,id'],

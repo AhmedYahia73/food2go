@@ -397,6 +397,13 @@ class CashierMakeOrderController extends Controller
         }
         event(new PrintOrder($order['order'])); 
         // _________________________________
+ 
+        if($request->order_pending){
+            return response()->json([
+                'success' => "You draft order success", 
+                'order_number' => $order['payment']['order_number']
+            ]); 
+        }
         return response()->json([
             "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
@@ -625,6 +632,13 @@ class CashierMakeOrderController extends Controller
         //_________________________________
          
         // _________________________________
+ 
+        if($request->order_pending){
+            return response()->json([
+                'success' => "You draft order success", 
+                'order_number' => $order['payment']['order_number']
+            ]); 
+        }
         return response()->json([ 
             "success" => $this->checkout_data($request),
             "kitchen_items" => $kitchen_items,  
@@ -671,6 +685,13 @@ class CashierMakeOrderController extends Controller
         ]);
         $order_data = $this->order_format($order['payment'], 0);
 
+ 
+        if($request->order_pending){
+            return response()->json([
+                'success' => "You draft order success", 
+                'order_number' => $order['payment']['order_number']
+            ]); 
+        }
         return response()->json([
             'success' => $this->checkout_data($request), 
             'request' => $request->all()
@@ -885,8 +906,14 @@ class CashierMakeOrderController extends Controller
         ->where("table_id", $request->table_id)
         ->delete();
  
+        if($request->order_pending){
+            return response()->json([
+                'success' => "You draft order success", 
+                'order_number' => $order['payment']['order_number']
+            ]); 
+        }
         return response()->json([
-            'success' => $order_items,
+            'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number']
         ]);
     }
@@ -990,6 +1017,13 @@ class CashierMakeOrderController extends Controller
         ->where("table_id", $request->table_id)
         ->delete();
 
+ 
+        if($request->order_pending){
+            return response()->json([
+                'success' => "You draft order success", 
+                'order_number' => $order['payment']['order_number']
+            ]); 
+        }
         return response()->json([
             "success" => $this->checkout_data($request),
             'order_number' => $order_number,
