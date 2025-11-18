@@ -686,15 +686,8 @@ class CashierMakeOrderController extends Controller
         ]);
         $order_data = $this->order_format($order['payment'], 0);
 
- 
-        if($request->order_pending){
-            return response()->json([
-                'success' => "You draft order success", 
-                'order_number' => $order['payment']['order_number']
-            ]); 
-        }
-        return response()->json([
-            'success' => $this->checkout_data($request), 
+  
+        return response()->json([ 
             'request' => $request->all()
         ]);
     }
