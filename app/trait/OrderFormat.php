@@ -82,7 +82,7 @@ trait OrderFormat
                 $variations[] = [
                     "id" => $element['variation']['id'],
                     "name" => $name,
-                    "price" => $element['variation']['price'],
+                    //"price" => $element['variation']['price'],
                     "options" => $options,
                 ];
             }
