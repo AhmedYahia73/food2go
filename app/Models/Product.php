@@ -51,6 +51,10 @@ class Product extends Model
         ->first();
     }
 
+    public function recipes(){
+        return $this->hasMany(Recipe::class, 'product_id');
+    }
+
     public function group_price(){
         return $this->hasMany(GroupPrice::class, "product_id");
     }
