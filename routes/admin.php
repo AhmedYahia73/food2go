@@ -87,6 +87,7 @@ use App\Http\Controllers\api\admin\settings\business_setup\OrderSettingControlle
 use App\Http\Controllers\api\admin\settings\business_setup\OrderNotificationController;
 use App\Http\Controllers\api\admin\settings\business_setup\SMSIntegrationController;
 use App\Http\Controllers\api\admin\settings\business_setup\EmailIntegrationController;
+use App\Http\Controllers\api\admin\settings\LanguageSettingController;
 use App\Http\Controllers\api\admin\main_data\MainDataController;
 use App\Http\Controllers\api\admin\waiter\WaiterController;
 
@@ -132,6 +133,7 @@ use App\Http\Controllers\api\admin\purchases\ManufacturingController;
 
 use App\Http\Controllers\api\admin\report\FilterController;
 use App\Http\Controllers\api\admin\settings\TransferFinancialController;
+use App\Http\Controllers\api\admin\preparation_man\PreparationManController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -142,6 +144,16 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    Route::controller(PreparationManController::class)
+    ->prefix('preparation_man')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'preparation_man');
+        Route::put('/status/{id}', 'status'); 
+        Route::post('/add', 'create'); 
+        Route::post('/update/{id}', 'modify'); 
+        Route::delete('/delete/{id}', 'delete'); 
+    });
+    
     Route::controller(FilterController::class)
     ->prefix('save_filter')->group(function(){
         Route::get('/public_info', 'public_info'); 
@@ -753,6 +765,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::delete('/delete/{id}', 'delete')->middleware('can:delete_extra');
         });
 
+        Route::controller(LanguageSettingController::class)
+        ->prefix('lang_setting')->group(function(){
+            Route::get('/', 'view');
+            Route::post('/update', 'update');
+        });
+//
         Route::controller(FinancialAccountingController::class)->prefix('financial')->group(function(){
             Route::get('/', 'view')->middleware('can:view_financial_accounting');
             Route::get('item/{id}', 'financial')->middleware('can:edit_financial_accounting');

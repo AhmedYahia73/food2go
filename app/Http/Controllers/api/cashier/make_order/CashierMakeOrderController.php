@@ -1418,6 +1418,7 @@ class CashierMakeOrderController extends Controller
 
     public function checkout_data($request){ 
         $products = [];
+        $locale = $request->locale ?? "en";
         foreach ($request->products as $item) {
             $addons = [];
             if(isset($item['addons'])){
@@ -1425,7 +1426,12 @@ class CashierMakeOrderController extends Controller
                     $count = $element['count'];
                     $addon_name = $this->addons
                     ->where('id', $element['addon_id'])
-                    ->first()?->name;
+                    ->with('translations')
+                    ->first();
+                    $addon_name = $addon_name?->translations
+                    ->where("locale", $locale)
+                    ->where("key", $addon_name->name)
+                    ->first()?->value ?? $addon_name->name;
                     $price = $element['price'];
                     $total = $count * $price;
                     $addons[] = [
@@ -1441,7 +1447,12 @@ class CashierMakeOrderController extends Controller
             $price = $item['price'];
             $name = $this->products
             ->where('id', $item['product_id'])
-            ->first()?->name;
+            ->with('translations')
+            ->first();
+            $name = $name?->translations
+            ->where("locale", $locale)
+            ->where("key", $name->name)
+            ->first()?->value ?? $name->name;
             $total = $count * $price;
             $products[] = [
                 'count' => $count,

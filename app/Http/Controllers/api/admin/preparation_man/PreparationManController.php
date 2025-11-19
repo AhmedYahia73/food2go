@@ -75,7 +75,7 @@ class PreparationManController extends Controller
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
-            'status' => 'required|boolean',
+            'name' => 'required|unique:preparation_men,name',
             'password' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
@@ -86,7 +86,7 @@ class PreparationManController extends Controller
             ],400);
         }
         
-        $preparationRequest = $request->validated();
+        $preparationRequest = $validator->validated();
         $this->preparation_man
         ->create($preparationRequest);
 
@@ -97,7 +97,7 @@ class PreparationManController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'status' => 'required|boolean',
+            'name' => 'required|unique:preparation_men,name,' . $id,
             'password' => 'sometimes',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
@@ -108,7 +108,7 @@ class PreparationManController extends Controller
             ],400);
         }
         
-        $preparationRequest = $request->validated();
+        $preparationRequest = $validator->validated();
         if(!empty($request->password)){
             $preparationRequest['password'] = bcrypt($request->password);
         }

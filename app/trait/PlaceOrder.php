@@ -4,11 +4,13 @@ namespace App\trait;
 
 use App\Models\Payment;
 use App\Models\BranchOff;
+use App\Models\TranslationTbl;
 use App\Models\KitchenItem;
 use App\Models\KItemExtra;
 use App\Models\KItemExclude;
 use App\Models\KItemAddon;
 use App\Models\KItemVriation;
+use App\Models\Setting;
 use App\Models\KItemOption;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -800,7 +802,10 @@ trait PlaceOrder
     }
 
     public function takeaway_kitchen_format($order){
-        $order_data = []; 
+        $order_data = [];
+        $locale = Setting::
+        where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
         foreach ($order->order_details ?? $order as $key => $item) {
             $product = collect([]);
             $product['id'] = $item->product[0]->product->id;
@@ -808,7 +813,14 @@ trait PlaceOrder
             $product['category_id'] = $item->product[0]->product->category_id;
             $product['sub_category_id'] = $item->product[0]->product->sub_category_id;
             $product['notes'] = $item->product[0]->notes;
-            $product['count'] = $item->product[0]->count; 
+            $product['count'] = $item->product[0]->count;
+            $product['name'] = TranslationTbl::
+            where("locale", $locale)
+            ->where('key', $product['name'])
+            ->orderByDesc("id")
+            ->first()
+            ?->value ?? $product['name'];
+
             $variation = [];
             $addons = [];
             $excludes = [];
@@ -819,33 +831,63 @@ trait PlaceOrder
                 $options_items = $element->options;
                 $options = [];
                 foreach ($options_items as $value) {
-                    $options[] = ["id" => $value->id, "name" => $value->name];
+                    $option_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $value->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $value->name;
+                    $options[] = ["id" => $value->id, "name" => $option_element];
                 }  
+                $variation_element = TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $element?->variation?->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $element?->variation?->name;
                 $variation[] = [
 					"id" => $element?->variation?->id, 
-                    'name' => $element?->variation?->name,
+                    'name' => $variation_element,
                     'options' => $options,
                 ]; 
             } 
             foreach ($item->addons as $key => $element) {
                 $element->addon->count = $element->count;
                 unset($element->count);
+                $addon_element = TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $element->addon->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $element->addon->name;
                 $addons[] = [
 					"id" => $element->addon->id, 
-                    'name' => $element->addon->name,
+                    'name' => $addon_element,
                     'count' => $element->addon->count,
                 ];
             }
             foreach ($item->excludes as $element) {
+                $exclude_element = TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $element->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $element->name;
                 $excludes[] = [
 					"id" => $element->id,
-					'name' => $element->name
+					'name' => $exclude_element
 				];
             }
             foreach ($item->extras as $element) {
+                $extra_element = TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $element->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $element->name;
                 $extras[] = [
 					"id" => $element->id,
-					'name' => $element->name,
+					'name' => $extra_element,
 				];
             } 
             $order_data[$key] = $product;
