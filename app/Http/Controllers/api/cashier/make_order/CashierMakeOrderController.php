@@ -1418,7 +1418,9 @@ class CashierMakeOrderController extends Controller
 
     public function checkout_data($request){ 
         $products = [];
-        $locale = $request->locale ?? "en";
+        $locale = Setting::
+        where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
         foreach ($request->products as $item) {
             $addons = [];
             if(isset($item['addons'])){
