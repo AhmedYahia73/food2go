@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 trait OrderFormat
 { 
-    public function order_details($id, $locale){
+    public function order_details_format($id, $locale){
         $order = Order::
         with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
         'branch', 'delivery'])

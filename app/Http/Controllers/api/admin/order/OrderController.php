@@ -1261,7 +1261,7 @@ class OrderController extends Controller
         // })
         // ->find($id);
         $locale = $request->locale ?? "en";
-        $order = $this->order_details($id, $locale);
+        $order = $this->order_details_format($id, $locale);
 
         return response()->json([
             'order' => $order
