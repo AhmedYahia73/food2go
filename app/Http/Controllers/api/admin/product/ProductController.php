@@ -32,6 +32,7 @@ class ProductController extends Controller
         ->with(['addons', 'excludes', 'extra', 'variations.options.extra',
         'category', 'subCategory', 'discount', 'tax', 'group_products:id,name'
         , 'unit:id,name'])
+        ->orderBy('order')
         ->get()
         ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)

@@ -42,6 +42,7 @@ class BannerController extends Controller
         $categories = $this->categories
         ->get();
         $products = $this->products
+        ->orderBy('order')
         ->get();
         $deals = $this->deals
         ->get();

@@ -253,6 +253,7 @@ class HomeController extends Controller
             'Dec' => $orders_dec->sum('amount'),
         ];
         $products = $this->products
+        ->orderBy('order')
         ->get();
         $top_selling = $products
         ->sortByDesc('orders_count_branch');

@@ -37,7 +37,8 @@ class DeliveryController extends Controller
         // https://bcknd.food2go.online/admin/delivery
         $deliveries = $this->deliveries
         ->get();
-        $branches = $this->branches->get();
+        $branches = $this->branches
+        ->orderBy('order')->get();
 
         return response()->json([
             'deliveries' => $deliveries,

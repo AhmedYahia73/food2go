@@ -63,6 +63,7 @@ class AddressController extends Controller
             ];
         });
         $branches = $this->branch
+        ->orderBy('order')
         ->get();
         $cities = $this->city
         ->where('status', 1)
@@ -153,6 +154,7 @@ class AddressController extends Controller
        
         $branches = $this->branch
         ->withLocale($request->locale)
+        ->orderBy('order')
         ->get()
         ->map(function($item) use($request){
             return [

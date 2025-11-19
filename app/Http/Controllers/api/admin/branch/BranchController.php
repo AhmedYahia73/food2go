@@ -46,6 +46,7 @@ class BranchController extends Controller
         // https://bcknd.food2go.online/admin/branch
         $branches = $this->branches
         ->with('city')
+        ->orderBy('order')
         ->get();
 
         return response()->json([

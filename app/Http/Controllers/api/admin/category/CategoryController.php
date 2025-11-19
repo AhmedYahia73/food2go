@@ -180,6 +180,7 @@ class CategoryController extends Controller
         ->whereNotNull('category_id')
         ->get();
         $branches = $this->branch
+        ->orderBy('order')
         ->get()
         ->map(function($item) use($branch_off_category) {
             $branches_category_off = $branch_off_category->pluck('branch_id')->filter(); 

@@ -81,6 +81,7 @@ class MakeOrderController extends Controller
         }
         $branche = $this->branches
         ->where('id', $request->branch_id)
+        ->orderBy('order')
         ->where('status', 1)
         ->first();
 

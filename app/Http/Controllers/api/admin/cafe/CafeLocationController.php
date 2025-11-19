@@ -21,6 +21,7 @@ class CafeLocationController extends Controller
         ->get();
         $branches = $this->branches
         ->select('id', 'name')
+        ->orderBy('order')
         ->get();
 
         return response()->json([

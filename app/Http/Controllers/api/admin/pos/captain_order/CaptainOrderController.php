@@ -26,6 +26,7 @@ class CaptainOrderController extends Controller
         ->get();
         $branches = $this->branches
         ->select('id', 'name')
+        ->orderBy('order')
         ->get();
         $cafe_locations = $this->cafe_locations
         ->select('id', 'name', 'branch_id')

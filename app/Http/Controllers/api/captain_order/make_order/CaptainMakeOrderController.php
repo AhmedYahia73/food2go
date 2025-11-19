@@ -97,6 +97,7 @@ class CaptainMakeOrderController extends Controller
             return !$category_off->contains($item->id);
         });
         $products = $this->products
+        ->orderBy('order')
         ->with([
             'addons' => fn($q) => $q->withLocale($locale),
             'category_addons' => fn($q) => $q->withLocale($locale),
@@ -162,6 +163,7 @@ class CaptainMakeOrderController extends Controller
             return $item;
         });
         $favourite_products = $this->products 
+        ->orderBy('order')
         ->with([
             'addons' => fn($q) => $q->withLocale($locale),
             'category_addons' => fn($q) => $q->withLocale($locale),
@@ -274,6 +276,7 @@ class CaptainMakeOrderController extends Controller
         ->get(); 
         $option_off = $branch_off->pluck('option_id')->filter();
         $products = $this->products
+        ->orderBy('order')
             ->with([
                 'addons' => fn($q) => $q->withLocale($locale),
                 'category_addons' => fn($q) => $q->withLocale($locale),
@@ -371,6 +374,7 @@ class CaptainMakeOrderController extends Controller
         $option_off = $branch_off->pluck('option_id')->filter();
 
         $products = $this->products
+        ->orderBy('order')
             ->with([
                 'addons' => fn($q) => $q->withLocale($locale),
                 'category_addons' => fn($q) => $q->withLocale($locale),
@@ -489,6 +493,7 @@ class CaptainMakeOrderController extends Controller
             return !$category_off->contains($item->id);
         });
         $products = $this->products
+        ->orderBy('order')
         ->with(['addons' => function($query) use($locale){
             $query->withLocale($locale);
         },'sub_category_addons' => function($query) use($locale){
@@ -605,6 +610,7 @@ class CaptainMakeOrderController extends Controller
         $option_off = $branch_off->pluck('option_id')->filter();
 
         $products = $this->products
+        ->orderBy('order')
         ->with(['addons' => function($query) use($locale){
             $query->withLocale($locale);
         },'sub_category_addons' => function($query) use($locale){
@@ -715,6 +721,7 @@ class CaptainMakeOrderController extends Controller
             return !$category_off->contains($item->id);
         });
         $products = $this->products
+        ->orderBy('order')
         ->with(['addons' => function($query) use($locale){
             $query->withLocale($locale);
         },'sub_category_addons' => function($query) use($locale){
@@ -797,6 +804,7 @@ class CaptainMakeOrderController extends Controller
             return $item;
         });
         $favourite_products = $this->products
+        ->orderBy('order')
         ->with(['addons' => function($query) use($locale){
             $query->withLocale($locale);
         },'sub_category_addons' => function($query) use($locale){

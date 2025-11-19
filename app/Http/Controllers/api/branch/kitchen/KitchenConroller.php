@@ -43,6 +43,7 @@ class KitchenConroller extends Controller
     public function products_in_kitchen(Request $request, $id){
         $products = $this->products
         ->select('name', 'id', 'image')
+        ->orderBy('order')
         ->whereHas('kitchen', fn($query) => $query
             ->where('kitchens.id', $id)
         )
@@ -93,6 +94,7 @@ class KitchenConroller extends Controller
         ->where('type', 'brista')
         ->values();
         $products = $this->products
+        ->orderBy('order')
         ->get()
         ->map(function($item){
             return [

@@ -108,6 +108,7 @@ class HomeController extends Controller
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
+            ->orderBy('order')
             ->with([ 
                 'favourite_product' => fn($q) => $q->where('users.id', $user_id),
                 'addons' => fn($q) => $q->withLocale($locale),
@@ -164,6 +165,7 @@ class HomeController extends Controller
         }
         else{
                 $products = $this->product
+                ->orderBy('order')
                 ->with([
                     'addons' => fn($q) => $q->withLocale($locale),
                     'category_addons' => fn($q) => $q->withLocale($locale),
@@ -203,6 +205,7 @@ class HomeController extends Controller
             });
         }
         $discounts = $this->product
+        ->orderBy('order')
         ->with('discount')
         ->whereHas('discount')
         ->get();
@@ -268,6 +271,7 @@ class HomeController extends Controller
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
+            ->orderBy('order')
             ->with([ 
                 'favourite_product' => fn($q) => $q->where('users.id', $user_id),
                 'addons' => fn($q) => $q->withLocale($locale),
@@ -322,6 +326,7 @@ class HomeController extends Controller
         }
         else{
                 $products = $this->product
+                ->orderBy('order')
                 ->with([
                     'addons' => fn($q) => $q->withLocale($locale),
                     'category_addons' => fn($q) => $q->withLocale($locale),
@@ -506,6 +511,7 @@ class HomeController extends Controller
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
+            ->orderBy('order')
             ->with([ 
                 'favourite_product' => fn($q) => $q->where('users.id', $user_id),
             ])
@@ -603,6 +609,7 @@ class HomeController extends Controller
         }
         else{
             $products = $this->product 
+            ->orderBy('order')
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1) 
@@ -733,6 +740,7 @@ class HomeController extends Controller
             $tax = $tax->setting;
         }
         $products = $this->product 
+        ->orderBy('order')
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
         ->where('recommended', 1)
@@ -856,6 +864,7 @@ class HomeController extends Controller
             $tax = $tax->setting;
         }
         $products = $this->product 
+        ->orderBy('order')
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
         ->whereHas('discount')
@@ -1037,6 +1046,7 @@ class HomeController extends Controller
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
+            ->orderBy('order')
             ->with(['addons' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'excludes' => function($query) use($locale){
@@ -1084,6 +1094,7 @@ class HomeController extends Controller
         }
         else{
             $products = $this->product
+            ->orderBy('order')
             ->with(['addons' => function($query) use($locale){
                 $query->withLocale($locale);
             }, 'excludes' => function($query) use($locale){
@@ -1130,6 +1141,7 @@ class HomeController extends Controller
         }
             
         $discounts = $this->product
+        ->orderBy('order')
         ->with('discount')
         ->whereHas('discount')
         ->get();
@@ -1176,6 +1188,7 @@ class HomeController extends Controller
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation   
         $user_id = $request->user_id;
         $products = $this->product
+        ->orderBy('order')
         ->with([ 
         'addons' => function($query) use($locale){
             $query->withLocale($locale);
@@ -1276,6 +1289,7 @@ class HomeController extends Controller
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
+            ->orderBy('order')
             ->where('category_id', $request->category_id)
             ->where('price', '>=', $request->min_price)
             ->where('price', '<=', $request->max_price)
@@ -1320,6 +1334,7 @@ class HomeController extends Controller
         }
         else{
             $products = $this->product
+            ->orderBy('order')
             ->where('category_id', $request->category_id)
             ->where('price', '>=', $request->min_price)
             ->where('price', '<=', $request->max_price)

@@ -117,6 +117,7 @@ class ClientMakeOrderController extends Controller
         if ($request->user_id) {
             $user_id = $request->user_id;
             $products = $this->product
+            ->orderBy('order')
             ->with([ 
                 'favourite_product' => fn($q) => $q->where('users.id', $user_id),
                 'addons' => fn($q) => $q->withLocale($locale),
@@ -176,6 +177,7 @@ class ClientMakeOrderController extends Controller
         }
         else{
                 $products = $this->product
+                ->orderBy('order')
                 ->with([
                     'addons' => fn($q) => $q->withLocale($locale),
                     'category_addons' => fn($q) => $q->withLocale($locale),
@@ -219,6 +221,7 @@ class ClientMakeOrderController extends Controller
             });
         }
         $discounts = $this->product
+        ->orderBy('order')
         ->with('discount')
         ->whereHas('discount')
         ->get();
@@ -295,6 +298,7 @@ class ClientMakeOrderController extends Controller
             return !$category_off->contains($item->id);
         });
         $products = $this->products
+        ->orderBy('order')
         ->with(['addons' => function($query) use($locale){
             $query->withLocale($locale);
         },'sub_category_addons' => function($query) use($locale){

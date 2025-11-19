@@ -73,6 +73,7 @@ class KitchenController extends Controller
         ->where('type', 'brista')
         ->values();
         $branches = $this->branches
+        ->orderBy('order')
         ->get();
         $products = $this->products
         ->whereNull('kitchen_id')
