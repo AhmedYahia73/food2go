@@ -56,7 +56,6 @@ trait OrderFormat
                 $excludes[] = [
                     "id" => $element['id'],
                     "name" => $name,
-                    "price" => $element['price'],
                 ];
             }
             foreach ($item['variations'] as $element) {
