@@ -42,6 +42,7 @@ class Product extends Model
         'weight_point',
         'weight_status',
         'recipe',
+        'order'
     ];
     protected $appends = ['image_link', 'orders_count', 'taxes', 'orders_count_branch'];
 

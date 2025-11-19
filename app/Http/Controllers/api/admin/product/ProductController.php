@@ -4,7 +4,7 @@ namespace App\Http\Controllers\api\admin\product;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\File; 
 
 use App\Models\Product;
 use App\Models\Discount;

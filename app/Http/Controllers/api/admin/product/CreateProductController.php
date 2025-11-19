@@ -478,6 +478,35 @@ class CreateProductController extends Controller
         ]);
     }
 
+    public function order_of_product(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'order' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        } 
+        
+        $current_product = $this->products
+        ->where('id', $id)
+        ->first();
+        $products = $this->products
+        ->where('order', $request->order)
+        ->first();
+        if (!empty($products)) {
+            $this->products
+            ->where('order', '>=', $request->order)
+            ->increment('order');
+        }
+
+        $current_product->update(['order' => $request->order]);
+
+        return response()->json([
+            'success' => 'You update order success'
+        ]);
+    }
+
     public function update_price(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'price' => 'required|numeric',

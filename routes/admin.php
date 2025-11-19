@@ -634,10 +634,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('branch')->group(function(){
         Route::get('/', 'view')->middleware('can:view_branch');
 
-        Route::post('/branch_product_options', 'branch_product_options');
+        Route::post('/order_of_branch/{id}', 'order_of_branch');
         Route::post('/product_pricing', 'product_pricing');
         Route::post('/option_pricing', 'option_pricing');
 
+            Route::put('/order_of_product/{id}', 'order_of_product')->middleware('can:edit_branch'); 
         Route::get('/branch_in_product/{id}', 'branch_in_product')->middleware('can:product_branch');
         Route::get('/branch_product/{id}', 'branch_product')->middleware('can:product_branch');
         Route::get('/branch_options/{id}', 'branch_options')->middleware('can:option_branch');
@@ -724,6 +725,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
         Route::controller(CreateProductController::class)->group(function(){
             Route::post('/add', 'create')->middleware('can:add_product'); 
+            Route::put('/order_of_product/{id}', 'order_of_product')->middleware('can:edit_product'); 
             Route::post('/import_excel', 'import_excel')->middleware('can:edit_product'); 
             Route::post('/update/{id}', 'modify')->middleware('can:edit_product'); 
             Route::put('/update_price/{id}', 'update_price')->middleware('can:edit_product'); 

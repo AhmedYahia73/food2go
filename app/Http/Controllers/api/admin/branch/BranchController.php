@@ -53,6 +53,35 @@ class BranchController extends Controller
         ]);
     }
 
+    public function order_of_branch(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'order' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        } 
+        
+        $current_branch = $this->branches
+        ->where('id', $id)
+        ->first();
+        $branches = $this->branches
+        ->where('order', $request->order)
+        ->first();
+        if (!empty($branches)) {
+            $this->branches
+            ->where('order', '>=', $request->order)
+            ->increment('order');
+        }
+
+        $current_branch->update(['order' => $request->order]);
+
+        return response()->json([
+            'success' => 'You update order success'
+        ]);
+    }
+
     public function branch($id){
         // https://bcknd.food2go.online/admin/branch/item/{id}
         $branch = $this->branches
