@@ -25,7 +25,7 @@ use App\Events\PrintOrder;
 use App\Models\Order;
 use App\Models\UserDue;
 use App\Models\Kitchen;
-use App\Models\KitchenOrder;
+use App\Models\KitchenOrder;  
 use App\Models\OrderCart;
 use App\Models\OrderDetail;
 use App\Models\ProductSale;
@@ -405,10 +405,15 @@ class CashierMakeOrderController extends Controller
                 'order_number' => $order['payment']['order_number']
             ]); 
         }
+        $locale = Setting::
+        where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
+        $financials = $this->get_financial($request, $locale);
         return response()->json([
             "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
             'order_number' => $order['order']->order_number,
+            "financials" => $financials,
         ]);
     }
 
@@ -625,11 +630,6 @@ class CashierMakeOrderController extends Controller
         $caheir_name = $request->user()->user_name;
         $address = Branch::where("id", $request->user()->branch_id)
         ->first()?->address;
-        $financial_ids = array_column($request->financials, 'id');
-        $financial_accounts = $this->financial_account
-        ->whereIn('id', $financial_ids)
-        ->get()
-        ->pluck("name");
         //_________________________________
          
         // _________________________________
@@ -640,6 +640,10 @@ class CashierMakeOrderController extends Controller
                 'order_number' => $order['payment']['order_number']
             ]); 
         }
+        $locale = Setting::
+        where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
+        $financials = $this->get_financial($request, $locale);
         return response()->json([ 
             "success" => $this->checkout_data($request),
             "kitchen_items" => $kitchen_items,  
@@ -647,7 +651,7 @@ class CashierMakeOrderController extends Controller
             'type' => $type,
             'caheir_name' => $caheir_name,
             'address' => $address,
-            'financial_accounts' => $financial_accounts,
+            'financials' => $financials,
             'date' => now(),
         ]);
     }
@@ -906,9 +910,14 @@ class CashierMakeOrderController extends Controller
                 'order_number' => $order['payment']['order_number']
             ]); 
         }
+        $locale = Setting::
+        where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
+        $financials = $this->get_financial($request, $locale);
         return response()->json([
             'success' => $this->checkout_data($request), 
-            'order_number' => $order['payment']['order_number']
+            'order_number' => $order['payment']['order_number'],
+            "financials" => $financials
         ]);
     }
 
@@ -1018,9 +1027,14 @@ class CashierMakeOrderController extends Controller
                 'order_number' => $order['payment']['order_number']
             ]); 
         }
+        $locale = Setting::
+        where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
+        $financials = $this->get_financial($request, $locale);
         return response()->json([
             "success" => $this->checkout_data($request),
             'order_number' => $order_number,
+            'financials' => $financials,
         ]);
     } 
 
@@ -1466,5 +1480,26 @@ class CashierMakeOrderController extends Controller
         }
 
         return $products;
+    }
+
+    public function get_financial($request, $locale){
+        $financial_account = $request->financials; 
+        
+        $ids = array_column($financial_account, 'id');
+        $amounts = array_column($financial_account, 'amount');
+        $financial_account = $this->financial_account
+        ->whereIn("id", $financial_account) 
+        ->get()
+        ->map(function($item, $key) use($amounts){
+            return [ 
+                "name" => $item->name,
+                "amount" => $amounts[$key],
+            ];
+        });
+            // $name = $financial_account->translations
+            // ->where("locale", $locale)
+            // ->where("key", $financial_account->name)
+            // ->first()?->value ??  
+         return $financial_account;
     }
 }
