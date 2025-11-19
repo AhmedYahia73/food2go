@@ -191,7 +191,13 @@ class ProductController extends Controller
         ->select("id", "name") 
         ->where("category_id", $id)
         ->orWhere("sub_category_id", $id)
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
 
 
         return response()->json([
