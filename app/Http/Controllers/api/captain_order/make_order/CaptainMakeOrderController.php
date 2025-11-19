@@ -115,7 +115,7 @@ class CaptainMakeOrderController extends Controller
                 ->select("products.id", "products.name")->withLocale($locale)]),
         ])
         ->withLocale($locale)
-        ->where('item_type', '!=', 'offline') 
+        ->where('item_type', '!=', 'online') 
         ->where('status', 1)
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
@@ -181,7 +181,7 @@ class CaptainMakeOrderController extends Controller
                 ->select("products.id", "products.name")->withLocale($locale)]),
         ])
         ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
+        ->where('item_type', '!=', 'online') 
         ->where("favourite", 1)
         ->where('status', 1)
         ->get()
@@ -514,7 +514,7 @@ class CaptainMakeOrderController extends Controller
             }]);
         }, 'sales_count', 'tax'])
         ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
+        ->where('item_type', '!=', 'online') 
         ->where("favourite", 1)
         ->where('status', 1)
         ->get()
@@ -631,7 +631,7 @@ class CaptainMakeOrderController extends Controller
             }]);
         }, 'sales_count', 'tax'])
         ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
+        ->where('item_type', '!=', 'online') 
         ->where(function($query) use($id){
             $query->where("category_id", $id)
             ->orWhere("sub_category_id", $id);
@@ -825,7 +825,7 @@ class CaptainMakeOrderController extends Controller
             }]);
         }, 'sales_count', 'tax'])
         ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
+        ->where('item_type', '!=', 'online') 
         ->where("favourite", 1)
         ->where('status', 1)
         ->get()
