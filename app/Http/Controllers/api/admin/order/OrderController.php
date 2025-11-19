@@ -19,12 +19,14 @@ use App\Models\User;
 use App\Models\TimeSittings; 
 
 use App\trait\Recipe;
+use App\trait\OrderFormat;
 
 class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Delivery $deliveries, 
     private Branch $branches, private Setting $settings, private User $user,
     private LogOrder $log_order, private TimeSittings $TimeSittings){}
+    use OrderFormat;
     use Recipe;
 
     public function transfer_branch(Request $request, $id){
@@ -1251,13 +1253,15 @@ class OrderController extends Controller
 
     public function invoice($id){
         // https://bcknd.food2go.online/admin/order/invoice/{id}
-        $order = $this->orders
-        ->with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 'branch', 'delivery'])
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->find($id);
+        // $order = $this->orders
+        // ->with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 'branch', 'delivery'])
+        // ->where(function($query) {
+        //     $query->where('status', 1)
+        //     ->orWhereNull('status');
+        // })
+        // ->find($id);
+        $locale = $request->locale ?? "en";
+        $order = $this->order_details($id, $locale);
 
         return response()->json([
             'order' => $order
