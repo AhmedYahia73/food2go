@@ -187,31 +187,16 @@ class ProductController extends Controller
     }
 
     public function products_in_category(Request $request, $id){
-        $current_product = $this->products
-        ->where('id', $id)
-        ->first();
-        if(empty($current_product)){
-            return response()->json([
-                "errors" => "id is wrong"
-            ], 400);
-        }
         $products = $this->products
+        ->select("id", "name")
         ->where('order', $request->order)
-        ->where("category_id", $current_product->category_id)
-        ->where("sub_category_id", $current_product->sub_category_id)
-        ->first();
-        if (!empty($products)) {
-            $this->products
-            ->where('order', '>=', $request->order)
-            ->where("category_id", $current_product->category_id)
-            ->where("sub_category_id", $current_product->sub_category_id)
-            ->increment('order');
-        }
+        ->where("category_id", $id)
+        ->orWhere("sub_category_id", $id)
+        ->get();
 
-        $current_product->update(['order' => $request->order]);
 
         return response()->json([
-            'success' => 'You update order success'
+            'products' => $products
         ]);
     }
 
