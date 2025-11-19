@@ -4,7 +4,8 @@ namespace App\Http\Controllers\api\admin\product;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File; 
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Validator; 
 
 use App\Models\Product;
 use App\Models\Discount;
@@ -182,6 +183,73 @@ class ProductController extends Controller
 
         return response()->json([
             'reviews' => $reviews
+        ]);
+    }
+
+    public function products_in_category(Request $request, $id){
+        $current_product = $this->products
+        ->where('id', $id)
+        ->first();
+        if(empty($current_product)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+        $products = $this->products
+        ->where('order', $request->order)
+        ->where("category_id", $current_product->category_id)
+        ->where("sub_category_id", $current_product->sub_category_id)
+        ->first();
+        if (!empty($products)) {
+            $this->products
+            ->where('order', '>=', $request->order)
+            ->where("category_id", $current_product->category_id)
+            ->where("sub_category_id", $current_product->sub_category_id)
+            ->increment('order');
+        }
+
+        $current_product->update(['order' => $request->order]);
+
+        return response()->json([
+            'success' => 'You update order success'
+        ]);
+    }
+
+    public function order_of_product(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'order' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        } 
+        
+        $current_product = $this->products
+        ->where('id', $id)
+        ->first();
+        if(empty($current_product)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+        $products = $this->products
+        ->where('order', $request->order)
+        ->where("category_id", $current_product->category_id)
+        ->where("sub_category_id", $current_product->sub_category_id)
+        ->first();
+        if (!empty($products)) {
+            $this->products
+            ->where('order', '>=', $request->order)
+            ->where("category_id", $current_product->category_id)
+            ->where("sub_category_id", $current_product->sub_category_id)
+            ->increment('order');
+        }
+
+        $current_product->update(['order' => $request->order]);
+
+        return response()->json([
+            'success' => 'You update order success'
         ]);
     }
 }

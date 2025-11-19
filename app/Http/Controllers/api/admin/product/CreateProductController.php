@@ -478,44 +478,6 @@ class CreateProductController extends Controller
         ]);
     }
 
-    public function order_of_product(Request $request, $id){
-        $validator = Validator::make($request->all(), [
-            'order' => 'required|numeric',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        } 
-        
-        $current_product = $this->products
-        ->where('id', $id)
-        ->first();
-        if(empty($current_product)){
-            return response()->json([
-                "errors" => "id is wrong"
-            ], 400);
-        }
-        $products = $this->products
-        ->where('order', $request->order)
-        ->where("category_id", $current_product->category_id)
-        ->where("sub_category_id", $current_product->sub_category_id)
-        ->first();
-        if (!empty($products)) {
-            $this->products
-            ->where('order', '>=', $request->order)
-            ->where("category_id", $current_product->category_id)
-            ->where("sub_category_id", $current_product->sub_category_id)
-            ->increment('order');
-        }
-
-        $current_product->update(['order' => $request->order]);
-
-        return response()->json([
-            'success' => 'You update order success'
-        ]);
-    }
-
     public function update_price(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'price' => 'required|numeric',
