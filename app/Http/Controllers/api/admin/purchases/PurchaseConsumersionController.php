@@ -22,6 +22,7 @@ class PurchaseConsumersionController extends Controller
 
     public function view(Request $request){
         $consumersions = $this->consumersions
+        ->with("category", "product", "branch", "store", "admin")
         ->get()
         ->map(function($item){
             return [
@@ -44,6 +45,32 @@ class PurchaseConsumersionController extends Controller
 
         return response()->json([
             'consumersions' => $consumersions, 
+        ]);
+    }
+
+    public function consumersion_item(Request $request, $id){
+        $consumersion = $this->consumersions
+        ->where("id", $id)
+        ->with("category", "product", "branch", "store", "admin")
+        ->first(); 
+
+        return response()->json([
+            'data' => [
+                'id' => $consumersion->id,
+                'category_id' => $consumersion->category_id,
+                'product_id' => $consumersion->product_id,
+                'branch_id' => $consumersion->branch_id,
+                'store_id' => $consumersion->store_id,
+                'admin_id' => $consumersion->admin_id,
+                'category' => $consumersion?->category?->name,
+                'product' => $consumersion?->product?->name,
+                'branch' => $consumersion?->branch?->name,
+                'store' => $consumersion?->store?->name,
+                'admin' => $consumersion?->admin?->name,
+                'quintity' => $consumersion->quintity,
+                'date' => $consumersion->date,
+                'status' => $consumersion->status,
+            ], 
         ]);
     }
 
@@ -75,6 +102,7 @@ class PurchaseConsumersionController extends Controller
             return [
                 "id" => $item->id,
                 "name" => $item->name,
+                "category_id" => $item->category_id,
             ];
         });
         $stores = $this->stores

@@ -418,6 +418,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PurchaseConsumersionController::class)
     ->prefix('purchase_consumersion')->group(function(){
         Route::get('/', 'view'); 
+        Route::get('/item/{id}', 'consumersion_item'); 
         Route::get('/lists', 'lists'); 
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
