@@ -1488,8 +1488,9 @@ class CashierMakeOrderController extends Controller
         $ids = array_column($financial_account, 'id');
         $amounts = array_column($financial_account, 'amount');
         $financial_account = $this->financial_account
-        ->whereIn("id", $financial_account) 
+        ->whereIn("id", $ids) 
         ->get()
+        ->values()
         ->map(function($item, $key) use($amounts){
             return [ 
                 "name" => $item->name,
