@@ -1251,7 +1251,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function invoice($id){
+    public function invoice(Request $request, $id){
         // https://bcknd.food2go.online/admin/order/invoice/{id}
         // $order = $this->orders
         // ->with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 'branch', 'delivery'])
