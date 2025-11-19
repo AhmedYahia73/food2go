@@ -376,6 +376,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PurchaseController::class)
     ->prefix('purchase')->group(function(){
         Route::get('/', 'view');
+        Route::get('/lists', 'lists');
         Route::get('/item/{id}', 'purchase_item');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');

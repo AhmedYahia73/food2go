@@ -55,6 +55,14 @@ class PurchaseController extends Controller
                 })
             ];
         });
+
+        return response()->json([
+            'purchases' => $purchases, 
+        ]);
+    }
+
+    public function lists(Request $request){
+        
         $categories = $this->categories
         ->select('id', 'name', 'category_id')
         ->where('status', 1)
@@ -76,8 +84,7 @@ class PurchaseController extends Controller
         ->where("status", 1)
         ->get();
 
-        return response()->json([
-            'purchases' => $purchases,
+        return response()->json([ 
             'categories' => $categories,
             'products' => $products,
             'stores' => $stores,
