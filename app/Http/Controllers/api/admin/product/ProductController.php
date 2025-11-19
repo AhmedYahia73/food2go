@@ -188,8 +188,7 @@ class ProductController extends Controller
 
     public function products_in_category(Request $request, $id){
         $products = $this->products
-        ->select("id", "name")
-        ->where('order', $request->order)
+        ->select("id", "name") 
         ->where("category_id", $id)
         ->orWhere("sub_category_id", $id)
         ->get();
