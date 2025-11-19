@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Trait;
+namespace App\trait;
 
 use App\Models\Order; 
 use App\Models\TranslationTbl; 
@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 trait OrderFormat
 { 
-    public function order_details($id, $locale){
+    public function order_details_format($id, $locale){
         $order = Order::
         with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
         'branch', 'delivery'])
@@ -80,9 +80,9 @@ trait OrderFormat
                     ];
                 }
                 $variations[] = [
-                    "id" => $element['id'],
+                    "id" => $element['variation']['id'],
                     "name" => $name,
-                    "price" => $element['price'],
+                    "price" => $element['variation']['price'],
                     "options" => $options,
                 ];
             }
