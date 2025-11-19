@@ -638,7 +638,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/product_pricing', 'product_pricing');
         Route::post('/option_pricing', 'option_pricing');
 
-            Route::put('/order_of_product/{id}', 'order_of_product')->middleware('can:edit_branch'); 
+        Route::put('/order_of_product/{id}', 'order_of_product')->middleware('can:edit_branch'); 
         Route::get('/branch_in_product/{id}', 'branch_in_product')->middleware('can:product_branch');
         Route::get('/branch_product/{id}', 'branch_product')->middleware('can:product_branch');
         Route::get('/branch_options/{id}', 'branch_options')->middleware('can:option_branch');

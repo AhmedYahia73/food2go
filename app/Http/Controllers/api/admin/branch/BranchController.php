@@ -66,6 +66,11 @@ class BranchController extends Controller
         $current_branch = $this->branches
         ->where('id', $id)
         ->first();
+        if(empty($current_branch)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
         $branches = $this->branches
         ->where('order', $request->order)
         ->first();

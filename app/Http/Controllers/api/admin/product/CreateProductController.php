@@ -491,12 +491,21 @@ class CreateProductController extends Controller
         $current_product = $this->products
         ->where('id', $id)
         ->first();
+        if(empty($current_product)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
         $products = $this->products
         ->where('order', $request->order)
+        ->where("category_id", $current_product->category_id)
+        ->where("sub_category_id", $current_product->sub_category_id)
         ->first();
         if (!empty($products)) {
             $this->products
             ->where('order', '>=', $request->order)
+            ->where("category_id", $current_product->category_id)
+            ->where("sub_category_id", $current_product->sub_category_id)
             ->increment('order');
         }
 
