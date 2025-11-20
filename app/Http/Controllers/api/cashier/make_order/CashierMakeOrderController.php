@@ -1452,7 +1452,7 @@ class CashierMakeOrderController extends Controller
         $locale = Setting::
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
-        foreach ($request->products as $item) {
+        foreach ($request['products'] as $item) {
             $item = (array) $item;
             $addons = [];
             if(isset($item['addons'])){
