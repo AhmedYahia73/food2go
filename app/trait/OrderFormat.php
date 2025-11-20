@@ -203,16 +203,18 @@ trait OrderFormat
                 ];
             }
             foreach ($item['addons'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
-                $addons[] = [
-                    "id" => $element['id'],
-                    "name" => $name,
-                    "price" => $element['price'],
-                ];
+                if(isset($element['name'])){
+                    $name = TranslationTbl::
+                    where("key", $element['name'])
+                    ->where("locale", $locale)
+                    ->orderByDesc("id")
+                    ->first()?->value ?? $element['name'];
+                    $addons[] = [
+                        "id" => $element['id'],
+                        "name" => $name,
+                        "price" => $element['price'],
+                    ];
+                }
             }
             foreach ($item['excludes'] as $element) {
                 $name = TranslationTbl::

@@ -738,7 +738,7 @@ class OrderController extends Controller
         if ($order->order_status != 'processing' && $order->order_status != 'out_for_delivery'
          && $order->order_status != 'confirmed') {
             return response()->json([
-                'faild' => 'Status must be processing'
+                'errors' => 'Status must be processing'
             ], 400);
         } 
         $order->update([
