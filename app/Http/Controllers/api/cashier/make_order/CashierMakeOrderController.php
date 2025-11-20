@@ -704,7 +704,8 @@ class CashierMakeOrderController extends Controller
 
   
         return response()->json([ 
-            'request' => $request->all()
+            'request' => $request->all(),
+            "cart_id" => $order['payment']->id
         ]);
     }
 
