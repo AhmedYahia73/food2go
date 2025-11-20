@@ -1458,14 +1458,14 @@ class CashierMakeOrderController extends Controller
                 foreach ($item['addons'] as $element) {
                     $count = $element['count'];
                     $addon_name = $this->addons
-                    ->where('id', $element['addon_id'])
+                    ->where('id', $element['addon']['id'])
                     ->with('translations')
                     ->first();
                     $addon_name = $addon_name?->translations
                     ->where("locale", $locale)
                     ->where("key", $addon_name->name)
                     ->first()?->value ?? $addon_name->name;
-                    $price = $element['price'];
+                    $price = $element['addon']['price'];
                     $total = $count * $price;
                     $addons[] = [
                         'count' => $count,
