@@ -320,7 +320,8 @@ class POSOrderController extends Controller
         $order_data = $this->order_format($order['payment'], 0);
 
         return response()->json([
-            'success' => $order_data, 
+            'success' => $order_data,
+            "order_cart_id" => $order['payment']->id,
         ]);
     }
 

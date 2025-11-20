@@ -62,6 +62,7 @@ class Order extends Model
         'from_table_order',
         'due',
         'dicount_id',
+        'preparation_read_status',
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];

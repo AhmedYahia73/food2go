@@ -64,6 +64,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ->prefix('storage')
             ->name('storage.')
             ->group(base_path('routes/storage.php'));
+            Route::middleware('api')
+            ->prefix('preparation_man')
+            ->name('preparation_man.')
+            ->group(base_path('routes/preparation_man.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -78,6 +82,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'IsWaiter' => WaiterMiddleware::class,
             'IsAdminOrBranch' => AdmiOrBranchMiddleware::class,
             'IsStorage' => StorageMiddleware::class,
+            'IsPreparation' => PreparationMiddleware::class,
         ]);
          $middleware->redirectGuestsTo(function (Request $request) {
             if (!$request->is('api/*')) {
