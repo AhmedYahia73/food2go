@@ -40,14 +40,14 @@ trait OrderFormat
             }
             foreach ($item['addons'] as $element) {
                 $name = TranslationTbl::
-                where("key", $element['name'])
+                where("key", $element['addon']['name'])
                 ->where("locale", $locale)
                 ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
+                ->first()?->value ?? $element['addon']['name'];
                 $addons[] = [
-                    "id" => $element['id'],
+                    "id" => $element['addon']['id'],
                     "name" => $name,
-                    "price" => $element['price'],
+                    "price" => $element['addon']['price'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
@@ -209,9 +209,9 @@ trait OrderFormat
                 ->orderByDesc("id")
                 ->first()?->value ?? $element['addon']['name'];
                 $addons[] = [
-                    "id" => $element['id'],
+                    "id" => $element['addon']['id'],
                     "name" => $name,
-                    "price" => $element['price'],
+                    "price" => $element['addon']['price'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
