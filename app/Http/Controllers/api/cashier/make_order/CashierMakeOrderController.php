@@ -1485,6 +1485,7 @@ class CashierMakeOrderController extends Controller
             ->where("locale", $locale)
             ->where("key", $name->name)
             ->first()?->value ?? $name->name;
+            dd($item);
             $total = $count * $item['price'];
             $products[] = [
                 'count' => $count,
