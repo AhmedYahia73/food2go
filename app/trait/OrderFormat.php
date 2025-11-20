@@ -238,8 +238,8 @@ trait OrderFormat
                     $options[] = [
                         "id" => $value['id'],
                         "name" => $option_name,
-                        "price" => $value['price'],
-                        "total_option_price" => $value['total_option_price'],
+                        //"price" => $value['price'],
+                        //"total_option_price" => $value['total_option_price'],
                     ];
                 }
                 $variations[] = [
@@ -257,8 +257,7 @@ trait OrderFormat
                 ->first()?->value ?? $item['product'][0]['product']['name'];
                 $product = [
                     'id' => $item['product'][0]['product']['id'],
-                    'name' => $name,
-                    'price' => $item['product'][0]['product']['price'], 
+                    'name' => $name,  
                     'count' => $item['product'][0]['count'], 
                 ];
             }  
