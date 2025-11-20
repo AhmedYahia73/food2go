@@ -421,11 +421,15 @@ class CashierMakeOrderController extends Controller
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
+        $address = $order['order']->address;
+        $customer = $order['order']->user;
         return response()->json([
             "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
             'order_number' => $order['order']->order_number,
             "financials" => $financials,
+            "address" => $address,
+            "customer" => $customer,
         ]);
     }
 
