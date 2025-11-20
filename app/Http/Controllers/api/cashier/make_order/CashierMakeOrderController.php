@@ -424,7 +424,7 @@ class CashierMakeOrderController extends Controller
         $address = $order['order']->address;
         $customer = $order['order']->user;
         return response()->json([
-            "success" => $this->checkout_data($request),
+            "success" => $this->checkout_data($request->all()),
             'kitchen_items' => $kitchen_items,
             'order_number' => $order['order']->order_number,
             "financials" => $financials,
@@ -661,7 +661,7 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
         return response()->json([ 
-            "success" => $this->checkout_data($request),
+            "success" => $this->checkout_data($request->all()),
             "kitchen_items" => $kitchen_items,  
             "order_number" => $order['order']->order_number,
             'type' => $type,
@@ -932,9 +932,9 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
         return response()->json([
-            'success' => $this->checkout_data($request), 
+            'success' => $this->checkout_data($request->all()), 
             'order_number' => $order['payment']['order_number'],
-            "financials" => $financials
+            "financials" => $financials,
         ]);
     }
 
@@ -1049,7 +1049,7 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
         return response()->json([
-            "success" => $this->checkout_data($request),
+            "success" => $this->checkout_data($request->all()),
             'order_number' => $order_number,
             'financials' => $financials,
         ]);
@@ -1452,7 +1452,7 @@ class CashierMakeOrderController extends Controller
         $locale = Setting::
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
-        foreach ($request['products'] as $item) {
+        foreach ($request->products as $item) {
             $item = (array) $item;
             $addons = [];
             if(isset($item['addons'])){
