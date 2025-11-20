@@ -28,8 +28,14 @@ class PreparationController extends Controller
             ->where("order_type", "delivery");
         })
         ->get();
-        $
-        $order_preparation_format;
+        $orders = [];
+        foreach ($orders_query as $order) {
+            $orders[] = $this->order_preparation_format($order, $locale);
+        }
+
+        return response()->json([
+            "orders" => $orders,
+        ]);
     }
     
     public function preparation_status(Request $request, $id){

@@ -174,10 +174,8 @@ trait OrderFormat
         return $order_arr;
     }
     
-    public function order_preparation_format($id, $locale){
-        $order = Order::
-        where("id", $id)
-        ->first();
+    public function order_preparation_format($order, $locale){
+     
         $products = [];
         foreach ($order->order_details_data as $item) {
             # TranslationTbl
