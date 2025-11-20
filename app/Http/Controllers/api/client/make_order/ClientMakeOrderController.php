@@ -580,7 +580,7 @@ class ClientMakeOrderController extends Controller
     //     $validator = Validator::make($request->all(), [
     //         'preparing' => 'required',
     //         'preparing.*.cart_id' => 'required|exists:order_carts,id',
-    //         'preparing.*.status' => 'required|in:preparing,done,pick_up',
+    //         'preparing.*.status' => 'required|in:preparing,preparation,done,pick_up',
     //         'table_id' => 'required|exists:cafe_tables,id',
     //     ]);
     //     if ($validator->fails()) { // if Validate Make Error Return Message Error

@@ -350,9 +350,11 @@ class POSOrderController extends Controller
             $order_item = $this->order_format($item);
             $orders = $orders->merge($order_item);
         }
+        $dine_in_status = ['watting', 'preparing', 'preparation', 'done', 'pick_up'];
 
         return response()->json([
-            'success' => $orders
+            'success' => $orders,
+            'dine_in_status' => $dine_in_status,
         ]);
     }
 

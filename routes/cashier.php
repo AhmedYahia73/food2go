@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/view_user_order', 'view_user_order');
 
         Route::get('/lists', 'lists');
+        Route::get('/status_lists', 'status_lists');
 
         Route::post('/discount_module', 'discount_module');
 

@@ -171,7 +171,7 @@ class DealOrderController extends Controller
 
     public function order_status(Request $request, $id){
          $validator = Validator::make($request->all(), [
-            'order_status' => 'required|in:preparing,done,pick_up',
+            'order_status' => 'required|in:preparing,preparation,done,pick_up',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

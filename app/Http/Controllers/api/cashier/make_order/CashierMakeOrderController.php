@@ -81,6 +81,18 @@ class CashierMakeOrderController extends Controller
     use POS;
     use Recipe; 
 
+    public function status_lists(){ 
+        $take_away_status = ['watting', 'preparing', 'preparation', 'done', 'pick_up'];
+        $delivery_status = ['watting', 'preparing','done', 'preparation', 'ready_for_delivery','out_for_delivery','delivered','returned'];
+        $dine_in_status = ['watting', 'preparing', 'done', 'pick_up'];
+
+        return response()->json([
+            "take_away_status" => $take_away_status,
+            "delivery_status" => $delivery_status,
+            "dine_in_status" => $dine_in_status,
+        ]);
+    }
+
     public function list_due_users(Request $request){
         $users =$this->user
         ->where("due_status", 1)
@@ -498,7 +510,7 @@ class CashierMakeOrderController extends Controller
 
     public function order_status(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'delivery_status' => 'required|in:preparing,done,ready_for_delivery,out_for_delivery,delivered,returned',
+            'delivery_status' => 'required|in:preparing,done,preparation,ready_for_delivery,out_for_delivery,delivered,returned',
         ]); 
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -742,7 +754,7 @@ class CashierMakeOrderController extends Controller
         $validator = Validator::make($request->all(), [
             'preparing' => 'required',
             'preparing.*.cart_id' => 'required|exists:order_carts,id',
-            'preparing.*.status' => 'required|in:preparing,done,pick_up',
+            'preparing.*.status' => 'required|in:preparing,preparation,done,pick_up',
             'table_id' => 'required|exists:cafe_tables,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -1068,14 +1080,14 @@ class CashierMakeOrderController extends Controller
 
     public function take_away_status(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'take_away_status' => 'required|in:preparing,done,pick_up',
+            'take_away_status' => 'required|in:preparing,done,preparation,pick_up',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         }
-        $status_arr = ['watting', 'preparing', 'done', 'pick_up'];
+        $status_arr = ['watting', 'preparing', 'preparation', 'done', 'pick_up'];
         $order = $this->order
         ->where('id', $id)
         ->first();
