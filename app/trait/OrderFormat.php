@@ -259,8 +259,7 @@ trait OrderFormat
                     'id' => $item['product'][0]['product']['id'],
                     'name' => $name,
                     'price' => $item['product'][0]['product']['price'], 
-                    'count' => $item['product'][0]['count'],
-                    'notes' => $item['product'][0]['notes'],
+                    'count' => $item['product'][0]['count'], 
                 ];
             }  
             $product_item = [
