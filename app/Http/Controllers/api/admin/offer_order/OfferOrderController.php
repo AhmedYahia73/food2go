@@ -42,7 +42,7 @@ class OfferOrderController extends Controller
 
         if (empty($offer_order)) {
             return response()->json([
-                'faild' => 'Code is expired'
+                'errors' => 'Code is expired'
             ]);
         } 
         else {
@@ -75,7 +75,7 @@ class OfferOrderController extends Controller
         ->first();
         if (!$offer_order->offer || $user->points < $offer_order->offer->points) {
             return response()->json([
-                'faild' => 'Your points is not enough'
+                'errors' => 'Your points is not enough'
             ], 400);
         }
         $user->points = $user->points - $offer_order->offer->points; 

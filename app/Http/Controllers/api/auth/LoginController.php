@@ -57,7 +57,7 @@ class LoginController extends Controller
         ->first();
         if (empty($user)) {
             return response()->json([
-                'faield' => 'This Store Man does not have the ability to login'
+                'errors' => 'This Store Man does not have the ability to login'
             ], 405);
         }
         if (password_verify($request->input('password'), $user->password)) {
@@ -70,7 +70,7 @@ class LoginController extends Controller
             ], 200);
         }
         else {
-            return response()->json(['faield'=>'creational not Valid'],403);
+            return response()->json(['errors'=>'creational not Valid'],403);
         }
     }
 
@@ -89,7 +89,7 @@ class LoginController extends Controller
         ->first();
         if (empty($user)) {
             return response()->json([
-                'faield' => 'This preparation man does not have the ability to login'
+                'errors' => 'This preparation man does not have the ability to login'
             ], 405);
         }
         if (password_verify($request->input('password'), $user->password)) {
@@ -129,7 +129,7 @@ class LoginController extends Controller
             ], 200);
         }
         else {
-            return response()->json(['faield'=>'creational not Valid'],403);
+            return response()->json(['errors'=>'creational not Valid'],403);
         }
     }
 
@@ -148,7 +148,7 @@ class LoginController extends Controller
         ->first();
         if (empty($user)) {
             return response()->json([
-                'faield' => 'This Kitchen does not have the ability to login'
+                'errors' => 'This Kitchen does not have the ability to login'
             ], 405);
         }
         if (password_verify($request->input('password'), $user->password)) {
@@ -188,7 +188,7 @@ class LoginController extends Controller
             ], 200);
         }
         else {
-            return response()->json(['faield'=>'creational not Valid'],403);
+            return response()->json(['errors'=>'creational not Valid'],403);
         }
     }
 
@@ -220,7 +220,7 @@ class LoginController extends Controller
         }
         if (empty($user)) {
             return response()->json([
-                'faield' => 'This user does not have the ability to login'
+                'errors' => 'This user does not have the ability to login'
             ], 405);
         }
         if ($user->status == 0) {
@@ -251,7 +251,7 @@ class LoginController extends Controller
             ], 200);
         }
         else { 
-            return response()->json(['faield'=>'creational not Valid'],403);
+            return response()->json(['errors'=>'creational not Valid'],403);
         }
     }
 
@@ -413,7 +413,7 @@ class LoginController extends Controller
         ->first();
         if (empty($user)) {
             return response()->json([
-                'faield' => 'This user does not have the ability to login'
+                'errors' => 'This user does not have the ability to login'
             ], 405);
         }
         if ($user->status == 0) {
@@ -467,7 +467,7 @@ class LoginController extends Controller
             ], 200);
         }
         else { 
-            return response()->json(['faield'=>'creational not Valid'],403);
+            return response()->json(['errors'=>'creational not Valid'],403);
         }
     }
 
@@ -580,7 +580,7 @@ class LoginController extends Controller
         }
         if (empty($user)) {
             return response()->json([
-                'faield' => 'This user does not have the ability to login'
+                'errors' => 'This user does not have the ability to login'
             ], 405);
         }
         if ($user->status == 0) {
@@ -610,7 +610,7 @@ class LoginController extends Controller
             ], 200);
         }
         else { 
-            return response()->json(['faield'=>'creational not Valid'],403);
+            return response()->json(['errors'=>'creational not Valid'],403);
         }
     }
 

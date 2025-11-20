@@ -56,12 +56,12 @@ class DealOrderController extends Controller
                 ]);
             } else {
                 return response()->json([
-                    'faild' => 'Code is expired'
+                    'errors' => 'Code is expired'
                 ], 200);
             }
         } catch (QueryException $q) {
             return response()->json([
-                'faild' => 'Code is expired'
+                'errors' => 'Code is expired'
             ], 200);
         }
  
