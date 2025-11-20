@@ -1477,7 +1477,7 @@ class CashierMakeOrderController extends Controller
             }
 
             $count = $item['count'];
-            $price = $item['price'] ?? $item->price;
+            $price = $item->price;
             $name = $this->products
             ->where('id', $item['product_id'])
             ->with('translations')
