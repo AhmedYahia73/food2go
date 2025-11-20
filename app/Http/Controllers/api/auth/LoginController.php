@@ -28,7 +28,8 @@ use App\Models\Waiter;
 use App\Models\DeviceToken;
 use App\Models\StorageMan;
 use App\Models\FinantiolAcounting; 
-use App\Models\CompanyInfo; 
+use App\Models\CompanyInfo;
+use App\Models\PreparationMan;
 
 class LoginController extends Controller
 {
@@ -38,7 +39,7 @@ class LoginController extends Controller
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
     private Kitchen $kitchen, private Waiter $waiter, private StorageMan $store_man_model,
     private Cashier $cashier_machine, private FinantiolAcounting $financial_account,
-    private CompanyInfo $company_info,
+    private CompanyInfo $company_info, private PreparationMan $preparation_man
     ){}
 
     public function store_man(Request $request){
@@ -66,6 +67,65 @@ class LoginController extends Controller
                 'store_man' => $user,
                 'token' => $user->token, 
                 'role'  => $role,
+            ], 200);
+        }
+        else {
+            return response()->json(['faield'=>'creational not Valid'],403);
+        }
+    }
+
+    public function preparation_man_login(Request $request){
+        // preparation_man
+        $validation = Validator::make($request->all(), [
+            'name' => 'required', 
+            'password' => 'required', 
+        ]);
+        if ($validation->fails()) {
+            return response()->json($validation->errors(), 422);
+        }
+
+        $user = $this->preparation_man
+        ->where('name', $request->name)
+        ->first();
+        if (empty($user)) {
+            return response()->json([
+                'faield' => 'This preparation man does not have the ability to login'
+            ], 405);
+        }
+        if (password_verify($request->input('password'), $user->password)) {
+            $user->token = $user->createToken('preparation_man')->plainTextToken;
+            $role = $user->type;
+            $app_setup = MainData::
+            first();
+            $app_setup = [
+                "name" => $app_setup?->name ?? null,
+                "ar_name" => $app_setup?->translations()
+                ?->where("locale", "ar")->where("key", $app_setup?->name)
+                ->first()?->value ?? $app_setup?->name ,
+                "first_color" => $app_setup?->first_color ?? null,
+                "second_color" => $app_setup?->second_color ?? null,
+                "third_color" => $app_setup?->third_color ?? null,
+                "instagram" => $app_setup?->instagram ?? null,
+                "facebook" => $app_setup?->facebook ?? null,
+                "logo" => $app_setup?->logo_link ?? null,
+                'image_1' => $app_setup?->image1_link ?? null,
+                'image_2' => $app_setup?->image2_link ?? null,
+                'image_3' => $app_setup?->image3_link ?? null,
+                'image_4' => $app_setup?->image4_link ?? null,
+                'image_5' => $app_setup?->image5_link ?? null,
+                'image_6' => $app_setup?->image6_link ?? null,
+            ];
+            $notification = Setting::where("name", "notification_sound")
+            ->first()?->setting;
+            $notification = url("storage/" . $notification);
+            return response()->json([
+                'preparation_man' => $user,
+                'token' => $user->token,
+                'branch_name' => $user->branch->name,
+                'branch_phone' => $user->branch->phone,
+                'role'  => $role,
+                'app_setup'  => $app_setup,
+                "notification" => $notification
             ], 200);
         }
         else {

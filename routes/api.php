@@ -23,9 +23,12 @@ Route::prefix('welcome')->group(function(){
 Route::controller(CashierMakeOrderController::class)->group(function(){
     Route::get('sign-qz-request', 'certificate_sign');
 });
-
 Route::prefix('store_man/auth')->controller(LoginController::class)->group(function(){
     Route::post('login', 'store_man');
+});
+
+Route::prefix('preparation_man/auth')->controller(LoginController::class)->group(function(){
+    Route::post('login', 'preparation_man_login');
 });
 
 Route::prefix('kitchen/auth')->controller(LoginController::class)->group(function(){
