@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api\preparation_man;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator; 
 use Illuminate\Http\Request;
 use App\trait\OrderFormat;
 
@@ -85,7 +86,24 @@ class PreparationController extends Controller
         ]);
     }
     
-    public function read_status(Request $request){
+    public function read_status(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'preparation_read_status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
 
+        $this->orders
+        ->where("id", $id)
+        ->update([
+            "preparation_read_status" => $request->preparation_read_status
+        ]);
+
+        return response()->json([
+            "success" => "You read order success",
+        ]);
     }
 }
