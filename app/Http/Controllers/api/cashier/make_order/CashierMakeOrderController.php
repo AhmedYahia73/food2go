@@ -819,7 +819,7 @@ class CashierMakeOrderController extends Controller
         // Keys
         // date, amount, total_tax, total_discount
         // notes, payment_method_id, table_id
-  
+        return response()->json([$request->all()]);
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
             'order_type' => 'dine_in',
@@ -931,10 +931,10 @@ class CashierMakeOrderController extends Controller
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
-        return response()->json([  
+        return response()->json([
+            'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number'],
-            "financials" => $financials,
-            "request->all()" => $request->all(),
+            "financials" => $financials
         ]);
     }
 
@@ -1452,7 +1452,7 @@ class CashierMakeOrderController extends Controller
         $locale = Setting::
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
-        foreach ($request->products as $item) { 
+        foreach ($request->products as $item) {
             $addons = [];
             if(isset($item['addons'])){
                 foreach ($item['addons'] as $element) {
@@ -1477,7 +1477,7 @@ class CashierMakeOrderController extends Controller
             }
 
             $count = $item['count'];
-            $price = isset($item['price']) ? $item['price']: $item->price;
+            $price = $item['price'];
             $name = $this->products
             ->where('id', $item['product_id'])
             ->with('translations')
