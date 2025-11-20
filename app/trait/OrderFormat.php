@@ -180,7 +180,7 @@ trait OrderFormat
     public function order_preparation_format($order, $locale){
      
         $products = [];
-        if(empty($$order->order_details_data)){
+        if(empty($order->order_details_data)){
             return null;
         }
         foreach ($order->order_details_data as $item) {
