@@ -54,6 +54,7 @@ class PurchaseController extends Controller
                 'material' => $item?->material?->name,
                 'admin' => $item?->admin?->name,
                 'store' => $item?->store?->name,
+                'type' => $item->type,
                 'financial' => $item?->financial
                 ?->map(function($element){
                     return [
@@ -100,6 +101,10 @@ class PurchaseController extends Controller
         ->select("name", "id", 'category_id')
         ->where("status", 1)
         ->get();
+        $types = [
+            "material",
+            "product",
+        ];
 
         return response()->json([ 
             'categories' => $categories,
@@ -109,6 +114,7 @@ class PurchaseController extends Controller
             'units' => $units,
             'material_categories' => $material_categories,
             'materials' => $materials,
+            'types' => $types,
         ]);
     }
 
@@ -135,6 +141,7 @@ class PurchaseController extends Controller
             'unit' => $purchases?->unit?->name,
             'admin' => $purchases?->admin?->name,
             'store' => $purchases?->store?->name,
+            'type' => $item->type,
         ]);
     }
 
