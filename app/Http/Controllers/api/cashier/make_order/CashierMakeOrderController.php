@@ -424,7 +424,7 @@ class CashierMakeOrderController extends Controller
         $address = $order['order']->address;
         $customer = $order['order']->user;
         return response()->json([
-            "success" => $this->checkout_data($request->all()),
+            "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
             'order_number' => $order['order']->order_number,
             "financials" => $financials,
@@ -661,7 +661,7 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
         return response()->json([ 
-            "success" => $this->checkout_data($request->all()),
+            "success" => $this->checkout_data($request),
             "kitchen_items" => $kitchen_items,  
             "order_number" => $order['order']->order_number,
             'type' => $type,
@@ -932,9 +932,10 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
         return response()->json([
-            'success' => $this->checkout_data($request->all()), 
+            'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number'],
             "financials" => $financials,
+            "request" => $request,
         ]);
     }
 
@@ -1049,7 +1050,7 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
         return response()->json([
-            "success" => $this->checkout_data($request->all()),
+            "success" => $this->checkout_data($request),
             'order_number' => $order_number,
             'financials' => $financials,
         ]);
@@ -1447,13 +1448,12 @@ class CashierMakeOrderController extends Controller
         }
     }
 
-    public function checkout_data($request){ 
+    public function checkout_data(Request $request){ 
         $products = [];
         $locale = Setting::
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
-        foreach ($request->products as $item) {
-            $item = (array) $item;
+        foreach ($request->products as $item) { 
             $addons = [];
             if(isset($item['addons'])){
                 foreach ($item['addons'] as $element) {
