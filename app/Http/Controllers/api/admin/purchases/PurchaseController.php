@@ -197,10 +197,10 @@ class PurchaseController extends Controller
             ]);
 
             $financial = FinantiolAcounting::
-            where("id", $element['id'])
+            where("id", $item['id'])
             ->first();
             if($financial){
-                $financial->balance -= $element['amount'];
+                $financial->balance -= $item['amount'];
                 $financial->save();
             }
         }
@@ -324,10 +324,10 @@ class PurchaseController extends Controller
             ]);
 
             $financial = FinantiolAcounting::
-            where("id", $element['id'])
+            where("id", $item['id'])
             ->first();
             if($financial){
-                $financial->balance -= $element['amount'];
+                $financial->balance -= $item['amount'];
                 $financial->save();
             }
         }
