@@ -1448,7 +1448,7 @@ class CashierMakeOrderController extends Controller
         }
     }
 
-    public function checkout_data(Request $request){ 
+    public function checkout_data($request){ 
         $products = [];
         $locale = Setting::
         where("name", "setting_lang")
