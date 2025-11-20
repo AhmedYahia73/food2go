@@ -11,6 +11,9 @@ class Purchase extends Model
 
     protected $fillable = [
         'category_id',
+        'category_material_id',
+        'material_id',
+        "type",
         'product_id',
         'admin_id', 
         'store_id',

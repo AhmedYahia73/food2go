@@ -14,6 +14,9 @@ use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore; 
 use App\Models\FinantiolAcounting;
 use App\Models\PurchaseStock;
+use App\Models\MaterialCategory;
+use App\Models\MaterialStock;
+use App\Models\Material;
 use App\Models\Unit;
 
 class PurchaseController extends Controller
@@ -21,8 +24,9 @@ class PurchaseController extends Controller
     public function __construct(private Purchase $purchases,
     private PurchaseProduct $products, private PurchaseCategory $categories,
     private PurchaseStore $stores, private FinantiolAcounting $financial,
-    private PurchaseFinancial $purchase_financial,
-    private PurchaseStock $stock, private Unit $units){}
+    private PurchaseFinancial $purchase_financial, private Material $materials,
+    private PurchaseStock $stock, private Unit $units,
+    private MaterialCategory $material_categories, private MaterialStock $material_stock){}
     use image;
 
     public function view(Request $request){
@@ -80,7 +84,15 @@ class PurchaseController extends Controller
         ->where('status', 1)
         ->get();
         $units = $this->units
-        ->select("name", "status")
+        ->select("name", "id")
+        ->where("status", 1)
+        ->get();
+        $material_categories = $this->material_categories
+        ->select("name", "id", 'category_id')
+        ->where("status", 1)
+        ->get();
+        $materials = $this->materials
+        ->select("name", "id", 'category_id')
         ->where("status", 1)
         ->get();
 
@@ -90,6 +102,8 @@ class PurchaseController extends Controller
             'stores' => $stores,
             'financials' => $financials,
             'units' => $units,
+            'material_categories' => $material_categories,
+            'materials' => $materials,
         ]);
     }
 
@@ -121,6 +135,11 @@ class PurchaseController extends Controller
         $validator = Validator::make($request->all(), [
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'product_id' => ['exists:purchase_products,id'],
+
+            'material_id' => ['exists:materials,id'],
+            'category_material_id' => ['exists:material_categories,id'],
+            "type" => ["required", "in:material,product"],
+
             'store_id' => ['required', 'exists:purchase_stores,id'],
             'unit_id' => ['required', 'exists:units,id'],
             'total_coast' => ['required', 'numeric'],
@@ -134,7 +153,18 @@ class PurchaseController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }// 
+        }
+
+        if (empty($request->material_id) && $request->type == "material") {
+            return response()->json([
+                "material is required"
+            ], 400);
+        }
+        if (empty($request->product_id) && $request->type == "product") {
+            return response()->json([
+                "material is required"
+            ], 400);
+        }
 
         $purchaseRequest = $validator->validated();
         $purchaseRequest['admin_id'] = $request->user()->id;
@@ -160,22 +190,44 @@ class PurchaseController extends Controller
                 $financial->save();
             }
         }
-        $stock = $this->stock
-        ->where('product_id', $request->product_id)
-        ->where('store_id', $request->store_id)
-        ->first();
-        if(empty($stock)){
-            $this->stock
-            ->create([
-                'category_id' => $request->category_id,
-                'product_id' => $request->product_id,
-                'store_id' => $request->store_id,
-                'quantity' => $request->quintity,
-            ]);
+        // deduct from stock
+        if($request->type == "material"){
+            $material_stock = $this->material_stock
+            ->where('material_id', $request->material_id)
+            ->where('store_id', $request->store_id)
+            ->first();
+            if(empty($material_stock)){
+                $this->material_stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'material_id' => $request->material_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => $request->quintity,
+                ]);
+            }
+            else{
+                $material_stock->quantity += $request->quintity;
+                $material_stock->save();
+            }
         }
         else{
-            $stock->quantity += $request->quintity;
-            $stock->save();
+            $stock = $this->stock
+            ->where('product_id', $request->product_id)
+            ->where('store_id', $request->store_id)
+            ->first();
+            if(empty($stock)){
+                $this->stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'product_id' => $request->product_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => $request->quintity,
+                ]);
+            }
+            else{
+                $stock->quantity += $request->quintity;
+                $stock->save();
+            }
         }
 
         return response()->json([
@@ -187,6 +239,11 @@ class PurchaseController extends Controller
         $validator = Validator::make($request->all(), [
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'product_id' => ['required', 'exists:purchase_products,id'],
+
+            'material_id' => ['exists:materials,id'],
+            'category_material_id' => ['exists:material_categories,id'],
+            "type" => ["required", "in:material,product"],
+
             'store_id' => ['required', 'exists:purchase_stores,id'],
             'unit_id' => ['required', 'exists:units,id'],
             'total_coast' => ['required', 'numeric'],
@@ -200,6 +257,17 @@ class PurchaseController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }// 
+
+        if (empty($request->material_id) && $request->type == "material") {
+            return response()->json([
+                "material is required"
+            ], 400);
+        }
+        if (empty($request->product_id) && $request->type == "product") {
+            return response()->json([
+                "material is required"
+            ], 400);
+        }
 
         $purchases = $this->purchases
         ->where('id', $id)
@@ -249,22 +317,45 @@ class PurchaseController extends Controller
                 $financial->save();
             }
         }
-        $stock = $this->stock
-        ->where('product_id', $request->product_id)
-        ->where('store_id', $request->store_id)
-        ->first();
-        if(empty($stock)){
-            $this->stock
-            ->create([
-                'category_id' => $request->category_id,
-                'product_id' => $request->product_id,
-                'store_id' => $request->store_id,
-                'quantity' => $request->quintity - $purchases->quintity,
-            ]);
+        
+        // deduct from stock
+        if($request->type == "material"){
+            $material_stock = $this->material_stock
+            ->where('material_id', $request->material_id)
+            ->where('store_id', $request->store_id)
+            ->first();
+            if(empty($material_stock)){
+                $this->material_stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'material_id' => $request->material_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => $request->quintity - $purchases->quintity,
+                ]);
+            }
+            else{
+                $material_stock->quantity += $request->quintity - $purchases->quintity;
+                $material_stock->save();
+            }
         }
         else{
-            $stock->quantity += $request->quintity - $purchases->quintity;
-            $stock->save();
+            $stock = $this->stock
+            ->where('product_id', $request->product_id)
+            ->where('store_id', $request->store_id)
+            ->first();
+            if(empty($stock)){
+                $this->stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'product_id' => $request->product_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => $request->quintity - $purchases->quintity,
+                ]);
+            }
+            else{
+                $stock->quantity += $request->quintity - $purchases->quintity;
+                $stock->save();
+            }
         }
 
         return response()->json([
