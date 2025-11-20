@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\cashier\order;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\trait\OrderFormat;
 use App\trait\Recipe;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator; 
@@ -40,6 +41,7 @@ class OrderController extends Controller
     private OptionProduct $options){}
     use Recipe;
     use POS;
+    use OrderFormat;
 
     public function pos_orders(Request $request){
         $validator = Validator::make($request->all(), [
@@ -549,6 +551,18 @@ class OrderController extends Controller
             "canceled" => $canceled,
             "scheduled" => $scheduled,
             "refund" => $refund,
+        ]);
+    }
+
+    public function invoice(Request $request, $id){ 
+        $locale = $this->settings
+        ->where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
+        $order = $this->order_details_format($id, $locale);
+
+        return response()->json([
+            'order' => $order,
+            'locale' => $locale,
         ]);
     }
 

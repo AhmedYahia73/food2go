@@ -72,6 +72,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/point_of_sale', 'pos_orders');
         Route::get('/order_count', 'order_count');
         Route::get('/online_orders', 'online_orders');
+        Route::get('/invoice/{id}', 'invoice');
         Route::get('/order_item/{id}', 'order_item');
         Route::put('/transfer_branch/{id}', 'transfer_branch');
         Route::post('/delivery', 'delivery');
