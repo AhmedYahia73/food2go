@@ -1485,10 +1485,10 @@ class CashierMakeOrderController extends Controller
             ->where("locale", $locale)
             ->where("key", $name->name)
             ->first()?->value ?? $name->name;
-            $total = $count * $price;
+            $total = $count * $item['price'];
             $products[] = [
                 'count' => $count,
-                'price' => $price,
+                'price' => $item['price'],
                 'name' => $name,
                 'total' => $total,
                 "addons" => $addons
