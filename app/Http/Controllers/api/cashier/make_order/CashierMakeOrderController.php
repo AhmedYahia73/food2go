@@ -1476,7 +1476,8 @@ class CashierMakeOrderController extends Controller
                 }
             }
 
-            $count = $item['count']; 
+            $count = $item['count'];
+            $price = $item['price'];
             $name = $this->products
             ->where('id', $item['product_id'])
             ->with('translations')
@@ -1485,11 +1486,10 @@ class CashierMakeOrderController extends Controller
             ->where("locale", $locale)
             ->where("key", $name->name)
             ->first()?->value ?? $name->name;
-            dd($item);
-            $total = $count * $item['price'];
+            $total = $count * $price;
             $products[] = [
                 'count' => $count,
-                'price' => $item['price'],
+                'price' => $price,
                 'name' => $name,
                 'total' => $total,
                 "addons" => $addons
