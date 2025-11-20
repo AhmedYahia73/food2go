@@ -31,7 +31,8 @@ class PurchaseController extends Controller
 
     public function view(Request $request){
         $purchases = $this->purchases
-        ->with('category', 'product', 'admin', 'store', 'unit')
+        ->with('category', 'product', 'admin', 'store', 'unit', 
+        'material', 'material_category')
         ->get()
         ->map(function($item){
             return [
@@ -43,10 +44,14 @@ class PurchaseController extends Controller
                 'receipt_link' => $item->receipt_link,
                 'category_id' => $item->category_id,
                 'product_id' => $item->product_id,
+                'category_material_id' => $item->category_material_id,
+                'material_id' => $item->material_id,
                 'admin_id' => $item->admin_id,
                 'store_id' => $item->store_id,
                 'category' => $item?->category?->name,
                 'product' => $item?->product?->name,
+                'material_category' => $item?->material_category?->name,
+                'material' => $item?->material?->name,
                 'admin' => $item?->admin?->name,
                 'store' => $item?->store?->name,
                 'financial' => $item?->financial
@@ -109,7 +114,7 @@ class PurchaseController extends Controller
 
     public function purchase_item(Request $request, $id){
         $purchases = $this->purchases
-        ->with('category', 'product', 'admin', 'store', 'unit')
+        ->with('category', 'admin', 'store', 'unit')
         ->where('id', $id)
         ->first();
 
@@ -120,11 +125,13 @@ class PurchaseController extends Controller
             'receipt_link' => $purchases->receipt_link,
             'category_id' => $purchases->category_id,
             'product_id' => $purchases->product_id,
+            'category_material_id' => $item->category_material_id,
+            'material_id' => $item->material_id,
             'admin_id' => $purchases->admin_id,
             'store_id' => $purchases->store_id,
             'category' => $purchases?->category?->name,
             'store_id' => $purchases->store_id,
-            'unit_id' => $purchases?->unit_id,
+            'unit_id' => $purchases?->unit_id,  
             'unit' => $purchases?->unit?->name,
             'admin' => $purchases?->admin?->name,
             'store' => $purchases?->store?->name,
