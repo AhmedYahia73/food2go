@@ -39,11 +39,50 @@ class PreparationController extends Controller
     }
     
     public function preparation_status(Request $request, $id){
+        $order = $this->orders
+        ->where("id", $id)
+        ->first();
+        if (empty($order)) {
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
 
+        if ($order->order_type == "take_away") {
+            $order->take_away_status = "preparation";
+        }
+        elseif ($order->order_type == "delivery") {
+            $order->delivery_status = "preparation";
+        }
+        $order->save();
+
+        return response()->json([
+            "success" => "you update status success"
+        ]);
     }
     
     public function notification(Request $request){
+        $locale = $this->settings
+        ->where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
+        $orders_query = $this->orders
+        ->where("order_type", "!=", "dine_in")
+        ->where(function($query){
+            $query->where("take_away_status", "!=", "pick_up")
+            ->where("order_type", "take_away")
+            ->orWhereIn("delivery_status", ['watting', 'preparing', 'done'])
+            ->where("order_type", "delivery");
+        })
+        ->where("preparation_read_status", false)
+        ->get();
+        $orders = [];
+        foreach ($orders_query as $order) {
+            $orders[] = $this->order_preparation_format($order, $locale);
+        }
 
+        return response()->json([
+            "orders" => $orders,
+        ]);
     }
     
     public function read_status(Request $request){

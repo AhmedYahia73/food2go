@@ -15,7 +15,7 @@ trait OrderFormat
         'branch', 'delivery'])
         ->where("id", $id)
         ->first();
-        if(empty($order)){
+        if(empty($order->order_details_data)){
             return null;
         }
         $products = [];
