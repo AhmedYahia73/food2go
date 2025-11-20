@@ -147,6 +147,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PreparationManController::class)
     ->prefix('preparation_man')->group(function(){
         Route::get('/', 'view');
+        Route::get('/lists', 'lists');
         Route::get('/item/{id}', 'preparation_man');
         Route::put('/status/{id}', 'status'); 
         Route::post('/add', 'create'); 

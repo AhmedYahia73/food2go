@@ -120,7 +120,7 @@ class PurchaseController extends Controller
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'category_id' => ['required', 'exists:purchase_categories,id'],
-            'product_id' => ['required', 'exists:purchase_products,id'],
+            'product_id' => ['exists:purchase_products,id'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
             'unit_id' => ['required', 'exists:units,id'],
             'total_coast' => ['required', 'numeric'],

@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\PreparationMan;
+use App\Models\Branch;
 
 class PreparationManController extends Controller
 {
-    public function __construct(private PreparationMan $preparation_man){}
+    public function __construct(private PreparationMan $preparation_man,
+    private Branch $branches){}
 
     public function view(Request $request){
         $preparation_men = $this->preparation_man
@@ -30,6 +32,22 @@ class PreparationManController extends Controller
 
         return response()->json([
             'preparation_men' => $preparation_men
+        ]);
+    }
+
+    public function lists(Request $request){
+        $branches = $this->branches
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+        return response()->json([
+            "branches" => $branches
         ]);
     }
 
