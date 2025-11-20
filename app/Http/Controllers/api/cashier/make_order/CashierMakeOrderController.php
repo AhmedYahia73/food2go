@@ -930,12 +930,12 @@ class CashierMakeOrderController extends Controller
         $locale = Setting::
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
-        $financials = $this->get_financial($request, $locale);
+        $financials = $this->get_financial($request->all(), $locale);
         return response()->json([
-            'success' => $this->checkout_data($request), 
+            'success' => $this->checkout_data($request->all()), 
             'order_number' => $order['payment']['order_number'],
             "financials" => $financials,
-            "request" => $request,
+            "request->all()" => $request->all(),
         ]);
     }
 
