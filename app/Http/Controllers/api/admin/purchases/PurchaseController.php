@@ -171,12 +171,12 @@ class PurchaseController extends Controller
 
         if (empty($request->material_id) && $request->type == "material") {
             return response()->json([
-                "material is required"
+                "errors" => "material is required"
             ], 400);
         }
         if (empty($request->product_id) && $request->type == "product") {
             return response()->json([
-                "material is required"
+                "errors" => "material is required"
             ], 400);
         }
 
@@ -274,12 +274,12 @@ class PurchaseController extends Controller
 
         if (empty($request->material_id) && $request->type == "material") {
             return response()->json([
-                "material is required"
+                "errors" => "material is required"
             ], 400);
         }
         if (empty($request->product_id) && $request->type == "product") {
             return response()->json([
-                "material is required"
+                "errors" => "material is required"
             ], 400);
         }
 
