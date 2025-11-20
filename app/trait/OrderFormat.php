@@ -15,6 +15,9 @@ trait OrderFormat
         'branch', 'delivery'])
         ->where("id", $id)
         ->first();
+        if(empty($order)){
+            return null;
+        }
         $products = [];
         foreach ($order->order_details_data as $item) {
             # TranslationTbl
