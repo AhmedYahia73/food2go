@@ -15,6 +15,7 @@ use App\Http\Middleware\KitchenMiddleware;
 use App\Http\Middleware\WaiterMiddleware;
 use App\Http\Middleware\StorageMiddleware;
 use App\Http\Middleware\AdmiOrBranchMiddleware;
+use App\Http\Middleware\PreparationMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
