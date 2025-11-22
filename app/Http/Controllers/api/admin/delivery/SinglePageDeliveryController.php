@@ -218,7 +218,7 @@ class SinglePageDeliveryController extends Controller
         ]);
     }
 
-    public function faild_orders(Request $request){
+    public function faild_orders(Request $request, $id){
         
         $orders = $this->ordersModel
         ->where("order_type", "delivery")

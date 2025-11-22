@@ -671,7 +671,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/current_orders/{id}', 'current_orders');
         Route::get('/delivered_order/{id}', 'delivered_order');
         Route::post('/filter_delivered_order/{id}', 'filter_delivered_order');
-        Route::get('/faild_orders', 'faild_orders');
+        Route::get('/faild_orders/{id}', 'faild_orders');
         Route::post('/confirm_faild_order', 'confirm_faild_order');
         Route::post('/pay_orders', 'pay_orders');
     });
