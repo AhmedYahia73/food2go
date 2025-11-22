@@ -392,7 +392,9 @@ class SinglePageDeliveryController extends Controller
         ->where("order_type", "delivery") 
         ->whereIn("id", $request->order_ids) 
         ->update([
-            "delivery_id" => $request->delivery_id
+            "delivery_id" => $request->delivery_id,
+            "order_status" => 'out_for_delivery',
+            "delivery_status" => 'out_for_delivery',
         ]);
 
         return response()->json([
