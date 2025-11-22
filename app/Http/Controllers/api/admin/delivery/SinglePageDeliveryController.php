@@ -335,7 +335,7 @@ class SinglePageDeliveryController extends Controller
         ]);
     }
 
-    public function pay_orders(Request $request){ 
+    public function pay_orders(Request $request){
         $validator = Validator::make($request->all(), [
             'order_ids' => 'required|array',
             'order_ids.*' => 'required|exists:orders,id',
@@ -373,6 +373,30 @@ class SinglePageDeliveryController extends Controller
 
         return response()->json([
             "success" => "You payment orders success"
+        ]);
+    }
+
+    public function orders_delivery(Request $request){
+        $validator = Validator::make($request->all(), [
+            'order_ids' => 'required|array',
+            'order_ids.*' => 'required|exists:orders,id',
+            'delivery_id' => 'required|exists:deliveries,id', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        
+        $orders = $this->ordersModel
+        ->where("order_type", "delivery") 
+        ->whereIn("id", $request->order_ids) 
+        ->update([
+            "delivery_id" => $request->delivery_id
+        ]);
+
+        return response()->json([
+            "success" => "You select delivery success"
         ]);
     }
 }

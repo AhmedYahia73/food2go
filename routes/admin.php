@@ -669,6 +669,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('delivery/single_page')->group(function(){
         Route::get('/lists', 'lists');
         Route::get('/orders', 'orders');
+        Route::post('/orders_delivery', 'orders_delivery');
         Route::get('/current_orders/{id}', 'current_orders');
         Route::get('/delivered_order/{id}', 'delivered_order');
         Route::post('/filter_delivered_order/{id}', 'filter_delivered_order');
