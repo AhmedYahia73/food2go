@@ -1299,7 +1299,7 @@ class CashierMakeOrderController extends Controller
         ->whereIn('id', $request->cart_ids)
         ->delete();
         $order_cart = $this->order_cart
-        ->whereIn('table_id', $request->table_id)
+        ->where('table_id', $request->table_id)
         ->first();
         if(empty($order_cart)){ 
             $cafe_table = $this->cafe_table
