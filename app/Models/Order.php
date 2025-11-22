@@ -63,6 +63,7 @@ class Order extends Model
         'due',
         'dicount_id',
         'preparation_read_status',
+        'due_from_delivery',
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
@@ -157,6 +158,10 @@ class Order extends Model
 
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');
+    }
+
+    public function cashier_man(){
+        return $this->belongsTo(CashierMan::class, 'cashier_man_id');
     }
 
     public function casheir(){
