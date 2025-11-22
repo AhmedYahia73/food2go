@@ -1298,6 +1298,16 @@ class CashierMakeOrderController extends Controller
         $order_cart = $this->order_cart
         ->whereIn('id', $request->cart_ids)
         ->delete();
+        $order_cart = $this->order_cart
+        ->whereIn('table_id', $request->table_id)
+        ->first();
+        if(empty($order_cart)){ 
+            $cafe_table = $this->cafe_table
+            ->where('id', $request->table_id)
+            ->update([
+                'current_status' => 'not_available_pre_order'
+            ]);
+        }
 
         return response()->json([
             'success' => 'you void order success'
