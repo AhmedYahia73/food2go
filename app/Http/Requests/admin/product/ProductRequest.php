@@ -37,6 +37,8 @@ class ProductRequest extends FormRequest
             'tax_id' => ['nullable', 'exists:taxes,id'],
             'status' => ['required', 'boolean'],
             'recommended' => ['required', 'boolean'],
+            'order' => ['sometimes', 'boolean'],
+            'product_code' => ['sometimes'],
             'points' => ['required', 'numeric'],
             'upsaling_group_id' => ['array'],
             'upsaling_group_id.*' => ['exists:upsaling_groups,id'],

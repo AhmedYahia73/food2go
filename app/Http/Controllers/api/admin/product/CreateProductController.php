@@ -46,6 +46,8 @@ class CreateProductController extends Controller
         'weight_point',
         'weight_status',
         'recipe',
+        'order',
+        'product_code',
     ];
     use image;
     use translaion;
