@@ -9,12 +9,68 @@ use Carbon\Carbon;
 
 use App\Models\Order;
 use App\Models\OrderFinancial;
-use App\Models\TimeSittings; 
+use App\Models\TimeSittings;
+
+use App\Models\Branch;
+use App\Models\Cashier;
+use App\Models\CashierMan;
+use App\Models\FinantiolAcounting;
 
 class SinglePageDeliveryController extends Controller
 {
     public function __construct(private Order $ordersModel,
-    private OrderFinancial $order_financials, private TimeSittings $TimeSittings){}
+    private OrderFinancial $order_financials, private TimeSittings $TimeSittings,
+    private Cashier $cashiers, private CashierMan $cashier_men, 
+    private FinantiolAcounting $financial_accounting, private Branch $branches){}
+    
+    public function lists(Request $request){ 
+        $branches = $this->branches
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name, 
+            ];
+        });
+        $cashiers = $this->cashiers
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "branch_id" => $item->branch_id,
+            ];
+        });
+        $cashier_men = $this->cashier_men
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "user_name" => $item->user_name,
+                "branch_id" => $item->branch_id,
+            ];
+        });
+        $financial_accounting = $this->financial_accounting
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "description_status" => $item->description_status,
+            ];
+        });
+
+        return response()->json([
+            "branches" => $branches,
+            "cashiers" => $cashiers,
+            "cashier_men" => $cashier_men,
+            "financial_accounting" => $financial_accounting,
+        ]);
+    }
     
     public function orders(Request $request){
         $orders = $this->ordersModel
@@ -284,6 +340,7 @@ class SinglePageDeliveryController extends Controller
             'order_ids' => 'required|array',
             'order_ids.*' => 'required|exists:orders,id',
             'financial_id' => 'required|exists:finantiol_acountings,id',
+            'branch_id' => 'required|exists:branches,id',
             'cashier_id' => 'required|exists:cashiers,id',
             'cashier_man_id' => 'required|exists:cashier_men,id',
             "description" => 'sometimes',
