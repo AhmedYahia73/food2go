@@ -28,7 +28,7 @@ class DueGroupController extends Controller
         }
 
         $due_amount = $due->balance;
-        $module_payment = $this->ModulePayment
+        $module_payment = $this->module_payment
         ->where("group_product_id", $id)
         ->orderByDesc("id")
         ->get()
