@@ -79,6 +79,14 @@ class DueGroupController extends Controller
 
         $data = $request->financials;
         $total = array_sum(array_column($data, 'amount'));
+        $group_products = $this->group_products
+        ->where("id", $request->group_product_id)
+        ->first();
+        if($group_products->balance < $total){
+            return response()->json([
+                "errors" => "Total Payment > Due"
+            ], 400);
+        }
         $module_payment = $this->module_payment
         ->create([
             "group_product_id" => $request->group_product_id,
@@ -91,7 +99,12 @@ class DueGroupController extends Controller
                 "financial_id" => $item['id'],
                 "amount" => $item['amount'],
             ]);
+            $financial_account = $this->financial_account
+            ->where("id", $item['id'])
+            ->first();
+            $financial_account->increment("balance", $item['amount']);
         }
+        $group_products->decrement("balance", $total);
 
         return response()->json([
             "success" => "You payment success"
