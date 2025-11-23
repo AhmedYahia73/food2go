@@ -7,8 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class ModuleFinancial extends Model
 {
     protected $fillable = [
-        'group_product_id',
+        'module_id',
         'financial_id',
         'amount',
-    ]; 
+    ];
+
+    public function financial(){
+        return $this->belongsTo(FinantiolAcounting::class, 'financial_id');
+    }
 }

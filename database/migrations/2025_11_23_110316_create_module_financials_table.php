@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('module_financials', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('group_product_id')->nullable()->constrained('group_products')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('financial_id')->nullable()->constrained('finantiol_acountings')->onUpdate('cascade')->onDelete('set null');
+            $table->foreignId('module_id')->nullable()->constrained('module_payments')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('financial_id')->nullable()->constrained('finantiol_acountings')->onUpdate('cascade')->onDelete('cascade');
             $table->float("amount");
             $table->timestamps();
         });
