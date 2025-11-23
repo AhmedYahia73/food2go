@@ -355,6 +355,10 @@ class SinglePageDeliveryController extends Controller
         ->where("order_type", "delivery") 
         ->whereIn("id", $request->order_ids) 
         ->get();
+        $financial_accounting = $this->financial_accounting
+        ->where("id", $request->financial_id)
+        ->first();
+        $total= 0 ;
         foreach ($orders as $item) {
             $this->order_financials
             ->create([
@@ -369,7 +373,9 @@ class SinglePageDeliveryController extends Controller
             $item->update([
                 "due_from_delivery" => 0
             ]);
+            $total += $item->amount;
         }
+        $financial_accounting->increment('balance', $total); 
 
         return response()->json([
             "success" => "You payment orders success"
