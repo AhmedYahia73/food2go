@@ -368,4 +368,39 @@ class DeliveryBalanceController extends Controller
             "success" => "You select delivery success"
         ]);
     }
+
+    public function order_history(Request $request){ 
+        $orders = $this->ordersModel
+        ->with(['branch', 'user', 'address', 'cashier_man'])
+        ->where("order_type", "delivery")
+        ->where(function($query){
+            $query->whereIn("order_status", 'delivered')
+            ->orWhere("delivery_status", "delivered");
+        }) 
+        ->where("due_from_delivery", 0)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "amount" => $item->amount, 
+                "order_number" => $item->order_number,
+                "order_status" => $item->pos ? $item->delivery_status: $item->order_status,
+                "source" => $item->source,
+                "delivery_id" => $item->delivery_id ,
+                "branch" =>  $item?->branch?->name,
+                "user" => [
+                    "name" => $item?->user?->name,
+                    "phone" => $item?->user?->phone,
+                ],
+                "address" => $item?->address,
+                "cashier_man" => $item?->cashier_man?->user_name,
+                "date" => $item?->created_at?->format("Y-m-d"),
+                "time" => $item?->created_at?->format("H:i:s"),
+            ];
+        });
+
+        return response()->json([
+            "orders" => $orders
+        ]);
+    }
 }
