@@ -374,7 +374,7 @@ class DeliveryBalanceController extends Controller
         ->with(['branch', 'user', 'address', 'cashier_man'])
         ->where("order_type", "delivery")
         ->where(function($query){
-            $query->whereIn("order_status", 'delivered')
+            $query->where("order_status", 'delivered')
             ->orWhere("delivery_status", "delivered");
         }) 
         ->where("due_from_delivery", 0)
