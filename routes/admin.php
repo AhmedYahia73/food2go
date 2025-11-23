@@ -137,6 +137,8 @@ use App\Http\Controllers\api\admin\settings\TransferFinancialController;
 use App\Http\Controllers\api\admin\preparation_man\PreparationManController;
 use App\Http\Controllers\api\admin\group_price\DueGroupController;
 
+use App\Http\Controllers\api\admin\delivery_balance\DeliveryBalanceController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
@@ -146,6 +148,18 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    Route::controller(DeliveryBalanceController::class)
+    ->prefix('delivery_balance')->group(function(){
+        Route::get('/lists', 'lists');
+        Route::get('/all_orders', 'orders');
+        Route::get('/current_orders', 'current_orders');
+        Route::post('/filter_current_orders', 'filter_current_orders');
+        Route::get('/faild_orders', 'faild_orders');
+        Route::post('/confirm_faild_order', 'confirm_faild_order');
+        Route::post('/pay_orders', 'pay_orders');
+        Route::post('/orders_delivery', 'orders_delivery');
+    });
+    
     Route::controller(DueGroupController::class)
     ->prefix('due_group_module')->group(function(){
         Route::get('/{id}', 'view');
