@@ -52,6 +52,7 @@ use App\Models\Delivery;
 use App\Models\DiscountModule;
 use App\Models\CheckoutRequest;// dicount_id
 use App\Models\FinantiolAcounting;
+use App\Models\GroupProduct;
 use Illuminate\Support\Facades\Storage;
 
 use App\trait\image;
@@ -74,7 +75,7 @@ class CashierMakeOrderController extends Controller
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CashierMan $cashier_man, private UserDue $user_due,
     private DiscountModule $discount_module, private FinantiolAcounting $financial_account,
-    private CheckoutRequest $checkout_request_query){}
+    private CheckoutRequest $checkout_request_query, private GroupProduct $group_products){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -423,6 +424,10 @@ class CashierMakeOrderController extends Controller
         $financials = $this->get_financial($request, $locale);
         $address = $order['order']->address;
         $customer = $order['order']->user;
+        if($request->module_id){
+            $this->module_financial($request->amount, $request->module_id);
+        }
+
         return response()->json([
             "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
@@ -660,6 +665,10 @@ class CashierMakeOrderController extends Controller
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
+        if($request->module_id){
+            $this->module_financial($request->amount, $request->module_id);
+        }
+
         return response()->json([ 
             "success" => $this->checkout_data($request),
             "kitchen_items" => $kitchen_items,  
@@ -927,6 +936,10 @@ class CashierMakeOrderController extends Controller
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
+        if($request->module_id){
+            $this->module_financial($request->amount, $request->module_id);
+        }
+
         return response()->json([
             'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number'],
@@ -1044,6 +1057,10 @@ class CashierMakeOrderController extends Controller
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
+        if($request->module_id){
+            $this->module_financial($request->amount, $request->module_id);
+        }
+        
         return response()->json([
             "success" => $this->checkout_data($request),
             'order_number' => $order_number,
@@ -1525,5 +1542,12 @@ class CashierMakeOrderController extends Controller
             // ->where("key", $financial_account->name)
             // ->first()?->value ??  
          return $financial_account;
+    }
+
+    public function module_financial($amount, $module_id){
+        $group_products = $this->group_products
+        ->where("id", $module_id)
+        ->first();
+        $group_products->increment("balance", $amount);
     }
 }

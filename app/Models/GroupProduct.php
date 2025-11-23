@@ -14,6 +14,7 @@ class GroupProduct extends Model
         'increase_precentage',
         'decrease_precentage',
         'due',
+        'balance',
         'module',
         'status', 
     ];

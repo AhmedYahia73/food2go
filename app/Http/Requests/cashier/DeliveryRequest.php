@@ -54,6 +54,8 @@ class DeliveryRequest extends FormRequest
             'address_id' => 'required|exists:addresses,id',
             'user_id' => ['exists:users,id', 'required_unless:order_pending,1,true'],
             'dicount_id' => ['exists:discounts,id'],
+
+            'module_id' => ['exists:group_products,id'],
         ];
     }
 
