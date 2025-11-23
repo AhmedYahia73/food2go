@@ -14,6 +14,7 @@ use App\Models\Manufaturing;
 use App\Models\ManufaturingRecipe;
 use App\Models\MaterialStock;
 use App\Models\PurchaseStore;
+use App\Models\PurchaseStock;
 use App\Models\Material;
 
 class ManufacturingController extends Controller
@@ -22,7 +23,7 @@ class ManufacturingController extends Controller
     private PurchaseProduct $products, private PurchaseCategory $category,
     private Manufaturing $maufaturing, private ManufaturingRecipe $maufaturing_recipe, 
     private MaterialStock $stock, private Material $materials,
-    private PurchaseStore $stores){}
+    private PurchaseStore $stores, private PurchaseStock $purchase_stock){}
 
     public function lists(Request $request){
         $products = $this->products
@@ -136,7 +137,28 @@ class ManufacturingController extends Controller
             ->first();
             $stock->quantity -= $item['weight'];
             $stock->save();
+        }
+        $purchase_stock = $this->purchase_stock
+        ->where("product_id", $request->product_id)
+        ->first();
+        if (empty($purchase_stock)) {
+            $product_item = $this->products
+            ->where("id", $request->product_id)
+            ->first();
+            $this->purchase_stock
+            ->create([ 
+                'category_id' => $product_item->category_id,
+                'product_id' => $request->product_id,
+                'store_id' => $request->store_id,
+                'quantity' => $request->quantity,
+                //'unit_id' => $request->,
+            ]);
         } 
+        else {
+            $purchase_stock->quantity += $request->quantity;
+            $purchase_stock->save();
+        }
+        
 
         return response()->json([
             'success' => 'You moke Product success'
