@@ -168,7 +168,7 @@ class DeliveryBalanceController extends Controller
         ]);
     }
 
-    public function filter_current_orders(Request $request, $id){ 
+    public function filter_current_orders(Request $request){ 
         $validator = Validator::make($request->all(), [
             'delivery_id' => 'exists:deliveries,id|required', 
         ]);
