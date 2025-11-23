@@ -153,6 +153,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/lists', 'lists');
         Route::get('/all_orders', 'orders');
         Route::get('/current_orders', 'current_orders');
+        
         Route::post('/filter_current_orders', 'filter_current_orders');
         Route::get('/faild_orders', 'faild_orders');
         Route::post('/confirm_faild_order', 'confirm_faild_order');

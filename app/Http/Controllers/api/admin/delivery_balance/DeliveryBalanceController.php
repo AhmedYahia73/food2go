@@ -170,44 +170,19 @@ class DeliveryBalanceController extends Controller
 
     public function filter_current_orders(Request $request, $id){ 
         $validator = Validator::make($request->all(), [
-            'from' => 'date|required',
-            'to' => 'date|required',
+            'delivery_id' => 'exists:deliveries,id|required', 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
-        $time_sittings = $this->TimeSittings 
-        ->get();
-        if ($time_sittings->count() > 0) { 
-            $from = $time_sittings[0]->from;
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-            if ($start >= $end) {
-                $end = $end->addDay();
-            }
-			if($start >= now()){
-                $start = $start->subDay();
-			} 
-        } else {
-            $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
         } 
-        $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
-        $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
-
         
         $total_orders = $this->ordersModel
         ->where("order_type", "delivery")
         ->where("due_from_delivery", 1) 
-        ->with(['branch', 'user', 'address', 'cashier_man'])
-        ->whereBetween('created_at', [$start, $end])
+        ->where("delivery_id", $request->delivery_id)
+        ->with(['branch', 'user', 'address', 'cashier_man']) 
         ->get()
         ->map(function($item){
             return [
@@ -230,7 +205,7 @@ class DeliveryBalanceController extends Controller
         $total_amount = $this->ordersModel
         ->where("order_type", "delivery")
         ->where("due_from_delivery", 1)
-        ->whereBetween('created_at', [$start, $end])
+        ->where("delivery_id", $request->delivery_id)
         ->sum("amount");
         $on_the_way_amount = $this->ordersModel
         ->where("order_type", "delivery")
@@ -239,12 +214,12 @@ class DeliveryBalanceController extends Controller
             $query->where("order_status", "out_for_delivery")
             ->orWhere("delivery_status", "out_for_delivery");
         })
-        ->whereBetween('created_at', [$start, $end])
+        ->where("delivery_id", $request->delivery_id)
         ->sum("amount");
         $cash_on_hand_amount = $this->ordersModel
         ->where("order_type", "delivery")
         ->where("due_from_delivery", 1)
-        ->whereBetween('created_at', [$start, $end])
+        ->where("delivery_id", $request->delivery_id)
         ->where(function($query){
             $query->where("order_status", "delivered")
             ->orWhere("delivery_status", "delivered");
