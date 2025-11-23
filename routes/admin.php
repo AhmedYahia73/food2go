@@ -31,6 +31,7 @@ use App\Http\Controllers\api\admin\cafe\CafeLocationController;
 
 use App\Http\Controllers\api\admin\customer\CustomerController;
 use App\Http\Controllers\api\admin\delivery\DeliveryController;
+use App\Http\Controllers\api\admin\delivery\SinglePageDeliveryController;
 use App\Http\Controllers\api\admin\branch\BranchController;
 use App\Http\Controllers\api\admin\admin\AdminController;
 
@@ -662,6 +663,19 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/add', 'create')->middleware('can:add_delivery');
         Route::post('/update/{id}', 'modify')->middleware('can:edit_delivery');
         Route::delete('/delete/{id}', 'delete')->middleware('can:delete_delivery');
+    });
+
+    Route::controller(SinglePageDeliveryController::class)
+    ->prefix('delivery/single_page')->group(function(){
+        Route::get('/lists', 'lists');
+        Route::get('/orders', 'orders');
+        Route::post('/orders_delivery', 'orders_delivery');
+        Route::get('/current_orders/{id}', 'current_orders');
+        Route::get('/delivered_order/{id}', 'delivered_order');
+        Route::post('/filter_delivered_order/{id}', 'filter_delivered_order');
+        Route::get('/faild_orders/{id}', 'faild_orders');
+        Route::post('/confirm_faild_order', 'confirm_faild_order');
+        Route::post('/pay_orders', 'pay_orders');
     });
 
     Route::controller(CustomerController::class)

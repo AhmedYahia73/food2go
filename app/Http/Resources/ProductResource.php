@@ -65,7 +65,7 @@ class ProductResource extends JsonResource
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
                 'discount_val' => $price - $discount,
-                'tax_val' => $tax - $price,
+                'tax_val' => round($tax - $price, 2),
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
@@ -91,6 +91,7 @@ class ProductResource extends JsonResource
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
                 'weight_status' => $this->weight_status ?? 0,
+                'product_code' => $this->product_code,
             ];
         } 
         else {
@@ -134,7 +135,7 @@ class ProductResource extends JsonResource
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
                 'discount_val' => $price - $discount,
-                'tax_val' => $tax - $price,
+                'tax_val' => round($tax - $price, 2),
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
@@ -159,6 +160,7 @@ class ProductResource extends JsonResource
                 'updated_at' => $this->updated_at,
                 'tax_obj' => $this->tax,
                 'weight_status' => $this->weight_status ?? 0,
+                'product_code' => $this->product_code,
             ];
         }
     }

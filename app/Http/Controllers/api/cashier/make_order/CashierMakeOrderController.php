@@ -819,7 +819,6 @@ class CashierMakeOrderController extends Controller
         // Keys
         // date, amount, total_tax, total_discount
         // notes, payment_method_id, table_id
-  
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
             'order_type' => 'dine_in',
@@ -880,10 +879,7 @@ class CashierMakeOrderController extends Controller
         
             $product[$key]['count'] = $item->count;
             $product[$key]['product_id'] = $item->id;
-        }
-        $request->merge([  
-            'products' => $product, 
-        ]);
+        } 
         
         $order = $this->dine_in_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
@@ -1302,6 +1298,16 @@ class CashierMakeOrderController extends Controller
         $order_cart = $this->order_cart
         ->whereIn('id', $request->cart_ids)
         ->delete();
+        $order_cart = $this->order_cart
+        ->where('table_id', $request->table_id)
+        ->first();
+        if(empty($order_cart)){ 
+            $cafe_table = $this->cafe_table
+            ->where('id', $request->table_id)
+            ->update([
+                'current_status' => 'not_available_pre_order'
+            ]);
+        }
 
         return response()->json([
             'success' => 'you void order success'
