@@ -135,6 +135,7 @@ use App\Http\Controllers\api\admin\purchases\ManufacturingController;
 use App\Http\Controllers\api\admin\report\FilterController;
 use App\Http\Controllers\api\admin\settings\TransferFinancialController;
 use App\Http\Controllers\api\admin\preparation_man\PreparationManController;
+use App\Http\Controllers\api\admin\group_price\DueGroupController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -145,6 +146,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    Route::controller(DueGroupController::class)
+    ->prefix('due_group_module')->group(function(){
+        Route::get('/{id}', 'view');
+        Route::post('/payment', 'payment');
+    });
+
     Route::controller(PreparationManController::class)
     ->prefix('preparation_man')->group(function(){
         Route::get('/', 'view');
