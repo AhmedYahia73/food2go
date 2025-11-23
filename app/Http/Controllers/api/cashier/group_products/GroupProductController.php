@@ -25,7 +25,7 @@ class GroupProductController extends Controller
 
     public function groups_product(Request $request){
         $group_product = $this->group_product
-        ->select("id", "name", "module")
+        ->select("id", "name", "module", "due")
         ->where("status", 1)
         ->get();
 

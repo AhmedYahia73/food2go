@@ -59,7 +59,7 @@ class GroupController extends Controller
 
     public function create(Request $request){
         // https://bcknd.food2go.online/admin/group/add
-        //Key
+        // Key
         // name, status
         $validator = Validator::make($request->all(), [
             'name' => 'required',

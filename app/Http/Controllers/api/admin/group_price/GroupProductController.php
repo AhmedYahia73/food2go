@@ -14,7 +14,7 @@ class GroupProductController extends Controller
 
     public function view(Request $request){
         $group_products = $this->group_product
-        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status")
+        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status", "due")
         ->get();
         $modules = [
             "take_away",
@@ -30,7 +30,7 @@ class GroupProductController extends Controller
     
     public function group_item(Request $request, $id){
         $group_product = $this->group_product
-        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status")
+        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status", "due")
         ->where("id", $id)
         ->first();
 
@@ -66,6 +66,7 @@ class GroupProductController extends Controller
             'module' => ['required', "in:take_away,delivery,dine_in"], 
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
+            'due' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -89,6 +90,7 @@ class GroupProductController extends Controller
             'module' => ['required', "in:take_away,delivery,dine_in"], 
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
+            'due' => ['required', 'boolean'],
             'status' => ['required', 'boolean'], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
