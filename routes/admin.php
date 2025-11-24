@@ -138,6 +138,7 @@ use App\Http\Controllers\api\admin\preparation_man\PreparationManController;
 use App\Http\Controllers\api\admin\group_price\DueGroupController;
 
 use App\Http\Controllers\api\admin\delivery_balance\DeliveryBalanceController;
+use App\Http\Controllers\api\admin\customer\RestoreCustomerController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -148,6 +149,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    Route::controller(RestoreCustomerController::class)
+    ->prefix('restore_user')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/{id}', 'restore');
+    });
+    
     Route::controller(DeliveryBalanceController::class)
     ->prefix('delivery_balance')->group(function(){
         Route::get('/lists', 'lists');
