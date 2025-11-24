@@ -118,6 +118,7 @@ trait OrderFormat
             "order_details" => $products,
             "amount" => $order->amount,
             "order_status" => $order->order_status,
+            "payment" => $order->payment_method_id == 2 ? "Paid" : "UnPaid",
             "order_type" => $order->order_type,
             "total_tax" => $order->total_tax,
             "total_discount" => $order->total_discount,
