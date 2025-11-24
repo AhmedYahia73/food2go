@@ -217,6 +217,7 @@ class PurchaseController extends Controller
                     'material_id' => $request->material_id,
                     'store_id' => $request->store_id,
                     'quantity' => $request->quintity,
+                    'unit_id' => $request->unit_id,
                 ]);
             }
             else{
@@ -236,6 +237,7 @@ class PurchaseController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->store_id,
                     'quantity' => $request->quintity,
+                    'unit_id' => $request->unit_id,
                 ]);
             }
             else{
@@ -345,6 +347,7 @@ class PurchaseController extends Controller
                     'material_id' => $request->material_id,
                     'store_id' => $request->store_id,
                     'quantity' => $request->quintity - $purchases->quintity,
+                    'unit_id' => $request->unit_id,
                 ]);
             }
             else{
@@ -364,6 +367,7 @@ class PurchaseController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->store_id,
                     'quantity' => $request->quintity - $purchases->quintity,
+                    'unit_id' => $request->unit_id,
                 ]);
             }
             else{

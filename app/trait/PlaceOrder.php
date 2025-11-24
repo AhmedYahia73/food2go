@@ -240,7 +240,6 @@ trait PlaceOrder
 
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
-                ->withLocale($locale)
                 ->first();
                 $product_item = collect([$product_item]);
                 $product_item = ProductResource::collection($product_item);
@@ -273,7 +272,6 @@ trait PlaceOrder
                         
                         $exclude = $this->excludes
                         ->where('id', $exclude)
-                        ->withLocale($locale)
                         ->first();
                         $exclude = collect([$exclude]);
                         $exclude = ExcludeResource::collection($exclude);
@@ -295,7 +293,6 @@ trait PlaceOrder
                         
                         $addon_item = $this->addons
                         ->where('id', $addon['addon_id'])
-                        ->withLocale($locale)
                         ->first();
                         $addon_item = collect([$addon_item]);
                         $addon_item = AddonResource::collection($addon_item);
@@ -318,7 +315,6 @@ trait PlaceOrder
                         ]); // Add extra
                         $extra_item = $this->extras
                         ->where('id', $extra)
-                        ->withLocale($locale)
                         ->first();
                         $extra_item = collect([$extra_item]);
                         $extra_item = ExtraResource::collection($extra_item);
@@ -339,7 +335,6 @@ trait PlaceOrder
                         
                         $extra_item = $this->extras
                         ->where('id', $extra)
-                        ->withLocale($locale)
                         ->first();
                         $extra_item = collect([$extra_item]);
                         $extra_item = ExtraResource::collection($extra_item);
@@ -363,12 +358,10 @@ trait PlaceOrder
                         }
                         $variations = $this->variation
                         ->where('id', $variation['variation_id'])
-                        ->withLocale($locale)
                         ->first();
                         $variations = collect([$variations]);
                         $options = $this->options
                         ->whereIn('id', $variation['option_id'])
-                        ->withLocale($locale)
                         ->get();
                         $variations = VariationResource::collection($variations);
                         $variations = count($variations) > 0 ? $variations[0] : null;

@@ -18,6 +18,8 @@ class PurchaseTransfer extends Model
         'category_id',
         'status',
         'unit_id',
+        'material_id',
+        'category_material_id',
     ];
 
     public function category(){
