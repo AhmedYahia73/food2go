@@ -23,7 +23,7 @@ class PurchaseWasted extends Model
         return $this->belongsTo(Material::class, 'material_id');
     }
 
-    public function material_category(){
+    public function category_material(){
         return $this->belongsTo(MaterialCategory::class, 'category_material_id');
     }
 
