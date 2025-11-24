@@ -11,6 +11,7 @@ use App\Models\PurchaseStock;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore;
+use App\Models\MaterialStock;
 use App\Models\MaterialCategory;
 use App\Models\Material;
 use App\Models\Branch;
@@ -21,7 +22,8 @@ class PurchaseConsumersionController extends Controller
     private PurchaseStock $stock, private PurchaseCategory $categories,
     private PurchaseProduct $products, private PurchaseStore $stores,
     private Branch $branches, private Material $materials,
-    private MaterialCategory $material_categories){}
+    private MaterialCategory $material_categories, 
+    private MaterialStock $material_stock){}
 
     public function view(Request $request){
         $consumersions = $this->consumersions
@@ -217,29 +219,56 @@ class PurchaseConsumersionController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
+        } 
+        if(empty($request->material_id) && empty($request->product_id)){
+            return response()->json([
+                "errors" => "You must enter material_id or product_id"
+            ], 400);
         }
         
+            //
         $consumersionsRequest = $validator->validated();
         $consumersionsRequest['admin_id'] = $request->user()->id;
         $consumersionsRequest['status'] = 'approve';
         $consumersions = $this->consumersions
         ->create($consumersionsRequest);
-        $stock = $this->stock
-        ->where('product_id', $request->product_id)
-        ->where('store_id', $request->store_id)
-        ->first();
-        if(empty($stock)){
-            $this->stock
-            ->create([
-                'category_id' => $request->category_id,
-                'product_id' => $request->product_id,
-                'store_id' => $request->store_id,
-                'quantity' => -$request->quintity,
-            ]);
+        if(!empty($request->product_id)){
+            $stock = $this->stock
+            ->where('product_id', $request->product_id)
+            ->where('store_id', $request->store_id)
+            ->first();
+            if(empty($stock)){
+                $this->stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'product_id' => $request->product_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => -$request->quintity,
+                ]);
+            }
+            else{
+                $stock->quantity -= $request->quintity;
+                $stock->save();
+            }
         }
         else{
-            $stock->quantity -= $request->quintity;
-            $stock->save();
+            $material_stock = $this->material_stock
+            ->where('material_id', $request->material_id)
+            ->where('store_id', $request->store_id)
+            ->first();
+            if(empty($material_stock)){
+                $this->material_stock
+                ->create([
+                    'category_id' => $request->category_material_id,
+                    'material_id' => $request->material_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => -$request->quintity,
+                ]);
+            }
+            else{
+                $material_stock->quantity -= $request->quintity;
+                $material_stock->save();
+            }
         }
 
         return response()->json([
@@ -262,6 +291,11 @@ class PurchaseConsumersionController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
+        } 
+        if(empty($request->material_id) && empty($request->product_id)){
+            return response()->json([
+                "errors" => "You must enter material_id or product_id"
+            ], 400);
         }
 
         $consumersionsRequest = $validator->validated();
@@ -269,22 +303,43 @@ class PurchaseConsumersionController extends Controller
         $consumersions = $this->consumersions
         ->where('id', $id)
         ->first();
-        $stock = $this->stock
-        ->where('product_id', $request->product_id)
-        ->where('store_id', $request->store_id)
-        ->first();
-        if(empty($stock)){
-            $this->stock
-            ->create([
-                'category_id' => $request->category_id,
-                'product_id' => $request->product_id,
-                'store_id' => $request->store_id,
-                'quantity' => $consumersions->quintity - $request->quintity,
-            ]);
+        if(!empty($request->product_id)){
+            $stock = $this->stock
+            ->where('product_id', $request->product_id)
+            ->where('store_id', $request->store_id)
+            ->first();
+            if(empty($stock)){
+                $this->stock
+                ->create([
+                    'category_id' => $request->category_id,
+                    'product_id' => $request->product_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => $consumersions->quintity - $request->quintity,
+                ]);
+            }
+            else{
+                $stock->quantity += $consumersions->quintity - $request->quintity;
+                $stock->save();
+            }
         }
         else{
-            $stock->quantity += $consumersions->quintity - $request->quintity;
-            $stock->save();
+            $material_stock = $this->material_stock
+            ->where('material_id', $request->material_id)
+            ->where('store_id', $request->store_id)
+            ->first();
+            if(empty($material_stock)){
+                $this->material_stock
+                ->create([
+                    'category_id' => $request->category_material_id,
+                    'material_id' => $request->material_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => $consumersions->quintity - $request->quintity,
+                ]);
+            }
+            else{
+                $material_stock->quantity += $consumersions->quintity - $request->quintity;
+                $material_stock->save();
+            }
         }
         $consumersions->update($consumersionsRequest);
 
