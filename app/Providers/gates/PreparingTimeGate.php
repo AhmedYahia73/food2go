@@ -11,9 +11,10 @@ class PreparingTimeGate
     {
         Gate::define('view_preparing_time', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PreparingTime') &&
-                $admin->user_positions->roles->where('role', 'PreparingTime')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PreparingTime')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -21,9 +22,10 @@ class PreparingTimeGate
         }); 
         Gate::define('edit_preparing_time', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PreparingTime') &&
-                $admin->user_positions->roles->where('role', 'PreparingTime')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PreparingTime')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty())
             ) {
                 return true;
             }

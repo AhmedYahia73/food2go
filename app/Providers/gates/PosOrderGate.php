@@ -11,9 +11,10 @@ class PosOrderGate
     {
         Gate::define('view_pos_order', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosOrder') &&
-                $admin->user_positions->roles->where('role', 'PosOrder')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PosOrder')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -21,9 +22,10 @@ class PosOrderGate
         });
         Gate::define('status_pos_table', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PosTable') &&
-                $admin->user_positions->roles->where('role', 'PosOrder')->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PosOrder')->pluck('action')->intersect(['all', 'status'])->isNotEmpty())
             ) {
                 return true;
             }

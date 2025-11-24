@@ -11,9 +11,10 @@ class CafeLocationGate
     {
         Gate::define('view_cafe_location', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('CafeLocation') &&
-                $admin->user_positions->roles->where('role', 'CafeLocation')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'CafeLocation')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -21,9 +22,10 @@ class CafeLocationGate
         });
         Gate::define('add_cafe_location', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('CafeLocation') &&
-                $admin->user_positions->roles->where('role', 'CafeLocation')->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'CafeLocation')->pluck('action')->intersect(['all', 'add'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -31,9 +33,10 @@ class CafeLocationGate
         });
         Gate::define('edit_cafe_location', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('CafeLocation') &&
-                $admin->user_positions->roles->where('role', 'CafeLocation')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'CafeLocation')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -41,9 +44,10 @@ class CafeLocationGate
         });
         Gate::define('delete_cafe_location', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('CafeLocation') &&
-                $admin->user_positions->roles->where('role', 'CafeLocation')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'CafeLocation')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty())
             ) {
                 return true;
             }

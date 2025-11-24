@@ -11,9 +11,10 @@ class TimeSlotGate
     {
         Gate::define('view_time_slot', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('TimeSlot') &&
-                $admin->user_positions->roles->where('role', 'TimeSlot')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'TimeSlot')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -21,9 +22,10 @@ class TimeSlotGate
         }); 
         Gate::define('edit_time_slot', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('TimeSlot') &&
-                $admin->user_positions->roles->where('role', 'TimeSlot')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'TimeSlot')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty())
             ) {
                 return true;
             }

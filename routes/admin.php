@@ -151,8 +151,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     Route::controller(RestoreCustomerController::class)
     ->prefix('restore_user')->group(function(){
-        Route::get('/', 'view');
-        Route::put('/{id}', 'restore');
+        Route::get('/', 'view')->middleware('can:view_restore');
+        Route::put('/{id}', 'restore')->middleware('can:restore');
     });
     
     Route::controller(DeliveryBalanceController::class)

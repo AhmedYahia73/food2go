@@ -11,9 +11,10 @@ class PaymentMethodGate
     {
         Gate::define('view_payment_method', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PaymentMethod') &&
-                $admin->user_positions->roles->where('role', 'PaymentMethod')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PaymentMethod')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -21,9 +22,10 @@ class PaymentMethodGate
         });
         Gate::define('add_payment_method', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PaymentMethod') &&
-                $admin->user_positions->roles->where('role', 'PaymentMethod')->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PaymentMethod')->pluck('action')->intersect(['all', 'add'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -31,9 +33,10 @@ class PaymentMethodGate
         });
         Gate::define('edit_payment_method', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PaymentMethod') &&
-                $admin->user_positions->roles->where('role', 'PaymentMethod')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PaymentMethod')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -41,9 +44,10 @@ class PaymentMethodGate
         });
         Gate::define('delete_payment_method', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('PaymentMethod') &&
-                $admin->user_positions->roles->where('role', 'PaymentMethod')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'PaymentMethod')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty())
             ) {
                 return true;
             }

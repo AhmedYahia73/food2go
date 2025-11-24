@@ -11,9 +11,10 @@ class OfferOrderGate
     {
         Gate::define('approve_offer_order', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('OfferOrder') &&
-                $admin->user_positions->roles->where('role', 'OfferOrder')->pluck('action')->intersect(['all', 'approve_offer'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'OfferOrder')->pluck('action')->intersect(['all', 'approve_offer'])->isNotEmpty())
             ) {
                 return true;
             }

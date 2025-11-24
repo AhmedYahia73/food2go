@@ -11,9 +11,10 @@ class CompanyInfoGate
     {
         Gate::define('view_company_info', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('CompanyInfo') &&
-                $admin->user_positions->roles->where('role', 'CompanyInfo')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'CompanyInfo')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -21,9 +22,10 @@ class CompanyInfoGate
         });
         Gate::define('edit_company_info', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('CompanyInfo') &&
-                $admin->user_positions->roles->where('role', 'CompanyInfo')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'CompanyInfo')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty())
             ) {
                 return true;
             }

@@ -11,9 +11,10 @@ class BranchGate
     {
         Gate::define('view_branch', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Branch') &&
-                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -21,9 +22,10 @@ class BranchGate
         });
         Gate::define('add_branch', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Branch') &&
-                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'add'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'add'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -31,9 +33,10 @@ class BranchGate
         });
         Gate::define('edit_branch', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Branch') &&
-                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'edit'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -41,9 +44,10 @@ class BranchGate
         });
         Gate::define('delete_branch', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Branch') &&
-                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -52,9 +56,10 @@ class BranchGate
         
         Gate::define('product_branch', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Branch') &&
-                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'product'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'product'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -62,9 +67,10 @@ class BranchGate
         });
         Gate::define('category_branch', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Branch') &&
-                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'category'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'category'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -72,9 +78,10 @@ class BranchGate
         });
         Gate::define('option_branch', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Branch') &&
-                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'option'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Branch')->pluck('action')->intersect(['all', 'option'])->isNotEmpty())
             ) {
                 return true;
             }

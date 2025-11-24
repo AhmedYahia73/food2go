@@ -11,9 +11,10 @@ class PaymentGate
     {
         Gate::define('view_payments', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Payment') &&
-                $admin->user_positions->roles->where('role', 'Payment')->pluck('action')->intersect(['all', 'view'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Payment')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
             ) {
                 return true;
             }
@@ -21,9 +22,10 @@ class PaymentGate
         });
         Gate::define('status_payments', function (Admin $admin) {
             if (
-                $admin->user_positions &&
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
                 $admin->user_positions->roles->pluck('role')->contains('Payment') &&
-                $admin->user_positions->roles->where('role', 'Payment')->pluck('action')->intersect(['all', 'status'])->isNotEmpty()
+                $admin->user_positions->roles->where('role', 'Payment')->pluck('action')->intersect(['all', 'status'])->isNotEmpty())
             ) {
                 return true;
             }
