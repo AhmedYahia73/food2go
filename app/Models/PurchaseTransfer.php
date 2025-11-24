@@ -22,6 +22,14 @@ class PurchaseTransfer extends Model
         'category_material_id',
     ];
 
+    public function material(){
+        return $this->belongsTo(Material::class, 'material_id');
+    }
+
+    public function material_category(){
+        return $this->belongsTo(MaterialCategory::class, 'category_material_id');
+    }
+
     public function category(){
         return $this->belongsTo(PurchaseCategory::class, 'category_id');
     }

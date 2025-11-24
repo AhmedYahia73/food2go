@@ -29,7 +29,8 @@ class PurchaseTransferController extends Controller
 
     public function view(Request $request){ 
         $purchases = $this->purchases
-        ->with('category', 'product', 'from_store', 'to_store', 'admin')
+        ->with('category', 'product', 'from_store', 'to_store', 'admin',
+        'material', 'material_category')
         ->get()
         ->map(function($item){
             return [
@@ -38,6 +39,12 @@ class PurchaseTransferController extends Controller
                 'to_store_id' => $item->to_store_id,
                 'product_id' => $item->product_id,
                 'category_id' => $item->category_id,
+                
+                'category_material_id' => $item->category_material_id,
+                'material_id' => $item->material_id,
+                'category_material' => $item?->category_material?->name,
+                'material' => $item?->material?->name,
+                
                 'quintity' => $item->quintity, 
                 'to_store' => $item?->to_store?->name,
                 'from_store' => $item?->from_store?->name,
@@ -63,6 +70,24 @@ class PurchaseTransferController extends Controller
         ->select("name", "status")
         ->where("status", 1)
         ->get();
+        $materials = $this->materials
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+        $material_categories = $this->material_categories
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
 
         return response()->json([
             'purchases' => $purchases,
@@ -70,6 +95,8 @@ class PurchaseTransferController extends Controller
             'products' => $products,
             'stores' => $stores, 
             'units' => $units, 
+            'material_categories' => $material_categories,
+            'materials' => $materials,
         ]);
     }
 

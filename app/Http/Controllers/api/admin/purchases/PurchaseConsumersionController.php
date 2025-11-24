@@ -27,7 +27,7 @@ class PurchaseConsumersionController extends Controller
 
     public function view(Request $request){
         $consumersions = $this->consumersions
-        ->with("category", "product", "branch", "store", "admin")
+        ->with("category", "product", "branch", "store", "admin", "material", "category_material")
         ->get()
         ->map(function($item){
             return [
@@ -62,7 +62,8 @@ class PurchaseConsumersionController extends Controller
     public function consumersion_item(Request $request, $id){
         $consumersion = $this->consumersions
         ->where("id", $id)
-        ->with("category", "product", "branch", "store", "admin")
+        ->with("category", "product", "branch", "store", "admin", 
+        "material", "category_material")
         ->first(); 
 
         return response()->json([
