@@ -152,7 +152,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(RestoreCustomerController::class)
     ->prefix('restore_user')->group(function(){
         Route::get('/', 'view');
-        Route::get('/{id}', 'restore');
+        Route::put('/{id}', 'restore');
     });
     
     Route::controller(DeliveryBalanceController::class)
