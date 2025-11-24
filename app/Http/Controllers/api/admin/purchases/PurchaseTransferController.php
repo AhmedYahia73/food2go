@@ -189,8 +189,7 @@ class PurchaseTransferController extends Controller
                     ]);
                 }
                 else{
-                    $material_stock = $this->material_stock
-                    ->where('category_id', $purchases->category_id)
+                    $material_stock = $this->material_stock 
                     ->where('material_id', $purchases->material_id)
                     ->where('store_id', $purchases->from_store_id)
                     ->first();
