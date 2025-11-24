@@ -658,7 +658,7 @@ class CashierMakeOrderController extends Controller
         if($request->order_pending){
             return response()->json([
                 'success' => "You draft order success", 
-                'order_number' => $order['payment']['order_number']
+                'order_number' => $order['order']['order_number']
             ]); 
         }
         $locale = Setting::
