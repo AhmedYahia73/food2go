@@ -12,6 +12,8 @@ class PurchaseConsumersion extends Model
     protected $fillable = [
         'category_id',
         'product_id',
+        'material_id',
+        'category_material_id',
         'branch_id',
         'store_id',
         'admin_id',
@@ -19,6 +21,14 @@ class PurchaseConsumersion extends Model
         'date',
         'status',
     ];
+
+    public function category_material(){
+        return $this->belongsTo(MaterialCategory::class, 'category_material_id');
+    }
+
+    public function material(){
+        return $this->belongsTo(Material::class, 'material_id');
+    }
 
     public function category(){
         return $this->belongsTo(PurchaseCategory::class, 'category_id');

@@ -11,14 +11,17 @@ use App\Models\PurchaseStock;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore;
-use App\Models\Branch; 
+use App\Models\MaterialCategory;
+use App\Models\Material;
+use App\Models\Branch;
 
 class PurchaseConsumersionController extends Controller
 {
     public function __construct(private PurchaseConsumersion $consumersions,
     private PurchaseStock $stock, private PurchaseCategory $categories,
     private PurchaseProduct $products, private PurchaseStore $stores,
-    private Branch $branches){}
+    private Branch $branches, private Material $materials,
+    private MaterialCategory $material_categories){}
 
     public function view(Request $request){
         $consumersions = $this->consumersions
@@ -32,6 +35,12 @@ class PurchaseConsumersionController extends Controller
                 'branch_id' => $item->branch_id,
                 'store_id' => $item->store_id,
                 'admin_id' => $item->admin_id,
+                
+                'category_material_id' => $item->category_material_id,
+                'material_id' => $item->material_id,
+                'category_material' => $item?->category_material?->name,
+                'material' => $item?->material?->name,
+
                 'category' => $item?->category?->name,
                 'product' => $item?->product?->name,
                 'branch' => $item?->branch?->name,
@@ -62,6 +71,10 @@ class PurchaseConsumersionController extends Controller
                 'branch_id' => $consumersion->branch_id,
                 'store_id' => $consumersion->store_id,
                 'admin_id' => $consumersion->admin_id,
+                
+                'category_material_id' => $item->category_material_id,
+                'material_id' => $item->material_id,
+
                 'category' => $consumersion?->category?->name,
                 'product' => $consumersion?->product?->name,
                 'branch' => $consumersion?->branch?->name,
@@ -115,11 +128,31 @@ class PurchaseConsumersionController extends Controller
                 "name" => $item->name,
             ];
         });
+        $materials = $this->materials
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+        $material_categories = $this->material_categories
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
 
         return response()->json([
             'branches' => $branches, 
             'categories' => $categories,
             'products' => $products,
+            'material_categories' => $material_categories,
+            'materials' => $materials,
             'stores' => $stores,
         ]);
     }
@@ -171,8 +204,10 @@ class PurchaseConsumersionController extends Controller
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
-            'category_id' => ['required', 'exists:purchase_categories,id'],
-            'product_id' => ['required', 'exists:purchase_products,id'],
+            'category_id' => ['exists:purchase_categories,id'],
+            'product_id' => ['exists:purchase_products,id'],
+            'material_id' => ['exists:materials,id'],
+            'category_material_id' => ['exists:material_categories,id'],
             'branch_id' => ['required', 'exists:branches,id'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
             'quintity' => ['required', 'numeric'],
@@ -216,6 +251,8 @@ class PurchaseConsumersionController extends Controller
         $validator = Validator::make($request->all(), [
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'product_id' => ['required', 'exists:purchase_products,id'],
+            'material_id' => ['exists:materials,id'],
+            'category_material_id' => ['exists:material_categories,id'],
             'branch_id' => ['required', 'exists:branches,id'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
             'quintity' => ['required', 'numeric'],

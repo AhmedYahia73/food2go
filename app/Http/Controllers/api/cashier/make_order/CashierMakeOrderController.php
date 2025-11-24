@@ -1350,6 +1350,12 @@ class CashierMakeOrderController extends Controller
         })
         ->where("status", 1)
         ->first();
+        if(empty($discount_module)){
+            return response()->json([
+                "discount" => 0,
+                "module" => null,
+            ]);
+        }
 
         return response()->json([
             "discount" => $discount_module->discount,

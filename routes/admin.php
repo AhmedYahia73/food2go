@@ -149,6 +149,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
+    // DeliveryBalanceGate, RestoreGate, DueGroupGate
     Route::controller(RestoreCustomerController::class)
     ->prefix('restore_user')->group(function(){
         Route::get('/', 'view')->middleware('can:view_restore');
@@ -171,19 +172,19 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(DueGroupController::class)
     ->prefix('due_group_module')->group(function(){
-        Route::get('/{id}', 'view');
-        Route::post('/payment', 'payment');
+        Route::get('/{id}', 'view')->middleware('can:due_module');
+        Route::post('/payment', 'payment')->middleware('can:due_module_payment');
     });
 
     Route::controller(PreparationManController::class)
     ->prefix('preparation_man')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/lists', 'lists');
-        Route::get('/item/{id}', 'preparation_man');
-        Route::put('/status/{id}', 'status'); 
-        Route::post('/add', 'create'); 
-        Route::post('/update/{id}', 'modify'); 
-        Route::delete('/delete/{id}', 'delete'); 
+        Route::get('/', 'view')->middleware('can:view_preparation_man');
+        Route::get('/lists', 'lists')->middleware('can:view_preparation_man');
+        Route::get('/item/{id}', 'preparation_man')->middleware('can:view_preparation_man');
+        Route::put('/status/{id}', 'status')->middleware('can:status_preparation_man'); 
+        Route::post('/add', 'create')->middleware('can:add_preparation_man'); 
+        Route::post('/update/{id}', 'modify')->middleware('can:edit_preparation_man'); 
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_preparation_man'); 
     });
     
     Route::controller(FilterController::class)

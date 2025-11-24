@@ -61,6 +61,7 @@ use App\Providers\gates\PosReportsGate;
 use App\Providers\gates\OrderDelayGate;
 use App\Providers\gates\DeliveryBalanceGate;
 use App\Providers\gates\RestoreGate;
+use App\Providers\gates\DueGroupGate;
 
 use App\Providers\Cashier\CashierRoles;
 use Illuminate\Support\Facades\Schema;
@@ -169,5 +170,6 @@ class AppServiceProvider extends ServiceProvider
         CashierRoles::defineGates();
         RestoreGate::defineGates();
         DeliveryBalanceGate::defineGates();
+        DueGroupGate::defineGates();
     }
 }
