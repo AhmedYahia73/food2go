@@ -279,8 +279,8 @@ class PurchaseConsumersionController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'category_id' => ['required', 'exists:purchase_categories,id'],
-            'product_id' => ['required', 'exists:purchase_products,id'],
+            'category_id' => ['exists:purchase_categories,id'],
+            'product_id' => ['exists:purchase_products,id'],
             'material_id' => ['exists:materials,id'],
             'category_material_id' => ['exists:material_categories,id'],
             'branch_id' => ['required', 'exists:branches,id'],
