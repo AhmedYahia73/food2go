@@ -138,7 +138,7 @@ trait OrderFormat
                 ?->where("key", $order?->branch?->name)
                 ?->where("locale", $locale)
                 ?->first()
-                ?->value() ?? $order?->branch?->name,
+                ?->value ?? $order?->branch?->name,
                 "address" => $order?->branch?->address,
                 "email" => $order?->branch?->email,
                 "phone" => $order?->branch?->phone,
