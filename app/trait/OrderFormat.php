@@ -133,7 +133,12 @@ trait OrderFormat
             "status_payment" => $order->status_payment,
             "branch" => [
                 "id" => $order?->branch?->id,
-                "name" => $order?->branch?->name,
+                "name" => $order?->branch
+                ?->translations()
+                ?->where("key", $order?->branch?->name)
+                ?->where("locale", $locale)
+                ?->first()
+                ?->value() ?? $order?->branch?->name,
                 "address" => $order?->branch?->address,
                 "email" => $order?->branch?->email,
                 "phone" => $order?->branch?->phone,
