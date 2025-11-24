@@ -59,6 +59,8 @@ use App\Providers\gates\OrderGate;
 use App\Providers\gates\PaymentGate;
 use App\Providers\gates\PosReportsGate;
 use App\Providers\gates\OrderDelayGate;
+use App\Providers\gates\DeliveryBalanceGate;
+use App\Providers\gates\RestoreGate;
 
 use App\Providers\Cashier\CashierRoles;
 use Illuminate\Support\Facades\Schema;
@@ -165,5 +167,7 @@ class AppServiceProvider extends ServiceProvider
         // ________________________  Cashier  ________________________
 
         CashierRoles::defineGates();
+        RestoreGate::defineGates();
+        DeliveryBalanceGate::defineGates();
     }
 }

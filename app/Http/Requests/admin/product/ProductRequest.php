@@ -40,6 +40,7 @@ class ProductRequest extends FormRequest
             'order' => ['sometimes', 'boolean'],
             'product_code' => ['sometimes'],
             'points' => ['required', 'numeric'],
+            'recipe' => ['required', 'boolean'],
             'upsaling_group_id' => ['array'],
             'upsaling_group_id.*' => ['exists:upsaling_groups,id'],
             'addons.*' => ['exists:addons,id'],
