@@ -563,4 +563,36 @@ class BranchController extends Controller
             'success' => 'You add data success'
         ]);
     }
+
+    public function stoped_product_in_branch($id){
+        // /admin/branch/stoped_product_in_branch
+        $branch_off = $this->branch_off
+        ->where('branch_id', $id)
+        ->get();
+
+        $product_off = $branch_off->pluck('product_id')->filter()->toArray();
+        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
+
+        $products = $this->products
+            ->where('status', 1)
+            ->get()
+            ->map(function ($item) use ($product_off, $category_off) {
+                $is_off = in_array($item->id, $product_off)
+                || in_array($item->category_id, $category_off)
+                || in_array($item->sub_category_id, $category_off);
+
+                if ($is_off) {
+                    return [
+                        "id"     => $item->id,
+                        "name"   => $item->name,
+                        "status" => 0 ,
+                    ];
+                }
+            })
+            ->filter();
+
+        return response()->json([
+            'products' => $products,
+        ]);
+    }
 }

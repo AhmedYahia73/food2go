@@ -11,7 +11,8 @@ class CRUDGate
     {
         $roles = ['save_filter', 'service_fees', 'purchase_recipe', 'material_product',
         'material_categories', 'expenses_category', 'expenses', 'group_product', 'group',
-        'discount_code', 'recipe', 'unit', 'discount_module', 'upsaling'];
+        'discount_code', 'recipe', 'unit', 'discount_module', 'upsaling', 'purchase',
+        'purchase', 'wasted', 'purchase_stores'];
         $actions = ["view", 'status', 'add', 'update', 'delete'];
         foreach ($roles as $item) {
             foreach ($actions as $element) {

@@ -408,21 +408,21 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(PurchaseController::class)
     ->prefix('purchase')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/lists', 'lists');
-        Route::get('/item/{id}', 'purchase_item');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_purchase');
+        Route::get('/lists', 'lists')->middleware('can:view_purchase');
+        Route::get('/item/{id}', 'purchase_item')->middleware('can:view_purchase');
+        Route::post('/add', 'create')->middleware('can:add_purchase');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_purchase');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_purchase');
     });
     
     Route::controller(WastedController::class)
     ->prefix('wasted')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'wested');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create'); 
-        Route::post('/update/{id}', 'modify'); 
+        Route::get('/', 'view')->middleware('can:view_wasted');
+        Route::get('/item/{id}', 'wested')->middleware('can:view_wasted');
+        Route::put('/status/{id}', 'status')->middleware('can:status_wasted');
+        Route::post('/add', 'create')->middleware('can:add_wasted'); 
+        Route::post('/update/{id}', 'modify')->middleware('can:update_wasted'); 
     });
     
     Route::controller(PurchaseTransferController::class)
@@ -434,11 +434,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(StoreController::class)
     ->prefix('purchase_stores')->group(function(){
-        Route::get('/', 'view');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_purchase_stores');
+        Route::put('/status/{id}', 'status')->middleware('can:status_purchase_stores');
+        Route::post('/add', 'create')->middleware('can:add_purchase_stores');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_purchase_stores');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_purchase_stores');
     });
     
     Route::controller(PurchaseProductController::class)
@@ -670,6 +670,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::put('/order_of_branch/{id}', 'order_of_branch')->middleware('can:edit_branch');
         Route::post('/product_pricing', 'product_pricing');
         Route::post('/option_pricing', 'option_pricing');
+
+        Route::get('/stoped_product_in_branch/{branch_id}', 'stoped_product_in_branch');
 
         Route::get('/branch_in_product/{id}', 'branch_in_product')->middleware('can:product_branch');
         Route::get('/branch_product/{id}', 'branch_product')->middleware('can:product_branch');
