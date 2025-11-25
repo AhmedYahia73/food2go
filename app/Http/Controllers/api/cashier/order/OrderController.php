@@ -28,6 +28,7 @@ use App\Models\Addon;
 use App\Models\ExtraProduct;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
+use App\Models\CashierMan;
 
 class OrderController extends Controller
 {
@@ -38,7 +39,7 @@ class OrderController extends Controller
     private FinantiolAcounting $financial_account, private Product $products,
     private ExcludeProduct $excludes, private Addon $addons,
     private ExtraProduct $extras, private VariationProduct $variation,
-    private OptionProduct $options){}
+    private OptionProduct $options, private CashierMan $cashier_man){}
     use Recipe;
     use POS;
     use OrderFormat;
