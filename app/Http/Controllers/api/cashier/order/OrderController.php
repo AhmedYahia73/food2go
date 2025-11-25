@@ -28,6 +28,7 @@ use App\Models\Addon;
 use App\Models\ExtraProduct;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
+use App\Models\VoidFinancial;
 
 class OrderController extends Controller
 {
@@ -38,7 +39,7 @@ class OrderController extends Controller
     private FinantiolAcounting $financial_account, private Product $products,
     private ExcludeProduct $excludes, private Addon $addons,
     private ExtraProduct $extras, private VariationProduct $variation,
-    private OptionProduct $options){}
+    private OptionProduct $options, private VoidFinancial $void_financial){}
     use Recipe;
     use POS;
     use OrderFormat;
@@ -981,5 +982,102 @@ class OrderController extends Controller
         }
 
         return ["success" => true];
+    }
+
+    public function void_order(Request $request){
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,id',
+            'financial_id' => 'required|exists:finantiol_acountings,id',
+            'manager_id' => 'required',
+            'manager_password' => 'required', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $cashier_man = $this->cashier_man
+        ->where('my_id', $request->manager_id)
+        ->first();
+        if(empty($cashier_man) || !password_verify($request->input('manager_password'), $cashier_man->password)){
+            return response()->json([
+                'errors' => 'id or password is wrong'
+            ], 400);
+        }
+        if(!$cashier_man->void_order){
+            return response()->json([
+                'errors' => "You don't have this premission"
+            ], 400);
+        }
+
+        $order = $this->orders
+        ->where("id", $request->order_id)
+        ->first();
+        if ($order->pos) {
+            if($order->order_type == 'take_away'){
+                $order->take_away_status = "returned";
+            }
+            elseif($order->order_type == 'delivery'){
+                $order->delivery_status = "returned";
+            }
+            elseif($order->order_type == 'dine_in'){
+                return response()->json([
+                    'errors' => "You can't avoid dine in order"
+                ], 400);
+            }
+        }
+        else{
+            $order->order_status = "returned";
+        }
+        $order->void_financial_id = $request->financial_id;
+        $order->is_void = 1;
+        $order->save();
+        $financial_account = $this->financial_account
+        ->where("id", $request->financial_id)
+        ->decrement('balance', $order->amount);
+
+        return response()->json([
+            "success" => "You void order success"
+        ]);
+    }
+
+    public function void_order_list(Request $request){ 
+        $orders = $this->orders
+        ->where("is_void", 1)
+        ->get()
+        ->map(function($item){ 
+            return [ 
+                'id' => $item->id,
+                'order_number' => $item->order_number,
+                'created_at' => $item->created_at,
+                'amount' => $item->amount,
+                'operation_status' => $item->operation_status,
+                'order_type' => $item->order_type,
+                'order_status' => $order_type,
+                'type' => $item->pos ? 'Point of Sale' : "Online Order",
+                'source' => $item->source,
+                'status' => $item->status,
+                'points' => $item->points, 
+                'rejected_reason' => $item->rejected_reason,
+                'transaction_id' => $item->transaction_id,
+                'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+                'branch' => ['name' => $item?->branch?->name, ],
+                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                'admin' => ['name' => $item?->admin?->name,],
+                'payment_method' => ['id' => $item?->payment_method?->id,
+                                    'name' => $item?->payment_method?->name],
+                'financial_accountigs' => $item->financial_accountigs,
+                'schedule' => ['name' => $item?->schedule?->name],
+                'delivery' => ['name' => $item?->delivery?->name], 
+            ];
+        });
+
+        return response()->json([
+            "orders" => $orders
+        ]);
     }
 }

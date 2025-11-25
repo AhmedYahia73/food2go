@@ -37,7 +37,7 @@ class ProductRequest extends FormRequest
             'tax_id' => ['nullable', 'exists:taxes,id'],
             'status' => ['required', 'boolean'],
             'recommended' => ['required', 'boolean'],
-            'order' => ['sometimes', 'boolean'],
+            'order' => ['required', 'numeric'],
             'product_code' => ['sometimes'],
             'points' => ['required', 'numeric'],
             'recipe' => ['required', 'boolean'],

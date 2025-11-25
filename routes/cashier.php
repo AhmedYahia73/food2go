@@ -69,6 +69,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
     Route::controller(OrderController::class)
     ->prefix("orders")->group(function(){
+        Route::get('/void_order_list', 'void_order_list');
+        Route::post('/void_order', 'void_order');
         Route::post('/point_of_sale', 'pos_orders');
         Route::get('/order_count', 'order_count');
         Route::get('/online_orders', 'online_orders');
