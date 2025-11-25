@@ -53,7 +53,7 @@ class User extends Authenticatable
                 return substr($phone, 3);
             }
             $first_third = substr($phone, 0, 3);
-            if ($first_fourth == "+20") { 
+            if ($first_third == "+20") { 
                 return substr($phone, 2);
             }
             return $phone;
