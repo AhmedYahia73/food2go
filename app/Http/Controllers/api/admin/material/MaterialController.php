@@ -75,7 +75,7 @@ class MaterialController extends Controller
             'name' => ['required'],
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
-            'category_id' => ['required', 'exists:purchase_categories,id'],
+            'category_id' => ['required', 'exists:material_categories,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -97,7 +97,7 @@ class MaterialController extends Controller
             'name' => ['required'],
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
-            'category_id' => ['required', 'exists:purchase_categories,id'],
+            'category_id' => ['required', 'exists:material_categories,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
