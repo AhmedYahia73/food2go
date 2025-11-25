@@ -149,7 +149,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
-    // DeliveryBalanceGate, RestoreGate, DueGroupGate
+    // DeliveryBalanceGate, RestoreGate, DueGroupGate, CRUDGate
     Route::controller(RestoreCustomerController::class)
     ->prefix('restore_user')->group(function(){
         Route::get('/', 'view')->middleware('can:view_restore');
@@ -189,13 +189,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(FilterController::class)
     ->prefix('save_filter')->group(function(){
-        Route::get('/public_info', 'public_info'); 
-        Route::get('/lists', 'lists'); 
-        Route::post('/', 'view'); 
-        Route::get('/item/{id}', 'filter_item'); 
-        Route::post('/add', 'create'); 
-        Route::post('/update/{id}', 'modify'); 
-        Route::delete('/delete/{id}', 'delete'); 
+        Route::get('/public_info', 'public_info')->middleware('can:view_save_filter'); 
+        Route::get('/lists', 'lists')->middleware('can:view_save_filter'); 
+        Route::post('/', 'view')->middleware('can:view_save_filter'); 
+        Route::get('/item/{id}', 'filter_item')->middleware('can:view_save_filter'); 
+        Route::post('/add', 'create')->middleware('can:add_save_filter'); 
+        Route::post('/update/{id}', 'modify')->middleware('can:update_save_filter'); 
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_save_filter'); 
     });
     
     Route::controller(ManufacturingController::class)
@@ -215,63 +215,63 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(ServiceFeesController::class)
     ->prefix('service_fees')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'service_fees_item');
-        Route::get('/lists', 'lists');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_service_fees');
+        Route::get('/item/{id}', 'service_fees_item')->middleware('can:view_service_fees');
+        Route::get('/lists', 'lists')->middleware('can:view_service_fees');
+        Route::put('/status/{id}', 'status')->middleware('can:status_service_fees');
+        Route::post('/add', 'create')->middleware('can:add_service_fees');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_service_fees');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_service_fees');
     });
     
     Route::controller(PurchaseRecipeController::class)
     ->prefix('purchase_recipe')->group(function(){
-        Route::get('/{id}', 'view');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/{id}', 'view')->middleware('can:view_purchase_recipe');
+        Route::put('/status/{id}', 'status')->middleware('can:status_purchase_recipe');
+        Route::post('/add', 'create')->middleware('can:add_purchase_recipe');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_purchase_recipe');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_purchase_recipe');
     });
 
     Route::controller(MaterialController::class)
     ->prefix('material_product')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/product/{id}', 'product');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_material_product');
+        Route::get('/product/{id}', 'product')->middleware('can:view_material_product');
+        Route::put('/status/{id}', 'status')->middleware('can:status_material_product');
+        Route::post('/add', 'create')->middleware('can:add_material_product');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_material_product');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_material_product');
     });
     
     Route::controller(MaterialCategoryController::class)
     ->prefix('material_categories')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'category');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_material_categories');
+        Route::get('/item/{id}', 'category')->middleware('can:view_material_categories');
+        Route::put('/status/{id}', 'status')->middleware('can:status_material_categories');
+        Route::post('/add', 'create')->middleware('can:add_material_categories');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_material_categories');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_material_categories');
     }); 
     // _____________________________________
     Route::controller(ExpenseCategoryController::class)
     ->prefix('expenses_category')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'category_item');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_expenses_category');
+        Route::get('/item/{id}', 'category_item')->middleware('can:view_expenses_category');
+        Route::put('/status/{id}', 'status')->middleware('can:status_expenses_category');
+        Route::post('/add', 'create')->middleware('can:add_expenses_category');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_expenses_category');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_expenses_category');
     });
 
     Route::controller(ExpenseListController::class)
     ->prefix('expenses')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/lists', 'lists');
-        Route::get('/item/{id}', 'expense_item');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_expenses');
+        Route::get('/lists', 'lists')->middleware('can:view_expenses');
+        Route::get('/item/{id}', 'expense_item')->middleware('can:view_expenses');
+        Route::put('/status/{id}', 'status')->middleware('can:status_expenses');
+        Route::post('/add', 'create')->middleware('can:add_expenses');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_expenses');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_expenses');
     });
 
     Route::controller(ExpenseController::class)
@@ -284,12 +284,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(GroupProductController::class)
     ->prefix('group_product')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'group_item');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_group_product');
+        Route::get('/item/{id}', 'group_item')->middleware('can:view_group_product');
+        Route::put('/status/{id}', 'status')->middleware('can:status_group_product');
+        Route::post('/add', 'create')->middleware('can:add_group_product');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_group_product');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_group_product');
     });
 
     Route::controller(GroupPriceController::class)
@@ -317,20 +317,20 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(GroupController::class)
     ->prefix('group')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'group');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_group');
+        Route::get('/item/{id}', 'group')->middleware('can:view_group');
+        Route::put('/status/{id}', 'status')->middleware('can:status_group');
+        Route::post('/add', 'create')->middleware('can:add_group');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_group');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_group');
     });
 
     Route::controller(DiscountCodeController::class)
     ->prefix('discount_code')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/generated_codes/{id}', 'generated_codes');
-        Route::post('/add', 'create');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_discount_code');
+        Route::get('/generated_codes/{id}', 'generated_codes')->middleware('can:view_discount_code');
+        Route::post('/add', 'create')->middleware('can:add_discount_code');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_discount_code');
     });
 
     Route::controller(UnitController::class)

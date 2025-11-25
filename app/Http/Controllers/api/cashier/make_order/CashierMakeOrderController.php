@@ -863,6 +863,11 @@ class CashierMakeOrderController extends Controller
         $order_carts = $this->order_cart
         ->whereIn('table_id', $tables_ids)
         ->get();
+        if(isset($order_carts[0])){
+            $request->merge([  
+                'captain_id' => $request->captain_id,  
+            ]); 
+        }
         $orders = collect([]);
         $product = [];
         foreach ($order_carts as $key => $item) {

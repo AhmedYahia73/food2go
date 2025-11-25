@@ -45,6 +45,21 @@ class User extends Authenticatable
     ];
     protected $appends = ['role', 'orders_count', 'image_link', 'name', 'type', 'orders_count_branch', "can_debit"];
 
+    public function getphoneAttribute(){
+        if (isset($this->attributes['phone'])) {
+            $phone = $this->attributes['phone'];
+            $first_fourth = substr($phone, 0, 4);
+            if ($first_fourth == "+200") { 
+                return substr($phone, 3);
+            }
+            $first_third = substr($phone, 0, 3);
+            if ($first_fourth == "+20") { 
+                return substr($phone, 2);
+            }
+            return $phone;
+        }
+    }
+
     public function getNameAttribute(){
         return $this->attributes['f_name'] . ' ' . $this->attributes['l_name'];
     }

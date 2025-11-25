@@ -62,6 +62,8 @@ use App\Providers\gates\OrderDelayGate;
 use App\Providers\gates\DeliveryBalanceGate;
 use App\Providers\gates\RestoreGate;
 use App\Providers\gates\DueGroupGate;
+use App\Providers\gates\CRUDGate;
+use App\Providers\gates\PreparationManGate;
 
 use App\Providers\Cashier\CashierRoles;
 use Illuminate\Support\Facades\Schema;
@@ -171,5 +173,7 @@ class AppServiceProvider extends ServiceProvider
         RestoreGate::defineGates();
         DeliveryBalanceGate::defineGates();
         DueGroupGate::defineGates();
+        PreparationManGate::defineGates();
+        CRUDGate::defineGates();
     }
 }

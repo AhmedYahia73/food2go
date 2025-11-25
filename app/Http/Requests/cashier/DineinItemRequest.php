@@ -27,7 +27,7 @@ class DineinItemRequest extends FormRequest
             'amount' => ['required', 'numeric'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
-       
+            'captain_id' => ['sometimes', 'exists:captain_orders,id'],
             'products' => ['required_unless:order_pending,1,true', 'array'],
             'products.*.product_id' => ['exists:products,id', 'required_unless:order_pending,1,true'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
