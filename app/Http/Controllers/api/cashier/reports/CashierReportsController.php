@@ -755,8 +755,16 @@ class CashierReportsController extends Controller
     }
 
     public function financial_report(Request $request){
-        // Order
-        if($request->user()->report){
+        // 
+        $validator = Validator::make($request->all(), [
+            'password' => ['required'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        if($request->user()->report && password_verify($request->input('password'), $request->user()->password)){
             $orders = Order::
             select("id")
             ->where('cashier_man_id', $request->user()->id)
