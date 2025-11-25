@@ -301,10 +301,10 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(RecipeController::class)
     ->prefix('recipe')->group(function(){
-        Route::get('/{id}', 'view');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/{id}', 'view')->middleware('can:view_recipe');
+        Route::post('/add', 'create')->middleware('can:add_recipe');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_recipe');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_recipe');
     });
 
     Route::controller(NotificationSoundController::class)
@@ -335,12 +335,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(UnitController::class)
     ->prefix('unit')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/item/{id}', 'unit_item');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_unit');
+        Route::get('/item/{id}', 'unit_item')->middleware('can:view_unit');
+        Route::put('/status/{id}', 'status')->middleware('can:status_unit');
+        Route::post('/add', 'create')->middleware('can:add_unit');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_unit');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_unit');
     });
     
     Route::controller(ReportController::class)
@@ -365,22 +365,22 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(DiscountModuleController::class)
     ->prefix('discount_module')->group(function(){
-        Route::get('/', 'view'); 
-        Route::get('/item/{id}', 'discount_item');
-        Route::post('/add', 'create');
-        Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_discount_module');
+        Route::get('/item/{id}', 'discount_item')->middleware('can:view_discount_module');
+        Route::post('/add', 'create')->middleware('can:add_discount_module');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_discount_module');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_discount_module');
     });
     
     Route::controller(UpsalingController::class)
     ->prefix('upsaling')->group(function(){
-        Route::get('/', 'view');
-        Route::get('/lists', 'lists');
-        Route::get('/item/{id}', 'upsaling_item');
-        Route::put('/status/{id}', 'status');
-        Route::post('/add', 'create');
-        Route::put('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::get('/', 'view')->middleware('can:view_upsaling');
+        Route::get('/lists', 'lists')->middleware('can:view_upsaling');
+        Route::get('/item/{id}', 'upsaling_item')->middleware('can:view_upsaling');
+        Route::put('/status/{id}', 'status')->middleware('can:status_upsaling');
+        Route::post('/add', 'create')->middleware('can:add_upsaling');
+        Route::put('/update/{id}', 'modify')->middleware('can:update_upsaling');
+        Route::delete('/delete/{id}', 'delete')->middleware('can:delete_upsaling');
     });
     
     Route::controller(TableOrderController::class)

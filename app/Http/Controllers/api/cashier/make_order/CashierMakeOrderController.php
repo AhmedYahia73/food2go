@@ -597,12 +597,13 @@ class CashierMakeOrderController extends Controller
             $user = $this->user
             ->where("id", $request->user_id)
             ->first();
-            $due = $user->due + $request->due;
+            $due = $user->due + $request->amount;
             if($user->max_due < $due){
                 return response()->json([
                     "errors" => "user is exceed the alloed limit"
                 ], 400); 
             }
+            $user->increment('due', $due);
         }
         $kitchen_items = [];
         if($request->order_pending){
@@ -836,6 +837,23 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'status' => 1,
         ]); 
+        if($request->due && !$request->user_id){ 
+            return response()->json([
+                "errors" => "user_id is required"
+            ], 400); 
+        }
+        if($request->due){
+            $user = $this->user
+            ->where("id", $request->user_id)
+            ->first();
+            $due = $user->due + $request->amount;
+            if($user->max_due < $due){
+                return response()->json([
+                    "errors" => "user is exceed the alloed limit"
+                ], 400); 
+            }
+            $user->increment('due', $due);
+        }
         $errors = $this->finantion_validation($request);
         if(isset($errors['errors'])){
             return response()->json([
@@ -972,6 +990,23 @@ class CashierMakeOrderController extends Controller
             return response()->json([
                 'errors' => $errors,
             ], 400);
+        }
+        if($request->due && !$request->user_id){ 
+            return response()->json([
+                "errors" => "user_id is required"
+            ], 400); 
+        }
+        if($request->due){
+            $user = $this->user
+            ->where("id", $request->user_id)
+            ->first();
+            $due = $user->due + $request->amount;
+            if($user->max_due < $due){
+                return response()->json([
+                    "errors" => "user is exceed the alloed limit"
+                ], 400); 
+            }
+            $user->increment('due', $due);
         }
         if($request->dicount_id){
             if(!$request->user()->discount_perimission){
