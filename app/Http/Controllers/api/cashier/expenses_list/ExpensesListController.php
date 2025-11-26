@@ -42,11 +42,14 @@ class ExpensesListController extends Controller
         ]);
     }
 
-    public function lists(Request $request){
+    public function lists(Request $request){ 
         $expenses = $this->expenses_list
         ->select("id", "name")
         ->where("status", 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+
+        });
         $financial = $this->financial
         ->select("id", "name")
         ->where("status", 1)
