@@ -134,57 +134,57 @@ trait OrderFormat
             "order_date" => $order->order_date,
             "status_payment" => $order->status_payment,
             "branch" => [
-                "id" => $order?->branch?->id,
+                "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch
                 ?->translations()
-                ?->where("key", $order?->branch?->name)
+                ?->where("key", $order?->branch?->name ?? null)
                 ?->where("locale", $locale)
                 ?->first()
-                ?->value ?? $order?->branch?->name,
-                "address" => $order?->branch?->address,
-                "email" => $order?->branch?->email,
-                "phone" => $order?->branch?->phone,
+                ?->value ?? $order?->branch?->name ?? null,
+                "address" => $order?->branch?->address ?? null,
+                "email" => $order?->branch?->email ?? null,
+                "phone" => $order?->branch?->phone ?? null,
             ],
             "user" => [
-                "id" => $order?->user?->id,
-                "f_name" => $order?->user?->f_name,
-                "l_name" => $order?->user?->l_name,
-                "email" => $order?->user?->email,
-                "phone" => $order?->user?->phone,
-                "phone_2" => $order?->user?->phone_2,
-                "name" => $order?->user?->name,
+                "id" => $order?->user?->id ?? null,
+                "f_name" => $order?->user?->f_name ?? null,
+                "l_name" => $order?->user?->l_name ?? null,
+                "email" => $order?->user?->email ?? null,
+                "phone" => $order?->user?->phone ?? null,
+                "phone_2" => $order?->user?->phone_2 ?? null,
+                "name" => $order?->user?->name ?? null,
             ],
             "admin" => [
-                "id" => $order?->admin?->id,
-                "name" => $order?->admin?->name,
+                "id" => $order?->admin?->id ?? null,
+                "name" => $order?->admin?->name ?? null,
             ],
             "delivery" => [
-                "id" => $order?->delivery?->id,
-                "f_name" => $order?->delivery?->f_name,
-                "l_name" => $order?->delivery?->l_name,
-                "phone" => $order?->delivery?->phone,
+                "id" => $order?->delivery?->id ?? null,
+                "f_name" => $order?->delivery?->f_name ?? null,
+                "l_name" => $order?->delivery?->l_name ?? null,
+                "phone" => $order?->delivery?->phone ?? null,
             ],
             "address" => [
-                "id" => $order?->address?->id,
-                "address" => $order?->address?->address,
-                "street" => $order?->address?->street,
-                "building_num" => $order?->address?->building_num,
-                "floor_num" => $order?->address?->floor_num,
-                "apartment" => $order?->address?->apartment,
-                "additional_data" => $order?->address?->additional_data,
-                "type" => $order?->address?->type,
-                "map" => $order?->address?->map,
+                "id" => $order?->address?->id ?? null,
+                "address" => $order?->address?->address ?? null,
+                "street" => $order?->address?->street ?? null,
+                "building_num" => $order?->address?->building_num ?? null,
+                "floor_num" => $order?->address?->floor_num ?? null,
+                "apartment" => $order?->address?->apartment ?? null,
+                "additional_data" => $order?->address?->additional_data ?? null,
+                "type" => $order?->address?->type ?? null,
+                "map" => $order?->address?->map ?? null,
                 "zone" => [
-                    "zone" => $order?->address?->zone?->zone,
-                    "price" => $order?->address?->zone?->price,
+                    "zone" => $order?->address?->zone?->zone ?? null,
+                    "price" => $order?->address?->zone?->price ?? null,
                 ],
-                "city" => $order?->address?->zone?->city?->name,
+                "city" => $order?->address?->zone?->city?->name ?? null,
             ],  
         ];
         
         return $order_arr;
     }
-    
+
     // ___________________________________________________________
 
     public function order_item_format($order, $id, $locale){
@@ -305,66 +305,66 @@ trait OrderFormat
             "order_date" => $order->order_date,
             "status_payment" => $order->status_payment,
             "branch" => [
-                "id" => $order?->branch?->id,
+                "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch
                 ?->translations()
                 ?->where("key", $order?->branch?->name)
                 ?->where("locale", $locale)
                 ?->first()
-                ?->value ?? $order?->branch?->name,
-                "address" => $order?->branch?->address,
-                "email" => $order?->branch?->email,
-                "phone" => $order?->branch?->phone,
-                "count_orders" => $order?->branch?->count_orders,
+                ?->value ?? $order?->branch?->name ?? null,
+                "address" => $order?->branch?->address ?? null,
+                "email" => $order?->branch?->email ?? null,
+                "phone" => $order?->branch?->phone ?? null,
+                "count_orders" => $order?->branch?->count_orders ?? null,
             ],
             "user" => [
-                "id" => $order?->user?->id,
-                "f_name" => $order?->user?->f_name,
-                "l_name" => $order?->user?->l_name,
-                "email" => $order?->user?->email,
-                "phone" => $order?->user?->phone,
-                "phone_2" => $order?->user?->phone_2,
-                "name" => $order?->user?->name,
-                "count_orders" => $order?->user?->count_orders,
+                "id" => $order?->user?->id ?? null,
+                "f_name" => $order?->user?->f_name ?? null,
+                "l_name" => $order?->user?->l_name ?? null,
+                "email" => $order?->user?->email ?? null,
+                "phone" => $order?->user?->phone ?? null,
+                "phone_2" => $order?->user?->phone_2 ?? null,
+                "name" => $order?->user?->name ?? null,
+                "count_orders" => $order?->user?->count_orders ?? null,
             ],
             "admin" => [
-                "id" => $order?->admin?->id,
-                "name" => $order?->admin?->name,
+                "id" => $order?->admin?->id ?? null,
+                "name" => $order?->admin?->name ?? null,
             ],
             "delivery" => [
-                "id" => $order?->delivery?->id,
-                "f_name" => $order?->delivery?->f_name,
-                "l_name" => $order?->delivery?->l_name,
-                "phone" => $order?->delivery?->phone,
-                "count_orders" => $order?->delivery?->count_orders,
+                "id" => $order?->delivery?->id ?? null,
+                "f_name" => $order?->delivery?->f_name ?? null,
+                "l_name" => $order?->delivery?->l_name ?? null,
+                "phone" => $order?->delivery?->phone ?? null,
+                "count_orders" => $order?->delivery?->count_orders ?? null,
             ],
             "address" => [
-                "id" => $order?->address?->id,
-                "address" => $order?->address?->address,
-                "street" => $order?->address?->street,
-                "building_num" => $order?->address?->building_num,
-                "floor_num" => $order?->address?->floor_num,
-                "apartment" => $order?->address?->apartment,
-                "additional_data" => $order?->address?->additional_data,
-                "type" => $order?->address?->type,
-                "map" => $order?->address?->map,
+                "id" => $order?->address?->id ?? null,
+                "address" => $order?->address?->address ?? null,
+                "street" => $order?->address?->street ?? null,
+                "building_num" => $order?->address?->building_num ?? null,
+                "floor_num" => $order?->address?->floor_num ?? null,
+                "apartment" => $order?->address?->apartment ?? null,
+                "additional_data" => $order?->address?->additional_data ?? null,
+                "type" => $order?->address?->type ?? null,
+                "map" => $order?->address?->map ?? null,
                 "zone" => [
-                    "zone" => $order?->address?->zone?->zone,
-                    "price" => $order?->address?->zone?->price,
+                    "zone" => $order?->address?->zone?->zone ?? null,
+                    "price" => $order?->address?->zone?->price ?? null,
                 ],
-                "city" => $order?->address?->zone?->city?->name,
+                "city" => $order?->address?->zone?->city?->name ?? null,
             ], 
             "payment_method" => [ 
-                "id" => $order?->payment_method?->id,
+                "id" => $order?->payment_method?->id ?? null,
                 "name" => $order?->payment_method
                 ?->translations()
                 ?->where("key", $order?->payment_method?->name)
                 ?->where("locale", $locale)
                 ?->first()
-                ?->value ?? $order?->payment_method?->name,
-                "logo" => $order?->payment_method?->logo_link
+                ?->value ?? $order?->payment_method?->name ?? null,
+                "logo" => $order?->payment_method?->logo_link ?? null
             ],
-            "schedule" => $order?->schedule?->name
+            "schedule" => $order?->schedule?->name ?? null
         ];
         
         return $order_arr;
