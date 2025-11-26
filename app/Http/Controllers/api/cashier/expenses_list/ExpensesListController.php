@@ -19,21 +19,46 @@ class ExpensesListController extends Controller
     ,private ExpenseCategory $category){}
 
     public function view(Request $request){
+        $locale = $request->locale ?? "en";
         $expenses = $this->expenses
         ->with(["expense:id,name", "admin:id,name", "cashier:id,name", 
         "financial_account:id,name", "category:id,name"])
         ->where("cahier_man_id", $request->user()->id)
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
                 "amount" => $item->amount,
                 "note" => $item->note,
-                "expense" => $item->expense,
+                "expense" => [
+                    "id" => $item?->expense?->id,
+                    'name' => $item?->expense
+                    ?->translations()
+                    ?->where("locale", $locale)
+                    ?->where('key', $item?->expense?->name)
+                    ?->first()
+                    ?->value ?? $item->name ?? null,
+                ],
                 "admin" => $item->admin, 
-                "cashier" => $item->cashier, 
+                "cashier" =>  [
+                    "id" => $item?->cashier?->id,
+                    'name' => $item?->cashier
+                    ?->translations()
+                    ?->where("locale", $locale)
+                    ?->where('key', $item?->cashier?->name)
+                    ?->first()
+                    ?->value ?? $item->name ?? null,
+                ],
                 "financial_account" => $item->financial_account,
-                "category" => $item->category,
+                "category" =>  [
+                    "id" => $item?->category?->id,
+                    'name' => $item?->category
+                    ?->translations()
+                    ?->where("locale", $locale)
+                    ?->where('key', $item?->category?->name)
+                    ?->first()
+                    ?->value ?? $item->name ?? null,
+                ],
             ];
         });
 
@@ -42,13 +67,23 @@ class ExpensesListController extends Controller
         ]);
     }
 
-    public function lists(Request $request){ 
+    public function lists(Request $request){
+        $locale = $request->locale ?? "en";
         $expenses = $this->expenses_list
         ->select("id", "name")
         ->where("status", 1)
         ->get()
         ->map(function($item) use($locale){
-
+            return [
+                "id" => $item->id,
+                "name" => $item?->name
+                ?->translations()
+                ?->where("locale", $locale)
+                ?->where('key', $item->name)
+                ?->first()
+                ?->value ?? $item->name ?? null
+                ,
+            ];
         });
         $financial = $this->financial
         ->select("id", "name")
@@ -57,7 +92,19 @@ class ExpensesListController extends Controller
         $categories = $this->category
         ->select("id", "name")
         ->where("status", 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "name" => $item?->name
+                ?->translations()
+                ?->where("locale", $locale)
+                ?->where('key', $item->name)
+                ?->first()
+                ?->value ?? $item->name ?? null
+                ,
+            ];
+        });
 
         return response()->json([
             'expenses' => $expenses,  
