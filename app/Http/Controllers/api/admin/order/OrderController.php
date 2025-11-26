@@ -307,6 +307,7 @@ class OrderController extends Controller
 				'order_status' => $item->order_status,
 				'source' => $item->source,
 				'status' => $item->status,
+				'rate' => $item->rate,
 				'points' => $item->points, 
 				'rejected_reason' => $item->rejected_reason,
 				'transaction_id' => $item->transaction_id,
