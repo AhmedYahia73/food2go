@@ -18,6 +18,16 @@ class GroupProduct extends Model
         'module',
         'status', 
     ];
+    
+    public function getModuleAttribute()
+    {
+        $decoded = json_decode($this->attributes['module'] ?? '', true);
+
+        return (json_last_error() === JSON_ERROR_NONE && is_array($decoded))
+            ? $decoded
+            : null;
+    }
+
 
     public function un_active_products(){
         return $this->belongsToMany(Product::class, "product_group_product", "group_product_id", "product_id");
