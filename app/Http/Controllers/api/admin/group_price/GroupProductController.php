@@ -12,14 +12,6 @@ class GroupProductController extends Controller
 {
     public function __construct(private GroupProduct $group_product){}
 
-    protected $groupRequest = [
-        'name',  
-        'increase_precentage', 
-        'decrease_precentage', 
-        'due',
-        'status',
-    ];
-
     public function view(Request $request){
         $group_products = $this->group_product
         ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status", "due")
@@ -84,8 +76,7 @@ class GroupProductController extends Controller
             ],400);
         }
 
-        $groupRequest = $request->only($this->groupRequest);
-        $groupRequest['module'] = json_encode($request->module);
+        $groupRequest = $validator->validated();
         $this->group_product
         ->create($groupRequest);
 
@@ -98,7 +89,7 @@ class GroupProductController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required'], 
             'module' => ['required', "array"], 
-            'module.*' => ['required', "in:take_away,delivery,dine_in"], 
+            'module.*' => ['required', "in:take_away,delivery,dine_in"],
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
             'due' => ['required', 'boolean'],
@@ -110,8 +101,7 @@ class GroupProductController extends Controller
             ],400);
         }
 
-        $groupRequest = $request->only($this->groupRequest);
-        $groupRequest['module'] = json_encode($request->module);
+        $groupRequest = $validator->validated();
         $this->group_product
         ->where("id", $id)
         ->update($groupRequest);
