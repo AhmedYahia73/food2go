@@ -19,18 +19,27 @@ class GroupProduct extends Model
         'status', 
     ];
 
-    public function setModuleAttribute($value)
+   public function getModuleAttribute()
     {
-        if (is_array($value)) {
-            $this->attributes['module'] = json_encode($value, JSON_UNESCAPED_UNICODE);
-        } 
-        else if ($value === null) {
-            $this->attributes['module'] = null;
-        } 
-        else {
-            $this->attributes['module'] = $value;
+        $raw = $this->attributes['module'] ?? null;
+
+        // لو فاضي → رجع null
+        if (!$raw) {
+            return null;
         }
+
+        // فكّ JSON
+        $decoded = json_decode($raw, true);
+
+        // لو مش Array → رجع null
+        if (!is_array($decoded)) {
+            return null;
+        }
+
+        // رجّع الـ Array
+        return $decoded;
     }
+
 
     public function getModuleAttribute()
     {
