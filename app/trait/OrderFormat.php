@@ -358,12 +358,14 @@ trait OrderFormat
             ], 
             "payment_method" => [ 
                 "id" => $order?->payment_method?->id ?? null,
-                "name" => $order?->payment_method
+                "name" => isset($order?->payment_method)  ?
+                $order?->payment_method
                 ?->translations()
                 ?->where("key", $order?->payment_method?->name)
                 ?->where("locale", $locale)
                 ?->first()
-                ?->value ?? $order?->payment_method?->name ?? null,
+                ?->value ?? $order?->payment_method?->name ?? null
+                : null,
                 "logo" => $order?->payment_method?->logo_link ?? null
             ],
             "schedule" => $order?->schedule?->name ?? null
