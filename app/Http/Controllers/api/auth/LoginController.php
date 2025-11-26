@@ -622,6 +622,7 @@ class LoginController extends Controller
                 'addresses' => $addresses,
                 'zones' => $zones,
                 'rate' => $rate,
+                'order_id' => $order?->id,
             ], 200);
         }
         else { 
