@@ -24,6 +24,7 @@ class ExpensesListController extends Controller
         ->with(["expense:id,name", "admin:id,name", "cashier:id,name", 
         "financial_account:id,name", "category:id,name"])
         ->where("cahier_man_id", $request->user()->id)
+        ->orderByDesc("id")
         ->get()
         ->map(function($item) use($locale){
             return [
@@ -133,9 +134,61 @@ class ExpensesListController extends Controller
         $expenseRequest['branch_id'] = $request->user()->branch_id;
         $this->expenses
         ->create($expenseRequest);
+        $financial = FinantiolAcounting::
+        where("id", $request->financial_account_id)
+        ->first();
+        if($financial){
+            $financial->balance -= $request->amount;
+            $financial->save();
+        }
 
         return response()->json([
             "success" => "You add expense success"
+        ]);
+    }
+
+    public function update(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'expense_id' => ['required', 'exists:expense_lists,id'],
+            'financial_account_id' => ['required', 'exists:finantiol_acountings,id'],
+            'category_id' => ['required', 'exists:expense_categories,id'],
+            'amount' => ['required', 'numeric'],
+            'note' => ['sometimes'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $expenses = $this->expenses
+        ->where("id", $id)
+        ->where("cahier_man_id", $request->user()->id)
+        ->first();
+        $financial = FinantiolAcounting::
+        where("id", $expenses->financial_account_id)
+        ->first();
+        if($financial){
+            $financial->balance += $expenses->amount;
+            $financial->save();
+        }
+        $expenses->expense_id = $request->expense_id;
+        $expenses->financial_account_id = $request->financial_account_id;
+        $expenses->category_id = $request->category_id;
+        $expenses->amount = $request->amount;
+        $expenses->note = $request->note;
+        $expenses->save();
+
+        $financial = FinantiolAcounting::
+        where("id", $request->financial_account_id)
+        ->first();
+        if($financial){
+            $financial->balance -= $request->amount;
+            $financial->save();
+        }
+
+        return response()->json([
+            "success" => "You update expense success"
         ]);
     }
 }
