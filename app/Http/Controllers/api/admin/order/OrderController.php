@@ -1163,8 +1163,8 @@ class OrderController extends Controller
                 "from_status" => $item->from_status,
                 "to_status" => $item->to_status,
                 "admin" => [
-                    "id" => $element?->admin?->id,
-                    "name" => $element?->admin?->name,
+                    "id" => $item?->admin?->id,
+                    "name" => $item?->admin?->name,
                 ]
             ];
         });;
