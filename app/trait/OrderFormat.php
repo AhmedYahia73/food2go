@@ -185,6 +185,8 @@ trait OrderFormat
         return $order_arr;
     }
     
+    // ___________________________________________________________
+
     public function order_item_format($order, $id, $locale){
         if(empty($order->order_details_data)){
             return null;
