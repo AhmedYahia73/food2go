@@ -602,11 +602,22 @@ class LoginController extends Controller
 
             $user->role = $role;
             $user->token = $user->createToken($user->role)->plainTextToken;
+            
+            $order = $this->orders 
+            ->where('user_id', $request->user()->id)
+            ->where('order_status', 'delivered')
+            ->first();
+            $rate = false;
+            if(!empty($order->rate)){
+                $rate = true;
+            }  
+
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
                 'addresses' => $addresses,
-                'zones' => $zones, 
+                'zones' => $zones,
+                'rate' => $rate,
             ], 200);
         }
         else { 
