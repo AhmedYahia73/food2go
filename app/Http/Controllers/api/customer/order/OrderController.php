@@ -163,12 +163,32 @@ class OrderController extends Controller
                 'address_name' => $item?->order_address?->address ?? null,
                 'addons' => $addons,
                 'order_date' => $item->order_date,
+                'rate' => $item->rate,
+                'comment' => $item->comment,
             ];
         });
 
         return response()->json([
             'orders' => $orders
         ]);
+    }
+
+    public function evaulate_order(Request $request){
+        $validator = Validator::make($request->all(), [
+            'rate' => 'required|numeric|between:1,5',
+            'comment' => 'sometimes',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $orders = $this->orders 
+        ->where('user_id', $request->user()->id)
+        ->where('order_status', 'delivered') 
+        ->where('rate')
+        ->get();
     }
 
     public function order_track($id){
