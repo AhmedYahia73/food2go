@@ -341,12 +341,15 @@ class OrderController extends Controller
         ]);
     }
 
-    public function cancel_evaluate(Request $request, $id){
+    public function cancel_evaluate(Request $request){
         $order = $this->orders
-        ->where("id", $id)
-        ->update([
-            "is_cancel_evaluate" => 1
-        ]);
+        ->orderByDesc("id")
+        ->first();
+        if ($order) {
+            $order->update([
+                "is_cancel_evaluate" => 1
+            ]);
+        }
 
         return response()->json([
             'success' => 'You evaluate success'
