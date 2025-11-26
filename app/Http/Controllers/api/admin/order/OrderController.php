@@ -1162,12 +1162,10 @@ class OrderController extends Controller
                 "id" => $item->id,
                 "from_status" => $item->from_status,
                 "to_status" => $item->to_status,
-                "admin" => $item->admin->map(function($element){
-                    return [
-                        "id" => $element?->admin?->id,
-                        "name" => $element?->admin?->name,
-                    ];
-                }),
+                "admin" => [
+                    "id" => $element?->admin?->id,
+                    "name" => $element?->admin?->name,
+                ]
             ];
         });;
         $branches = $this->branches
