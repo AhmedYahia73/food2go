@@ -317,7 +317,7 @@ trait OrderFormat
                 "phone" => $order?->branch?->phone ?? null,
                 "count_orders" => $order?->branch?->count_orders ?? null,
             ],
-            "user" => [
+            "user" => isset($order?->user?->id) ? [
                 "id" => $order?->user?->id ?? null,
                 "f_name" => $order?->user?->f_name ?? null,
                 "l_name" => $order?->user?->l_name ?? null,
@@ -326,7 +326,7 @@ trait OrderFormat
                 "phone_2" => $order?->user?->phone_2 ?? null,
                 "name" => $order?->user?->name ?? null,
                 "count_orders" => $order?->user?->count_orders ?? null,
-            ],
+            ] : null,
             "admin" => [
                 "id" => $order?->admin?->id ?? null,
                 "name" => $order?->admin?->name ?? null,
