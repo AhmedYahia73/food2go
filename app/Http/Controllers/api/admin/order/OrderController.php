@@ -1178,15 +1178,7 @@ class OrderController extends Controller
                 "id" => $item->id,
                 "name" => $item->name,
             ];
-        });
-        return response()->json([
-            'order' => $order,
-            'deliveries' => $deliveries,
-            'order_status' => $order_status,
-            'preparing_time' => $preparing_arr,
-            'log_order' => $log_order,
-            'branches' => $branches,
-        ]);
+        }); 
         $order = $this->order_item_format($order, $id, $locale);
 
         return response()->json([
@@ -1196,6 +1188,7 @@ class OrderController extends Controller
             'preparing_time' => $preparing_arr,
             'log_order' => $log_order,
             'branches' => $branches,
+            'locale' => $locale
         ]);
     }
 
