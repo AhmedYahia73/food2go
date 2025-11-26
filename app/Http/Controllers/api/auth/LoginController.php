@@ -606,7 +606,7 @@ class LoginController extends Controller
             $user->token = $user->createToken($user->role)->plainTextToken;
             
             $order = $this->orders 
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->where('order_status', 'delivered') 
             ->first();
             $rate = false;
