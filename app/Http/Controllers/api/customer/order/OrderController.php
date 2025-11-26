@@ -352,7 +352,8 @@ class OrderController extends Controller
         }
 
         return response()->json([
-            'success' => 'You evaluate success'
+            'success' => 'You evaluate success',
+            'order' => $order?->is_cancel_evaluate
         ]);
     }
 }
