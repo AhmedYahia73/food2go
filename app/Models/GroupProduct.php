@@ -18,37 +18,32 @@ class GroupProduct extends Model
         'module',
         'status', 
     ];
+    public function setModuleAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['module'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+        } elseif ($value === null) {
+            $this->attributes['module'] = null;
+        } else {
+            $this->attributes['module'] = $value;
+        }
+    }
 
-   public function getModuleAttribute()
+    public function getModuleAttribute()
     {
         $raw = $this->attributes['module'] ?? null;
 
-        // لو فاضي → رجع null
         if (!$raw) {
             return null;
         }
 
-        // فكّ JSON
         $decoded = json_decode($raw, true);
-
-        // لو مش Array → رجع null
-        if (!is_array($decoded)) {
-            return null;
-        }
-
-        // رجّع الـ Array
-        return $decoded;
-    }
-
-
-    public function getModuleAttribute()
-    {
-        $decoded = json_decode($this->attributes['module'] ?? '', true);
 
         return (json_last_error() === JSON_ERROR_NONE && is_array($decoded))
             ? $decoded
             : null;
     }
+
 
 
     public function un_active_products(){
