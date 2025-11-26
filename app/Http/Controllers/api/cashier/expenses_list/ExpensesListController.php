@@ -76,7 +76,7 @@ class ExpensesListController extends Controller
         ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
-                "name" => $item?->name
+                "name" => $item
                 ?->translations()
                 ?->where("locale", $locale)
                 ?->where('key', $item->name)
@@ -96,7 +96,7 @@ class ExpensesListController extends Controller
         ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
-                "name" => $item?->name
+                "name" => $item
                 ?->translations()
                 ?->where("locale", $locale)
                 ?->where('key', $item->name)
