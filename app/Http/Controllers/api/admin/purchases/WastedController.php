@@ -35,6 +35,7 @@ class WastedController extends Controller
                 'store' => $item?->store?->name,
                 'category_id' => $item?->category_id,
                 'product_id' => $item?->product_id,
+                'reason' => $item->reason,
                 
                 'category_material_id' => $item->category_material_id,
                 'material_id' => $item->material_id,
@@ -101,6 +102,7 @@ class WastedController extends Controller
             'category_id' => $wested?->category_id,
             'product_id' => $wested?->product_id,
             'store_id' => $wested?->store_id,
+            "reason" => $wested->reason,
                 
             'category_material_id' => $item->category_material_id,
             'material_id' => $item->material_id,
@@ -158,6 +160,7 @@ class WastedController extends Controller
         $validator = Validator::make($request->all(), [
             'category_id' => ['exists:purchase_categories,id'],
             'product_id' => ['exists:purchase_products,id'],
+            'reason' => ["required"],
             
             'material_id' => ['exists:materials,id'],
             'category_material_id' => ['exists:material_categories,id'],
@@ -229,6 +232,7 @@ class WastedController extends Controller
         $validator = Validator::make($request->all(), [
             'category_id' => ['exists:purchase_categories,id'],
             'product_id' => ['exists:purchase_products,id'],
+            'reason' => ["required"],
 
             'material_id' => ['exists:materials,id'],
             'category_material_id' => ['exists:material_categories,id'],

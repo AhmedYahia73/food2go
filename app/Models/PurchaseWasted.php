@@ -17,6 +17,7 @@ class PurchaseWasted extends Model
         'status',
         'material_id',
         'category_material_id',
+        'reason',
     ];
 
     public function material(){
