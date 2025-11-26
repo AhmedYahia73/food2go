@@ -37,7 +37,7 @@ class ExpensesListController extends Controller
                     ?->where("locale", $locale)
                     ?->where('key', $item?->expense?->name)
                     ?->first()
-                    ?->value ?? $item->name ?? null,
+                    ?->value ?? $item?->expense?->name ?? null,
                 ],
                 "admin" => $item->admin, 
                 "cashier" =>  [
@@ -47,7 +47,7 @@ class ExpensesListController extends Controller
                     ?->where("locale", $locale)
                     ?->where('key', $item?->cashier?->name)
                     ?->first()
-                    ?->value ?? $item->name ?? null,
+                    ?->value ?? $item?->cashier?->name ?? null,
                 ],
                 "financial_account" => $item->financial_account,
                 "category" =>  [
@@ -57,7 +57,7 @@ class ExpensesListController extends Controller
                     ?->where("locale", $locale)
                     ?->where('key', $item?->category?->name)
                     ?->first()
-                    ?->value ?? $item->name ?? null,
+                    ?->value ?? $item?->category?->name ?? null,
                 ],
             ];
         });
