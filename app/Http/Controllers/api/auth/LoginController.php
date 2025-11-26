@@ -610,7 +610,7 @@ class LoginController extends Controller
             ->where('order_status', 'delivered') 
             ->first();
             $rate = false;
-            if($order && !empty($order->rate) && !$order->is_cancel_evaluate){
+            if($order && empty($order->rate) && !$order->is_cancel_evaluate){
                 $rate = true;
             }  
 
