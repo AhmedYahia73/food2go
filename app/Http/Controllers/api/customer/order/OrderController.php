@@ -173,7 +173,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function evaulate_order(Request $request){
+    public function evaulate_order(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'rate' => 'required|numeric|between:1,5',
             'comment' => 'sometimes',
@@ -184,11 +184,24 @@ class OrderController extends Controller
             ],400);
         }
 
-        $orders = $this->orders 
+        $order = $this->orders 
         ->where('user_id', $request->user()->id)
         ->where('order_status', 'delivered') 
-        ->where('rate')
-        ->get();
+        ->whereNull('rate')
+        ->first();
+        if(empty($order)){
+            return response()->json([
+                'errors' => "id is wrong"
+            ], 400);
+        }
+        $order->update([
+            "rate" => $request->rate,
+            "comment" => $request->comment ?? $order->comment,
+        ]);
+
+        return response()->json([
+            "success" => "You update status success"
+        ]);
     }
 
     public function order_track($id){

@@ -100,6 +100,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/order_status/{id}', 'order_track');
         Route::get('/cancel_time', 'cancel_time');
         Route::put('/cancel/{id}', 'cancel');
+        Route::put('/evaulate_order/{id}', 'evaulate_order');
     });
 
     Route::controller(DealController::class)->prefix('deal')->group(function(){
