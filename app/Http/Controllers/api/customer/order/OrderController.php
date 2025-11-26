@@ -340,4 +340,16 @@ class OrderController extends Controller
             'cancel_time' => $cancel_time
         ]);
     }
+
+    public function cancel_evaluate(Request $request, $id){
+        $order = $this->orders
+        ->where("id", $id)
+        ->update([
+            "is_cancel_evaluate" => 1
+        ]);
+
+        return response()->json([
+            'success' => 'You evaluate success'
+        ]);
+    }
 }

@@ -97,6 +97,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/', 'upcomming');
         Route::get('/notification_sound', 'notification_sound');
         Route::get('/history', 'order_history');
+        Route::get('/cancel_evaluate/{id}', 'cancel_evaluate');
         Route::get('/order_status/{id}', 'order_track');
         Route::get('/cancel_time', 'cancel_time');
         Route::put('/cancel/{id}', 'cancel');

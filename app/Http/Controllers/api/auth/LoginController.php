@@ -30,6 +30,7 @@ use App\Models\StorageMan;
 use App\Models\FinantiolAcounting; 
 use App\Models\CompanyInfo;
 use App\Models\PreparationMan;
+use App\Models\Order;
 
 class LoginController extends Controller
 {
@@ -39,7 +40,8 @@ class LoginController extends Controller
     private CashierMan $cashier, private CashierShift $cashier_shift, private SmsBalance $sms_balance,
     private Kitchen $kitchen, private Waiter $waiter, private StorageMan $store_man_model,
     private Cashier $cashier_machine, private FinantiolAcounting $financial_account,
-    private CompanyInfo $company_info, private PreparationMan $preparation_man
+    private CompanyInfo $company_info, private PreparationMan $preparation_man,
+    private Order $orders
     ){}
 
     public function store_man(Request $request){
@@ -605,10 +607,10 @@ class LoginController extends Controller
             
             $order = $this->orders 
             ->where('user_id', $request->user()->id)
-            ->where('order_status', 'delivered')
+            ->where('order_status', 'delivered') 
             ->first();
             $rate = false;
-            if(!empty($order->rate)){
+            if($order && !empty($order->rate) && !$order->is_cancel_evaluate){
                 $rate = true;
             }  
 
