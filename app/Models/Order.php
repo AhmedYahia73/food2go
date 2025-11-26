@@ -20,6 +20,8 @@ class Order extends Model
 
     protected $fillable = [
         'date',
+        'rate',
+        'comment',
         'pos',
         'user_id',
         'branch_id',
