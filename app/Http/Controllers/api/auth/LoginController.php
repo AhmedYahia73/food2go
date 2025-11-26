@@ -608,6 +608,8 @@ class LoginController extends Controller
             $order = $this->orders 
             ->where('user_id', $user->id)
             ->where('order_status', 'delivered') 
+            ->whereNull('rate') 
+            ->orderByDesc("id")
             ->first();
             $rate = false;
             if($order && empty($order->rate) && !$order->is_cancel_evaluate){

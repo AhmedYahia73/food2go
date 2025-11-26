@@ -344,7 +344,8 @@ class OrderController extends Controller
     public function cancel_evaluate(Request $request){
         $order = $this->orders
         ->where('user_id', $request->user()->id)
-        ->where('order_status', 'delivered') 
+        ->where('order_status', 'delivered')
+        ->whereNull('rate') 
         ->orderByDesc("id")
         ->first();
         if ($order) {
