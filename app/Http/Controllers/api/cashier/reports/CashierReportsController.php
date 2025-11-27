@@ -785,7 +785,7 @@ class CashierReportsController extends Controller
             selectRaw("
                 financial_id,
                 orders.order_type,
-                SUM(amount) as total_amount
+                SUM(order_financials.amount) as total_amount
             ")
             ->whereIn("order_id", $orders)
             ->join("orders", "orders.id", "=", "order_financials.order_id")
