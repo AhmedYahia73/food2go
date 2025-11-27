@@ -965,39 +965,44 @@ class CashierReportsController extends Controller
                     "amount" => $item->amount,
                 ];
             });
-            $online_order = [];
+            $paid_online_order = [];
             foreach ($online_order_paid as $item) {
-                if(isset($online_order[$item->payment_method_id])){
-                    $online_order[$item->payment_method_id] = [
+                if(isset($paid_online_order[$item->payment_method_id])){
+                    $paid_online_order[$item->payment_method_id] = [
                         "payment_method" => $item?->payment_method?->name,
                         "payment_method_id" => $item->payment_method_id,
-                        "amount" => $item->amount + $online_order[$item->payment_method_id]['amount'],
+                        "amount" => $item->amount + $paid_online_order[$item->payment_method_id]['amount'],
                     ];
                 }
                 else{
-                    $online_order[$item->payment_method_id] = [
+                    $paid_online_order[$item->payment_method_id] = [
                         "payment_method" => $item?->payment_method?->name,
                         "payment_method_id" => $item->payment_method_id,
                         "amount" => $item->amount,
                     ]; 
                 }
             }
+            $unpaid_online_order = [];
             foreach ($online_order_unpaid as $item) {
-                if(isset($online_order[$item['payment_method_id']])){
-                    $online_order[$item['payment_method_id']] = [
+                if(isset($unpaid_online_order[$item['payment_method_id']])){
+                    $unpaid_online_order[$item['payment_method_id']] = [
                         "payment_method" =>  $item['payment_method'],
                         "payment_method_id" => $item['payment_method_id'],
-                        "amount" => $item['amount'] + $online_order[$item['payment_method_id']]['amount'],
+                        "amount" => $item['amount'] + $unpaid_online_order[$item['payment_method_id']]['amount'],
                     ];
                 }
                 else{
-                    $online_order[$item['payment_method_id']] = [
+                    $unpaid_online_order[$item['payment_method_id']] = [
                         "payment_method" =>  $item['payment_method'],
                         "payment_method_id" => $item['payment_method_id'],
                         "amount" => $item['amount'],
                     ]; 
                 }
             }
+            $online_order = [
+                'paid' => $paid_online_order,
+                'un_paid' => $unpaid_online_order,
+            ];
 
             return response()->json([
                 'perimission' => true,
