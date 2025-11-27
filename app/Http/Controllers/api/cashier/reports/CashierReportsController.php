@@ -885,27 +885,6 @@ class CashierReportsController extends Controller
                     ];
                 }
             }
-            foreach ($expenses as $item) {
-                $total_amount -= $item->total_amount;
-                if(isset($financial_accounts[$item->financial_account_id])){
-                    $financial_accounts[$item->financial_account_id] = [
-                        "financial_id" => $item->financial_account_id,
-                        "financial_name" => $item?->financial_account?->name,
-                        "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'] - $item->amount, 
-                        "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
-                        "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
-                    ];
-                }
-                else{
-                    $financial_accounts[$item->financial_account_id] = [
-                        "financial_id" => $item->financial_account_id,
-                        "financial_name" => $item?->financial_account?->name,
-                        "total_amount_delivery" => -$item->total_amount ,
-                        "total_amount_take_away" => 0,
-                        "total_amount_dine_in" => 0,
-                    ];
-                }
-            }
             $financial_accounts = collect($financial_accounts);
             $financial_accounts = $financial_accounts->values();
 
