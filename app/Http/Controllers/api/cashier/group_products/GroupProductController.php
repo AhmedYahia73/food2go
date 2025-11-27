@@ -94,8 +94,7 @@ class GroupProductController extends Controller
         }, 'sales_count', 'tax', "group_price", 
         "group_product_status"])
         ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
-        ->where("favourite", 1)
+        ->where('item_type', '!=', 'online') 
         ->where('status', 1)
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, 
@@ -221,7 +220,7 @@ class GroupProductController extends Controller
         }, 'sales_count', 'tax', "group_price", 
         "group_product_status"])
         ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
+        ->where('item_type', '!=', 'online')
         ->where(function($query) use($id){
             $query->where("category_id", $id)
             ->orWhere("sub_category_id", $id);
