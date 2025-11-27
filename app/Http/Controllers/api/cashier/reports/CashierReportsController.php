@@ -967,18 +967,18 @@ class CashierReportsController extends Controller
             });
             $paid_online_order = [];
             foreach ($online_order_paid as $item) {
-                if(isset($paid_online_order[$item->payment_method_id])){
-                    $paid_online_order[$item->payment_method_id] = [
-                        "payment_method" => $item?->payment_method?->name,
-                        "payment_method_id" => $item->payment_method_id,
-                        "amount" => $item->amount + $paid_online_order[$item->payment_method_id]['amount'],
+                if(isset($paid_online_order[$item['payment_method_id']])){
+                    $paid_online_order[$item['payment_method_id']] = [
+                        "payment_method" => $item['payment_method'],
+                        "payment_method_id" => $item['payment_method_id'],
+                        "amount" => $item['amount'] + $paid_online_order[$item['payment_method_id']]['amount'],
                     ];
                 }
                 else{
-                    $paid_online_order[$item->payment_method_id] = [
-                        "payment_method" => $item?->payment_method?->name,
-                        "payment_method_id" => $item->payment_method_id,
-                        "amount" => $item->amount,
+                    $paid_online_order[$item['payment_method_id']] = [
+                        "payment_method" => $item['payment_method'],
+                        "payment_method_id" => $item['payment_method_id'],
+                        "amount" => $item['amount'],
                     ]; 
                 }
             }
