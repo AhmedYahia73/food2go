@@ -67,7 +67,7 @@ class PurchaseTransferController extends Controller
         ->where('status', 1)
         ->get(); 
         $units = $this->units
-        ->select("name", "status")
+        ->select("name", "id")
         ->where("status", 1)
         ->get();
         $materials = $this->materials
