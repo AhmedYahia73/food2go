@@ -764,7 +764,7 @@ class CashierReportsController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        if($request->user()->report && password_verify($request->input('password'), $request->user()->password)){
+        if($request->user()->report == "all" && password_verify($request->input('password'), $request->user()->password)){
             $order_count = Order::
             select("id")
             ->where('cashier_man_id', $request->user()->id)
@@ -1011,10 +1011,22 @@ class CashierReportsController extends Controller
                 'total_amount' => $total_amount, 
                 'expenses_total' => $expenses_total, 
                 'expenses' => $expenses, 
-                'online_order' => $online_order
+                'online_order' => $online_order,
+                'report_role' => $request->user()->report,
+            ]);
+        }
+        elseif($request->user()->report == "all" && password_verify($request->input('password'), $request->user()->password)){
 
 
-
+            return response()->json([
+                'perimission' => true,
+                'financial_accounts' => $financial_accounts,
+                'order_count' => $order_count,
+                'total_amount' => $total_amount, 
+                'expenses_total' => $expenses_total, 
+                'expenses' => $expenses, 
+                'online_order' => $online_order,
+                'report_role' => $request->user()->report,
             ]);
         }
 
