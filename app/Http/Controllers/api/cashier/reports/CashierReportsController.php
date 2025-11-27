@@ -917,6 +917,7 @@ class CashierReportsController extends Controller
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
             ->with("financial_account")
+            ->groupBy("financial_account_id")
             ->get()
             ->map(function($item){
                 return [
