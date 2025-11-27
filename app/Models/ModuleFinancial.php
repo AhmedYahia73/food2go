@@ -10,6 +10,8 @@ class ModuleFinancial extends Model
         'module_id',
         'financial_id',
         'amount',
+        'cashier_id',
+        'cahier_man_id',
     ];
 
     public function financial(){

@@ -75,8 +75,8 @@ class PurchaseConsumersionController extends Controller
                 'store_id' => $consumersion->store_id,
                 'admin_id' => $consumersion->admin_id,
                 
-                'category_material_id' => $item->category_material_id,
-                'material_id' => $item->material_id,
+                'category_material_id' => $consumersion->category_material_id,
+                'material_id' => $consumersion->material_id,
 
                 'category' => $consumersion?->category?->name,
                 'product' => $consumersion?->product?->name,
