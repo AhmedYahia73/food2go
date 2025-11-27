@@ -774,21 +774,21 @@ class CashierReportsController extends Controller
             select("id")
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
-            ->where("order_type	", "take_away")
+            ->where("order_type", "take_away")
             ->pluck('id')
             ->toArray();
             $delivery_orders = Order::
             select("id")
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
-            ->where("order_type	", "delivery")
+            ->where("order_type", "delivery")
             ->pluck('id')
             ->toArray();
             $dine_in_orders = Order::
             select("id")
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
-            ->where("order_type	", "dine_in")
+            ->where("order_type", "dine_in")
             ->pluck('id')
             ->toArray();
             
