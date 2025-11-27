@@ -781,25 +781,50 @@ class CashierReportsController extends Controller
             $expenses = $this->expenses
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now());
+            
+            // $financial_accounts = OrderFinancial::
+            // selectRaw("financial_id ,SUM(amount) as total_amount")
+            // ->whereIn("order_id", $orders)
+            // ->with("financials", 'order:id,order_type')
+            // ->groupBy("financial_id") 
+            // ->get()
+            // ->map(function($item) use($expenses) {
+
+            //     return [
+            //         "total_amount" => $item->total_amount ,
+            //         "financial_id" => $item->financial_id,
+            //         "financial_name" => $item?->financials?->name,
+            //     ];
+            // });
             $financial_accounts = OrderFinancial::
             selectRaw("
-                financial_id,
+                order_financials.financial_id,
                 orders.order_type,
-                SUM(order_financials.amount) as total_amount
+                SUM(order_financials.amount) as type_amount
             ")
-            ->whereIn("order_id", $orders)
             ->join("orders", "orders.id", "=", "order_financials.order_id")
-            ->groupBy("financial_id", "orders.order_type")
+            ->whereIn("order_financials.order_id", $orders)
+            ->groupBy("order_financials.financial_id", "orders.order_type")
             ->with("financials")
             ->get()
-            ->map(function($item) {
+            ->groupBy("financial_id")
+            ->map(function($items) {
+
+                // pivot per type
+                $dine_in_amount   = $items->where("order_type", "dine_in")->sum("type_amount");
+                $take_away_amount = $items->where("order_type", "take_away")->sum("type_amount");
+                $delivery_amount  = $items->where("order_type", "delivery")->sum("type_amount");
+
                 return [
-                    "financial_id"   => $item->financial_id,
-                    "financial_name" => $item?->financials?->name,
-                    "order_type"     => $item->order_type,
-                    "total_amount"   => $item->total_amount,
+                    "financial_id"      => $items->first()->financial_id,
+                    "financial_name"    => $items->first()?->financials?->name,
+                    "dine_in_amount"    => $dine_in_amount,
+                    "take_away_amount"  => $take_away_amount,
+                    "delivery_amount"   => $delivery_amount,
+                    "total_amount"      => $dine_in_amount + $take_away_amount + $delivery_amount,
                 ];
-            });
+            })
+            ->values();
 
 
             return response()->json([
