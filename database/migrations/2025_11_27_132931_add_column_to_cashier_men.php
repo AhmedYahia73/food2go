@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('cashier_men', function (Blueprint $table) {
-            $table->enum("report", ["unactive", "financial", "all"])
-            ->change();
+            $table->dropColumn("report");
+            $table->enum("report", ["unactive", "financial", "all"]);
         });
     }
 
