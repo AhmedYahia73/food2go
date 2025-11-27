@@ -1000,8 +1000,8 @@ class CashierReportsController extends Controller
                 }
             }
             $online_order = [
-                'paid' => $paid_online_order,
-                'un_paid' => $unpaid_online_order,
+                'paid' => array_values($paid_online_order),
+                'un_paid' => array_values($unpaid_online_order),
             ];
 
             return response()->json([
