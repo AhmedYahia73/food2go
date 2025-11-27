@@ -39,6 +39,8 @@ class PurchaseTransferController extends Controller
                 'to_store_id' => $item->to_store_id,
                 'product_id' => $item->product_id,
                 'category_id' => $item->category_id,
+                'unit' => $item?->unit?->name,
+                'unit_id' => $item->unit_id,
                 
                 'category_material_id' => $item->category_material_id,
                 'material_id' => $item->material_id,

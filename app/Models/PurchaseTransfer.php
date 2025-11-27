@@ -49,4 +49,8 @@ class PurchaseTransfer extends Model
     public function admin(){
         return $this->belongsTo(Admin::class, 'admin_id');
     }
+
+    public function unit(){
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
 }

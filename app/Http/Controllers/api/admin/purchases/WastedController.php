@@ -66,6 +66,7 @@ class WastedController extends Controller
             return [
                 "id" => $item->id,
                 "name" => $item->name,
+                "category_id" => $item->category_id,
             ];
         });
         $material_categories = $this->material_categories

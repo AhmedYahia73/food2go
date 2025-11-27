@@ -1060,6 +1060,6 @@ class CashierReportsController extends Controller
             'perimission' => false,
             'financial_accounts' => null,
             'report_role' => $request->user()->report,
-        ], 400);
+        ]);
     }
 }
