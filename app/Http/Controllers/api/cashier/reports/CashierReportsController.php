@@ -798,7 +798,9 @@ class CashierReportsController extends Controller
             ->first();
             $expenses = $this->expenses
             ->where('created_at', '>=', $shift->start_time ?? now())
-            ->where('created_at', '<=', $shift->end_time ?? now());
+            ->where('created_at', '<=', $shift->end_time ?? now())
+            ->with("financial_account")
+            ->get();
             
             $delivery_financial_accounts = OrderFinancial::
             selectRaw("financial_id ,SUM(amount) as total_amount")
@@ -880,6 +882,27 @@ class CashierReportsController extends Controller
                         "total_amount_delivery" => 0 ,
                         "total_amount_take_away" => 0,
                         "total_amount_dine_in" => $item->total_amount,
+                    ];
+                }
+            }
+            foreach ($expenses as $item) {
+                $total_amount -= $item->total_amount;
+                if(isset($financial_accounts[$item->financial_account_id])){
+                    $financial_accounts[$item->financial_account_id] = [
+                        "financial_id" => $item->financial_account_id,
+                        "financial_name" => $item?->financials?->name,
+                        "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'] - $item->amount, 
+                        "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                        "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                    ];
+                }
+                else{
+                    $financial_accounts[$item->financial_account_id] = [
+                        "financial_id" => $item->financial_account_id,
+                        "financial_name" => $item?->financials?->name,
+                        "total_amount_delivery" => -$item->total_amount ,
+                        "total_amount_take_away" => 0,
+                        "total_amount_dine_in" => 0,
                     ];
                 }
             }
