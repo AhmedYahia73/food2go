@@ -884,7 +884,7 @@ class CashierReportsController extends Controller
                         "total_amount_dine_in" => $item->total_amount,
                     ];
                 }
-            }
+            } 
             $financial_accounts = collect($financial_accounts);
             $financial_accounts = $financial_accounts->values();
 
