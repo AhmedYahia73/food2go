@@ -285,7 +285,8 @@ class OrderController extends Controller
         }
 
         return response()->json([
-            "errors" => "password is wrong"
+            "errors" => "password is wrong",
+            "pass" => $request->user()->password
         ], 400);
     }
 
