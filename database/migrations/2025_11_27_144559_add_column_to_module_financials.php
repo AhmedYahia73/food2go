@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('module_financials', function (Blueprint $table) {
-            //
+            $table->foreignId('cashier_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('cahier_man_id')->nullable()->constrained('cashier_men')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
