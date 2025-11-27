@@ -584,8 +584,7 @@ class BranchController extends Controller
                 if ($is_off) {
                     return [
                         "id"     => $item->id,
-                        "name"   => $item->name,
-                        "status" => 0 ,
+                        "name"   => $item->name, 
                     ];
                 }
             })
