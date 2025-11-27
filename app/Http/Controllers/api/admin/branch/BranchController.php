@@ -589,7 +589,8 @@ class BranchController extends Controller
                     ];
                 }
             })
-            ->filter();
+            ->filter()
+            ->values();
 
         return response()->json([
             'products' => $products,
