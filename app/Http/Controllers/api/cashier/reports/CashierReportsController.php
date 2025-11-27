@@ -781,25 +781,26 @@ class CashierReportsController extends Controller
             $expenses = $this->expenses
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now());
-            
             $financial_accounts = OrderFinancial::
-            selectRaw("financial_id, SUM(amount) as total_amount")
+            selectRaw("
+                financial_id,
+                orders.order_type,
+                SUM(amount) as total_amount
+            ")
             ->whereIn("order_id", $orders)
+            ->join("orders", "orders.id", "=", "order_financials.order_id")
+            ->groupBy("financial_id", "orders.order_type")
             ->with("financials")
-            ->groupBy("financial_id")
             ->get()
-            ->map(function($item) use($expenses) {
-                $expenses_amount = $expenses
-                ->where("financial_account_id", $item->financial_id)
-                ->sum("amount") ?? 0;
+            ->map(function($item) {
                 return [
-                    "total_amount" => $item->total_amount - $expenses_amount,
-                    "total_expenses" => $expenses_amount,
-                    "total_order" => $item->total_amount,
-                    "financial_id" => $item->financial_id,
+                    "financial_id"   => $item->financial_id,
                     "financial_name" => $item?->financials?->name,
+                    "order_type"     => $item->order_type,
+                    "total_amount"   => $item->total_amount,
                 ];
             });
+
 
             return response()->json([
                 'perimission' => true,
