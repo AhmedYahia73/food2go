@@ -65,6 +65,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/', 'view');
         Route::get('/lists', 'lists');
         Route::post('/add', 'create');
+        Route::post('/update/{id}', 'update');
     });
 
     Route::controller(OrderController::class)

@@ -19,21 +19,47 @@ class ExpensesListController extends Controller
     ,private ExpenseCategory $category){}
 
     public function view(Request $request){
+        $locale = $request->locale ?? "en";
         $expenses = $this->expenses
         ->with(["expense:id,name", "admin:id,name", "cashier:id,name", 
         "financial_account:id,name", "category:id,name"])
         ->where("cahier_man_id", $request->user()->id)
+        ->orderByDesc("id")
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
                 "amount" => $item->amount,
                 "note" => $item->note,
-                "expense" => $item->expense,
+                "expense" => [
+                    "id" => $item?->expense?->id,
+                    'name' => $item?->expense
+                    ?->translations()
+                    ?->where("locale", $locale)
+                    ?->where('key', $item?->expense?->name)
+                    ?->first()
+                    ?->value ?? $item?->expense?->name ?? null,
+                ],
                 "admin" => $item->admin, 
-                "cashier" => $item->cashier, 
+                "cashier" =>  [
+                    "id" => $item?->cashier?->id,
+                    'name' => $item?->cashier
+                    ?->translations()
+                    ?->where("locale", $locale)
+                    ?->where('key', $item?->cashier?->name)
+                    ?->first()
+                    ?->value ?? $item?->cashier?->name ?? null,
+                ],
                 "financial_account" => $item->financial_account,
-                "category" => $item->category,
+                "category" =>  [
+                    "id" => $item?->category?->id,
+                    'name' => $item?->category
+                    ?->translations()
+                    ?->where("locale", $locale)
+                    ?->where('key', $item?->category?->name)
+                    ?->first()
+                    ?->value ?? $item?->category?->name ?? null,
+                ],
             ];
         });
 
@@ -43,10 +69,23 @@ class ExpensesListController extends Controller
     }
 
     public function lists(Request $request){
+        $locale = $request->locale ?? "en";
         $expenses = $this->expenses_list
         ->select("id", "name")
         ->where("status", 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "name" => $item
+                ?->translations()
+                ?->where("locale", $locale)
+                ?->where('key', $item->name)
+                ?->first()
+                ?->value ?? $item->name ?? null
+                ,
+            ];
+        });
         $financial = $this->financial
         ->select("id", "name")
         ->where("status", 1)
@@ -54,7 +93,19 @@ class ExpensesListController extends Controller
         $categories = $this->category
         ->select("id", "name")
         ->where("status", 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "name" => $item
+                ?->translations()
+                ?->where("locale", $locale)
+                ?->where('key', $item->name)
+                ?->first()
+                ?->value ?? $item->name ?? null
+                ,
+            ];
+        });
 
         return response()->json([
             'expenses' => $expenses,  
@@ -83,9 +134,61 @@ class ExpensesListController extends Controller
         $expenseRequest['branch_id'] = $request->user()->branch_id;
         $this->expenses
         ->create($expenseRequest);
+        $financial = FinantiolAcounting::
+        where("id", $request->financial_account_id)
+        ->first();
+        if($financial){
+            $financial->balance -= $request->amount;
+            $financial->save();
+        }
 
         return response()->json([
             "success" => "You add expense success"
+        ]);
+    }
+
+    public function update(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'expense_id' => ['required', 'exists:expense_lists,id'],
+            'financial_account_id' => ['required', 'exists:finantiol_acountings,id'],
+            'category_id' => ['required', 'exists:expense_categories,id'],
+            'amount' => ['required', 'numeric'],
+            'note' => ['sometimes'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $expenses = $this->expenses
+        ->where("id", $id)
+        ->where("cahier_man_id", $request->user()->id)
+        ->first();
+        $financial = FinantiolAcounting::
+        where("id", $expenses->financial_account_id)
+        ->first();
+        if($financial){
+            $financial->balance += $expenses->amount;
+            $financial->save();
+        }
+        $expenses->expense_id = $request->expense_id;
+        $expenses->financial_account_id = $request->financial_account_id;
+        $expenses->category_id = $request->category_id;
+        $expenses->amount = $request->amount;
+        $expenses->note = $request->note;
+        $expenses->save();
+
+        $financial = FinantiolAcounting::
+        where("id", $request->financial_account_id)
+        ->first();
+        if($financial){
+            $financial->balance -= $request->amount;
+            $financial->save();
+        }
+
+        return response()->json([
+            "success" => "You update expense success"
         ]);
     }
 }

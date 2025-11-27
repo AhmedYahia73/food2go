@@ -78,7 +78,7 @@ class MaterialCategoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
             'status' => ['required', 'boolean'],
-            'category_id' => ['exists:purchase_categories,id'],
+            'category_id' => ['exists:material_categories,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -99,7 +99,7 @@ class MaterialCategoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required'],
             'status' => ['required', 'boolean'],
-            'category_id' => ['exists:purchase_categories,id'],
+            'category_id' => ['exists:material_categories,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

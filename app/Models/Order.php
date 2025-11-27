@@ -20,6 +20,8 @@ class Order extends Model
 
     protected $fillable = [
         'date',
+        'rate',
+        'comment',
         'pos',
         'user_id',
         'branch_id',
@@ -66,6 +68,7 @@ class Order extends Model
         'due_from_delivery',
         'void_financial_id',
         'is_void',
+        'is_cancel_evaluate',
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];

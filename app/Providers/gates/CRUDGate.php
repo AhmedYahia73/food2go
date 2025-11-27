@@ -16,7 +16,7 @@ class CRUDGate
         $actions = ["view", 'status', 'add', 'update', 'delete'];
         foreach ($roles as $item) {
             foreach ($actions as $element) {
-                Gate::define($element . '_' . $item, function (Admin $admin) {
+                Gate::define($element . '_' . $item, function (Admin $admin) use($item, $element) {
                     if (
                         $admin->admin_position == "super_admin" ||
                         ($admin->user_positions &&

@@ -94,7 +94,7 @@ class OrderController extends Controller
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
             ,'order_status', 'order_type',
             'delivery_id', 'address_id', 'source',
-            'payment_method_id', 
+            'payment_method_id', 'rate',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
             ->whereBetween('created_at', [$start, $end])
@@ -124,6 +124,7 @@ class OrderController extends Controller
                     'points' => $item->points, 
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
+                    'rate' => $item->rate,
                     'user' => [
                         'f_name' => $item?->user?->f_name,
                         'l_name' => $item?->user?->l_name,
@@ -142,7 +143,7 @@ class OrderController extends Controller
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
             ,'order_status',
             'delivery_id', 'address_id', 'source',
-            'payment_method_id', 'order_type',
+            'payment_method_id', 'order_type', 'rate',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
             ->where("branch_id", $request->user()->id)
@@ -165,6 +166,7 @@ class OrderController extends Controller
                     'order_number' => $item->order_number,
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
+                    'rate' => $item->rate,
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
                     'order_status' => $item->order_status,
@@ -276,7 +278,7 @@ class OrderController extends Controller
         $start = $start->subDay();
         $orders = $this->orders
         ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-        ,'order_status',
+        ,'order_status', 'rate',
         'delivery_id', 'address_id', 'source',
         'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
@@ -305,6 +307,7 @@ class OrderController extends Controller
 				'order_status' => $item->order_status,
 				'source' => $item->source,
 				'status' => $item->status,
+				'rate' => $item->rate,
 				'points' => $item->points, 
 				'rejected_reason' => $item->rejected_reason,
 				'transaction_id' => $item->transaction_id,
@@ -1058,8 +1061,135 @@ class OrderController extends Controller
     //     ]);
     // }
 
-    public function order($id){
+    public function order(Request $request, $id){
         // https://bcknd.food2go.online/admin/order/order/{id}
+        // $locale = $request->locale ?? "en";
+        // $order = $this->orders
+        // ->with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
+        // 'branch', 'delivery', 
+        // 'payment_method:id,name,logo', 'schedule'])
+        // ->where(function($query) {
+        //     $query->where('status', 1)
+        //     ->orWhereNull('status');
+        // })
+        // ->find($id);
+        // if(empty($order)){
+        //     return response()->json([
+        //         "errors" => "id is wrong"
+        //     ], 400);
+        // }  
+        // try {
+        //     $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
+        // } 
+        // catch (\Throwable $th) {
+        //     $order->user = collect([]);
+        //     $order->user->count_orders = 0;
+        // }
+        // if (!empty($order->branch)) {
+        //     $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
+        // }
+        // if (!empty($order->delivery)) {
+        //     $order->delivery->count_orders = $this->orders
+        //     ->where('delivery_id', $order->delivery_id)
+        //     ->count();
+        // }
+        // $deliveries = $this->deliveries
+        // ->select('id', 'f_name', 'l_name')
+        // ->get()
+        // ->map(function($item){
+        //     return [
+        //         "id" => $item->id,
+        //         "f_name" => $item->f_name,
+        //         "l_name" => $item->l_name,
+        //     ];
+        // });
+        // $order_status = ['pending', 'processing', 'out_for_delivery',
+        // 'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
+        // 'faild_to_deliver', 'refund'];
+        // $preparing_time = $order->branch->food_preparion_time ?? '00:30';
+        // // if (empty($preparing_time)) {
+        // $time_parts = explode(':', $preparing_time);
+
+        // // _________________________________________
+        
+        // $delivery_time = $this->settings
+        // ->where('name', 'delivery_time')
+        // ->orderByDesc('id')
+        // ->first();
+        // if (empty($delivery_time)) {
+        //     $delivery_time = $this->settings
+        //     ->create([
+        //         'name' => 'delivery_time',
+        //         'setting' => '00:30:00',
+        //     ]);
+        // }
+        // $time_to_add = $delivery_time->setting;
+        // list($order_hours, $order_minutes, $order_seconds) = explode(':', $time_to_add);
+        // // Get hours, minutes, and seconds
+        // $hours = $time_parts[0];
+        // $minutes = $time_parts[1]; 
+        // $order_seconds = 0;
+        // $hours = (int)$hours;
+        // $minutes = (int)$minutes;
+        
+        // if($order->order_type == 'delivery'){
+        //     // Ensure that $hours, $minutes, and $seconds are integers
+        //     $hours = (int)$hours + (int)$order_hours;
+        //     $minutes = (int)$minutes + (int)$order_minutes;
+        //     $order_seconds = '00';
+        // }
+        // $hours += intval($minutes / 60);
+        // $minutes = $minutes % 60;
+        // $preparing_arr = [
+        //     'days' => 0,
+        //     'hours' => $hours,
+        //     'minutes' => $minutes,
+        //     'seconds' => 0,
+        // ];
+        // //     $preparing_time = $this->settings
+        // //     ->create([
+        // //         'name' => 'preparing_time',
+        // //         'setting' => json_encode($preparing_arr),
+        // //     ]);
+        // // }
+        // // $preparing_time = json_decode($preparing_time->setting);
+        // $log_order = $this->log_order
+        // ->with(['admin:id,name'])
+        // ->where('order_id', $id)
+        // ->get()
+        // ->map(function($item){
+        //     return [
+        //         "id" => $item->id,
+        //         "from_status" => $item->from_status,
+        //         "to_status" => $item->to_status,
+        //         "admin" => [
+        //             "id" => $item?->admin?->id,
+        //             "name" => $item?->admin?->name,
+        //         ]
+        //     ];
+        // });;
+        // $branches = $this->branches
+        // ->select('name', 'id')
+        // ->where('status', 1)
+        // ->get()
+        // ->map(function($item){
+        //     return [
+        //         "id" => $item->id,
+        //         "name" => $item->name,
+        //     ];
+        // }); 
+        // $order = $this->order_item_format($order, $id, $locale);
+
+        // return response()->json([
+        //     'order' => $order,
+        //     'deliveries' => $deliveries,
+        //     'order_status' => $order_status,
+        //     'preparing_time' => $preparing_arr,
+        //     'log_order' => $log_order,
+        //     'branches' => $branches,
+        //     'locale' => $locale
+        // ]);
+        
         $order = $this->orders
         ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',

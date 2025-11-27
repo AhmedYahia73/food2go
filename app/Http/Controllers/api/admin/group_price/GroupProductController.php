@@ -63,7 +63,8 @@ class GroupProductController extends Controller
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'name' => ['required'], 
-            'module' => ['required', "in:take_away,delivery,dine_in"], 
+            'module' => ['required', "array"], 
+            'module.*' => ['required', "in:take_away,delivery,dine_in"], 
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
             'due' => ['required', 'boolean'],
@@ -87,7 +88,8 @@ class GroupProductController extends Controller
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'name' => ['required'], 
-            'module' => ['required', "in:take_away,delivery,dine_in"], 
+            'module' => ['required', "array"], 
+            'module.*' => ['required', "in:take_away,delivery,dine_in"],
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
             'due' => ['required', 'boolean'],

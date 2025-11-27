@@ -1024,35 +1024,6 @@ class CashierMakeOrderController extends Controller
         $order_carts = $this->order_cart
         ->whereIn('id', $request->cart_id)
         ->get();
-        $orders = collect([]);
-        $product = [];
-        foreach ($order_carts as $key => $item) {
-            $order_item = $this->order_format($item, $key);
-            $orders = $orders->merge($order_item);
-        }
-       
-        foreach ($orders as $key => $item) {
-            $product[$key]['exclude_id'] = collect($item->excludes)->pluck('id');
-            $product[$key]['extra_id'] = collect($item->extras)->pluck('id');
-            $product[$key]['variation'] = collect($item->variation_selected)->map(function($element){
-                return [
-                    'variation_id' => $element->id,
-                    'option_id' => collect($element->options)->pluck('id'),
-                ];
-            });
-            $product[$key]['addons'] = collect($item->addons_selected)->map(function($element){
-                return [
-                    'addon_id' => ($element->id),
-                    'count' => ($element->count),
-                ];
-            }); 
-        
-            $product[$key]['count'] = $item->count;
-            $product[$key]['product_id'] = $item->id;
-        }
-        $request->merge([  
-            'products' => $product, 
-        ]);
         
         $order = $this->dine_in_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
@@ -1060,7 +1031,7 @@ class CashierMakeOrderController extends Controller
         }
         $order_number = $order['payment']['order_number'];
         $order['payment']['cart'] = $order['payment']['order_details'];
-        $order = $this->order_format(($order['payment']), 0);
+        // $order = $this->order_format(($order['payment']), 0);
       // Pull Pecipe
         $order_details = $order['payment']['order_details'];
         $products = [];

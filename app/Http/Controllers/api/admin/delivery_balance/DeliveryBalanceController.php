@@ -148,7 +148,9 @@ class DeliveryBalanceController extends Controller
         ->where("due_from_delivery", 1)
         ->where(function($query){
             $query->where("order_status", "out_for_delivery")
-            ->orWhere("delivery_status", "out_for_delivery");
+            ->where("pos", 0)
+            ->orWhere("delivery_status", "out_for_delivery")
+            ->where("pos", 1);
         })
         ->sum("amount");
         $cash_on_hand_amount = $this->ordersModel
@@ -156,7 +158,9 @@ class DeliveryBalanceController extends Controller
         ->where("due_from_delivery", 1)
         ->where(function($query){
             $query->where("order_status", "delivered")
-            ->orWhere("delivery_status", "delivered");
+            ->where("pos", 0)
+            ->orWhere("delivery_status", "delivered")
+            ->where("pos", 1);
         })
         ->sum("amount");
 

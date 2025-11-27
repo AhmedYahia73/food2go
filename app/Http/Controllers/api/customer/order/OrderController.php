@@ -163,11 +163,44 @@ class OrderController extends Controller
                 'address_name' => $item?->order_address?->address ?? null,
                 'addons' => $addons,
                 'order_date' => $item->order_date,
+                'rate' => $item->rate,
+                'comment' => $item->comment,
             ];
         });
 
         return response()->json([
             'orders' => $orders
+        ]);
+    }
+
+    public function evaulate_order(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'rate' => 'required|numeric|between:1,5',
+            'comment' => 'sometimes',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $order = $this->orders 
+        ->where('user_id', $request->user()->id)
+        ->where('order_status', 'delivered') 
+        ->whereNull('rate')
+        ->first();
+        if(empty($order)){
+            return response()->json([
+                'errors' => "id is wrong"
+            ], 400);
+        }
+        $order->update([
+            "rate" => $request->rate,
+            "comment" => $request->comment ?? $order->comment,
+        ]);
+
+        return response()->json([
+            "success" => "You update status success"
         ]);
     }
 
@@ -305,6 +338,25 @@ class OrderController extends Controller
 
         return response()->json([
             'cancel_time' => $cancel_time
+        ]);
+    }
+
+    public function cancel_evaluate(Request $request){
+        $order = $this->orders
+        ->where('user_id', $request->user()->id)
+        ->where('order_status', 'delivered')
+        ->whereNull('rate') 
+        ->orderByDesc("id")
+        ->first();
+        if ($order) {
+            $order->update([
+                "is_cancel_evaluate" => 1
+            ]);
+        }
+
+        return response()->json([
+            'success' => 'You evaluate success',
+            'order' => $order?->is_cancel_evaluate
         ]);
     }
 }
