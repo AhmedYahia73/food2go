@@ -323,6 +323,15 @@ class DeliveryBalanceController extends Controller
         $financial_accounting = $this->financial_accounting
         ->where("id", $request->financial_id)
         ->first();
+        $cashier_men = $this->cashier_men
+        ->where("id", $request->cashier_man_id)
+        ->first(); 
+        $orders = $this->ordersModel
+        ->where("order_type", "delivery") 
+        ->whereIn("id", $request->order_ids) 
+        ->update([
+            "shift" => $cashier_men->shift_number
+        ]);
         $total= 0 ;
         foreach ($orders as $item) {
             $this->order_financials
