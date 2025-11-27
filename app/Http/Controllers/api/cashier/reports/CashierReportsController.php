@@ -765,14 +765,32 @@ class CashierReportsController extends Controller
             ],400);
         }
         if($request->user()->report && password_verify($request->input('password'), $request->user()->password)){
-            $orders = Order::
+            $order_count = Order::
             select("id")
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
-            ->get();
-            $order_count = $orders->count();
-            $orders = $orders 
-            ?->pluck("id")?->toArray() ?? [];
+            ->count();
+            $take_away_orders = Order::
+            select("id")
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->where("order_type	", "take_away")
+            ->pluck('id')
+            ->toArray();
+            $delivery_orders = Order::
+            select("id")
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->where("order_type	", "delivery")
+            ->pluck('id')
+            ->toArray();
+            $dine_in_orders = Order::
+            select("id")
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->where("order_type	", "dine_in")
+            ->pluck('id')
+            ->toArray();
             
             $shift = $this->cashier_shift
             ->where('shift', $request->user()->shift_number)
@@ -782,58 +800,88 @@ class CashierReportsController extends Controller
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now());
             
-            // $financial_accounts = OrderFinancial::
-            // selectRaw("financial_id ,SUM(amount) as total_amount")
-            // ->whereIn("order_id", $orders)
-            // ->with("financials", 'order:id,order_type')
-            // ->groupBy("financial_id") 
-            // ->get()
-            // ->map(function($item) use($expenses) {
-
-            //     return [
-            //         "total_amount" => $item->total_amount ,
-            //         "financial_id" => $item->financial_id,
-            //         "financial_name" => $item?->financials?->name,
-            //     ];
-            // });
-            $financial_accounts = OrderFinancial::
-            selectRaw("
-                order_financials.financial_id,
-                orders.order_type,
-                SUM(order_financials.amount) as type_amount
-            ")
-            ->join("orders", "orders.id", "=", "order_financials.order_id")
-            ->whereIn("order_financials.order_id", $orders)
-            ->groupBy("order_financials.financial_id", "orders.order_type")
+            $delivery_financial_accounts = OrderFinancial::
+            selectRaw("financial_id ,SUM(amount) as total_amount")
+            ->whereIn("order_id", $delivery_orders)
             ->with("financials")
-            ->get()
-            ->groupBy("financial_id")
-            ->map(function($items) {
-
-                // pivot per type
-                $dine_in_amount   = $items->where("order_type", "dine_in")->sum("type_amount");
-                $take_away_amount = $items->where("order_type", "take_away")->sum("type_amount");
-                $delivery_amount  = $items->where("order_type", "delivery")->sum("type_amount");
-
-                return [
-                    "financial_id"      => $items->first()->financial_id,
-                    "financial_name"    => $items->first()?->financials?->name,
-                    "dine_in_amount"    => $dine_in_amount,
-                    "take_away_amount"  => $take_away_amount,
-                    "delivery_amount"   => $delivery_amount,
-                    "total_amount"      => $dine_in_amount + $take_away_amount + $delivery_amount,
-                ];
-            })
-            ->values();
-
+            ->groupBy("financial_id") 
+            ->get();
+            $take_away_financial_accounts = OrderFinancial::
+            selectRaw("financial_id ,SUM(amount) as total_amount")
+            ->whereIn("order_id", $take_away_orders)
+            ->with("financials")
+            ->groupBy("financial_id") 
+            ->get();
+            $dine_in_financial_accounts = OrderFinancial::
+            selectRaw("financial_id ,SUM(amount) as total_amount")
+            ->whereIn("order_id", $dine_in_orders)
+            ->with("financials")
+            ->groupBy("financial_id") 
+            ->get();
+            $financial_accounts = [];
+            $total_amount = 0;
+            foreach ($delivery_financial_accounts as $item) {
+                $total_amount += $item->total_amount;
+                if(isset($financial_accounts[$item->financial_id])){
+                    $financial_accounts[$item->financial_id] = [
+                        "total_amount_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_delivery'],
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                    ];
+                }
+                else{
+                    $financial_accounts[$item->financial_id] = [
+                        "total_amount_delivery" => $item->total_amount ,
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                    ];
+                }
+            }
+            foreach ($take_away_financial_accounts as $item) {
+                $total_amount += $item->total_amount;
+                if(isset($financial_accounts[$item->financial_id])){
+                    $financial_accounts[$item->financial_id] = [
+                        "total_amount_take_away" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                    ];
+                }
+                else{
+                    $financial_accounts[$item->financial_id] = [
+                        "total_amount_take_away" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name,
+                        'order_type' => 'take_away',
+                    ];
+                }
+            }
+            foreach ($dine_in_financial_accounts as $item) {
+                $total_amount += $item->total_amount;
+                if(isset($financial_accounts[$item->financial_id])){
+                    $financial_accounts[$item->financial_id] = [
+                        "total_amount_dine_in" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name,
+                        'order_type' => 'dine_in',
+                    ];
+                }
+                else{
+                    $financial_accounts[$item->financial_id] = [
+                        "total_amount" => $item->total_amount ,
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name,
+                        'order_type' => 'dine_in',
+                    ];
+                }
+            }
+            $financial_accounts = collect($financial_accounts);
+            $financial_accounts = $financial_accounts->values();
 
             return response()->json([
                 'perimission' => true,
                 'financial_accounts' => $financial_accounts,
                 'order_count' => $order_count,
-                'total_amount' => $financial_accounts->sum('total_amount'),
-                'total_expenses' => $financial_accounts->sum('total_expenses'),
-                'total_order' => $financial_accounts->sum('total_order'),
+                'total_amount' => $total_amount, 
             ]);
         }
 
