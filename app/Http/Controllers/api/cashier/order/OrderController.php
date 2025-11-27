@@ -210,7 +210,7 @@ class OrderController extends Controller
                 "order_type" => $order_type, 
             ]);
         }
-        elseif(password_verify($request->input('password'), $request->user()->password)){
+        elseif(password_verify($request->input('password'), $request->user()->password) ){
            $order_recentage = $this->settings
             ->where("name", "order_precentage")
             ->first()?->setting ?? 100;
@@ -281,6 +281,7 @@ class OrderController extends Controller
             return response()->json([
                 "orders" => $orders,
                 "order_type" => $order_type, 
+                'real_order' => $request->user()->real_orders
             ]);
         }
 
