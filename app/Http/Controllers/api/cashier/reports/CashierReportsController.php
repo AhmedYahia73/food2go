@@ -817,70 +817,74 @@ class CashierReportsController extends Controller
             ->whereIn("order_id", $dine_in_orders)
             ->with("financials")
             ->groupBy("financial_id") 
-            ->get();$financial_accounts = [];
-
+            ->get();
+            $financial_accounts = [];
             $total_amount = 0;
-
-            // ---------------- DELIVERY ----------------
             foreach ($delivery_financial_accounts as $item) {
-                $id = $item->financial_id;
                 $total_amount += $item->total_amount;
-
-                if (!isset($financial_accounts[$id])) {
-                    $financial_accounts[$id] = [
-                        "financial_id" => $id,
+                if(isset($financial_accounts[$item->financial_id])){
+                    $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
                         "financial_name" => $item?->financials?->name,
-                        "total_amount_delivery" => 0,
+                        "total_amount_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_delivery'], 
+                        "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                        "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                    ];
+                }
+                else{
+                    $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                        "total_amount_delivery" => $item->total_amount ,
                         "total_amount_take_away" => 0,
                         "total_amount_dine_in" => 0,
                     ];
                 }
-
-                $financial_accounts[$id]["total_amount_delivery"] += $item->total_amount;
             }
-
-
-            // ---------------- TAKE AWAY ----------------
             foreach ($take_away_financial_accounts as $item) {
-                $id = $item->financial_id;
                 $total_amount += $item->total_amount;
-
-                if (!isset($financial_accounts[$id])) {
-                    $financial_accounts[$id] = [
-                        "financial_id" => $id,
-                        "financial_name" => $item?->financials?->name,
-                        "total_amount_delivery" => 0,
-                        "total_amount_take_away" => 0,
+                if(isset($financial_accounts[$item->financial_id])){
+                    $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                        "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'], 
+                        "total_amount_take_away" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                        "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                    ];
+                }
+                else{
+                    $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                        "total_amount_delivery" => 0 ,
+                        "total_amount_take_away" => $item->total_amount,
                         "total_amount_dine_in" => 0,
                     ];
                 }
-
-                $financial_accounts[$id]["total_amount_take_away"] += $item->total_amount;
             }
-
-
-            // ---------------- DINE IN ----------------
             foreach ($dine_in_financial_accounts as $item) {
-                $id = $item->financial_id;
                 $total_amount += $item->total_amount;
-
-                if (!isset($financial_accounts[$id])) {
-                    $financial_accounts[$id] = [
-                        "financial_id" => $id,
+                if(isset($financial_accounts[$item->financial_id])){
+                    $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
                         "financial_name" => $item?->financials?->name,
-                        "total_amount_delivery" => 0,
-                        "total_amount_take_away" => 0,
-                        "total_amount_dine_in" => 0,
+                        "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'], 
+                        "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                        "total_amount_dine_in" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_dine_in'],
                     ];
                 }
-
-                $financial_accounts[$id]["total_amount_dine_in"] += $item->total_amount;
+                else{
+                    $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name,
+                        "total_amount_delivery" => 0 ,
+                        "total_amount_take_away" => 0,
+                        "total_amount_dine_in" => $item->total_amount,
+                    ];
+                }
             }
-
-
-            // Final collection
-            $financial_accounts = collect($financial_accounts)->values();
-
+            $financial_accounts = collect($financial_accounts);
+            $financial_accounts = $financial_accounts->values();
 
             return response()->json([
                 'perimission' => true,
