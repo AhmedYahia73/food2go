@@ -25,7 +25,7 @@ trait Recipe
                 ];
             }
             if($product->recipe){
-                $recipes = $product->recipe;
+                $recipes = $product->recipes;
                 foreach ($recipes as $element) {
                     $stock = PurchaseStock::
                     where("product_id", $element->store_product_id)
