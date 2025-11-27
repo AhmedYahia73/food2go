@@ -1015,24 +1015,51 @@ class CashierReportsController extends Controller
                 'report_role' => $request->user()->report,
             ]);
         }
-        elseif($request->user()->report == "all" && password_verify($request->input('password'), $request->user()->password)){
-
+        elseif($request->user()->report == "financial" && password_verify($request->input('password'), $request->user()->password)){
+            $orders = Order::
+            select("id")
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->get();
+            $orders = $orders 
+            ?->pluck("id")?->toArray() ?? [];
+            
+            $shift = $this->cashier_shift
+            ->where('shift', $request->user()->shift_number)
+            ->where('cashier_man_id', $request->user()->id)
+            ->first();
+            $expenses = $this->expenses
+            ->where('created_at', '>=', $shift->start_time ?? now())
+            ->where('created_at', '<=', $shift->end_time ?? now());
+            
+            $financial_accounts = OrderFinancial::
+            selectRaw("financial_id, SUM(amount) as total_amount")
+            ->whereIn("order_id", $orders)
+            ->with("financials")
+            ->groupBy("financial_id")
+            ->get()
+            ->map(function($item) use($expenses) {
+                $expenses_amount = $expenses
+                ->where("financial_account_id", $item->financial_id)
+                ->sum("amount") ?? 0;
+                return [
+                    "total_amount" => $item->total_amount - $expenses_amount,
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name,
+                ];
+            });
 
             return response()->json([
                 'perimission' => true,
                 'financial_accounts' => $financial_accounts,
-                'order_count' => $order_count,
-                'total_amount' => $total_amount, 
-                'expenses_total' => $expenses_total, 
-                'expenses' => $expenses, 
-                'online_order' => $online_order,
                 'report_role' => $request->user()->report,
             ]);
         }
 
         return response()->json([
             'perimission' => false,
-            'financial_accounts' => null
+            'financial_accounts' => null,
+            'report_role' => $request->user()->report,
         ], 400);
     }
 }
