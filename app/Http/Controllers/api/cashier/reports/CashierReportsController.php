@@ -910,7 +910,6 @@ class CashierReportsController extends Controller
             }
             $financial_accounts = collect($financial_accounts);
             $financial_accounts = $financial_accounts->values();
-
             
             $expenses = $this->expenses
             ->selectRaw("financial_account_id, SUM(amount) AS total")
@@ -925,6 +924,80 @@ class CashierReportsController extends Controller
                     "total" => $item->total,
                 ];
             });
+            $online_order_paid = $this->orders
+            ->selectRaw("payment_method_id, SUM(amount) AS amount")
+            ->where("pos", 0)
+            ->where(function($query){
+                $query->where("payment_method_id", "!=", 2)
+                ->where(function($q){
+                    $q->where("status", 1)
+                    ->orWhereNull("status");
+                })
+                ->orWhereHas("financial_accountigs");
+            })
+            ->with("payment_method")
+            ->groupBy("payment_method_id")
+            ->groupBy("order_type")
+            ->get()
+            ->map(function($item){
+                return [
+                    "payment_method" => $item?->payment_method?->name,
+                    "payment_method_id" => $item->payment_method_id,
+                    "amount" => $item->amount,
+                ];
+            });
+            $online_order_unpaid = $this->orders
+            ->selectRaw("payment_method_id, SUM(amount) AS amount")
+            ->where("pos", 0) 
+            ->where("payment_method_id", 2)
+            ->where(function($q){
+                $q->where("status", 1)
+                ->orWhereNull("status");
+            }) 
+            ->with("payment_method")
+            ->groupBy("payment_method_id")
+            ->groupBy("order_type")
+            ->get()
+            ->map(function($item){
+                return [
+                    "payment_method" => $item?->payment_method?->name,
+                    "payment_method_id" => $item->payment_method_id,
+                    "amount" => $item->amount,
+                ];
+            });
+            $online_order = [];
+            foreach ($online_order_paid as $item) {
+                if(isset($online_order[$item->payment_method_id])){
+                    $online_order[$item->payment_method_id] = [
+                        "payment_method" => $item?->payment_method?->name,
+                        "payment_method_id" => $item->payment_method_id,
+                        "amount" => $item->amount + $online_order[$item->payment_method_id]['amount'],
+                    ];
+                }
+                else{
+                    $online_order[$item->payment_method_id] = [
+                        "payment_method" => $item?->payment_method?->name,
+                        "payment_method_id" => $item->payment_method_id,
+                        "amount" => $item->amount,
+                    ]; 
+                }
+            }
+            foreach ($online_order_unpaid as $item) {
+                if(isset($online_order[$item->payment_method_id])){
+                    $online_order[$item->payment_method_id] = [
+                        "payment_method" => $item?->payment_method?->name,
+                        "payment_method_id" => $item->payment_method_id,
+                        "amount" => $item->amount + $online_order[$item->payment_method_id]['amount'],
+                    ];
+                }
+                else{
+                    $online_order[$item->payment_method_id] = [
+                        "payment_method" => $item?->payment_method?->name,
+                        "payment_method_id" => $item->payment_method_id,
+                        "amount" => $item->amount,
+                    ]; 
+                }
+            }
 
             return response()->json([
                 'perimission' => true,
@@ -933,6 +1006,10 @@ class CashierReportsController extends Controller
                 'total_amount' => $total_amount, 
                 'expenses_total' => $expenses_total, 
                 'expenses' => $expenses, 
+                'online_order' => $online_order
+
+
+                
             ]);
         }
 
