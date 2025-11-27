@@ -983,18 +983,18 @@ class CashierReportsController extends Controller
                 }
             }
             foreach ($online_order_unpaid as $item) {
-                if(isset($online_order[$item->payment_method_id])){
-                    $online_order[$item->payment_method_id] = [
-                        "payment_method" => $item?->payment_method?->name,
-                        "payment_method_id" => $item->payment_method_id,
-                        "amount" => $item->amount + $online_order[$item->payment_method_id]['amount'],
+                if(isset($online_order[$item['payment_method_id']])){
+                    $online_order[$item['payment_method_id']] = [
+                        "payment_method" => isset($item['payment_method']) ? $item['payment_method']['name'] : null,
+                        "payment_method_id" => $item['payment_method_id'],
+                        "amount" => $item['amount'] + $online_order[$item['payment_method_id']]['amount'],
                     ];
                 }
                 else{
-                    $online_order[$item->payment_method_id] = [
-                        "payment_method" => $item?->payment_method?->name,
-                        "payment_method_id" => $item->payment_method_id,
-                        "amount" => $item->amount,
+                    $online_order[$item['payment_method_id']] = [
+                        "payment_method" => isset($item['payment_method']) ? $item['payment_method']['name'] : null,
+                        "payment_method_id" => $item['payment_method_id'],
+                        "amount" => $item['amount'],
                     ]; 
                 }
             }
@@ -1009,7 +1009,7 @@ class CashierReportsController extends Controller
                 'online_order' => $online_order
 
 
-                
+
             ]);
         }
 
