@@ -822,7 +822,7 @@ class CashierReportsController extends Controller
             $total_amount = 0;
             foreach ($delivery_financial_accounts as $item) {
                 $total_amount += $item->total_amount;
-                if(isset($financial_accounts[$item->financial_id])){
+                if(isset($financial_accounts[$item->financial_id]['total_amount_delivery'])){
                     $financial_accounts[$item->financial_id] = [
                         "total_amount_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_delivery'],
                         "financial_id" => $item->financial_id,
@@ -839,7 +839,7 @@ class CashierReportsController extends Controller
             }
             foreach ($take_away_financial_accounts as $item) {
                 $total_amount += $item->total_amount;
-                if(isset($financial_accounts[$item->financial_id])){
+                if(isset($financial_accounts[$item->financial_id]['total_amount_take_away'])){
                     $financial_accounts[$item->financial_id] = [
                         "total_amount_take_away" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_take_away'],
                         "financial_id" => $item->financial_id,
@@ -857,7 +857,7 @@ class CashierReportsController extends Controller
             }
             foreach ($dine_in_financial_accounts as $item) {
                 $total_amount += $item->total_amount;
-                if(isset($financial_accounts[$item->financial_id])){
+                if(isset($financial_accounts[$item->financial_id]['total_amount_dine_in'])){
                     $financial_accounts[$item->financial_id] = [
                         "total_amount_dine_in" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_dine_in'],
                         "financial_id" => $item->financial_id,
