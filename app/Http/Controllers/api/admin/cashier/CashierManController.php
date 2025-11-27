@@ -59,12 +59,18 @@ class CashierManController extends Controller
             'all_reports',
             'table_status',
         ];
+        $report_role = [
+            "unactive", 
+            "financial", 
+            "all"
+        ];
 
         return response()->json([
             'cashiers' => $cashier,
             'cashier_men' => $cashier_men,
             'branches' => $branches,
             'roles' => $roles,
+            'report_role' => $report_role,
         ]);
     }
 
