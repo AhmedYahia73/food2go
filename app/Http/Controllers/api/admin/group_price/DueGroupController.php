@@ -69,7 +69,9 @@ class DueGroupController extends Controller
             'group_product_id' => ['required', 'exists:group_products,id'], 
             'financials' => ['required', 'array'], 
             'financials.*.id' => ['required', 'exists:finantiol_acountings,id'], 
-            'financials.*.amount' => ['required', 'numeric'], 
+            'financials.*.amount' => ['required', 'numeric'],
+            'cashier_id' => ['required', 'exists:cashiers,id'],
+            'cahier_man_id' => ['required', 'exists:cashier_men,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -98,6 +100,8 @@ class DueGroupController extends Controller
                 "module_id" => $module_payment->id,
                 "financial_id" => $item['id'],
                 "amount" => $item['amount'],
+                "cashier_id" => $request->cashier_id,
+                "cahier_man_id" => $request->cahier_man_id,
             ]);
             $financial_account = $this->financial_account
             ->where("id", $item['id'])
