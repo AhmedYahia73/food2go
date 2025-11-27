@@ -18,6 +18,7 @@ class Expense extends Model
         'financial_account_id',
         'category_id',
         'amount',
+        'shift',
         'note',
     ];
 

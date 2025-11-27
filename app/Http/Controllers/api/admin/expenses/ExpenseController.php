@@ -103,7 +103,7 @@ class ExpenseController extends Controller
         }
 
         $expenseRequest = $validator->validated();
-        $expenseRequest['admin_id'] = $request->user()->id;
+        $expenseRequest['admin_id'] = $request->user()->id; 
         $this->expenses
         ->create($expenseRequest);
         $financial = FinantiolAcounting::

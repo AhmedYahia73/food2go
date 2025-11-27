@@ -770,6 +770,7 @@ class CashierReportsController extends Controller
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
             ->get();
+            $order_count = $orders->count();
             $orders = $orders 
             ?->pluck("id")?->toArray() ?? [];
             
@@ -793,6 +794,8 @@ class CashierReportsController extends Controller
                 ->sum("amount") ?? 0;
                 return [
                     "total_amount" => $item->total_amount - $expenses_amount,
+                    "total_expenses" => $expenses_amount,
+                    "total_order" => $item->total_amount,
                     "financial_id" => $item->financial_id,
                     "financial_name" => $item?->financials?->name,
                 ];
@@ -800,7 +803,11 @@ class CashierReportsController extends Controller
 
             return response()->json([
                 'perimission' => true,
-                'financial_accounts' => $financial_accounts
+                'financial_accounts' => $financial_accounts,
+                'order_count' => $order_count,
+                'total_amount' => $financial_accounts->sum('total_amount'),
+                'total_expenses' => $financial_accounts->sum('total_expenses'),
+                'total_order' => $financial_accounts->sum('total_order'),
             ]);
         }
 
