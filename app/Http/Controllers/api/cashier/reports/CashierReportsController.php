@@ -886,7 +886,7 @@ class CashierReportsController extends Controller
                 }
             }  
             foreach ($expenses as $item) {
-                $total_amount -= $item->total_amount;
+                $total_amount -= $item->amount;
                 if(isset($financial_accounts[$item->financial_account_id])){
                     $financial_accounts[$item->financial_account_id] = [
                         "financial_id" => $item->financial_account_id,
