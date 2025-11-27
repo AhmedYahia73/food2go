@@ -884,8 +884,10 @@ class CashierReportsController extends Controller
                         "total_amount_dine_in" => $item->total_amount,
                     ];
                 }
-            }  
+            }
+            $expenses_total = 0;
             foreach ($expenses as $item) {
+                $expenses_total += $item->amount;
                 $total_amount -= $item->amount;
                 if(isset($financial_accounts[$item->financial_account_id])){
                     $financial_accounts[$item->financial_account_id] = [
@@ -909,11 +911,27 @@ class CashierReportsController extends Controller
             $financial_accounts = collect($financial_accounts);
             $financial_accounts = $financial_accounts->values();
 
+            
+            $expenses = $this->expenses
+            ->selectRaw("financial_account_id, SUM(amount) AS total")
+            ->where('created_at', '>=', $shift->start_time ?? now())
+            ->where('created_at', '<=', $shift->end_time ?? now())
+            ->with("financial_account")
+            ->get()
+            ->map(function($item){
+                return [
+                    "financial_account" => $item?->financial_account?->name,
+                    "total" => $item->total,
+                ];
+            });
+
             return response()->json([
                 'perimission' => true,
                 'financial_accounts' => $financial_accounts,
                 'order_count' => $order_count,
                 'total_amount' => $total_amount, 
+                'expenses_total' => $expenses_total, 
+                'expenses' => $expenses, 
             ]);
         }
 
