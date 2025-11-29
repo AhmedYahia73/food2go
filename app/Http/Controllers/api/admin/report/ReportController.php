@@ -21,7 +21,8 @@ use App\Models\FinancialHistory;
 
 class ReportController extends Controller
 {
-    public function __construct(private Expense $expenses){}
+    public function __construct(private Expense $expenses,
+    private Order $orders){}
 
     public function view_raise_product(){
         $products = OrderDetail::
