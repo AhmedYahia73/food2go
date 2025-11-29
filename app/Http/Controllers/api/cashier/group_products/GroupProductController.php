@@ -151,6 +151,7 @@ class GroupProductController extends Controller
                     $status = $element->group_product_status
                     ->where("id", $group_product->id)->count()
                     <= 0; 
+                    $element->price = $price;
                     return $element;
                 });
               
