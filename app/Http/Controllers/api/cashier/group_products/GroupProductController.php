@@ -45,6 +45,7 @@ class GroupProductController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        $group_id = $request->group_id;
         // Group Product
         $group_product = $this->group_product
         ->where("id", $request->group_id)
@@ -98,7 +99,7 @@ class GroupProductController extends Controller
         ->where('status', 1)
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, 
-        $branch_id, $request, $group_product){
+        $branch_id, $request, $group_id, $group_product){
             //get count of sales of product to detemine stock
             // Price of group
             $price = $product->price;
@@ -136,11 +137,20 @@ class GroupProductController extends Controller
                 return null;
             }
             $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product, $branch_id) {
+            use ($option_off, $product, $branch_id, $group_id, $group_product) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id){
-                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
-                    ->first()?->price ?? $element->price;
+                $variation->options = $variation->options->map(function($element) use($branch_id, $group_id, $group_product){
+                     $price = $element?->group_price
+                    ?->where("group_product_id", $group_id)
+                    ?->where("option_id", $element->id)
+                    ?->first()?->price ?? null;
+                    if(empty($price)){
+                        $price = $group_product->increase_precentage - $group_product->decrease_precentage;
+                        $price = $element->price + $price * $element->price / 100;
+                    }
+                    $status = $element->group_product_status
+                    ->where("id", $group_product->id)->count()
+                    <= 0; 
                     return $element;
                 });
               
