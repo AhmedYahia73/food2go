@@ -1287,6 +1287,12 @@ class ReportController extends Controller
             'paid' => array_values($paid_online_order),
             'un_paid' => array_values($unpaid_online_order),
         ];
+        $financial_accounts = collect($financial_accounts);
+        if($request->financial_id){
+            $financial_accounts = $financial_accounts
+            ->where("financial_id", $request->financial_id)
+            ->values();
+        }
 
         return response()->json([ 
             'financial_accounts' => $financial_accounts,
