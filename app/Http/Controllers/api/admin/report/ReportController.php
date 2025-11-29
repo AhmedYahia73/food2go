@@ -775,7 +775,9 @@ class ReportController extends Controller
         $orders = Order::
         select("id");
         $expenses = $this->expenses;
-
+        $start = Carbon::parse('1111-01-01');
+        $end = now();
+        $end = Carbon::parse($end);
         if($request->from || $request->to){
             
             $time_sittings = TimeSittings:: 
@@ -899,6 +901,8 @@ class ReportController extends Controller
             ],400);
         }
 
+        $start = Carbon::parse('1111-01-01');
+        $end = now();
         // Order
         $order_count = Order::
         select("id");
