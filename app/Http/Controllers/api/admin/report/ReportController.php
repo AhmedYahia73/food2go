@@ -18,11 +18,12 @@ use App\Models\Purchase;
 use App\Models\PurchaseStock;
 use App\Models\Expense;
 use App\Models\FinancialHistory;
+use App\Models\CashierShift;
 
 class ReportController extends Controller
 {
     public function __construct(private Expense $expenses,
-    private Order $orders){}
+    private Order $orders, private CashierShift $cashier_shift){}
 
     public function view_raise_product(){
         $products = OrderDetail::
