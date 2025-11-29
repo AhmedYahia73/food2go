@@ -1047,6 +1047,10 @@ class OrderController extends Controller
         ->where("is_void", 1)
         ->get()
         ->map(function($item){ 
+            $order_type = $item->order_status;
+            // if($item->pos){
+            //     $order_type = 
+            // }
             return [ 
                 'id' => $item->id,
                 'order_number' => $item->order_number,
