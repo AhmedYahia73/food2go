@@ -1048,9 +1048,17 @@ class OrderController extends Controller
         ->get()
         ->map(function($item){ 
             $order_type = $item->order_status;
-            // if($item->pos){
-            //     $order_type = 
-            // }
+            if($item->pos){
+                if ($item->order_type == "take_away") {
+                    $order_type = $item->take_away_status;
+                }
+                elseif ($item->order_type == "delivery") {
+                    $order_type = $item->delivery_status;
+                }
+                elseif ($item->order_type == "dine_in") {
+                    $order_type = "pick_up";
+                } 
+            }
             return [ 
                 'id' => $item->id,
                 'order_number' => $item->order_number,
