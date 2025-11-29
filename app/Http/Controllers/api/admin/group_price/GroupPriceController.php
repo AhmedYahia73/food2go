@@ -134,15 +134,15 @@ class GroupPriceController extends Controller
                 "name" => $item->name,
                 "options" => $item->options
                 ->map(function($element) use($group_id, $group_product){
-                    $price = $item?->group_price
+                    $price = $element?->group_price
                     ?->where("group_product_id", $group_id)
                     ?->where("option_id", $element->id)
                     ?->first()?->price ?? null;
                     if(empty($price)){
                         $price = $group_product->increase_precentage - $group_product->decrease_precentage;
-                        $price = $item->price + $price * $item->price / 100;
+                        $price = $element->price + $price * $element->price / 100;
                     }
-                    $status = $item->group_product_status
+                    $status = $element->group_product_status
                     ->where("id", $group_product->id)->count()
                     <= 0; 
                     return [
