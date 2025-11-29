@@ -377,6 +377,9 @@ class CustomerController extends Controller
         // Keys
         // f_name, l_name, email, phone, password, status, image, phone_2
         $data = $request->only($this->customerRequest);
+        if(empty($request->max_due)){ 
+            unset($data['max_due']);
+        }
         if ($request->image) {
             $imag_path = $this->upload($request, 'image', 'users/customers/image');
             $data['image'] = $imag_path;
@@ -409,7 +412,10 @@ class CustomerController extends Controller
         $data = $request->only($this->customerUpdateRequest);
         $user = $this->customers
         ->where('id', $id)
-        ->first();
+        ->first();    
+        if(empty($request->max_due)){ 
+            unset($data['max_due']);
+        }
         if (!is_string($request->image)) {
             $imag_path = $this->upload($request, 'image', 'users/customers/image');
             $data['image'] = $imag_path;
