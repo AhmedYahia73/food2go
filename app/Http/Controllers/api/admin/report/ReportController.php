@@ -886,7 +886,7 @@ class ReportController extends Controller
         ]);
     }
 
-    public function financial_reports(){
+    public function financial_reports(Request $request){
         $validator = Validator::make($request->all(), [
             'from' => ['date'],
             'to' => ['date'],
