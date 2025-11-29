@@ -883,4 +883,413 @@ class ReportController extends Controller
             'financial_accounts' => $financial_accounts
         ]);
     }
+
+    public function financial_reports(){
+        $validator = Validator::make($request->all(), [
+            'from' => ['date'],
+            'to' => ['date'],
+            'cashier_id' => ['exists:cashiers,id'],
+            'branch_id' => ['exists:branches,id'],
+            'cashier_man_id' => ['exists:cashier_men,id'],
+            'financial_id' => ['exists:finantiol_acountings,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        // Order
+        $order_count = Order::
+        select("id");
+        $take_away_orders = Order::
+        select("id") 
+        ->where("order_type", "take_away");
+        $delivery_orders = Order::
+        select("id") 
+        ->where("order_type", "delivery");
+        $dine_in_orders = Order::
+        select("id") 
+        ->where("order_type", "dine_in");
+         
+        $expenses = $this->expenses
+        ->with("financial_account");
+        
+        $expenses_items = $this->expenses
+        ->selectRaw("financial_account_id, SUM(amount) AS total")
+        ->with("financial_account")
+        ->groupBy("financial_account_id");
+        $online_order_paid = $this->orders
+        ->selectRaw("payment_method_id, SUM(amount) AS amount")
+        ->where("pos", 0)
+        ->where(function($query){
+            $query->where("payment_method_id", "!=", 2)
+            ->where(function($q){
+                $q->where("status", 1)
+                ->orWhereNull("status");
+            })
+            ->orWhereHas("financial_accountigs");
+        })
+        ->with("payment_method")
+        ->groupBy("payment_method_id")
+        ->groupBy("order_type");
+        $online_order_unpaid = $this->orders
+        ->selectRaw("payment_method_id, SUM(amount) AS amount")
+        ->where("pos", 0) 
+        ->where("payment_method_id", 2)
+        ->where(function($q){
+            $q->where("status", 1)
+            ->orWhereNull("status");
+        }) 
+        ->with("payment_method")
+        ->groupBy("payment_method_id")
+        ->groupBy("order_type");
+
+        if($request->from || $request->to){
+            
+            $time_sittings = TimeSittings:: 
+            get();
+            if ($time_sittings->count() > 0) { 
+                $from = $time_sittings[0]->from;
+                $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+                $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+                $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+                $from = date('Y-m-d') . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                }
+
+                // if ($start > $end) {
+                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+                // }
+                // else{
+                //     $end = Carbon::parse($from)->addHours(intval($hours));
+                // } format('Y-m-d H:i:s')
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
+            } 
+            $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
+            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
+  
+            $expenses = $expenses
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+            $order_count = $order_count
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+            $take_away_orders = $take_away_orders
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+            $delivery_orders = $delivery_orders
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end); 
+            $dine_in_orders = $dine_in_orders
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+                
+            $expenses_items = $expenses_items
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+            $online_order_paid = $online_order_paid
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+            $online_order_unpaid = $online_order_unpaid
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+        }
+        if($request->cashier_id){ 
+
+            $expenses = $expenses
+            ->where("cashier_id", $request->cashier_id);
+            $order_count = $order_count
+            ->where("cashier_id", $request->cashier_id);
+            $take_away_orders = $take_away_orders
+            ->where("cashier_id", $request->cashier_id);
+            $delivery_orders = $delivery_orders
+            ->where("cashier_id", $request->cashier_id);
+            $dine_in_orders = $dine_in_orders
+            ->where("cashier_id", $request->cashier_id);
+
+            $expenses_items = $expenses_items
+            ->where("cashier_id", $request->cashier_id);
+            $online_order_paid = $online_order_paid
+            ->where("cashier_id", $request->cashier_id);
+            $online_order_unpaid = $online_order_unpaid
+            ->where("cashier_id", $request->cashier_id);
+        }
+        if($request->branch_id){ 
+            $expenses = $expenses
+            ->where("branch_id", $request->branch_id);
+            $order_count = $order_count
+            ->where("branch_id", $request->branch_id);
+            $take_away_orders = $take_away_orders
+            ->where("branch_id", $request->branch_id);
+            $delivery_orders = $delivery_orders
+            ->where("branch_id", $request->branch_id);
+            $dine_in_orders = $dine_in_orders
+            ->where("branch_id", $request->branch_id);
+            $expenses_items = $expenses_items
+            ->where("branch_id", $request->branch_id);
+            $online_order_paid = $online_order_paid
+            ->where("branch_id", $request->branch_id);
+            $online_order_unpaid = $online_order_unpaid
+            ->where("branch_id", $request->branch_id);
+        }
+        if($request->cashier_man_id){
+            $expenses = $expenses
+            ->where("cashier_man_id", $request->cashier_man_id);
+            $order_count = $order_count
+            ->where("cashier_man_id", $request->cashier_man_id);
+            $take_away_orders = $take_away_orders
+            ->where("cashier_man_id", $request->cashier_man_id);
+            $delivery_orders = $delivery_orders
+            ->where("cashier_man_id", $request->cashier_man_id);
+            $dine_in_orders = $dine_in_orders
+            ->where("cashier_man_id", $request->cashier_man_id); 
+            
+            $expenses_items = $expenses_items
+            ->where("cashier_man_id", $request->cashier_man_id); 
+            $online_order_paid = $online_order_paid
+            ->where("cashier_man_id", $request->cashier_man_id); 
+            $online_order_unpaid = $online_order_unpaid
+            ->where("cashier_man_id", $request->cashier_man_id); 
+        }
+        if($request->financial_id){
+            $expenses = $expenses
+            ->where("financial_account_id", $request->financial_id);
+            $order_count = $order_count
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
+            $take_away_orders = $take_away_orders
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
+            $delivery_orders = $delivery_orders
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
+            $dine_in_orders = $dine_in_orders
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });  
+            
+            $expenses_items = $expenses_items
+            ->where("financial_account_id", $request->financial_id);
+            $online_order_paid = $online_order_paid
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });  
+            $online_order_unpaid = $online_order_unpaid
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });  
+        }
+        // ____________________________________________________________
+    
+        
+        $expenses = $expenses  
+        ->get();
+        $order_count = $order_count
+        ->count();
+        $take_away_orders = $take_away_orders
+        ->pluck('id')
+        ->toArray();
+        $delivery_orders = $delivery_orders
+        ->pluck('id')
+        ->toArray();
+        $dine_in_orders = $dine_in_orders
+        ->pluck('id')
+        ->toArray();
+
+        $delivery_financial_accounts = OrderFinancial::
+        selectRaw("financial_id ,SUM(amount) as total_amount")
+        ->whereIn("order_id", $delivery_orders)
+        ->with("financials")
+        ->groupBy("financial_id") 
+        ->get();
+        $take_away_financial_accounts = OrderFinancial::
+        selectRaw("financial_id ,SUM(amount) as total_amount")
+        ->whereIn("order_id", $take_away_orders)
+        ->with("financials")
+        ->groupBy("financial_id") 
+        ->get();
+        $dine_in_financial_accounts = OrderFinancial::
+        selectRaw("financial_id ,SUM(amount) as total_amount")
+        ->whereIn("order_id", $dine_in_orders)
+        ->with("financials")
+        ->groupBy("financial_id") 
+        ->get();
+        $financial_accounts = [];
+        $total_amount = 0;
+        foreach ($delivery_financial_accounts as $item) {
+            $total_amount += $item->total_amount;
+            if(isset($financial_accounts[$item->financial_id])){
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name,
+                    "total_amount_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_delivery'], 
+                    "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                    "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                ];
+            }
+            else{
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name, 
+                    "total_amount_delivery" => $item->total_amount ,
+                    "total_amount_take_away" => 0,
+                    "total_amount_dine_in" => 0,
+                ];
+            }
+        }
+        foreach ($take_away_financial_accounts as $item) {
+            $total_amount += $item->total_amount;
+            if(isset($financial_accounts[$item->financial_id])){
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name, 
+                    "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'], 
+                    "total_amount_take_away" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                    "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                ];
+            }
+            else{
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name, 
+                    "total_amount_delivery" => 0 ,
+                    "total_amount_take_away" => $item->total_amount,
+                    "total_amount_dine_in" => 0,
+                ];
+            }
+        }
+        foreach ($dine_in_financial_accounts as $item) {
+            $total_amount += $item->total_amount;
+            if(isset($financial_accounts[$item->financial_id])){
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name,
+                    "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'], 
+                    "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                    "total_amount_dine_in" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                ];
+            }
+            else{
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name,
+                    "total_amount_delivery" => 0 ,
+                    "total_amount_take_away" => 0,
+                    "total_amount_dine_in" => $item->total_amount,
+                ];
+            }
+        }
+        $expenses_total = 0;
+        foreach ($expenses as $item) {
+            $expenses_total += $item->amount;
+            $total_amount -= $item->amount;
+            if(isset($financial_accounts[$item->financial_account_id])){
+                $financial_accounts[$item->financial_account_id] = [
+                    "financial_id" => $item->financial_account_id,
+                    "financial_name" => $item?->financial_account?->name,
+                    "total_amount_delivery" => $financial_accounts[$item->financial_account_id]['total_amount_delivery'] - $item->amount, 
+                    "total_amount_take_away" => $financial_accounts[$item->financial_account_id]['total_amount_take_away'],
+                    "total_amount_dine_in" => $financial_accounts[$item->financial_account_id]['total_amount_dine_in'],
+                ];
+            }
+            else{
+                $financial_accounts[$item->financial_account_id] = [
+                    "financial_id" => $item->financial_account_id,
+                    "financial_name" => $item?->financial_account?->name,
+                    "total_amount_delivery" => -$item->amount ,
+                    "total_amount_take_away" => 0,
+                    "total_amount_dine_in" => 0,
+                ];
+            }
+        }
+        $financial_accounts = collect($financial_accounts);
+        $financial_accounts = $financial_accounts->values();
+        
+        $expenses_items = $expenses_items
+        ->get()
+        ->map(function($item){
+            return [
+                "financial_account" => $item?->financial_account?->name,
+                "total" => $item->total,
+            ];
+        });
+        $online_order_paid = $online_order_paid
+        ->get()
+        ->map(function($item){
+            return [
+                "payment_method" => $item?->payment_method?->name,
+                "payment_method_id" => $item->payment_method_id,
+                "amount" => $item->amount,
+            ];
+        });
+        $online_order_unpaid = $online_order_unpaid
+        ->get()
+        ->map(function($item){
+            return [
+                "payment_method" => $item?->payment_method?->name,
+                "payment_method_id" => $item->payment_method_id,
+                "amount" => $item->amount,
+            ];
+        });
+        $paid_online_order = [];
+        foreach ($online_order_paid as $item) {
+            if(isset($paid_online_order[$item['payment_method_id']])){
+                $paid_online_order[$item['payment_method_id']] = [
+                    "payment_method" => $item['payment_method'],
+                    "payment_method_id" => $item['payment_method_id'],
+                    "amount" => $item['amount'] + $paid_online_order[$item['payment_method_id']]['amount'],
+                ];
+            }
+            else{
+                $paid_online_order[$item['payment_method_id']] = [
+                    "payment_method" => $item['payment_method'],
+                    "payment_method_id" => $item['payment_method_id'],
+                    "amount" => $item['amount'],
+                ]; 
+            }
+        }
+        $unpaid_online_order = [];
+        foreach ($online_order_unpaid as $item) {
+            if(isset($unpaid_online_order[$item['payment_method_id']])){
+                $unpaid_online_order[$item['payment_method_id']] = [
+                    "payment_method" =>  $item['payment_method'],
+                    "payment_method_id" => $item['payment_method_id'],
+                    "amount" => $item['amount'] + $unpaid_online_order[$item['payment_method_id']]['amount'],
+                ];
+            }
+            else{
+                $unpaid_online_order[$item['payment_method_id']] = [
+                    "payment_method" =>  $item['payment_method'],
+                    "payment_method_id" => $item['payment_method_id'],
+                    "amount" => $item['amount'],
+                ]; 
+            }
+        }
+        $online_order = [
+            'paid' => array_values($paid_online_order),
+            'un_paid' => array_values($unpaid_online_order),
+        ];
+
+        return response()->json([ 
+            'financial_accounts' => $financial_accounts,
+            'order_count' => $order_count,
+            'total_amount' => $total_amount, 
+            'expenses_total' => $expenses_total, 
+            'expenses' => $expenses_items, 
+            'online_order' => $online_order, 
+        ]);
+    }
 }

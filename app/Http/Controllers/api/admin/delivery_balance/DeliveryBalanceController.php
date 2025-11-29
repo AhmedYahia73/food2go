@@ -330,7 +330,9 @@ class DeliveryBalanceController extends Controller
         ->where("order_type", "delivery") 
         ->whereIn("id", $request->order_ids) 
         ->update([
-            "shift" => $cashier_men->shift_number
+            "shift" => $cashier_men->shift_number,
+            'cashier_id' => $cashier_men->cashier_id,
+            'cashier_man_id' => $request->cashier_man_id,
         ]);
         $total= 0 ;
         foreach ($orders as $item) {

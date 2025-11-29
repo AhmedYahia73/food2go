@@ -935,6 +935,7 @@ class CashierReportsController extends Controller
                 })
                 ->orWhereHas("financial_accountigs");
             })
+            ->where('shift', $request->user()->shift_number)
             ->with("payment_method")
             ->groupBy("payment_method_id")
             ->groupBy("order_type")
@@ -954,6 +955,7 @@ class CashierReportsController extends Controller
                 $q->where("status", 1)
                 ->orWhereNull("status");
             }) 
+            ->where('shift', $request->user()->shift_number)
             ->with("payment_method")
             ->groupBy("payment_method_id")
             ->groupBy("order_type")
