@@ -105,10 +105,10 @@ class WastedController extends Controller
             'store_id' => $wested?->store_id,
             "reason" => $wested->reason,
                 
-            'category_material_id' => $item->category_material_id,
-            'material_id' => $item->material_id,
-            'category_material' => $item?->category_material?->name,
-            'material' => $item?->material?->name,
+            'category_material_id' => $wested->category_material_id,
+            'material_id' => $wested->material_id,
+            'category_material' => $wested?->category_material?->name,
+            'material' => $wested?->material?->name,
 
             'quantity' => $wested?->quantity,
             'status' => $wested?->status,
