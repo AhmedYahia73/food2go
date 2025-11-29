@@ -297,6 +297,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/{id}', 'view');
         Route::put('/status', 'status');
         Route::put('/price', 'price');
+        Route::get('/variations/{product_id}/{group_id}', 'variations');
+        Route::post('/variations_price', 'variations_price');
     });
 
     Route::controller(RecipeController::class)
