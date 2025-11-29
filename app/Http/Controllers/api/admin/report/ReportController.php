@@ -952,7 +952,7 @@ class ReportController extends Controller
         ->where("pos", 0) 
         ->where('shift', $shift->shift)
         ->where("payment_method_id", 2)
-        ->whereDoesnotHave("financial_accountigs")
+        ->whereDoesntHave("financial_accountigs")
         ->where(function($q){
             $q->where("status", 1)
             ->orWhereNull("status");
