@@ -887,7 +887,7 @@ class ReportController extends Controller
         ]);
     }
 
-    public function financial_reports(Request $request){
+    public function financial_reports(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'from' => ['date'],
             'to' => ['date'],
@@ -904,29 +904,37 @@ class ReportController extends Controller
 
         $start = Carbon::parse('1111-01-01');
         $end = now();
+        $shift = $this->cashier_shift 
+        ->where('id', $id)
+        ->first();
         // Order
         $order_count = Order::
-        select("id");
+        where('shift', $shift->shift);
         $take_away_orders = Order::
-        select("id") 
+        where('shift', $shift->shift)
         ->where("order_type", "take_away");
         $delivery_orders = Order::
-        select("id") 
+        where('shift', $shift->shift)
         ->where("order_type", "delivery");
         $dine_in_orders = Order::
-        select("id") 
+        where('shift', $shift->shift)
         ->where("order_type", "dine_in");
          
         $expenses = $this->expenses
+        ->where('created_at', '>=', $shift->start_time ?? now())
+        ->where('created_at', '<=', $shift->end_time ?? now())
         ->with("financial_account");
         
         $expenses_items = $this->expenses
         ->selectRaw("financial_account_id, SUM(amount) AS total")
+        ->where('created_at', '>=', $shift->start_time ?? now())
+        ->where('created_at', '<=', $shift->end_time ?? now())
         ->with("financial_account")
         ->groupBy("financial_account_id");
         $online_order_paid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
         ->where("pos", 0)
+        ->where('shift', $shift->shift)
         ->where(function($query){
             $query->where("payment_method_id", "!=", 2)
             ->where(function($q){
@@ -941,6 +949,7 @@ class ReportController extends Controller
         $online_order_unpaid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
         ->where("pos", 0) 
+        ->where('shift', $shift->shift)
         ->where("payment_method_id", 2)
         ->where(function($q){
             $q->where("status", 1)
