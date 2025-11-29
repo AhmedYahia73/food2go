@@ -361,7 +361,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/lists_report', 'lists_report');
         Route::post('/orders_report', 'orders_report');
         Route::post('/financial_report', 'financial_report');
-        Route::post('/cashier_report/{id}', 'financial_reports');
+        Route::get('/cashier_report/{id}', 'cashier_report');
     });
     
     Route::controller(DiscountModuleController::class)

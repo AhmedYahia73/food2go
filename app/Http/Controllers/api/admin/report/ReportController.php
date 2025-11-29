@@ -888,43 +888,43 @@ class ReportController extends Controller
         ]);
     }
 
-    public function financial_reports(Request $request, $id){
-        $validator = Validator::make($request->all(), [
-            'from' => ['date'],
-            'to' => ['date'],
-            'cashier_id' => ['exists:cashiers,id'],
-            'branch_id' => ['exists:branches,id'],
-            'cashier_man_id' => ['exists:cashier_men,id'],
-            'financial_id' => ['exists:finantiol_acountings,id'],
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
+    public function cashier_report(Request $request, $id){
 
         $start = Carbon::parse('1111-01-01');
         $end = now();
         $shift = $this->cashier_shift 
         ->where('id', $id)
         ->first();
+        if(empty($shift)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
         // Order
         $order_count = Order::
-        where('shift', $shift->shift);
+        where('shift', $shift->shift)
+        ->count();
         $take_away_orders = Order::
         where('shift', $shift->shift)
-        ->where("order_type", "take_away");
+        ->where("order_type", "take_away")
+        ->pluck('id')
+        ->toArray();
         $delivery_orders = Order::
         where('shift', $shift->shift)
-        ->where("order_type", "delivery");
+        ->where("order_type", "delivery")
+        ->pluck('id')
+        ->toArray();
         $dine_in_orders = Order::
         where('shift', $shift->shift)
-        ->where("order_type", "dine_in");
+        ->where("order_type", "dine_in")
+        ->pluck('id')
+        ->toArray();
          
         $expenses = $this->expenses
         ->where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
-        ->with("financial_account");
+        ->with("financial_account")
+        ->get();
         
         $expenses_items = $this->expenses
         ->selectRaw("financial_account_id, SUM(amount) AS total")
@@ -960,169 +960,9 @@ class ReportController extends Controller
         ->groupBy("payment_method_id")
         ->groupBy("order_type");
 
-        if($request->from || $request->to){
-            
-            $time_sittings = TimeSittings:: 
-            get();
-            if ($time_sittings->count() > 0) { 
-                $from = $time_sittings[0]->from;
-                $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-                $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-                $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-                $from = date('Y-m-d') . ' ' . $from;
-                $start = Carbon::parse($from);
-                $end = Carbon::parse($end);
-                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                if ($start >= $end) {
-                    $end = $end->addDay();
-                }
-                if($start >= now()){
-                    $start = $start->subDay();
-                }
-
-                // if ($start > $end) {
-                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-                // }
-                // else{
-                //     $end = Carbon::parse($from)->addHours(intval($hours));
-                // } format('Y-m-d H:i:s')
-            } else {
-                $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
-                $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
-            } 
-            $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
-            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
-  
-            $expenses = $expenses
-            ->where("created_at", ">=", $start)
-            ->where("created_at", "<=", $end);
-            $order_count = $order_count
-            ->where("created_at", ">=", $start)
-            ->where("created_at", "<=", $end);
-            $take_away_orders = $take_away_orders
-            ->where("created_at", ">=", $start)
-            ->where("created_at", "<=", $end);
-            $delivery_orders = $delivery_orders
-            ->where("created_at", ">=", $start)
-            ->where("created_at", "<=", $end); 
-            $dine_in_orders = $dine_in_orders
-            ->where("created_at", ">=", $start)
-            ->where("created_at", "<=", $end);
-                
-            $expenses_items = $expenses_items
-            ->where("created_at", ">=", $start)
-            ->where("created_at", "<=", $end);
-            $online_order_paid = $online_order_paid
-            ->where("created_at", ">=", $start)
-            ->where("created_at", "<=", $end);
-            $online_order_unpaid = $online_order_unpaid
-            ->where("created_at", ">=", $start)
-            ->where("created_at", "<=", $end);
-        }
-        if($request->cashier_id){ 
-
-            $expenses = $expenses
-            ->where("cashier_id", $request->cashier_id);
-            $order_count = $order_count
-            ->where("cashier_id", $request->cashier_id);
-            $take_away_orders = $take_away_orders
-            ->where("cashier_id", $request->cashier_id);
-            $delivery_orders = $delivery_orders
-            ->where("cashier_id", $request->cashier_id);
-            $dine_in_orders = $dine_in_orders
-            ->where("cashier_id", $request->cashier_id);
-
-            $expenses_items = $expenses_items
-            ->where("cashier_id", $request->cashier_id);
-            $online_order_paid = $online_order_paid
-            ->where("cashier_id", $request->cashier_id);
-            $online_order_unpaid = $online_order_unpaid
-            ->where("cashier_id", $request->cashier_id);
-        }
-        if($request->branch_id){ 
-            $expenses = $expenses
-            ->where("branch_id", $request->branch_id);
-            $order_count = $order_count
-            ->where("branch_id", $request->branch_id);
-            $take_away_orders = $take_away_orders
-            ->where("branch_id", $request->branch_id);
-            $delivery_orders = $delivery_orders
-            ->where("branch_id", $request->branch_id);
-            $dine_in_orders = $dine_in_orders
-            ->where("branch_id", $request->branch_id);
-            $expenses_items = $expenses_items
-            ->where("branch_id", $request->branch_id);
-            $online_order_paid = $online_order_paid
-            ->where("branch_id", $request->branch_id);
-            $online_order_unpaid = $online_order_unpaid
-            ->where("branch_id", $request->branch_id);
-        }
-        if($request->cashier_man_id){
-            $expenses = $expenses
-            ->where("cashier_man_id", $request->cashier_man_id);
-            $order_count = $order_count
-            ->where("cashier_man_id", $request->cashier_man_id);
-            $take_away_orders = $take_away_orders
-            ->where("cashier_man_id", $request->cashier_man_id);
-            $delivery_orders = $delivery_orders
-            ->where("cashier_man_id", $request->cashier_man_id);
-            $dine_in_orders = $dine_in_orders
-            ->where("cashier_man_id", $request->cashier_man_id); 
-            
-            $expenses_items = $expenses_items
-            ->where("cashier_man_id", $request->cashier_man_id); 
-            $online_order_paid = $online_order_paid
-            ->where("cashier_man_id", $request->cashier_man_id); 
-            $online_order_unpaid = $online_order_unpaid
-            ->where("cashier_man_id", $request->cashier_man_id); 
-        }
-        if($request->financial_id){
-            $expenses = $expenses
-            ->where("financial_account_id", $request->financial_id);
-            $order_count = $order_count
-            ->whereHas("financial_accountigs", function($query) use($request){
-                $query->where("finantiol_acountings.id", $request->financial_id);
-            });
-            $take_away_orders = $take_away_orders
-            ->whereHas("financial_accountigs", function($query) use($request){
-                $query->where("finantiol_acountings.id", $request->financial_id);
-            });
-            $delivery_orders = $delivery_orders
-            ->whereHas("financial_accountigs", function($query) use($request){
-                $query->where("finantiol_acountings.id", $request->financial_id);
-            });
-            $dine_in_orders = $dine_in_orders
-            ->whereHas("financial_accountigs", function($query) use($request){
-                $query->where("finantiol_acountings.id", $request->financial_id);
-            });  
-            
-            $expenses_items = $expenses_items
-            ->where("financial_account_id", $request->financial_id);
-            $online_order_paid = $online_order_paid
-            ->whereHas("financial_accountigs", function($query) use($request){
-                $query->where("finantiol_acountings.id", $request->financial_id);
-            });  
-            $online_order_unpaid = $online_order_unpaid
-            ->whereHas("financial_accountigs", function($query) use($request){
-                $query->where("finantiol_acountings.id", $request->financial_id);
-            });  
-        }
         // ____________________________________________________________
     
-        
-        $expenses = $expenses  
-        ->get();
-        $order_count = $order_count
-        ->count();
-        $take_away_orders = $take_away_orders
-        ->pluck('id')
-        ->toArray();
-        $delivery_orders = $delivery_orders
-        ->pluck('id')
-        ->toArray();
-        $dine_in_orders = $dine_in_orders
-        ->pluck('id')
-        ->toArray();
+          
 
         $delivery_financial_accounts = OrderFinancial::
         selectRaw("financial_id ,SUM(amount) as total_amount")
