@@ -168,7 +168,7 @@ trait OrderFormat
                 "phone" => $order?->delivery?->phone ?? null,
             ],
             "address" => [
-                "id" => $order?->address?->id ?? null,
+                "id" => $order?->address,
                 "address" => $order?->address?->address ?? null,
                 "street" => $order?->address?->street ?? null,
                 "building_num" => $order?->address?->building_num ?? null,
@@ -185,7 +185,7 @@ trait OrderFormat
             ],  
         ];
         
-        return $order;
+        return $order_arr;
     }
 
     // ___________________________________________________________
