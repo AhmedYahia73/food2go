@@ -161,7 +161,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
      Route::controller(PopupController::class)
     ->prefix('popup')->group(function(){
         Route::get('/', 'view');
-        Route::put('status/', 'status');
+        Route::put('status', 'status');
         Route::post('create_or_update', 'create_or_update');
         Route::delete('delete', 'delete');
     });

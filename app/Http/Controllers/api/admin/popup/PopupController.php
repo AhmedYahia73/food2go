@@ -43,7 +43,7 @@ class PopupController extends Controller
         $popup->status = $request->status;
         $popup->save();
 
-        return reponse()->json([
+        return response()->json([
             "success" => "you update status success"
         ]);
     }
