@@ -17,10 +17,14 @@ class Popup extends Model
     protected $appends = ["image_en_link", "image_ar_link"];
 
     public function getImageEnLinkAttribute(){
-        return url('storage/' . $this->attributes['image_en']);
+        if(isset($this->attributes['image_en'])){
+            return url('storage/' . $this->attributes['image_en']);
+        }
     }
 
     public function getImageArLinkAttribute(){
-        return url('storage/' . $this->attributes['image_ar']);
+        if(isset($this->attributes['image_ar'])){
+            return url('storage/' . $this->attributes['image_ar']);
+        }
     }
 }

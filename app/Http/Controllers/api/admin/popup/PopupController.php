@@ -19,12 +19,12 @@ class PopupController extends Controller
         ->first();
 
         return response()->json([
-            'image_en' => $popup->image_en_link,
-            'image_ar' => $popup->image_ar_link,
-            'name_en' => $popup->name_en,
-            'name_ar' => $popup->name_ar,
-            'link' => $popup->link,
-            'status' => $popup->status,
+            'image_en' => $popup->image_en_link ?? null,
+            'image_ar' => $popup->image_ar_link ?? null,
+            'name_en' => $popup->name_en ?? null,
+            'name_ar' => $popup->name_ar ?? null,
+            'link' => $popup->link ?? null,
+            'status' => $popup->status ?? null,
         ]);
     }
 
