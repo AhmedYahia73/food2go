@@ -18,7 +18,6 @@ trait OrderFormat
         'branch', 'delivery'])
         ->where("id", $id)
         ->first();
-        $address = $order->address;
         if(empty($order->order_details_data)){
             return null;
         }
@@ -169,20 +168,20 @@ trait OrderFormat
                 "phone" => $order?->delivery?->phone ?? null,
             ],
             "address" => [
-                "id" => $address,
-                "address" => $address?->address ?? null,
-                "street" => $address?->street ?? null,
-                "building_num" => $address?->building_num ?? null,
-                "floor_num" => $address?->floor_num ?? null,
-                "apartment" => $address?->apartment ?? null,
-                "additional_data" => $address?->additional_data ?? null,
-                "type" => $address?->type ?? null,
-                "map" => $address?->map ?? null,
+                "id" => $order?->address?->id ?? null,
+                "address" => $order?->address?->address ?? null,
+                "street" => $order?->address?->street ?? null,
+                "building_num" => $order?->address?->building_num ?? null,
+                "floor_num" => $order?->address?->floor_num ?? null,
+                "apartment" => $order?->address?->apartment ?? null,
+                "additional_data" => $order?->address?->additional_data ?? null,
+                "type" => $order?->address?->type ?? null,
+                "map" => $order?->address?->map ?? null,
                 "zone" => [
-                    "zone" => $address?->zone?->zone ?? null,
-                    "price" => $address?->zone?->price ?? null,
+                    "zone" => $order?->address?->zone?->zone ?? null,
+                    "price" => $order?->address?->zone?->price ?? null,
                 ],
-                "city" => $address?->zone?->city?->name ?? null,
+                "city" => $order?->address?->zone?->city?->name ?? null,
             ],  
         ];
         
