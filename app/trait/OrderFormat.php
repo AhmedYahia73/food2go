@@ -186,7 +186,7 @@ trait OrderFormat
             ],  
         ];
         
-        return $order;
+        return $order_arr;
     }
 
     // ___________________________________________________________
