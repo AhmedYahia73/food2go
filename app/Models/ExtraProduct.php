@@ -20,6 +20,10 @@ class ExtraProduct extends Model
         'group_id'
     ];
 
+    public function group_price(){
+        return $this->hasMany(GroupExtraPrice::class, 'extra_id');
+    }
+
     public function parent_extra(){
         return $this->belongsTo(ExtraProduct::class, 'extra_id');
     }
@@ -39,6 +43,14 @@ class ExtraProduct extends Model
     
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
+    }
+    
+    public function option(){
+        return $this->belongsTo(OptionProduct::class, 'option_id');
+    }
+    
+    public function variation(){
+        return $this->belongsTo(VariationProduct::class, 'variation_id');
     }
 
     public function scopeWithLocale($query, $locale = null)
