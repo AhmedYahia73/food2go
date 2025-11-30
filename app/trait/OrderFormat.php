@@ -51,6 +51,7 @@ trait OrderFormat
                     "id" => $element['addon']['id'],
                     "name" => $name,
                     "price" => $element['addon']['price'],
+                    "count" => $element['count'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
