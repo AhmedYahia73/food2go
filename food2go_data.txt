@@ -64,7 +64,7 @@ INSERT INTO `user_roles` (`id`, `user_position_id`, `role`, `action`, `created_a
 
 
 
-INSERT INTO `admins` (`id`, `name`, `email`, `phone`, `image`, `password`, `user_position_id`, `status`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`) VALUES (NULL, 'admin', 'admin@gmail.com', '123', NULL, '$2y$12$gseo6HdE3gDOo1SJKETwRekRy6v037BoGCsEApK4iX7bvggNg.2eK', '1', '1', NULL, NULL, NULL, NULL);
+INSERT INTO `admins` (`id`, `name`, `email`, `phone`, `image`, `password`, `user_position_id`, `status`, `email_verified_at`, `remember_token`, `created_at`, `updated_at`, `admin_position`) VALUES (NULL, 'admin', 'admin@gmail.com', '123', NULL, '$2y$12$gseo6HdE3gDOo1SJKETwRekRy6v037BoGCsEApK4iX7bvggNg.2eK', '1', '1', NULL, NULL, NULL, NULL, 'super_admin');
 
 
 

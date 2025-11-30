@@ -140,6 +140,8 @@ use App\Http\Controllers\api\admin\group_price\DueGroupController;
 use App\Http\Controllers\api\admin\delivery_balance\DeliveryBalanceController;
 use App\Http\Controllers\api\admin\customer\RestoreCustomerController;
 
+use App\Http\Controllers\api\admin\popup\PopupController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
@@ -154,6 +156,14 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('restore_user')->group(function(){
         Route::get('/', 'view')->middleware('can:view_restore');
         Route::put('/{id}', 'restore')->middleware('can:restore');
+    });
+
+     Route::controller(PopupController::class)
+    ->prefix('popup')->group(function(){
+        Route::get('/', 'view');
+        Route::put('status/{id}', 'status');
+        Route::post('create_or_update', 'create_or_update');
+        Route::delete('delete', 'delete');
     });
     
     Route::controller(DeliveryBalanceController::class)

@@ -53,6 +53,16 @@ class CaptainMakeOrderController extends Controller
     use PlaceOrder;
     use PaymentPaymob;
 
+    public function discount_list(Request $request){
+        $discount_list = $this->discount
+        ->select("id", "name", "type", "amount")
+        ->get();
+
+        return response()->json([
+            'discount_list' => $discount_list
+        ]);
+    }
+
     public function my_lists(Request $request){
         // /captain/my_lists
         
