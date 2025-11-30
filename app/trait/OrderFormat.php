@@ -167,7 +167,7 @@ trait OrderFormat
                 "l_name" => $order?->delivery?->l_name ?? null,
                 "phone" => $order?->delivery?->phone ?? null,
             ],
-            "my_address" => [
+            "address" => [
                 "id" => $order?->address?->id ?? null,
                 "address" => $order?->address?->address ?? null,
                 "street" => $order?->address?->street ?? null,
@@ -185,7 +185,7 @@ trait OrderFormat
             ],  
         ];
         
-        return $order_arr;
+        return $order;
     }
 
     // ___________________________________________________________
@@ -343,7 +343,7 @@ trait OrderFormat
                 "phone" => $order?->delivery?->phone ?? null,
                 "count_orders" => $order?->delivery?->count_orders ?? null,
             ],
-            "my_address" => [
+            "address" => [
                 "id" => $order?->address?->id ?? null,
                 "address" => $order?->address?->address ?? null,
                 "street" => $order?->address?->street ?? null,
@@ -617,7 +617,7 @@ trait OrderFormat
                 "phone" => $order?->delivery?->phone ?? null,
                 "count_orders" => $order?->delivery?->count_orders ?? null,
             ],
-            "my_address" => [
+            "address" => [
                 "id" => $order?->address?->id ?? null,
                 "address" => $order?->address?->address ?? null,
                 "street" => $order?->address?->street ?? null,
@@ -632,7 +632,7 @@ trait OrderFormat
                     "price" => $order?->address?->zone?->price ?? null,
                 ],
                 "city" => $order?->address?->zone?->city?->name ?? null,
-            ], 
+            ],  
         ];
         
         return $order_arr;
