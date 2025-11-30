@@ -141,6 +141,7 @@ use App\Http\Controllers\api\admin\delivery_balance\DeliveryBalanceController;
 use App\Http\Controllers\api\admin\customer\RestoreCustomerController;
 
 use App\Http\Controllers\api\admin\popup\PopupController;
+use App\Http\Controllers\api\admin\free_discount\FreeDiscountController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -152,6 +153,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     // جديد تحت التجربة 
     // DeliveryBalanceGate, RestoreGate, DueGroupGate, CRUDGate
+    Route::controller(FreeDiscountController::class)
+    ->prefix('restore_user')->group(function(){
+        Route::get('/', 'view');
+        Route::post('/create_update', 'create_update');
+    });
+
     Route::controller(RestoreCustomerController::class)
     ->prefix('restore_user')->group(function(){
         Route::get('/', 'view')->middleware('can:view_restore');
