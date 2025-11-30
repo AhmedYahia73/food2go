@@ -3,7 +3,10 @@
 namespace App\trait;
 
 use App\Models\Order; 
-use App\Models\TranslationTbl; 
+use App\Models\TranslationTbl;
+use App\Models\GroupProduct;
+use App\Models\GroupPrice;
+use App\Models\GroupOptionPrice;
  
 use Illuminate\Http\Request;
 
@@ -470,6 +473,166 @@ trait OrderFormat
             "take_away_status" => $order->take_away_status,
             "delivery_status" => $order->delivery_status,
             "order_number" => $order->order_number, 
+        ];
+        
+        return $order_arr;
+    }
+
+    // ___________________________________________________________
+
+    public function checkout_format($order, $id, $locale){
+        if(empty($order->order_details_data)){
+            return null;
+        }
+        $precentage = 0;
+        $group_product = GroupProduct::
+        where("id", $order->module_id)
+        ->first();
+        if (!empty($group_product)) {
+            $precentage = $group_product->increase_precentage - $group_product->decrease_precentage;
+        }
+
+        $products = [];
+        foreach ($order->order_details_data as $item) {
+            # TranslationTbl
+            $extras = [];
+            $addons = [];
+            $excludes = [];
+            $variations = [];
+            $product = [];
+            $product_price = 0;
+            foreach ($item['extras'] as $element) {
+                // هيتعمله سعر خاص
+                $product_price += $element['price'];
+            }
+            foreach ($item['addons'] as $element) {
+                // هيتعمله سعر خاص
+                $name = TranslationTbl::
+                where("key", $element['addon']['name'])
+                ->where("locale", $locale)
+                ->orderByDesc("id")
+                ->first()?->value ?? $element['addon']['name'];
+                $addons[] = [
+                    "id" => $element['addon']['id'],
+                    "name" => $name,
+                    "price" => $element['addon']['price'],
+                ];
+            } 
+            foreach ($item['variations'] as $element) { 
+                $options = [];
+                foreach ($element['options'] as $value) { 
+                    $option_price_item = GroupOptionPrice::
+                    where("option_id", $value['id'])
+                    ->where("group_product_id", $order->module_id)
+                    ->first();
+                    if (!empty($option_price_item)) {
+                        $price = $option_price_item->price;
+                    }
+                    else{
+                        $price = $value['price'] + $value['price'] * $precentage / 100;
+                    }
+                    $product_price += $price; 
+                } 
+            }
+            if(isset($item['product'][0]['product'])){
+                $price = $item['product'][0]['product']['price'];
+                $count = $item['product'][0]['count'];
+                $product_price_item = GroupPrice::
+                where("product_id", $item['product'][0]['product']['id'])
+                ->where("group_product_id", $order->module_id)
+                ->first();
+                if (!empty($product_price_item)) {
+                    $price = $product_price_item->price;
+                }
+                else{
+                    $price = $price + $price * $precentage / 100;
+                }
+                $product_price += $price;
+                $name = TranslationTbl::
+                where("key", $item['product'][0]['product']['name'])
+                ->where("locale", $locale)
+                ->orderByDesc("id")
+                ->first()?->value ?? $item['product'][0]['product']['name'];
+                $product = [
+                    'id' => $item['product'][0]['product']['id'],
+                    'name' => $name,
+                    'price' => $product_price,
+                    'total_price' => $product_price * $count,
+                    'count' => $count,
+                ];
+            }  
+            $product_item = [
+                "extras" => $extras,
+                "addons" => $addons,
+                "addons" => $addons,
+                "variations" => $variations,
+                "product" => $product,
+            ];
+            $products[] = $product_item;
+        }
+        $order_arr = [
+            "id" => $order->id,
+            "order_details" => $products,
+            "amount" => $order->amount,
+            "order_status" => $order->order_status,
+            "payment" => $order->payment_method_id !== 2 ? "Paid" : "UnPaid",
+            "order_type" => $order->order_type,
+            "total_tax" => $order->total_tax,
+            "total_discount" => $order->total_discount,
+            "coupon_discount" => $order->coupon_discount,
+            "order_number" => $order->order_number,
+            "date" => $order->created_at,
+            "status_payment" => $order->status_payment,
+            "branch" => [
+                "id" => $order?->branch?->id ?? null,
+                "name" => $order?->branch
+                ?->translations()
+                ?->where("key", $order?->branch?->name)
+                ?->where("locale", $locale)
+                ?->first()
+                ?->value ?? $order?->branch?->name ?? null,
+                "address" => $order?->branch?->address ?? null,
+                "email" => $order?->branch?->email ?? null,
+                "phone" => $order?->branch?->phone ?? null,
+                "count_orders" => $order?->branch?->count_orders ?? null,
+            ],
+            "user" => isset($order?->user?->id) ? [
+                "id" => $order?->user?->id ?? null,
+                "f_name" => $order?->user?->f_name ?? null,
+                "l_name" => $order?->user?->l_name ?? null,
+                "email" => $order?->user?->email ?? null,
+                "phone" => $order?->user?->phone ?? null,
+                "phone_2" => $order?->user?->phone_2 ?? null,
+                "name" => $order?->user?->name ?? null,
+                "count_orders" => $order?->user?->count_orders ?? null,
+            ] : null,
+            "admin" => [
+                "id" => $order?->admin?->id ?? null,
+                "name" => $order?->admin?->name ?? null,
+            ],
+            "delivery" => [
+                "id" => $order?->delivery?->id ?? null,
+                "f_name" => $order?->delivery?->f_name ?? null,
+                "l_name" => $order?->delivery?->l_name ?? null,
+                "phone" => $order?->delivery?->phone ?? null,
+                "count_orders" => $order?->delivery?->count_orders ?? null,
+            ],
+            "address" => [
+                "id" => $order?->address?->id ?? null,
+                "address" => $order?->address?->address ?? null,
+                "street" => $order?->address?->street ?? null,
+                "building_num" => $order?->address?->building_num ?? null,
+                "floor_num" => $order?->address?->floor_num ?? null,
+                "apartment" => $order?->address?->apartment ?? null,
+                "additional_data" => $order?->address?->additional_data ?? null,
+                "type" => $order?->address?->type ?? null,
+                "map" => $order?->address?->map ?? null,
+                "zone" => [
+                    "zone" => $order?->address?->zone?->zone ?? null,
+                    "price" => $order?->address?->zone?->price ?? null,
+                ],
+                "city" => $order?->address?->zone?->city?->name ?? null,
+            ], 
         ];
         
         return $order_arr;

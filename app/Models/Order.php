@@ -69,6 +69,7 @@ class Order extends Model
         'void_financial_id',
         'is_void',
         'is_cancel_evaluate',
+        'module_id',
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];

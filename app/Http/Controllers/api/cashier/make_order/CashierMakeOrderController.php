@@ -415,7 +415,8 @@ class CashierMakeOrderController extends Controller
         if($request->order_pending){
             return response()->json([
                 'success' => "You draft order success", 
-                'order_number' => $order['payment']['order_number']
+                'order_number' => $order['payment']['order_number'],
+                'order_id' => $order['payment']['id'],
             ]); 
         }
         $locale = Setting::
@@ -424,6 +425,8 @@ class CashierMakeOrderController extends Controller
         $financials = $this->get_financial($request, $locale);
         $address = $order['order']->address;
         $customer = $order['order']->user;
+        $delivery_fees = $order['order']->load('address.zone');
+        $delivery_fees = $delivery_fees?->address?->zone?->price ?? 0;
         if($request->module_id){
             $this->module_financial($request->amount, $request->module_id);
         }
@@ -432,8 +435,10 @@ class CashierMakeOrderController extends Controller
             "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
             'order_number' => $order['order']->order_number,
+            'order_id' => $order['order']->id,
             "financials" => $financials,
             "address" => $address,
+            "delivery_fees" => $delivery_fees,
             "customer" => $customer,
         ]);
     }
@@ -659,7 +664,8 @@ class CashierMakeOrderController extends Controller
         if($request->order_pending){
             return response()->json([
                 'success' => "You draft order success", 
-                'order_number' => $order['order']['order_number']
+                'order_number' => $order['order']['order_number'],
+                'order_id' => $order['order']['id'],
             ]); 
         }
         $locale = Setting::
@@ -952,7 +958,8 @@ class CashierMakeOrderController extends Controller
         if($request->order_pending){
             return response()->json([
                 'success' => "You draft order success", 
-                'order_number' => $order['payment']['order_number']
+                'order_number' => $order['payment']['order_number'],
+                'order_id' => $order['payment']['id'],
             ]); 
         }
         $locale = Setting::
@@ -966,6 +973,7 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number'],
+            'order_id' => $order['payment']['id'],
             "financials" => $financials
         ]);
     }
@@ -1030,6 +1038,7 @@ class CashierMakeOrderController extends Controller
             return response()->json($order, 400);
         }
         $order_number = $order['payment']['order_number'];
+        $order_id = $order['payment']['id'];
         $order['payment']['cart'] = $order['payment']['order_details'];
         // $order = $this->order_format(($order['payment']), 0);
       // Pull Pecipe
@@ -1061,7 +1070,8 @@ class CashierMakeOrderController extends Controller
         if($request->order_pending){
             return response()->json([
                 'success' => "You draft order success", 
-                'order_number' => $order['payment']['order_number']
+                'order_number' => $order['payment']['order_number'],
+                'order_id' => $order_id,
             ]); 
         }
         $locale = Setting::
@@ -1075,6 +1085,8 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             "success" => $this->checkout_data($request),
             'order_number' => $order_number,
+            'order_id' => $order_id,
+            'order_id' => $order_number,
             'financials' => $financials,
         ]);
     } 
