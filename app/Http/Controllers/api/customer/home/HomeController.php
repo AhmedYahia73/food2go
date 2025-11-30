@@ -26,6 +26,7 @@ use App\Models\Policy;
 use App\Models\SmsBalance;
 use App\Models\PaymentMethod; 
 use App\Models\Addon;
+use App\Models\Popup;
 
 class HomeController extends Controller
 {
@@ -35,7 +36,32 @@ class HomeController extends Controller
     private Address $address, private ScheduleSlot $schedule_list,
     private MainData $main_data, private Policy $policies,
     private MenueImage $menue_image, private SmsBalance $sms_balance,
-    private Addon $addons, private PaymentMethod $payment_method){}
+    private Addon $addons, private PaymentMethod $payment_method,
+    private Popup $popup){}
+
+    public function show_popup(Request $request){
+        $locale = $request->locale ?? "en";
+        $popup = $this->popup
+        ->where('status', 1)
+        ->first();
+
+        if(!empty($popup)){
+            return response()->json([
+                "show_popup" => true,
+                "image" => $locale == "en" ? $popup->image_en_link : $popup->image_ar_link,
+                "name" => $locale == "en" ? $popup->name_en : $popup->name_ar,
+                "link" => $popup->link,
+            ]);
+        }
+        else{
+            return response()->json([
+                "show_popup" => false,
+                "image" => null,
+                "name" => null,
+                "link" => null,
+            ]);
+        }
+    }
 
     public function mainData(){
         // https://bcknd.food2go.online/customer/home/main_data
