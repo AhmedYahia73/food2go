@@ -344,7 +344,7 @@ trait OrderFormat
                 "count_orders" => $order?->delivery?->count_orders ?? null,
             ],
             "address" => [
-                "id" => $order?->address?->id ?? null,
+                "id" => $order?->address ?? null,
                 "address" => $order?->address?->address ?? null,
                 "street" => $order?->address?->street ?? null,
                 "building_num" => $order?->address?->building_num ?? null,
@@ -618,7 +618,7 @@ trait OrderFormat
                 "count_orders" => $order?->delivery?->count_orders ?? null,
             ],
             "address" => [
-                "id" => $order?->address,
+                "id" => $order?->address?->id ?? null,
                 "address" => $order?->address?->address ?? null,
                 "street" => $order?->address?->street ?? null,
                 "building_num" => $order?->address?->building_num ?? null,
