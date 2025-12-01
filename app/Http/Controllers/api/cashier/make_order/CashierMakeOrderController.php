@@ -360,7 +360,7 @@ class CashierMakeOrderController extends Controller
         if($request->module_id && $request->due_module > 0){ 
             $due_module = $this->module_financial($request->due_module, $request->module_id);
             if(!$due_module['success']){
-                return json()->response([
+                return response()->json([
                     'errors' => $due_module['errors']
                 ], 400);
             }
