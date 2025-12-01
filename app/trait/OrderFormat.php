@@ -667,6 +667,7 @@ trait OrderFormat
             "order_time" => $order->created_at->format('h:i A'),
             "date" => $order->created_at,
             "status_payment" => $order->status_payment,
+            "delivery_fees" => $order?->address?->zone?->price ?? null,
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch
