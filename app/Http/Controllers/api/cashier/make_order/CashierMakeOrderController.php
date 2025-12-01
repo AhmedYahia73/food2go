@@ -1682,7 +1682,7 @@ class CashierMakeOrderController extends Controller
             pluck("email");
             foreach ($emails as $key => $item) {
                 Mail::to($item)->send(
-                    new CashierLimitExceeded(auth()->user()->user_name, $total, $amount)
+                    new CashierLimitExceeded(auth()->user()->user_name, $my_shift_discount, $amount)
                 );
             }
         }
