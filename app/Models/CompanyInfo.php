@@ -29,6 +29,7 @@ class CompanyInfo extends Model
         'order_online',
         'android_switch',
         'ios_switch',
+        'preparation_num_status',
         'cover_app_image',
     ];
     protected $appends = ['logo_link', 'fav_icon_link', 'cover_app_image_link'];

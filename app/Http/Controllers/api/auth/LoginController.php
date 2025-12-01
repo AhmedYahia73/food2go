@@ -245,11 +245,14 @@ class LoginController extends Controller
                     ['token' => $request->fcm_token]
                 ); 
             }
+            $logo_link = $this->company_info
+            ->first()?->logo_link;
 
             return response()->json([
                 'admin' => $user,
                 'token' => $user->token,
                 'role' => $role,
+                'logo_link' => $logo_link,
             ], 200);
         }
         else { 
@@ -313,10 +316,14 @@ class LoginController extends Controller
             $user->save();
             $user->role = 'captain_order';
             $user->token = $user->createToken('captain_order')->plainTextToken;
+            $preparation_num_status = $this->company_info
+            ->first()?->preparation_num_status;
+
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
                 'role' => $user->role,
+                'preparation_num_status' => $preparation_num_status,
             ], 200);
         }
         else { 
@@ -460,12 +467,16 @@ class LoginController extends Controller
             $user->token = $user->createToken('cashier')->plainTextToken;
             $resturant_name = $this->company_info
             ->first();
+            $preparation_num_status = $this->company_info
+            ->first()?->preparation_num_status;
+            
             return response()->json([
                 'cashier' => $user,
                 'token' => $user->token,
                 'start_shift' => $start_shift,
                 'financial_account' => $financial_account,
-                "resturant_name" => $resturant_name?->name
+                "resturant_name" => $resturant_name?->name,
+                'preparation_num_status' => $preparation_num_status,
             ], 200);
         }
         else { 
