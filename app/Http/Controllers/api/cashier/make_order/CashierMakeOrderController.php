@@ -13,6 +13,8 @@ use App\Http\Requests\cashier\TakawayRequest;
 use App\Http\Requests\cashier\DeliveryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
+use App\Mail\CashierLimitExceeded;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 // ____________________________________________________
@@ -47,11 +49,13 @@ use App\Models\CafeTable;
 use App\Models\TimeSittings;
 use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
+use App\Models\CashierShift;
 use App\Models\CashierMan;
 use App\Models\Delivery;
 use App\Models\DiscountModule;
 use App\Models\CheckoutRequest;// dicount_id
 use App\Models\FinantiolAcounting;
+use App\Models\DiscountEmail;
 use App\Models\GroupProduct;
 use Illuminate\Support\Facades\Storage;
 
@@ -339,7 +343,7 @@ class CashierMakeOrderController extends Controller
             'shift' => $request->user()->shift_number,
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
-        ]); 
+        ]);  
         if($request->dicount_id){
             if(!$request->user()->discount_perimission){
                 return response()->json([
@@ -368,6 +372,12 @@ class CashierMakeOrderController extends Controller
                     "errors" => "user is exceed the alloed limit"
                 ], 400); 
             }
+        }
+        $free_discount = $this->free_discount($request->free_discount);
+        if(!$free_discount['success']){
+            return response()->json([
+                "errors" => $$free_discount['errors']
+            ], 400);
         }
         $kitchen_items = [];
         $order = $this->delivery_make_order($request);
@@ -609,6 +619,12 @@ class CashierMakeOrderController extends Controller
                 ], 400); 
             }
             $user->increment('due', $due);
+        }
+        $free_discount = $this->free_discount($request->free_discount);
+        if(!$free_discount['success']){
+            return response()->json([
+                "errors" => $$free_discount['errors']
+            ], 400);
         }
         $kitchen_items = [];
         if($request->order_pending){
@@ -879,6 +895,12 @@ class CashierMakeOrderController extends Controller
                 ], 400);
             }
         }
+        $free_discount = $this->free_discount($request->free_discount);
+        if(!$free_discount['success']){
+            return response()->json([
+                "errors" => $$free_discount['errors']
+            ], 400);
+        }
         $tables_ids = $this->cafe_table
         ->where('id', $request->table_id)
         ->orWhere('main_table_id', $request->table_id)
@@ -1028,6 +1050,12 @@ class CashierMakeOrderController extends Controller
                     'errors' => 'Password is wrong'
                 ], 400);
             }
+        }
+        $free_discount = $this->free_discount($request->free_discount);
+        if(!$free_discount['success']){
+            return response()->json([
+                "errors" => $$free_discount['errors']
+            ], 400);
         }
         $order_carts = $this->order_cart
         ->whereIn('id', $request->cart_id)
@@ -1594,5 +1622,43 @@ class CashierMakeOrderController extends Controller
         ->where("id", $module_id)
         ->first();
         $group_products->increment("balance", $amount);
+    }
+
+    public function free_discount($amount){
+        $max_discount_order = $this->settings
+        ->where("name", 'max_discount_order')
+        ->first()?->setting ?? 0;
+        $max_discount_shift = $this->settings
+        ->where("name", 'max_discount_shift')
+        ->first()?->setting ?? 0;
+        $max_discount_order = floatval($max_discount_order);
+        $max_discount_shift = floatval($max_discount_shift);
+        CashierShift::
+        where("shift", auth()->user()->shift_number)
+        ->where("cashier_man_id", auth()->user()->id)
+        ->increment("free_discount", $amount);
+        $my_shift_discount = CashierShift::
+        where("shift", auth()->user()->shift_number)
+        ->where("cashier_man_id", auth()->user()->id)
+        ->first()?->free_discount;
+        if(empty($my_shift_discount)){
+            return [
+                "errors" => "You Out of the shift",
+                "success" => false,
+            ];
+        }
+        if($max_discount_order < $amount || $max_discount_shift < $my_shift_discount){
+            $emails = DiscountEmail::
+            pluck("email");
+            foreach ($emails as $key => $item) {
+                Mail::to($item)->send(
+                    new CashierLimitExceeded(auth()->user()->user_name, $total, $amount)
+                );
+            }
+        }
+
+        return [
+            "success" => true
+        ];
     }
 }
