@@ -245,14 +245,11 @@ class LoginController extends Controller
                     ['token' => $request->fcm_token]
                 ); 
             }
-            $logo_link = $this->company_info
-            ->first()?->logo_link;
 
             return response()->json([
                 'admin' => $user,
                 'token' => $user->token,
                 'role' => $role,
-                'logo_link' => $logo_link,
             ], 200);
         }
         else { 

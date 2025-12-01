@@ -25,7 +25,8 @@ class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Delivery $deliveries, 
     private Branch $branches, private Setting $settings, private User $user,
-    private LogOrder $log_order, private TimeSittings $TimeSittings){}
+    private LogOrder $log_order, private TimeSittings $TimeSittings
+    , private CompanyInfo $company_info){}
     use OrderFormat;
     use Recipe;
 
@@ -1327,8 +1328,12 @@ class OrderController extends Controller
         $locale = $request->locale ?? "en";
         $order = $this->order_details_format($id, $locale);
 
+        $logo_link = $this->company_info
+        ->first()?->logo_link;
+
         return response()->json([
-            'order' => $order
+            'order' => $order,
+            'logo_link' => $logo_link,
         ]);
     }
 
