@@ -31,7 +31,7 @@ class AddressRequest extends FormRequest
             'building_num' => ['required'],
             'floor_num' => ['required'],
             'apartment' => ['required'],
-            'additional_data' => ['required'],
+            'additional_data' => ['sometimes'],
             'type' => ['required'],
             'map' => ['required'], 
         ];
