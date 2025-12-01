@@ -62,12 +62,12 @@
         </p>
 
         <p class="item">
-            <span class="label">Total at Shift:</span>
+            <span class="label">Total Discount at Shift:</span>
             {{ $total }}
         </p>
 
         <p class="item">
-            <span class="label">Amount at This Order:</span>
+            <span class="label">Discounted Order Amount:</span>
             {{ $amount }}
         </p>
 

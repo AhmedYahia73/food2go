@@ -343,7 +343,7 @@ class CashierMakeOrderController extends Controller
             'shift' => $request->user()->shift_number,
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
-        ]);  
+        ]);
         if($request->dicount_id){
             if(!$request->user()->discount_perimission){
                 return response()->json([
@@ -354,6 +354,14 @@ class CashierMakeOrderController extends Controller
             !password_verify($request->input('password'), $request->user()->password)) {
                 return response()->json([
                     'errors' => 'Password is wrong'
+                ], 400);
+            }
+        }
+        if($request->module_id && $request->due_module > 0){ 
+            $due_module = $this->module_financial($request->due_module, $request->module_id);
+            if(!$due_module['success']){
+                return json()->response([
+                    'errors' => $due_module['errors']
                 ], 400);
             }
         }
@@ -437,9 +445,6 @@ class CashierMakeOrderController extends Controller
         $customer = $order['order']->user;
         $delivery_fees = $order['order']->load('address.zone');
         $delivery_fees = $delivery_fees?->address?->zone?->price ?? 0;
-        if($request->module_id){
-            $this->module_financial($request->amount, $request->module_id);
-        }
 
         return response()->json([
             "success" => $this->checkout_data($request),
@@ -608,6 +613,14 @@ class CashierMakeOrderController extends Controller
                 ], 400);
             }
         }
+        if($request->module_id && $request->due_module > 0){ 
+            $due_module = $this->module_financial($request->due_module, $request->module_id);
+            if(!$due_module['success']){
+                return json()->response([
+                    'errors' => $due_module['errors']
+                ], 400);
+            }
+        }
         if($request->due){
             $user = $this->user
             ->where("id", $request->user_id)
@@ -687,10 +700,7 @@ class CashierMakeOrderController extends Controller
         $locale = Setting::
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
-        $financials = $this->get_financial($request, $locale);
-        if($request->module_id){
-            $this->module_financial($request->amount, $request->module_id);
-        }
+        $financials = $this->get_financial($request, $locale);  
 
         return response()->json([ 
             "success" => $this->checkout_data($request),
@@ -864,6 +874,14 @@ class CashierMakeOrderController extends Controller
                 "errors" => "user_id is required"
             ], 400); 
         }
+        if($request->module_id && $request->due_module > 0){ 
+            $due_module = $this->module_financial($request->due_module, $request->module_id);
+            if(!$due_module['success']){
+                return json()->response([
+                    'errors' => $due_module['errors']
+                ], 400);
+            }
+        }
         if($request->due){
             $user = $this->user
             ->where("id", $request->user_id)
@@ -987,11 +1005,8 @@ class CashierMakeOrderController extends Controller
         $locale = Setting::
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
-        $financials = $this->get_financial($request, $locale);
-        if($request->module_id){
-            $this->module_financial($request->amount, $request->module_id);
-        }
-
+        $financials = $this->get_financial($request, $locale); 
+ 
         return response()->json([
             'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number'],
@@ -1020,6 +1035,14 @@ class CashierMakeOrderController extends Controller
             return response()->json([
                 'errors' => $errors,
             ], 400);
+        }
+        if($request->module_id && $request->due_module > 0){ 
+            $due_module = $this->module_financial($request->due_module, $request->module_id);
+            if(!$due_module['success']){
+                return json()->response([
+                    'errors' => $due_module['errors']
+                ], 400);
+            }
         }
         if($request->due && !$request->user_id){ 
             return response()->json([
@@ -1106,10 +1129,7 @@ class CashierMakeOrderController extends Controller
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
-        if($request->module_id){
-            $this->module_financial($request->amount, $request->module_id);
-        }
-        
+ 
         return response()->json([
             "success" => $this->checkout_data($request),
             'order_number' => $order_number,
@@ -1617,11 +1637,21 @@ class CashierMakeOrderController extends Controller
          return $financial_account;
     }
 
-    public function module_financial($amount, $module_id){
+    public function module_financial($due_module, $module_id){
+        
         $group_products = $this->group_products
         ->where("id", $module_id)
         ->first();
-        $group_products->increment("balance", $amount);
+        if($due_module > 0 && (!$group_products || !$group_products->due)){
+            return [
+                "errors" => "Group Module can not be due",
+                "success" => false,
+            ];
+        }
+        $group_products->increment("balance", $due_module);
+        return [ 
+            "success" => true,
+        ];
     }
 
     public function free_discount($amount){

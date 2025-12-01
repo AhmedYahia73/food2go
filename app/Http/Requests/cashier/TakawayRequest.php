@@ -54,6 +54,8 @@ class TakawayRequest extends FormRequest
             'due' => ['required_unless:order_pending,1,true', 'boolean'],
             'user_id' => ['exists:users,id'],
             'dicount_id' => ['exists:discounts,id'],
+            'free_discount' => ['numeric', 'sometimes'],
+            'due_module' => ['numeric', 'sometimes'],
         ];
     }
 

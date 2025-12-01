@@ -42,6 +42,7 @@ class DineinOrderRequest extends FormRequest
             'products.*.price' => ['numeric', 'required'],
             'products.*.addons.*.price' => ['numeric', 'required'],
 
+            'free_discount' => ['numeric', 'sometimes'],
 
             'financials' => ['array'],
             'financials.*.id' => ['required', 'exists:finantiol_acountings,id'],
@@ -52,6 +53,7 @@ class DineinOrderRequest extends FormRequest
             'user_id' => ['exists:users,id'],
             'dicount_id' => ['exists:discounts,id'],
             'due' => ['required', 'boolean'],
+            'due_module' => ['numeric', 'sometimes'],
             'source' => 'sometimes', 
             'table_id' => ['required', 'exists:cafe_tables,id'],
 

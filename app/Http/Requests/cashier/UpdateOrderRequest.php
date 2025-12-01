@@ -42,6 +42,8 @@ class UpdateOrderRequest extends FormRequest
             'financials.*.amount' => ['required_if:order_pending,false', 'numeric'], 
             'financials.*.description' => ['sometimes'], 
             'financials.*.transition_id' => ['sometimes'], 
+            'free_discount' => ['numeric', 'sometimes'],
+            'due_module' => ['numeric', 'sometimes'],
         ];
     }
 }
