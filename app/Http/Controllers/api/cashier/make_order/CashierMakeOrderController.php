@@ -1308,10 +1308,26 @@ class CashierMakeOrderController extends Controller
         ]);
     } 
 
-    public function order_void(Request $request){
+    public function order_void(Request $request){ 
         $validator = Validator::make($request->all(), [
             'cart_ids' => 'required|array',
             'cart_ids.*' => 'exists:order_carts,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $order_cart = $this->order_cart
+        ->whereIn('id', $request->cart_ids)
+        ->where("prepration_status", "!=", "watting")
+        ->first();
+        if(!empty($order_cart)){
+            return response()->json([
+                'errors' => 'Orders must be waiting',
+            ], 400);
+        }
+        $validator = Validator::make($request->all(), [  
             'table_id' => 'required|exists:cafe_tables,id',
             'manager_id' => 'required',
             'manager_password' => 'required', 
