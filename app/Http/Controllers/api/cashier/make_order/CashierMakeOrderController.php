@@ -373,7 +373,7 @@ class CashierMakeOrderController extends Controller
                 ], 400); 
             }
         }
-        $free_discount = $this->free_discount($request->free_discount);
+        $free_discount = $this->free_discount($request->free_discount ?? 0);
         if(!$free_discount['success']){
             return response()->json([
                 "errors" => $$free_discount['errors']
@@ -620,7 +620,7 @@ class CashierMakeOrderController extends Controller
             }
             $user->increment('due', $due);
         }
-        $free_discount = $this->free_discount($request->free_discount);
+        $free_discount = $this->free_discount($request->free_discount ?? 0);
         if(!$free_discount['success']){
             return response()->json([
                 "errors" => $$free_discount['errors']
@@ -895,7 +895,7 @@ class CashierMakeOrderController extends Controller
                 ], 400);
             }
         }
-        $free_discount = $this->free_discount($request->free_discount);
+        $free_discount = $this->free_discount($request->free_discount ?? 0);
         if(!$free_discount['success']){
             return response()->json([
                 "errors" => $$free_discount['errors']
@@ -1051,7 +1051,7 @@ class CashierMakeOrderController extends Controller
                 ], 400);
             }
         }
-        $free_discount = $this->free_discount($request->free_discount);
+        $free_discount = $this->free_discount($request->free_discount ?? 0);
         if(!$free_discount['success']){
             return response()->json([
                 "errors" => $$free_discount['errors']
