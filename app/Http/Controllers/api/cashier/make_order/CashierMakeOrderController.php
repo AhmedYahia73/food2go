@@ -1640,7 +1640,7 @@ class CashierMakeOrderController extends Controller
         $my_shift_discount = CashierShift::
         where("shift", auth()->user()->shift_number)
         ->where("cashier_man_id", auth()->user()->id)
-        ->first();
+        ->first()?->free_discount;
         if(empty($my_shift_discount)){
             return [
                 "errors" => $my_shift_discount,
