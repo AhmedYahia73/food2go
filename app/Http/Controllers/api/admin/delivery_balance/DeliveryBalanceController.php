@@ -326,7 +326,7 @@ class DeliveryBalanceController extends Controller
         $cashier_men = $this->cashier_men
         ->where("id", $request->cashier_man_id)
         ->first(); 
-        $orders = $this->ordersModel
+        $this->ordersModel
         ->where("order_type", "delivery") 
         ->whereIn("id", $request->order_ids) 
         ->update([
