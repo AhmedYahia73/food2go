@@ -136,8 +136,8 @@ trait OrderFormat
             "customer_cancel_reason" => $order->customer_cancel_reason,
             "source" => $order->source,
             "order_date" => $order->created_at->format('Y-m-d'),
-            "order_date" => $order->created_at->format('h:i A'),
-            "time" => $order->status_payment,
+            "order_time" => $order->created_at->format('h:i A'),
+            "status_payment" => $order->status_payment,
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch
@@ -311,7 +311,7 @@ trait OrderFormat
             "customer_cancel_reason" => $order->customer_cancel_reason,
             "source" => $order->source,
             "order_date" => $order->created_at->format('Y-m-d'),
-            "order_date" => $order->created_at->format('h:i A'),
+            "order_time" => $order->created_at->format('h:i A'),
             "status_payment" => $order->status_payment,
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
@@ -588,7 +588,7 @@ trait OrderFormat
             "coupon_discount" => $order->coupon_discount,
             "order_number" => $order->order_number,
             "order_date" => $order->created_at->format('Y-m-d'),
-            "order_date" => $order->created_at->format('h:i A'),
+            "order_time" => $order->created_at->format('h:i A'),
             "date" => $order->created_at,
             "status_payment" => $order->status_payment,
             "branch" => [
