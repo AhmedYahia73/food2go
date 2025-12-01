@@ -135,8 +135,9 @@ trait OrderFormat
             "transaction_id" => $order->transaction_id,
             "customer_cancel_reason" => $order->customer_cancel_reason,
             "source" => $order->source,
-            "order_date" => $order->order_date,
-            "status_payment" => $order->status_payment,
+            "order_date" => $order->created_at->format('Y-m-d'),
+            "order_date" => $order->created_at->format('h:i A'),
+            "time" => $order->status_payment,
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch
@@ -225,6 +226,7 @@ trait OrderFormat
                     "id" => $element['addon']['id'],
                     "name" => $name,
                     "price" => $element['addon']['price'],
+                    "count" => $element['count'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
@@ -308,7 +310,8 @@ trait OrderFormat
             "transaction_id" => $order->transaction_id,
             "customer_cancel_reason" => $order->customer_cancel_reason,
             "source" => $order->source,
-            "order_date" => $order->order_date,
+            "order_date" => $order->created_at->format('Y-m-d'),
+            "order_date" => $order->created_at->format('h:i A'),
             "status_payment" => $order->status_payment,
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
@@ -406,6 +409,7 @@ trait OrderFormat
                     "id" => $element['addon']['id'],
                     "name" => $name,
                     "price" => $element['addon']['price'],
+                    "count" => $element['count'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
@@ -517,6 +521,7 @@ trait OrderFormat
                     "id" => $element['addon']['id'],
                     "name" => $name,
                     "price" => $element['addon']['price'],
+                    "count" => $element['count'],
                 ];
             } 
             foreach ($item['variations'] as $element) { 
@@ -582,6 +587,8 @@ trait OrderFormat
             "total_discount" => $order->total_discount,
             "coupon_discount" => $order->coupon_discount,
             "order_number" => $order->order_number,
+            "order_date" => $order->created_at->format('Y-m-d'),
+            "order_date" => $order->created_at->format('h:i A'),
             "date" => $order->created_at,
             "status_payment" => $order->status_payment,
             "branch" => [
