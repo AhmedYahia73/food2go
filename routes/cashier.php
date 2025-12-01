@@ -86,6 +86,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/delivery', 'delivery');
         Route::post('/update_order/{id}', 'update_order');
         Route::put('/status/{id}', 'status');
+        Route::get('/order_checkout/{id}', 'order_checkout');
     });
 
     Route::controller(GroupProductController::class)

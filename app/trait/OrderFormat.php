@@ -7,6 +7,8 @@ use App\Models\TranslationTbl;
 use App\Models\GroupProduct;
 use App\Models\GroupPrice;
 use App\Models\GroupOptionPrice;
+use App\Models\GroupAddonPrice;
+use App\Models\GroupExtraPrice;
  
 use Illuminate\Http\Request;
 
@@ -507,11 +509,54 @@ trait OrderFormat
             $product = [];
             $product_price = 0;
             foreach ($item['extras'] as $element) {
-                // هيتعمله سعر خاص
-                $product_price += $element['price'];
+                // هيتعمله سعر خاص 
+                $extra_price_item = GroupExtraPrice::
+                where("extra_id", $element['id'])
+                ->where("group_product_id", $order->module_id)
+                ->first();
+                if (!empty($extra_price_item)) {
+                    $extra_price = $extra_price_item->price;
+                }
+                else{
+                    $extra_price = $element['price'] + $element['price'] * $precentage / 100;
+                }
+                $product_price += $extra_price;
+
+                $name = TranslationTbl::
+                where("key", $element['name'])
+                ->where("locale", $locale)
+                ->orderByDesc("id")
+                ->first()?->value ?? $element['name'];
+                $extras[] = [
+                    "id" => $element['id'],
+                    "name" => $name,
+                ];
+            }
+            foreach ($item['excludes'] as $element) {
+                $name = TranslationTbl::
+                where("key", $element['name'])
+                ->where("locale", $locale)
+                ->orderByDesc("id")
+                ->first()?->value ?? $element['name'];
+                $excludes[] = [
+                    "id" => $element['id'],
+                    "name" => $name,
+                ];
             }
             foreach ($item['addons'] as $element) {
                 // هيتعمله سعر خاص
+                
+                $addon_price_item = GroupAddonPrice::
+                where("addon_id", $element['addon']['id'])
+                ->where("group_product_id", $order->module_id)
+                ->first();
+                if (!empty($addon_price_item)) {
+                    $addon_price = $addon_price_item->price;
+                }
+                else{
+                    $addon_price = $element['addon']['price'] + $element['addon']['price'] * $precentage / 100;
+                }
+
                 $name = TranslationTbl::
                 where("key", $element['addon']['name'])
                 ->where("locale", $locale)
@@ -520,13 +565,33 @@ trait OrderFormat
                 $addons[] = [
                     "id" => $element['addon']['id'],
                     "name" => $name,
-                    "price" => $element['addon']['price'],
+                    "price" => $addon_price,
                     "count" => $element['count'],
+                    "total" => $addon_price * $element['count'],
                 ];
+                // Addon , Extra
+                
             } 
             foreach ($item['variations'] as $element) { 
+                
+                $name = TranslationTbl::
+                where("key", $element['variation']['name'])
+                ->where("locale", $locale)
+                ->orderByDesc("id")
+                ->first()?->value ?? $element['variation']['name'];
                 $options = [];
-                foreach ($element['options'] as $value) { 
+                foreach ($element['options'] as $value) {
+                    $option_name = TranslationTbl::
+                    where("key", $value['name'])
+                    ->where("locale", $locale)
+                    ->orderByDesc("id")
+                    ->first()?->value ?? $value['name'];
+                    $options[] = [
+                        "id" => $value['id'],
+                        "name" => $option_name,
+                        "price" => $value['price'],
+                        "total_option_price" => $value['total_option_price'],
+                    ];
                     $option_price_item = GroupOptionPrice::
                     where("option_id", $value['id'])
                     ->where("group_product_id", $order->module_id)
@@ -538,7 +603,13 @@ trait OrderFormat
                         $price = $value['price'] + $value['price'] * $precentage / 100;
                     }
                     $product_price += $price; 
-                } 
+                }
+                $variations[] = [
+                    "id" => $element['variation']['id'],
+                    "name" => $name,
+                    //"price" => $element['variation']['price'],
+                    "options" => $options,
+                ]; 
             }
             if(isset($item['product'][0]['product'])){
                 $price = $item['product'][0]['product']['price'];
@@ -570,7 +641,7 @@ trait OrderFormat
             $product_item = [
                 "extras" => $extras,
                 "addons" => $addons,
-                "addons" => $addons,
+                "excludes" => $excludes,
                 "variations" => $variations,
                 "product" => $product,
             ];

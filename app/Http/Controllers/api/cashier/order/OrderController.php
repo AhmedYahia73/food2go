@@ -44,6 +44,18 @@ class OrderController extends Controller
     use POS;
     use OrderFormat;
 
+    public function order_checkout(Request $request, $id){
+        $locale = $request->locale ?? "en";
+        $order = $this->orders
+        ->where("id", $id)
+        ->first();
+        $order_checkout = $this->checkout_format($order, $id, $locale);
+
+        return response()->json([
+            "order_checkout" => $order_checkout
+        ]);
+    }
+
     public function pos_orders(Request $request){
         $validator = Validator::make($request->all(), [
             'password' => 'required',
