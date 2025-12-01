@@ -19,6 +19,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     ->group(function(){
         Route::get('/discount_list', 'discount_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/my_lists', 'my_lists');
+        Route::post('/preparation_num', 'preparation_num');
         Route::get('/my_selection_lists', 'my_selection_lists');
         Route::get('/product_in_category/{id}', 'product_in_category')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
 

@@ -53,6 +53,29 @@ class CaptainMakeOrderController extends Controller
     use PlaceOrder;
     use PaymentPaymob;
 
+
+    public function preparation_num(Request $request){ 
+        $validator = Validator::make($request->all(), [
+            'preparation_num' => 'required|numeric',
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $cafe_table = $this->cafe_table
+        ->where("id", $request->table_id)
+        ->update([
+            "preparation_num" => $request->preparation_num
+        ]);
+
+        return response()->json([
+            "success" => "You put prepration number success"
+        ]);
+    }
+    
     public function discount_list(Request $request){
         $discount_list = $this->discount
         ->select("id", "name", "type", "amount")
