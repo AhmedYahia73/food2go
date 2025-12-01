@@ -376,7 +376,7 @@ class CashierMakeOrderController extends Controller
         $free_discount = $this->free_discount($request->free_discount ?? 0);
         if(!$free_discount['success']){
             return response()->json([
-                "errors" => $$free_discount['errors']
+                "errors" => $free_discount['errors']
             ], 400);
         }
         $kitchen_items = [];
@@ -623,7 +623,7 @@ class CashierMakeOrderController extends Controller
         $free_discount = $this->free_discount($request->free_discount ?? 0);
         if(!$free_discount['success']){
             return response()->json([
-                "errors" => $$free_discount['errors']
+                "errors" => $free_discount['errors']
             ], 400);
         }
         $kitchen_items = [];
@@ -898,7 +898,7 @@ class CashierMakeOrderController extends Controller
         $free_discount = $this->free_discount($request->free_discount ?? 0);
         if(!$free_discount['success']){
             return response()->json([
-                "errors" => $$free_discount['errors']
+                "errors" => $free_discount['errors']
             ], 400);
         }
         $tables_ids = $this->cafe_table
@@ -1054,7 +1054,7 @@ class CashierMakeOrderController extends Controller
         $free_discount = $this->free_discount($request->free_discount ?? 0);
         if(!$free_discount['success']){
             return response()->json([
-                "errors" => $$free_discount['errors']
+                "errors" => $free_discount['errors']
             ], 400);
         }
         $order_carts = $this->order_cart
