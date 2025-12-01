@@ -653,8 +653,7 @@ trait OrderFormat
         }
         $order_arr = [
             "id" => $order->id,
-            "order_details" => $products,
-            'total_price_calculated' => $total_price_calculated,
+            "order_details" => $products, 
             "amount" => $order->amount,
             "order_status" => $order->order_status,
             "payment" => $order->payment_method_id !== 2 ? "Paid" : "UnPaid",
