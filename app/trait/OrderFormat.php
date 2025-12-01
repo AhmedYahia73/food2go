@@ -500,6 +500,7 @@ trait OrderFormat
         }
 
         $products = [];
+        $total_price_calculated = 0;
         foreach ($order->order_details_data as $item) {
             # TranslationTbl
             $extras = [];
@@ -569,6 +570,7 @@ trait OrderFormat
                     "count" => $element['count'],
                     "total" => $addon_price * $element['count'],
                 ];
+                $total_price_calculated += $addon_price * $element['count'];
                 // Addon , Extra
                 
             } 
@@ -637,6 +639,8 @@ trait OrderFormat
                     'total_price' => $product_price * $count,
                     'count' => $count,
                 ];
+                
+                $total_price_calculated += $product_price * $count;
             }  
             $product_item = [
                 "extras" => $extras,
@@ -650,6 +654,7 @@ trait OrderFormat
         $order_arr = [
             "id" => $order->id,
             "order_details" => $products,
+            'total_price_calculated' => $total_price_calculated,
             "amount" => $order->amount,
             "order_status" => $order->order_status,
             "payment" => $order->payment_method_id !== 2 ? "Paid" : "UnPaid",
