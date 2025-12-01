@@ -17,6 +17,7 @@ use App\Models\Setting;
 use App\Models\LogOrder;
 use App\Models\User;
 use App\Models\TimeSittings; 
+use App\Models\CompanyInfo; 
 
 use App\trait\Recipe;
 use App\trait\OrderFormat;
