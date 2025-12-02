@@ -71,6 +71,7 @@ class Order extends Model
         'is_cancel_evaluate',
         'free_discount',
         'module_id',
+        'module_order_number',
         'due_module',
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];

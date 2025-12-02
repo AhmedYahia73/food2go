@@ -82,23 +82,40 @@ class HomeController extends Controller
     }
 
     public function cashier_data(Request $request){
+        
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
         $orders = $this->order
         ->where('pos', 1)
         ->where('order_active', 1)
+        ->with("branch:id,name,food_preparion_time")
         ->where('cashier_man_id', $request->user()->id)
         ->orderByDesc("id")
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($delivery_time){
             $order_status = null;
             if($item->order_type == "take_away"){
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                 $order_status = $item->take_away_status;
             }
             elseif($item->order_type == "delivery"){
+                $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                $time2 = Carbon::parse($delivery_time);
+                $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                $result = gmdate('i:s', $totalSeconds);
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
                 $order_status = $item->delivery_status;
+            }
+            elseif ($item->order_type == "dine_in") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
             }
             return [
                 "id" => $item->id,
                 "order_number" => $item->order_number,
+                'food_preparion_time' => $food_preparion_time,
                 "created_at" => $item->created_at,
                 "order_details" => $item->order_details,  
                 "order_type" => $item->order_type, 

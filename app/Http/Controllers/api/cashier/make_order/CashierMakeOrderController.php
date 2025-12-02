@@ -147,7 +147,7 @@ class CashierMakeOrderController extends Controller
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number')
         ->where('cashier_man_id', $request->user()->id)
         ->orderByDesc('id')
         ->whereBetween('created_at', [$start, $end])
@@ -158,7 +158,7 @@ class CashierMakeOrderController extends Controller
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number')
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'delivery')
@@ -170,7 +170,7 @@ class CashierMakeOrderController extends Controller
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number')
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'take_away')
@@ -182,7 +182,7 @@ class CashierMakeOrderController extends Controller
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number')
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'dine_in')
@@ -194,7 +194,7 @@ class CashierMakeOrderController extends Controller
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number')
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'car_slow')
@@ -212,7 +212,7 @@ class CashierMakeOrderController extends Controller
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number')
         ->orderByDesc('id')
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'delivery')
