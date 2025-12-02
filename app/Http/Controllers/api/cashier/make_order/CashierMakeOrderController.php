@@ -455,6 +455,7 @@ class CashierMakeOrderController extends Controller
             "address" => $address,
             "delivery_fees" => $delivery_fees,
             "customer" => $customer,
+            "module_order_number" => $request->module_order_number ?? null,
         ]);
     }
 
@@ -711,6 +712,7 @@ class CashierMakeOrderController extends Controller
             'address' => $address,
             'financials' => $financials,
             'date' => now(),
+            "module_order_number" => $request->module_order_number ?? null,
         ]);
     }
 
@@ -1011,7 +1013,8 @@ class CashierMakeOrderController extends Controller
             'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number'],
             'order_id' => $order['payment']['id'],
-            "financials" => $financials
+            "financials" => $financials,
+            "module_order_number" => $request->module_order_number ?? null,
         ]);
     }
 
@@ -1136,6 +1139,7 @@ class CashierMakeOrderController extends Controller
             'order_id' => $order_id,
             'order_id' => $order_number,
             'financials' => $financials,
+            "module_order_number" => $request->module_order_number ?? null,
         ]);
     } 
 
