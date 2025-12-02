@@ -21,7 +21,7 @@ class CategoryController extends Controller
     private Translation $translations, private TranslationTbl $translation_tbl,
     private Branch $branch, private BranchOff $branch_off){}
 
-    public function view(){
+    public function view(Request $request){
         // https://bcknd.food2go.online/admin/category
         $locale = $request->locale ?? 'en';
         $categories = $this->categories
@@ -31,6 +31,7 @@ class CategoryController extends Controller
         ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
+            unset($item->translations);
             
             return $item;
         });
@@ -42,7 +43,7 @@ class CategoryController extends Controller
         ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
-            
+            unset($item->translations);
             return $item;
         });
         $sub_categories = $this->categories
@@ -52,6 +53,7 @@ class CategoryController extends Controller
         ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
+            unset($item->translations);
             
             return $item;
         });
@@ -59,6 +61,7 @@ class CategoryController extends Controller
         ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
+            unset($item->translations);
             
             return [
                 "id" => $item->id,

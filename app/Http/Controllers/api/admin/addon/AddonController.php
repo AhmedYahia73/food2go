@@ -24,7 +24,7 @@ class AddonController extends Controller
     ];
     use translaion;
 
-    public function view(){
+    public function view(Request $request){
         // https://bcknd.food2go.online/admin/addons
         $locale = $request->locale ?? 'en';
         $addons = $this->addons
@@ -33,6 +33,7 @@ class AddonController extends Controller
         ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
+            unset($item->translations);
             
             return $item;
         });
