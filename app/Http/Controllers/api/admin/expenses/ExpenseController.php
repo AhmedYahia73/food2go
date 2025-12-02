@@ -24,7 +24,7 @@ class ExpenseController extends Controller
 
     public function view(Request $request){
         $expenses = $this->expenses
-        ->with(["expense:id,name", "admin:id,name"
+        ->with(["admin:id,name"
         ,"branch:id,name", "cashier:id,name", "cahier_man:id,user_name",
         "financial_account:id,name", "category:id,name"])
         ->get()
@@ -48,11 +48,7 @@ class ExpenseController extends Controller
         ]);
     }
 
-    public function lists(Request $request){
-        $expenses = $this->expenses_list
-        ->select("id", "name")
-        ->where("status", 1)
-        ->get();
+    public function lists(Request $request){ 
         $branches = $this->branches
         ->select("id", "name")
         ->where("status", 1)
@@ -74,8 +70,7 @@ class ExpenseController extends Controller
         ->where("status", 1)
         ->get();
 
-        return response()->json([
-            'expenses' => $expenses,
+        return response()->json([ 
             'branches' => $branches, 
             'cashiers' => $cashiers, 
             'cashier_man' => $cashier_man, 
@@ -86,7 +81,7 @@ class ExpenseController extends Controller
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
-            'expense_id' => ['required', 'exists:expense_lists,id'],
+            'expense' => ['required'],
             //'admin_id' => ['required', ''],
             'branch_id' => ['required', 'exists:branches,id'],
             'cashier_id' => ['required', 'exists:cashiers,id'],
@@ -149,8 +144,8 @@ class ExpenseController extends Controller
             ->where("cahier_man_id", $request->cahier_man_id);
         }
         $expenses_lists = $expenses
-        ->with(["expense:id,name", "admin:id,name"
-        ,"branch:id,name", "cashier:id,name", "cahier_man:id,user_name",
+        ->with(["admin:id,name", "branch:id,name", 
+        "cashier:id,name", "cahier_man:id,user_name",
         "financial_account:id,name", "category:id,name"])
         ->get()
         ->map(function($item){
