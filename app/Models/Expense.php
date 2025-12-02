@@ -10,7 +10,7 @@ class Expense extends Model
     use HasFactory;
 
     protected $fillable = [
-        'expense_id',
+        'expense', 
         'admin_id',
         'branch_id',
         'cashier_id',
@@ -21,10 +21,6 @@ class Expense extends Model
         'shift',
         'note',
     ];
-
-    public function expense(){
-        return $this->belongsTo(ExpenseList::class, 'expense_id');
-    }
 
     public function admin(){
         return $this->belongsTo(Admin::class, 'admin_id');

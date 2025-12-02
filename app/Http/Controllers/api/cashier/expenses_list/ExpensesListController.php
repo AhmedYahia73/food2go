@@ -6,22 +6,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-use App\Models\Expense;
-
-use App\Models\ExpenseList;
+use App\Models\Expense; 
+  
 use App\Models\ExpenseCategory;
 use App\Models\FinantiolAcounting;
 
 class ExpensesListController extends Controller
 {
-    public function __construct(private Expense $expenses
-    , private ExpenseList $expenses_list, private FinantiolAcounting $financial 
-    ,private ExpenseCategory $category){}
+    public function __construct(private Expense $expenses, 
+    private FinantiolAcounting $financial, private ExpenseCategory $category){}
 
     public function view(Request $request){
         $locale = $request->locale ?? "en";
         $expenses = $this->expenses
-        ->with(["expense:id,name", "admin:id,name", "cashier:id,name", 
+        ->with(["admin:id,name", "cashier:id,name", 
         "financial_account:id,name", "category:id,name"])
         ->where("cahier_man_id", $request->user()->id)
         ->orderByDesc("id")
@@ -31,15 +29,7 @@ class ExpensesListController extends Controller
                 "id" => $item->id,
                 "amount" => $item->amount,
                 "note" => $item->note,
-                "expense" => [
-                    "id" => $item?->expense?->id,
-                    'name' => $item?->expense
-                    ?->translations()
-                    ?->where("locale", $locale)
-                    ?->where('key', $item?->expense?->name)
-                    ?->first()
-                    ?->value ?? $item?->expense?->name ?? null,
-                ],
+                "expense" => $item->expense,
                 "admin" => $item->admin, 
                 "cashier" =>  [
                     "id" => $item?->cashier?->id,
@@ -70,22 +60,7 @@ class ExpensesListController extends Controller
 
     public function lists(Request $request){
         $locale = $request->locale ?? "en";
-        $expenses = $this->expenses_list
-        ->select("id", "name")
-        ->where("status", 1)
-        ->get()
-        ->map(function($item) use($locale){
-            return [
-                "id" => $item->id,
-                "name" => $item
-                ?->translations()
-                ?->where("locale", $locale)
-                ?->where('key', $item->name)
-                ?->first()
-                ?->value ?? $item->name ?? null
-                ,
-            ];
-        });
+
         $financial = $this->financial
         ->select("id", "name")
         ->where("status", 1)
@@ -107,8 +82,7 @@ class ExpensesListController extends Controller
             ];
         });
 
-        return response()->json([
-            'expenses' => $expenses,  
+        return response()->json([   
             'financial' => $financial, 
             'categories' => $categories, 
         ]);
@@ -116,7 +90,7 @@ class ExpensesListController extends Controller
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
-            'expense_id' => ['required', 'exists:expense_lists,id'],
+            'expense' => ['required'],
             'financial_account_id' => ['required', 'exists:finantiol_acountings,id'],
             'category_id' => ['required', 'exists:expense_categories,id'],
             'amount' => ['required', 'numeric'],
@@ -149,7 +123,7 @@ class ExpensesListController extends Controller
 
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'expense_id' => ['required', 'exists:expense_lists,id'],
+            'expense' => ['required'],
             'financial_account_id' => ['required', 'exists:finantiol_acountings,id'],
             'category_id' => ['required', 'exists:expense_categories,id'],
             'amount' => ['required', 'numeric'],
@@ -172,7 +146,7 @@ class ExpensesListController extends Controller
             $financial->balance += $expenses->amount;
             $financial->save();
         }
-        $expenses->expense_id = $request->expense_id;
+        $expenses->expense = $request->expense;
         $expenses->financial_account_id = $request->financial_account_id;
         $expenses->category_id = $request->category_id;
         $expenses->amount = $request->amount;
