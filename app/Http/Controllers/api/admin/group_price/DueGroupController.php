@@ -99,11 +99,17 @@ class DueGroupController extends Controller
                 "name" => $item->name,
             ];
         });
+        $all_orders = $this->orders
+        ->where('module_id', $request->module_id)
+        ->where("created_at", ">=", $start)
+        ->where("created_at", "<=", $end)
+        ->count();
 
         return response()->json([
             "due_amount" => $due_amount,
             "module_payment" => $module_payment,
             "financial_account" => $financial_account,
+            "all_orders" => $all_orders,
         ]);
     }
 
