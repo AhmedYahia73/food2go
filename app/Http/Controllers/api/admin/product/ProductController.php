@@ -39,6 +39,7 @@ class ProductController extends Controller
             ->where('locale', $locale)->first()?->value ?? $item->name;
             $item->description = $item->translations->where('key', $item->description)
             ->where('locale', $locale)->first()?->value ?? $item->description;
+            unset($item->translations);
             
             return $item;
         });//extra_id
