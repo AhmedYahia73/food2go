@@ -12,6 +12,8 @@ class ServiceFees extends Model
     protected $fillable = [
         'type',
         'amount',
+        'module',
+        'online_type',
     ];
 
     protected $hidden = array('pivot');

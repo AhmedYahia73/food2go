@@ -30,10 +30,14 @@ class ServiceFeesController extends Controller
         ->where("status", 1)
         ->get();
         $types = ['precentage','value'];
+        $modules = ["pos", "online"];
+        $online_types = ["all", "app", "web"];
 
         return response()->json([
             "branches" => $branches, 
             "types" => $types, 
+            "modules" => $modules, 
+            "online_types" => $online_types, 
         ]);
     }
 
@@ -73,6 +77,8 @@ class ServiceFeesController extends Controller
         $validator = Validator::make($request->all(), [
             'type' => ['required', 'in:precentage,value'],
             'amount' => ['required', 'numeric'],
+            'module' => ['required', 'in:pos,online'],
+            'online_type' => ['sometimes', 'in:all,app,web'],
             'branches' => ['required', 'array'],
             'branches.*' => ['required', 'exists:branches,id'],
         ]);
@@ -96,6 +102,8 @@ class ServiceFeesController extends Controller
         $validator = Validator::make($request->all(), [
             'type' => ['required', 'in:precentage,value'],
             'amount' => ['required', 'numeric'],
+            'module' => ['required', 'in:pos,online'],
+            'online_type' => ['sometimes', 'in:all,app,web'],
             'branches' => ['required', 'array'],
             'branches.*' => ['required', 'exists:branches,id'],
         ]);
