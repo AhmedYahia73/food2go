@@ -28,7 +28,7 @@ class CategoryController extends Controller
         ->with('addons')
         ->orderBy('priority')
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
             
@@ -39,7 +39,7 @@ class CategoryController extends Controller
         ->whereNull('category_id')
         ->orderBy('priority')
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
             
@@ -49,14 +49,14 @@ class CategoryController extends Controller
         ->whereNotNull('category_id')
         ->orderBy('priority')
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
             
             return $item;
         });
         $addons = $this->addons->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
             
