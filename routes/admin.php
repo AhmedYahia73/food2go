@@ -196,13 +196,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(PreparationManController::class)
     ->prefix('preparation_man')->group(function(){
-        Route::get('/', 'view')->middleware('can:view_preparation_man');
         Route::get('/lists', 'lists')->middleware('can:view_preparation_man');
         Route::get('/item/{id}', 'preparation_man')->middleware('can:view_preparation_man');
         Route::put('/status/{id}', 'status')->middleware('can:status_preparation_man'); 
         Route::post('/add', 'create')->middleware('can:add_preparation_man'); 
         Route::post('/update/{id}', 'modify')->middleware('can:edit_preparation_man'); 
         Route::delete('/delete/{id}', 'delete')->middleware('can:delete_preparation_man'); 
+        Route::get('/{id}', 'view')->middleware('can:view_preparation_man');
     });
     
     Route::controller(FilterController::class)

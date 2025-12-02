@@ -14,9 +14,10 @@ class PreparationManController extends Controller
     public function __construct(private PreparationMan $preparation_man,
     private Branch $branches){}
 
-    public function view(Request $request){
+    public function view(Request $request, $id){
         $preparation_men = $this->preparation_man
         ->with("branch")
+        ->where("branch_id", $id)
         ->get()
         ->map(function($item){
             return [
