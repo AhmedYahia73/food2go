@@ -65,6 +65,10 @@ class OrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
         $password = $this->settings
         ->where('name', 'password')
         ->first()?->setting ?? null;
@@ -94,21 +98,30 @@ class OrderController extends Controller
             }) 
             ->where('order_active', 1)
             ->orderByDesc('id')
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
             'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
-            ->map(function($item){
+            ->map(function($item) use($delivery_time){
                 $order_type = "";
+                $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
+                    $food_preparion_time = $item->food_preparion_time;
                     $order_type = "pickup";
                 }
                 elseif ($item->order_type == "take_away") {
+                    $food_preparion_time = $item->food_preparion_time;
                     $order_type = $item->take_away_status;
                 }
                 elseif ($item->order_type == "delivery") {
+                    $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                    $time2 = Carbon::parse($delivery_time);
+                    $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                    $result = gmdate('i:s', $totalSeconds);
+                    $food_preparion_time = $item->food_preparion_time;
+
                     $order_type = $item->delivery_status;
                 }
                 return [ 
@@ -125,6 +138,7 @@ class OrderController extends Controller
                     'points' => $item->points, 
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
+                    'food_preparion_time' => $food_preparion_time,
                     'user' => [
                         'f_name' => $item?->user?->f_name,
                         'l_name' => $item?->user?->l_name,
@@ -161,27 +175,37 @@ class OrderController extends Controller
                 ->orWhereNull('status');
             }) 
             ->orderByDesc('id')
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
             'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
-            ->map(function($item){
+            ->map(function($item) use($delivery_time){
                 $order_type = "";
+                $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
                     $order_type = "pickup";
+                    $food_preparion_time = $item->food_preparion_time;
                 }
                 elseif ($item->order_type == "take_away") {
                     $order_type = $item->take_away_status;
+                    $food_preparion_time = $item->food_preparion_time;
                 }
                 elseif ($item->order_type == "delivery") {
+                    $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                    $time2 = Carbon::parse($delivery_time);
+                    $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                    $result = gmdate('i:s', $totalSeconds);
+                    $food_preparion_time = $item->food_preparion_time;
+
                     $order_type = $item->delivery_status;
                 }
                 return [ 
                     'id' => $item->id,
                     'order_number' => $item->order_number,
                     'created_at' => $item->created_at,
+                    'preparing_time' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
@@ -190,6 +214,7 @@ class OrderController extends Controller
                     'source' => $item->source,
                     'status' => $item->status,
                     'points' => $item->points, 
+                    'food_preparion_time' => $food_preparion_time, 
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
                     'user' => [
@@ -240,21 +265,30 @@ class OrderController extends Controller
             }) 
             ->where('order_active', 1)
             ->orderByDesc('id')
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
             'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
-            ->map(function($item){
+            ->map(function($item) use($delivery_time){
                 $order_type = "";
+                $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
                     $order_type = "pickup";
+                    $food_preparion_time = $item->food_preparion_time;
                 }
                 elseif ($item->order_type == "take_away") {
+                    $food_preparion_time = $item->food_preparion_time;
                     $order_type = $item->take_away_status;
                 }
                 elseif ($item->order_type == "delivery") {
+                    $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                    $time2 = Carbon::parse($delivery_time);
+                    $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                    $result = gmdate('i:s', $totalSeconds);
+                    $food_preparion_time = $item->food_preparion_time;
+                    
                     $order_type = $item->delivery_status;
                 }
                 return [ 
@@ -271,6 +305,7 @@ class OrderController extends Controller
                     'points' => $item->points, 
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
+                    'food_preparion_time' => $food_preparion_time,
                     'user' => [
                         'f_name' => $item?->user?->f_name,
                         'l_name' => $item?->user?->l_name,
@@ -304,6 +339,10 @@ class OrderController extends Controller
     public function online_orders(Request $request){
         $time_sittings = $this->TimeSittings 
         ->get();
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
         if ($time_sittings->count() > 0) {
             $from = $time_sittings[0]->from;
             $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
@@ -362,7 +401,22 @@ class OrderController extends Controller
         }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
         'schedule:id,name', 'delivery'])
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($delivery_time){
+                $food_preparion_time = "00:00";
+                if ($item->order_type == "dine_in") {
+                    $food_preparion_time = $item->food_preparion_time;
+                }
+                elseif ($item->order_type == "take_away") {
+                    $food_preparion_time = $item->food_preparion_time;
+                }
+                elseif ($item->order_type == "delivery") {
+                    $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                    $time2 = Carbon::parse($delivery_time);
+                    $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                    $result = gmdate('i:s', $totalSeconds);
+                    $food_preparion_time = $item->food_preparion_time;
+                }
+
             return [ 
                 'id' => $item->id,
                 'order_number' => $item->order_number,
@@ -372,6 +426,7 @@ class OrderController extends Controller
                 'order_type' => $item->order_type,
                 'order_status' => $item->order_status,
                 'source' => $item->source,
+                'food_preparion_time' => $food_preparion_time,
                 'status' => $item->status,
                 'points' => $item->points, 
                 'rejected_reason' => $item->rejected_reason,
