@@ -49,6 +49,7 @@ trait POS
         'module_id',
         'captain_id',
         'due_module',
+        'module_order_number',
     ];
 
     public function take_away_make_order($request, $paymob = 0){
