@@ -108,11 +108,11 @@ class OrderController extends Controller
                 $order_type = "";
                 $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                     $order_type = "pickup";
                 }
                 elseif ($item->order_type == "take_away") {
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                     $order_type = $item->take_away_status;
                 }
                 elseif ($item->order_type == "delivery") {
@@ -120,7 +120,7 @@ class OrderController extends Controller
                     $time2 = Carbon::parse($delivery_time);
                     $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
                     $result = gmdate('i:s', $totalSeconds);
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
 
                     $order_type = $item->delivery_status;
                 }
@@ -186,18 +186,18 @@ class OrderController extends Controller
                 $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
                     $order_type = "pickup";
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                 }
                 elseif ($item->order_type == "take_away") {
                     $order_type = $item->take_away_status;
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                 }
                 elseif ($item->order_type == "delivery") {
                     $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
                     $time2 = Carbon::parse($delivery_time);
                     $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
                     $result = gmdate('i:s', $totalSeconds);
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
 
                     $order_type = $item->delivery_status;
                 }
@@ -276,10 +276,10 @@ class OrderController extends Controller
                 $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
                     $order_type = "pickup";
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                 }
                 elseif ($item->order_type == "take_away") {
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                     $order_type = $item->take_away_status;
                 }
                 elseif ($item->order_type == "delivery") {
@@ -287,7 +287,7 @@ class OrderController extends Controller
                     $time2 = Carbon::parse($delivery_time);
                     $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
                     $result = gmdate('i:s', $totalSeconds);
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                     
                     $order_type = $item->delivery_status;
                 }
@@ -404,17 +404,17 @@ class OrderController extends Controller
         ->map(function($item) use($delivery_time){
                 $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                 }
                 elseif ($item->order_type == "take_away") {
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                 }
                 elseif ($item->order_type == "delivery") {
                     $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
                     $time2 = Carbon::parse($delivery_time);
                     $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
                     $result = gmdate('i:s', $totalSeconds);
-                    $food_preparion_time = $item->food_preparion_time;
+                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                 }
 
             return [ 
