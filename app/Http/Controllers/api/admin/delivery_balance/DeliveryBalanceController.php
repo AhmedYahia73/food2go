@@ -119,7 +119,7 @@ class DeliveryBalanceController extends Controller
         $total_orders = $this->ordersModel
         ->where("order_type", "delivery")
         ->where("due_from_delivery", 1) 
-        ->with(['branch', 'user', 'address', 'cashier_man'])
+        ->with(['branch', 'user', 'address', 'cashier_man', 'financial_accountigs'])
         ->get()
         ->map(function($item){
             return [
@@ -129,6 +129,9 @@ class DeliveryBalanceController extends Controller
                 "source" => $item->source,
                 "order_status" => $item->pos ? $item->delivery_status: $item->order_status,
                 "branch" =>  $item?->branch?->name,
+                'order_type' => (empty($item->payment_method_id) ||
+                $item->payment_method_id == 2 ) && $item->financial_accountigs->count() == 0 ?
+                'unpaid' : 'paid',
                 "user" => [
                     "name" => $item?->user?->name,
                     "phone" => $item?->user?->phone,
@@ -161,6 +164,10 @@ class DeliveryBalanceController extends Controller
             ->where("pos", 0)
             ->orWhere("delivery_status", "delivered")
             ->where("pos", 1);
+        })
+        ->where(function($query){
+            $query->whereNull("payment_method_id")
+            ->orWhere('payment_method_id', 1);
         })
         ->sum("amount");
 
