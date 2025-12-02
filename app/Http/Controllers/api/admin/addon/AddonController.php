@@ -28,7 +28,13 @@ class AddonController extends Controller
         // https://bcknd.food2go.online/admin/addons
         $addons = $this->addons
         ->with('tax')
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->name = $item->translations->where('key', $item->name)
+            ->where('locale', $locale)->first()?->value ?? $item->name; 
+            
+            return $item;
+        });
         $taxes = $this->taxes
         ->get();
 

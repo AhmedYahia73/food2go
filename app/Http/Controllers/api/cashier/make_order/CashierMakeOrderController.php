@@ -711,7 +711,6 @@ class CashierMakeOrderController extends Controller
             'address' => $address,
             'financials' => $financials,
             'date' => now(),
-            "req" => $request->all()
         ]);
     }
 

@@ -23,20 +23,48 @@ class CategoryController extends Controller
 
     public function view(){
         // https://bcknd.food2go.online/admin/category
+        $locale = $request->locale ?? 'en';
         $categories = $this->categories
         ->with('addons')
         ->orderBy('priority')
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->name = $item->translations->where('key', $item->name)
+            ->where('locale', $locale)->first()?->value ?? $item->name; 
+            
+            return $item;
+        });
         $parent_categories = $this->categories
         ->with('sub_categories')
         ->whereNull('category_id')
         ->orderBy('priority')
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->name = $item->translations->where('key', $item->name)
+            ->where('locale', $locale)->first()?->value ?? $item->name; 
+            
+            return $item;
+        });
         $sub_categories = $this->categories
         ->whereNotNull('category_id')
         ->orderBy('priority')
-        ->get();
-        $addons = $this->addons->get();
+        ->get()
+        ->map(function($item){
+            $item->name = $item->translations->where('key', $item->name)
+            ->where('locale', $locale)->first()?->value ?? $item->name; 
+            
+            return $item;
+        });
+        $addons = $this->addons->get()
+        ->map(function($item){
+            $item->name = $item->translations->where('key', $item->name)
+            ->where('locale', $locale)->first()?->value ?? $item->name; 
+            
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
         $counter = [];
         for ($i=1; $i <= count($categories) + 1; $i++) { 
             $counter[] = $i;
