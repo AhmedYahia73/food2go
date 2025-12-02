@@ -117,7 +117,7 @@ class DueGroupController extends Controller
         $validator = Validator::make($request->all(), [
             'from' => 'required|date',
             'to' => 'required|date',
-            'module_id' => 'exists:group_products,id',
+            'module_id' => 'required|exists:group_products,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
