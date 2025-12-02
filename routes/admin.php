@@ -297,7 +297,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/', 'view');
         Route::post('/expenses_report', 'expenses_report');
         Route::get('/lists', 'lists');  
-        Route::post('/add', 'create'); 
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'update');
     });
 
     Route::controller(GroupProductController::class)
