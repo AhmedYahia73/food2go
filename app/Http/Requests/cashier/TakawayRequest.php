@@ -56,6 +56,7 @@ class TakawayRequest extends FormRequest
             'dicount_id' => ['exists:discounts,id'],
             'free_discount' => ['numeric', 'sometimes'],
             'due_module' => ['numeric', 'sometimes'],
+            'module_order_number' => ['sometimes'],
         ];
     }
 

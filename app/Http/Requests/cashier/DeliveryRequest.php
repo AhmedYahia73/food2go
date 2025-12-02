@@ -58,6 +58,7 @@ class DeliveryRequest extends FormRequest
             'free_discount' => ['numeric', 'sometimes'],
             'due_module' => ['numeric', 'sometimes'],
             'module_id' => ['exists:group_products,id'],
+            'module_order_number' => ['sometimes'],
         ];
     }
 

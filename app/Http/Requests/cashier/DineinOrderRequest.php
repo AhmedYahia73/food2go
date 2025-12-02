@@ -54,7 +54,8 @@ class DineinOrderRequest extends FormRequest
             'dicount_id' => ['exists:discounts,id'],
             'due' => ['required', 'boolean'],
             'due_module' => ['numeric', 'sometimes'],
-            'source' => 'sometimes', 
+            'source' => 'sometimes',
+            'module_order_number' => ['sometimes'],
             'table_id' => ['required', 'exists:cafe_tables,id'],
 
         ];
