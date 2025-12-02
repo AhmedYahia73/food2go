@@ -177,6 +177,7 @@ class DueGroupController extends Controller
                 'transaction_id' => $item->transaction_id,
                 'transaction_id' => $item->transaction_id,
                 'due_module' => $item->due_module,
+                'type_order' => $item->due_module > 0 ? "unpaid" : "paid",
                 'rate' => $item->rate,
                 'type' => $item->pos ? "Point of Sale" : "Online Order",
                 'user' => [
