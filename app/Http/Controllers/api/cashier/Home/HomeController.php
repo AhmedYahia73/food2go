@@ -9,6 +9,8 @@ use App\Models\Cashier;
 use App\Models\Order;
 use App\Models\Setting;
 
+use Carbon\Carbon;
+
 class HomeController extends Controller
 {
     public function __construct(private Cashier $cashier,
