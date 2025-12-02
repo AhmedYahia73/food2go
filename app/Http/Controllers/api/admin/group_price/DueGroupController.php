@@ -43,6 +43,8 @@ class DueGroupController extends Controller
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }  
+        $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
+        $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
 
         if($request->from){
             $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
@@ -115,9 +117,10 @@ class DueGroupController extends Controller
 
     public function orders(Request $request){
         $validator = Validator::make($request->all(), [
-            'from' => 'required|date',
-            'to' => 'required|date',
+            'from' => 'date',
+            'to' => 'date',
             'module_id' => 'required|exists:group_products,id',
+            'type' => 'in:paid,unpaid'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -140,20 +143,24 @@ class DueGroupController extends Controller
             }
 			if($start >= now()){
                 $start = $start->subDay();
-			}
-
-            // if ($start > $end) {
-            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // } format('Y-m-d H:i:s')
+			} 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
         } 
         $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
         $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
+
+        if($request->from){
+            $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
+        }
+        if($request->to && ! $request->from){
+            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
+            $start = Carbon::parse('1999-05-05' . ' ' . $start->format('H:i:s'));
+        }
+        if($request->to && $request->from){
+            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s')); 
+        }
         $all_orders = $this->orders
         ->where('module_id', $request->module_id)
         ->where("created_at", ">=", $start)
@@ -191,6 +198,11 @@ class DueGroupController extends Controller
                 'delivery' => ['name' => $item?->delivery?->name], 
             ];
         });
+        if($request->type){
+            $all_orders = $all_orders
+            ->where('type_order', $request->type)
+            ->values();
+        }
 
         return response()->json([
             "orders" => $all_orders
