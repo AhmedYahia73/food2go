@@ -99,7 +99,7 @@ class HomeController extends Controller
         ->map(function($item) use($delivery_time){
             $order_status = null;
             if($item->order_type == "take_away"){
-                $food_preparion_time = "00:" . $item?->branch?->food_preparion_time ?? "00:00";
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
                 $order_status = $item->take_away_status;
             }
             elseif($item->order_type == "delivery"){
@@ -112,7 +112,7 @@ class HomeController extends Controller
                 $order_status = $item->delivery_status;
             }
             elseif ($item->order_type == "dine_in") {
-                $food_preparion_time = "00:" . $item?->branch?->food_preparion_time ?? "00:00";
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
             }
             return [
                 "id" => $item->id,
