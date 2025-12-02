@@ -152,7 +152,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
 
     // جديد تحت التجربة 
-    // DeliveryBalanceGate, RestoreGate, DueGroupGate, CRUDGate
+    // DeliveryBalanceGate,
     Route::controller(FreeDiscountController::class)
     ->prefix('free_discount')->group(function(){
         Route::get('/', 'view');
