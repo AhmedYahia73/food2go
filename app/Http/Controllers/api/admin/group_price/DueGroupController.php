@@ -21,7 +21,6 @@ class DueGroupController extends Controller
     private Order $orders){}
 
     public function view(Request $request, $id){
-        
         $time_sittings = $this->TimeSittings 
         ->get();
         if ($time_sittings->count() > 0) {
@@ -44,6 +43,16 @@ class DueGroupController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }  
 
+        if($request->from){
+            $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
+        }
+        if($request->to && ! $request->from){
+            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
+            $start = Carbon::parse('1999-05-05' . ' ' . $start->format('H:i:s'));
+        }
+        if($request->to && $request->from){
+            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s')); 
+        }
         $due = $this->group_products
         ->where("id", $id)
         ->first();
@@ -74,20 +83,11 @@ class DueGroupController extends Controller
                 "financials" => $module_financials,
             ];
         });
-        $all_orders_due = $this->orders
-        ->where('module_id', $id)
-        ->sum("due_module");
         $due_orders_due = $this->orders
         ->where('module_id', $id)
         ->where("created_at", ">=", $start)
         ->where("created_at", "<=", $end)
         ->sum("due_module");
-        
-        $all_collect = $this->module_payment
-        ->where("group_product_id", $id)
-        ->where("created_at", ">=", $start)
-        ->where("created_at", "<=", $end)
-        ->sum("amount");
 
         $financial_account = $this->financial_account
         ->where("status", 1)
@@ -103,6 +103,89 @@ class DueGroupController extends Controller
             "due_amount" => $due_amount,
             "module_payment" => $module_payment,
             "financial_account" => $financial_account,
+        ]);
+    }
+
+    public function orders(Request $request){
+        $validator = Validator::make($request->all(), [
+            'from' => 'required|date',
+            'to' => 'required|date',
+            'module_id' => 'exists:group_products,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        if ($time_sittings->count() > 0) { 
+            $from = $time_sittings[0]->from;
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // } format('Y-m-d H:i:s')
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
+        } 
+        $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
+        $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
+        $all_orders = $this->orders
+        ->where('module_id', $request->module_id)
+        ->where("created_at", ">=", $start)
+        ->where("created_at", "<=", $end)
+        ->with('user', 'address.zone', 'branch', 'admin',
+        'schedule', 'delivery')
+        ->get()
+        ->map(function($item){
+            return [ 
+                'id' => $item->id,
+                'order_number' => $item->order_number,
+                'created_at' => $item->created_at,
+                'amount' => $item->amount,
+                'operation_status' => $item->operation_status,
+                'order_type' => $item->order_type,
+                'order_status' => $item->order_status,
+                'source' => $item->source,
+                'status' => $item->status,
+                'points' => $item->points, 
+                'rejected_reason' => $item->rejected_reason,
+                'transaction_id' => $item->transaction_id,
+                'transaction_id' => $item->transaction_id,
+                'due_module' => $item->due_module,
+                'rate' => $item->rate,
+                'type' => $item->pos ? "Point of Sale" : "Online Order",
+                'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+                'branch' => ['name' => $item?->branch?->name, ],
+                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                'admin' => ['name' => $item?->admin?->name,],
+                'schedule' => ['name' => $item?->schedule?->name],
+                'delivery' => ['name' => $item?->delivery?->name], 
+            ];
+        });
+
+        return response()->json([
+            "orders" => $all_orders
         ]);
     }
 

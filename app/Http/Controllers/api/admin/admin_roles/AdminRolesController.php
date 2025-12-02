@@ -28,7 +28,6 @@ class AdminRolesController extends Controller
         ->get();
         $roles = [
             'Admin' => [ 'view', 'add', 'edit', 'delete'],
-
             'save_filter' => ["view", 'status', 'add', 'update', 'delete'],
             'service_fees' => ["view", 'status', 'add', 'update', 'delete'],
             'purchase_recipe' => ["view", 'status', 'add', 'update', 'delete'],
@@ -49,7 +48,6 @@ class AdminRolesController extends Controller
             'Due Module' => ["view", 'payment'],
             'Restore User' => ["view", 'restore'],
             'Delivery Balance' => ["all_orders", 'current_orders', 'faild_orders', 'confirm_faild_order', 'pay_orders', 'delivery_for_orders'],
-             
             'Home' => [ 'view'],
             'Addons' => [ 'view', 'add', 'edit', 'delete'],
             'Banner' => [ 'view', 'add', 'edit', 'delete'],

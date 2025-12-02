@@ -189,6 +189,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(DueGroupController::class)
     ->prefix('due_group_module')->group(function(){
+        Route::get('/group_orders', 'orders')->middleware('can:due_module');
         Route::get('/{id}', 'view')->middleware('can:due_module');
         Route::post('/payment', 'payment')->middleware('can:due_module_payment');
     });
