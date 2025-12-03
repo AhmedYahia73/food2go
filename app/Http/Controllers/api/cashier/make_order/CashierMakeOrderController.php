@@ -1261,7 +1261,7 @@ class CashierMakeOrderController extends Controller
         ->first();  
         $order_kitchen = [];
         
-        $order_data = $this->takeaway_kitchen_format($order);
+        $order_data = $this->dine_in_print($order);
         $order_items = collect($order_data['order_data']);
         $kitchen_items = $order_data['kitchen_items'];
         $kitchen_order = collect($order_data['kitchen_order']);
