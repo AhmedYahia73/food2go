@@ -1038,7 +1038,7 @@ trait PlaceOrder
                 } 
                 // $item->addons->addon->count = $item->addons->count;
                 // $item->variations->variation->options = $item->variations->options;
-                
+                $order_data[$key] = collect([]);
                 $order_data[$key]->id = $product->id;
                 $order_data[$key]->name = $product_name;
                 $order_data[$key]->category_id = $product->category_id;
