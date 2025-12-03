@@ -53,7 +53,7 @@ class OrderController extends Controller
         ->get();
 
         return response()->json([
-            "void_reason" => $void_reason
+            "void_reasons" => $void_reasons
         ]); 
     }
 
