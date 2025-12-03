@@ -1567,22 +1567,32 @@ class CashierMakeOrderController extends Controller
             if (isset($item['extra_id'])) {
                 $extra = $this->extras
                 ->whereIn("id", $item['extra_id'])
+                ->with("translations")
                 ->get();
-                foreach ($extra as $key => $value) {
+                foreach ($extra as $key => $value) { 
+                    $name = $value?->translations
+                    ->where("locale", $locale)
+                    ->where("key", $value->name)
+                    ->first()?->value ?? $value->name;
                     $extras_items[] = [
                         "id" => $value->id,
-                        "name" => $value->name,
+                        "name" => $name,
                     ];
                 }
             }
             if (isset($item['exclude_id'])) {
                 $exclude = $this->excludes
                 ->where("id", $item['exclude_id'])
+                ->with("translations")
                 ->get();
                 foreach ($exclude as $key => $value) {
+                    $name = $value?->translations
+                    ->where("locale", $locale)
+                    ->where("key", $value->name)
+                    ->first()?->value ?? $value->name;
                     $excludes_items[] = [
                         "id" => $value->id,
-                        "name" => $value->name,
+                        "name" => $name,
                     ];
                 }
             }
