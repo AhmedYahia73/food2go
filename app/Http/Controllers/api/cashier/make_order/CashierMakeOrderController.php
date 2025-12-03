@@ -1537,10 +1537,12 @@ class CashierMakeOrderController extends Controller
     public function checkout_data($request){ 
         $products = [];
         $locale = Setting::
-        where("name", "setting_lang")
+        where("name", "cashier_lang")
         ->first()?->setting ?? 'en';
         foreach ($request->products as $item) {
             $addons = [];
+            $extras_items = [];
+            $excludes_items = [];
             if(isset($item['addons'])){
                 foreach ($item['addons'] as $element) {
                     $count = $element['count'];
@@ -1562,6 +1564,24 @@ class CashierMakeOrderController extends Controller
                     ];
                 }
             }
+            if (isset($item['extra_id'])) {
+                $extra = $this->extras
+                ->where("id", $item['extra_id'])
+                ->first();
+                $extras_items = [
+                    "id" => $item['extra_id'],
+                    "name" => $extra->name,
+                ];
+            }
+            if (isset($item['exclude_id'])) {
+                $exclude = $this->excludes
+                ->where("id", $item['exclude_id'])
+                ->first();
+                $excludes_items = [
+                    "id" => $item['exclude_id'],
+                    "name" => $exclude->name,
+                ];
+            }
 
             $count = $item['count'];
             $price = $item['price'];
@@ -1579,7 +1599,9 @@ class CashierMakeOrderController extends Controller
                 'price' => $price,
                 'name' => $name,
                 'total' => $total,
-                "addons" => $addons
+                "addons" => $addons,
+                "extras" => $extras_items,
+                "excludes" => $excludes_items,
             ];
         }
 

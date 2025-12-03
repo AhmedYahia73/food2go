@@ -73,6 +73,8 @@ class Order extends Model
         'module_id',
         'module_order_number',
         'due_module',
+        'void_id',
+        'void_reason',
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
