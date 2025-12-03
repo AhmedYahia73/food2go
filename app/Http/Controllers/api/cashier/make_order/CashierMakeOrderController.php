@@ -1578,7 +1578,7 @@ class CashierMakeOrderController extends Controller
             if (isset($item['exclude_id'])) {
                 $exclude = $this->excludes
                 ->where("id", $item['exclude_id'])
-                ->first();
+                ->get();
                 foreach ($exclude as $key => $value) {
                     $excludes_items[] = [
                         "id" => $value->id,
