@@ -13,25 +13,61 @@ class LanguageSettingController extends Controller
     public function __construct(private Setting $settings){}
 
     public function view(Request $request){
-        $settings_lang = $this->settings
-        ->where("name", "setting_lang")
+        $kitchen_lang = $this->settings
+        ->where("name", "kitchen_lang")
         ->first();
-        if (empty($settings_lang)) {
-            $settings_lang = $this->settings
+        if (empty($kitchen_lang)) {
+            $kitchen_lang = $this->settings
             ->create([
-                'name' => 'setting_lang',
-                'setting' => 'en',
+                'name' => 'kitchen_lang',
+                'setting' => 'ar',
+            ]);
+        }
+        $brista_lang = $this->settings
+        ->where("name", "brista_lang")
+        ->first();
+        if (empty($brista_lang)) {
+            $brista_lang = $this->settings
+            ->create([
+                'name' => 'brista_lang',
+                'setting' => 'ar',
+            ]);
+        }
+        $cashier_lang = $this->settings
+        ->where("name", "cashier_lang")
+        ->first();
+        if (empty($cashier_lang)) {
+            $cashier_lang = $this->settings
+            ->create([
+                'name' => 'cashier_lang',
+                'setting' => 'ar',
+            ]);
+        }
+        $preparation_lang = $this->settings
+        ->where("name", "preparation_lang")
+        ->first();
+        if (empty($preparation_lang)) {
+            $preparation_lang = $this->settings
+            ->create([
+                'name' => 'preparation_lang',
+                'setting' => 'ar',
             ]);
         }
 
         return response()->json([
-            "lang" => $settings_lang->setting
+            "brista_lang" => $brista_lang->setting,
+            "kitchen_lang" => $kitchen_lang->setting,
+            "cashier_lang" => $cashier_lang->setting,
+            "preparation_lang" => $preparation_lang->setting,
         ]);
     }
 
     public function update(Request $request){
         $validation = Validator::make($request->all(), [
-            'lang' => 'required|in:en,ar',
+            'brista_lang' => 'required|in:en,ar',
+            'kitchen_lang' => 'required|in:en,ar',
+            'cashier_lang' => 'required|in:en,ar',
+            'preparation_lang' => 'required|in:en,ar',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -39,19 +75,64 @@ class LanguageSettingController extends Controller
             ],400);
         }
 
-        $settings_lang = $this->settings
-        ->where("name", "setting_lang")
+        $brista_lang = $this->settings
+        ->where("name", "brista_lang")
         ->first();
-        if (empty($settings_lang)) {
+        if (empty($brista_lang)) {
             $this->settings
             ->create([
-                'name' => 'setting_lang',
+                'name' => 'brista_lang',
                 'setting' => $request->lang,
             ]);
         }
         else{
-            $settings_lang->setting = $request->lang;
-            $settings_lang->save();
+            $brista_lang->setting = $request->lang;
+            $brista_lang->save();
+        }
+        // ____________________________
+        $kitchen_lang = $this->settings
+        ->where("name", "kitchen_lang")
+        ->first();
+        if (empty($kitchen_lang)) {
+            $this->settings
+            ->create([
+                'name' => 'kitchen_lang',
+                'setting' => $request->lang,
+            ]);
+        }
+        else{
+            $kitchen_lang->setting = $request->lang;
+            $kitchen_lang->save();
+        }
+        // ____________________________
+        $cashier_lang = $this->settings
+        ->where("name", "cashier_lang")
+        ->first();
+        if (empty($cashier_lang)) {
+            $this->settings
+            ->create([
+                'name' => 'cashier_lang',
+                'setting' => $request->lang,
+            ]);
+        }
+        else{
+            $cashier_lang->setting = $request->lang;
+            $cashier_lang->save();
+        }
+        // ____________________________
+        $preparation_lang = $this->settings
+        ->where("name", "preparation_lang")
+        ->first();
+        if (empty($preparation_lang)) {
+            $this->settings
+            ->create([
+                'name' => 'preparation_lang',
+                'setting' => $request->lang,
+            ]);
+        }
+        else{
+            $preparation_lang->setting = $request->lang;
+            $preparation_lang->save();
         }
 
         return response()->json([
