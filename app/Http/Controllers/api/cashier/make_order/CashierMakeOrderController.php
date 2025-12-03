@@ -849,7 +849,8 @@ class CashierMakeOrderController extends Controller
                 'order' => json_encode($item),
                 'type' => 'dine_in',
                 'cart_id' => $value['cart_id'],
-            ]); 
+            ]);
+            $kitchen_items[$key]->order = $item;
         }
 
         return response()->json([
