@@ -1662,6 +1662,12 @@ class CashierMakeOrderController extends Controller
     }
 
     public function free_discount($amount){
+        if(!auth()->user()->free_discount){
+            return [
+                "errors" => "You Do not have this premission",
+                "success" => false,
+            ];
+        }
         $max_discount_order = $this->settings
         ->where("name", 'max_discount_order')
         ->first()?->setting ?? 0;
