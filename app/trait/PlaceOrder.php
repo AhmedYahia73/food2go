@@ -1038,18 +1038,17 @@ trait PlaceOrder
                 } 
                 // $item->addons->addon->count = $item->addons->count;
                 // $item->variations->variation->options = $item->variations->options;
-                $order_data[$key] = collect([]);
-                $order_data[$key]->id = $product->id;
-                $order_data[$key]->name = $product_name;
-                $order_data[$key]->category_id = $product->category_id;
-                $order_data[$key]->sub_category_id = $product->sub_category_id;
-                $order_data[$key]->notes = $item->product[0]->notes;
-                $order_data[$key]->count = $item->product[0]->count;
-                $order_data[$key]->cart_id = $order->id;
-                $order_data[$key]->excludes = $excludes;
-                $order_data[$key]->extras = $extras;
-                $order_data[$key]->variation_selected = $variation;
-                $order_data[$key]->addons_selected = $addons;
+                $order_data[$key]['id'] = $product->id;
+                $order_data[$key]['name'] = $product_name;
+                $order_data[$key]['category_id'] = $product->category_id;
+                $order_data[$key]['sub_category_id'] = $product->sub_category_id;
+                $order_data[$key]['notes'] = $item->product[0]->notes;
+                $order_data[$key]['count'] = $item->product[0]->count;
+                $order_data[$key]['cart_id'] = $order->id;
+                $order_data[$key]['excludes'] = $excludes;
+                $order_data[$key]['extras'] = $extras;
+                $order_data[$key]['variation_selected'] = $variation;
+                $order_data[$key]['addons_selected'] = $addons;
             }
 
             return array_values($order_data);
