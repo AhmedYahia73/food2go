@@ -822,7 +822,7 @@ trait PlaceOrder
                     ->orWhere('categories.id', $product['sub_category_id']);
                 });
             })
-            ->where('branch_id', $request->user()->branch_id)
+            ->where('branch_id', auth()->user()->branch_id)
             ->first();
             if(!empty($kitchen) && $kitchen->type == "kitchen"){ 
                 $locale = Setting::
