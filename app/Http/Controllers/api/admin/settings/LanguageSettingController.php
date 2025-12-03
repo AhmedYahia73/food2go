@@ -82,11 +82,11 @@ class LanguageSettingController extends Controller
             $this->settings
             ->create([
                 'name' => 'brista_lang',
-                'setting' => $request->lang,
+                'setting' => $request->brista_lang,
             ]);
         }
         else{
-            $brista_lang->setting = $request->lang;
+            $brista_lang->setting = $request->brista_lang;
             $brista_lang->save();
         }
         // ____________________________
@@ -97,11 +97,11 @@ class LanguageSettingController extends Controller
             $this->settings
             ->create([
                 'name' => 'kitchen_lang',
-                'setting' => $request->lang,
+                'setting' => $request->kitchen_lang,
             ]);
         }
         else{
-            $kitchen_lang->setting = $request->lang;
+            $kitchen_lang->setting = $request->kitchen_lang;
             $kitchen_lang->save();
         }
         // ____________________________
@@ -112,11 +112,11 @@ class LanguageSettingController extends Controller
             $this->settings
             ->create([
                 'name' => 'cashier_lang',
-                'setting' => $request->lang,
+                'setting' => $request->cashier_lang,
             ]);
         }
         else{
-            $cashier_lang->setting = $request->lang;
+            $cashier_lang->setting = $request->cashier_lang;
             $cashier_lang->save();
         }
         // ____________________________
@@ -127,11 +127,11 @@ class LanguageSettingController extends Controller
             $this->settings
             ->create([
                 'name' => 'preparation_lang',
-                'setting' => $request->lang,
+                'setting' => $request->preparation_lang,
             ]);
         }
         else{
-            $preparation_lang->setting = $request->lang;
+            $preparation_lang->setting = $request->preparation_lang;
             $preparation_lang->save();
         }
 
