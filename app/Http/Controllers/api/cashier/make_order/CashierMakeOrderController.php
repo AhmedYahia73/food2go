@@ -823,6 +823,7 @@ class CashierMakeOrderController extends Controller
             $order_item = collect($order_item);
 
             $element = $order_item[0];
+            $kitchen_order = [];
             $kitchen = $this->kitchen
             ->where(function($q) use($element){
                 $q->whereHas('products', function($query) use ($element){
@@ -837,11 +838,11 @@ class CashierMakeOrderController extends Controller
             ->first(); 
             if(!empty($kitchen)){
                 $kitchen_items[$kitchen->id] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $order_data[$key];
+                $kitchen_order[$kitchen->id][] = $element;
             }
         }
         foreach ($kitchen_order as $key => $item) {
-            $kitchen_order = $this->kitchen_order
+            $this->kitchen_order
             ->create([
                 'table_id' => $request->table_id,
                 'kitchen_id' => $key,
@@ -1261,7 +1262,7 @@ class CashierMakeOrderController extends Controller
         ->first();  
         $order_kitchen = [];
         
-        $order_data = $this->dine_in_print($order);
+        $order_data = $this->takeaway_kitchen_format($order);
         $order_items = collect($order_data['order_data']);
         $kitchen_items = $order_data['kitchen_items'];
         $kitchen_order = collect($order_data['kitchen_order']);
