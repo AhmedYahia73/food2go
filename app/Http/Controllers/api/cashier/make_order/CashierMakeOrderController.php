@@ -344,8 +344,8 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
         ]);
-        if($request->dicount_id){
-            if(!$request->user()->discount_perimission){
+        if($request->dicount_id || $request->free_discount){
+            if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
                     'errors' => "You don't have perimission to make discount"
                 ], 400);
@@ -601,8 +601,8 @@ class CashierMakeOrderController extends Controller
                 "errors" => "user_id is required"
             ], 400); 
         }
-        if($request->dicount_id){
-            if(!$request->user()->discount_perimission){
+        if($request->dicount_id || $request->free_discount){
+            if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
                     'errors' => "You don't have perimission to make discount"
                 ], 400);
@@ -812,6 +812,7 @@ class CashierMakeOrderController extends Controller
         }
         
         $kitchen_order = [];
+        $kitchen_items = [];
         foreach ($request->preparing as $value) {
             $order_cart = $this->order_cart
             ->where('id', $value['cart_id'])
@@ -903,8 +904,8 @@ class CashierMakeOrderController extends Controller
                 'errors' => $errors,
             ], 400);
         }
-        if($request->dicount_id){
-            if(!$request->user()->discount_perimission){
+        if($request->dicount_id || $request->free_discount){
+            if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
                     'errors' => "You don't have perimission to make discount"
                 ], 400);
@@ -1065,8 +1066,8 @@ class CashierMakeOrderController extends Controller
             }
             $user->increment('due', $due);
         }
-        if($request->dicount_id){
-            if(!$request->user()->discount_perimission){
+        if($request->dicount_id || $request->free_discount){
+            if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
                     'errors' => "You don't have perimission to make discount"
                 ], 400);
@@ -1633,10 +1634,6 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 0;
         $max_discount_order = floatval($max_discount_order);
         $max_discount_shift = floatval($max_discount_shift);
-        CashierShift::
-        where("shift", auth()->user()->shift_number)
-        ->where("cashier_man_id", auth()->user()->id)
-        ->increment("free_discount", $amount);
         $my_shift_discount = CashierShift::
         where("shift", auth()->user()->shift_number)
         ->where("cashier_man_id", auth()->user()->id)
@@ -1647,6 +1644,11 @@ class CashierMakeOrderController extends Controller
                 "success" => false,
             ];
         }
+        CashierShift::
+        where("shift", auth()->user()->shift_number)
+        ->where("cashier_man_id", auth()->user()->id)
+        ->increment("free_discount", $amount);
+        $my_shift_discount += $amount;
         if($max_discount_order < $amount || $max_discount_shift < $my_shift_discount){
             $emails = DiscountEmail::
             pluck("email");
