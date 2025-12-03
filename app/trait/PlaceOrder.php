@@ -931,8 +931,129 @@ trait PlaceOrder
         ];
     }
 
-    public function dine_in_kitchen_print(){
-        
+
+    public function dine_in_print($order, $locale = "ar", $key = 0){
+        $order_data = [];
+        foreach ($order->cart ?? $order as $key => $item) {
+            if(isset($item->product)){
+                $product = $item->product[0]->product;
+                // Kitchen
+                $kitchen = $this->kitchen
+                ->where(function($q) use($product){
+                    $q->whereHas('products', function($query) use ($product){
+                        $query->where('products.id', $product->id);
+                    })
+                    ->orWhereHas('category', function($query) use ($product){
+                        $query->where('categories.id', $product->category_id)
+                        ->orWhere('categories.id', $product->sub_category_id);
+                    });
+                })
+                ->where('branch_id', $request->user()->branch_id)
+                ->first();
+                if(!empty($kitchen) && $kitchen->type == "kitchen"){ 
+                    $locale = Setting::
+                    where("name", "kitchen_lang")
+                    ->first()?->setting ?? 'ar';
+                }
+                elseif(!empty($kitchen) && $kitchen->type == "brista"){ 
+                    $locale = Setting::
+                    where("name", "brista_lang")
+                    ->first()?->setting ?? 'ar';
+                }
+
+                $product_name =  TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $product->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $product->name;
+                unset($product->addons);
+                unset($product->variations);
+                $variation = [];
+                $addons = [];
+                $excludes = [];
+                $extras = [];
+                foreach ($item->variations as $key => $element) {
+                    $options_items = $element->options;
+                    $options = [];
+                    foreach ($options_items as $value) {
+                        $option_element = TranslationTbl::
+                        where("locale", $locale)
+                        ->where('key', $value->name)
+                        ->orderByDesc("id")
+                        ->first()
+                        ?->value ?? $value->name;
+                        $options[] = ["id" => $value->id, "name" => $option_element];
+                    }  
+                    $variation_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $element?->variation?->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $element?->variation?->name;
+                    $variation[] = [
+                        "id" => $element?->variation?->id, 
+                        'name' => $variation_element,
+                        'options' => $options,
+                    ]; 
+                } 
+                foreach ($item->addons as $key => $element) {
+                    $element->addon->count = $element->count;
+                    unset($element->count);
+                    $addon_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $element->addon->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $element->addon->name;
+                    $addons[] = [
+                        "id" => $element->addon->id, 
+                        'name' => $addon_element,
+                        'count' => $element->addon->count,
+                    ];
+                }
+                foreach ($item->excludes as $element) {
+                    $exclude_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $element->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $element->name;
+                    $excludes[] = [
+                        "id" => $element->id,
+                        'name' => $exclude_element
+                    ];
+                }
+                foreach ($item->extras as $element) {
+                    $extra_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $element->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $element->name;
+                    $extras[] = [
+                        "id" => $element->id,
+                        'name' => $extra_element,
+                    ];
+                } 
+                // $item->addons->addon->count = $item->addons->count;
+                // $item->variations->variation->options = $item->variations->options;
+                
+                $order_data[$key]->id = $product->id;
+                $order_data[$key]->name = $product_name;
+                $order_data[$key]->category_id = $product->category_id;
+                $order_data[$key]->sub_category_id = $product->sub_category_id;
+                $order_data[$key]->notes = $item->product[0]->notes;
+                $order_data[$key]->count = $item->product[0]->count;
+                $order_data[$key]->cart_id = $order->id;
+                $order_data[$key]->excludes = $excludes;
+                $order_data[$key]->extras = $extras;
+                $order_data[$key]->variation_selected = $variation;
+                $order_data[$key]->addons_selected = $addons;
+            }
+
+            return array_values($order_data);
+        }
     }
 
     public function kitechen_cart($item, $kitchen_order){ 

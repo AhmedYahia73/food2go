@@ -819,7 +819,7 @@ class CashierMakeOrderController extends Controller
             $preparing = $order_cart->cart;
             $order_cart->prepration_status = $value['status'];  
             $order_cart->save();
-            $order_item = $this->order_format($order_cart);
+            $order_item = $this->dine_in_print($order_cart);
             $order_item = collect($order_item);
 
             $element = $order_item[0];
@@ -834,10 +834,10 @@ class CashierMakeOrderController extends Controller
                 });
             })
             ->where('branch_id', $request->user()->branch_id)
-            ->first();
-            $element->note = $order_cart->notes;
-            if(!empty($kitchen) && $value['status'] == 'preparing'){
-                $kitchen_order[$kitchen->id][] = $element;
+            ->first(); 
+            if(!empty($kitchen)){
+                $kitchen_items[$kitchen->id] = $kitchen;
+                $kitchen_order[$kitchen->id][] = $order_data[$key];
             }
         }
         foreach ($kitchen_order as $key => $item) {
