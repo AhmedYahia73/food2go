@@ -1065,7 +1065,7 @@ class CaptainMakeOrderController extends Controller
             $kitchen_items = [];
             $order_cart = $order['payment'];  
             $preparing = $order_cart->cart;
-            $order_cart->prepration_status = $value['status'];  
+            $order_cart->prepration_status = "preparing";  
             $order_cart->save();
             $order_item = $this->dine_in_print($order_cart);
             $order_item = collect($order_item);
@@ -1095,7 +1095,7 @@ class CaptainMakeOrderController extends Controller
                     'kitchen_id' => $key,
                     'order' => json_encode($item),
                     'type' => 'dine_in',
-                    'cart_id' => $value['cart_id'],
+                    'cart_id' => $order_cart->id,
                 ]);
                 $kitchen_items[$key]['order'] = $item[0];
             }
