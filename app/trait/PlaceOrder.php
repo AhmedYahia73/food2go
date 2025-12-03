@@ -931,6 +931,10 @@ trait PlaceOrder
         ];
     }
 
+    public function dine_in_kitchen_print(){
+        
+    }
+
     public function kitechen_cart($item, $kitchen_order){ 
         // foreach ($item as $element) {
         //     $kitchen_item = KitchenItem::create([
