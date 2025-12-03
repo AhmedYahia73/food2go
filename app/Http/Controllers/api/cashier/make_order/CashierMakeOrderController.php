@@ -1566,21 +1566,25 @@ class CashierMakeOrderController extends Controller
             }
             if (isset($item['extra_id'])) {
                 $extra = $this->extras
-                ->where("id", $item['extra_id'])
-                ->first();
-                $extras_items = [
-                    "id" => $item['extra_id'],
-                    "name" => $extra->name,
-                ];
+                ->whereIn("id", $item['extra_id'])
+                ->get();
+                foreach ($extra as $key => $value) {
+                    $extras_items[] = [
+                        "id" => $value->id,
+                        "name" => $value->name,
+                    ];
+                }
             }
             if (isset($item['exclude_id'])) {
                 $exclude = $this->excludes
                 ->where("id", $item['exclude_id'])
                 ->first();
-                $excludes_items = [
-                    "id" => $item['exclude_id'],
-                    "name" => $exclude->name,
-                ];
+                foreach ($exclude as $key => $value) {
+                    $excludes_items[] = [
+                        "id" => $value->id,
+                        "name" => $value->name,
+                    ];
+                }
             }
 
             $count = $item['count'];
