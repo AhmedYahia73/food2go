@@ -854,6 +854,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => 'You perpare success',
+            "kitchen_items" => $kitchen_items
         ]);
     }
 
