@@ -1664,7 +1664,7 @@ class CashierMakeOrderController extends Controller
     public function free_discount($amount){
         if(!auth()->user()->free_discount){
             return [
-                "errors" => "You Do not have this premission",
+                "errors" => "You Do not have this premission on free discount",
                 "success" => false,
             ];
         }
