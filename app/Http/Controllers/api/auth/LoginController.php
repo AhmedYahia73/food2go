@@ -622,7 +622,10 @@ class LoginController extends Controller
             $rate = false;
             if($order && empty($order->rate) && !$order->is_cancel_evaluate){
                 $rate = true;
-            }  
+            }
+            $r_online_noti = $this->settings
+            ->where("name", "r_online_noti")
+            ->first()->setting;
 
             return response()->json([
                 'user' => $user,
@@ -631,6 +634,7 @@ class LoginController extends Controller
                 'zones' => $zones,
                 'rate' => $rate,
                 'order_id' => $rate ? $order?->id : null,
+                "r_online_noti" => $r_online_noti,
             ], 200);
         }
         else { 
