@@ -1220,34 +1220,16 @@ class CashierMakeOrderController extends Controller
             'kitchen_items' => $kitchen_items
         ]);
     } 
-
+// kitchen_lang, brista_lang
     public function preparing_delivery($request, $id){
         $order = $this->order
         ->where('id', $id)
-        ->first(); 
-        $kitchen_items = [];
-        $order_items = $this->takeaway_kitchen_format($order);
-        $order_items = collect($order_items);
-        $kitchen_order = [];
-        foreach ($order_items as $key => $element) {
-            $kitchen = $this->kitchen
-            ->where(function($q) use($element){
-                $q->whereHas('products', function($query) use ($element){
-                    $query->where('products.id', $element['id']);
-                })
-                ->orWhereHas('category', function($query) use ($element){
-                    $query->where('categories.id', $element['category_id'])
-                    ->orWhere('categories.id', $element['sub_category_id']);
-                });
-            })
-            ->where('branch_id', $request->user()->branch_id)
-            ->first();
-            if(!empty($kitchen)){
-                $kitchen_items[$kitchen->id] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $element;
-            }
-        }
-            
+        ->first();  
+        $order_data = $this->takeaway_kitchen_format($order);
+        $order_items = collect($order_data['order_data']);
+        $kitchen_items = $order_data['kitchen_items'];
+        $kitchen_order = collect($order_data['kitchen_order']);
+    
         foreach ($kitchen_order as $key => $item) {
             $kitchen_items[$key] = [
                 "id" => $kitchen_items[$key]->id,
@@ -1279,30 +1261,13 @@ class CashierMakeOrderController extends Controller
         $order = $this->order
         ->where('id', $id)
         ->first();  
-        $order_items = $this->takeaway_kitchen_format($order);
-        $order_items = collect($order_items);
-        $kitchen_order = [];
-        $kitchen_items = [];
         $order_kitchen = [];
-        foreach ($order_items as $key => $element) {
-            $kitchen = $this->kitchen
-            ->where(function($q) use($element){
-                $q->whereHas('products', function($query) use ($element){
-                    $query->where('products.id', $element['id']);
-                })
-                ->orWhereHas('category', function($query) use ($element){
-                    $query->where('categories.id', $element['category_id'])
-                    ->orWhere('categories.id', $element['sub_category_id']);
-                });
-            })
-            ->where('branch_id', $request->user()->branch_id)
-            ->first();
-            if(!empty($kitchen)){
-                $kitchen_items[$kitchen->id] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $element;
-            }
-        }
-            
+        
+        $order_data = $this->takeaway_kitchen_format($order);
+        $order_items = collect($order_data['order_data']);
+        $kitchen_items = $order_data['kitchen_items'];
+        $kitchen_order = collect($order_data['kitchen_order']);
+  
         foreach ($kitchen_order as $key => $item) {
             $order_kitchen[$key] = [
                 "id" => $kitchen_items[$key]->id,

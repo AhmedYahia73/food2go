@@ -12,6 +12,7 @@ use App\Models\KItemAddon;
 use App\Models\KItemVriation;
 use App\Models\Setting;
 use App\Models\KItemOption;
+use App\Models\Kitchen;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -798,10 +799,10 @@ trait PlaceOrder
 
     public function takeaway_kitchen_format($order){
         $order_data = [];
-        $locale = Setting::
-        where("name", "setting_lang")
-        ->first()?->setting ?? 'en';
+        $kitchen_order = [];
+        $kitchen_items = [];
         foreach ($order->order_details ?? $order as $key => $item) {
+            $locale = 'ar';
             $product = collect([]);
             $product['id'] = $item->product[0]->product->id;
             $product['name'] = $item->product[0]->product->name;
@@ -809,6 +810,31 @@ trait PlaceOrder
             $product['sub_category_id'] = $item->product[0]->product->sub_category_id;
             $product['notes'] = $item->product[0]->notes;
             $product['count'] = $item->product[0]->count;
+
+            // kitchen
+            $kitchen = Kitchen::
+            where(function($q) use($product){
+                $q->whereHas('products', function($query) use ($product){
+                    $query->where('products.id', $product['id']);
+                })
+                ->orWhereHas('category', function($query) use ($product){
+                    $query->where('categories.id', $product['category_id'])
+                    ->orWhere('categories.id', $product['sub_category_id']);
+                });
+            })
+            ->where('branch_id', $request->user()->branch_id)
+            ->first();
+            if(!empty($kitchen) && $kitchen->type == "kitchen"){ 
+                $locale = Setting::
+                where("name", "kitchen_lang")
+                ->first()?->setting ?? 'ar';
+            }
+            elseif(!empty($kitchen) && $kitchen->type == "brista"){ 
+                $locale = Setting::
+                where("name", "brista_lang")
+                ->first()?->setting ?? 'ar';
+            }
+
             $product['name'] = TranslationTbl::
             where("locale", $locale)
             ->where('key', $product['name'])
@@ -892,9 +918,17 @@ trait PlaceOrder
             $order_data[$key]['extras'] = $extras;
             $order_data[$key]['variation_selected'] = $variation;
             $order_data[$key]['addons_selected'] = $addons;
+            if(!empty($kitchen)){
+                $kitchen_items[$kitchen->id] = $kitchen;
+                $kitchen_order[$kitchen->id][] = $order_data[$key];
+            }
         }
 
-        return $order_data;
+        return [
+            "order_data" => $order_data,
+            "kitchen_items" => $kitchen_items,
+            "kitchen_order" => $kitchen_order,
+        ];
     }
 
     public function kitechen_cart($item, $kitchen_order){ 

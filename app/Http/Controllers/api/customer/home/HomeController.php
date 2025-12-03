@@ -435,7 +435,7 @@ class HomeController extends Controller
 
     public function payment_methods(Request $request){
         $payment_methods = $this->payment_method
-        ->select('id', 'name', 'description', 'logo')
+        ->select('id', 'name', 'description', 'logo', 'feez_amount', 'feez_status')
         ->orderBy('order')
         ->get();
         $schedules = $this->schedule_list
