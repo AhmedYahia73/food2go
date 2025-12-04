@@ -26,6 +26,7 @@ class PurchaseProductController extends Controller
                 'status' => $item->status,
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
+                'min_stock' => $item->min_stock,
             ];
         }); 
         $categories = $this->categories
