@@ -453,6 +453,7 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
+            'kitchen_items_count' => count($kitchen_items),
             'order_number' => $order['order']->order_number,
             'order_id' => $order['order']->id,
             "financials" => $financials,
@@ -1269,6 +1270,7 @@ class CashierMakeOrderController extends Controller
                 "print_name" => $kitchen_items[$key]->print_name,
                 "print_ip" => $kitchen_items[$key]->print_ip,
                 "print_status" => $kitchen_items[$key]->print_status,
+                "order" => $item,
                 "order" => $item,
                 "order_type" => $order->order_type,
             ];

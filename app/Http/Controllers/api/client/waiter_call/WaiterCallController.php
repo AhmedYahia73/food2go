@@ -65,10 +65,11 @@ class WaiterCallController extends Controller
         $device_token = $device_token->toArray();
         $body = 'Table ' . $cafe_table->table_number . 
             ' at location ' . $cafe_table?->location?->name . ' Want Waiter';
-        $this->sendNotificationToMany($device_token, $cafe_table->table_number, $body);
+        $waiters = $this->sendNotificationToMany($device_token, $cafe_table->table_number, $body);
         
         return response()->json([
-            'success' => 'You call waiter success'
+            'success' => 'You call waiter success',
+            "waiters" => $waiters->count()
         ]);
     }
 
