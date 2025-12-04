@@ -34,11 +34,31 @@ class SupplierController extends Controller
     }
 
     public function create(Request $request){
-        
+        $validator = Validator::make($request->all(), [
+            'name' => ['required'],
+            'phone' => ['required', 'unique:suppliers,phone'],
+            'email' => ['required', 'unique:suppliers,email'],
+            'status' => ['required'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
     }
 
     public function modify(Request $request, $id){
-        
+        $validator = Validator::make($request->all(), [
+            'name' => ['required'],
+            'phone' => ['required', 'unique:suppliers,phone,' . $id],
+            'email' => ['required', 'unique:suppliers,email,' . $id],
+            'status' => ['required'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
     }
 
     public function delete(Request $request, $id){

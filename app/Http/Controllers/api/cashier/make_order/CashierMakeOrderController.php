@@ -1582,7 +1582,7 @@ class CashierMakeOrderController extends Controller
             }
             if (isset($item['exclude_id'])) {
                 $exclude = $this->excludes
-                ->where("id", $item['exclude_id'])
+                ->whereIn("id", $item['exclude_id'])
                 ->with("translations")
                 ->get();
                 foreach ($exclude as $key => $value) {
@@ -1596,6 +1596,25 @@ class CashierMakeOrderController extends Controller
                     ];
                 }
             }
+            if (isset($product['variation'])) {
+                foreach ($product['variation'] as $variation) {
+                    $variation_item = $this->variation
+                    ->where('id', $variation['variation_id'])
+                    ->withLocale($locale)
+                    ->first();
+                    $options = $this->options
+                    ->whereIn('id', $variation['option_id'])
+                    ->withLocale($locale)
+                    ->get(); 
+                    $order_details[$key]['variations'][] = [
+                        'variation' => $variation_item,
+                        'options' => $options,
+                    ];
+                    $amount_product += $this->options
+                    ->whereIn('id', $variation['option_id'])
+                    ->sum('price');
+                }
+            } 
 
             $count = $item['count'];
             $price = $item['price'];
@@ -1616,6 +1635,7 @@ class CashierMakeOrderController extends Controller
                 "addons" => $addons,
                 "extras" => $extras_items,
                 "excludes" => $excludes_items,
+                "variations" => $excludes_items,
             ];
         }
 
