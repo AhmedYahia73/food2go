@@ -166,8 +166,10 @@ class ManufacturingController extends Controller
             ->where('store_id', $request->store_id)
             ->where("material_id", $item['id'])
             ->first();
-            $stock->quantity -= $item['weight'];
-            $stock->save();
+            if(!empty($stock)){
+                $stock->quantity -= $item['weight'];
+                $stock->save();
+            }
         }
         $purchase_stock = $this->purchase_stock
         ->where("product_id", $request->product_id)
