@@ -403,7 +403,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/item/{id}', 'upsaling_item')->middleware('can:view_upsaling');
         Route::put('/status/{id}', 'status')->middleware('can:status_upsaling');
         Route::post('/add', 'create')->middleware('can:add_upsaling');
-        Route::put('/update/{id}', 'modify')->middleware('can:update_upsaling');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_upsaling');
         Route::delete('/delete/{id}', 'delete')->middleware('can:delete_upsaling');
     });
     
