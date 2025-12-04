@@ -191,7 +191,8 @@ class ManufacturingController extends Controller
         
 
         return response()->json([
-            'success' => 'You moke Product success'
+            'success' => 'You moke Product success',
+            "cost" => $cost,
         ]);
     }
 
