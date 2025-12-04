@@ -75,7 +75,8 @@ class CaptainMakeOrderController extends Controller
         ]);
 
         return response()->json([
-            "success" => "You put prepration number success"
+            "success" => "You put prepration number success",
+            "preparation_num" => $request->preparation_num
         ]);
     }
     
