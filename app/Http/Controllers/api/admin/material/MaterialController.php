@@ -40,7 +40,7 @@ class MaterialController extends Controller
         ]);
     }
 
-    public function material_stock(Request $request, $id){
+    public function material_stock(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => ['required', 'exists:purchase_stores,id'], 
         ]);
