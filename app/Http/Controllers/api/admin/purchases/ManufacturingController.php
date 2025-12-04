@@ -112,7 +112,7 @@ class ManufacturingController extends Controller
             ->where("material_id", $item['id'])
             ->where("quantity", '>=', $item['weight'])
             ->first();
-            if(empty($stock)){
+            if(empty($stock) || $item['weight'] == 0){
                 $material = $this->materials
                 ->where('id', $item['id'])
                 ->first();
