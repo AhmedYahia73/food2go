@@ -212,7 +212,7 @@ class LoginController extends Controller
         ->first();
         $r_online_noti = $this->settings
         ->where("name", "r_online_noti")
-        ->first()->setting;
+        ->first()?->setting ?? 0;
         if (empty($user)) {
             $user = $this->branch
             ->where('email', $request->email)
