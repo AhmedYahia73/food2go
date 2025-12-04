@@ -58,6 +58,7 @@ class DiscountController extends Controller
         ->whereHas("branches", function($query) use($request){
             $query->where("branches.id", $request->user()->branch_id);
         })
+        ->where("module", "pos")
         ->orderByDesc("id")
         ->first();
 

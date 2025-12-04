@@ -25,6 +25,7 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 use App\Events\PrintOrder;
 
 use App\Models\Order;
+use App\Models\CompanyInfo;
 use App\Models\UserDue;
 use App\Models\Kitchen;
 use App\Models\KitchenOrder;  
@@ -79,7 +80,8 @@ class CashierMakeOrderController extends Controller
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CashierMan $cashier_man, private UserDue $user_due,
     private DiscountModule $discount_module, private FinantiolAcounting $financial_account,
-    private CheckoutRequest $checkout_request_query, private GroupProduct $group_products){}
+    private CheckoutRequest $checkout_request_query, private GroupProduct $group_products,
+    private CompanyInfo $company_info){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -445,6 +447,8 @@ class CashierMakeOrderController extends Controller
         $customer = $order['order']->user;
         $delivery_fees = $order['order']->load('address.zone');
         $delivery_fees = $delivery_fees?->address?->zone?->price ?? 0;
+        $reaturant_name = $this->company_info
+        ->first()?->name;
 
         return response()->json([
             "success" => $this->checkout_data($request),
@@ -455,6 +459,7 @@ class CashierMakeOrderController extends Controller
             "address" => $address,
             "delivery_fees" => $delivery_fees,
             "customer" => $customer,
+            "reaturant_name" => $reaturant_name,
             "module_order_number" => $request->module_order_number ?? null,
         ]);
     }
@@ -702,6 +707,8 @@ class CashierMakeOrderController extends Controller
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);  
+        $reaturant_name = $this->company_info
+        ->first()?->name;
 
         return response()->json([ 
             "success" => $this->checkout_data($request),
@@ -711,6 +718,7 @@ class CashierMakeOrderController extends Controller
             'caheir_name' => $caheir_name,
             'address' => $address,
             'financials' => $financials,
+            'reaturant_name' => $reaturant_name,
             'date' => now(),
             "module_order_number" => $request->module_order_number ?? null,
         ]);
@@ -1011,12 +1019,20 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale); 
  
+        $preparation_num = $this->cafe_table
+        ->where('id', $request->table_id) 
+        ->first()?->preparation_num ?? null;
+        $reaturant_name = $this->company_info
+        ->first()?->name;
+
         return response()->json([
             'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number'],
             'order_id' => $order['payment']['id'],
             "financials" => $financials,
+            "reaturant_name" => $reaturant_name,
             "module_order_number" => $request->module_order_number ?? null,
+            "preparation_num" => $preparation_num
         ]);
     }
 
@@ -1135,6 +1151,12 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
  
+        $preparation_num = $this->cafe_table
+        ->where('id', $request->table_id) 
+        ->first()?->preparation_num ?? null; 
+        $reaturant_name = $this->company_info
+        ->first()?->name;
+
         return response()->json([
             "success" => $this->checkout_data($request),
             'order_number' => $order_number,
@@ -1142,6 +1164,8 @@ class CashierMakeOrderController extends Controller
             'order_id' => $order_number,
             'financials' => $financials,
             "module_order_number" => $request->module_order_number ?? null,
+            "preparation_num" => $preparation_num,
+            "reaturant_name" => $reaturant_name,
         ]);
     } 
 
