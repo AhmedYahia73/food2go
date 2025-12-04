@@ -120,6 +120,7 @@ class ManufacturingController extends Controller
                     'errors' => $material->name . ' is not in stock'
                 ], 400);
             }
+            continue;
             $stock = $stock->quintity;
             $last_purchase_amount = 0;
             $purchase = $this->purchase
