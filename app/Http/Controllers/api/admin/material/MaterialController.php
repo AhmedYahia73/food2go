@@ -56,7 +56,7 @@ class MaterialController extends Controller
         ->get()
         ->map(function($item) use($stocks){
             $stock = $stocks
-            ->where("product_id", $item->id)
+            ->where("material_id", $item->id)
             ->first()?->quantity ?? 0;
             return [
                 'id' => $item->id,
@@ -75,7 +75,7 @@ class MaterialController extends Controller
         ->get();
 
         return response()->json([
-            'products' => $product,
+            'materials' => $product,
             'categories' => $categories,
         ]);
     }
