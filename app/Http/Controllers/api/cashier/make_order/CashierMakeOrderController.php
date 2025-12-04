@@ -24,6 +24,7 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 
 use App\Events\PrintOrder;
 
+use App\Models\ServiceFees;
 use App\Models\Order;
 use App\Models\CompanyInfo;
 use App\Models\UserDue;
@@ -81,7 +82,7 @@ class CashierMakeOrderController extends Controller
     private CashierMan $cashier_man, private UserDue $user_due,
     private DiscountModule $discount_module, private FinantiolAcounting $financial_account,
     private CheckoutRequest $checkout_request_query, private GroupProduct $group_products,
-    private CompanyInfo $company_info){}
+    private CompanyInfo $company_info, private ServiceFees $service_fees_model){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -448,7 +449,14 @@ class CashierMakeOrderController extends Controller
         $delivery_fees = $order['order']->load('address.zone');
         $delivery_fees = $delivery_fees?->address?->zone?->price ?? 0;
         $reaturant_name = $this->company_info
-        ->first()?->name;
+        ->first()?->name; 
+        $service_fees_model = $this->service_fees_model
+        ->whereHas("branches", function($query) use($request){
+            $query->where("branches.id", $request->user()->branch_id);
+        })
+        ->where("module", "pos") 
+        ->orderByDesc("id")
+        ->first();
 
         return response()->json([
             "success" => $this->checkout_data($request),
@@ -464,6 +472,7 @@ class CashierMakeOrderController extends Controller
             "module_order_number" => $request->module_order_number ?? null,
             "total_tax" => $request->total_tax ?? 0,
             "total_discount" => $request->total_discount ?? 0,
+            "service_fees_model" => $service_fees_model
         ]);
     }
 
@@ -713,6 +722,14 @@ class CashierMakeOrderController extends Controller
         $reaturant_name = $this->company_info
         ->first()?->name;
 
+        $service_fees_model = $this->service_fees_model
+        ->whereHas("branches", function($query) use($request){
+            $query->where("branches.id", $request->user()->branch_id);
+        })
+        ->where("module", "pos") 
+        ->orderByDesc("id")
+        ->first();
+
         return response()->json([ 
             "success" => $this->checkout_data($request),
             "kitchen_items" => $kitchen_items,  
@@ -724,6 +741,7 @@ class CashierMakeOrderController extends Controller
             'reaturant_name' => $reaturant_name,
             'date' => now(),
             "module_order_number" => $request->module_order_number ?? null,
+            "service_fees_model" => $service_fees_model,
             "total_tax" => $request->total_tax ?? 0,
             "total_discount" => $request->total_discount ?? 0,
         ]);
@@ -1029,6 +1047,13 @@ class CashierMakeOrderController extends Controller
         ->first()?->preparation_num ?? null;
         $reaturant_name = $this->company_info
         ->first()?->name;
+        $service_fees_model = $this->service_fees_model
+        ->whereHas("branches", function($query) use($request){
+            $query->where("branches.id", $request->user()->branch_id);
+        })
+        ->where("module", "pos") 
+        ->orderByDesc("id")
+        ->first();
 
         return response()->json([
             'success' => $this->checkout_data($request), 
@@ -1036,6 +1061,7 @@ class CashierMakeOrderController extends Controller
             'order_id' => $order['payment']['id'],
             "financials" => $financials,
             "reaturant_name" => $reaturant_name,
+            "service_fees_model" => $service_fees_model,
             "module_order_number" => $request->module_order_number ?? null,
             "preparation_num" => $preparation_num,
             "total_tax" => $request->total_tax ?? 0,
@@ -1164,12 +1190,21 @@ class CashierMakeOrderController extends Controller
         $reaturant_name = $this->company_info
         ->first()?->name;
 
+        $service_fees_model = $this->service_fees_model
+        ->whereHas("branches", function($query) use($request){
+            $query->where("branches.id", $request->user()->branch_id);
+        })
+        ->where("module", "pos") 
+        ->orderByDesc("id")
+        ->first();
+
         return response()->json([
             "success" => $this->checkout_data($request),
             'order_number' => $order_number,
             'order_id' => $order_id,
             'order_id' => $order_number,
             'financials' => $financials,
+            "service_fees_model" => $service_fees_model,
             "module_order_number" => $request->module_order_number ?? null,
             "preparation_num" => $preparation_num,
             "reaturant_name" => $reaturant_name,
