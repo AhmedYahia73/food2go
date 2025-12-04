@@ -155,8 +155,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
     Route::controller(NotificationController::class)
-    ->prefix('min_stock_notification')->group(function(){
-        Route::get('/', 'view');
+    ->prefix('notification')->group(function(){
+        Route::get('/stock_product', 'stock_product');
+        Route::get('/stock_material', 'stock_material');
     });
     
     Route::controller(FreeDiscountController::class)

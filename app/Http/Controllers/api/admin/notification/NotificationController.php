@@ -15,7 +15,7 @@ class NotificationController extends Controller
     public function __construct(private PurchaseStock $product_stock,
     private MaterialStock $material_stock,){}
 
-    public function view(Request $request){
+    public function stock_product(Request $request){
         $product_stock = $this->product_stock
         ->with("product", "store", "unit")
         ->get()
@@ -32,7 +32,15 @@ class NotificationController extends Controller
                 ];
             }
         })
-        ->filter();
+        ->filter()
+        ->values(); 
+
+        return response()->json([
+            "product_stock" => $product_stock, 
+        ]);
+    }
+
+    public function stock_material(Request $request){ 
         $material_stock = $this->material_stock
         ->with("material", "store", "unit")
         ->get()
@@ -49,10 +57,10 @@ class NotificationController extends Controller
                 ];
             }
         })
-        ->filter();
+        ->filter()
+        ->values();
 
-        return response()->json([
-            "product_stock" => $product_stock,
+        return response()->json([ 
             "material_stock" => $material_stock,
         ]);
     }
