@@ -1616,10 +1616,10 @@ class CashierMakeOrderController extends Controller
                         $option_items[] = $value
                         ?->translations
                         ?->where('locale', $locale)
-                        ?->first()?->value ?? $variation_element?->name ?? null;
+                        ?->first()?->value ?? $value?->name ?? null;
                     }
                     $variation_item[$key]['variations'][] = [
-                        'variation' => $variation_item,
+                        'variation' => $variation_element,
                         'options' => $option_items,
                     ]; 
                 }
