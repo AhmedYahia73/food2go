@@ -117,7 +117,6 @@ class PaymentMethodController extends Controller
         $payment_method = $this->payment_methods
         ->where('id', $id)
         ->where('id', '!=', 1)
-        ->where('id', '!=', 2)
         ->first();
         if(empty($payment_method)){
             return response()->json([
@@ -129,8 +128,10 @@ class PaymentMethodController extends Controller
             $paymentMethodRequest['logo'] = $image_path;
             $this->deleteImage($payment_method->logo);
         }
-        $payment_method
-        ->update($paymentMethodRequest);
+        if($payment_method->id != 2){
+            $payment_method
+            ->update($paymentMethodRequest);
+        }
 
         return response()->json([
             'payment_method' => $payment_method

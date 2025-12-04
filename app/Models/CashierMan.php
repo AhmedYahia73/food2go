@@ -27,6 +27,7 @@ class CashierMan extends Model
         'cashier_id',
         'online_order',
         'report',
+        'free_discount',
     ];
     protected $appends = ['role', 'image_link'];
 

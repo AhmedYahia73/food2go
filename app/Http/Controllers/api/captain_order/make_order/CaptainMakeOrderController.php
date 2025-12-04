@@ -16,6 +16,7 @@ use App\Models\ProductSale;
 use App\Models\Product;
 use App\Models\ExcludeProduct;
 use App\Models\ExtraProduct;
+use App\Models\KitchenOrder;
 use App\Models\Addon;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
@@ -32,6 +33,7 @@ use App\Models\Zone;
 use App\Models\CheckoutRequest;
 use App\Models\FinantiolAcounting;
 use App\Models\Discount;
+use App\Models\Kitchen;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -48,7 +50,8 @@ class CaptainMakeOrderController extends Controller
     private CafeLocation $cafe_location, private CafeTable $cafe_table,
     private OrderCart $order_cart, private Zone $zone,
     private FinantiolAcounting $financial_account, private Discount $discount,
-    private CheckoutRequest $checkout_request_query){}
+    private KitchenOrder $kitchen_order, private CheckoutRequest $checkout_request_query,
+    private Kitchen $kitchen){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -1057,7 +1060,47 @@ class CaptainMakeOrderController extends Controller
             'current_status' => 'not_available_with_order'
         ]);
         $order_data = $this->order_format($order['payment'], 0);
+        if($request->order_status == "preparing"){
+            $kitchen_order = [];
+            $kitchen_items = [];
+            $order_cart = $order['payment'];  
+            $preparing = $order_cart->cart;
+            $order_cart->prepration_status = "preparing";  
+            $order_cart->save();
+            $order_item = $this->dine_in_print($order_cart);
+            $order_item = collect($order_item);
 
+            $element = $order_item[0];
+            $kitchen_order = [];
+            $kitchen = $this->kitchen
+            ->where(function($q) use($element){
+                $q->whereHas('products', function($query) use ($element){
+                    $query->where('products.id', $element['id']);
+                })
+                ->orWhereHas('category', function($query) use ($element){
+                    $query->where('categories.id', $element['category_id'])
+                    ->orWhere('categories.id', $element['sub_category_id']);
+                });
+            })
+            ->where('branch_id', $request->user()->branch_id)
+            ->first(); 
+            if(!empty($kitchen)){
+                $kitchen_items[$kitchen->id] = $kitchen;
+                $kitchen_order[$kitchen->id][] = $element;
+            }
+            foreach ($kitchen_order as $key => $item) {
+                $this->kitchen_order
+                ->create([
+                    'table_id' => $request->table_id,
+                    'kitchen_id' => $key,
+                    'order' => json_encode($item),
+                    'type' => 'dine_in',
+                    'cart_id' => $order_cart->id,
+                ]);
+                $kitchen_items[$key]['order'] = $item[0];
+            }
+        }
+  
         return response()->json([
             'success' => $order_data, 
         ]);

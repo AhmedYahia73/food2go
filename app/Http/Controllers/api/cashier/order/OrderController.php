@@ -29,6 +29,7 @@ use App\Models\ExtraProduct;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
 use App\Models\CashierMan;
+use App\Models\VoidReason;
 
 class OrderController extends Controller
 {
@@ -39,10 +40,22 @@ class OrderController extends Controller
     private FinantiolAcounting $financial_account, private Product $products,
     private ExcludeProduct $excludes, private Addon $addons,
     private ExtraProduct $extras, private VariationProduct $variation,
-    private OptionProduct $options, private CashierMan $cashier_man){}
+    private OptionProduct $options, private CashierMan $cashier_man,
+    private VoidReason $void_reasons){}
     use Recipe;
     use POS;
     use OrderFormat;
+
+    public function void_lists(Request $request){
+        $void_reasons = $this->void_reasons
+        ->select("id", "void_reason")
+        ->where("status", 1)
+        ->get();
+
+        return response()->json([
+            "void_reasons" => $void_reasons
+        ]); 
+    }
 
     public function order_checkout(Request $request, $id){
         $locale = $request->locale ?? "en";
@@ -1057,6 +1070,8 @@ class OrderController extends Controller
             'financial_id' => 'required|exists:finantiol_acountings,id',
             'manager_id' => 'required',
             'manager_password' => 'required', 
+            'void_id' => 'required|exists:void_reasons,id', 
+            'void_reason' => 'sometimes', 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -1097,6 +1112,8 @@ class OrderController extends Controller
         else{
             $order->order_status = "returned";
         }
+        $order->void_id = $request->void_id;
+        $order->void_reason = $request->void_reason;
         $order->void_financial_id = $request->financial_id;
         $order->is_void = 1;
         $order->save();

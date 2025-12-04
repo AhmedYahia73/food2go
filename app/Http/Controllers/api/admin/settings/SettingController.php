@@ -375,9 +375,21 @@ class SettingController extends Controller
                 'setting' => 1
             ]);
         }
+        $re_notification = $this->settings
+        ->where('name', 'r_online_noti')
+        ->orderByDesc('id')
+        ->first(); 
+        if (empty($re_notification)) { 
+            $re_notification = $this->settings
+            ->create([
+                'name' => 'r_online_noti',
+                'setting' => 0
+            ]);
+        }
 
         return response()->json([
-            'repeated_notification' => $re_notification->setting
+            'repeated_notification' => $re_notification->setting,
+            'r_online_noti' => $re_notification->setting,
         ]);
     }
 
@@ -386,7 +398,8 @@ class SettingController extends Controller
         // Keys
         // repeated
         $validator = Validator::make($request->all(), [
-            'repeated' => 'required|boolean', 
+            'repeated' => 'required|boolean',
+            'r_online_noti' => 'required|boolean',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -410,9 +423,27 @@ class SettingController extends Controller
                 'setting' => $request->repeated
             ]);
         } 
+        $notification_sound = $this->settings
+        ->where('name', 'r_online_noti')
+        ->orderByDesc('id')
+        ->first();
+        if (empty($notification_sound)) { 
+            $notification_sound = $this->settings
+            ->create([
+                'name' => 'r_online_noti',
+                'setting' => $request->r_online_noti
+            ]);
+        }
+        else{ 
+            $notification_sound
+            ->update([
+                'setting' => $request->r_online_noti
+            ]);
+        } 
 
         return response()->json([
-            'success' => $request->repeated ? 'active' : 'banned'
+            'success' => $request->repeated ? 'active' : 'banned',
+            "r_online_noti" => $request->r_online_noti ? 'active' : 'banned',
         ]);
     }
 

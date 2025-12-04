@@ -49,6 +49,7 @@ class CashierManController extends Controller
                 'discount_perimission' => $item->discount_perimission,
                 'online_order' => $item->online_order,
                 'report' => $item->report,
+                "free_discount" => $item->free_discount,
             ];
         });
         $branches = $this->branch

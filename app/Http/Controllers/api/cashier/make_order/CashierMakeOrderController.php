@@ -344,8 +344,8 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
         ]);
-        if($request->dicount_id){
-            if(!$request->user()->discount_perimission){
+        if($request->dicount_id || $request->free_discount){
+            if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
                     'errors' => "You don't have perimission to make discount"
                 ], 400);
@@ -601,8 +601,8 @@ class CashierMakeOrderController extends Controller
                 "errors" => "user_id is required"
             ], 400); 
         }
-        if($request->dicount_id){
-            if(!$request->user()->discount_perimission){
+        if($request->dicount_id || $request->free_discount){
+            if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
                     'errors' => "You don't have perimission to make discount"
                 ], 400);
@@ -752,7 +752,6 @@ class CashierMakeOrderController extends Controller
 
   
         return response()->json([ 
-            'request' => $request->all(),
             "cart_id" => $order['payment']->id
         ]);
     }
@@ -813,6 +812,7 @@ class CashierMakeOrderController extends Controller
         }
         
         $kitchen_order = [];
+        $kitchen_items = [];
         foreach ($request->preparing as $value) {
             $order_cart = $this->order_cart
             ->where('id', $value['cart_id'])
@@ -820,29 +820,30 @@ class CashierMakeOrderController extends Controller
             $preparing = $order_cart->cart;
             $order_cart->prepration_status = $value['status'];  
             $order_cart->save();
-            $order_item = $this->order_format($order_cart);
+            $order_item = $this->dine_in_print($order_cart);
             $order_item = collect($order_item);
 
             $element = $order_item[0];
+            $kitchen_order = [];
             $kitchen = $this->kitchen
             ->where(function($q) use($element){
                 $q->whereHas('products', function($query) use ($element){
-                    $query->where('products.id', $element->id);
+                    $query->where('products.id', $element['id']);
                 })
                 ->orWhereHas('category', function($query) use ($element){
-                    $query->where('categories.id', $element->category_id)
-                    ->orWhere('categories.id', $element->sub_category_id);
+                    $query->where('categories.id', $element['category_id'])
+                    ->orWhere('categories.id', $element['sub_category_id']);
                 });
             })
             ->where('branch_id', $request->user()->branch_id)
-            ->first();
-            $element->note = $order_cart->notes;
-            if(!empty($kitchen) && $value['status'] == 'preparing'){
+            ->first(); 
+            if(!empty($kitchen)){
+                $kitchen_items[$kitchen->id] = $kitchen;
                 $kitchen_order[$kitchen->id][] = $element;
             }
         }
         foreach ($kitchen_order as $key => $item) {
-            $kitchen_order = $this->kitchen_order
+            $this->kitchen_order
             ->create([
                 'table_id' => $request->table_id,
                 'kitchen_id' => $key,
@@ -850,11 +851,12 @@ class CashierMakeOrderController extends Controller
                 'type' => 'dine_in',
                 'cart_id' => $value['cart_id'],
             ]);
-            $this->kitechen_cart($item, $kitchen_order );
+            $kitchen_items[$key]['order'] = $item[0];
         }
 
         return response()->json([
             'success' => 'You perpare success',
+            "kitchen_items" => array_values($kitchen_items)
         ]);
     }
 
@@ -902,8 +904,8 @@ class CashierMakeOrderController extends Controller
                 'errors' => $errors,
             ], 400);
         }
-        if($request->dicount_id){
-            if(!$request->user()->discount_perimission){
+        if($request->dicount_id || $request->free_discount){
+            if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
                     'errors' => "You don't have perimission to make discount"
                 ], 400);
@@ -1064,8 +1066,8 @@ class CashierMakeOrderController extends Controller
             }
             $user->increment('due', $due);
         }
-        if($request->dicount_id){
-            if(!$request->user()->discount_perimission){
+        if($request->dicount_id || $request->free_discount){
+            if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
                     'errors' => "You don't have perimission to make discount"
                 ], 400);
@@ -1220,34 +1222,16 @@ class CashierMakeOrderController extends Controller
             'kitchen_items' => $kitchen_items
         ]);
     } 
-
+// kitchen_lang, brista_lang
     public function preparing_delivery($request, $id){
         $order = $this->order
         ->where('id', $id)
-        ->first(); 
-        $kitchen_items = [];
-        $order_items = $this->takeaway_kitchen_format($order);
-        $order_items = collect($order_items);
-        $kitchen_order = [];
-        foreach ($order_items as $key => $element) {
-            $kitchen = $this->kitchen
-            ->where(function($q) use($element){
-                $q->whereHas('products', function($query) use ($element){
-                    $query->where('products.id', $element['id']);
-                })
-                ->orWhereHas('category', function($query) use ($element){
-                    $query->where('categories.id', $element['category_id'])
-                    ->orWhere('categories.id', $element['sub_category_id']);
-                });
-            })
-            ->where('branch_id', $request->user()->branch_id)
-            ->first();
-            if(!empty($kitchen)){
-                $kitchen_items[$kitchen->id] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $element;
-            }
-        }
-            
+        ->first();  
+        $order_data = $this->takeaway_kitchen_format($order);
+        $order_items = collect($order_data['order_data']);
+        $kitchen_items = $order_data['kitchen_items'];
+        $kitchen_order = collect($order_data['kitchen_order']);
+    
         foreach ($kitchen_order as $key => $item) {
             $kitchen_items[$key] = [
                 "id" => $kitchen_items[$key]->id,
@@ -1279,30 +1263,13 @@ class CashierMakeOrderController extends Controller
         $order = $this->order
         ->where('id', $id)
         ->first();  
-        $order_items = $this->takeaway_kitchen_format($order);
-        $order_items = collect($order_items);
-        $kitchen_order = [];
-        $kitchen_items = [];
         $order_kitchen = [];
-        foreach ($order_items as $key => $element) {
-            $kitchen = $this->kitchen
-            ->where(function($q) use($element){
-                $q->whereHas('products', function($query) use ($element){
-                    $query->where('products.id', $element['id']);
-                })
-                ->orWhereHas('category', function($query) use ($element){
-                    $query->where('categories.id', $element['category_id'])
-                    ->orWhere('categories.id', $element['sub_category_id']);
-                });
-            })
-            ->where('branch_id', $request->user()->branch_id)
-            ->first();
-            if(!empty($kitchen)){
-                $kitchen_items[$kitchen->id] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $element;
-            }
-        }
-            
+        
+        $order_data = $this->takeaway_kitchen_format($order);
+        $order_items = collect($order_data['order_data']);
+        $kitchen_items = $order_data['kitchen_items'];
+        $kitchen_order = collect($order_data['kitchen_order']);
+  
         foreach ($kitchen_order as $key => $item) {
             $order_kitchen[$key] = [
                 "id" => $kitchen_items[$key]->id,
@@ -1570,10 +1537,12 @@ class CashierMakeOrderController extends Controller
     public function checkout_data($request){ 
         $products = [];
         $locale = Setting::
-        where("name", "setting_lang")
+        where("name", "cashier_lang")
         ->first()?->setting ?? 'en';
         foreach ($request->products as $item) {
             $addons = [];
+            $extras_items = [];
+            $excludes_items = [];
             if(isset($item['addons'])){
                 foreach ($item['addons'] as $element) {
                     $count = $element['count'];
@@ -1595,6 +1564,38 @@ class CashierMakeOrderController extends Controller
                     ];
                 }
             }
+            if (isset($item['extra_id'])) {
+                $extra = $this->extras
+                ->whereIn("id", $item['extra_id'])
+                ->with("translations")
+                ->get();
+                foreach ($extra as $key => $value) { 
+                    $name = $value?->translations
+                    ->where("locale", $locale)
+                    ->where("key", $value->name)
+                    ->first()?->value ?? $value->name;
+                    $extras_items[] = [
+                        "id" => $value->id,
+                        "name" => $name,
+                    ];
+                }
+            }
+            if (isset($item['exclude_id'])) {
+                $exclude = $this->excludes
+                ->where("id", $item['exclude_id'])
+                ->with("translations")
+                ->get();
+                foreach ($exclude as $key => $value) {
+                    $name = $value?->translations
+                    ->where("locale", $locale)
+                    ->where("key", $value->name)
+                    ->first()?->value ?? $value->name;
+                    $excludes_items[] = [
+                        "id" => $value->id,
+                        "name" => $name,
+                    ];
+                }
+            }
 
             $count = $item['count'];
             $price = $item['price'];
@@ -1612,7 +1613,9 @@ class CashierMakeOrderController extends Controller
                 'price' => $price,
                 'name' => $name,
                 'total' => $total,
-                "addons" => $addons
+                "addons" => $addons,
+                "extras" => $extras_items,
+                "excludes" => $excludes_items,
             ];
         }
 
@@ -1659,6 +1662,12 @@ class CashierMakeOrderController extends Controller
     }
 
     public function free_discount($amount){
+        if(!auth()->user()->free_discount){
+            return [
+                "errors" => "You Do not have this premission on free discount",
+                "success" => false,
+            ];
+        }
         $max_discount_order = $this->settings
         ->where("name", 'max_discount_order')
         ->first()?->setting ?? 0;
@@ -1667,10 +1676,6 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 0;
         $max_discount_order = floatval($max_discount_order);
         $max_discount_shift = floatval($max_discount_shift);
-        CashierShift::
-        where("shift", auth()->user()->shift_number)
-        ->where("cashier_man_id", auth()->user()->id)
-        ->increment("free_discount", $amount);
         $my_shift_discount = CashierShift::
         where("shift", auth()->user()->shift_number)
         ->where("cashier_man_id", auth()->user()->id)
@@ -1681,6 +1686,11 @@ class CashierMakeOrderController extends Controller
                 "success" => false,
             ];
         }
+        CashierShift::
+        where("shift", auth()->user()->shift_number)
+        ->where("cashier_man_id", auth()->user()->id)
+        ->increment("free_discount", $amount);
+        $my_shift_discount += $amount;
         if($max_discount_order < $amount || $max_discount_shift < $my_shift_discount){
             $emails = DiscountEmail::
             pluck("email");

@@ -114,6 +114,35 @@ class WaiterCallController extends Controller
         ]);
     }
 
+    public function call_captain_order(Request $request){
+        $validator = Validator::make($request->all(), [
+            'table_id' => ['required', 'exists:cafe_tables,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $cafe_table = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->with('location:id,name')
+        ->first();
+        $branch_id = $cafe_table->branch_id; 
+        $users_tokens = $this->captain_order
+        ->where("branch_id", $branch_id)
+        ->pluck('fcm_token')
+        ->filter()->toArray();  
+        $body = 'Table ' . $cafe_table->table_number . 
+            ' at location ' . $cafe_table?->location?->name . ' Call Captain Order';
+  
+        $notifications = $this->sendNotificationToMany($users_tokens, $cafe_table->table_number, $body);
+   
+        return response()->json([
+            'success' => 'You call captain order success',
+            "notifications" => $notifications->count()
+        ]);
+    }
+
     public function cancel_call_pyment(Request $request){
         $validator = Validator::make($request->all(), [
             'table_id' => ['required', 'exists:cafe_tables,id'],
