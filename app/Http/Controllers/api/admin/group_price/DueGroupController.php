@@ -112,6 +112,7 @@ class DueGroupController extends Controller
             "module_payment" => $module_payment,
             "financial_account" => $financial_account,
             "all_orders" => $all_orders,
+            "total_collect" => $module_payment->sum("total"),
         ]);
     }
 
