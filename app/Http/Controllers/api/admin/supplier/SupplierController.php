@@ -38,13 +38,21 @@ class SupplierController extends Controller
             'name' => ['required'],
             'phone' => ['required', 'unique:suppliers,phone'],
             'email' => ['required', 'unique:suppliers,email'],
-            'status' => ['required'], 
+            'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         }
+
+        $supplierRequest = $validator->validated();
+        $this->suppliers
+        ->create($supplierRequest);
+
+        return response()->json([
+            "success" => "You add data success"
+        ]);
     }
 
     public function modify(Request $request, $id){
@@ -52,16 +60,31 @@ class SupplierController extends Controller
             'name' => ['required'],
             'phone' => ['required', 'unique:suppliers,phone,' . $id],
             'email' => ['required', 'unique:suppliers,email,' . $id],
-            'status' => ['required'], 
+            'status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         }
+
+        $supplierRequest = $validator->validated();
+        $this->suppliers
+        ->where("id", $id)
+        ->update($supplierRequest);
+
+        return response()->json([
+            "success" => "You update data success"
+        ]);
     }
 
     public function delete(Request $request, $id){
-        
+        $this->suppliers
+        ->where("id", $id)
+        ->delete();
+
+        return response()->json([
+            "success" => "You delete data success"
+        ]);
     }
 }

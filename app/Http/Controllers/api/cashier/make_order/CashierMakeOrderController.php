@@ -1596,9 +1596,9 @@ class CashierMakeOrderController extends Controller
                         "name" => $name,
                     ];
                 }
-            }
-            if (isset($product['variation'])) {
-                foreach ($product['variation'] as $variation) {
+            } 
+            if (isset($item['variation'])) {
+                foreach ($item['variation'] as $variation) {
                     $variation_element = $this->variation
                     ->where('id', $variation['variation_id'])
                     ->with('translations')
@@ -1618,7 +1618,7 @@ class CashierMakeOrderController extends Controller
                         ?->where('locale', $locale)
                         ?->first()?->value ?? $value?->name ?? null;
                     }
-                    $variation_item[$key]['variations'][] = [
+                    $variation_item[$key][] = [
                         'variation' => $variation_element,
                         'options' => $option_items,
                     ]; 

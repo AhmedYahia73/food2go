@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseCategory;
+use App\Models\PurchaseStock;
 
 class PurchaseProductController extends Controller
 {
     public function __construct(private PurchaseProduct $product,
-    private PurchaseCategory $categories){}
+    private PurchaseCategory $categories, private PurchaseStock $stock){}
 
     public function view(Request $request){
         $product = $this->product 
@@ -35,6 +36,25 @@ class PurchaseProductController extends Controller
         return response()->json([
             'products' => $product,
             'categories' => $categories,
+        ]);
+    }
+
+    public function product_stock(Request $request, $id){
+        $stocks = $this->stock
+        ->where("product_id", $id)
+        ->with("store", "unit")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "product" => $item?->product?->name,
+                "quantity" => $item->quantity,
+                "store" => $item?->store?->name,
+            ];
+        });
+
+        return response()->json([
+            "stocks" => $stocks,
         ]);
     }
     

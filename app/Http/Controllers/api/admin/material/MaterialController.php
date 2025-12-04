@@ -7,12 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\MaterialCategory;
+use App\Models\MaterialStock;
 use App\Models\Material;
 
 class MaterialController extends Controller
 {
     public function __construct(private Material $product,
-    private MaterialCategory $categories){}
+    private MaterialCategory $categories, private MaterialStock $stock){}
 
     public function view(Request $request){
         $product = $this->product 
@@ -35,6 +36,25 @@ class MaterialController extends Controller
         return response()->json([
             'materials' => $product,
             'categories' => $categories,
+        ]);
+    }
+
+    public function material_stock(Request $request, $id){
+        $stocks = $this->stock
+        ->where("material_id", $id)
+        ->with("store", "unit")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "material" => $item?->material?->name,
+                "quantity" => $item->quantity,
+                "store" => $item?->store?->name,
+            ];
+        });
+
+        return response()->json([
+            "stocks" => $stocks,
         ]);
     }
     
