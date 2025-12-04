@@ -65,7 +65,8 @@ class WaiterCallController extends Controller
         
         return response()->json([
             'success' => 'You call waiter success',
-            "waiters" => $waiters->count()
+            "waiters" => $waiters->count(),
+            "users_tokens2" => $users_tokens2
         ]);
     }
 
