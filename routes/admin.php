@@ -142,6 +142,7 @@ use App\Http\Controllers\api\admin\customer\RestoreCustomerController;
 
 use App\Http\Controllers\api\admin\popup\PopupController;
 use App\Http\Controllers\api\admin\free_discount\FreeDiscountController;
+use App\Http\Controllers\api\admin\notification\NotificationController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -153,6 +154,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
+    Route::controller(NotificationController::class)
+    ->prefix('min_stock_notification')->group(function(){
+        Route::get('/', 'view');
+    });
+    
     Route::controller(FreeDiscountController::class)
     ->prefix('free_discount')->group(function(){
         Route::get('/', 'view');
