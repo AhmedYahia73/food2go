@@ -464,7 +464,7 @@ class CashierMakeOrderController extends Controller
             "module_order_number" => $request->module_order_number ?? null,
             "total_tax" => $request->total_tax ?? 0,
             "total_discount" => $request->total_discount ?? 0,
-            "service_fees_model" => $request->service_fees ?? null,
+            "service_fees" => $request->service_fees ?? null,
         ]);
     }
 
@@ -725,7 +725,7 @@ class CashierMakeOrderController extends Controller
             'reaturant_name' => $reaturant_name,
             'date' => now(),
             "module_order_number" => $request->module_order_number ?? null,
-            "service_fees_model" => $request->service_fees ?? null,
+            "service_fees" => $request->service_fees ?? null,
             "total_tax" => $request->total_tax ?? 0,
             "total_discount" => $request->total_discount ?? 0,
         ]);
@@ -1038,7 +1038,7 @@ class CashierMakeOrderController extends Controller
             'order_id' => $order['payment']['id'],
             "financials" => $financials,
             "reaturant_name" => $reaturant_name,
-            "service_fees_model" => $request->service_fees ?? null,
+            "service_fees" => $request->service_fees ?? null,
             "module_order_number" => $request->module_order_number ?? null,
             "preparation_num" => $preparation_num,
             "total_tax" => $request->total_tax ?? 0,
@@ -1173,7 +1173,7 @@ class CashierMakeOrderController extends Controller
             'order_id' => $order_id,
             'order_id' => $order_number,
             'financials' => $financials,
-            "service_fees_model" => $request->service_fees ?? null,
+            "service_fees" => $request->service_fees ?? null,
             "module_order_number" => $request->module_order_number ?? null,
             "preparation_num" => $preparation_num,
             "reaturant_name" => $reaturant_name,
