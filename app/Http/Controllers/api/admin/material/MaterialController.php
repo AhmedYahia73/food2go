@@ -41,21 +41,42 @@ class MaterialController extends Controller
     }
 
     public function material_stock(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'store_id' => ['required', 'exists:purchase_stores,id'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
         $stocks = $this->stock
-        ->where("material_id", $id)
-        ->with("store", "unit")
+        ->where("store_id", $request->store_id);
+        $product = $this->product 
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($stocks){
+            $stock = $stocks
+            ->where("product_id", $item->id)
+            ->first()?->quantity ?? 0;
             return [
-                "id" => $item->id,
-                "material" => $item?->material?->name,
-                "quantity" => $item->quantity,
-                "store" => $item?->store?->name,
+                'id' => $item->id,
+                'name' => $item->name,
+                'description' => $item->description,
+                'status' => $item->status,
+                'category_id' => $item->category_id,
+                'category' => $item?->category?->name,
+                'min_stock' => $item->min_stock,
+                "stock" => $stock
             ];
-        });
+        }); 
+        $categories = $this->categories
+        ->select('id', 'name', 'category_id')
+        ->where('status', 1)
+        ->get();
 
         return response()->json([
-            "stocks" => $stocks,
+            'products' => $product,
+            'categories' => $categories,
         ]);
     }
     
