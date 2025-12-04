@@ -461,6 +461,8 @@ class CashierMakeOrderController extends Controller
             "customer" => $customer,
             "reaturant_name" => $reaturant_name,
             "module_order_number" => $request->module_order_number ?? null,
+            "total_tax" => $request->total_tax ?? 0,
+            "total_discount" => $request->total_discount ?? 0,
         ]);
     }
 
@@ -721,6 +723,8 @@ class CashierMakeOrderController extends Controller
             'reaturant_name' => $reaturant_name,
             'date' => now(),
             "module_order_number" => $request->module_order_number ?? null,
+            "total_tax" => $request->total_tax ?? 0,
+            "total_discount" => $request->total_discount ?? 0,
         ]);
     }
 
@@ -1032,7 +1036,9 @@ class CashierMakeOrderController extends Controller
             "financials" => $financials,
             "reaturant_name" => $reaturant_name,
             "module_order_number" => $request->module_order_number ?? null,
-            "preparation_num" => $preparation_num
+            "preparation_num" => $preparation_num,
+            "total_tax" => $request->total_tax ?? 0,
+            "total_discount" => $request->total_discount ?? 0,
         ]);
     }
 
