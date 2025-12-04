@@ -1599,21 +1599,29 @@ class CashierMakeOrderController extends Controller
             }
             if (isset($product['variation'])) {
                 foreach ($product['variation'] as $variation) {
-                    $variation_item = $this->variation
+                    $variation_element = $this->variation
                     ->where('id', $variation['variation_id'])
-                    ->withLocale($locale)
+                    ->with('translations')
                     ->first();
+                    $variation_element = $variation_element
+                    ?->translations
+                    ?->where('locale', $locale)
+                    ?->first()?->value ?? $variation_element?->name ?? null;
                     $options = $this->options
                     ->whereIn('id', $variation['option_id'])
-                    ->withLocale($locale)
-                    ->get(); 
-                    $order_details[$key]['variations'][] = [
+                    ->with('translations')
+                    ->get();
+                    $option_items = [];
+                    foreach ($options as $value) {
+                        $option_items[] = $value
+                        ?->translations
+                        ?->where('locale', $locale)
+                        ?->first()?->value ?? $variation_element?->name ?? null;
+                    }
+                    $variation_item[$key]['variations'][] = [
                         'variation' => $variation_item,
-                        'options' => $options,
-                    ];
-                    $amount_product += $this->options
-                    ->whereIn('id', $variation['option_id'])
-                    ->sum('price');
+                        'options' => $option_items,
+                    ]; 
                 }
             } 
 
