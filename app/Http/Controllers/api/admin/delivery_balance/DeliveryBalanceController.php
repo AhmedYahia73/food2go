@@ -167,7 +167,7 @@ class DeliveryBalanceController extends Controller
         })
         ->where(function($query){
             $query->whereNull("payment_method_id")
-            ->orWhere('payment_method_id', 1);
+            ->orWhere('payment_method_id', 2);
         })
         ->sum("amount");
 

@@ -13,6 +13,7 @@ class Manufaturing extends Model
         'product_id',
         'store_id',
         'quantity',
+        'cost',
     ];
 
     public function product(){
