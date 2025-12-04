@@ -1543,6 +1543,7 @@ class CashierMakeOrderController extends Controller
             $addons = [];
             $extras_items = [];
             $excludes_items = [];
+            $variation_item = [];
             if(isset($item['addons'])){
                 foreach ($item['addons'] as $element) {
                     $count = $element['count'];
@@ -1635,7 +1636,7 @@ class CashierMakeOrderController extends Controller
                 "addons" => $addons,
                 "extras" => $extras_items,
                 "excludes" => $excludes_items,
-                "variations" => $excludes_items,
+                "variations" => $variation_item,
             ];
         }
 
