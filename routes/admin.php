@@ -261,7 +261,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(MaterialController::class)
     ->prefix('material_product')->group(function(){
         Route::get('/', 'view')->middleware('can:view_material_product');
-        Route::get('/stock/{id}', 'material_stock')->middleware('can:view_material_product');
+        Route::get('/stock', 'material_stock')->middleware('can:view_material_product');
         Route::get('/product/{id}', 'product')->middleware('can:view_material_product');
         Route::put('/status/{id}', 'status')->middleware('can:status_material_product');
         Route::post('/add', 'create')->middleware('can:add_material_product');
@@ -475,7 +475,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PurchaseProductController::class)
     ->prefix('purchase_product')->group(function(){
         Route::get('/', 'view');
-        Route::get('/stock/{id}', 'product_stock');
+        Route::get('/stock', 'product_stock');
         Route::get('/item/{id}', 'product_item');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
