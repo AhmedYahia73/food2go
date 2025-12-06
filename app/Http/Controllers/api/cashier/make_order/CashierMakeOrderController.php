@@ -1250,8 +1250,11 @@ class CashierMakeOrderController extends Controller
                 'type' => $order->order_type,
                 'order_id' => $order->id,
             ]); 
-        } 
+        }
         $kitchen_items = array_values($kitchen_items);
+        foreach ($kitchen_items as $key => $value) {
+            $kitchen_items[$key]['order_count'] = count($kitchen_items[$key]['order']);
+        }
 
         return [
             'success' => $order_items,
