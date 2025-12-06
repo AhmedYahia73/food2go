@@ -86,6 +86,10 @@ class Order extends Model
         return $this->created_at->format('H:i:s');
     }
 
+    public function group_module(){
+        return $this->belongsTo(GroupProduct::class, 'module_id');
+    }
+
     public function getorderNumberAttribute(){
         $time_settings = TimeSittings::
         where('branch_id', $this->branch_id)

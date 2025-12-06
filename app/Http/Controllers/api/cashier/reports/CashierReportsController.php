@@ -14,6 +14,7 @@ use App\Models\TimeSittings;
 use App\Models\FinantiolAcounting;
 use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
+use App\Models\GroupProduct;
 use App\Models\Expense;
 
 class CashierReportsController extends Controller
@@ -1007,13 +1008,26 @@ class CashierReportsController extends Controller
                 'un_paid' => array_values($unpaid_online_order),
             ];
 
-            if($request->user()->report == "all"){
+            if($request->user()->report == "all"){      
+                $group_modules = $this->orders
+                ->selectRaw("module_id, SUM(amount), SUM(due_module)")
+                ->with("group_module")
+                ->groupBy("module_id")
+                ->get()
+                ->map(function($item){
+                    return [
+                        "amount" => $item->amount,
+                        "due" => $item->due_module,
+                        "module" => $item?->group_module?->name,
+                    ];
+                });
                 return response()->json([
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
                     'order_count' => $order_count,
                     'total_amount' => $total_amount, 
                     'expenses_total' => $expenses_total, 
+                    'group_modules' => $group_modules, 
                     'expenses' => $expenses, 
                     'online_order' => $online_order,
                     'report_role' => $request->user()->report,
