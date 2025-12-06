@@ -868,6 +868,7 @@ class CashierMakeOrderController extends Controller
             ]);
             $kitchen_items[$key]['order'] = $item[0];
         }
+        $kitchen_items = array_values($kitchen_items);
         foreach ($kitchen_items as $key => $value) {
             $items = collect($kitchen_items[$key]['order']);
             $peice_items = $items
@@ -880,7 +881,7 @@ class CashierMakeOrderController extends Controller
         
         return response()->json([
             'success' => 'You perpare success',
-            "kitchen_items" => array_values($kitchen_items)
+            "kitchen_items" => $kitchen_items
         ]);
     }
 
