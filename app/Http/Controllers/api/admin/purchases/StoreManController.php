@@ -50,12 +50,12 @@ class StoreManController extends Controller
         ->first();
 
         return response()->json([
-            'user_name' => $store_man->user_name,
-            'phone' => $store_man->phone, 
-            'store_id' => $store_man?->store_id,
-            'store' => $store_man?->store?->name,
-            'image' => $store_man->image_link,
-            'status' => $store_man->status,
+            'user_name' => $store_man->user_name ?? null,
+            'phone' => $store_man->phone ?? null, 
+            'store_id' => $store_man?->store_id ?? null,
+            'store' => $store_man?->store?->name ?? null,
+            'image' => $store_man->image_link ?? null,
+            'status' => $store_man->status ?? null,
         ]);
     }
 
