@@ -25,6 +25,14 @@ class OnlineOrderController extends Controller
     public function transfer_branch(Request $request, $id){
         // branch/online_order/transfer_branch
         // keys => branch_id
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $orders = $this->orders
         ->where('id', $id)
         -update([
