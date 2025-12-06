@@ -36,7 +36,7 @@ class InventoryProductController extends Controller
 
         $stocks = $this->stocks
         ->where("store_id", $request->store_id)
-        ->with("category", "material")
+        ->with("category", "product")
         ->get()
         ->map(function($item){
             return [
