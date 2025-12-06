@@ -46,7 +46,7 @@ class StoreManController extends Controller
     
     public function store_man(Request $request, $id){ 
         $store_man = $this->store_man
-        ->where('store_man_id', $id)
+        ->where('id', $id)
         ->get()
         ->map(function($item){
             return [
