@@ -47,20 +47,15 @@ class StoreManController extends Controller
     public function store_man(Request $request, $id){ 
         $store_man = $this->store_man
         ->where('id', $id)
-        ->get()
-        ->map(function($item){
-            return [
-                'user_name' => $item->user_name,
-                'phone' => $item->phone, 
-                'store_id' => $item?->store_id,
-                'store' => $item?->store?->name,
-                'image' => $item->image_link,
-                'status' => $item->status,
-            ];
-        });
+        ->first();
 
         return response()->json([
-            'store_man' => $store_man,
+            'user_name' => $store_man->user_name,
+            'phone' => $store_man->phone, 
+            'store_id' => $store_man?->store_id,
+            'store' => $store_man?->store?->name,
+            'image' => $store_man->image_link,
+            'status' => $store_man->status,
         ]);
     }
 
