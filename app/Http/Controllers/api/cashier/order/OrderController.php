@@ -793,7 +793,7 @@ class OrderController extends Controller
             'branch_id' => $request->branch_id,
             'operation_status' => 'pending',
             'admin_id' => null,
-            'order_status' => $request->pending,
+            'order_status' => 'pending',
         ]);  
 
         return response()->json([
