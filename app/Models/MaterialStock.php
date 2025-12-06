@@ -16,6 +16,7 @@ class MaterialStock extends Model
         'store_id',
         'quantity',
         'unit_id',
+        'actual_quantity',
     ];
 
     public function category(){

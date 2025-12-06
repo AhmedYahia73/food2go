@@ -217,11 +217,13 @@ class PurchaseController extends Controller
                     'material_id' => $request->material_id,
                     'store_id' => $request->store_id,
                     'quantity' => $request->quintity,
+                    "actual_quantity" => $request->quintity,
                     'unit_id' => $request->unit_id,
                 ]);
             }
             else{
                 $material_stock->quantity += $request->quintity;
+                $material_stock->actual_quantity += $request->quintity;
                 $material_stock->save();
             }
         }
@@ -237,11 +239,13 @@ class PurchaseController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->store_id,
                     'quantity' => $request->quintity,
+                    'actual_quantity' => $request->quintity,
                     'unit_id' => $request->unit_id,
                 ]);
             }
             else{
                 $stock->quantity += $request->quintity;
+                $stock->actual_quantity += $request->quintity;
                 $stock->save();
             }
         }
@@ -348,10 +352,12 @@ class PurchaseController extends Controller
                     'store_id' => $request->store_id,
                     'quantity' => $request->quintity - $purchases->quintity,
                     'unit_id' => $request->unit_id,
+                    "actual_quantity" => $request->quintity - $purchases->quintity,
                 ]);
             }
             else{
                 $material_stock->quantity += $request->quintity - $purchases->quintity;
+                $material_stock->actual_quantity += $request->quintity - $purchases->quintity;
                 $material_stock->save();
             }
         }
@@ -367,10 +373,12 @@ class PurchaseController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->store_id,
                     'quantity' => $request->quintity - $purchases->quintity,
+                    'actual_quantity' => $request->quintity - $purchases->quintity,
                     'unit_id' => $request->unit_id,
                 ]);
             }
             else{
+                $stock->actual_quantity += $request->quintity - $purchases->quintity;
                 $stock->quantity += $request->quintity - $purchases->quintity;
                 $stock->save();
             }

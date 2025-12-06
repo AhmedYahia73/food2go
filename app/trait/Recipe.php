@@ -41,6 +41,7 @@ trait Recipe
                         if($product->unit_id == $stock->unit_id){
                             $count = $item['count'];
                             $stock->quantity -= $count;
+                            $stock->actual_quantity -= $count;
                         }
                         else{
                             if($stock?->unit?->name == "Kg" && $product?->unit?->name == "Gram"){
@@ -53,11 +54,13 @@ trait Recipe
                                 $count = $item["count"];
                             }
                             $stock->quantity -= $count;
+                            $stock->actual_quantity -= $count;
                         }
                     }
                     else{
                         $count = $item['count'];
                         $stock->quantity -= $count;
+                        $stock->actual_quantity -= $count;
                     }
                     if($count > $stock->quantity){
                         return [

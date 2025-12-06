@@ -159,10 +159,12 @@ class PurchaseController extends Controller
                 'product_id' => $request->product_id,
                 'store_id' => $request->user()->store_id,
                 'quantity' => $request->quintity,
+                'actual_quantity' => $request->quintity,
             ]);
         }
         else{
             $stock->quantity += $request->quintity;
+            $stock->actual_quantity += $request->quintity;
             $stock->save();
         }
 

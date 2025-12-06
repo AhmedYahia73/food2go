@@ -84,10 +84,12 @@ class WastedController extends Controller
                 'product_id' => $request->product_id,
                 'store_id' => $request->user()->store_id,
                 'quantity' => -$request->quantity,
+                'actual_quantity' => -$request->quantity,
             ]);
         }
         else{
             $stock->quantity -= $request->quantity;
+            $stock->actual_quantity -= $request->quantity;
             $stock->save();
         }
 

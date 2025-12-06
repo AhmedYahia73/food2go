@@ -140,10 +140,12 @@ class PurchaseTransferController extends Controller
                         'product_id' => $purchases->product_id,
                         'store_id' => $purchases->from_store_id,
                         'quantity' => -$purchases->quintity,
+                        'actual_quantity' => -$purchases->quintity,
                     ]);
                 }
                 else{
                     $stock->quantity -= $purchases->quintity;
+                    $stock->actual_quantity -= $purchases->quintity;
                     $stock->save();
                 }
 
@@ -154,6 +156,7 @@ class PurchaseTransferController extends Controller
                         'product_id' => $purchases->product_id,
                         'store_id' => $purchases->to_store_id,
                         'quantity' => $purchases->quintity,
+                        'actual_quantity' => $purchases->quintity,
                     ]);
                 }
                 else{
@@ -163,6 +166,7 @@ class PurchaseTransferController extends Controller
                     ->where('store_id', $purchases->to_store_id)
                     ->first();
                     $stock->quantity += $purchases->quintity;
+                    $stock->actual_quantity += $purchases->quintity;
                     $stock->save();
                 }
                 $purchases->status = $request->status;
@@ -188,6 +192,7 @@ class PurchaseTransferController extends Controller
                         'material_id' => $purchases->material_id,
                         'store_id' => $purchases->from_store_id,
                         'quantity' => -$purchases->quintity,
+                        "actual_quantity" => -$purchases->quintity,
                         'unit_id' => -$product->unit_id,
                     ]);
                 }
@@ -197,6 +202,7 @@ class PurchaseTransferController extends Controller
                     ->where('store_id', $purchases->from_store_id)
                     ->first();
                     $material_stock->quantity -= $purchases->quintity;
+                    $material_stock->actual_quantity -= $purchases->quintity;
                     $material_stock->save();
                 }
 
@@ -207,6 +213,7 @@ class PurchaseTransferController extends Controller
                         'material_id' => $purchases->material_id,
                         'store_id' => $purchases->to_store_id,
                         'quantity' => $purchases->quintity,
+                        'actual_quantity' => $purchases->quintity,
                         'unit_id' => $purchases->unit_id,
                     ]);
                 }
@@ -217,6 +224,7 @@ class PurchaseTransferController extends Controller
                     ->where('store_id', $purchases->to_store_id)
                     ->first();
                     $material_stock->quantity += $purchases->quintity;
+                    $material_stock->actual_quantity += $purchases->quintity;
                     $material_stock->save();
                 } 
             }
@@ -284,6 +292,7 @@ class PurchaseTransferController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->from_store_id,
                     'quantity' => -$request->quintity,
+                    'actual_quantity' => -$request->quintity,
                     'unit_id' => -$product->unit_id,
                 ]);
             }
@@ -294,6 +303,7 @@ class PurchaseTransferController extends Controller
                 ->where('store_id', $request->from_store_id)
                 ->first();
                 $stock->quantity -= $request->quintity;
+                $stock->actual_quantity -= $request->quintity;
                 $stock->save();
             }
 
@@ -304,6 +314,7 @@ class PurchaseTransferController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->to_store_id,
                     'quantity' => $request->quintity,
+                    'actual_quantity' => $request->quintity,
                     'unit_id' => $request->unit_id,
                 ]);
             }
@@ -314,6 +325,7 @@ class PurchaseTransferController extends Controller
                 ->where('store_id', $request->to_store_id)
                 ->first();
                 $stock->quantity += $request->quintity;
+                $stock->actual_quantity += $request->quintity;
                 $stock->save();
             }
         }
@@ -337,6 +349,7 @@ class PurchaseTransferController extends Controller
                     'store_id' => $request->from_store_id,
                     'quantity' => -$request->quintity,
                     'unit_id' => -$product->unit_id,
+                    "actual_quantity" => -$request->quintity,
                 ]);
             }
             else{
@@ -345,6 +358,7 @@ class PurchaseTransferController extends Controller
                 ->where('store_id', $request->from_store_id)
                 ->first();
                 $material_stock->quantity -= $request->quintity;
+                $material_stock->actual_quantity -= $request->quintity;
                 $material_stock->save();
             }
 
@@ -356,6 +370,7 @@ class PurchaseTransferController extends Controller
                     'store_id' => $request->to_store_id,
                     'quantity' => $request->quintity,
                     'unit_id' => $request->unit_id,
+                    "actual_quantity" => $request->quintity,
                 ]);
             }
             else{
@@ -364,6 +379,7 @@ class PurchaseTransferController extends Controller
                 ->where('store_id', $request->to_store_id)
                 ->first();
                 $material_stock->quantity += $request->quintity;
+                $material_stock->actual_quantity += $request->quintity;
                 $material_stock->save();
             } 
         }

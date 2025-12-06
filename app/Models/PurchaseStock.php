@@ -14,6 +14,7 @@ class PurchaseStock extends Model
         'product_id',
         'store_id',
         'quantity',
+        'actual_quantity',
         'unit_id',
     ];
 

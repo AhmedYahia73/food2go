@@ -189,10 +189,12 @@ class PurchaseConsumersionController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->to_store_id,
                     'quantity' => -$request->quintity,
+                    'actual_quantity' => -$request->quintity,
                 ]);
             }
             else{
                 $stock->quantity -= $request->quintity;
+                $stock->actual_quantity -= $request->quintity;
                 $stock->save();
             }
         }
@@ -246,10 +248,12 @@ class PurchaseConsumersionController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->store_id,
                     'quantity' => -$request->quintity,
+                    'actual_quantity' => -$request->quintity,
                 ]);
             }
             else{
                 $stock->quantity -= $request->quintity;
+                $stock->actual_quantity -= $request->quintity;
                 $stock->save();
             }
         }
@@ -265,10 +269,12 @@ class PurchaseConsumersionController extends Controller
                     'material_id' => $request->material_id,
                     'store_id' => $request->store_id,
                     'quantity' => -$request->quintity,
+                    'actual_quantity' => $request->quintity,
                 ]);
             }
             else{
                 $material_stock->quantity -= $request->quintity;
+                $material_stock->actual_quantity -= $request->quintity;
                 $material_stock->save();
             }
         }
@@ -317,10 +323,12 @@ class PurchaseConsumersionController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->store_id,
                     'quantity' => $consumersions->quintity - $request->quintity,
+                    'actual_quantity' => $consumersions->quintity - $request->quintity,
                 ]);
             }
             else{
                 $stock->quantity += $consumersions->quintity - $request->quintity;
+                $stock->actual_quantity += $consumersions->quintity - $request->quintity;
                 $stock->save();
             }
         }
@@ -336,10 +344,12 @@ class PurchaseConsumersionController extends Controller
                     'material_id' => $request->material_id,
                     'store_id' => $request->store_id,
                     'quantity' => $consumersions->quintity - $request->quintity,
+                    "actual_quantity" => $consumersions->quintity - $request->quintity,
                 ]);
             }
             else{
                 $material_stock->quantity += $consumersions->quintity - $request->quintity;
+                $material_stock->actual_quantity += $consumersions->quintity - $request->quintity;
                 $material_stock->save();
             }
         }

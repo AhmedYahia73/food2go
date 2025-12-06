@@ -174,6 +174,7 @@ class ManufacturingController extends Controller
             ->first();
             if(!empty($stock)){
                 $stock->quantity -= $item['weight'];
+                $stock->actual_quantity -= $item['weight'];
                 $stock->save();
             }
         }
@@ -190,11 +191,13 @@ class ManufacturingController extends Controller
                 'product_id' => $request->product_id,
                 'store_id' => $request->store_id,
                 'quantity' => $request->quantity,
+                'actual_quantity' => $request->quantity,
                 //'unit_id' => $request->,
             ]);
         } 
         else {
             $purchase_stock->quantity += $request->quantity;
+            $purchase_stock->actual_quantity += $request->quantity;
             $purchase_stock->save();
         }
         

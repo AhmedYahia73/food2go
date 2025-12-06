@@ -141,10 +141,12 @@ class WastedController extends Controller
                     'product_id' => $wested->product_id,
                     'store_id' => $wested->store_id,
                     'quantity' => -$wested->quantity,
+                    'actual_quantity' => -$wested->quantity,
                 ]);
             }
             else{
                 $stock->quantity -= $wested->quantity;
+                $stock->actual_quantity -= $wested->quantity;
                 $stock->save();
             }
         }
@@ -197,10 +199,12 @@ class WastedController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->store_id,
                     'quantity' => -$request->quantity,
+                    'actual_quantity' => -$request->quantity,
                 ]);
             }
             else{
                 $stock->quantity -= $request->quantity;
+                $stock->actual_quantity -= $request->quantity;
                 $stock->save();
             }
         }
@@ -216,10 +220,12 @@ class WastedController extends Controller
                     'material_id' => $request->material_id,
                     'store_id' => $request->store_id,
                     'quantity' => -$request->quantity,
+                    'actual_quantity' => -$request->quantity,
                 ]);
             }
             else{
                 $material_stock->quantity -= $request->quantity;
+                $material_stock->actual_quantity -= $request->quantity;
                 $material_stock->save();
             }
         }
@@ -269,9 +275,11 @@ class WastedController extends Controller
                     'product_id' => $request->product_id,
                     'store_id' => $request->store_id,
                     'quantity' => $wested->quantity - $request->quantity,
+                    'actual_quantity' => $wested->quantity - $request->quantity,
                 ]);
             }
             else{
+                $stock->actual_quantity += $wested->quantity - $request->quantity;
                 $stock->quantity += $wested->quantity - $request->quantity;
                 $stock->save();
             }
@@ -288,9 +296,11 @@ class WastedController extends Controller
                     'material_id' => $request->material_id,
                     'store_id' => $request->store_id,
                     'quantity' => $wested->quantity - $request->quantity,
+                    'actual_quantity' => $wested->quantity - $request->quantity,
                 ]);
             }
             else{
+                $material_stock->actual_quantity += $wested->quantity - $request->quantity;
                 $material_stock->quantity += $wested->quantity - $request->quantity;
                 $material_stock->save();
             }
