@@ -775,6 +775,24 @@ class OrderController extends Controller
         ]);
     }
 
+    public function branches(Request $request){
+        // admin/order/transfer_branch
+        // keys => branch_id  
+        $branches = $this->branches
+        ->where('status', 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        }); 
+
+        return response()->json([
+            "branches" => $branches
+        ]);
+    }
+
     public function transfer_branch(Request $request, $id){
         // admin/order/transfer_branch
         // keys => branch_id 
