@@ -20,7 +20,7 @@ class OrdersController extends Controller
         $orders = $this->order_carts
         ->where('prepration_status', 'done')
         ->whereHas('table', function($query) use($locations){
-            $query->where('location_id', $locations);
+            $query->whereIn('location_id', $locations->toArray());
         })
         ->get()
         ->map(function($item){
