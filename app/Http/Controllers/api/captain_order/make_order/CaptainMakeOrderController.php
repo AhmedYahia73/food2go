@@ -59,7 +59,7 @@ class CaptainMakeOrderController extends Controller
 
     public function preparation_num(Request $request){ 
         $validator = Validator::make($request->all(), [
-            'preparation_num' => 'required|numeric',
+            'preparation_num' => 'required|numeric|unique:cafe_tables,preparation_num',
             'table_id' => 'required|exists:cafe_tables,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -75,7 +75,8 @@ class CaptainMakeOrderController extends Controller
         ]);
 
         return response()->json([
-            "success" => "You put prepration number success"
+            "success" => "You put prepration number success",
+            "preparation_num" => $request->preparation_num
         ]);
     }
     

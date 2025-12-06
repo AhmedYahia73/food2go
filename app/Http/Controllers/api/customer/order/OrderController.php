@@ -15,12 +15,42 @@ use App\Models\Order;
 use App\Models\Setting;
 use App\Models\Product;
 use App\Models\DeviceToken;
+use App\Models\ServiceFees;
+
 
 class OrderController extends Controller
 {
     public function __construct(private Order $orders, private Setting $settings,
-    private NewNotification $notification, private DeviceToken $device_token){}
+    private NewNotification $notification, private DeviceToken $device_token,
+    private ServiceFees $service_fees_model){}
     use Notifications;
+
+    public function service_fees(Request $request){
+        $validator = Validator::make($request->all(), [
+            'online_type' => 'required|in:app,web', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $service_fees_model = $this->service_fees_model
+        ->whereHas("branches", function($query) use($request){
+            $query->where("branches.id", $request->user()->branch_id);
+        })
+        ->where("module", "online")
+        ->where(function($query) use($request){
+            $query->where("online_type", "all")
+            ->orWhere("online_type", $request->online_type);
+        })
+        ->orderByDesc("id")
+        ->first();
+
+        return response()->json([
+            "type" => $service_fees_model?->type ?? "value",
+            "amount" => $service_fees_model?->amount ?? 0,
+        ]);
+    }
 
     public function upcomming(Request $request){
         // https://bcknd.food2go.online/customer/orders

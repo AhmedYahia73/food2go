@@ -126,10 +126,12 @@ class ServiceFeesController extends Controller
         $service_fees->update([
             "type" => $request->type,
             "amount" => $request->amount,
+            "module" => $request->module,
+            "online_type" => $request->online_type,
         ]);
 
         return response()->json([
-            "success" => "You add service fees success"
+            "success" => "You update service fees success"
         ]);
     }
 

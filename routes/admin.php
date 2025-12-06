@@ -142,6 +142,7 @@ use App\Http\Controllers\api\admin\customer\RestoreCustomerController;
 
 use App\Http\Controllers\api\admin\popup\PopupController;
 use App\Http\Controllers\api\admin\free_discount\FreeDiscountController;
+use App\Http\Controllers\api\admin\notification\NotificationController;
 
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
@@ -153,6 +154,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
+    Route::controller(NotificationController::class)
+    ->prefix('notification')->group(function(){
+        Route::get('/stock_product', 'stock_product');
+        Route::get('/stock_material', 'stock_material');
+    });
+    
     Route::controller(FreeDiscountController::class)
     ->prefix('free_discount')->group(function(){
         Route::get('/', 'view');
@@ -254,6 +261,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(MaterialController::class)
     ->prefix('material_product')->group(function(){
         Route::get('/', 'view')->middleware('can:view_material_product');
+        Route::get('/stock', 'material_stock')->middleware('can:view_material_product');
         Route::get('/product/{id}', 'product')->middleware('can:view_material_product');
         Route::put('/status/{id}', 'status')->middleware('can:status_material_product');
         Route::post('/add', 'create')->middleware('can:add_material_product');
@@ -402,7 +410,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/item/{id}', 'upsaling_item')->middleware('can:view_upsaling');
         Route::put('/status/{id}', 'status')->middleware('can:status_upsaling');
         Route::post('/add', 'create')->middleware('can:add_upsaling');
-        Route::put('/update/{id}', 'modify')->middleware('can:update_upsaling');
+        Route::post('/update/{id}', 'modify')->middleware('can:update_upsaling');
         Route::delete('/delete/{id}', 'delete')->middleware('can:delete_upsaling');
     });
     
@@ -467,6 +475,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PurchaseProductController::class)
     ->prefix('purchase_product')->group(function(){
         Route::get('/', 'view');
+        Route::get('/stock', 'product_stock');
         Route::get('/item/{id}', 'product_item');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');

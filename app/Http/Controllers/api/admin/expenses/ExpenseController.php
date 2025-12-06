@@ -54,11 +54,11 @@ class ExpenseController extends Controller
         ->where("status", 1)
         ->get();
         $cashiers = $this->cashiers
-        ->select("id", "name")
+        ->select("id", "name", "branch_id")
         ->where("status", 1)
         ->get();
         $cashier_man = $this->cashier_man
-        ->select("id", "user_name")
+        ->select("id", "user_name", "branch_id")
         ->where("status", 1)
         ->get();  
         $financial = $this->financial

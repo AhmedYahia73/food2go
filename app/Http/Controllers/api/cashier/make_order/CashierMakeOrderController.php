@@ -23,8 +23,9 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 // ____________________________________________________
 
 use App\Events\PrintOrder;
-
+ 
 use App\Models\Order;
+use App\Models\CompanyInfo;
 use App\Models\UserDue;
 use App\Models\Kitchen;
 use App\Models\KitchenOrder;  
@@ -79,7 +80,8 @@ class CashierMakeOrderController extends Controller
     private Delivery $delivery, private CashierBalance $cashier_balance,
     private CashierMan $cashier_man, private UserDue $user_due,
     private DiscountModule $discount_module, private FinantiolAcounting $financial_account,
-    private CheckoutRequest $checkout_request_query, private GroupProduct $group_products){}
+    private CheckoutRequest $checkout_request_query, private GroupProduct $group_products,
+    private CompanyInfo $company_info){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -445,17 +447,24 @@ class CashierMakeOrderController extends Controller
         $customer = $order['order']->user;
         $delivery_fees = $order['order']->load('address.zone');
         $delivery_fees = $delivery_fees?->address?->zone?->price ?? 0;
+        $reaturant_name = $this->company_info
+        ->first()?->name;  
 
         return response()->json([
             "success" => $this->checkout_data($request),
             'kitchen_items' => $kitchen_items,
+            'kitchen_items_count' => count($kitchen_items),
             'order_number' => $order['order']->order_number,
             'order_id' => $order['order']->id,
             "financials" => $financials,
             "address" => $address,
             "delivery_fees" => $delivery_fees,
             "customer" => $customer,
+            "reaturant_name" => $reaturant_name,
             "module_order_number" => $request->module_order_number ?? null,
+            "total_tax" => $request->total_tax ?? 0,
+            "total_discount" => $request->total_discount ?? 0,
+            "service_fees" => $request->service_fees ?? null,
         ]);
     }
 
@@ -702,6 +711,8 @@ class CashierMakeOrderController extends Controller
         where("name", "setting_lang")
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);  
+        $reaturant_name = $this->company_info
+        ->first()?->name; 
 
         return response()->json([ 
             "success" => $this->checkout_data($request),
@@ -711,8 +722,12 @@ class CashierMakeOrderController extends Controller
             'caheir_name' => $caheir_name,
             'address' => $address,
             'financials' => $financials,
+            'reaturant_name' => $reaturant_name,
             'date' => now(),
             "module_order_number" => $request->module_order_number ?? null,
+            "service_fees" => $request->service_fees ?? null,
+            "total_tax" => $request->total_tax ?? 0,
+            "total_discount" => $request->total_discount ?? 0,
         ]);
     }
 
@@ -1011,12 +1026,23 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale); 
  
+        $preparation_num = $this->cafe_table
+        ->where('id', $request->table_id) 
+        ->first()?->preparation_num ?? null;
+        $reaturant_name = $this->company_info
+        ->first()?->name; 
+
         return response()->json([
             'success' => $this->checkout_data($request), 
             'order_number' => $order['payment']['order_number'],
             'order_id' => $order['payment']['id'],
             "financials" => $financials,
+            "reaturant_name" => $reaturant_name,
+            "service_fees" => $request->service_fees ?? null,
             "module_order_number" => $request->module_order_number ?? null,
+            "preparation_num" => $preparation_num,
+            "total_tax" => $request->total_tax ?? 0,
+            "total_discount" => $request->total_discount ?? 0,
         ]);
     }
 
@@ -1135,13 +1161,22 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
  
+        $preparation_num = $this->cafe_table
+        ->where('id', $request->table_id) 
+        ->first()?->preparation_num ?? null; 
+        $reaturant_name = $this->company_info
+        ->first()?->name; 
+
         return response()->json([
             "success" => $this->checkout_data($request),
             'order_number' => $order_number,
             'order_id' => $order_id,
             'order_id' => $order_number,
             'financials' => $financials,
+            "service_fees" => $request->service_fees ?? null,
             "module_order_number" => $request->module_order_number ?? null,
+            "preparation_num" => $preparation_num,
+            "reaturant_name" => $reaturant_name,
         ]);
     } 
 
@@ -1239,6 +1274,7 @@ class CashierMakeOrderController extends Controller
                 "print_name" => $kitchen_items[$key]->print_name,
                 "print_ip" => $kitchen_items[$key]->print_ip,
                 "print_status" => $kitchen_items[$key]->print_status,
+                "order" => $item,
                 "order" => $item,
                 "order_type" => $order->order_type,
             ];
@@ -1546,6 +1582,7 @@ class CashierMakeOrderController extends Controller
             $addons = [];
             $extras_items = [];
             $excludes_items = [];
+            $variation_item = [];
             if(isset($item['addons'])){
                 foreach ($item['addons'] as $element) {
                     $count = $element['count'];
@@ -1585,7 +1622,7 @@ class CashierMakeOrderController extends Controller
             }
             if (isset($item['exclude_id'])) {
                 $exclude = $this->excludes
-                ->where("id", $item['exclude_id'])
+                ->whereIn("id", $item['exclude_id'])
                 ->with("translations")
                 ->get();
                 foreach ($exclude as $key => $value) {
@@ -1598,7 +1635,34 @@ class CashierMakeOrderController extends Controller
                         "name" => $name,
                     ];
                 }
-            }
+            } 
+            if (isset($item['variation'])) {
+                foreach ($item['variation'] as $variation) {
+                    $variation_element = $this->variation
+                    ->where('id', $variation['variation_id'])
+                    ->with('translations')
+                    ->first();
+                    $variation_element = $variation_element
+                    ?->translations
+                    ?->where('locale', $locale)
+                    ?->first()?->value ?? $variation_element?->name ?? null;
+                    $options = $this->options
+                    ->whereIn('id', $variation['option_id'])
+                    ->with('translations')
+                    ->get();
+                    $option_items = [];
+                    foreach ($options as $value) {
+                        $option_items[] = $value
+                        ?->translations
+                        ?->where('locale', $locale)
+                        ?->first()?->value ?? $value?->name ?? null;
+                    }
+                    $variation_item[$key][] = [
+                        'variation' => $variation_element,
+                        'options' => $option_items,
+                    ]; 
+                }
+            } 
 
             $count = $item['count'];
             $price = $item['price'];
@@ -1619,6 +1683,7 @@ class CashierMakeOrderController extends Controller
                 "addons" => $addons,
                 "extras" => $extras_items,
                 "excludes" => $excludes_items,
+                "variations" => $variation_item,
             ];
         }
 

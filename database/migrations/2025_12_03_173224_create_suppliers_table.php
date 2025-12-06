@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string("name");
             $table->string("phone")->unique()->nullable();
+            $table->string("email")->unique()->nullable();
             $table->boolean("status")->default(1);
             $table->float("balance")->default(0);
             $table->timestamps();

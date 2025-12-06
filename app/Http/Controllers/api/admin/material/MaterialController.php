@@ -7,12 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\MaterialCategory;
+use App\Models\MaterialStock;
 use App\Models\Material;
 
 class MaterialController extends Controller
 {
     public function __construct(private Material $product,
-    private MaterialCategory $categories){}
+    private MaterialCategory $categories, private MaterialStock $stock){}
 
     public function view(Request $request){
         $product = $this->product 
@@ -25,6 +26,47 @@ class MaterialController extends Controller
                 'status' => $item->status,
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
+                'min_stock' => $item->min_stock,
+            ];
+        }); 
+        $categories = $this->categories
+        ->select('id', 'name', 'category_id')
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'materials' => $product,
+            'categories' => $categories,
+        ]);
+    }
+
+    public function material_stock(Request $request){
+        $validator = Validator::make($request->all(), [
+            'store_id' => ['required', 'exists:purchase_stores,id'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $stocks = $this->stock
+        ->where("store_id", $request->store_id);
+        $product = $this->product 
+        ->get()
+        ->map(function($item) use($stocks){
+            $stock = $stocks
+            ->where("material_id", $item->id)
+            ->first()?->quantity ?? 0;
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'description' => $item->description,
+                'status' => $item->status,
+                'category_id' => $item->category_id,
+                'category' => $item?->category?->name,
+                'min_stock' => $item->min_stock,
+                "stock" => $stock
             ];
         }); 
         $categories = $this->categories
@@ -76,6 +118,7 @@ class MaterialController extends Controller
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:material_categories,id'],
+            'min_stock' => ['required', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -98,6 +141,7 @@ class MaterialController extends Controller
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:material_categories,id'],
+            'min_stock' => ['required', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

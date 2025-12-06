@@ -14,6 +14,7 @@ class Material extends Model
         'description',
         'status',
         'category_id',
+        'min_stock',
     ];
 
     public function category(){

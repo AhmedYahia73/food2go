@@ -15,6 +15,7 @@ use App\Models\ManufaturingRecipe;
 use App\Models\MaterialStock;
 use App\Models\PurchaseStore;
 use App\Models\PurchaseStock;
+use App\Models\Purchase;
 use App\Models\Material;
 
 class ManufacturingController extends Controller
@@ -23,7 +24,8 @@ class ManufacturingController extends Controller
     private PurchaseProduct $products, private PurchaseCategory $category,
     private Manufaturing $maufaturing, private ManufaturingRecipe $maufaturing_recipe, 
     private MaterialStock $stock, private Material $materials,
-    private PurchaseStore $stores, private PurchaseStock $purchase_stock){}
+    private PurchaseStore $stores, private PurchaseStock $purchase_stock,
+    private Purchase $purchase){}
 
     public function lists(Request $request){
         $products = $this->products
@@ -101,14 +103,16 @@ class ManufacturingController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        
+
+        $total_price = 0;
+        $cost = 0;
         foreach ($request->materials as $item) {
             $stock = $this->stock
             ->where('store_id', $request->store_id)
             ->where("material_id", $item['id'])
             ->where("quantity", '>=', $item['weight'])
             ->first();
-            if(empty($stock)){
+            if(empty($stock) && $item['weight'] != 0){
                 $material = $this->materials
                 ->where('id', $item['id'])
                 ->first();
@@ -116,6 +120,32 @@ class ManufacturingController extends Controller
                     'errors' => $material->name . ' is not in stock'
                 ], 400);
             }
+            continue;
+            $stock = $stock->quintity;
+            $last_purchase_amount = 0;
+            $purchase = $this->purchase
+            ->where('store_id', $request->store_id)
+            ->orderByDesc("id")
+            ->get();
+            $purchase_arr = [];
+            foreach ($purchase as $element) {
+                $last_purchase_amount = $element->quintity;
+                $purchase_arr[] = $element;
+                if($element->quintity >= $stock){
+                    break;
+                }
+                $stock -= $element->quintity;
+            }
+            $purchase_arr = array_reverse($purchase_arr);
+            foreach ($purchase_arr as $key => $element) {
+                $cost_item = $element->total_coast / $element->quintity;
+                if($key == 0){
+                    $cost += $cost_item * $last_purchase_amount;
+                }
+                else{
+                    $cost += $cost_item * $element->quintity;
+                }
+            } 
         }
         // manufactring history
         $maufaturing = $this->maufaturing
@@ -123,6 +153,7 @@ class ManufacturingController extends Controller
             'product_id' => $request->product_id,
             'store_id' => $request->store_id,
             'quantity' => $request->quantity,
+            "cost" => $cost
         ]);
         foreach ($request->materials as $item) {
             $this->maufaturing_recipe
@@ -135,8 +166,10 @@ class ManufacturingController extends Controller
             ->where('store_id', $request->store_id)
             ->where("material_id", $item['id'])
             ->first();
-            $stock->quantity -= $item['weight'];
-            $stock->save();
+            if(!empty($stock)){
+                $stock->quantity -= $item['weight'];
+                $stock->save();
+            }
         }
         $purchase_stock = $this->purchase_stock
         ->where("product_id", $request->product_id)
@@ -161,7 +194,8 @@ class ManufacturingController extends Controller
         
 
         return response()->json([
-            'success' => 'You moke Product success'
+            'success' => 'You moke Product success',
+            "cost" => $cost,
         ]);
     }
 

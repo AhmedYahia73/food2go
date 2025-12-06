@@ -78,6 +78,7 @@ class ClientMakeOrderController extends Controller
     use PlaceOrder;
     use PaymentPaymob;
     use POS; 
+    use Notifications;
 
     public function products(Request $request, $id){
         // https://bcknd.food2go.online/client/order/products/{id}

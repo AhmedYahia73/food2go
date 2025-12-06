@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseCategory;
+use App\Models\PurchaseStock;
 
 class PurchaseProductController extends Controller
 {
     public function __construct(private PurchaseProduct $product,
-    private PurchaseCategory $categories){}
+    private PurchaseCategory $categories, private PurchaseStock $stock){}
 
     public function view(Request $request){
         $product = $this->product 
@@ -25,6 +26,47 @@ class PurchaseProductController extends Controller
                 'status' => $item->status,
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
+                'min_stock' => $item->min_stock,
+            ];
+        }); 
+        $categories = $this->categories
+        ->select('id', 'name', 'category_id')
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'products' => $product,
+            'categories' => $categories,
+        ]);
+    }
+
+    public function product_stock(Request $request){
+        $validator = Validator::make($request->all(), [
+            'store_id' => ['required', 'exists:purchase_stores,id'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $stocks = $this->stock
+        ->where("store_id", $request->store_id);
+        $product = $this->product 
+        ->get()
+        ->map(function($item) use($stocks){
+            $stock = $stocks
+            ->where("product_id", $item->id)
+            ->first()?->quantity ?? 0;
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'description' => $item->description,
+                'status' => $item->status,
+                'category_id' => $item->category_id,
+                'category' => $item?->category?->name,
+                'min_stock' => $item->min_stock,
+                "stock" => $stock
             ];
         }); 
         $categories = $this->categories
@@ -77,6 +119,7 @@ class PurchaseProductController extends Controller
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:purchase_categories,id'],
+            'min_stock' => ['required', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -99,6 +142,7 @@ class PurchaseProductController extends Controller
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:purchase_categories,id'],
+            'min_stock' => ['required', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
