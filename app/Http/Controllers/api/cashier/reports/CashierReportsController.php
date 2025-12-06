@@ -1010,7 +1010,7 @@ class CashierReportsController extends Controller
 
             if($request->user()->report == "all"){      
                 $group_modules = $this->orders
-                ->selectRaw("module_id, SUM(amount), SUM(due_module)")
+                ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module")
                 ->with("group_module")
                 ->groupBy("module_id")
                 ->get()
