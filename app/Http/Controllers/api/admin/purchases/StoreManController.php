@@ -53,8 +53,9 @@ class StoreManController extends Controller
                 'user_name' => $item->user_name,
                 'phone' => $item->phone, 
                 'store_id' => $item?->store_id,
-                'stora' => $item?->store?->name,
+                'store' => $item?->store?->name,
                 'image' => $item->image_link,
+                'status' => $item->status,
             ];
         });
 

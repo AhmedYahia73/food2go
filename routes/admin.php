@@ -486,6 +486,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(StoreController::class)
     ->prefix('purchase_stores')->group(function(){
         Route::get('/', 'view')->middleware('can:view_purchase_stores');
+        Route::get('/item/{id}', 'store_item')->middleware('can:view_purchase_stores');
         Route::put('/status/{id}', 'status')->middleware('can:status_purchase_stores');
         Route::post('/add', 'create')->middleware('can:add_purchase_stores');
         Route::post('/update/{id}', 'modify')->middleware('can:update_purchase_stores');
@@ -527,6 +528,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(StoreManController::class)
     ->prefix('purchase_store_man')->group(function(){
         Route::get('/', 'view');
+        Route::get('/item/{id}', 'store_man');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');

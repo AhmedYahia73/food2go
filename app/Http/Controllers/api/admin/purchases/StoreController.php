@@ -38,6 +38,21 @@ class StoreController extends Controller
         ]);
     }
 
+    public function store_item(Request $request, $id){
+        $store = $this->store
+        ->with('branches')
+        ->where("id", $id)
+        ->first();
+
+        return response()->json([
+            'id' => $store->id,
+            'name' => $store->name,
+            'location' => $store->location,
+            'status' => $store->status,
+            'branches' => $store?->branches?->select('id', 'name'), 
+        ]);
+    }
+
     public function status(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'status' => ['required', 'boolean'], 
