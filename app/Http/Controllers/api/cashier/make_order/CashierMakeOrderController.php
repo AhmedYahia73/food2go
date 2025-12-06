@@ -1336,14 +1336,14 @@ class CashierMakeOrderController extends Controller
             $this->kitechen_cart($item, $kitchen_order );
         }
         $order_kitchen = array_values($order_kitchen);
-        foreach ($kitchen_items as $key => $value) {
-            $items = collect($kitchen_items[$key]['order']);
+        foreach ($order_kitchen as $key => $value) {
+            $items = collect($order_kitchen[$key]['order']);
             $peice_items = $items
             ->where("weight", 0)->sum("count");
             $weight_items = $items
             ->where("weight", 1)->sum("count");
             
-            $kitchen_items[$key]['order_count'] = $peice_items + $weight_items;
+            $order_kitchen[$key]['order_count'] = $peice_items + $weight_items;
         }
 
         return [
