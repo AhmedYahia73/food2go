@@ -48,6 +48,10 @@ class InventoryProductController extends Controller
                 "unit" => $item?->unit?->name,
             ];
         });
+
+        return response()->json([
+            "stocks" => $stocks
+        ]);
     }
 
     public function modify_stocks(Request $request){
