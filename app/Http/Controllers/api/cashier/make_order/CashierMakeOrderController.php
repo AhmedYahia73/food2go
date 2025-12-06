@@ -1291,6 +1291,7 @@ class CashierMakeOrderController extends Controller
         foreach ($kitchen_items as $key => $value) {
             $items = collect($kitchen_items[$key]['order']);
             $items = $items->sum("count");
+            
             $kitchen_items[$key]['order_count'] = count($kitchen_items[$key]['order']) * $items;
         }
 

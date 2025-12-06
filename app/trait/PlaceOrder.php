@@ -810,6 +810,7 @@ trait PlaceOrder
             $product['sub_category_id'] = $item->product[0]->product->sub_category_id;
             $product['notes'] = $item->product[0]->notes;
             $product['count'] = $item->product[0]->count;
+            $product['weight'] = $item->product[0]->product->weight_status;
 
             // kitchen
             $kitchen = Kitchen::
