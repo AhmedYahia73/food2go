@@ -120,7 +120,9 @@ class ManufacturingController extends Controller
                     'errors' => $material->name . ' is not in stock'
                 ], 400);
             }
-            continue;
+			elseif($item['weight'] == 0){
+            	continue;
+			}
             $stock = $stock->quintity;
             $last_purchase_amount = 0;
             $purchase = $this->purchase
@@ -128,6 +130,7 @@ class ManufacturingController extends Controller
             ->orderByDesc("id")
             ->get();
             $purchase_arr = [];
+			$weight = $item['weight'];
             foreach ($purchase as $element) {
                 $last_purchase_amount = $element->quintity;
                 $purchase_arr[] = $element;
@@ -135,16 +138,19 @@ class ManufacturingController extends Controller
                     break;
                 }
                 $stock -= $element->quintity;
-            }
-            $purchase_arr = array_reverse($purchase_arr);
+            } 
             foreach ($purchase_arr as $key => $element) {
                 $cost_item = $element->total_coast / $element->quintity;
-                if($key == 0){
+                if($key == 0 && count($purchase_arr) > 1){
                     $cost += $cost_item * $last_purchase_amount;
                 }
+				elseif(count($purchase_arr) == $key + 1){ 
+                    $cost += $cost_item * $weight;
+				}
                 else{
-                    $cost += $cost_item * $element->quintity;
+                    $cost += $cost_item * $element->quintity; 
                 }
+				$weight -= $element->quintity;
             } 
         }
         // manufactring history
@@ -210,6 +216,7 @@ class ManufacturingController extends Controller
                 'store' => $item?->store?->name,
                 'quantity' => $item->quantity,
                 'date' => $item->created_at,
+                'cost' => $item->cost,
             ];
         });
 
