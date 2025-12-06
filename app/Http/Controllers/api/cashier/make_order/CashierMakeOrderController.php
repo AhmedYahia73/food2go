@@ -870,7 +870,7 @@ class CashierMakeOrderController extends Controller
         }
         $kitchen_items = array_values($kitchen_items);
         foreach ($kitchen_items as $key => $value) {
-            $items = collect($kitchen_items[$key]['order']);
+            $items = collect($value['order']);
             $peice_items = $items
             ->where("weight", 0)->sum("count");
             $weight_items = $items

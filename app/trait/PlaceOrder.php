@@ -1041,6 +1041,7 @@ trait PlaceOrder
                 // $item->variations->variation->options = $item->variations->options;
                 $order_data[$key]['id'] = $product->id;
                 $order_data[$key]['name'] = $product_name;
+                $order_data[$key]['weight'] = $product->weight_status;
                 $order_data[$key]['category_id'] = $product->category_id;
                 $order_data[$key]['sub_category_id'] = $product->sub_category_id;
                 $order_data[$key]['notes'] = $item->product[0]->notes;
