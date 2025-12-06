@@ -1290,9 +1290,12 @@ class CashierMakeOrderController extends Controller
         $kitchen_items = array_values($kitchen_items);
         foreach ($kitchen_items as $key => $value) {
             $items = collect($kitchen_items[$key]['order']);
-            $items = $items->sum("count");
+            $items = $items
+            ->where("weight", 0)->sum("count");
+            $weight_items = $items
+            ->where("weight", 1)->sum("count");
             
-            $kitchen_items[$key]['order_count'] = count($kitchen_items[$key]['order']) * $items;
+            $kitchen_items[$key]['order_count'] = $items + $weight_items;
         }
 
         return [
