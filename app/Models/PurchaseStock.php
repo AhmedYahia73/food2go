@@ -17,6 +17,16 @@ class PurchaseStock extends Model
         'actual_quantity',
         'unit_id',
     ];
+    protected $appends = ["inability"];
+
+    public function getInabilityAttribute(){
+        if(isset($this->attributes['quantity']) && isset($this->attributes['actual_quantity'])){
+            return $this->attributes['quantity'] - $this->attributes['actual_quantity'];
+        }
+        else{
+            return 0;
+        }
+    }
 
     public function category(){
         return $this->belongsTo(PurchaseCategory::class, 'category_id');

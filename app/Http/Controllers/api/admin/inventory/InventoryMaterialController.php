@@ -8,25 +8,38 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\MaterialStock;
 use App\Models\PurchaseStore;
+use App\Models\Material;
+use App\Models\MaterialCategory;
 
 class InventoryMaterialController extends Controller
 {
     public function __construct(private PurchaseStore $stores,
-    private MaterialStock $stocks){}
+    private MaterialStock $stocks, private Material $materials,
+    private MaterialCategory $categories){}
 
     public function lists(Request $request){
         $stores = $this->stores
         ->select("id", "name")
         ->get();
+        $materials = $this->materials
+        ->select("name", "id", "category_id")
+        ->get();
+        $categories = $this->categories
+        ->select("id", "name")
+        ->get();
 
         return response()->json([
-            "stores" => $stores
+            "stores" => $stores,
+            "materials" => $materials,
+            "categories" => $categories,
         ]);
     }
 
     public function view(Request $request){
         $validator = Validator::make($request->all(), [
-            'store_id' => 'required|exists:purchase_stores,id', 
+            'store_id' => 'required|exists:purchase_stores,id',
+            'materials' => 'required|array',
+            'materials.*' => 'required|exists:materials,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -36,6 +49,7 @@ class InventoryMaterialController extends Controller
 
         $stocks = $this->stocks
         ->where("store_id", $request->store_id)
+        ->whereIn("material_id", $request->materials)
         ->with("category", "material")
         ->get()
         ->map(function($item){
@@ -43,6 +57,7 @@ class InventoryMaterialController extends Controller
                 "id" => $item->id,
                 "quantity" => $item->quantity,
                 "actual_quantity" => $item->actual_quantity,
+                "inability" => $item->inability,
                 "category" => $item?->category?->name,
                 "material" => $item?->material?->name,
                 "unit" => $item?->unit?->name,

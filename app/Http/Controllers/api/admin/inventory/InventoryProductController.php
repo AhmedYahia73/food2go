@@ -8,25 +8,38 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\PurchaseStock;
 use App\Models\PurchaseStore;
+use App\Models\PurchaseProduct;
+use App\Models\PurchaseCategory;
 
 class InventoryProductController extends Controller
 {
     public function __construct(private PurchaseStore $stores,
-    private PurchaseStock $stocks){}
+    private PurchaseStock $stocks, private PurchaseProduct $products,
+    private PurchaseCategory $categories,){}
 
     public function lists(Request $request){
         $stores = $this->stores
         ->select("id", "name")
         ->get();
+        $products = $this->products
+        ->select("name", "id", "category_id")
+        ->get();
+        $categories = $this->categories
+        ->select("id", "name")
+        ->get();
 
         return response()->json([
-            "stores" => $stores
+            "stores" => $stores,
+            "products" => $products,
+            "categories" => $categories,
         ]);
     }
 
     public function view(Request $request){
         $validator = Validator::make($request->all(), [
-            'store_id' => 'required|exists:purchase_stores,id', 
+            'store_id' => 'required|exists:purchase_stores,id',
+            'products' => 'required|array',
+            'products.*' => 'required|exists:purchase_products,id', 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -36,6 +49,7 @@ class InventoryProductController extends Controller
 
         $stocks = $this->stocks
         ->where("store_id", $request->store_id)
+        ->whereIn("product_id", $request->products)
         ->with("category", "product")
         ->get()
         ->map(function($item){
@@ -46,6 +60,7 @@ class InventoryProductController extends Controller
                 "category" => $item?->category?->name,
                 "product" => $item?->product?->name,
                 "unit" => $item?->unit?->name,
+                "inability" => $item->inability,
             ];
         });
 
