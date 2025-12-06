@@ -144,6 +144,9 @@ use App\Http\Controllers\api\admin\popup\PopupController;
 use App\Http\Controllers\api\admin\free_discount\FreeDiscountController;
 use App\Http\Controllers\api\admin\notification\NotificationController;
 
+use App\Http\Controllers\api\admin\inventory\InventoryMaterialController;
+use App\Http\Controllers\api\admin\inventory\InventoryProductController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
@@ -154,6 +157,23 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
+    
+    Route::controller(InventoryMaterialController::class)
+    ->prefix('inventory/material')->group(function(){
+        Route::get('/lists', 'lists');
+        Route::post('/', 'view');
+        Route::post('/modify_stocks', 'modify_stocks');
+        Route::post('/modify_actual', 'modify_actual');
+    });
+    
+    Route::controller(InventoryProductController::class)
+    ->prefix('inventory/product')->group(function(){
+        Route::get('/lists', 'lists');
+        Route::post('/', 'view');
+        Route::post('/modify_stocks', 'modify_stocks');
+        Route::post('/modify_actual', 'modify_actual');
+    });
+    
     Route::controller(NotificationController::class)
     ->prefix('notification')->group(function(){
         Route::get('/stock_product', 'stock_product');
