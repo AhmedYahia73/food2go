@@ -1293,7 +1293,7 @@ class CashierMakeOrderController extends Controller
             $peice_items = $items
             ->where("weight", 0)->sum("count");
             $weight_items = $items
-            ->where("weight", 1)->sum("count");
+            ->where("weight", 1)->count();
             
             $kitchen_items[$key]['order_count'] = $peice_items + $weight_items;
         }
@@ -1341,7 +1341,7 @@ class CashierMakeOrderController extends Controller
             $peice_items = $items
             ->where("weight", 0)->sum("count");
             $weight_items = $items
-            ->where("weight", 1)->sum("count");
+            ->where("weight", 1)->count();
             
             $order_kitchen[$key]['order_count'] = $peice_items + $weight_items;
         }
