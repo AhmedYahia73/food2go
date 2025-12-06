@@ -1036,9 +1036,10 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale); 
  
-        $preparation_num = $this->cafe_table
+        $table_item = $this->cafe_table
         ->where('id', $request->table_id) 
-        ->first()?->preparation_num ?? null;
+        ->first();
+        $preparation_num = $table_item?->preparation_num ?? null;
         $reaturant_name = $this->company_info
         ->first()?->name; 
 
@@ -1051,6 +1052,7 @@ class CashierMakeOrderController extends Controller
             "service_fees" => $request->service_fees ?? null,
             "module_order_number" => $request->module_order_number ?? null,
             "preparation_num" => $preparation_num,
+            "table_number" => $table_item?->table_number,
             "total_tax" => $request->total_tax ?? 0,
             "total_discount" => $request->total_discount ?? 0,
         ]);
@@ -1171,9 +1173,10 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
  
-        $preparation_num = $this->cafe_table
+        $table_item = $this->cafe_table
         ->where('id', $request->table_id) 
-        ->first()?->preparation_num ?? null; 
+        ->first();
+        $preparation_num = $table_item?->preparation_num ?? null; 
         $reaturant_name = $this->company_info
         ->first()?->name; 
 
@@ -1186,6 +1189,7 @@ class CashierMakeOrderController extends Controller
             "service_fees" => $request->service_fees ?? null,
             "module_order_number" => $request->module_order_number ?? null,
             "preparation_num" => $preparation_num,
+            "table_number" => $table_item?->table_number,
             "reaturant_name" => $reaturant_name,
         ]);
     } 
