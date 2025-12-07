@@ -10,11 +10,15 @@ use App\Models\Expense;
   
 use App\Models\ExpenseCategory;
 use App\Models\FinantiolAcounting;
+use App\Models\OrderFinancial;
+use App\Models\Order;  
+use App\Models\CashierShift;
 
 class ExpensesListController extends Controller
 {
     public function __construct(private Expense $expenses, 
-    private FinantiolAcounting $financial, private ExpenseCategory $category){}
+    private FinantiolAcounting $financial, private ExpenseCategory $category,
+    private CashierShift $cashier_shift){}
 
     public function view(Request $request){
         $locale = $request->locale ?? "en";
@@ -108,6 +112,36 @@ class ExpensesListController extends Controller
         $expenseRequest['branch_id'] = $request->user()->branch_id;
         $this->expenses
         ->create($expenseRequest);
+        // ___________________________________
+    
+        $orders = Order::
+        select("id")
+        ->where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->pluck('id')
+        ->toArray();
+        
+        $shift = $this->cashier_shift
+        ->where('shift', $request->user()->shift_number)
+        ->where('cashier_man_id', $request->user()->id)
+        ->first();
+        $expenses = $this->expenses
+        ->where('created_at', '>=', $shift->start_time ?? now())
+        ->where('created_at', '<=', $shift->end_time ?? now())
+        ->where("financial_account_id", $request->financial_account_id)
+        ->sum('amount');
+        
+        $financial_accounts = OrderFinancial:: 
+        whereIn("order_id", $orders)  
+        ->where("financial_id", $request->financial_account_id)
+        ->sum('amount'); 
+        $total_cash = $financial_accounts - $expenses;
+        if($total_cash > $request->amount){
+            return response()->json([
+                "errors" => "cash not enough"
+            ], 400);
+        }
+            //_____________________________________
         $financial = FinantiolAcounting::
         where("id", $request->financial_account_id)
         ->first();
