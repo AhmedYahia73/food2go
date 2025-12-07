@@ -166,7 +166,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/open_inventory/{id}', 'open_inventory');
         Route::post('/modify_materials/{id}', 'modify_materials');
         Route::get('/inability_list/{id}', 'inability_list');
-        Route::get('/wested', 'wested');
+        Route::حخسف('/wested', 'wested');
     });
     
     Route::controller(InventoryProductController::class)
