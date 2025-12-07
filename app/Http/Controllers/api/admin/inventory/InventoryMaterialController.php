@@ -66,7 +66,6 @@ class InventoryMaterialController extends Controller
     public function create_inventory(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => 'required|exists:purchase_stores,id',
-            'inventory_id' => 'required|exists:inventory_lists,id',
             "type" => 'required|in:partial,full',
             'materials' => 'array',
             'materials.*' => 'required|exists:materials,id',
