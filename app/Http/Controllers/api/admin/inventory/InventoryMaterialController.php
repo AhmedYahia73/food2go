@@ -83,7 +83,7 @@ class InventoryMaterialController extends Controller
             "store_id" => $request->store_id,
         ]);
         $all_quantity = 0;
-        $materials_arr = [];
+        $items_count = 0;
         $materials = collect([]);
         if($request->materials && count($request->materials) > 0){
             $materials = $request->materials;
@@ -104,6 +104,7 @@ class InventoryMaterialController extends Controller
             ->first();
             $stock_quintity = $stock?->quintity ?? 0;
             $all_quantity += $stock_quintity;
+            
             $material_inventory = InventoryMaterialHistory::
             create([
                 'category_id' => $item->category_id,
@@ -115,7 +116,7 @@ class InventoryMaterialController extends Controller
                 'cost' => 0,
             ]);
         }  
-        $inventory->product_num = count($materials_arr);
+        $inventory->product_num = ++$items_count;;
         $inventory->total_quantity = $all_quantity;
         $inventory->save();
 
