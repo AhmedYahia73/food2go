@@ -87,7 +87,6 @@ class InventoryMaterialController extends Controller
 
     public function modify_stocks(Request $request){
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
             'stocks' => 'required|array',
             'stocks.*.id' => 'required|exists:material_stocks,id',
             'stocks.*.quantity' => 'required|numeric',
