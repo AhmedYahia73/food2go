@@ -177,6 +177,7 @@ class InventoryMaterialController extends Controller
             ->get();
             $purchase_arr = [];
             $total_quantity = $stock_quintity - $item['quantity'];
+            $item_quantity = $stock_quintity - $item['quantity'];
             foreach ($purchase as $element) {
                 $last_purchase_amount = $element->quintity;
                 $purchase_arr[] = $element;
@@ -204,7 +205,7 @@ class InventoryMaterialController extends Controller
             ->update([
                 'quantity' => $item['quantity'],
                 'cost' => $cost,
-                'inability' => $stock_quintity - $item['quantity'],
+                'inability' => $item_quantity,
             ]); 
         }
 
