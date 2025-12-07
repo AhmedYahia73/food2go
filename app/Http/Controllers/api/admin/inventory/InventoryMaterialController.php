@@ -111,7 +111,7 @@ class InventoryMaterialController extends Controller
             $last_purchase_amount = 0;
             $purchase = $this->purchase
             ->where('store_id', $stock->store_id)
-            ->where('material_id', $item->material_id)
+            ->where('material_id', $stock->material_id)
             ->orderByDesc("id")
             ->get();
             $purchase_arr = [];
