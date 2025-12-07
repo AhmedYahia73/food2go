@@ -79,7 +79,8 @@ class InventoryProductController extends Controller
         });
 
         return response()->json([
-            "stocks" => $stocks
+            "stocks" => $stocks,
+            "product_count" => $stocks->count(),
         ]);
     }
 

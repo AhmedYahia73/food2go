@@ -80,7 +80,8 @@ class InventoryMaterialController extends Controller
         });
 
         return response()->json([
-            "stocks" => $stocks
+            "stocks" => $stocks,
+            "material_count" => $stocks->count(),
         ]);
     }
 
@@ -183,6 +184,7 @@ class InventoryMaterialController extends Controller
     public function history(Request $request){
         $material_inventory = $this->inventory
         ->whereHas("materials")
+        ->with("admin")
         ->get();
     }
 }

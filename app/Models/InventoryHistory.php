@@ -17,4 +17,8 @@ class InventoryHistory extends Model
     public function products(){
         return $this->hasMany(InventoryProductHistory::class, "inventory_id");
     }
+
+    public function admin(){
+        return $this->hasMany(Admin::class, "admin_id");
+    }
 }
