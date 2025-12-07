@@ -13,6 +13,7 @@ use App\Models\PurchaseCategory;
 use App\Models\InventoryProductHistory;
 use App\Models\Purchase;
 use App\Models\InventoryList;
+use App\Models\PurchaseWasted;
 
 class InventoryProductController extends Controller
 {
