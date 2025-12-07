@@ -45,6 +45,7 @@ class InventoryMaterialController extends Controller
         $inventory_list = $this->inventory_list
         ->orderByDesc("id")
         ->with("store")
+        ->where("status", "final")
         ->whereHas("materials")
         ->get()
         ->map(function($item){
