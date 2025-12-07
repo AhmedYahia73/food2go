@@ -18,7 +18,7 @@ class InventoryProductController extends Controller
 {
     public function __construct(private PurchaseStore $stores,
     private PurchaseStock $stocks, private PurchaseProduct $products,
-    private PurchaseCategory $categories, private InventoryHistory $inventory,
+    private PurchaseCategory $categories, 
     private InventoryProductHistory $product_history, private Purchase $purchase
     , private InventoryList $inventory_list){}
 
