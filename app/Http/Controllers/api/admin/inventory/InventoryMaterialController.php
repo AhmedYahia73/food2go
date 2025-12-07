@@ -119,7 +119,7 @@ class InventoryMaterialController extends Controller
             foreach ($purchase as $element) {
                 $last_purchase_amount = $element->quintity;
                 $purchase_arr[] = $element;
-                if($element->quintity >= $stock){
+                if($element->quintity >= $stock->quantity){
                     break;
                 }
                 $stock -= $element->quintity;
