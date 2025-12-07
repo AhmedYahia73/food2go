@@ -141,7 +141,7 @@ class ExpensesListController extends Controller
                 "errors" => "cash not enough"
             ], 400);
         }
-            //_____________________________________
+        //_____________________________________
         $financial = FinantiolAcounting::
         where("id", $request->financial_account_id)
         ->first();
