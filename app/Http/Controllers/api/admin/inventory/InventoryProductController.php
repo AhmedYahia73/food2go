@@ -199,6 +199,10 @@ class InventoryProductController extends Controller
             ],400);
         }
   
+        $InventoryList = InventoryList::
+        where("id", $id)
+        ->with("store")
+        ->first();
         $arr_items = [];
         foreach ($request->products as $item) {
             $cost = 0;
@@ -208,7 +212,7 @@ class InventoryProductController extends Controller
             $stock_quintity = $stock->quantity ?? 0;
             $last_purchase_amount = 0;
             $purchase = $this->purchase
-            ->where('store_id', $stock?->store_id)
+            ->where('store_id', $InventoryList?->store_id)
             ->where('product_id', $item['id'])
             ->orderByDesc("id")
             ->get();
@@ -264,7 +268,8 @@ class InventoryProductController extends Controller
 
         return response()->json([
             "success" => "You update stoks success",
-            "report" => $arr_items
+            "report" => $arr_items,
+            "store_name" => $InventoryList?->store?->name,
         ]);
     }
 
