@@ -75,7 +75,9 @@ class InventoryMaterialController extends Controller
         ->map(function($item){
             return [
                 "id" => $item->id,
-                "has_shortage" => ($item?->materials?->actual_quantity ?? 0) != ($item?->materials?->quantity ?? 0) ? true : false,
+                "has_shortage" => $item?->materials?->filter(function ($item) {
+                    return $item['quantity'] != $item['actual_quantity'];
+                })->count() > 0  ? true : false,
                 "store" => $item?->store?->name,
                 "product_num" => $item->product_num,
                 "total_quantity" => $item->total_quantity,
