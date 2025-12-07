@@ -186,6 +186,7 @@ class InventoryMaterialController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        $arr_items = [];
  
         foreach ($request->materials as $item) {
             $cost = 0;
@@ -231,10 +232,28 @@ class InventoryMaterialController extends Controller
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
+            $arr_items[] = InventoryMaterialHistory::
+            where("inventory_id", $id)
+            ->where("material_id", $item['id'])
+            ->get()
+            ->map(function($item){
+                return [
+                    "id" => $item->id,
+                    "quantity" => $item->quantity,
+                    "actual_quantity" => $item->actual_quantity,
+                    "inability" => $item->inability,
+                    "cost" => $item->cost,
+                    "date" => $item->created_at,
+                    "date" => $item->created_at,
+                    "category" => $item?->category?->name,
+                    "material" => $item?->material?->name,
+                ];
+            }); 
         }
 
         return response()->json([
-            "success" => "You update stoks success"
+            "success" => "You update stoks success",
+            "report" => $arr_items,
         ]);
     }
 

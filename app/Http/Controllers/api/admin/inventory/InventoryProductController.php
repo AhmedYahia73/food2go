@@ -199,6 +199,7 @@ class InventoryProductController extends Controller
             ],400);
         }
   
+        $arr_items = [];
         foreach ($request->products as $item) {
             $cost = 0;
             $stock = $this->stocks
@@ -243,10 +244,28 @@ class InventoryProductController extends Controller
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
+            $arr_items = InventoryProductHistory::
+            where("inventory_id", $id)
+            ->where("product_id", $item['id'])
+            ->get()
+            ->map(function($item){
+                return [
+                    "id" => $item->id,
+                    "quantity" => $item->quantity,
+                    "actual_quantity" => $item->actual_quantity,
+                    "inability" => $item->inability,
+                    "cost" => $item->cost,
+                    "date" => $item->created_at,
+                    "date" => $item->created_at,
+                    "category" => $item?->category?->name,
+                    "product" => $item?->product?->name,
+                ];
+            }); 
         }
 
         return response()->json([
-            "success" => "You update stoks success"
+            "success" => "You update stoks success",
+            "report" => $arr_items
         ]);
     }
 
