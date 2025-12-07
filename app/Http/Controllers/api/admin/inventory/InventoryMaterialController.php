@@ -204,7 +204,7 @@ class InventoryMaterialController extends Controller
             ->update([
                 'quantity' => $item['quantity'],
                 'cost' => $cost,
-                'inability' => $total_quantity,
+                'inability' => $stock_quintity - $item['quantity'],
             ]); 
         }
 
