@@ -13,6 +13,7 @@ use App\Models\MaterialCategory;
 use App\Models\InventoryHistory;
 use App\Models\InventoryMaterialHistory;
 use App\Models\Purchase;
+use App\Models\InventoryList;
 
 class InventoryMaterialController extends Controller
 {
@@ -20,7 +21,7 @@ class InventoryMaterialController extends Controller
     private MaterialStock $stocks, private Material $materials,
     private MaterialCategory $categories, private InventoryHistory $inventory,
     private InventoryMaterialHistory $materials_history,
-    private Purchase $purchase){}
+    private Purchase $purchase, private InventoryList $inventory_list){}
 
     public function lists(Request $request){
         $stores = $this->stores
@@ -39,6 +40,27 @@ class InventoryMaterialController extends Controller
             "categories" => $categories,
         ]);
     }
+
+    public function inventory_history(Request $request){
+        $inventory_list = $this->inventory_list
+        ->orderByDesc("id")
+        ->with("store")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "store" => $item?->store?->name,
+                "product_num" => $item->product_num,
+                "total_quantity" => $item->total_quantity,
+                "cost" => $item->cost,
+                "date" => $item->created_at,
+            ];
+        });
+
+        return response()->json([
+            "inventory_list" => $inventory_list, 
+        ]);
+    } 
 
     public function view(Request $request){
         $validator = Validator::make($request->all(), [
@@ -83,7 +105,7 @@ class InventoryMaterialController extends Controller
 
         return response()->json([
             "stocks" => $stocks,
-            "material_count" => $stocks->count(),
+            "material_count" => $stocks->sum('quantity'),
         ]);
     }
 
@@ -187,6 +209,22 @@ class InventoryMaterialController extends Controller
         $material_inventory = $this->inventory
         ->whereHas("materials")
         ->with("admin")
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "date" => $item->created_at->format("Y-m-d"),
+                "time" => $item->created_at->format("H:i"),
+                "admin" => $item?->admin?->name,
+            ];
+        });
+
+        return response()->json([
+            "material_inventory" => $material_inventory
+        ]);
+    }
+
+    public function history_details(Request $request){
+
     }
 }

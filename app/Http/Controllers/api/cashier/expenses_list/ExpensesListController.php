@@ -111,6 +111,11 @@ class ExpensesListController extends Controller
         $financial = FinantiolAcounting::
         where("id", $request->financial_account_id)
         ->first();
+        if($financial && $financial->balance < $request->amount){
+            return response()->json([
+                "errors" => "Balance not enough"
+            ], 400);
+        }
         if($financial){
             $financial->balance -= $request->amount;
             $financial->save();

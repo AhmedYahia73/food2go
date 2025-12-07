@@ -13,13 +13,15 @@ use App\Models\PurchaseCategory;
 use App\Models\InventoryHistory;
 use App\Models\InventoryProductHistory;
 use App\Models\Purchase;
+use App\Models\InventoryList;
 
 class InventoryProductController extends Controller
 {
     public function __construct(private PurchaseStore $stores,
     private PurchaseStock $stocks, private PurchaseProduct $products,
     private PurchaseCategory $categories, private InventoryHistory $inventory,
-    private InventoryProductHistory $product_history, private Purchase $purchase){}
+    private InventoryProductHistory $product_history, private Purchase $purchase
+    , private InventoryList $inventory_list){}
 
     public function lists(Request $request){
         $stores = $this->stores
@@ -39,7 +41,28 @@ class InventoryProductController extends Controller
         ]);
     }
 
-    public function view(Request $request){
+    public function inventory_history(Request $request){
+        $inventory_list = $this->inventory_list
+        ->orderByDesc("id")
+        ->with("store")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "store" => $item?->store?->name,
+                "product_num" => $item->product_num,
+                "total_quantity" => $item->total_quantity,
+                "cost" => $item->cost,
+                "date" => $item->created_at,
+            ];
+        });
+
+        return response()->json([
+            "inventory_list" => $inventory_list, 
+        ]);
+    }
+
+    public function create_inventeory(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => 'required|exists:purchase_stores,id',
             "type" => 'required|in:partial,full',
@@ -81,7 +104,7 @@ class InventoryProductController extends Controller
 
         return response()->json([
             "stocks" => $stocks,
-            "product_count" => $stocks->count(),
+            "material_count" => $stocks->sum('quantity'),
         ]);
     }
 
