@@ -175,6 +175,7 @@ class InventoryProductController extends Controller
             return [
                 "category" => $item?->category?->name,
                 "product" => $item?->product?->name,
+                "product_id" => $item?->product?->id,
                 "quantity" => $item?->quantity, 
                 "inability" => $item?->inability,
                 "cost" => $item?->cost,

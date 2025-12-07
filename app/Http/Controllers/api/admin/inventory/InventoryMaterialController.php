@@ -163,6 +163,7 @@ class InventoryMaterialController extends Controller
             return [
                 "category" => $item?->category?->name,
                 "material" => $item?->material?->name,
+                "material_id" => $item?->material?->id,
                 "quantity" => $item?->quantity, 
                 "inability" => $item?->inability,
                 "cost" => $item?->cost,

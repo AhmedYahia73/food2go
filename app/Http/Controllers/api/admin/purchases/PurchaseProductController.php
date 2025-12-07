@@ -27,6 +27,7 @@ class PurchaseProductController extends Controller
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
                 'min_stock' => $item->min_stock,
+                "stock" => $stock, 
             ];
         }); 
         $categories = $this->categories
@@ -57,7 +58,7 @@ class PurchaseProductController extends Controller
         ->map(function($item) use($stocks){
             $stock = $stocks
             ->where("product_id", $item->id)
-            ->first()?->quantity ?? 0;
+            ->first()?->quantity ?? 0; 
             return [
                 'id' => $item->id,
                 'name' => $item->name,
@@ -66,7 +67,7 @@ class PurchaseProductController extends Controller
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
                 'min_stock' => $item->min_stock,
-                "stock" => $stock
+                "stock" => $stock, 
             ];
         }); 
         $categories = $this->categories
