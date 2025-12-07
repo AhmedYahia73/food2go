@@ -557,6 +557,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(OrderController::class)
     ->prefix('order')->group(function(){
         Route::get('/', 'orders')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/void_orders', 'void_orders')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/orders_count', 'orders_count')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/order_details', 'order_details')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/lists', 'lists')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);

@@ -147,6 +147,10 @@ class Order extends Model
         return json_decode($data);
     }
 
+    public function void(){
+        return $this->belongsTo(VoidReason::class, 'void_id');
+    }
+
     public function financial_accountigs(){
         return $this->belongsToMany(FinantiolAcounting::class, 'order_financials', 'order_id', 'financial_id');
     }
