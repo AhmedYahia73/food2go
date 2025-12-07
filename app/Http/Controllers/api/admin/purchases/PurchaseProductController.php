@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\Purchase;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseStock;
@@ -51,14 +52,16 @@ class PurchaseProductController extends Controller
             ],400);
         }
 
+        $purchase = Purchase::
+        where("store_id", $request->store_id);
         $stocks = $this->stock
         ->where("store_id", $request->store_id);
         $product = $this->product 
         ->get()
-        ->map(function($item) use($stocks){
+        ->map(function($item) use($stocks, $purchase){
             $stock = $stocks
             ->where("product_id", $item->id)
-            ->first()?->quantity ?? 0; 
+            ->first()?->quantity ?? 0;
             return [
                 'id' => $item->id,
                 'name' => $item->name,

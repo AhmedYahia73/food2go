@@ -198,12 +198,7 @@ class InventoryProductController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
- 
-        InventoryList::
-        where("id", $id)
-        ->update([
-            "status" => "final"
-        ]);
+  
         foreach ($request->products as $item) {
             $cost = 0;
             $stock = $this->stocks
