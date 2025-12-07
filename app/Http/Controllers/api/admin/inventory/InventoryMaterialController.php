@@ -259,7 +259,7 @@ class InventoryMaterialController extends Controller
                 "actual_quantity" => $inventory_material->quantity
             ]);
         
-            $material_stock = $this->material_stock
+            $material_stock = $this->stocks
             ->where('material_id', $item)
             ->where('store_id', $request->store_id)
             ->first();
@@ -275,7 +275,7 @@ class InventoryMaterialController extends Controller
             ]);
             
             if(empty($material_stock)){
-                $this->material_stock
+                $this->stocks
                 ->create([
                     'category_id' => $inventory_material->category_id,
                     'material_id' => $inventory_material->material_id,
