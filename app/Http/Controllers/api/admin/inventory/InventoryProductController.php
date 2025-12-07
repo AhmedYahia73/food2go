@@ -10,12 +10,15 @@ use App\Models\PurchaseStock;
 use App\Models\PurchaseStore;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseCategory;
+use App\Models\InventoryHistory;
+use App\Models\InventoryProductHistory;
 
 class InventoryProductController extends Controller
 {
     public function __construct(private PurchaseStore $stores,
     private PurchaseStock $stocks, private PurchaseProduct $products,
-    private PurchaseCategory $categories,){}
+    private PurchaseCategory $categories, private InventoryHistory $inventory,
+    private InventoryProductHistory $product_history){}
 
     public function lists(Request $request){
         $stores = $this->stores
@@ -38,8 +41,11 @@ class InventoryProductController extends Controller
     public function view(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => 'required|exists:purchase_stores,id',
-            'products' => 'required|array',
-            'products.*' => 'required|exists:purchase_products,id', 
+            "type" => 'required|in:partial,full',
+            'products' => 'array',
+            'products.*' => 'exists:purchase_products,id', 
+            'category_products' => 'array',
+            'category_products.*' => 'exists:purchase_categories,id', 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -49,9 +55,17 @@ class InventoryProductController extends Controller
 
         $stocks = $this->stocks
         ->where("store_id", $request->store_id)
-        ->whereIn("product_id", $request->products)
-        ->with("category", "product")
-        ->get()
+        ->with("category", "product");
+        if($request->products && $request->type == "partial"){
+            $stocks = $stocks
+            ->whereIn("product_id", $request->products);
+        }
+        elseif($request->category_products && $request->type == "partial"){
+            $stocks = $stocks
+            ->whereIn("category_id", $request->category_products);
+        }
+        $stocks = $stocks
+        ->get() 
         ->map(function($item){
             return [
                 "id" => $item->id,
@@ -71,6 +85,7 @@ class InventoryProductController extends Controller
 
     public function modify_stocks(Request $request){
         $validator = Validator::make($request->all(), [
+            'name' => 'required',
             'stocks' => 'required|array',
             'stocks.*.id' => 'required|exists:purchase_stocks,id',
             'stocks.*.quantity' => 'required|numeric',
@@ -82,10 +97,52 @@ class InventoryProductController extends Controller
         }
 
         foreach ($request->stocks as $item) {
-            $this->stocks
+            $cost = 0;
+            $stock = $this->stocks
             ->where("id", $item['id'])
-            ->update([
+            ->first();
+            
+            $last_purchase_amount = 0;
+            $purchase = $this->purchase
+            ->where('store_id', $stock->store_id)
+            ->where('product_id', $item->product_id)
+            ->orderByDesc("id")
+            ->get();
+            $purchase_arr = [];
+            $total_quantity = $item['quantity'] - $stock->quantity;
+            foreach ($purchase as $element) {
+                $last_purchase_amount = $element->quintity;
+                $purchase_arr[] = $element;
+                if($element->quintity >= $stock){
+                    break;
+                }
+                $stock -= $element->quintity;
+            } 
+            foreach ($purchase_arr as $key => $element) {
+                $cost_item = $element->total_coast / $element->quintity;
+                if($key == 0 && count($purchase_arr) > 1){
+                    $cost += $cost_item * $last_purchase_amount;
+                }
+				elseif(count($purchase_arr) == $key + 1){ 
+                    $cost += $cost_item * $total_quantity;
+				}
+                else{
+                    $cost += $cost_item * $element->quintity; 
+                }
+				$total_quantity -= $element->quintity;
+            } 
+            $this->product_history
+            ->create([
+                'product_id' => $stock->product_id,
+                'cost' => $cost,
+                'quantity_from' => $stock->quantity,
+                'quantity_to' => $item['quantity'],
+                'inability' => $item['quantity'] - $stock->quantity,
+                'inventory_id' => $inventory->id,
+            ]);
+            $stock->update([
                 "quantity" => $item['quantity'],
+                "actual_quantity" => $item['quantity'],
             ]);
         }
 

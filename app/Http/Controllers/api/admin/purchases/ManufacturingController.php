@@ -127,6 +127,7 @@ class ManufacturingController extends Controller
             $last_purchase_amount = 0;
             $purchase = $this->purchase
             ->where('store_id', $request->store_id)
+            ->where('material_id', $item['id'])
             ->orderByDesc("id")
             ->get();
             $purchase_arr = [];
