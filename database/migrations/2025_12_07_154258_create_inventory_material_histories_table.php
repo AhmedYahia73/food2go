@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('category_id')->nullable()->constrained('material_categories')->onUpdate('cascade')->onDelete('set null');
             $table->foreignId('material_id')->nullable()->constrained('materials')->onUpdate('cascade')->onDelete('set null');
-            $table->foreignId('inventory_id')->nullable()->constrained('inventory_histories')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('inventory_id')->nullable()->constrained('inventory_lists')->onUpdate('cascade')->onDelete('cascade');
             $table->integer("actual_quantity");
             $table->integer("quantity");
             $table->integer("inability");
