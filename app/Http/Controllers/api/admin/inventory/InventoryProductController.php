@@ -99,12 +99,12 @@ class InventoryProductController extends Controller
         }
         foreach ($products as $item) {
             $stock = $this->stocks
-            ->where("material_id", $item->id)
+            ->where("product_id", $item->id)
             ->first();
             $stock_quintity = $stock?->quantity ?? 0;
             $all_quantity += $stock_quintity;
             
-            $material_inventory = InventoryProductHistory::
+            $product_inventory = InventoryProductHistory::
             create([
                 'category_id' => $item->category_id,
                 'product_id' => $item->id,
@@ -126,7 +126,7 @@ class InventoryProductController extends Controller
     }
 
     public function open_inventory(Request $request, $id){
-        $materials = InventoryProductHistory::
+        $products = InventoryProductHistory::
         where("inventory_id", $id)
         ->with("category", "product")
         ->get()
@@ -141,11 +141,11 @@ class InventoryProductController extends Controller
         }); 
 
         return response()->json([
-            "materials" => $materials
+            "products" => $products
         ]);
     }
 
-    public function modify_materials(Request $request, $id){
+    public function modify_products(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'products' => 'required|array',
             'products.*.id' => 'required|exists:purchase_products,id',

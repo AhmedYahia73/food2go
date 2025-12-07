@@ -175,7 +175,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/history', 'inventory_history');
         Route::post('/create_inventory', 'create_inventory');
         Route::get('/open_inventory/{id}', 'open_inventory');
-        Route::post('/modify_materials/{id}', 'modify_materials');
+        Route::post('/modify_products/{id}', 'modify_products');
         Route::get('/inability_list/{id}', 'inability_list');
         Route::post('/wested', 'wested');
     });
