@@ -41,6 +41,18 @@ class InventoryProductController extends Controller
         ]);
     }
  
+    public function update_inventory_status(Request $request, $id){
+        $inventory_list = $this->inventory_list
+        ->where("id", $id)
+        ->update([
+            "status" => "final"
+        ]);
+
+        return response()->json([
+            "success" => "final", 
+        ]);
+    } 
+ 
     public function current_inventory_history(Request $request){
         $inventory_list = $this->inventory_list
         ->orderByDesc("id")

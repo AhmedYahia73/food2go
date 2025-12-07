@@ -173,6 +173,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(InventoryProductController::class)
     ->prefix('inventory/product')->group(function(){
         Route::get('/lists', 'lists');
+        Route::get('/update_inventory_status', 'update_inventory_status');
         Route::get('/history', 'inventory_history');
         Route::get('/current', 'current_inventory_history');
         Route::post('/create_inventory', 'create_inventory');
