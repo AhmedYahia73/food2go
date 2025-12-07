@@ -6,12 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class InventoryProductHistory extends Model
 {
-    protected $fillable = [
+    protected $fillable = [ 
+        'category_id',
         'product_id',
-        'quantity_from',
-        'quantity_to',
+        'inventory_id',
+        'quantity',
+        'acual_quantity',
         'inability',
         'cost',
-        'inventory_id',
     ];
+
+    public function category(){
+        return $this->belongsTo(PurchaseCategory::class, "category_id");
+    }
+
+    public function material(){
+        return $this->belongsTo(Material::class, "material_id");
+    }
 }

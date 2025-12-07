@@ -382,13 +382,7 @@ class CashierMakeOrderController extends Controller
                     "errors" => "user is exceed the alloed limit"
                 ], 400); 
             }
-        }
-        $free_discount = $this->free_discount($request->free_discount ?? 0);
-        if(!$free_discount['success']){
-            return response()->json([
-                "errors" => $free_discount['errors']
-            ], 400);
-        }
+        } 
         $kitchen_items = [];
         $order = $this->delivery_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
@@ -642,13 +636,7 @@ class CashierMakeOrderController extends Controller
                 ], 400); 
             }
             $user->increment('due', $due);
-        }
-        $free_discount = $this->free_discount($request->free_discount ?? 0);
-        if(!$free_discount['success']){
-            return response()->json([
-                "errors" => $free_discount['errors']
-            ], 400);
-        }
+        } 
         $kitchen_items = [];
         if($request->order_pending){
             $order = $this->take_away_make_order($request);
@@ -942,12 +930,6 @@ class CashierMakeOrderController extends Controller
                 ], 400);
             }
         }
-        $free_discount = $this->free_discount($request->free_discount ?? 0);
-        if(!$free_discount['success']){
-            return response()->json([
-                "errors" => $free_discount['errors']
-            ], 400);
-        }
         $tables_ids = $this->cafe_table
         ->where('id', $request->table_id)
         ->orWhere('main_table_id', $request->table_id)
@@ -1116,13 +1098,7 @@ class CashierMakeOrderController extends Controller
                     'errors' => 'Password is wrong'
                 ], 400);
             }
-        }
-        $free_discount = $this->free_discount($request->free_discount ?? 0);
-        if(!$free_discount['success']){
-            return response()->json([
-                "errors" => $free_discount['errors']
-            ], 400);
-        }
+        } 
         $order_carts = $this->order_cart
         ->whereIn('id', $request->cart_id)
         ->get();

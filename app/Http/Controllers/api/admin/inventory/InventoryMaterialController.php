@@ -54,6 +54,7 @@ class InventoryMaterialController extends Controller
                 "total_quantity" => $item->total_quantity,
                 "cost" => $item->cost,
                 "date" => $item->created_at,
+                "status" => $item->status,
             ];
         });
 
@@ -62,9 +63,10 @@ class InventoryMaterialController extends Controller
         ]);
     } 
 
-    public function view(Request $request){
+    public function create_inventory(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => 'required|exists:purchase_stores,id',
+            'inventory_id' => 'required|exists:inventory_lists,id',
             "type" => 'required|in:partial,full',
             'materials' => 'array',
             'materials.*' => 'required|exists:materials,id',
@@ -77,35 +79,69 @@ class InventoryMaterialController extends Controller
             ],400);
         }
 
-        $stocks = $this->stocks
-        ->where("store_id", $request->store_id)
-        ->with("category", "material");
-        
-        if($request->materials && $request->type == "partial"){
-            $stocks = $stocks
-            ->whereIn("material_id", $request->materials);
+        $inventory = InventoryList::
+        create([
+            "store_id" => $request->store_id,
+        ]);
+        $all_quantity = 0;
+        $materials_arr = [];
+        $materials = collect([]);
+        if($request->materials && count($request->materials) > 0){
+            $materials = $request->materials;
+            $materials = Material::
+            select("id", "name")
+            ->whereIn("id", $materials)
+            ->get();
         }
-        elseif($request->category_materials && $request->type == "partial"){
-            $stocks = $stocks
-            ->whereIn("category_id", $request->category_materials);
+        elseif($request->category_materials && count($request->category_materials) > 0){
+            $materials = Material::
+            select("id", "name")
+            ->whereIn("category_id", $request->category_materials)
+            ->get();
         }
-        $stocks = $stocks
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "quantity" => $item->quantity,
-                "actual_quantity" => $item->actual_quantity,
-                "inability" => $item->inability,
-                "category" => $item?->category?->name,
-                "material" => $item?->material?->name,
-                "unit" => $item?->unit?->name,
-            ];
-        });
+        foreach ($materials as $item) {
+            $stock = $this->stocks
+            ->where("material_id", $item->id)
+            ->first();
+            $stock_quintity = $stock?->quintity ?? 0;
+            $all_quantity += $stock_quintity;
+            $material_inventory = InventoryMaterialHistory::
+            create([
+                'category_id' => $item->category_id,
+                'material_id' => $item->id,
+                'inventory_id' => $inventory->id,
+                'quantity' => $stock_quintity, 
+                'inability' => 0,
+                'cost' => 0,
+            ]);
+        }  
+        $inventory->product_num = count($materials_arr);
+        $inventory->total_quantity = $all_quantity;
+        $inventory->save();
 
         return response()->json([
             "stocks" => $stocks,
-            "material_count" => $stocks->sum('quantity'),
+            "inventory" => $inventory,
+        ]);
+    }
+
+    public function open_inventory(Request $request, $id){
+        $materials = InventoryMaterialHistory::
+        where("inventory_id", $id)
+        ->with("category", "material")
+        ->get()
+        ->map(function($item){
+            return [
+                "category" => $item?->category?->name,
+                "material" => $item?->material?->name,
+                "quantity" => $item?->quantity, 
+                "inability" => $item?->inability,
+                "cost" => $item?->cost,
+            ];
+        }); 
+
+        return response()->json([
+            "materials" => $materials
         ]);
     }
 

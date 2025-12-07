@@ -11,6 +11,7 @@ class InventoryList extends Model
         'product_num',
         'total_quantity',
         'cost',
+        'status',
     ];
 
     public function store(){

@@ -14,11 +14,16 @@ return new class extends Migration
         Schema::create('inventory_lists', function (Blueprint $table) {
             $table->id();
             $table->foreignId('store_id')->nullable()->constrained('purchase_stores')->onUpdate('cascade')->onDelete('set null'); 
-            $table->integer("product_num");
-            $table->integer("total_quantity");
-            $table->float("cost"); 
+            $table->integer("product_num")->default(0);
+            $table->integer("total_quantity")->default(0);
+            $table->float("cost")->default(0); 
+            $table->emum("status", ["current", "final"])->default("current"); 
             $table->timestamps();
         });
+        
+        Schema::dropIfExists('inventory_product_histories');
+        Schema::dropIfExists('inventory_material_histories');
+        Schema::dropIfExists('inventory_histories');
     }
 
     /**
