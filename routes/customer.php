@@ -34,7 +34,7 @@ Route::controller(OtpController::class)->prefix('otp')->group(function(){
 
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
-        Route::post('/service_fees', 'service_fees')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::post('/service_fees/{id}', 'service_fees')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/show_popup', 'show_popup')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::post('/', 'products')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/slider', 'slider')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
