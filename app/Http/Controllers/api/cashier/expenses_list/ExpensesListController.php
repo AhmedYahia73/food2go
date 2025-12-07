@@ -136,7 +136,7 @@ class ExpensesListController extends Controller
         ->where("financial_id", $request->financial_account_id)
         ->sum('amount'); 
         $total_cash = $financial_accounts - $expenses;
-        if($total_cash > $request->amount){
+        if($total_cash < $request->amount){
             return response()->json([
                 "errors" => "cash not enough"
             ], 400);
