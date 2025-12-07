@@ -161,9 +161,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(InventoryMaterialController::class)
     ->prefix('inventory/material')->group(function(){
         Route::get('/lists', 'lists');
-        Route::post('/', 'view');
-        Route::post('/modify_stocks', 'modify_stocks');
-        Route::post('/modify_actual', 'modify_actual');
+        Route::get('/history', 'inventory_history');
+        Route::post('/create_inventory', 'create_inventory');
+        Route::get('/open_inventory/{id}', 'open_inventory');
+        Route::post('/modify_materials/{id}', 'modify_materials');
+        Route::get('/inability_list/{id}', 'inability_list');
+        Route::get('/wested', 'wested');
     });
     
     Route::controller(InventoryProductController::class)

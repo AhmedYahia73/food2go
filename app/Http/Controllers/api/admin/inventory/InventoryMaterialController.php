@@ -300,122 +300,122 @@ class InventoryMaterialController extends Controller
         ]);
     }
 
-    public function modify_stocks(Request $request){
-        $validator = Validator::make($request->all(), [
-            'stocks' => 'required|array',
-            'stocks.*.id' => 'required|exists:material_stocks,id',
-            'stocks.*.quantity' => 'required|numeric',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
+    // public function modify_stocks(Request $request){
+    //     $validator = Validator::make($request->all(), [
+    //         'stocks' => 'required|array',
+    //         'stocks.*.id' => 'required|exists:material_stocks,id',
+    //         'stocks.*.quantity' => 'required|numeric',
+    //     ]);
+    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
+    //         return response()->json([
+    //             'errors' => $validator->errors(),
+    //         ],400);
+    //     }
 
-        $inventory = $this->inventory
-        ->create([
-            "admin_id" => $request->user()->id,
-        ]);
-        foreach ($request->stocks as $item) {
-            $cost = 0;
-            $stock = $this->stocks
-            ->where("id", $item['id'])
-            ->first();
-            $stock_quintity = $stock->quintity;
-            $last_purchase_amount = 0;
-            $purchase = $this->purchase
-            ->where('store_id', $stock->store_id)
-            ->where('material_id', $stock->material_id)
-            ->orderByDesc("id")
-            ->get();
-            $purchase_arr = [];
-            $total_quantity = $item['quantity'] - $stock_quintity;
-            foreach ($purchase as $element) {
-                $last_purchase_amount = $element->quintity;
-                $purchase_arr[] = $element;
-                if($element->quintity >= $stock_quintity){
-                    break;
-                }
-                $stock_quintity -= $element->quintity;
-            } 
-            foreach ($purchase_arr as $key => $element) {
-                $cost_item = $element->total_coast / $element->quintity;
-                if($key == 0 && count($purchase_arr) > 1){
-                    $cost += $cost_item * $last_purchase_amount;
-                }
-				elseif(count($purchase_arr) == $key + 1){ 
-                    $cost += $cost_item * $total_quantity;
-				}
-                else{
-                    $cost += $cost_item * $element->quintity; 
-                }
-				$total_quantity -= $element->quintity;
-            } 
-            $this->materials_history
-            ->create([
-                'material_id' => $stock->material_id,
-                'cost' => $cost,
-                'quantity_from' => $stock->quantity,
-                'quantity_to' => $item['quantity'],
-                'inability' => $item['quantity'] - $stock->quantity,
-                'inventory_id' => $inventory->id,
-            ]);
-            $stock->update([
-                "quantity" => $item['quantity'],
-                "actual_quantity" => $item['quantity'],
-            ]);
-        }
+    //     $inventory = $this->inventory
+    //     ->create([
+    //         "admin_id" => $request->user()->id,
+    //     ]);
+    //     foreach ($request->stocks as $item) {
+    //         $cost = 0;
+    //         $stock = $this->stocks
+    //         ->where("id", $item['id'])
+    //         ->first();
+    //         $stock_quintity = $stock->quintity;
+    //         $last_purchase_amount = 0;
+    //         $purchase = $this->purchase
+    //         ->where('store_id', $stock->store_id)
+    //         ->where('material_id', $stock->material_id)
+    //         ->orderByDesc("id")
+    //         ->get();
+    //         $purchase_arr = [];
+    //         $total_quantity = $item['quantity'] - $stock_quintity;
+    //         foreach ($purchase as $element) {
+    //             $last_purchase_amount = $element->quintity;
+    //             $purchase_arr[] = $element;
+    //             if($element->quintity >= $stock_quintity){
+    //                 break;
+    //             }
+    //             $stock_quintity -= $element->quintity;
+    //         } 
+    //         foreach ($purchase_arr as $key => $element) {
+    //             $cost_item = $element->total_coast / $element->quintity;
+    //             if($key == 0 && count($purchase_arr) > 1){
+    //                 $cost += $cost_item * $last_purchase_amount;
+    //             }
+	// 			elseif(count($purchase_arr) == $key + 1){ 
+    //                 $cost += $cost_item * $total_quantity;
+	// 			}
+    //             else{
+    //                 $cost += $cost_item * $element->quintity; 
+    //             }
+	// 			$total_quantity -= $element->quintity;
+    //         } 
+    //         $this->materials_history
+    //         ->create([
+    //             'material_id' => $stock->material_id,
+    //             'cost' => $cost,
+    //             'quantity_from' => $stock->quantity,
+    //             'quantity_to' => $item['quantity'],
+    //             'inability' => $item['quantity'] - $stock->quantity,
+    //             'inventory_id' => $inventory->id,
+    //         ]);
+    //         $stock->update([
+    //             "quantity" => $item['quantity'],
+    //             "actual_quantity" => $item['quantity'],
+    //         ]);
+    //     }
 
-        return response()->json([
-            "success" => "You update stoks success"
-        ]);
-    }
+    //     return response()->json([
+    //         "success" => "You update stoks success"
+    //     ]);
+    // }
 
-    public function modify_actual(Request $request){
-        $validator = Validator::make($request->all(), [
-            'stocks' => 'required|array',
-            'stocks.*.id' => 'required|exists:material_stocks,id',
-            'stocks.*.actual_quantity' => 'required|numeric',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
+    // public function modify_actual(Request $request){
+    //     $validator = Validator::make($request->all(), [
+    //         'stocks' => 'required|array',
+    //         'stocks.*.id' => 'required|exists:material_stocks,id',
+    //         'stocks.*.actual_quantity' => 'required|numeric',
+    //     ]);
+    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
+    //         return response()->json([
+    //             'errors' => $validator->errors(),
+    //         ],400);
+    //     }
 
-        foreach ($request->stocks as $item) {
-            $this->stocks
-            ->where("id", $item['id'])
-            ->update([
-                "actual_quantity" => $item['actual_quantity'],
-            ]);
-        }
+    //     foreach ($request->stocks as $item) {
+    //         $this->stocks
+    //         ->where("id", $item['id'])
+    //         ->update([
+    //             "actual_quantity" => $item['actual_quantity'],
+    //         ]);
+    //     }
 
-        return response()->json([
-            "success" => "You update actual quantity success"
-        ]);
-    }
+    //     return response()->json([
+    //         "success" => "You update actual quantity success"
+    //     ]);
+    // }
 
-    public function history(Request $request){
-        $material_inventory = $this->inventory
-        ->whereHas("materials")
-        ->with("admin")
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "date" => $item->created_at->format("Y-m-d"),
-                "time" => $item->created_at->format("H:i"),
-                "admin" => $item?->admin?->name,
-            ];
-        });
+    // public function history(Request $request){
+    //     $material_inventory = $this->inventory
+    //     ->whereHas("materials")
+    //     ->with("admin")
+    //     ->get()
+    //     ->map(function($item){
+    //         return [
+    //             "id" => $item->id,
+    //             "date" => $item->created_at->format("Y-m-d"),
+    //             "time" => $item->created_at->format("H:i"),
+    //             "admin" => $item?->admin?->name,
+    //         ];
+    //     });
 
-        return response()->json([
-            "material_inventory" => $material_inventory
-        ]);
-    }
+    //     return response()->json([
+    //         "material_inventory" => $material_inventory
+    //     ]);
+    // }
 
-    public function history_details(Request $request){
+    // public function history_details(Request $request){
 
-    }
+    // }
 }
