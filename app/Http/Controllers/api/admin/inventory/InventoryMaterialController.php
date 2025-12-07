@@ -232,23 +232,22 @@ class InventoryMaterialController extends Controller
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
-            $arr_items[] = InventoryMaterialHistory::
+            $one_item = InventoryMaterialHistory::
             where("inventory_id", $id)
             ->where("material_id", $item['id'])
-            ->get()
-            ->map(function($item){
-                return [
-                    "id" => $item->id,
-                    "quantity" => $item->quantity,
-                    "actual_quantity" => $item->actual_quantity,
-                    "inability" => $item->inability,
-                    "cost" => $item->cost,
-                    "date" => $item->created_at,
-                    "date" => $item->created_at,
-                    "category" => $item?->category?->name,
-                    "material" => $item?->material?->name,
-                ];
-            }); 
+            ->first();
+            $arr_items[] = 
+             [
+                "id" => $one_item->id,
+                "quantity" => $one_item->quantity,
+                "actual_quantity" => $one_item->actual_quantity,
+                "inability" => $one_item->inability,
+                "cost" => $one_item->cost,
+                "date" => $one_item->created_at,
+                "date" => $one_item->created_at,
+                "category" => $one_item?->category?->name,
+                "material" => $one_item?->material?->name,
+            ];
         }
 
         return response()->json([

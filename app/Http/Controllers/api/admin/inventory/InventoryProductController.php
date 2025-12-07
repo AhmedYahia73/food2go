@@ -244,23 +244,22 @@ class InventoryProductController extends Controller
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
-            $arr_items = InventoryProductHistory::
+            $one_item = InventoryProductHistory::
             where("inventory_id", $id)
             ->where("product_id", $item['id'])
-            ->get()
-            ->map(function($item){
-                return [
-                    "id" => $item->id,
-                    "quantity" => $item->quantity,
-                    "actual_quantity" => $item->actual_quantity,
-                    "inability" => $item->inability,
-                    "cost" => $item->cost,
-                    "date" => $item->created_at,
-                    "date" => $item->created_at,
-                    "category" => $item?->category?->name,
-                    "product" => $item?->product?->name,
-                ];
-            }); 
+            ->orderByDesc("id")
+            ->first();
+            $arr_items[] = [
+                "id" => $one_item->id,
+                "quantity" => $one_item->quantity,
+                "actual_quantity" => $one_item->actual_quantity,
+                "inability" => $one_item->inability,
+                "cost" => $one_item->cost,
+                "date" => $one_item->created_at,
+                "date" => $one_item->created_at,
+                "category" => $one_item?->category?->name,
+                "product" => $one_item?->product?->name,
+            ];
         }
 
         return response()->json([
