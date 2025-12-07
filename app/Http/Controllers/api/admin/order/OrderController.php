@@ -67,7 +67,7 @@ class OrderController extends Controller
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
             ,'order_status', 'order_type',
             'delivery_id', 'address_id', 'source',
-            'payment_method_id', 'rate',
+            'payment_method_id', 'rate', 'void_reason', 'void_id',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('is_void', 1)  
             ->orderByDesc('id')
