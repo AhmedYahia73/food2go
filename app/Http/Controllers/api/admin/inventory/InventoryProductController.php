@@ -208,7 +208,7 @@ class InventoryProductController extends Controller
             $stock_quintity = $stock->quantity ?? 0;
             $last_purchase_amount = 0;
             $purchase = $this->purchase
-            ->where('store_id', $stock->store_id)
+            ->where('store_id', $stock?->store_id)
             ->where('product_id', $item['id'])
             ->orderByDesc("id")
             ->get();
