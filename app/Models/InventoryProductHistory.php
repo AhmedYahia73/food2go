@@ -20,7 +20,7 @@ class InventoryProductHistory extends Model
         return $this->belongsTo(PurchaseCategory::class, "category_id");
     }
 
-    public function material(){
-        return $this->belongsTo(Material::class, "material_id");
+    public function product(){
+        return $this->belongsTo(PurchaseProduct::class, "product_id");
     }
 }

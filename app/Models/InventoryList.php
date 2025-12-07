@@ -17,4 +17,12 @@ class InventoryList extends Model
     public function store(){
         return $this->belongsTo(PurchaseStore::class, "store_id");
     }
+
+    public function products(){
+        return $this->hasMany(InventoryProductHistory::class, "inventory_id");
+    }
+
+    public function materials(){
+        return $this->hasMany(InventoryMaterialHistory::class, "inventory_id");
+    }
 }
