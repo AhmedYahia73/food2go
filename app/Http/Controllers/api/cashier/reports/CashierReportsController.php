@@ -913,15 +913,17 @@ class CashierReportsController extends Controller
             $financial_accounts = $financial_accounts->values();
             
             $expenses = $this->expenses
-            ->selectRaw("financial_account_id, SUM(amount) AS total")
+            ->selectRaw("financial_account_id, category_id, SUM(amount) AS total")
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
-            ->with("financial_account")
+            ->with("financial_account", "category")
             ->groupBy("financial_account_id")
+            ->groupBy("category_id")
             ->get()
             ->map(function($item){
                 return [
                     "financial_account" => $item?->financial_account?->name,
+                    "category" => $item?->category?->name,
                     "total" => $item->total,
                 ];
             });
