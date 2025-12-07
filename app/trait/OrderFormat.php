@@ -311,7 +311,7 @@ trait OrderFormat
             "rejected_reason" => $order->rejected_reason,
             "transaction_id" => $order->transaction_id,
             "customer_cancel_reason" => $order->customer_cancel_reason,
-            "cancel_reason" => $order->cancel_reason,
+            "admin_cancel_reason" => $order->admin_cancel_reason,
             "source" => $order->source,
             "order_date" => $order->created_at->format('Y-m-d'),
             "order_time" => $order->created_at->format('h:i A'),

@@ -40,12 +40,37 @@ class InventoryProductController extends Controller
             "categories" => $categories,
         ]);
     }
+ 
+    public function current_inventory_history(Request $request){
+        $inventory_list = $this->inventory_list
+        ->orderByDesc("id")
+        ->whereHas("products")
+        ->where("status", "current")
+        ->with("store")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "has_shortage" => ($item?->products?->actual_quantity ?? 0) != ($item?->products?->quantity ?? 0) ? true : false,
+                "store" => $item?->store?->name,
+                "product_num" => $item->product_num,
+                "total_quantity" => $item->total_quantity,
+                "cost" => $item->cost,
+                "date" => $item->created_at,
+                "status" => $item->status,
+            ];
+        });
 
+        return response()->json([
+            "inventory_list" => $inventory_list, 
+        ]);
+    } 
 
     public function inventory_history(Request $request){
         $inventory_list = $this->inventory_list
         ->orderByDesc("id")
         ->whereHas("products")
+        ->where("status", "final")
         ->with("store")
         ->get()
         ->map(function($item){

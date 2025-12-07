@@ -64,6 +64,31 @@ class InventoryMaterialController extends Controller
         ]);
     } 
 
+    public function current_inventory_history(Request $request){
+        $inventory_list = $this->inventory_list
+        ->orderByDesc("id")
+        ->with("store", "materials")
+        ->whereHas("materials")
+        ->where("status", "current")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "has_shortage" => ($item?->materials?->actual_quantity ?? 0) != ($item?->materials?->quantity ?? 0) ? true : false,
+                "store" => $item?->store?->name,
+                "product_num" => $item->product_num,
+                "total_quantity" => $item->total_quantity,
+                "cost" => $item->cost,
+                "date" => $item->created_at,
+                "status" => $item->status,
+            ];
+        });
+
+        return response()->json([
+            "inventory_list" => $inventory_list, 
+        ]);
+    } 
+
     public function create_inventory(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => 'required|exists:purchase_stores,id',
@@ -157,11 +182,6 @@ class InventoryMaterialController extends Controller
             ],400);
         }
  
-        InventoryList::
-        where("id", $id)
-        ->update([
-            "status" => "final"
-        ]);
         foreach ($request->materials as $item) {
             $cost = 0;
             $stock = $this->stocks
