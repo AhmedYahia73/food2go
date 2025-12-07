@@ -108,6 +108,7 @@ class InventoryMaterialController extends Controller
             $stock = $this->stocks
             ->where("id", $item['id'])
             ->first();
+            $stock_quintity = $stock->quintity;
             $last_purchase_amount = 0;
             $purchase = $this->purchase
             ->where('store_id', $stock->store_id)
@@ -115,14 +116,14 @@ class InventoryMaterialController extends Controller
             ->orderByDesc("id")
             ->get();
             $purchase_arr = [];
-            $total_quantity = $item['quantity'] - $stock->quantity;
+            $total_quantity = $item['quantity'] - $stock_quintity;
             foreach ($purchase as $element) {
                 $last_purchase_amount = $element->quintity;
                 $purchase_arr[] = $element;
-                if($element->quintity >= $stock->quantity){
+                if($element->quintity >= $stock_quintity){
                     break;
                 }
-                $stock -= $element->quintity;
+                $stock_quintity -= $element->quintity;
             } 
             foreach ($purchase_arr as $key => $element) {
                 $cost_item = $element->total_coast / $element->quintity;
