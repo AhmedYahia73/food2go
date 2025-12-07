@@ -119,7 +119,7 @@ class PurchaseProductController extends Controller
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:purchase_categories,id'],
-            'min_stock' => ['required', 'numeric'],
+            'min_stock' => ['sometimes', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -142,7 +142,7 @@ class PurchaseProductController extends Controller
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:purchase_categories,id'],
-            'min_stock' => ['required', 'numeric'],
+            'min_stock' => ['sometimes', 'numeric'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
