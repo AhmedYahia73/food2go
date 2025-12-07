@@ -88,14 +88,12 @@ class InventoryMaterialController extends Controller
         if($request->materials && count($request->materials) > 0){
             $materials = $request->materials;
             $materials = Material::
-            select("id", "name")
-            ->whereIn("id", $materials)
+            whereIn("id", $materials)
             ->get();
         }
         elseif($request->category_materials && count($request->category_materials) > 0){
             $materials = Material::
-            select("id", "name")
-            ->whereIn("category_id", $request->category_materials)
+            whereIn("category_id", $request->category_materials)
             ->get();
         }
         foreach ($materials as $item) {
