@@ -10,7 +10,8 @@ class InventoryMaterialHistory extends Model
         'category_id',
         'material_id',
         'inventory_id',
-        'quantity', 
+        'quantity',
+        "actual_quantity",
         'inability',
         'cost',
     ];

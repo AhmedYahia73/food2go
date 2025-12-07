@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer("product_num")->default(0);
             $table->integer("total_quantity")->default(0);
             $table->float("cost")->default(0); 
-            $table->emum("status", ["current", "final"])->default("current"); 
+            $table->enum("status", ["current", "final", "adjusted"])->default("current"); 
             $table->timestamps();
         });
         

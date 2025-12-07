@@ -9,17 +9,17 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\MaterialStock;
 use App\Models\PurchaseStore;
 use App\Models\Material;
-use App\Models\MaterialCategory;
-use App\Models\InventoryHistory;
+use App\Models\MaterialCategory; 
 use App\Models\InventoryMaterialHistory;
 use App\Models\Purchase;
 use App\Models\InventoryList;
+use App\Models\PurchaseWasted;
 
 class InventoryMaterialController extends Controller
 {
     public function __construct(private PurchaseStore $stores,
     private MaterialStock $stocks, private Material $materials,
-    private MaterialCategory $categories, private InventoryHistory $inventory,
+    private MaterialCategory $categories,
     private InventoryMaterialHistory $materials_history,
     private Purchase $purchase, private InventoryList $inventory_list){}
 
@@ -111,6 +111,7 @@ class InventoryMaterialController extends Controller
                 'material_id' => $item->id,
                 'inventory_id' => $inventory->id,
                 'quantity' => $stock_quintity, 
+                'actual_quantity' => $stock_quintity, 
                 'inability' => 0,
                 'cost' => 0,
             ]);
@@ -142,6 +143,160 @@ class InventoryMaterialController extends Controller
 
         return response()->json([
             "materials" => $materials
+        ]);
+    }
+
+    public function modify_materials(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'materials' => 'required|array',
+            'materials.*.id' => 'required|exists:materials,id',
+            'materials.*.quantity' => 'required|numeric',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+ 
+        InventoryList::
+        where("id", $id)
+        ->update([
+            "status" => "final"
+        ]);
+        foreach ($request->materials as $item) {
+            $cost = 0;
+            $stock = $this->stocks
+            ->where("material_id", $item['id'])
+            ->first();
+            $stock_quintity = $stock->quintity ?? 0;
+            $last_purchase_amount = 0;
+            $purchase = $this->purchase
+            ->where('store_id', $stock->store_id)
+            ->where('material_id', $item['id'])
+            ->orderByDesc("id")
+            ->get();
+            $purchase_arr = [];
+            $total_quantity = $stock_quintity - $item['quantity'];
+            foreach ($purchase as $element) {
+                $last_purchase_amount = $element->quintity;
+                $purchase_arr[] = $element;
+                if($element->quintity >= $stock_quintity){
+                    break;
+                }
+                $stock_quintity -= $element->quintity;
+            } 
+            foreach ($purchase_arr as $key => $element) {
+                $cost_item = $element->total_coast / $element->quintity;
+                if($key == 0 && count($purchase_arr) > 1){
+                    $cost += $cost_item * $last_purchase_amount;
+                }
+				elseif(count($purchase_arr) == $key + 1){ 
+                    $cost += $cost_item * $total_quantity;
+				}
+                else{
+                    $cost += $cost_item * $element->quintity; 
+                }
+				$total_quantity -= $element->quintity;
+            } 
+            InventoryMaterialHistory::
+            where("inventory_id", $id)
+            ->where("material_id", $item['id'])
+            ->update([
+                'quantity' => $item['quantity'],
+                'cost' => $cost,
+                'inability' => $total_quantity,
+            ]); 
+        }
+
+        return response()->json([
+            "success" => "You update stoks success"
+        ]);
+    }
+
+    public function inability_list(Request $request, $id){
+        $inability = InventoryMaterialHistory::
+        where("inventory_id", $id)
+        ->whereColumn('actual_quantity', '>', 'quantity')
+        ->with("category", "material")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "category" => $item?->category?->name,
+                "material" => $item?->material?->name,
+                "quantity" => $item->quantity,
+                "actual_quantity" => $item->actual_quantity,
+                "inability" => $item->inability,
+                "cost" => $item->cost,
+            ];
+        });
+
+        return response()->json([
+            "shourtage_list" => $inability
+        ]);
+    }
+
+    public function wested(Request $request){
+        $validator = Validator::make($request->all(), [
+            'reason' => ["required"],
+            'inabilities' => ['required', "array"],
+            "inabilities.*" => ['required', "exists:inventory_material_histories,id"], 
+            'store_id' => ['required', 'exists:purchase_stores,id'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        if(empty($request->material_id) && empty($request->product_id)){
+            return response()->json([
+                "errors" => "You must enter material_id or product_id"
+            ], 400);
+        }
+ 
+        foreach ($request->inabilities as $item) {
+            $inventory_material = InventoryMaterialHistory::
+            where("id", $item)
+            ->first();
+            $wested = $inventory_material->inability; 
+            $inventory_material->update([
+                "actual_quantity" => $inventory_material->quantity
+            ]);
+        
+            $material_stock = $this->material_stock
+            ->where('material_id', $item)
+            ->where('store_id', $request->store_id)
+            ->first();
+            $westedRequest['status'] = 'approve';
+            $wested = PurchaseWasted::
+            create([ 
+                'store_id' => $request->store_id, 
+                'quantity' => $wested,
+                'status' => "approve",
+                'material_id' => $inventory_material->material_id,
+                'category_material_id' => $inventory_material->category_id,
+                'reason' => $request->reason,
+            ]);
+            
+            if(empty($material_stock)){
+                $this->material_stock
+                ->create([
+                    'category_id' => $inventory_material->category_id,
+                    'material_id' => $inventory_material->material_id,
+                    'store_id' => $request->store_id,
+                    'quantity' => $inventory_material->quantity,
+                    'actual_quantity' => $inventory_material->quantity,
+                ]);
+            }
+            else{
+                $material_stock->quantity = $inventory_material->quantity;
+                $material_stock->actual_quantity = $inventory_material->quantity;
+                $material_stock->save();
+            } 
+        }
+
+        return response()->json([
+            'success' => 'You add data success'
         ]);
     }
 

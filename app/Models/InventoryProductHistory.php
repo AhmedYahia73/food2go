@@ -11,7 +11,7 @@ class InventoryProductHistory extends Model
         'product_id',
         'inventory_id',
         'quantity',
-        'acual_quantity',
+        'actual_quantity',
         'inability',
         'cost',
     ];
