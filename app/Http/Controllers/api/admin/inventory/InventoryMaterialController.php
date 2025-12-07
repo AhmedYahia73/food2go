@@ -102,7 +102,7 @@ class InventoryMaterialController extends Controller
             $stock = $this->stocks
             ->where("material_id", $item->id)
             ->first();
-            $stock_quintity = $stock?->quintity ?? 0;
+            $stock_quintity = $stock?->quantity ?? 0;
             $all_quantity += $stock_quintity;
             
             $material_inventory = InventoryMaterialHistory::
@@ -168,7 +168,7 @@ class InventoryMaterialController extends Controller
             $stock = $this->stocks
             ->where("material_id", $item['id'])
             ->first();
-            $stock_quintity = $stock->quintity ?? 0;
+            $stock_quintity = $stock->quantity ?? 0;
             $last_purchase_amount = 0;
             $purchase = $this->purchase
             ->where('store_id', $stock->store_id)
