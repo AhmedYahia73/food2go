@@ -56,7 +56,7 @@ class InventoryProductController extends Controller
     public function current_inventory_history(Request $request){
         $inventory_list = $this->inventory_list
         ->orderByDesc("id")
-        ->whereHas("products")
+        ->where("type", "product")
         ->where("status", "current")
         ->with("store")
         ->get()
@@ -83,7 +83,7 @@ class InventoryProductController extends Controller
     public function inventory_history(Request $request){
         $inventory_list = $this->inventory_list
         ->orderByDesc("id")
-        ->whereHas("products")
+        ->where("type", "product")
         ->where("status", "final")
         ->with("store")
         ->get()
@@ -122,6 +122,7 @@ class InventoryProductController extends Controller
         $inventory = InventoryList::
         create([
             "store_id" => $request->store_id,
+            "type" => 'product',
         ]);
         $all_quantity = 0;
         $items_count = 0;

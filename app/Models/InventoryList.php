@@ -12,6 +12,7 @@ class InventoryList extends Model
         'total_quantity',
         'cost',
         'status',
+        "type",
     ];
 
     public function store(){

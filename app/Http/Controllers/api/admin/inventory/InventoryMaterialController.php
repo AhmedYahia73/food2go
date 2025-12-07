@@ -46,7 +46,7 @@ class InventoryMaterialController extends Controller
         ->orderByDesc("id")
         ->with("store")
         ->where("status", "final")
-        ->whereHas("materials")
+        ->where("type", "material")
         ->get()
         ->map(function($item){
             return [
@@ -69,7 +69,7 @@ class InventoryMaterialController extends Controller
         $inventory_list = $this->inventory_list
         ->orderByDesc("id")
         ->with("store", "materials")
-        ->whereHas("materials")
+        ->where("type", "material")
         ->where("status", "current")
         ->get()
         ->map(function($item){
@@ -110,6 +110,7 @@ class InventoryMaterialController extends Controller
         $inventory = InventoryList::
         create([
             "store_id" => $request->store_id,
+            "type" => 'material',
         ]);
         $all_quantity = 0;
         $items_count = 0;
@@ -416,7 +417,7 @@ class InventoryMaterialController extends Controller
 
     // public function history(Request $request){
     //     $material_inventory = $this->inventory
-    //     ->whereHas("materials")
+    //     ->where("type", "material")
     //     ->with("admin")
     //     ->get()
     //     ->map(function($item){
