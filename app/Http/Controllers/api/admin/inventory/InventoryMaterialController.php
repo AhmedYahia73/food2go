@@ -238,15 +238,15 @@ class InventoryMaterialController extends Controller
             ->first();
             $arr_items[] = 
              [
-                "id" => $one_item->id,
-                "quantity" => $one_item->quantity,
-                "actual_quantity" => $one_item->actual_quantity,
-                "inability" => $one_item->inability,
-                "cost" => $one_item->cost,
-                "date" => $one_item->created_at,
-                "date" => $one_item->created_at,
-                "category" => $one_item?->category?->name,
-                "material" => $one_item?->material?->name,
+                "id" => $one_item?->id ?? null,
+                "quantity" => $one_item?->quantity ?? null,
+                "actual_quantity" => $one_item?->actual_quantity ?? null,
+                "inability" => $one_item?->inability ?? null,
+                "cost" => $one_item?->cost ?? null,
+                "date" => $one_item?->created_at ?? null,
+                "date" => $one_item?->created_at ?? null,
+                "category" => $one_item?->category?->name ?? null,
+                "material" => $one_item?->material?->name ?? null,
             ];
         }
 
