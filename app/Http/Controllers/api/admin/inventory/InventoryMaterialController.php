@@ -248,12 +248,7 @@ class InventoryMaterialController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
-        if(empty($request->material_id) && empty($request->product_id)){
-            return response()->json([
-                "errors" => "You must enter material_id or product_id"
-            ], 400);
-        }
+        } 
  
         foreach ($request->inabilities as $item) {
             $inventory_material = InventoryMaterialHistory::
