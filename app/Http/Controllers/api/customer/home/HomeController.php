@@ -24,7 +24,8 @@ use App\Models\MainData;
 use App\Models\MenueImage;
 use App\Models\Policy;
 use App\Models\SmsBalance;
-use App\Models\PaymentMethod; 
+use App\Models\PaymentMethod;
+use App\Models\ServiceFees;
 use App\Models\Addon;
 use App\Models\Popup;
 
@@ -38,6 +39,31 @@ class HomeController extends Controller
     private MenueImage $menue_image, private SmsBalance $sms_balance,
     private Addon $addons, private PaymentMethod $payment_method,
     private Popup $popup){}
+
+    public function service_fees(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'source' => 'required|in:web,app',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $service_fees = ServiceFees::
+        whereHas("branches", function($query) use($id){
+            $query->where("branches.id", $id);
+        })
+        ->where("module", "online")
+        ->where(function($query) use($request){
+            $query->where('online_type', 'all')
+            ->orWhere("online_type", $request->source);
+        })
+        ->first();
+
+        return response()->json([
+            "service_fees" => $service_fees,
+        ]);
+    }
 
     public function show_popup(Request $request){
         $locale = $request->locale ?? "en";
