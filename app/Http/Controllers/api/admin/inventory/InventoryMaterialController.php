@@ -120,7 +120,7 @@ class InventoryMaterialController extends Controller
         $inventory->save();
 
         return response()->json([
-            "stocks" => $stock,
+            "stocks" => $stock ?? [],
             "inventory" => $inventory,
         ]);
     }
