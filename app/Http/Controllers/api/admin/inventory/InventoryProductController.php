@@ -12,13 +12,14 @@ use App\Models\PurchaseProduct;
 use App\Models\PurchaseCategory;
 use App\Models\InventoryHistory;
 use App\Models\InventoryProductHistory;
+use App\Models\Purchase;
 
 class InventoryProductController extends Controller
 {
     public function __construct(private PurchaseStore $stores,
     private PurchaseStock $stocks, private PurchaseProduct $products,
     private PurchaseCategory $categories, private InventoryHistory $inventory,
-    private InventoryProductHistory $product_history){}
+    private InventoryProductHistory $product_history, private Purchase $purchase){}
 
     public function lists(Request $request){
         $stores = $this->stores

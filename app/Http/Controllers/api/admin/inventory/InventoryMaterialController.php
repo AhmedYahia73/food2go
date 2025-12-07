@@ -12,13 +12,15 @@ use App\Models\Material;
 use App\Models\MaterialCategory;
 use App\Models\InventoryHistory;
 use App\Models\InventoryMaterialHistory;
+use App\Models\Purchase;
 
 class InventoryMaterialController extends Controller
 {
     public function __construct(private PurchaseStore $stores,
     private MaterialStock $stocks, private Material $materials,
     private MaterialCategory $categories, private InventoryHistory $inventory,
-    private InventoryMaterialHistory $materials_history){}
+    private InventoryMaterialHistory $materials_history,
+    private Purchase $purchase){}
 
     public function lists(Request $request){
         $stores = $this->stores
