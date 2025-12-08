@@ -65,8 +65,8 @@ class OrderController extends Controller
         if ($request->user()->role == "admin") {
             $orders = $this->orders
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-            ,'order_status', 'order_type',
-            'delivery_id', 'address_id', 'source',
+            ,'order_status', 'order_type', 'user_id', 'address_id',
+            'delivery_id', 'address_id', 'source', 'delivery_id',
             'payment_method_id', 'rate', 'void_reason', 'void_id',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('is_void', 1)  
