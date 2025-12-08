@@ -110,8 +110,6 @@ class ExpensesListController extends Controller
         $expenseRequest['cahier_man_id'] = $request->user()->id;
         $expenseRequest['cashier_id'] = $request->user()->cashier_id;
         $expenseRequest['branch_id'] = $request->user()->branch_id;
-        $this->expenses
-        ->create($expenseRequest);
         // ___________________________________
     
         $orders = Order::
@@ -141,15 +139,10 @@ class ExpensesListController extends Controller
                 "errors" => "cash not enough"
             ], 400);
         }
+        $this->expenses
+        ->create($expenseRequest);
         //_____________________________________
-        $financial = FinantiolAcounting::
-        where("id", $request->financial_account_id)
-        ->first();
-        if($financial && $financial->balance < $request->amount){
-            return response()->json([
-                "errors" => "Balance not enough"
-            ], 400);
-        }
+       
         if($financial){
             $financial->balance -= $request->amount;
             $financial->save();

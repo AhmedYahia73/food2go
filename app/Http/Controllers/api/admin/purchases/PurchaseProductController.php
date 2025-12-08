@@ -65,7 +65,8 @@ class PurchaseProductController extends Controller
 
         $purchase = Purchase::
         where("store_id", $request->store_id)
-        ->orderByDesc('id');
+        ->orderByDesc('id')
+        ->get();
         $stocks = $this->stock
         ->where("store_id", $request->store_id)
         ->get();
@@ -78,7 +79,7 @@ class PurchaseProductController extends Controller
             $quantity_stock = $stock;
             $purchase = $purchase
             ->where("product_id", $item->id)
-            ->get();
+            ->values();
             $cost = 0;
             $count = 0;
             foreach ($purchase as $element) {

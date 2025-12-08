@@ -855,6 +855,7 @@ class ReportController extends Controller
         $start_balance = FinantiolAcounting::
         where("id", $request->financial_id)
         ->first()?->start_balance;
+        $expenses = $expenses->get();
         $financial_accounts = OrderFinancial::
         selectRaw("financial_id, SUM(amount) as total_amount")
         ->whereIn("order_id", $orders)
