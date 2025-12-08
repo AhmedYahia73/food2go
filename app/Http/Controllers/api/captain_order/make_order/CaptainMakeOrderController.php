@@ -32,6 +32,7 @@ use App\Models\OrderCart;
 use App\Models\Zone;
 use App\Models\CheckoutRequest;
 use App\Models\FinantiolAcounting;
+use App\Models\CashierMan;
 use App\Models\Discount;
 use App\Models\Kitchen;
 
@@ -52,7 +53,7 @@ class CaptainMakeOrderController extends Controller
     private OrderCart $order_cart, private Zone $zone,
     private FinantiolAcounting $financial_account, private Discount $discount,
     private KitchenOrder $kitchen_order, private CheckoutRequest $checkout_request_query,
-    private Kitchen $kitchen){}
+    private Kitchen $kitchen, private CashierMan $cashier_man){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
