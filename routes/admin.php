@@ -565,7 +565,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/order_details', 'order_details')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/lists', 'lists')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::post('/log', 'order_log')->middleware('can:log_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
-        Route::post('/transfer_branch/{id}', 'transfer_branch')->middleware('can:transfer_branch')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::post('/transfer_branch/{id}', 'transfer_branch')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/count', 'count_orders')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::post('/data', 'orders_data')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::post('/notification', 'notification')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
