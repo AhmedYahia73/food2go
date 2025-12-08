@@ -18,6 +18,6 @@ class Material extends Model
     ];
 
     public function category(){
-        return $this->belongsTo(PurchaseCategory::class, 'category_id');
+        return $this->belongsTo(MaterialCategory::class, 'category_id');
     }
 }
