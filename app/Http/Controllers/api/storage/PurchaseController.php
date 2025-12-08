@@ -32,7 +32,7 @@ class PurchaseController extends Controller
         ->get()
         ->map(function($item){
             return [
-                'purchase_id' => $item->id,
+                'id' => $item->id,
                 'total_coast' => $item->total_coast,
                 'quintity' => $item->quintity,
                 'date' => $item->date,
