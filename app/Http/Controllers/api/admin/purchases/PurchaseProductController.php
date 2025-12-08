@@ -68,7 +68,7 @@ class PurchaseProductController extends Controller
         ->orderByDesc('id');
         $stocks = $this->stock
         ->where("store_id", $request->store_id)
-        -get();
+        ->get();
         $product = $this->product 
         ->get()
         ->map(function($item) use($stocks, $purchase){
