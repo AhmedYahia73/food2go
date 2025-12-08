@@ -123,7 +123,7 @@ class ManufacturingController extends Controller
 			elseif($item['weight'] == 0){
             	continue;
 			}
-            $stock = $stock->quintity ?? 0;
+            $stock = $stock->quantity ?? 0;
             $last_purchase_amount = 0;
             $purchase = $this->purchase
             ->where('store_id', $request->store_id)
@@ -137,14 +137,14 @@ class ManufacturingController extends Controller
             foreach ($purchase as $element) { 
                 if($stock > 0){
                     $count_item++;
-                    $cost_item += $element->total_coast / $element->quintity;
+                    $cost_item += $element->total_coast / ($element->quintity == 0 ? 1 : $element->quintity);
                 }
                 else{
                     break;
                 }
                 $stock -= $element->quintity;
             } 
-            $cost += $cost_item / ($count_item == 0 ? 1 : $count_item);
+            $cost += $cost_item * $item['weight'] / ($count_item == 0 ? 1 : $count_item);
         }
         // manufactring history
         $maufaturing = $this->maufaturing
