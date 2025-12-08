@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\MaterialCategory;
 use App\Models\MaterialStock;
 use App\Models\Material;
+use App\Models\Purchase;
 
 class MaterialController extends Controller
 {
