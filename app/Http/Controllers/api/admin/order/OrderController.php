@@ -1298,129 +1298,129 @@ class OrderController extends Controller
             'locale' => $locale
         ]);
         
-        $order = $this->orders
-        ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
-        'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
-        'admin_cancel_reason', 'sechedule_slot_id')
-        ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
-        'branch:id,name', 'delivery', 'payment_method:id,name,logo',
-         'address.zone', 'admin:id,name,email,phone,image', 
-        'schedule'])
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->find($id);
-        $order->makeHidden('order_details_data');
-        $order_details = collect($order->order_details);
-        foreach ($order_details as $item) {
-            foreach ($item->product as $element) {
-                $total = collect($item->variations)->pluck('options')->flatten(1)
-                ->where('product_id', $element->product->id)->sum('price');
-                $element->product->price += $total;
-            }
-        }
-        $order->order_details = $order_details;
-        try {
-            $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
-        } 
-        catch (\Throwable $th) {
-            $order->user = collect([]);
-            $order->user->count_orders = 0;
-        }
-        if (!empty($order->branch)) {
-            $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
-        }
-        if (!empty($order->delivery)) {
-            $order->delivery->count_orders = $this->orders
-            ->where('delivery_id', $order->delivery_id)
-            ->count();
-        }
-        $deliveries = $this->deliveries
-        ->select('id', 'f_name', 'l_name')
-        ->get();
-        $order_status = ['pending', 'processing', 'out_for_delivery',
-        'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
-        'faild_to_deliver', 'refund'];
-        $preparing_time = $order->branch->food_preparion_time ?? '00:30';
-        // if (empty($preparing_time)) {
-        $time_parts = explode(':', $preparing_time);
+        // $order = $this->orders
+        // ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
+        // 'order_status', 'service_fees', 'order_type', 'payment_status', 'total_tax', 'total_discount',
+        // 'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
+        // 'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
+        // 'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
+        // 'admin_cancel_reason', 'sechedule_slot_id')
+        // ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
+        // 'branch:id,name', 'delivery', 'payment_method:id,name,logo',
+        //  'address.zone', 'admin:id,name,email,phone,image', 
+        // 'schedule'])
+        // ->where(function($query) {
+        //     $query->where('status', 1)
+        //     ->orWhereNull('status');
+        // })
+        // ->find($id);
+        // $order->makeHidden('order_details_data');
+        // $order_details = collect($order->order_details);
+        // foreach ($order_details as $item) {
+        //     foreach ($item->product as $element) {
+        //         $total = collect($item->variations)->pluck('options')->flatten(1)
+        //         ->where('product_id', $element->product->id)->sum('price');
+        //         $element->product->price += $total;
+        //     }
+        // }
+        // $order->order_details = $order_details;
+        // try {
+        //     $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
+        // } 
+        // catch (\Throwable $th) {
+        //     $order->user = collect([]);
+        //     $order->user->count_orders = 0;
+        // }
+        // if (!empty($order->branch)) {
+        //     $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
+        // }
+        // if (!empty($order->delivery)) {
+        //     $order->delivery->count_orders = $this->orders
+        //     ->where('delivery_id', $order->delivery_id)
+        //     ->count();
+        // }
+        // $deliveries = $this->deliveries
+        // ->select('id', 'f_name', 'l_name')
+        // ->get();
+        // $order_status = ['pending', 'processing', 'out_for_delivery',
+        // 'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
+        // 'faild_to_deliver', 'refund'];
+        // $preparing_time = $order->branch->food_preparion_time ?? '00:30';
+        // // if (empty($preparing_time)) {
+        // $time_parts = explode(':', $preparing_time);
 
-        // _________________________________________
+        // // _________________________________________
         
-        $delivery_time = $this->settings
-        ->where('name', 'delivery_time')
-        ->orderByDesc('id')
-        ->first();
-        if (empty($delivery_time)) {
-            $delivery_time = $this->settings
-            ->create([
-                'name' => 'delivery_time',
-                'setting' => '00:30:00',
-            ]);
-        }
-        $time_to_add = $delivery_time->setting;
-        list($order_hours, $order_minutes, $order_seconds) = explode(':', $time_to_add);
-        // Get hours, minutes, and seconds
-        $hours = $time_parts[0];
-        $minutes = $time_parts[1]; 
-        $order_seconds = 0;
-        $hours = (int)$hours;
-        $minutes = (int)$minutes;
-        
-        if($order->order_type == 'delivery'){
-            // Ensure that $hours, $minutes, and $seconds are integers
-            $hours = (int)$hours + (int)$order_hours;
-            $minutes = (int)$minutes + (int)$order_minutes;
-            $order_seconds = '00';
-        }
-        $hours += intval($minutes / 60);
-        $minutes = $minutes % 60;
-        $preparing_arr = [
-            'days' => 0,
-            'hours' => $hours,
-            'minutes' => $minutes,
-            'seconds' => 0,
-        ];
-        //     $preparing_time = $this->settings
+        // $delivery_time = $this->settings
+        // ->where('name', 'delivery_time')
+        // ->orderByDesc('id')
+        // ->first();
+        // if (empty($delivery_time)) {
+        //     $delivery_time = $this->settings
         //     ->create([
-        //         'name' => 'preparing_time',
-        //         'setting' => json_encode($preparing_arr),
+        //         'name' => 'delivery_time',
+        //         'setting' => '00:30:00',
         //     ]);
         // }
-        // $preparing_time = json_decode($preparing_time->setting);
-        $log_order = $this->log_order
-        ->with(['admin:id,name'])
-        ->where('order_id', $id)
-        ->get();
-        $branches = $this->branches
-        ->select('name', 'id')
-        ->where('status', 1)
-        ->get();
-        try {
-            if($order?->user?->orders){ 
-                $order->user->makeHidden("orders");
-				$order->user;
-            } 
-			if($order?->branch){
-                unset($order->branch);
-				$order->branch;
-            }
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
+        // $time_to_add = $delivery_time->setting;
+        // list($order_hours, $order_minutes, $order_seconds) = explode(':', $time_to_add);
+        // // Get hours, minutes, and seconds
+        // $hours = $time_parts[0];
+        // $minutes = $time_parts[1]; 
+        // $order_seconds = 0;
+        // $hours = (int)$hours;
+        // $minutes = (int)$minutes;
+        
+        // if($order->order_type == 'delivery'){
+        //     // Ensure that $hours, $minutes, and $seconds are integers
+        //     $hours = (int)$hours + (int)$order_hours;
+        //     $minutes = (int)$minutes + (int)$order_minutes;
+        //     $order_seconds = '00';
+        // }
+        // $hours += intval($minutes / 60);
+        // $minutes = $minutes % 60;
+        // $preparing_arr = [
+        //     'days' => 0,
+        //     'hours' => $hours,
+        //     'minutes' => $minutes,
+        //     'seconds' => 0,
+        // ];
+        // //     $preparing_time = $this->settings
+        // //     ->create([
+        // //         'name' => 'preparing_time',
+        // //         'setting' => json_encode($preparing_arr),
+        // //     ]);
+        // // }
+        // // $preparing_time = json_decode($preparing_time->setting);
+        // $log_order = $this->log_order
+        // ->with(['admin:id,name'])
+        // ->where('order_id', $id)
+        // ->get();
+        // $branches = $this->branches
+        // ->select('name', 'id')
+        // ->where('status', 1)
+        // ->get();
+        // try {
+        //     if($order?->user?->orders){ 
+        //         $order->user->makeHidden("orders");
+		// 		$order->user;
+        //     } 
+		// 	if($order?->branch){
+        //         unset($order->branch);
+		// 		$order->branch;
+        //     }
+        // } catch (\Throwable $th) {
+        //     //throw $th;
+        // }
 
-        return response()->json([
-            'order' => $order,
-            'deliveries' => $deliveries,
-            'order_status' => $order_status,
-            'preparing_time' => $preparing_arr,
-            'log_order' => $log_order,
-            'branches' => $branches,
-        ]);
+        // return response()->json([
+        //     'order' => $order,
+        //     'deliveries' => $deliveries,
+        //     'order_status' => $order_status,
+        //     'preparing_time' => $preparing_arr,
+        //     'log_order' => $log_order,
+        //     'branches' => $branches,
+        // ]);
     }
 
     public function invoice(Request $request, $id){

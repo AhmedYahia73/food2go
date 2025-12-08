@@ -57,6 +57,27 @@ class PurchaseRecipeController extends Controller
         ]);
     }
 
+    public function purchase_item(Request $request, $id){
+        $recipe = $this->recipe
+        ->where("id", $id)
+        ->with(["product:id,name", "material:id,name", 
+        "material_category:id,name", "unit:id,name"])
+        ->first();  
+
+        return response()->json([         
+            "id" => $item->id,
+            "weight" => $item->weight,
+            "status" => $item->status,
+            "product" => $item->product ? [
+                "id" => $item->product->id,
+                "name" => $item->product->name,
+            ]: null, 
+            "material" => $item->material,
+            "material_category" => $item->material_category,
+            "unit" => $item->unit,
+        ]);
+    }
+
     public function status(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'status' => ['required', 'boolean'],

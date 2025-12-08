@@ -280,6 +280,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(PurchaseRecipeController::class)
     ->prefix('purchase_recipe')->group(function(){
+        Route::get('item/{id}', 'purchase_item')->middleware('can:view_purchase_recipe');
         Route::get('/{id}', 'view')->middleware('can:view_purchase_recipe');
         Route::put('/status/{id}', 'status')->middleware('can:status_purchase_recipe');
         Route::post('/add', 'create')->middleware('can:add_purchase_recipe');
@@ -359,7 +360,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(RecipeController::class)
     ->prefix('recipe')->group(function(){
-        Route::get('item/{id}', 'recipe_item')->middleware('can:update_recipe');
+        Route::get('item/{id}', 'recipe_item')->middleware('can:view_recipe');
         Route::get('/{id}', 'view')->middleware('can:view_recipe');
         Route::post('/add', 'create')->middleware('can:add_recipe');
         Route::post('/update/{id}', 'modify')->middleware('can:update_recipe');

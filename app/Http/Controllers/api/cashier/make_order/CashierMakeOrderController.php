@@ -148,7 +148,7 @@ class CashierMakeOrderController extends Controller
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
+        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'service_fees',
         'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number')
         ->where('cashier_man_id', $request->user()->id)
         ->orderByDesc('id')
@@ -156,7 +156,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get();
         $delivery_order = $this->order
-        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -168,7 +168,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get();
         $take_away_order = $this->order
-        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -180,7 +180,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get();
         $dine_in_order = $this->order
-        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -192,7 +192,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get();
         $car_slow_order = $this->order
-        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
@@ -210,7 +210,7 @@ class CashierMakeOrderController extends Controller
             'car_slow' => $car_slow_order,
         ];
         $orders_to_delivery = $this->order
-        ->select('id', 'date', 'user_id', 'branch_id', 'amount',
+        ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 

@@ -22,6 +22,7 @@ class Order extends Model
         'date',
         'rate',
         'comment',
+        'service_fees',
         'pos',
         'user_id',
         'branch_id',

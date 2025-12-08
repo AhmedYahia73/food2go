@@ -17,7 +17,8 @@ class MaterialController extends Controller
     private MaterialCategory $categories, private MaterialStock $stock){}
 
     public function view(Request $request){
-        $product = $this->product 
+        $product = $this->product
+        ->with("category")
         ->get()
         ->map(function($item){
             return [
