@@ -53,7 +53,8 @@ class PurchaseProductController extends Controller
         }
 
         $purchase = Purchase::
-        where("store_id", $request->store_id);
+        where("store_id", $request->store_id)
+        ->orderByDesc('id');
         $stocks = $this->stock
         ->where("store_id", $request->store_id);
         $product = $this->product 
@@ -62,6 +63,23 @@ class PurchaseProductController extends Controller
             $stock = $stocks
             ->where("product_id", $item->id)
             ->first()?->quantity ?? 0;
+            $quantity_stock = $stock;
+            $purchase = $purchase
+            ->where("product_id", $item->id)
+            ->get();
+            $cost = 0;
+            $count = 0;
+            foreach ($purchase as $element) {
+                if($quantity_stock > 0){
+                    $count++;
+                    $cost = $element->total_coast / $element->quintity;
+                }
+                else{
+                    break;
+                }
+                $quantity_stock -= $element->quintity;
+            }
+            $cost /= $count;
             return [
                 'id' => $item->id,
                 'name' => $item->name,
@@ -71,6 +89,7 @@ class PurchaseProductController extends Controller
                 'category' => $item?->category?->name,
                 'min_stock' => $item->min_stock,
                 "stock" => $stock, 
+                "cost" => $cost, 
             ];
         }); 
         $categories = $this->categories
