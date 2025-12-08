@@ -71,11 +71,10 @@ class OrderController extends Controller
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('is_void', 1)  
             ->orderByDesc('id')
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
-                $query->select('id', 'zone_id')
-                ->with('zone:id,zone');
-            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery'])
+            ->with(['user', 'branch', 'address' => function($query){
+                $query->with('zone:id,zone');
+            }, 'admin', 'payment_method',
+            'schedule', 'delivery'])
             ->get()
             ->map(function($item){
                 return [ 
