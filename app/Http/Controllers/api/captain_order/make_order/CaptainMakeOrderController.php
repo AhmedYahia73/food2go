@@ -38,6 +38,7 @@ use App\Models\Kitchen;
 use App\trait\image;
 use App\trait\PlaceOrder;
 use App\trait\PaymentPaymob;
+use App\trait\Notifications;
 
 class CaptainMakeOrderController extends Controller
 {
@@ -55,7 +56,38 @@ class CaptainMakeOrderController extends Controller
     use image;
     use PlaceOrder;
     use PaymentPaymob;
+    use Notifications;
 
+
+
+    public function notification_order(Request $request){
+        $validator = Validator::make($request->all(), [
+            'table_id' => ['required', 'exists:cafe_tables,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $cafe_table = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->with('location:id,name')
+        ->first();
+        $branch_id = $request->user()->branch_id;
+        $users_tokens = $this->cashier_man
+        ->where("branch_id", $branch_id)
+        ->pluck('fcm_token')
+        ->filter()->toArray();
+        $body = 'Table ' . $cafe_table->table_number . 
+            ' at location ' . $cafe_table?->location?->name . ' Make Order';
+  
+        $notifications = $this->sendNotificationToMany($users_tokens, $cafe_table->table_number, $body);
+     
+        return response()->json([
+            'success' => 'You send notifications success',
+            "notifications" => $notifications->count()
+        ]);
+    }
 
     public function preparation_num(Request $request){ 
         $validator = Validator::make($request->all(), [
