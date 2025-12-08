@@ -63,6 +63,11 @@ class RecipeController extends Controller
         ->with(["product:id,name", "store_category:id,name", 
         "store_product:id,name", "unit:id,name"])
         ->first();
+        if(empty($recipe)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400); 
+        }
 
         return response()->json( [         
             "id" => $recipe->id,
