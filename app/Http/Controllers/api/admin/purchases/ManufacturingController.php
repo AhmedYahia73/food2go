@@ -132,27 +132,16 @@ class ManufacturingController extends Controller
             ->get();
             $purchase_arr = [];
 			$weight = $item['weight'];
-            foreach ($purchase as $element) {
-                $last_purchase_amount = $stock;
-                $purchase_arr[] = $element;
-                if($element->quintity >= $stock){
-                    break;
+            $cost_item = 0;
+            $count_item = 0;
+            foreach ($purchase as $element) { 
+                if($stock >= 0){
+                    $count_item++;
+                    $cost_item += $element->total_coast / $element->quintity;
                 }
                 $stock -= $element->quintity;
             } 
-            foreach ($purchase_arr as $key => $element) {
-                $cost_item = $element->total_coast / $element->quintity;
-                if($key == 0 && count($purchase_arr) > 1){
-                    $cost += $cost_item * $last_purchase_amount;
-                }
-				elseif(count($purchase_arr) == $key + 1){ 
-                    $cost += $cost_item * $weight;
-				}
-                else{
-                    $cost += $cost_item * $element->quintity; 
-                }
-				$weight -= $element->quintity;
-            } 
+            $cost += $cost_item / $count_item;
         }
         // manufactring history
         $maufaturing = $this->maufaturing
