@@ -10,11 +10,22 @@ use App\Models\Purchase;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseStock;
+use App\Models\PurchaseStore;
 
 class PurchaseProductController extends Controller
 {
     public function __construct(private PurchaseProduct $product,
     private PurchaseCategory $categories, private PurchaseStock $stock){}
+
+    public function stores_list(Request $request){
+        $stores = PurchaseStore::
+        select("id", "name")
+        ->get();
+
+        return response()->json([
+            "stores" => $stores
+        ]);
+    }
 
     public function view(Request $request){
         $product = $this->product 

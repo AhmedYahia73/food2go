@@ -505,6 +505,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(PurchaseProductController::class)
     ->prefix('purchase_product')->group(function(){
         Route::get('/', 'view');
+        Route::get('/stores_list', 'stores_list');
         Route::get('/stock', 'product_stock');
         Route::get('/item/{id}', 'product_item');
         Route::put('/status/{id}', 'status');
