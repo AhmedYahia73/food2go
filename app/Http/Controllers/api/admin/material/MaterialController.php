@@ -55,7 +55,8 @@ class MaterialController extends Controller
         where("store_id", $request->store_id)
         ->orderByDesc('id');
         $stocks = $this->stock
-        ->where("store_id", $request->store_id);
+        ->where("store_id", $request->store_id)
+        ->get();
         $product = $this->product 
         ->get()
         ->map(function($item) use($stocks, $purchase){
