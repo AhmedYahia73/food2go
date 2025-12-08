@@ -20,4 +20,8 @@ class PurchaseProduct extends Model
     public function category(){
         return $this->belongsTo(PurchaseCategory::class, 'category_id');
     }
+
+    public function stock(){
+        return $this->hasOne(PurchaseStock::class, 'product_id');
+    }
 }

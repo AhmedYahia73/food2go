@@ -131,18 +131,18 @@ class InventoryProductController extends Controller
         if($request->products && count($request->products) > 0){
             $products = $request->products;
             $products = PurchaseProduct::
-            whereIn("id", $products)
+            with("stock")
+            ->whereIn("id", $products)
             ->get();
         }
         elseif($request->categories && count($request->categories) > 0){
             $products = PurchaseProduct::
-            whereIn("category_id", $request->categories)
+            with("stock")
+            ->whereIn("category_id", $request->categories)
             ->get();
         }
-        foreach ($products as $item) {
-            $stock = $this->stocks
-            ->where("product_id", $item->id)
-            ->first();
+        foreach ($products as $item) { 
+            $stock = $item?->stock;
             $stock_quintity = $stock?->quantity ?? 0;
             $all_quantity += $stock_quintity;
             
