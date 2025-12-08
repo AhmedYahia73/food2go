@@ -20,4 +20,8 @@ class Material extends Model
     public function category(){
         return $this->belongsTo(MaterialCategory::class, 'category_id');
     }
+
+    public function stock(){
+        return $this->hasOne(MaterialStock::class, 'material_id');
+    }
 }

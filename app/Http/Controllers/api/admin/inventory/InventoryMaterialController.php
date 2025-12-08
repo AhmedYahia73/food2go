@@ -120,17 +120,17 @@ class InventoryMaterialController extends Controller
             $materials = $request->materials;
             $materials = Material::
             whereIn("id", $materials)
+            ->with("stock")
             ->get();
         }
         elseif($request->category_materials && count($request->category_materials) > 0){
             $materials = Material::
             whereIn("category_id", $request->category_materials)
+            ->with("stock")
             ->get();
         }
         foreach ($materials as $item) {
-            $stock = $this->stocks
-            ->where("material_id", $item->id)
-            ->first();
+            $stock = $item?->stock;
             $stock_quintity = $stock?->quantity ?? 0;
             $all_quantity += $stock_quintity;
             
