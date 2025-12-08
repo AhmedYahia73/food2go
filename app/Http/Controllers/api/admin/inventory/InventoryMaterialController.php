@@ -130,7 +130,7 @@ class InventoryMaterialController extends Controller
             ->get();
         }
         elseif($request->type == "full"){
-            $products = Material::
+            $materials = Material::
             with("stock") 
             ->get();
         }

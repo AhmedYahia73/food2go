@@ -44,6 +44,7 @@ trait PlaceOrder
         'sechedule_slot_id',
         'source',
         'captain_id',
+        "service_fees",
     ];
     protected $orderRequest = ['user_id', 'cart'];
     protected $priceCycle;
