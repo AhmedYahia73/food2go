@@ -71,7 +71,7 @@ class PurchaseProductController extends Controller
         $product = $this->product 
         ->get()
         ->map(function($item) use($stocks, $purchase){
-            $stock = clone $stocks
+            $stock = $stocks
             ->where("product_id", $item->id)
             ->first()?->quantity ?? 0;
             $quantity_stock = $stock;
