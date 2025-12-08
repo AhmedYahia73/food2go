@@ -57,6 +57,27 @@ class RecipeController extends Controller
         ]);
     }
 
+    public function recipe_item(Request $request, $id){
+        $recipe = $this->recipe
+        ->where("id", $id)
+        ->with(["product:id,name", "store_category:id,name", 
+        "store_product:id,name", "unit:id,name"])
+        ->first();
+
+        return response()->json( [         
+            "id" => $recipe->id,
+            "weight" => $recipe->weight,
+            "status" => $recipe->status,
+            "product" => $recipe->product ? [
+                "id" => $recipe->product->id,
+                "name" => $recipe->product->name,
+            ]: null, 
+            "store_category" => $recipe->store_category,
+            "store_product" => $recipe->store_product,
+            "unit" => $recipe->unit,
+        ]);
+    }
+
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
             'product_id' => ['required', 'exists:products,id'],
