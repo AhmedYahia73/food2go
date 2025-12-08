@@ -1161,8 +1161,23 @@ class CaptainMakeOrderController extends Controller
             'table_id' => $request->table_id
         ]);
 
+        $cafe_table = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->with('location:id,name')
+        ->first();
+        $branch_id = $request->user()->branch_id;
+        $users_tokens = $this->cashier_man
+        ->where("branch_id", $branch_id)
+        ->pluck('fcm_token')
+        ->filter()->toArray();
+        $body = 'Table ' . $cafe_table->table_number . 
+            ' at location ' . $cafe_table?->location?->name . ' Call Payment';
+  
+        $notifications = $this->sendNotificationToMany($users_tokens, $cafe_table->table_number, $body);
+      
         return response()->json([
-            'success' => 'You send request success'
+            'success' => 'You send request success',
+            "notifications" => $notifications->count(),
         ]);
     }
   
