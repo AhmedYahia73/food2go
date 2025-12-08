@@ -36,6 +36,12 @@ trait Recipe
                     })
                     ->with("unit")
                     ->first();
+                    if(empty($stock)){ 
+                        return [
+                            "success" => false,
+                            "msg" => "Recipe " . $element?->store_product?->name . 'not enough',
+                        ];
+                    }
                     
                     if($product->weight_status){
                         if($product->unit_id == $stock->unit_id){
