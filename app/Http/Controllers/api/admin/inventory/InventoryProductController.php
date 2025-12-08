@@ -67,6 +67,7 @@ class InventoryProductController extends Controller
                     return $item['quantity'] != $item['actual_quantity'];
                 })->count() > 0  ? true : false,
                 "store" => $item?->store?->name,
+                "store_id" => $item?->store?->id,
                 "product_num" => $item->product_num,
                 "total_quantity" => $item->total_quantity,
                 "cost" => $item->cost,
