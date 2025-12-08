@@ -135,9 +135,12 @@ class ManufacturingController extends Controller
             $cost_item = 0;
             $count_item = 0;
             foreach ($purchase as $element) { 
-                if($stock >= 0){
+                if($stock > 0){
                     $count_item++;
                     $cost_item += $element->total_coast / $element->quintity;
+                }
+                else{
+                    break;
                 }
                 $stock -= $element->quintity;
             } 
