@@ -79,7 +79,7 @@ class PurchaseProductController extends Controller
                 }
                 $quantity_stock -= $element->quintity;
             }
-            $cost /= $count;
+            $cost /= ($count == 0 ? 1 : $count);
             return [
                 'id' => $item->id,
                 'name' => $item->name,
