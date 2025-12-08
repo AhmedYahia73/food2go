@@ -132,8 +132,8 @@ class PurchaseController extends Controller
             'receipt_link' => $purchases->receipt_link,
             'category_id' => $purchases->category_id,
             'product_id' => $purchases->product_id,
-            'category_material_id' => $item->category_material_id,
-            'material_id' => $item->material_id,
+            'category_material_id' => $purchases->category_material_id,
+            'material_id' => $purchases->material_id,
             'admin_id' => $purchases->admin_id,
             'store_id' => $purchases->store_id,
             'category' => $purchases?->category?->name,
@@ -142,7 +142,7 @@ class PurchaseController extends Controller
             'unit' => $purchases?->unit?->name,
             'admin' => $purchases?->admin?->name,
             'store' => $purchases?->store?->name,
-            'type' => $item->type,
+            'type' => $purchases->type,
         ]);
     }
 
