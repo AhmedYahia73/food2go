@@ -209,7 +209,7 @@ class InventoryMaterialController extends Controller
             $total_quantity = $stock_quintity - $item['quantity'];
             $item_quantity = $stock_quintity - $item['quantity'];
             foreach ($purchase as $element) {
-                $last_purchase_amount = $element->quintity;
+                $last_purchase_amount = $stock_quintity;
                 $purchase_arr[] = $element;
                 if($element->quintity >= $stock_quintity){
                     break;

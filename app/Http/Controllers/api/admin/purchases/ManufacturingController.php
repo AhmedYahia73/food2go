@@ -133,7 +133,7 @@ class ManufacturingController extends Controller
             $purchase_arr = [];
 			$weight = $item['weight'];
             foreach ($purchase as $element) {
-                $last_purchase_amount = $element->quintity;
+                $last_purchase_amount = $stock;
                 $purchase_arr[] = $element;
                 if($element->quintity >= $stock){
                     break;
