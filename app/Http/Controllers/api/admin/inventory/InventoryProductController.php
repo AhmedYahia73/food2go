@@ -211,7 +211,6 @@ class InventoryProductController extends Controller
             ->where("product_id", $item['id'])
             ->first();
             $stock_quintity = $stock->quantity ?? 0;
-            $last_purchase_amount = 0;
             $purchase = $this->purchase
             ->where('store_id', $InventoryList?->store_id)
             ->where('product_id', $item['id'])
@@ -220,27 +219,21 @@ class InventoryProductController extends Controller
             $purchase_arr = [];
             $total_quantity = $stock_quintity - $item['quantity'];
             $item_quantity = $stock_quintity - $item['quantity'];
-            foreach ($purchase as $element) {
-                $last_purchase_amount = $stock_quintity;
-                $purchase_arr[] = $element;
-                if($element->quintity >= $stock_quintity){
+       
+            //_________________________________________
+            $cost_item = 0;
+            $count_item = 0;
+            foreach ($purchase as $element) { 
+                if($stock_quintity > 0){
+                    $count_item++;
+                    $cost_item += $element->total_coast / ($element->quintity == 0 ? 1 : $element->quintity);
+                }
+                else{
                     break;
                 }
                 $stock_quintity -= $element->quintity;
             } 
-            foreach ($purchase_arr as $key => $element) {
-                $cost_item = $element->total_coast / $element->quintity;
-                if($key == 0 && count($purchase_arr) > 1){
-                    $cost += $cost_item * $last_purchase_amount;
-                }
-				elseif(count($purchase_arr) == $key + 1){ 
-                    $cost += $cost_item * $total_quantity;
-				}
-                else{
-                    $cost += $cost_item * $element->quintity; 
-                }
-				$total_quantity -= $element->quintity;
-            } 
+            $cost += $cost_item * $item['quantity'] / ($count_item == 0 ? 1 : $count_item);
             InventoryProductHistory::
             where("inventory_id", $id)
             ->where("product_id", $item['id'])
