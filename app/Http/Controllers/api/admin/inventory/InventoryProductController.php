@@ -141,6 +141,11 @@ class InventoryProductController extends Controller
             ->whereIn("category_id", $request->categories)
             ->get();
         }
+        elseif($request->type == "full"){
+            $products = PurchaseProduct::
+            with("stock") 
+            ->get();
+        }
         foreach ($products as $item) { 
             $stock = $item?->stock;
             $stock_quintity = $stock?->quantity ?? 0;

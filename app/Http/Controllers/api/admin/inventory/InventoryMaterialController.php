@@ -129,6 +129,11 @@ class InventoryMaterialController extends Controller
             ->with("stock")
             ->get();
         }
+        elseif($request->type == "full"){
+            $products = Material::
+            with("stock") 
+            ->get();
+        }
         foreach ($materials as $item) {
             $stock = $item?->stock;
             $stock_quintity = $stock?->quantity ?? 0;
