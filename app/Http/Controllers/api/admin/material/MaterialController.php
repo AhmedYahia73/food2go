@@ -58,7 +58,7 @@ class MaterialController extends Controller
         ->where("store_id", $request->store_id);
         $product = $this->product 
         ->get()
-        ->map(function($item) use($stocks) use($purchase){
+        ->map(function($item) use($stocks, $purchase){
             $stock = $stocks
             ->where("material_id", $item->id)
             ->first()?->quantity ?? 0;
