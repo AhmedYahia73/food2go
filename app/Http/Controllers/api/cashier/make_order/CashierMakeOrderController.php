@@ -861,7 +861,7 @@ class CashierMakeOrderController extends Controller
             $items = collect($value['order']);
             $peice_items = $items
             ->where("weight", 0)->count() > 0 ? $items
-            ->where("weight", 0)[0]['count'] : 0; 
+            ->where("weight", 0)['count'] : 0; 
             $weight_items = $items
             ->where("weight", 1)->count() > 0 ? 1 : 0;
              
