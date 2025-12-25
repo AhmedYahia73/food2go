@@ -467,6 +467,84 @@ class OrderController extends Controller
         ]);
     }
 
+    public function notifications(Request $request){
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+ 
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
+        $start = $start->subDay();
+
+        // $order_recentage = $this->settings
+        // ->where("name", "order_precentage")
+        // ->first()?->setting ?? 100; 
+        $order_status = [
+            "pending",
+            "confirmed",
+            "processing",
+            "out_for_delivery",
+            "delivered",
+            "returned",
+            "faild_to_deliver",
+            "canceled",
+            "scheduled",
+            "refund",
+        ];
+        $orders = $this->orders
+        ->select('id')
+        ->where('pos', 0)
+        ->where('branch_id', $request->user()->branch_id)
+        ->whereBetween('created_at', [$start, $end])
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where("is_read", 0)
+        ->pluck("id");
+        // ->filter(function ($order, $index) use($order_recentage) {
+        //     $positionInBlock = $index % 10;
+        //     return $positionInBlock < ($order_recentage / 10);
+        // }); 
+
+        return response()->json([
+            "orders" => $orders, 
+            "orders_count" => $orders->count(), 
+        ]);
+    }
+
+    public function order_read(Request $request, $id){
+        $this->orders 
+        ->where("id", $id)
+        ->update([
+            "is_read" => 1
+        ]);
+
+        return response()->json([
+            "success" => "You read notifiction",
+        ]);
+    }
+
     public function order_count(Request $request){
         
         $time_sittings = $this->TimeSittings 

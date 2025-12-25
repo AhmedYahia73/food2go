@@ -76,6 +76,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(OrderController::class)
     ->prefix("orders")->group(function(){
         Route::get('/branches', 'branches');
+        Route::get('/notifications', 'notifications');
+        Route::get('/order_read/{id}', 'order_read');
         Route::get('/void_order_list', 'void_order_list');
         Route::get('/void_lists', 'void_lists');
         Route::post('/void_order', 'void_order');
