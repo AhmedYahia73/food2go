@@ -22,7 +22,9 @@ class GroupProduct extends Model
     protected $appends = ['icon_link'];
 
     public function getIconLinkAttribute(){
-        return url('storage/' . $this->attributes['icon']);
+        if(isset($this->attributes['icon'])){
+            return url('storage/' . $this->attributes['icon']);
+        }
     }
 
     public function setModuleAttribute($value)

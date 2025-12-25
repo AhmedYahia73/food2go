@@ -16,7 +16,7 @@ class GroupProductController extends Controller
 
     public function view(Request $request){
         $group_products = $this->group_product
-        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status", "due")
+        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status", "due", "icon")
         ->get();
         $modules = [
             "take_away",
@@ -32,7 +32,7 @@ class GroupProductController extends Controller
     
     public function group_item(Request $request, $id){
         $group_product = $this->group_product
-        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status", "due")
+        ->select("id", "name", "increase_precentage", "decrease_precentage", "module", "status", "due", "icon")
         ->where("id", $id)
         ->first();
 
