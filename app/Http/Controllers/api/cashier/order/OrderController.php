@@ -406,8 +406,7 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         }) 
-        ->orderByDesc('id')
-        ->where('order_status', 'pending')
+        ->orderByDesc('id') 
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
             $query->select('id', 'zone_id')
             ->with('zone:id,zone');
@@ -648,39 +647,22 @@ class OrderController extends Controller
     }
 
     public function order_item(Request $request, $id){
+        // https://bcknd.food2go.online/admin/order/order/{id}
+        $locale = $request->locale ?? "en";
         $order = $this->orders
-        ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
-        'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
-        'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
-        'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
-        'admin_cancel_reason', 'sechedule_slot_id', 'pos')
-        ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
-        'branch:id,name', 'delivery', 'payment_method:id,name,logo',
-         'address.zone', 'admin:id,name,email,phone,image', 
-        'schedule', 'financial_accountigs:id,name'])
+        ->with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
+        'branch', 'delivery', 
+        'payment_method:id,name,logo', 'schedule'])
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
         })
         ->find($id);
-        if(!$order){
+        if(empty($order)){
             return response()->json([
-                "errors" => "id wrong"
+                "errors" => "id is wrong"
             ], 400);
-        }
-        $order->type = $order->pos ? 'Point of Sale' : 'Online Order';
-        $order->makeHidden('order_details_data');
-        $order_details = collect($order->order_details);
-        foreach ($order_details as $item) {
-        
-            foreach ($item->product as $element) {
-                $total = collect($item->variations)->pluck('options')->flatten(1)
-                ->where('product_id', $element->product->id)->sum('price');
-                $element->product->price += $total;
-            }
-        }
-        $order->order_details = $order_details;
+        }  
         try {
             $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
         } 
@@ -691,14 +673,21 @@ class OrderController extends Controller
         if (!empty($order->branch)) {
             $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
         }
-        if (!empty($order->delivery_id)) {
+        if (!empty($order->delivery)) {
             $order->delivery->count_orders = $this->orders
             ->where('delivery_id', $order->delivery_id)
             ->count();
         }
         $deliveries = $this->deliveries
         ->select('id', 'f_name', 'l_name')
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "f_name" => $item->f_name,
+                "l_name" => $item->l_name,
+            ];
+        });
         $order_status = ['pending', 'processing', 'out_for_delivery',
         'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
         'faild_to_deliver', 'refund'];
@@ -749,29 +738,41 @@ class OrderController extends Controller
         //     ]);
         // }
         // $preparing_time = json_decode($preparing_time->setting);
+        $log_order = $this->log_order
+        ->with(['admin:id,name'])
+        ->where('order_id', $id)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "from_status" => $item->from_status,
+                "to_status" => $item->to_status,
+                "admin" => [
+                    "id" => $item?->admin?->id,
+                    "name" => $item?->admin?->name,
+                ]
+            ];
+        });;
         $branches = $this->branches
         ->select('name', 'id')
         ->where('status', 1)
-        ->get();
-        try {
-            if($order?->user?->orders){ 
-                $order->user->makeHidden("orders");
-				$order->user;
-            } 
-			if($order?->branch){
-                unset($order->branch);
-				$order->branch;
-            }
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        }); 
+        $order = $this->order_item_format($order, $id, $locale);
 
         return response()->json([
             'order' => $order,
             'deliveries' => $deliveries,
             'order_status' => $order_status,
             'preparing_time' => $preparing_arr,
+            'log_order' => $log_order,
             'branches' => $branches,
+            'locale' => $locale
         ]);
     }
 
