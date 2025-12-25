@@ -193,7 +193,7 @@ trait OrderFormat
         
         return $order_arr;
     }
-
+    
     // ___________________________________________________________
 
     public function order_item_format($order, $id, $locale){
