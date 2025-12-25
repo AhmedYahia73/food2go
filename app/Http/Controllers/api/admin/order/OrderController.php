@@ -1254,28 +1254,6 @@ class OrderController extends Controller
             'minutes' => $minutes,
             'seconds' => 0,
         ];
-        //     $preparing_time = $this->settings
-        //     ->create([
-        //         'name' => 'preparing_time',
-        //         'setting' => json_encode($preparing_arr),
-        //     ]);
-        // }
-        // $preparing_time = json_decode($preparing_time->setting);
-        $log_order = $this->log_order
-        ->with(['admin:id,name'])
-        ->where('order_id', $id)
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "from_status" => $item->from_status,
-                "to_status" => $item->to_status,
-                "admin" => [
-                    "id" => $item?->admin?->id,
-                    "name" => $item?->admin?->name,
-                ]
-            ];
-        });;
         $branches = $this->branches
         ->select('name', 'id')
         ->where('status', 1)
@@ -1293,7 +1271,6 @@ class OrderController extends Controller
             'deliveries' => $deliveries,
             'order_status' => $order_status,
             'preparing_time' => $preparing_arr,
-            'log_order' => $log_order,
             'branches' => $branches,
             'locale' => $locale
         ]);
