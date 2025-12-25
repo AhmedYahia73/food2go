@@ -375,12 +375,12 @@ class SettingController extends Controller
                 'setting' => 1
             ]);
         }
-        $re_notification = $this->settings
+        $r_online_noti = $this->settings
         ->where('name', 'r_online_noti')
         ->orderByDesc('id')
         ->first(); 
-        if (empty($re_notification)) { 
-            $re_notification = $this->settings
+        if (empty($r_online_noti)) { 
+            $r_online_noti = $this->settings
             ->create([
                 'name' => 'r_online_noti',
                 'setting' => 0
@@ -389,7 +389,7 @@ class SettingController extends Controller
 
         return response()->json([
             'repeated_notification' => $re_notification->setting,
-            'r_online_noti' => $re_notification->setting,
+            'r_online_noti' => $r_online_noti->setting,
         ]);
     }
 

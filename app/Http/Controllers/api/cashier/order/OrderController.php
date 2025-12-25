@@ -405,8 +405,8 @@ class OrderController extends Controller
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
-        }) 
-        ->orderByDesc('id') 
+        })
+        ->orderByDesc('id')
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
             $query->select('id', 'zone_id')
             ->with('zone:id,zone');
