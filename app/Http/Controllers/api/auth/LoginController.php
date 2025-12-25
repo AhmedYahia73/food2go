@@ -248,12 +248,24 @@ class LoginController extends Controller
                     ['token' => $request->fcm_token]
                 ); 
             }
+            // ____________________________ 
+            $order_lang = $this->settings
+            ->where("name", "order_lang")
+            ->first();
+            if (empty($order_lang)) {
+                $order_lang = $this->settings
+                ->create([
+                    'name' => 'order_lang',
+                    'setting' => 'ar',
+                ]);
+            }
 
             return response()->json([
                 'admin' => $user,
                 'token' => $user->token,
                 'role' => $role,
                 "r_online_noti" => $r_online_noti,
+                "order_lang" => $order_lang->setting,
             ], 200);
         }
         else { 
