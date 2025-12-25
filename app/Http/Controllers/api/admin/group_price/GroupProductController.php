@@ -101,7 +101,7 @@ class GroupProductController extends Controller
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
             'due' => ['required', 'boolean'],
-            'icon' => ['required'], 
+            'icon' => ['sometimes'], 
             'status' => ['required', 'boolean'], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
