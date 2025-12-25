@@ -521,6 +521,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where("is_read", 0)
+        ->orderByDesc("id")
         ->pluck("id");
         // ->filter(function ($order, $index) use($order_recentage) {
         //     $positionInBlock = $index % 10;
