@@ -13,7 +13,7 @@ use App\Models\GroupExtraPrice;
 use Illuminate\Http\Request;
 
 trait OrderFormat
-{ 
+{
     public function order_details_format($id, $locale){
         $order = Order::
         with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
@@ -103,6 +103,7 @@ trait OrderFormat
                 $product = [
                     'id' => $item['product'][0]['product']['id'],
                     'name' => $name,
+                    'image_link' => $item['product'][0]['product']['image_link'],
                     'price' => $item['product'][0]['product']['price'],
                     'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
                     'price_after_tax' => $item['product'][0]['product']['price_after_tax'],
