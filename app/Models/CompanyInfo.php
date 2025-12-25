@@ -31,6 +31,7 @@ class CompanyInfo extends Model
         'ios_switch',
         'preparation_num_status',
         'cover_app_image',
+        "show_map",
     ];
     protected $appends = ['logo_link', 'fav_icon_link', 'cover_app_image_link'];
 
