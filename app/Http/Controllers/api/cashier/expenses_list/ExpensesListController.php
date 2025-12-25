@@ -27,11 +27,16 @@ class ExpensesListController extends Controller
     public function view(Request $request){ 
 
         $locale = $request->locale ?? "en";
+        $shift = $this->cashier_shift
+        ->where('shift', $request->user()->shift_number)
+        ->where('cashier_man_id', $request->user()->id)
+        ->first();
         $expenses = $this->expenses
         ->with(["admin:id,name", "cashier:id,name", 
         "financial_account:id,name", "category:id,name"])
         ->where("cahier_man_id", $request->user()->id)
-        ->where('shift', $request->user()->shift_number)
+        ->where('created_at', '>=', $shift->start_time ?? now())
+        ->where('created_at', '<=', $shift->end_time ?? now())
         ->orderByDesc("id")
         ->get()
         ->map(function($item) use($locale){
