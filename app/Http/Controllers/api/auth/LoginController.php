@@ -639,12 +639,16 @@ class LoginController extends Controller
             if($order && empty($order->rate) && !$order->is_cancel_evaluate){
                 $rate = true;
             }
+            $show_map = $this->company_info
+            ->first()
+            ?->show_map ?? 1;
 
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
                 'addresses' => $addresses,
                 'zones' => $zones,
+                'show_map' => $show_map,
                 'rate' => $rate,
                 'order_id' => $rate ? $order?->id : null,
             ], 200);
