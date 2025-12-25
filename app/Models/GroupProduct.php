@@ -16,6 +16,7 @@ class GroupProduct extends Model
         'due',
         'balance',
         'module',
+        'icon',
         'status', 
     ];
     public function setModuleAttribute($value)

@@ -5,12 +5,14 @@ namespace App\Http\Controllers\api\admin\group_price;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\trait\image;
 
 use App\Models\GroupProduct;
 
 class GroupProductController extends Controller
 {
     public function __construct(private GroupProduct $group_product){}
+    use image;
 
     public function view(Request $request){
         $group_products = $this->group_product
@@ -67,6 +69,7 @@ class GroupProductController extends Controller
             'module.*' => ['required', "in:take_away,delivery,dine_in"], 
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
+            'icon' => ['required'], 
             'due' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
         ]);
@@ -77,6 +80,11 @@ class GroupProductController extends Controller
         }
 
         $groupRequest = $validator->validated();
+        if ($request->icon) {
+            $imag_path = $this->upload($request, 'icon', 'admin/group_products/icon');
+            $groupRequest['icon'] = $imag_path;
+        }
+
         $this->group_product
         ->create($groupRequest);
 
@@ -93,6 +101,7 @@ class GroupProductController extends Controller
             'increase_precentage' => ['required', 'numeric'], 
             'decrease_precentage' => ['required', 'numeric'], 
             'due' => ['required', 'boolean'],
+            'icon' => ['required'], 
             'status' => ['required', 'boolean'], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -100,21 +109,39 @@ class GroupProductController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-
+ 
         $groupRequest = $validator->validated();
-        $this->group_product
+        $group_product = $this->group_product
         ->where("id", $id)
-        ->update($groupRequest);
+        ->first();
+        if(empty($group_product)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+        if ($request->icon) {
+            $imag_path = $this->upload($request, 'icon', 'admin/group_products/icon');
+            $groupRequest['icon'] = $imag_path;
+            $this->deleteImage($group_product->image);
+        }
+        $group_product->update($groupRequest);
 
         return response()->json([
             "success" => "You update data success"
         ]);
     }
 
-    public function delete(Request $request, $id){
-        $this->group_product
+    public function delete(Request $request, $id){ 
+        $group_product = $this->group_product
         ->where("id", $id)
-        ->delete();
+        ->first();
+        if(empty($group_product)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+        $this->deleteImage($group_product->image);
+        $group_product->delete();
 
         return response()->json([
             "success" => "You delete data success"
