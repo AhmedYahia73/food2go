@@ -648,7 +648,6 @@ class OrderController extends Controller
     }
 
     public function order_item(Request $request, $id){
-        
         // https://bcknd.food2go.online/admin/order/order/{id}
         $locale = $request->locale ?? "en";
         $order = $this->orders
