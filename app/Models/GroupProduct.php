@@ -19,6 +19,12 @@ class GroupProduct extends Model
         'icon',
         'status', 
     ];
+    protected $appends = ['icon_link'];
+
+    public function getIconLinkAttribute(){
+        return url('storage/' . $this->attributes['icon']);
+    }
+
     public function setModuleAttribute($value)
     {
         if (is_array($value)) {
