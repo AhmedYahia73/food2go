@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\cashier\expenses_list;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 use App\Models\Expense; 
   
@@ -13,19 +14,51 @@ use App\Models\FinantiolAcounting;
 use App\Models\OrderFinancial;
 use App\Models\Order;  
 use App\Models\CashierShift;
+use App\Models\TimeSittings;
+use App\Models\Setting;
 
 class ExpensesListController extends Controller
 {
     public function __construct(private Expense $expenses, 
     private FinantiolAcounting $financial, private ExpenseCategory $category,
-    private CashierShift $cashier_shift){}
+    private CashierShift $cashier_shift,
+    private Setting $settings, private TimeSittings $TimeSittings){}
 
     public function view(Request $request){
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+ 
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
+        $start = $start->subDay();
+
         $locale = $request->locale ?? "en";
         $expenses = $this->expenses
         ->with(["admin:id,name", "cashier:id,name", 
         "financial_account:id,name", "category:id,name"])
         ->where("cahier_man_id", $request->user()->id)
+        ->whereBetween('created_at', [$start, $end])
         ->orderByDesc("id")
         ->get()
         ->map(function($item) use($locale){
