@@ -28,7 +28,7 @@ class UpdateCustomerRequest extends FormRequest
         return [
             'f_name' => ['required'],
             'l_name' => ['required'],
-            'email' => ['email', 'required', Rule::unique('users')->ignore($userId)],
+            'email' => ['email', 'sometimes', Rule::unique('users')->ignore($userId)],
             'phone' => ['required', Rule::unique('users')->ignore($userId)],
             'phone_2' => [Rule::unique('users')->ignore($userId)],
             'password' => ['sometimes'],

@@ -18,6 +18,7 @@ use App\Models\OrderDetail;
 use App\Models\TimeSittings;
 use App\Models\FinantiolAcounting;
 use App\Models\UserPaidDebt;
+use App\Models\Setting; 
 use App\Models\UserDue; 
 
 class CustomerController extends Controller
@@ -375,7 +376,24 @@ class CustomerController extends Controller
     public function create(CustomerRequest $request) {
         // https://bcknd.food2go.online/admin/customer/add
         // Keys
-        // f_name, l_name, email, phone, password, status, image, phone_2
+        // f_name, l_name, email, phone, password, status, image, phone_2    
+        $customer_login = Setting::
+        where("name", "customer_login")
+        ->first()?->setting ?? null;
+        if(empty($customer_login)){ 
+            return response()->json([
+                "errors" => "email is required"
+            ], 400); 
+        }
+        else{
+            $customer_login = json_decode($customer_login);
+            $customer_login = $customer_login->verification;
+            if($customer_login == "email"){
+                return response()->json([
+                    "errors" => "email is required"
+                ], 400);
+            }
+        }
         $data = $request->only($this->customerRequest);
         if(empty($request->max_due)){ 
             unset($data['max_due']);
@@ -409,6 +427,23 @@ class CustomerController extends Controller
         // https://bcknd.food2go.online/admin/customer/update/2
         // Keys
         // f_name, l_name, email, phone, password, status, image, phone_2
+        $customer_login = Setting::
+        where("name", "customer_login")
+        ->first()?->setting ?? null;
+        if(empty($customer_login)){ 
+            return response()->json([
+                "errors" => "email is required"
+            ], 400); 
+        }
+        else{
+            $customer_login = json_decode($customer_login);
+            $customer_login = $customer_login->verification;
+            if($customer_login == "email"){
+                return response()->json([
+                    "errors" => "email is required"
+                ], 400);
+            }
+        }
         $data = $request->only($this->customerUpdateRequest);
         $user = $this->customers
         ->where('id', $id)

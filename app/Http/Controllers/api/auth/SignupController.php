@@ -35,6 +35,23 @@ class SignupController extends Controller
         // https://bcknd.food2go.online/api/user/auth/signup
         // Keys
         // f_name, l_name, email, phone, password
+        $customer_login = Setting::
+        where("name", "customer_login")
+        ->first()?->setting ?? null;
+        if(empty($customer_login)){ 
+            return response()->json([
+                "errors" => "email is required"
+            ], 400); 
+        }
+        else{
+            $customer_login = json_decode($customer_login);
+            $customer_login = $customer_login->verification;
+            if($customer_login == "email"){
+                return response()->json([
+                    "errors" => "email is required"
+                ], 400);
+            }
+        }
         $data = $request->only($this->userRequest);
         $user = $this->user->create($data);
         $user->image = null;

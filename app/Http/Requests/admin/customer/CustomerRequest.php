@@ -26,7 +26,7 @@ class CustomerRequest extends FormRequest
         return [
             'f_name' => ['required'],
             'l_name' => ['required'],
-            'email' => ['email', 'required', 'unique:users,email'],
+            'email' => ['email', 'sometimes', 'unique:users,email'],
             'phone' => ['required', 'unique:users,phone'],
             'phone_2' => ['unique:users,phone_2'],
             'password' => ['required'],

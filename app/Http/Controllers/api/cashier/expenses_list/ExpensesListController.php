@@ -67,7 +67,7 @@ class ExpensesListController extends Controller
                 ],
             ];
         });
-
+ 
         return response()->json([
             "expenses" => $expenses, 
         ]);
