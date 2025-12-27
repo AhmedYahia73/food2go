@@ -44,6 +44,7 @@ class CashierManController extends Controller
                 'real_order' => $item->real_order,
                 'my_id' => $item->my_id,
                 'status' => $item->status,
+                'manger' => $item->manger,
                 'cashier' => $item->cashier,
                 'login' => $item->tokens()->exists(),
                 'discount_perimission' => $item->discount_perimission,

@@ -256,6 +256,13 @@ class AddressController extends Controller
         // Keys
         // zone_id, address, street, building_num, floor_num, apartment, additional_data, type, city_id
         $address_request = $request->only($this->AddressRequest);
+        $company_info = $this->company_info
+        ->first();
+        if(empty($request->map) && (empty($company_info) || $company_info->show_map)){
+            return response()->json([
+                "errors" => "map is required"
+            ], 400);
+        }
         $address = $this->address
         ->create($address_request);
         $request->user()->address()->attach($address->id);
