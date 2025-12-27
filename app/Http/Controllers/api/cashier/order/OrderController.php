@@ -892,6 +892,7 @@ class OrderController extends Controller
             'operation_status' => 'pending',
             'admin_id' => null,
             'order_status' => 'pending',
+            "transfer_from_id" => $request->user()->branch_id,
         ]);  
 
         return response()->json([

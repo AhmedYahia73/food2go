@@ -74,6 +74,7 @@ class Order extends Model
         'module_id',
         'module_order_number',
         'due_module',
+        'transfer_from_id',
         'void_id',
         'void_reason',
         "is_read",
@@ -86,6 +87,10 @@ class Order extends Model
     ];
     public function getdateAttribute(){
         return $this->created_at->format('H:i:s');
+    }
+
+    public function transfer_from(){
+        return $this->belongsTo(Branch::class, 'transfer_from_id');
     }
 
     public function group_module(){
