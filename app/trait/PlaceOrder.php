@@ -13,6 +13,7 @@ use App\Models\KItemVriation;
 use App\Models\Setting;
 use App\Models\KItemOption;
 use App\Models\Kitchen;
+use App\Models\TranslationTbl;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -728,11 +729,16 @@ trait PlaceOrder
         ];
     }
 
-    public function order_format($order, $key = 0){
+    public function order_format($order, $locale = "en"){
         $order_data = [];
         foreach ($order->cart ?? $order as $key => $item) {
             if(isset($item->product)){
                 $product = $item->product[0]->product;
+                $product->name = TranslationTbl::
+                where("locale", $locale)
+                ->where("key", $product->name)
+                ->orderByDesc("id")
+                ->first()->value ?? $product->name;
                 unset($product->addons);
                 unset($product->variations);
                 $variation = [];
@@ -740,13 +746,31 @@ trait PlaceOrder
                 // $item->addons->addon->count = $item->addons->count;
                 // $item->variations->variation->options = $item->variations->options;
                 foreach ($item->variations as $key => $element) {
-                    $element->variation->options = $element->options;
+                    $options = [];
+                    foreach ($element->options as $value) {
+                        $value->name = TranslationTbl::
+                        where("locale", $locale)
+                        ->where("key", $value->name)
+                        ->orderByDesc("id")
+                        ->first()->value ?? $value->name;
+                        $options[] = $value;
+                    }
+                    $element->variation->options = $options;
                     unset($element->options);
-                    $variation[] = $element->variation;
+                    $variation[] = TranslationTbl::
+                    where("locale", $locale)
+                    ->where("key", $element->variation)
+                    ->orderByDesc("id")
+                    ->first()->value ?? $element->variation; 
                 }
                 foreach ($item->addons as $key => $element) {
                     $element->addon->count = $element->count;
                     unset($element->count);
+                    $element->addon->name = TranslationTbl::
+                    where("locale", $locale)
+                    ->where("key", $element->name)
+                    ->orderByDesc("id")
+                    ->first()->value ?? $element->name;
                     $addons[] = $element->addon;
                 }
                 $order_data[$key] = $product;
