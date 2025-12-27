@@ -738,6 +738,11 @@ trait PlaceOrder
                 ->where("key", $product->name)
                 ->orderByDesc("id")
                 ->first()->value ?? $product->name;
+                $product->description = TranslationTbl::
+                where("locale", $locale)
+                ->where("key", $product->description)
+                ->orderByDesc("id")
+                ->first()->value ?? $product->description;
                 unset($product->addons);
                 unset($product->variations);
                 $variation = [];
