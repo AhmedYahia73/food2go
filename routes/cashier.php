@@ -16,7 +16,6 @@ use App\Http\Controllers\api\admin\offer_order\OfferOrderController;
 use App\Http\Controllers\api\cashier\profile\ProfileController; 
 use App\Http\Controllers\api\cashier\make_order\DiscountController;
 use App\Http\Controllers\api\cashier\order\OrderController;
-use App\Http\Controllers\api\cashier\order\ReciptDesignController;
 use App\Http\Controllers\api\cashier\expenses_list\ExpensesListController;
 use App\Http\Controllers\api\captain_order\make_order\CaptainMakeOrderController;
 use App\Http\Controllers\api\cashier\group_products\GroupProductController;
@@ -30,12 +29,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->group(function(){
         Route::post('/preparation_num', 'preparation_num');
     });
-
-    Route::controller(ReciptDesignController::class)
-    ->prefix("manager_order")
-    ->group(function(){
-        Route::get('/', 'shifts_today');
-    });
+ 
 
     Route::controller(CashierMakeOrderController::class)
     ->group(function(){
@@ -189,5 +183,6 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CashierReportsController::class)
     ->prefix('/reports')->group(function(){ 
         Route::post('end_shift_report', 'financial_report');
+        Route::get('/manger_report', 'shifts_today');
     }); 
 });
