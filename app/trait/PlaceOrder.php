@@ -756,11 +756,12 @@ trait PlaceOrder
                     }
                     $element->variation->options = $options;
                     unset($element->options);
-                    $variation[] = TranslationTbl::
+                    $element->variation->name = TranslationTbl::
                     where("locale", $locale)
-                    ->where("key", $element->variation)
+                    ->where("key", $element->variation->name)
                     ->orderByDesc("id")
-                    ->first()->value ?? $element->variation; 
+                    ->first()->value ?? $element->variation->name;
+                    $variation[] = $element->variation; 
                 }
                 foreach ($item->addons as $key => $element) {
                     $element->addon->count = $element->count;
