@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            //
+            $table->foreignId('transfer_from_id')->nullable()->constrained('branches')->onUpdate('cascade')->onDelete('set null');
         });
     }
 
