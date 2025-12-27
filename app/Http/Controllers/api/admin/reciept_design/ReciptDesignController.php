@@ -36,17 +36,17 @@ class ReciptDesignController extends Controller
         if(empty($reciept)){
             $this->reciept
             ->create([
-                'logo' => $request->logo ?? $reciept->logo,
-                'name' => $request->name ?? $reciept->name,
-                'address' => $request->address ?? $reciept->address,
-                'branch' => $request->branch ?? $reciept->branch,
-                'phone' => $request->phone ?? $reciept->phone,
-                'cashier_name' => $request->cashier_name ?? $reciept->cashier_name,
-                'footer' => $request->footer ?? $reciept->footer,
-                'taxes' => $request->taxes ?? $reciept->taxes,
-                'services' => $request->services ?? $reciept->services,
-                'table_num' => $request->table_num ?? $reciept->table_num,
-                'preparation_num' => $request->preparation_num ?? $reciept->preparation_num,
+                'logo' => $request->logo ?? 1,
+                'name' => $request->name ?? 1,
+                'address' => $request->address ?? 1,
+                'branch' => $request->branch ?? 1,
+                'phone' => $request->phone ?? 1,
+                'cashier_name' => $request->cashier_name ?? 1,
+                'footer' => $request->footer ?? 1,
+                'taxes' => $request->taxes ?? 1,
+                'services' => $request->services ?? 1,
+                'table_num' => $request->table_num ?? 1,
+                'preparation_num' => $request->preparation_num ?? 1,
             ]);
         }
         else{
