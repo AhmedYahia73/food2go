@@ -33,19 +33,40 @@ class ReciptDesignController extends Controller
     public function update(Request $request){
         $reciept = $this->reciept
         ->first();
+        if(empty($reciept)){
+            $this->reciept
+            ->create([
+                'logo' => $request->logo ?? $reciept->logo,
+                'name' => $request->name ?? $reciept->name,
+                'address' => $request->address ?? $reciept->address,
+                'branch' => $request->branch ?? $reciept->branch,
+                'phone' => $request->phone ?? $reciept->phone,
+                'cashier_name' => $request->cashier_name ?? $reciept->cashier_name,
+                'footer' => $request->footer ?? $reciept->footer,
+                'taxes' => $request->taxes ?? $reciept->taxes,
+                'services' => $request->services ?? $reciept->services,
+                'table_num' => $request->table_num ?? $reciept->table_num,
+                'preparation_num' => $request->preparation_num ?? $reciept->preparation_num,
+            ]);
+        }
+        else{
+            $reciept->update([
+                'logo' => $request->logo ?? $reciept->logo,
+                'name' => $request->name ?? $reciept->name,
+                'address' => $request->address ?? $reciept->address,
+                'branch' => $request->branch ?? $reciept->branch,
+                'phone' => $request->phone ?? $reciept->phone,
+                'cashier_name' => $request->cashier_name ?? $reciept->cashier_name,
+                'footer' => $request->footer ?? $reciept->footer,
+                'taxes' => $request->taxes ?? $reciept->taxes,
+                'services' => $request->services ?? $reciept->services,
+                'table_num' => $request->table_num ?? $reciept->table_num,
+                'preparation_num' => $request->preparation_num ?? $reciept->preparation_num,
+            ]);
+        }
 
-        $reciept->update([
-            'logo' => $request->logo ?? $reciept->logo,
-            'name' => $request->name ?? $reciept->name,
-            'address' => $request->address ?? $reciept->address,
-            'branch' => $request->branch ?? $reciept->branch,
-            'phone' => $request->phone ?? $reciept->phone,
-            'cashier_name' => $request->cashier_name ?? $reciept->cashier_name,
-            'footer' => $request->footer ?? $reciept->footer,
-            'taxes' => $request->taxes ?? $reciept->taxes,
-            'services' => $request->services ?? $reciept->services,
-            'table_num' => $request->table_num ?? $reciept->table_num,
-            'preparation_num' => $request->preparation_num ?? $reciept->preparation_num,
+        return response()->json([
+            "success" => "You update success"
         ]);
     }
 }
