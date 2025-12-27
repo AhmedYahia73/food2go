@@ -1373,11 +1373,13 @@ class CashierReportsController extends Controller
                     'group_modules' => $group_modules, 
                     'expenses' => $expenses, 
                     'online_order' => $online_order,
+                    'cashier_man' => $shift_item?->cashier_man ?? null,
                 ]);
             }
             elseif(auth()->user()->report == "financial"){
                 return response()->json([
                     'perimission' => true,
+                    'cashier_man' => $shift_item?->cashier_man ?? null,
                     'financial_accounts' => $financial_accounts,
                 ]);
             }
@@ -1386,6 +1388,7 @@ class CashierReportsController extends Controller
         return response()->json([
             'perimission' => false,
             'financial_accounts' => null, 
+            'cashier_man' => $shift_item?->cashier_man ?? null,
         ]);
     }
 }
