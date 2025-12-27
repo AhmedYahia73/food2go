@@ -101,7 +101,7 @@ use App\Http\Controllers\api\admin\purchases\PurchaseTransferController;
 use App\Http\Controllers\api\admin\purchases\WastedController;
 use App\Http\Controllers\api\admin\purchases\StockController;
 use App\Http\Controllers\api\admin\purchases\StoreManController;
-use App\Http\Controllers\api\admin\purchases\ReciptDesign;
+use App\Http\Controllers\api\admin\reciept_design\ReciptDesignController;
 
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
@@ -171,7 +171,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/wested', 'wested');
     });
     
-    Route::controller(ReciptDesign::class)
+    Route::controller(ReciptDesignController::class)
     ->prefix('reciept_design')->group(function(){
         Route::get('/', 'view');
         Route::put('/update', 'update'); 
