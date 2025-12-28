@@ -142,6 +142,7 @@ trait OrderFormat
             "order_date" => $order->created_at->format('Y-m-d'),
             "order_time" => $order->created_at->format('h:i A'),
             "status_payment" => $order->status_payment,
+            "service_fees" => $order->service_fees,
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch
