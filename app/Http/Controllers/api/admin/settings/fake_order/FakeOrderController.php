@@ -44,13 +44,13 @@ class FakeOrderController extends Controller
 
         $fake_order_precentage = Setting::
         where("name", "fake_order_precentage")
-        ->first()?->setting ?? null;
+        ->first();
         $fake_order_limit = Setting::
         where("name", "fake_order_limit")
-        ->first()?->setting ?? null;
+        ->first();
         $fake_order_status = Setting::
         where("name", "fake_order_status")
-        ->first()?->setting ?? null;
+        ->first();
         if(empty($fake_order_precentage)){
             $validator = Validator::make($request->all(), [
                 'fake_order_password' => 'required', 
@@ -64,7 +64,7 @@ class FakeOrderController extends Controller
         if(!empty($request->fake_order_password)){ 
             $fake_order_password = Setting::
             where("name", "fake_order_password")
-            ->first()?->setting ?? null;
+            ->first();
             if(empty($fake_order_password)){
                 Setting::create([
                     'name' => "fake_order_password",
