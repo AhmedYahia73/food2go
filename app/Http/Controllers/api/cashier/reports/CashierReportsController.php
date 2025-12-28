@@ -1460,49 +1460,49 @@ class CashierReportsController extends Controller
         ]);
     }
 
-    // public function filter_fake_order(Request $request){
-    //     $validator = Validator::make($request->all(), [
-    //         'date' => ['date'], 
-    //         'date_to' => ['date'], 
-    //     ]);
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'errors' => $validator->errors(),
-    //         ],400);
-    //     } 
+    public function filter_fake_order(Request $request){
+        $validator = Validator::make($request->all(), [
+            'date' => ['date'], 
+            'date_to' => ['date'], 
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        } 
 
-    //     $fake_order_precentage = Setting::
-    //     where("name", "fake_order_precentage")
-    //     ->first()?->setting ?? null;
-    //     $fake_order_limit = Setting::
-    //     where("name", "fake_order_limit")
-    //     ->first()?->setting ?? null; 
-    //     if ($time_sittings->count() > 0) {
-    //         $from_time = $time_sittings[0]->from;
-    //         $date_to = $request->date_to; 
-    //         $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-    //         $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-    //         $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-    //         $from = $request->date . ' ' . $from_time;
-    //         $start = Carbon::parse($from);
-    //         $end = Carbon::parse($end);
-	// 		$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
-    //         if ($start >= $end) {
-    //             $end = $end->addDay();
-    //         } 
-	// 		if($start >= now()){
-    //             $start = $start->subDay();
-	// 		}
-    //     } else {
-    //         $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-    //         $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-    //     }
+        $fake_order_precentage = Setting::
+        where("name", "fake_order_precentage")
+        ->first()?->setting ?? null;
+        $fake_order_limit = Setting::
+        where("name", "fake_order_limit")
+        ->first()?->setting ?? null; 
+        if ($time_sittings->count() > 0) {
+            $from_time = $time_sittings[0]->from;
+            $date_to = $request->date_to; 
+            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = $request->date . ' ' . $from_time;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+            if ($start >= $end) {
+                $end = $end->addDay();
+            } 
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
 
         
 
-    //     return response()->json([
-    //         "shifts" => $items,
-    //         'report_role' => auth()->user()->report,
-    //     ]);
-    // }
+        return response()->json([
+            "shifts" => $items,
+            'report_role' => auth()->user()->report,
+        ]);
+    }
 }
