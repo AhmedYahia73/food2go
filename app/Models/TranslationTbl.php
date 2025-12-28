@@ -9,7 +9,11 @@ class TranslationTbl extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['locale', 'key', 'value'];
+    protected $fillable = [
+        'locale', 
+        'key', 
+        'value'
+    ];
 
     public function translatable()
     {

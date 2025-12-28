@@ -101,6 +101,7 @@ use App\Http\Controllers\api\admin\purchases\PurchaseTransferController;
 use App\Http\Controllers\api\admin\purchases\WastedController;
 use App\Http\Controllers\api\admin\purchases\StockController;
 use App\Http\Controllers\api\admin\purchases\StoreManController;
+use App\Http\Controllers\api\admin\reciept_design\ReciptDesignController;
 
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
 
@@ -168,6 +169,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/modify_materials/{id}', 'modify_materials');
         Route::get('/inability_list/{id}', 'inability_list');
         Route::post('/wested', 'wested');
+    });
+    
+    Route::controller(ReciptDesignController::class)
+    ->prefix('reciept_design')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/update', 'update'); 
     });
     
     Route::controller(InventoryProductController::class)

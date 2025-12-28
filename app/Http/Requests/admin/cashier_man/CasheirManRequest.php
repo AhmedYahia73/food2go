@@ -36,7 +36,8 @@ class CasheirManRequest extends FormRequest
             'online_order' => ['required', 'boolean'],
             'void_order' => ['required', 'boolean'],
             'report' => ['required', 'in:unactive,financial,all'],
-            'free_discount' => ['sometimes', "boolean"]
+            'free_discount' => ['sometimes', "boolean"],
+            'manger' => ['sometimes', "boolean"],
         ];
     }
 

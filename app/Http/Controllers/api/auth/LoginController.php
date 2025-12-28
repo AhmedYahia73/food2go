@@ -30,6 +30,7 @@ use App\Models\StorageMan;
 use App\Models\FinantiolAcounting; 
 use App\Models\CompanyInfo;
 use App\Models\PreparationMan;
+use App\Models\ReceiptDesign;
 use App\Models\Order;
 
 class LoginController extends Controller
@@ -424,6 +425,21 @@ class LoginController extends Controller
         if ($validation->fails()) {
             return response()->json($validation->errors(), 422);
         }
+        $receipt_design = ReceiptDesign::
+        first();
+        $receipt_design = [
+            'logo' => $receipt_design->logo ?? 1,
+            'name' => $receipt_design->name ?? 1,
+            'address' => $receipt_design->address ?? 1,
+            'branch' => $receipt_design->branch ?? 1,
+            'phone' => $receipt_design->phone ?? 1,
+            'cashier_name' => $receipt_design->cashier_name ?? 1,
+            'footer' => $receipt_design->footer ?? 1,
+            'taxes' => $receipt_design->taxes ?? 1,
+            'services' => $receipt_design->services ?? 1,
+            'table_num' => $receipt_design->table_num ?? 1,
+            'preparation_num' => $receipt_design->preparation_num ?? 1,
+        ];
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
         ->whereHas('branch')
@@ -481,8 +497,7 @@ class LoginController extends Controller
             $resturant_name = $this->company_info
             ->first();
             $preparation_num_status = $this->company_info
-            ->first()?->preparation_num_status;
-            
+            ->first()?->preparation_num_status; 
             return response()->json([
                 'cashier' => $user,
                 'token' => $user->token,
@@ -491,6 +506,7 @@ class LoginController extends Controller
                 "resturant_name" => $resturant_name?->name,
                 "resturant_logo" => url('storage/' . $resturant_name?->logo),
                 'preparation_num_status' => $preparation_num_status,
+                "receipt_design" => $receipt_design,
             ], 200);
         }
         else {  

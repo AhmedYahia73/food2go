@@ -346,9 +346,10 @@ class POSOrderController extends Controller
         $order_cart = $this->order_cart
         ->where('table_id', $id)
         ->get();
+        $locale = $request->locale ?? "en";
         $orders = collect([]);
         foreach ($order_cart as $item) {
-            $order_item = $this->order_format($item);
+            $order_item = $this->order_format($item, $locale);
             $orders = $orders->merge($order_item);
         }
         $dine_in_status = ['watting', 'preparing', 'preparation', 'done', 'pick_up'];

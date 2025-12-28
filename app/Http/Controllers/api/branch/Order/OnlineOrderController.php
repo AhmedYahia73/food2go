@@ -35,10 +35,17 @@ class OnlineOrderController extends Controller
         }
         $orders = $this->orders
         ->where('id', $id)
-        -update([
+        ->first();
+        if(empty($orders)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+        $orders->update([
             'branch_id' => $request->branch_id,
             'operation_status' => 'pending',
             'admin_id' => null,
+            "transfer_from_id" => $orders->branch_id
         ]);
 
         return response()->json([

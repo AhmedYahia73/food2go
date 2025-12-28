@@ -37,10 +37,17 @@ class OrderController extends Controller
         if ($request->user()->role == "admin") {
             $orders = $this->orders
             ->where('id', $id)
-            ->update([
+            ->first();
+            if(empty($orders)){
+                return response()->json([
+                    "errors" => "id is wrong"
+                ], 400);
+            }
+            $orders->update([
                 'branch_id' => $request->branch_id,
                 'operation_status' => 'pending',
                 'admin_id' => null,
+                'transfer_from_id' => $orders->branch_id,
             ]);
         } else {
             $orders = $this->orders
@@ -50,6 +57,7 @@ class OrderController extends Controller
                 'branch_id' => $request->branch_id,
                 'operation_status' => 'pending',
                 'admin_id' => null,
+                'transfer_from_id' => $request->user()->id,
             ]);
         }
         
@@ -202,7 +210,7 @@ class OrderController extends Controller
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
             ,'order_status', 'order_type',
             'delivery_id', 'address_id', 'source',
-            'payment_method_id', 'rate',
+            'payment_method_id', 'rate', 'transfer_from_id',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
             ->whereBetween('created_at', [$start, $end])
@@ -215,7 +223,7 @@ class OrderController extends Controller
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
-            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+            }, 'transfer_from:id,name', 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
             'schedule:id,name', 'delivery'])
             ->get()
             ->map(function($item){
@@ -223,6 +231,7 @@ class OrderController extends Controller
                     'id' => $item->id,
                     'order_number' => $item->order_number,
                     'created_at' => $item->created_at,
+                    'transfer_from' => $item?->transfer_from?->name,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
@@ -250,7 +259,7 @@ class OrderController extends Controller
         $orders = $this->orders
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
             ,'order_status',
-            'delivery_id', 'address_id', 'source',
+            'delivery_id', 'address_id', 'source', 'transfer_from_id',
             'payment_method_id', 'order_type', 'rate',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('pos', 0)
@@ -266,7 +275,7 @@ class OrderController extends Controller
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery'])
+            'schedule:id,name', 'delivery', 'transfer_from:id,name'])
             ->get()
             ->map(function($item){
                 return [ 
@@ -278,6 +287,7 @@ class OrderController extends Controller
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
                     'order_status' => $item->order_status,
+                    'transfer_from' => $item?->transfer_from?->name,
                     'source' => $item->source,
                     'status' => $item->status,
                     'points' => $item->points, 
