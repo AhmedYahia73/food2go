@@ -24,7 +24,7 @@ class CashierReportsController extends Controller
     private Order $orders, private PaymentMethod $payment_methods
     , private TimeSittings $TimeSittings, private FinantiolAcounting $financial_account,
     private OrderFinancial $order_financial, private CashierBalance $cashier_balance,
-    private Expense $expenses){}
+    private Expense $expenses, private Setting $settings){}
     
     public function cashier_reports(Request $request){
     //     $cashier_balance = $this->cashier_balance;
@@ -1572,6 +1572,11 @@ class CashierReportsController extends Controller
         }
 
         // ___________________________________________________________
+        
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
         $orders = $this->orders
         ->where(function($query){
             $query->where('pos', 1)
@@ -1695,6 +1700,11 @@ class CashierReportsController extends Controller
         }
 
         // ___________________________________________________________
+        
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
         $orders = $this->orders
         ->where(function($query){
             $query->where('pos', 1)
