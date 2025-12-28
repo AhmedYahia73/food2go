@@ -489,6 +489,7 @@ class LoginController extends Controller
                 'start_shift' => $start_shift,
                 'financial_account' => $financial_account,
                 "resturant_name" => $resturant_name?->name,
+                "resturant_logo" => url('storage/' . $resturant_name?->logo),
                 'preparation_num_status' => $preparation_num_status,
             ], 200);
         }
