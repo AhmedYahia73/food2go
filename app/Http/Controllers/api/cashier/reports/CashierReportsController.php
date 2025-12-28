@@ -1552,11 +1552,11 @@ class CashierReportsController extends Controller
         ->get();
         if ($time_sittings->count() > 0) {
             $from_time = $time_sittings[0]->from;
-            $date_to = now(); 
+            $date_to = date("Y-m-d"); 
             $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
             $hours = $time_sittings[$time_sittings->count() - 1]->hours;
             $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = now() . ' ' . $from_time;
+            $from = date("Y-m-d") . ' ' . $from_time;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
 			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
