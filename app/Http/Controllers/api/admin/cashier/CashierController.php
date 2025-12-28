@@ -110,6 +110,7 @@ class CashierController extends Controller
             'cashier_names.*.name' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
+            "print_type" => 'required|in:usb,network',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -150,6 +151,7 @@ class CashierController extends Controller
             'cashier_names.*.tranlation_id' => 'required',
             'cashier_names.*.name' => 'required',
             'branch_id' => 'required|exists:branches,id',
+            "print_type" => 'required|in:usb,network',
             'status' => 'required|boolean',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
