@@ -773,9 +773,9 @@ trait PlaceOrder
                     unset($element->count);
                     $element->addon->name = TranslationTbl::
                     where("locale", $locale)
-                    ->where("key", $element->name)
+                    ->where("key", $element->addon->name)
                     ->orderByDesc("id")
-                    ->first()->value ?? $element->name;
+                    ->first()->value ?? $element->addon->name;
                     $addons[] = $element->addon;
                 }
                 $order_data[$key] = $product;
