@@ -1571,20 +1571,85 @@ class CashierReportsController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
 
-        $cashier_shifts = $this->cashier_shift
-        ->with('cashier_man:id,shift_number,user_name')
-        ->where('start_time', '>=', $start)
-        ->where('end_time', '<=', $end)
-        ->get();
-        $items = [];
+        $orders = $this->orders
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        })
+        ->where(function($query){
+            $query->where("take_away_status", "pick_up")
+            ->where("order_type", "take_away")
+            ->orWhere("delivery_status", "done")
+            ->where("order_type", "delivery")
+            ->orWhere("order_type", "dine_in");
 
-        foreach ($cashier_shifts as $item) {
-            $items[] = $this->shifts_cashiers($item);
-        }
+        })
+        ->whereBetween("created_at", [$start, $end]) 
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_active', 1) 
+        ->orderByDesc('id')
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+            $query->select('id', 'zone_id')
+            ->with('zone:id,zone');
+        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+        ->get()
+        ->map(function($item) use($delivery_time){
+            $order_type = "";
+            $food_preparion_time = "00:00";
+            if ($item->order_type == "dine_in") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                $order_type = "pickup";
+            }
+            elseif ($item->order_type == "take_away") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                $order_type = $item->take_away_status;
+            }
+            elseif ($item->order_type == "delivery") {
+                $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                $time2 = Carbon::parse($delivery_time);
+                $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                $result = gmdate('i:s', $totalSeconds);
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
+                $order_type = $item->delivery_status;
+            }
+            return [ 
+                'id' => $item->id,
+                'order_number' => $item->order_number,
+                'created_at' => $item->created_at,
+                'amount' => $item->amount,
+                'operation_status' => $item->operation_status,
+                'order_type' => $item->order_type,
+                'order_status' => $order_type,
+                'type' => $item->pos ? 'Point of Sale' : "Online Order",
+                'source' => $item->source,
+                'status' => $item->status,
+                'points' => $item->points, 
+                'rejected_reason' => $item->rejected_reason,
+                'transaction_id' => $item->transaction_id,
+                'food_preparion_time' => $food_preparion_time,
+                'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+                'branch' => ['name' => $item?->branch?->name, ],
+                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                'admin' => ['name' => $item?->admin?->name,],
+                'payment_method' => ['id' => $item?->payment_method?->id,
+                                    'name' => $item?->payment_method?->name],
+                'financial_accountigs' => $item->financial_accountigs,
+                'schedule' => ['name' => $item?->schedule?->name],
+                'delivery' => ['name' => $item?->delivery?->name], 
+            ];
+        });
 
         return response()->json([
-            "shifts" => $items,
-            'report_role' => auth()->user()->report,
+            "orders" => $orders, 
         ]);
     }
 
