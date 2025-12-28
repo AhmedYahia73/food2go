@@ -1571,6 +1571,7 @@ class CashierReportsController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
 
+        // ___________________________________________________________
         $orders = $this->orders
         ->where(function($query){
             $query->where('pos', 1)
