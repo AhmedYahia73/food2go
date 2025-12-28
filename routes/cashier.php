@@ -184,5 +184,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->prefix('/reports')->group(function(){ 
         Route::post('end_shift_report', 'financial_report');
         Route::post('/manger_report', 'shifts_today');
+
+        Route::post('/order_today', 'order_today');
+        Route::get('/filter_fake_order', 'filter_fake_order');
     }); 
 });
