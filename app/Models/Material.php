@@ -24,4 +24,8 @@ class Material extends Model
     public function stock(){
         return $this->hasOne(MaterialStock::class, 'material_id');
     }
+
+    public function stock_items(){
+        return $this->hasMany(MaterialStock::class, 'material_id');
+    }
 }
