@@ -10,10 +10,12 @@ use App\trait\image;
 use App\Models\Bundle;
 use App\Models\Discount;
 use App\Models\Tax;
+use App\Models\Translation;
 
 class BundleController extends Controller
 {
-    public function __construct(private Bundle $bundles){}
+    public function __construct(private Bundle $bundles,
+    private Translation $translations,){}
     use image;
 
     public function view(Request $request){
@@ -65,6 +67,34 @@ class BundleController extends Controller
         ->with("products", 'discount', 'tax')
         ->where("id", $id)
         ->first();
+        
+        $translations = $this->translations
+        ->where('status', 1)
+        ->get();
+        $bundle_names = [];
+        foreach ($translations as $item) {
+            $name = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->where('key', $bundle->name)
+            ->first();
+           $bundle_names[] = [
+               'tranlation_id' => $item->id,
+               'tranlation_name' => $item->name,
+               'name' => $name->value ?? null,
+           ]; 
+        }
+        $bundle_decriptions = [];
+        foreach ($translations as $item) {
+            $description = $this->translation_tbl
+            ->where('locale', $item->name)
+            ->where('key', $bundle->description)
+            ->first();
+           $bundle_decriptions[] = [
+               'tranlation_id' => $item->id,
+               'tranlation_name' => $item->name,
+               'name' => $description->value ?? null,
+           ]; 
+        }
         if(empty($bundle)){
             return response()->json([
                 "errors" => "id is wrong"
@@ -73,8 +103,8 @@ class BundleController extends Controller
 
         return response()->json([
             "id" => $bundle->id,
-            "name" => $bundle->name,
-            "description" => $bundle->description,
+            "bundle_names" => $bundle_names, 
+            "bundle_decriptions" => $bundle_decriptions, 
             "image" => $bundle->image_link,
             'discount_id' => $bundle->discount_id,
             'tax_id' => $bundle->tax_id,
