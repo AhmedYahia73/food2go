@@ -466,8 +466,9 @@ trait OrderFormat
                 ->first()?->value ?? $item['product'][0]['product']['name'];
                 $product = [
                     'id' => $item['product'][0]['product']['id'],
-                    'name' => $name,  
-                    'count' => $item['product'][0]['count'], 
+                    'note' => $item['product'][0]['product']['note'],
+                    'name' => $name,
+                    'count' => $item['product'][0]['count'],
                 ];
             }  
             $product_item = [

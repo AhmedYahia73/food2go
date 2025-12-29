@@ -1256,7 +1256,7 @@ class CashierMakeOrderController extends Controller
     public function preparing_delivery($request, $id){
         $order = $this->order
         ->where('id', $id)
-        ->first();  
+        ->first();
         $order_data = $this->takeaway_kitchen_format($order);
         $order_items = collect($order_data['order_data']);
         $kitchen_items = $order_data['kitchen_items'];
@@ -1690,6 +1690,7 @@ class CashierMakeOrderController extends Controller
             $products[] = [
                 'count' => $count,
                 'price' => $price,
+                'note' => $note,
                 'name' => $name,
                 'total' => $total,
                 "addons" => $addons,

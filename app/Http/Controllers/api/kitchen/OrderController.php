@@ -50,7 +50,8 @@ class OrderController extends Controller
                         });
 
                     $order = $orderData->only([
-                        'name', 'id', 'count', 'price', 'price_after_discount', 'price_after_tax'
+                        'name', 'id', 'count', 'price', 'price_after_discount', 
+                        'price_after_tax', 'notes'
                     ]);
 
                     $order['addons_selected'] = $addons_selected;
