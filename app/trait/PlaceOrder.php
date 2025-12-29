@@ -1,1809 +1,832 @@
 <?php
 
-namespace App\Http\Controllers\api\admin\order;
+namespace App\trait;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\CancelOrderMail;
-use Carbon\Carbon;
-
-use App\Models\Order;
-use App\Models\Delivery;
-use App\Models\Branch;
-use App\Models\Setting;
-use App\Models\LogOrder;
-use App\Models\User;
-use App\Models\TimeSittings; 
-use App\Models\KitchenOrder;
-use App\Models\Kitchen;
+use App\Models\Payment;
+use App\Models\BranchOff;
 use App\Models\TranslationTbl;
-use App\Models\CompanyInfo;
+use App\Models\KitchenItem;
+use App\Models\KItemExtra;
+use App\Models\KItemExclude;
+use App\Models\KItemAddon;
+use App\Models\KItemVriation;
+use App\Models\Setting;
+use App\Models\KItemOption;
+use App\Models\Kitchen; 
 
-use App\trait\Recipe;
-use App\trait\OrderFormat; 
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
-class OrderController extends Controller
-{
-    public function __construct(private Order $orders, private Delivery $deliveries, 
-    private Branch $branches, private Setting $settings, private User $user,
-    private LogOrder $log_order, private TimeSittings $TimeSittings
-    , private CompanyInfo $company_info, private KitchenOrder $kitchen_order){}
-    use OrderFormat; 
-    use Recipe;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\AddonResource;
+use App\Http\Resources\ExcludeResource;
+use App\Http\Resources\ExtraResource;
+use App\Http\Resources\VariationResource;
+use App\Http\Resources\OptionResource;
 
-    public function transfer_branch(Request $request, $id){
-        // admin/order/transfer_branch
-        // keys => branch_id
-        if ($request->user()->role == "admin") {
-            $orders = $this->orders
-            ->where('id', $id)
-            ->first();
-            if(empty($orders)){
-                return response()->json([
-                    "errors" => "id is wrong"
-                ], 400);
-            }
-            $orders->update([
-                'branch_id' => $request->branch_id,
-                'operation_status' => 'pending',
-                'admin_id' => null,
-                'transfer_from_id' => $orders->branch_id,
-            ]);
-        } else {
-            $orders = $this->orders
-            ->where('id', $id)
-            ->where('branch_id', $request->user()->id)
-            ->update([
-                'branch_id' => $request->branch_id,
-                'operation_status' => 'pending',
-                'admin_id' => null,
-                'transfer_from_id' => $request->user()->id,
-            ]);
-        }
-        
+trait PlaceOrder
+{ 
+    // This Traite About Place Order
+    protected $paymentRequest = [
+        'date',
+        'branch_id',
+        'amount',
+        'total_tax',
+        'total_discount',
+        'address_id',
+        'branch_id',
+        'order_type',
+        'payment_method_id',
+        'notes',
+        'coupon_discount',
+        'sechedule_slot_id',
+        'source',
+        'captain_id',
+        "service_fees",
+    ];
+    protected $orderRequest = ['user_id', 'cart'];
+    protected $priceCycle;
+    public function placeOrder($request, $user)
+    {
 
-        return response()->json([
-            'success' => 'You update branch success'
-        ]);
-    }
-
-    public function void_orders(Request $request){
-         // https://bcknd.food2go.online/admin/order
-       
-        if ($request->user()->role == "admin") {
-            $orders = $this->orders
-            ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-            ,'order_status', 'order_type', 'user_id', 'address_id',
-            'delivery_id', 'address_id', 'source', 'delivery_id',
-            'payment_method_id', 'rate', 'void_reason', 'void_id',
-            'status', 'points', 'rejected_reason', 'transaction_id')
-            ->where('is_void', 1)  
-            ->orderByDesc('id')
-            ->with(['user', 'branch', 'address' => function($query){
-                $query->with('zone:id,zone');
-            }, 'admin', 'payment_method',
-            'schedule', 'delivery'])
-            ->get()
-            ->map(function($item){
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number,
-                    'created_at' => $item->created_at,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'type' => $item->pos ? "Point of Sale" : "Online Order",
-                    'order_type' => $item->order_type,
-                    'order_status' => $item->pos ? 
-                    (($item->order_type == "take_away" ? $item->take_away_status :
-                    $item->order_type == "delivery") ? $item->delivery_status : "pickup") 
-                    : $item->order_status, 
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'void_reason' => $item->void_reason, 
-                    'void' => $item?->void?->void_reason, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                    'rate' => $item->rate,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
-                ];
-            });
-        }
-        else{
-        $orders = $this->orders
-            ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-            ,'order_status',
-            'delivery_id', 'address_id', 'source',
-            'payment_method_id', 'order_type', 'rate',
-            'status', 'points', 'rejected_reason', 'transaction_id')
-            ->where('is_void', 1)  
-            ->orderByDesc('id')
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
-                $query->select('id', 'zone_id')
-                ->with('zone:id,zone');
-            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery'])
-            ->get()
-            ->map(function($item){
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number,
-                    'created_at' => $item->created_at,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'type' => $item->pos ? "Point of Sale" : "Online Order",
-                    'order_type' => $item->order_type,
-                    'order_status' => $item->pos ? 
-                    (($item->order_type == "take_away" ? $item->take_away_status :
-                    $item->order_type == "delivery") ? $item->delivery_status : "pickup") 
-                    : $item->order_status, 
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'void_reason' => $item->void_reason, 
-                    'void' => $item?->void?->void_reason, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                    'rate' => $item->rate,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
-                ];
-            });
-        } 
-
-        return response()->json([
-            'orders' => $orders, 
-        ]);  
-    }
-
-    public function orders(Request $request){
-         // https://bcknd.food2go.online/admin/order
-      
-        $time_sittings = $this->TimeSittings 
-        ->get();
-        if ($time_sittings->count() > 0) {
-            $from = $time_sittings[0]->from;
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-            if ($start >= $end) {
-                $end = $end->addDay();
-            }
-			if($start >= now()){
-                $start = $start->subDay();
-			}
-
-            // if ($start > $end) {
-            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // } format('Y-m-d H:i:s')
-        } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        } 
-        $start = $start->subDay();
-        if ($request->user()->role == "admin") {
-            $orders = $this->orders
-            ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-            ,'order_status', 'order_type',
-            'delivery_id', 'address_id', 'source',
-            'payment_method_id', 'rate', 'transfer_from_id',
-            'status', 'points', 'rejected_reason', 'transaction_id')
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            }) 
-            ->orderByDesc('id')
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
-                $query->select('id', 'zone_id')
-                ->with('zone:id,zone');
-            }, 'transfer_from:id,name', 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery'])
-            ->get()
-            ->map(function($item){
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number,
-                    'created_at' => $item->created_at,
-                    'transfer_from' => $item?->transfer_from?->name,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'order_type' => $item->order_type,
-                    'order_status' => $item->order_status,
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                    'rate' => $item->rate,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
-                ];
-            });
-        }
-        else{
-        $orders = $this->orders
-            ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-            ,'order_status',
-            'delivery_id', 'address_id', 'source', 'transfer_from_id',
-            'payment_method_id', 'order_type', 'rate',
-            'status', 'points', 'rejected_reason', 'transaction_id')
-            ->where('pos', 0)
-            ->where("branch_id", $request->user()->id)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            }) 
-            ->orderByDesc('id')
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
-                $query->select('id', 'zone_id')
-                ->with('zone:id,zone');
-            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery', 'transfer_from:id,name'])
-            ->get()
-            ->map(function($item){
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number,
-                    'created_at' => $item->created_at,
-                    'amount' => $item->amount,
-                    'rate' => $item->rate,
-                    'operation_status' => $item->operation_status,
-                    'order_type' => $item->order_type,
-                    'order_status' => $item->order_status,
-                    'transfer_from' => $item?->transfer_from?->name,
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
-                ];
-            });
-        }
-        $pending = $orders
-        ->where('order_status', 'pending')
-        ->values();
-        $confirmed = $orders
-        ->where('order_status', 'confirmed')
-        ->values();
-        $processing = $orders
-        ->where('order_status', 'processing')
-        ->values();
-        $out_for_delivery = $orders
-        ->where('order_status', 'out_for_delivery')
-        ->values();
-        $delivered = $orders
-        ->where('order_status', 'delivered')
-        ->values();
-        $returned = $orders
-        ->where('order_status', 'returned')
-        ->values();
-        $faild_to_deliver = $orders
-        ->where('order_status', 'faild_to_deliver')
-        ->values();
-        $canceled = $orders
-        ->where('order_status', 'canceled')
-        ->values();
-        $scheduled = $orders
-        ->where('order_status', 'scheduled')
-        ->values();
-        $refund = $orders
-        ->where('order_status', 'refund')
-        ->values();
-        $deliveries = $this->deliveries
-        ->get();
-        $branches = $this->branches
-        ->where('status', 1)
-        ->get();
-
-        return response()->json([
-            'orders' => $orders,
-            'pending' => $pending,
-            'confirmed' => $confirmed,
-            'processing' => $processing,
-            'out_for_delivery' => $out_for_delivery,
-            'delivered' => $delivered,
-            'returned' => $returned,
-            'faild_to_deliver' => $faild_to_deliver,
-            'refund' => $refund,
-            'canceled' => $canceled,
-            'scheduled' => $scheduled, 
-            'deliveries' => $deliveries,
-            'branches' => $branches,
-            'start' => $start->format('Y-m-d H:i:s'),
-            'end' => $end->format('Y-m-d H:i:s'),
-            'role' => $request->user()->role
-        ]);  
-    }
- 
-    public function order_details(Request $request){
-        // https://bcknd.food2go.online/admin/order 
-        $validator = Validator::make($request->all(), [
-            'order_status' => 'required|in:pending,delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        $time_sittings = $this->TimeSittings 
-        ->get();
-        if ($time_sittings->count() > 0) {
-            $from = $time_sittings[0]->from;
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-            if ($start >= $end) {
-                $end = $end->addDay();
-            }
-			if($start >= now()){
-                $start = $start->subDay();
-			}
-        } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        } 
-        $start = $start->subDay();
-        $orders = $this->orders
-        ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-        ,'order_status', 'rate',
-        'delivery_id', 'address_id', 'source',
-        'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
-        ->where('pos', 0)
-        ->whereBetween('created_at', [$start, $end])
-        ->whereNull('captain_id')
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        }) 
-        ->orderByDesc('id')
-        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
-			$query->select('id', 'zone_id')
-			->with('zone:id,zone');
-		}, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-        'schedule:id,name', 'delivery'])
-        ->where('order_status', $request->order_status)
-        ->get()
-		->map(function($item){
-			return [ 
-				'id' => $item->id,
-				'order_number' => $item->order_number,
-				'created_at' => $item->created_at,
-				'amount' => $item->amount,
-				'operation_status' => $item->operation_status,
-				'order_status' => $item->order_status,
-				'source' => $item->source,
-				'status' => $item->status,
-				'rate' => $item->rate,
-				'points' => $item->points, 
-				'rejected_reason' => $item->rejected_reason,
-				'transaction_id' => $item->transaction_id,
-				'user' => [
-                    'f_name' => $item?->user?->f_name,
-                    'l_name' => $item?->user?->l_name,
-                    'phone' => $item?->user?->phone],
-				'branch' => ['name' => $item?->branch?->name, ],
-				'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-				'admin' => ['name' => $item?->admin?->name,],
-				'payment_method' => ['name' => $item?->payment_method?->name],
-				'schedule' => ['name' => $item?->schedule?->name],
-				'delivery' => ['name' => $item?->delivery?->name], 
-			];
-		});
-
-        return response()->json([
-            'orders' => $orders,
-        ]);
-    }
-
-    public function lists(Request $request){
-        $deliveries = $this->deliveries
-        ->select('id', 'f_name', 'l_name', 'phone')
-        ->get();
-        $branches = $this->branches
-        ->select('id', 'name')
-        ->where('status', 1)
-        ->get();
-
-        return response()->json([
-            'deliveries' => $deliveries,
-            'branches' => $branches,
-        ]);
-    }
-
-    public function orders_count(Request $request){
-    //     // https://bcknd.food2go.online/admin/order
-        $time_sittings = $this->TimeSittings 
-        ->get();
-        if ($time_sittings->count() > 0) {
-            $from = $time_sittings[0]->from;
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-            if ($start >= $end) {
-                $end = $end->addDay();
-            }
-			if($start >= now()){
-                $start = $start->subDay();
-			}
-
-            // if ($start > $end) {
-            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // } format('Y-m-d H:i:s')
-        } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        } 
-        $start = $start->subDay();
-        if ($request->user()->role == "admin") {
-            $orders = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $pending = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'pending')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $confirmed = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'confirmed')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $processing = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'processing')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $out_for_delivery = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'out_for_delivery')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $delivered = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'delivered')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $returned = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'returned')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $faild_to_deliver = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'faild_to_deliver')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $canceled = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'canceled')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $scheduled = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'scheduled')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $refund = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'refund')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count(); 
-        }
-        else{
-            $orders = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $pending = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'pending')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $confirmed = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'confirmed')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $processing = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'processing')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $out_for_delivery = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'out_for_delivery')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $delivered = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'delivered')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $returned = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'returned')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $faild_to_deliver = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'faild_to_deliver')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $canceled = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'canceled')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $scheduled = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'scheduled')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $refund = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'refund')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count(); 
-        }
-
-        return response()->json([
-            'orders' => $orders,
-            'pending' => $pending,
-            'confirmed' => $confirmed,
-            'processing' => $processing,
-            'out_for_delivery' => $out_for_delivery,
-            'delivered' => $delivered,
-            'returned' => $returned,
-            'faild_to_deliver' => $faild_to_deliver,
-            'refund' => $refund,
-            'canceled' => $canceled,
-            'scheduled' => $scheduled, 
-            'start' => $start->format('Y-m-d H:i:s'),
-            'end' => $end->format('Y-m-d H:i:s'),
-        ]);
-    }
-
-    public function count_orders(Request $request){
-        // https://bcknd.food2go.online/admin/order/count
-        
-        if ($request->user()->role == "admin") {
-            $orders = $this->orders 
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $pending = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'pending')
-            ->count();
-            $confirmed = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'confirmed')
-            ->count();
-            $processing = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'processing')
-            ->count();
-            $out_for_delivery = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'out_for_delivery')
-            ->count();
-            $delivered = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'delivered')
-            ->count();
-            $returned = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'returned')
-            ->count();
-            $faild_to_deliver = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'faild_to_deliver')
-            ->count();
-            $canceled = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'canceled')
-            ->count();
-            $scheduled = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'scheduled')
-            ->count();
-            $refund = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'refund')
-            ->count();
-        }
-        else{
-            $orders = $this->orders 
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $pending = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'pending')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $confirmed = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'confirmed')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $processing = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'processing')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $out_for_delivery = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'out_for_delivery')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $delivered = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'delivered')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $returned = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'returned')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $faild_to_deliver = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'faild_to_deliver')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $canceled = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'canceled')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $scheduled = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'scheduled')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $refund = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_status', 'refund')
-            ->where("branch_id", $request->user()->id)
-            ->count();
-        }
-
-        return response()->json([
-            'orders' => $orders,
-            'pending' => $pending,
-            // 'confirmed' => $confirmed,
-            'processing' => $processing,
-            'out_for_delivery' => $out_for_delivery,
-            'delivered' => $delivered,
-            'returned' => $returned,
-            'refund' => $refund,
-            'faild_to_deliver' => $faild_to_deliver,
-            'canceled' => $canceled,
-            'scheduled' => $scheduled,
-        ]);
-    }
-
-    // public function orders_data(Request $request){
-    //     // https://bcknd.food2go.online/admin/order/data
-    //     $validator = Validator::make($request->all(), [
-    //         'order_status' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
-    //     ]);
-    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
-    //         return response()->json([
-    //             'errors' => $validator->errors(),
-    //         ],400);
-    //     }
-    //     if ($request->order_status == 'all') {
-    //         $orders = $this->orders
-    //         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-    //         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-    //         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-    //         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-    //         'status', 'points', 'rejected_reason', 'transaction_id')
-    //         ->where('pos', 0)
-    //     ->whereNull('captain_id')
-    //         ->where(function($query) {
-    //             $query->where('status', 1)
-    //             ->orWhereNull('status');
-    //         })
-    //         ->orderByDesc('id')
-    //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-    //         'schedule', 'delivery'])
-    //         ->get();
-    //     } 
-    //     else {
-    //         $orders = $this->orders
-    //         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-    //         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-    //         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-    //         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-    //         'status', 'points', 'rejected_reason', 'transaction_id')
-    //         ->where('pos', 0)
-    //     ->whereNull('captain_id')
-    //         ->where(function($query) {
-    //             $query->where('status', 1)
-    //             ->orWhereNull('status');
-    //         })
-    //         ->where('order_status', $request->order_status)
-    //         ->orderByDesc('id')
-    //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-    //         'schedule', 'delivery'])
-    //         ->get();
-    //     }
-
-    //     return response()->json([
-    //         'orders' => $orders
-    //     ]);
-    // }
-
-    public function notification(Request $request){
-        // https://bcknd.food2go.online/admin/order/notification
-        // Key
-        // orders
-        $total = 0;
-        if ($request->user()->role == "admin") {
-            if ($request->orders) {
-                $old_orders = $request->orders;
-                $new_orders = $this->orders
-                ->where('pos', 0)
-                ->whereNull('captain_id')
-                ->where(function($query) {
-                    $query->where('status', 1)
-                    ->orWhereNull('status');
-                })
-                ->count();
-                $total = $new_orders - $old_orders;
-            }
-            $new_orders = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->orderByDesc('id')
-            ->limit($total)->pluck('id');
-        }
-        else{
-            if ($request->orders) {
-                $old_orders = $request->orders;
-                $new_orders = $this->orders
-                ->where('pos', 0)
-                ->whereNull('captain_id')
-                ->where("branch_id", $request->user()->id)
-                ->where(function($query) {
-                    $query->where('status', 1)
-                    ->orWhereNull('status');
-                })
-                ->count();
-                $total = $new_orders - $old_orders;
-            }
-            $new_orders = $this->orders
-            ->where('pos', 0)
-            ->whereNull('captain_id')
-            ->where("branch_id", $request->user()->id)
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->orderByDesc('id')
-            ->limit($total)->pluck('id');
-        }
-
-        return response()->json([
-            'new_orders' => $total,
-            'order_id' => $new_orders->last() ?? null,
-        ]);
-    }
-
-    public function branches(){
-        // https://bcknd.food2go.online/admin/order/branches
-        $branches = $this->branches
-        ->get();
-        $branches->push([
-            'id' => 0,
-            'name' => 'All'
-        ]);
-
-        return response()->json([
-            'branches' => $branches
-        ]);
-    }
-
-    // public function order_filter(Request $request){
-    //     // https://bcknd.food2go.online/admin/order/filter
-    //     // Key
-    //     // from, to, branch_id, type
-    //     $validator = Validator::make($request->all(), [ 
-    //         'type' => 'in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
-    //     ]);
-    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
-    //         return response()->json([
-    //             'errors' => $validator->errors(),
-    //         ],400);
-    //     }
-
-    //     if ($request->type) {
-    //         if ($request->type == 'all') {
-    //             $orders = $this->orders
-    //             ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-    //             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-    //             'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-    //             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-    //             'status', 'points', 'rejected_reason', 'transaction_id')
-    //             ->where('pos', 0)
-    //     ->whereNull('captain_id')
-    //             ->where('status', '!=', 2)
-    //             ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-    //             'schedule', 'delivery'])
-    //             ->orderBy('created_at')
-    //             ->get();
-    //         } else {
-    //             $orders = $this->orders
-    //             ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-    //             'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-    //             'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-    //             'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-    //             'status', 'points', 'rejected_reason', 'transaction_id')
-    //             ->where('pos', 0)
-    //     ->whereNull('captain_id')
-    //             ->where('status', '!=', 2)
-    //             ->where('order_status', $request->type)
-    //             ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-    //             'schedule', 'delivery'])
-    //             ->orderBy('created_at')
-    //             ->get();
-    //         }
-    //     }
-    //     else{
-    //         $orders = $this->orders
-    //         ->select('id', 'date', 'sechedule_slot_id', 'operation_status', 'user_id', 'branch_id', 'amount',
-    //         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-    //         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-    //         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
-    //         'status', 'points', 'rejected_reason', 'transaction_id')
-    //         ->where('pos', 0)
-    //     ->whereNull('captain_id')
-    //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-    //         'schedule', 'delivery'])
-    //         ->orderBy('created_at')
-    //         ->get();
-    //     }
-        
-    //     if ($request->branch_id && $request->branch_id != 0) {
-    //         $orders = $orders
-    //         ->where('branch_id', $request->branch_id);
-    //     }
-    //     if ($request->from) {
-    //         $orders = $orders
-    //         ->where('order_date', '>=', $request->from);
-    //     }
-    //     if ($request->to) {
-    //         $orders = $orders
-    //         ->where('order_date', '<=', $request->to);
-    //     }
-
-    //     return response()->json([
-    //         'orders' => array_values($orders->toArray())
-    //     ]);
-    // }
-
-    public function order(Request $request, $id){
-        // https://bcknd.food2go.online/admin/order/order/{id}
-        $locale = $request->locale ?? "en";
-        $order = $this->orders
-        ->with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
-        'branch', 'delivery', 
-        'payment_method:id,name,logo', 'schedule'])
-        ->where(function($query) {
-            $query->where('status', 1)
-            ->orWhereNull('status');
-        })
-        ->find($id);
-        if(empty($order)){
-            return response()->json([
-                "errors" => "id is wrong"
-            ], 400);
-        }  
+        // Start Make Payment
+        $paymentRequest = $request->only($this->paymentRequest);
         try {
-            $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
-        } 
-        catch (\Throwable $th) {
-            $order->user = collect([]);
-            $order->user->count_orders = 0;
-        }
-        if (!empty($order->branch)) {
-            $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
-        }
-        if (!empty($order->delivery)) {
-            $order->delivery->count_orders = $this->orders
-            ->where('delivery_id', $order->delivery_id)
-            ->count();
-        }
-        $deliveries = $this->deliveries
-        ->select('id', 'f_name', 'l_name')
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "f_name" => $item->f_name,
-                "l_name" => $item->l_name,
-            ];
-        });
-        $order_status = ['pending', 'processing', 'out_for_delivery',
-        'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
-        'faild_to_deliver', 'refund'];
-        $preparing_time = $order->branch->food_preparion_time ?? '00:30';
-        // if (empty($preparing_time)) {
-        $time_parts = explode(':', $preparing_time);
-
-        // _________________________________________
-        
-        $delivery_time = $this->settings
-        ->where('name', 'delivery_time')
-        ->orderByDesc('id')
-        ->first();
-        if (empty($delivery_time)) {
-            $delivery_time = $this->settings
-            ->create([
-                'name' => 'delivery_time',
-                'setting' => '00:30:00',
-            ]);
-        }
-        $time_to_add = $delivery_time->setting;
-        list($order_hours, $order_minutes, $order_seconds) = explode(':', $time_to_add);
-        // Get hours, minutes, and seconds
-        $hours = $time_parts[0];
-        $minutes = $time_parts[1]; 
-        $order_seconds = 0;
-        $hours = (int)$hours;
-        $minutes = (int)$minutes;
-        
-        if($order->order_type == 'delivery'){
-            // Ensure that $hours, $minutes, and $seconds are integers
-            $hours = (int)$hours + (int)$order_hours;
-            $minutes = (int)$minutes + (int)$order_minutes;
-            $order_seconds = '00';
-        }
-        $hours += intval($minutes / 60);
-        $minutes = $minutes % 60;
-        $preparing_arr = [
-            'days' => 0,
-            'hours' => $hours,
-            'minutes' => $minutes,
-            'seconds' => 0,
-        ];
-        //     $preparing_time = $this->settings
-        //     ->create([
-        //         'name' => 'preparing_time',
-        //         'setting' => json_encode($preparing_arr),
-        //     ]);
-        // }
-        // $preparing_time = json_decode($preparing_time->setting);
-        $log_order = $this->log_order
-        ->with(['admin:id,name'])
-        ->where('order_id', $id)
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "from_status" => $item->from_status,
-                "to_status" => $item->to_status,
-                "admin" => [
-                    "id" => $item?->admin?->id,
-                    "name" => $item?->admin?->name,
-                ]
-            ];
-        });;
-        $branches = $this->branches
-        ->select('name', 'id')
-        ->where('status', 1)
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "name" => $item->name,
-            ];
-        }); 
-        $order = $this->order_item_format($order, $id, $locale);
-
-        return response()->json([
-            'order' => $order,
-            'deliveries' => $deliveries,
-            'order_status' => $order_status,
-            'preparing_time' => $preparing_arr,
-            'log_order' => $log_order,
-            'branches' => $branches,
-            'locale' => $locale
-        ]);
-        
-        // $order = $this->orders
-        // ->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
-        // 'order_status', 'service_fees', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-        // 'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id', 'source',
-        // 'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
-        // 'status', 'points', 'rejected_reason', 'transaction_id', 'customer_cancel_reason', 
-        // 'admin_cancel_reason', 'sechedule_slot_id')
-        // ->with(['user:id,f_name,l_name,phone,phone_2,image,email', 
-        // 'branch:id,name', 'delivery', 'payment_method:id,name,logo',
-        //  'address.zone', 'admin:id,name,email,phone,image', 
-        // 'schedule'])
-        // ->where(function($query) {
-        //     $query->where('status', 1)
-        //     ->orWhereNull('status');
-        // })
-        // ->find($id);
-        // $order->makeHidden('order_details_data');
-        // $order_details = collect($order->order_details);
-        // foreach ($order_details as $item) {
-        //     foreach ($item->product as $element) {
-        //         $total = collect($item->variations)->pluck('options')->flatten(1)
-        //         ->where('product_id', $element->product->id)->sum('price');
-        //         $element->product->price += $total;
-        //     }
-        // }
-        // $order->order_details = $order_details;
-        // try {
-        //     $order->user->count_orders = $this->orders->where('user_id', $order->user_id)->count();
-        // } 
-        // catch (\Throwable $th) {
-        //     $order->user = collect([]);
-        //     $order->user->count_orders = 0;
-        // }
-        // if (!empty($order->branch)) {
-        //     $order->branch->count_orders = $this->orders->where('branch_id', $order->branch_id)->count();
-        // }
-        // if (!empty($order->delivery)) {
-        //     $order->delivery->count_orders = $this->orders
-        //     ->where('delivery_id', $order->delivery_id)
-        //     ->count();
-        // }
-        // $deliveries = $this->deliveries
-        // ->select('id', 'f_name', 'l_name')
-        // ->get();
-        // $order_status = ['pending', 'processing', 'out_for_delivery',
-        // 'delivered' ,'canceled', 'confirmed', 'scheduled', 'returned' ,
-        // 'faild_to_deliver', 'refund'];
-        // $preparing_time = $order->branch->food_preparion_time ?? '00:30';
-        // // if (empty($preparing_time)) {
-        // $time_parts = explode(':', $preparing_time);
-
-        // // _________________________________________
-        
-        // $delivery_time = $this->settings
-        // ->where('name', 'delivery_time')
-        // ->orderByDesc('id')
-        // ->first();
-        // if (empty($delivery_time)) {
-        //     $delivery_time = $this->settings
-        //     ->create([
-        //         'name' => 'delivery_time',
-        //         'setting' => '00:30:00',
-        //     ]);
-        // }
-        // $time_to_add = $delivery_time->setting;
-        // list($order_hours, $order_minutes, $order_seconds) = explode(':', $time_to_add);
-        // // Get hours, minutes, and seconds
-        // $hours = $time_parts[0];
-        // $minutes = $time_parts[1]; 
-        // $order_seconds = 0;
-        // $hours = (int)$hours;
-        // $minutes = (int)$minutes;
-        
-        // if($order->order_type == 'delivery'){
-        //     // Ensure that $hours, $minutes, and $seconds are integers
-        //     $hours = (int)$hours + (int)$order_hours;
-        //     $minutes = (int)$minutes + (int)$order_minutes;
-        //     $order_seconds = '00';
-        // }
-        // $hours += intval($minutes / 60);
-        // $minutes = $minutes % 60;
-        // $preparing_arr = [
-        //     'days' => 0,
-        //     'hours' => $hours,
-        //     'minutes' => $minutes,
-        //     'seconds' => 0,
-        // ];
-        // //     $preparing_time = $this->settings
-        // //     ->create([
-        // //         'name' => 'preparing_time',
-        // //         'setting' => json_encode($preparing_arr),
-        // //     ]);
-        // // }
-        // // $preparing_time = json_decode($preparing_time->setting);
-        // $log_order = $this->log_order
-        // ->with(['admin:id,name'])
-        // ->where('order_id', $id)
-        // ->get();
-        // $branches = $this->branches
-        // ->select('name', 'id')
-        // ->where('status', 1)
-        // ->get();
-        // try {
-        //     if($order?->user?->orders){ 
-        //         $order->user->makeHidden("orders");
-		// 		$order->user;
-        //     } 
-		// 	if($order?->branch){
-        //         unset($order->branch);
-		// 		$order->branch;
-        //     }
-        // } catch (\Throwable $th) {
-        //     //throw $th;
-        // }
-
-        // return response()->json([
-        //     'order' => $order,
-        //     'deliveries' => $deliveries,
-        //     'order_status' => $order_status,
-        //     'preparing_time' => $preparing_arr,
-        //     'log_order' => $log_order,
-        //     'branches' => $branches,
-        // ]);
-    }
-
-    public function invoice(Request $request, $id){
-        // https://bcknd.food2go.online/admin/order/invoice/{id}
-        // $order = $this->orders
-        // ->with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 'branch', 'delivery'])
-        // ->where(function($query) {
-        //     $query->where('status', 1)
-        //     ->orWhereNull('status');
-        // })
-        // ->find($id);
-        $locale = $request->locale ?? "en";
-        $order = $this->order_details_format($id, $locale);
-
-        $logo_link = $this->company_info
-        ->first()?->logo_link;
-
-        return response()->json([
-            'order' => $order,
-            'logo_link' => $logo_link,
-        ]);
-    }
-
-    public function status($id, Request $request){
-        // https://bcknd.food2go.online/admin/order/status/{id}
-        // Keys
-        // order_status, order_number
-        // if canceled => key admin_cancel_reason
-        $validator = Validator::make($request->all(), [
-            'order_status' => 'required|in:delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-
-        if ($request->user()->role == "admin") {
-            $order = $this->orders
-            ->where('id', $id)
-            ->first();
-        }
-        else{
-            $order = $this->orders
-            ->where('id', $id)
-            ->where("branch_id", $request->user()->id)
-            ->first();
-        }
-        $old_status = $order->order_status;
-        if (empty($order)) {
-            return response()->json([
-                'errors' => 'order is not found'
-            ], 400);
-        }
-        if ($request->order_status == 'delivered' || $request->order_status == 'returned'
-        || $request->order_status == 'faild_to_deliver'|| $request->order_status == 'refund'
-        || $request->order_status == 'canceled') {
-            $order->update([
-                'operation_status' => 'closed',
-            ]);
-        }
-       if ($order->operation_status == 'pending') {
-            if ($request->user()->role == "admin") {
-                $order->update([
-                    'admin_id' => $request->user()->id,
-                    'operation_status' => 'opened',
-                ]);
-            }
-            else{
-                $order->update([
-                    'operation_status' => 'opened',
-                ]);
-            }
-        }
-        else{
-            $arr =  ['pending','processing','confirmed','out_for_delivery','delivered','returned'
-            ,'faild_to_deliver','canceled','scheduled','refund'];
-            $new_index = array_search($request->order_status, $arr);
-            $old_index = array_search($order->order_status, $arr);
-            $user = $request->user();
-            $roles = $user?->user_positions?->roles?->where('role', 'Order')->pluck('action')->values();
-            $hasAllPermission = $roles->contains('all');
-            $hasBackStatus = $roles->contains('back_status');
-            $hasStatusPermission = $roles->contains('change_status');
-            $hasRequiredPermission = $hasAllPermission || $hasStatusPermission;
-            if (!$hasAllPermission && !$hasBackStatus && $new_index < $old_index) {
+            $activePaymentMethod = $this->paymentMethod->where('status', '1')->find($paymentRequest['payment_method_id']);
+            if (!$activePaymentMethod) {
                 return response()->json([
-                    'errors' => "You can't back by status"
-                ], 400);
+                    'paymentMethod.message' => 'This Payment Method Unavailable ',
+                ], 404);
             }
-
-            if ($order->admin_id !== $user->id && !$hasRequiredPermission) {
-                return response()->json([
-                    'errors' => "You can't change status"
-                ], 400);
+            $order = $this->make_order($request, 1);
+            if (isset($order['errors']) && !empty($order['errors'])) {
+                return $order;
             }
+        } catch (\Throwable $th) {
+            throw new HttpResponseException(response()->json(['errors' => 'Payment processing failed'], 500));
         }
-
-        if($old_status == "pending"){
-            $order_details = $order->order_details;
-            $products = [];
-            foreach ($order_details as $item) { 
-                $product_item = $item->product[0]; 
-                $products[] = [
-                    "id" => $product_item->product->id,
-                    "count" => $product_item->count,
-                ];
-            }
-            $errors = $this->pull_recipe($products, $order->branch_id); 
-            if(!$errors['success']){
-                return response()->json([
-                    "errors" => $errors['msg']
-                ], 400);
-            }
-        }
-
-        if ($request->order_status == 'processing') { 
-            $order->update([
-                'order_status' => $request->order_status,
-                'order_number' => $request->order_number ?? null,
-            ]); 
-        }
-        if ($request->order_status == 'confirmed') { 
-            $order->update([
-                'order_status' => $request->order_status,
-                'order_number' => $request->order_number ?? null,
-            ]);
-            $this->preparing_takeaway($id);
-        }
-        elseif($request->order_status == 'canceled'){
-            // Key
-            // admin_cancel_reason
-            $validator = Validator::make($request->all(), [
-                'admin_cancel_reason' => 'required',
-            ]);
-            if ($validator->fails()) { // if Validate Make Error Return Message Error
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ],400);
-            }
-            $data = [
-                'name' => $order?->user?->name,
-                'reason' => $request->admin_cancel_reason,
-            ];
-            Mail::to($order->user->email)->send(new CancelOrderMail($data));
-            $order->update([
-                'order_status' => $request->order_status,
-                'admin_cancel_reason' => $request->admin_cancel_reason,
-            ]);
-        }
-        else {
-            $order->update([
-                'order_status' => $request->order_status, 
-            ]);
-        }
-        $this->log_order
-        ->create([
-            'order_id' => $id,
-            'admin_id' => $request->user()->id,
-            'from_status' => $old_status,
-            'to_status' => $request->order_status,
-        ]); 
-
-        return response()->json([
-            'order_status' => $request->order_status
-        ]);
-    }
-
-    public function delivery(Request $request){
-        // https://bcknd.food2go.online/admin/order/delivery
-        // Keys
-        // delivery_id, order_id, order_number
-        $validator = Validator::make($request->all(), [
-            'delivery_id' => 'required|exists:deliveries,id',
-            'order_id' => 'required|exists:orders,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        $order = $this->orders
-        ->where('id', $request->order_id)
-        ->first();
-        if ($order->order_status != 'processing' && $order->order_status != 'out_for_delivery'
-         && $order->order_status != 'confirmed') {
-            return response()->json([
-                'errors' => 'Status must be processing'
-            ], 400);
-        }
-        if (!is_numeric($request->order_number)) {
-            $order->update([
-                'delivery_id' => $request->delivery_id, 
-                'order_status' => 'out_for_delivery',
-            ]);
-        }
-        else{ 
-            $order->update([
-                'delivery_id' => $request->delivery_id,
-                'order_number' => $request->order_number ?? $order->order_number,
-                'order_status' => 'out_for_delivery',
-            ]);
-        }
-
-        return response()->json([
-            'success' => 'You select delivery success'
-        ]);
-    }
-
-    public function user_details($id){
-        // https://bcknd.food2go.online/admin/order/user_details/{user_id}
-        $data = $this->user
-        ->where('id', $id)
-        ->withCount('orders')
-        ->with(['orders' => function($query){
-            $query->select('id', 'receipt', 'date', 'user_id', 'branch_id', 'amount',
-            'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
-            'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
-            'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'order_details',
-            'status', 'points', 'rejected_reason', 'transaction_id');
-        }, 'address'])
-        ->get();
-
-        return response()->json([
-            'data' => $data
-        ]);
-    }
-
-    public function order_log(Request $request){
-        // /admin/order/log
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required|exists:orders,id',
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        $log_order = $this->log_order
-        ->where('order_id', $request->order_id)
-        ->with('admin')
-        ->get();
-
-        return response()->json([
-            'log_order' => $log_order,
-        ]);
-    }
-
-    public function order_filter_date(Request $request){
-        // https://sultanayubbcknd.food2go.online/admin/order_filter_date
-        // date, date_to, branch_id, 
-        // type => all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund,
-        $validator = Validator::make($request->all(), [
-            'date' => 'required|date',
-            'date_to' => 'required|date',
-            'branch_id' => 'exists:branches,id',
-            'type' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        // _______________________________________
-        
-        $time_sittings = $this->TimeSittings 
-        ->get();
-        if ($time_sittings->count() > 0) { 
-            $from = $time_sittings[0]->from;
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-            if ($start >= $end) {
-                $end = $end->addDay();
-            }
-			if($start >= now()){
-                $start = $start->subDay();
-			}
-
-            // if ($start > $end) {
-            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // } format('Y-m-d H:i:s')
-        } else {
-            $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
-        } 
-        $start = Carbon::parse($request->date . ' ' . $start->format('H:i:s'));
-        $end = Carbon::parse($request->date_to . ' ' . $end->format('H:i:s'));
-        // ___________________________________________________
-        // settings     
-            // if ($start > date('H:i:s')) {
-            //     $end = Carbon::parse($date_to)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($date_to)->addHours(intval($hours));
-            // } 
-        
-        $orders = $this->orders
-        ->whereBetween('created_at', [$start, $end])
-        ->where('pos', 0)
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get();
-        if ($request->type != 'all') {
-            $orders = $orders->where('order_status', $request->type)->values();
-        }
-        if ($request->branch_id) {
-            $orders = $orders->where('branch_id', $request->branch_id)->values();
-        }
-
-        return response()->json([
-            'orders' => $orders
-        ]);
-    }
-
-    
-
-    public function preparing_takeaway($id){
-        $order = $this->orders
-        ->where('id', $id)
-        ->first();  
-        $order_kitchen = [];
-        
-        $order_data = $this->takeaway_kitchen_format($order);
-        $order_items = collect($order_data['order_data']);
-        $kitchen_items = $order_data['kitchen_items'];
-        $kitchen_order = collect($order_data['kitchen_order']); 
-        foreach ($kitchen_order as $key => $item) {
-            $order_kitchen[$key] = [
-                "id" => $kitchen_items[$key]->id,
-                "name" => $kitchen_items[$key]->name,
-                "print_name" => $kitchen_items[$key]->print_name,
-                "print_ip" => $kitchen_items[$key]->print_ip,
-                "print_status" => $kitchen_items[$key]->print_status,
-                "print_type" => $kitchen_items[$key]->print_type,
-                "order" => $item,
-                "order_type" => $order->order_type,
-            ];
-            $kitchen_order = $this->kitchen_order
-            ->create([
-                'kitchen_id' => $key,
-                'order' => json_encode($item),
-                'type' => $order->order_type,
-                'order_id' => $order->id,
-            ]); 
-        }
-        $order_kitchen = array_values($order_kitchen);
-        foreach ($order_kitchen as $key => $value) {
-            $items = collect($order_kitchen[$key]['order']);
-            $peice_items = $items
-            ->where("weight", 0)->sum("count");
-            $weight_items = $items
-            ->where("weight", 1)->count();
-            
-            $order_kitchen[$key]['order_count'] = $peice_items + $weight_items;
-        }
+        // End Make Payment
 
         return [
-            'success' => $order_items,
-            'kitchen_items' => $order_kitchen,
+            'payment' => $order['payment'],
+            'orderItems' => $order['orderItems'],
+            'items' => $order['items']
         ];
     }
-	 
+
+    private function createOrdersForItems(array $items, string $field, array $baseData)
+    {
+
+        $createdOrders = [];
+        $count = 1;
+        foreach ($items as $item) {
+            // Ensure $item is an array
+            // return $items; 
+            if (!is_array($item)) {
+                throw new \InvalidArgumentException("Each item should be an array.");
+            }
+            $periodPrice = $item['price_cycle'];
+
+            // Determine the model based on the $field
+            $itemName = match ($field) {
+                'extra_id' => 'extra',
+                'domain_id' => 'domain',
+                'plan_id' => 'plan',
+                default => throw new \InvalidArgumentException("Invalid field provided: $field"),
+            };
+            $model = $this->$itemName->find($item[$field]);
+            $this->priceCycle = $model->$periodPrice ?? $model->price;
+            // Prepare the order data
+
+            $orderData = array_merge($baseData, [
+                $field => $item[$field],
+                'price_cycle' => $periodPrice, // Add price_cycle here
+                'price_item' => $this->priceCycle, // Add price_item here
+            ]);
+
+            // Validate if item has the field key
+            if (!isset($item[$field])) {
+                throw new \InvalidArgumentException("Missing $field key in item.");
+            }
+            // Create the order and retrieve the model
+            $createdOrder = $this->order->create($orderData);
+            // Prepare the item data
+            $itemData = [
+                'name' => $model->name,
+                'amount_cents' => $this->priceCycle ?? $model->price,
+                'period' => $item['price_cycle'],
+                'quantity' => $count,
+                'description' => "Your Item is $model->name and Price: " . $this->priceCycle ?? $model->price,
+            ];
+
+            $createdOrders[] = $itemData;
+        }
+
+        return $createdOrders;
+    }
+
+
+
+    public function payment_approve($payment)
+    {
+        if ($payment) {
+            $payment->update(['status' => 1]);
+            return true;
+        }
+        return false;
+    }
+    public function order_success($payment)
+    {
+    }
+
+    public function make_order($request, $paymob = 0){
+        $branch_off = BranchOff::
+        where('branch_id', $request->branch_id)
+        ->get();
+        $products_off = $branch_off->pluck('product_id')->filter()->values()->all();
+        $options_off = $branch_off->pluck('option_id')->filter()->values()->all();
+        $categories_off = $branch_off->pluck('category_id')->filter()->values()->all();
+        $orderRequest = $request->only($this->paymentRequest); 
+        $user = auth()->user();
+
+        if(!$request->user_id || $request->user_id != 'empty'){
+            $orderRequest['user_id'] = auth()->user()->id;
+        }
+        
+        if (!empty($request->customer_id) && is_numeric($request->customer_id)) {
+            $orderRequest['customer_id'] = $request->customer_id;
+        }
+        
+        $orderRequest['order_status'] = 'pending';
+        if ($request->table_id) {
+            $orderRequest['table_id'] = $request->table_id;
+        }
+        if ($request->captain_id) {
+            $orderRequest['captain_id'] = $request->captain_id;
+        }
+        if ($request->cashier_id) {
+            $orderRequest['cashier_id'] = $request->cashier_id;
+        }
+        if ($request->cashier_man_id) {
+            $orderRequest['cashier_man_id'] = $request->cashier_man_id;
+        }
+        if ($request->shift) { 
+            $orderRequest['shift'] = $request->shift;
+        }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $points = 0;
+        $items = [];
+        $order_details = [];
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $product) {
+                $item = $this->products
+                ->where('id', $product['product_id'])
+                ->first();
+                if (in_array($item->id, $products_off) || 
+                in_array($item->category_id, $categories_off) ||
+                in_array($item->sub_category_id, $categories_off)) {
+                    return [
+                        'errors' => 'Product ' . $item->name . 
+                        ' is not found at this branch you can change branch or order'
+                    ];
+                }
+                if (!empty($item)) {
+                    $items[] = [ "name"=> $item->name,
+                            "amount_cents"=> $item->price,
+                            "description"=> $item->description,
+                            "quantity"=> $product['count']
+                        ];
+                    $points += $item->points * $product['count'];
+                    if (isset($product['variation'])) {
+                        foreach ($product['variation'] as $variation) {
+                            if ($variation['option_id']) {
+                                foreach ($variation['option_id'] as $option_id) {
+                                    $option_points = $this->options
+                                    ->where('id', $option_id)
+                                    ->first();
+                                    if (in_array($option_points->id, $options_off)) {
+                                        return [
+                                            'errors' => 'Option ' . $option_points->name . ' at product ' . $item->name . 
+                                            ' is not found at this branch you can change branch or order'
+                                        ];
+                                    }
+                                    $points += $option_points->points * $product['count'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if ($request->receipt) {
+            $orderRequest['receipt'] = $request->receipt;
+        }
+        $orderRequest['points'] = $points;
+        $order = $this->order
+        ->create($orderRequest);
+        if(!empty($user)){
+            $user->save();
+        }
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $key => $product) {
+                // $amount_product = 0;
+                $order_details[$key]['extras'] = [];
+                $order_details[$key]['addons'] = [];
+                $order_details[$key]['excludes'] = [];
+                $order_details[$key]['product'] = [];
+                $order_details[$key]['variations'] = [];
+
+                $product_item = $this->products
+                ->where('id', $product['product_id'])
+                ->first();
+                $product_item = collect([$product_item]);
+                $product_item = ProductResource::collection($product_item);
+                $product_item = count($product_item) > 0 ? $product_item[0] : null;
+                $order_details[$key]['product'][] = [
+                    'product' => $product_item,
+                    'count' => $product['count'],
+                    'notes' => isset($product['note']) ? $product['note'] : null,
+                ];
+                // Add product price
+                //$amount_product += $product_item->price;
+
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]); // Add product with count
+                if (isset($product['exclude_id'])) {
+                    foreach ($product['exclude_id'] as $exclude) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'exclude_id' => $exclude,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $exclude = $this->excludes
+                        ->where('id', $exclude)
+                        ->first();
+                        $exclude = collect([$exclude]);
+                        $exclude = ExcludeResource::collection($exclude);
+                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
+                        $order_details[$key]['excludes'][] = $exclude;
+                    }
+                } 
+                if (isset($product['addons'])) {
+                    foreach ($product['addons'] as $addon) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'addon_id' => $addon['addon_id'],
+                            'count' => $product['count'],
+                            'addon_count' => $addon['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $addon_item = $this->addons
+                        ->where('id', $addon['addon_id'])
+                        ->first();
+                        $addon_item = collect([$addon_item]);
+                        $addon_item = AddonResource::collection($addon_item);
+                        $addon_item = count($addon_item) > 0 ? $addon_item[0] : null;
+                        $order_details[$key]['addons'][] = [
+                            'addon' => $addon_item,
+                            'count' => $addon['count']
+                        ]; 
+                    }
+                } 
+                if (isset($product['extra_id'])) {
+                    foreach ($product['extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        $extra_item = $this->extras
+                        ->where('id', $extra)
+                        ->first();
+                        $extra_item = collect([$extra_item]);
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
+                        $order_details[$key]['extras'][] = $extra_item; 
+                    }
+                }
+                if (isset($product['product_extra_id'])) {
+                    foreach ($product['product_extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        
+                        $extra_item = $this->extras
+                        ->where('id', $extra)
+                        ->first();
+                        $extra_item = collect([$extra_item]);
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
+                        $order_details[$key]['extras'][] = $extra_item; 
+                    }
+                }
+                if (isset($product['variation'])) {
+					$product['variation'] = collect($product['variation'])->unique('variation_id');
+                    foreach ($product['variation'] as $variation) {
+                        foreach ($variation['option_id'] as $option_id) {
+                            $this->order_details
+                            ->create([
+                                'order_id' => $order->id,
+                                'product_id' => $product['product_id'],
+                                'variation_id' => $variation['variation_id'],
+                                'option_id' => $option_id,
+                                'count' => $product['count'],
+                                'product_index' => $key,
+                            ]); // Add variations & options
+                        }
+                        $variations = $this->variation
+                        ->where('id', $variation['variation_id'])
+                        ->first();
+                        $variations = collect([$variations]);
+                        $options = $this->options
+                        ->whereIn('id', $variation['option_id'])
+                        ->get();
+                        $variations = VariationResource::collection($variations);
+                        $variations = count($variations) > 0 ? $variations[0] : null;
+                        $options = OptionResource::collection($options);
+                        $order_details[$key]['variations'][] = [
+                            'variation' => $variations,
+                            'options' => $options,
+                        ];
+                        // $amount_product += $this->options
+                        // ->whereIn('id', $variation['option_id'])
+                        // ->sum('price');
+                    }
+                }
+                $discount_item = $product_item->discount;
+                $tax_item = $product_item->tax;
+                $tax = $this->settings
+                ->where('name', 'tax')
+                ->orderByDesc('id')
+                ->first();
+                if (!empty($tax_item)) {
+                    if (!empty($tax)) {
+                        $tax = $tax->setting;
+                    }
+                    else {
+                        $tax = $this->settings
+                        ->create([
+                            'name' => 'tax',
+                            'setting' => 'included',
+                        ]);
+                        $tax = $tax->setting;
+                    }
+                    // if ($tax_item->type == 'precentage') { 
+                    //     $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
+                    // }
+                    // else{ 
+                    //     $amount_product = $amount_product + $tax_item->amount;
+                    // }
+                }
+                // if (!empty($discount_item)) {
+                //     if ($discount_item->type == 'precentage') { 
+                //         $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
+                //     }
+                //     else{ 
+                //         $amount_product = $amount_product - $discount_item->amount;
+                //     }
+                // } 
+            }
+        } 
+        $order->order_details = json_encode($order_details);
+        if ($paymob) {
+            $order->status = 2;
+        }
+        $order->save();
+
+        return [
+            'payment' => $order,
+            'orderItems' => $order_details,
+            'items' => $items,
+        ];
+    }
+
+    public function make_order_cart($request, $paymob = 0){
+        $branch_off = BranchOff::
+        where('branch_id', $request->branch_id)
+        ->get();
+        $products_off = $branch_off->pluck('product_id')->filter()->values()->all();
+        $options_off = $branch_off->pluck('option_id')->filter()->values()->all();
+        $categories_off = $branch_off->pluck('category_id')->filter()->values()->all();
+        $orderRequest = $request->only($this->paymentRequest); 
+        $user = auth()->user(); 
+        if ($request->table_id) {
+            $orderRequest['table_id'] = $request->table_id;
+        }
+        if ($request->captain_id) {
+            $orderRequest['captain_id'] = $request->captain_id;
+        }
+        if ($request->cashier_id) {
+            $orderRequest['cashier_id'] = $request->cashier_id;
+        }
+        if ($request->cashier_man_id) {
+            $orderRequest['cashier_man_id'] = $request->cashier_man_id;
+        }
+        if ($request->shift) { 
+            $orderRequest['shift'] = $request->shift;
+        }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $points = 0;
+        $items = [];
+        $order_details = [];
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $product) {
+                $item = $this->products
+                ->where('id', $product['product_id'])
+                ->first();
+                if (in_array($item->id, $products_off) || 
+                in_array($item->category_id, $categories_off) ||
+                in_array($item->sub_category_id, $categories_off)) {
+                    return [
+                        'errors' => 'Product ' . $item->name . 
+                        ' is not found at this branch you can change branch or order'
+                    ];
+                }
+                if (!empty($item)) {
+                    $items[] = [ "name"=> $item->name,
+                            "amount_cents"=> $item->price,
+                            "description"=> $item->description,
+                            "quantity"=> $product['count']
+                        ];
+                    $points += $item->points * $product['count'];
+                    if (isset($product['variation'])) {
+                        foreach ($product['variation'] as $variation) {
+                            if ($variation['option_id']) {
+                                foreach ($variation['option_id'] as $option_id) {
+                                    $option_points = $this->options
+                                    ->where('id', $option_id)
+                                    ->first();
+                                    if (in_array($option_points->id, $options_off)) {
+                                        return [
+                                            'errors' => 'Option ' . $option_points->name . ' at product ' . $item->name . 
+                                            ' is not found at this branch you can change branch or order'
+                                        ];
+                                    }
+                                    $points += $option_points->points * $product['count'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if($request->order_pending){
+            $orderRequest['order_active'] = 0;
+        }
+        // Check if product is found
+        // if($request->table_id){
+        //     $order_carts = $this->order_cart
+        //     ->where('table_id', $request->table_id)
+        //     ->get();
+        //     foreach ($order_carts as $item) {
+        //         $carts = $item->cart;
+        //         foreach ($carts as $element) {
+        //             $old_product_id = $element->product[0]->product->id;
+        //             $new_product_id = $request->products[0]->product_id;
+        //             $old_product_notes = $element->product[0]->notes;
+        //             $new_product_notes = $request->products[0]->note;
+        //             if(count($element->product) > 0 && $old_product_id == $new_product_id
+        //             && $old_product_notes == $new_product_notes){
+        //                 $old_addons = $element->addons;
+        //                 $new_addons = $request->products[0]->addons;
+        //             }
+        //         }
+        //     }
+        // }
+        $orderRequest['points'] = $points;
+        $order = $this->order_cart
+        ->create($orderRequest);
+        if(!empty($user)){
+            $user->save();
+        }
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $key => $product) {
+                //$amount_product = 0;
+                $order_details[$key]['extras'] = [];
+                $order_details[$key]['addons'] = [];
+                $order_details[$key]['excludes'] = [];
+                $order_details[$key]['product'] = [];
+                $order_details[$key]['variations'] = [];
+
+                $product_item = $this->products
+                ->where('id', $product['product_id'])
+                ->withLocale($locale)
+                ->first();
+                $product_item = collect([$product_item]);
+                $product_item = ProductResource::collection($product_item);
+                $product_item = count($product_item) > 0 ? $product_item[0] : null; 
+                $order_details[$key]['product'][] = [
+                    'product' => $product_item,
+                    'count' => $product['count'],
+                    'prepration' => 'watting',
+                    'notes' => isset($product['note']) ? $product['note'] : null,
+                ];
+                // Add product price
+               // $amount_product += $product_item->price;
+
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]); // Add product with count
+                if (isset($product['exclude_id'])) {
+                    foreach ($product['exclude_id'] as $exclude) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'exclude_id' => $exclude,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $exclude = $this->excludes
+                        ->where('id', $exclude)
+                        ->withLocale($locale)
+                        ->first();
+                        $exclude = collect([$exclude]);
+                        $exclude = ExcludeResource::collection($exclude);
+                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
+                        $order_details[$key]['excludes'][] = $exclude;
+                    }
+                } 
+                if (isset($product['addons'])) {
+                    foreach ($product['addons'] as $addon) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'addon_id' => $addon['addon_id'],
+                            'count' => $product['count'],
+                            'addon_count' => $addon['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $addon_item = $this->addons
+                        ->where('id', $addon['addon_id'])
+                        ->withLocale($locale)
+                        ->first();
+                        $addon_item = collect([$addon_item]);
+                        $addon_item = AddonResource::collection($addon_item);
+                        $addon_item = count($addon_item) > 0 ? $addon_item[0] : null; 
+                        $order_details[$key]['addons'][] = [
+                            'addon' => $addon_item,
+                            'count' => $addon['count']
+                        ];
+                    }
+                } 
+                if (isset($product['extra_id'])) {
+                    foreach ($product['extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        $extra_item = $this->extras
+                        ->where('id', $extra)
+                        ->withLocale($locale)
+                        ->first();
+                        $extra_item = collect([$extra_item]);
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null; 
+                        $order_details[$key]['extras'][] = $extra_item; 
+                    }
+                }
+                if (isset($product['product_extra_id'])) {
+                    foreach ($product['product_extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        
+                        $extra_item = $this->extras
+                        ->where('id', $extra)
+                        ->withLocale($locale)
+                        ->first();
+                        $extra_item = collect([$extra_item]);
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null; 
+                        $order_details[$key]['extras'][] = $extra_item;  
+                    }
+                }
+                if (isset($product['variation'])) {
+                    foreach ($product['variation'] as $variation) {
+                        foreach ($variation['option_id'] as $option_id) {
+                            $this->order_details
+                            ->create([
+                                'order_id' => $order->id,
+                                'product_id' => $product['product_id'],
+                                'variation_id' => $variation['variation_id'],
+                                'option_id' => $option_id,
+                                'count' => $product['count'],
+                                'product_index' => $key,
+                            ]); // Add variations & options
+                        }
+                        $variations = $this->variation
+                        ->where('id', $variation['variation_id'])
+                        ->withLocale($locale)
+                        ->first();
+                        $variations = collect([$variations]);
+                        $options = $this->options
+                        ->whereIn('id', $variation['option_id'])
+                        ->withLocale($locale)
+                        ->get();
+                        $variations = VariationResource::collection($variations);
+                        $variations = count($variations) > 0 ? $variations[0] : null;
+                        $options = OptionResource::collection($options);
+                        $order_details[$key]['variations'][] = [
+                            'variation' => $variations,
+                            'options' => $options,
+                        ];
+                        // $order_details[$key]['excludes'] = [];
+                        // $order_details[$key]['variations'] = [];
+                        //$amount_product += $this->options
+                        // ->whereIn('id', $variation['option_id'])
+                        // ->sum('price');
+                    }
+                }
+                $discount_item = $product_item->discount;
+                $tax_item = $product_item->tax;
+                $tax = $this->settings
+                ->where('name', 'tax')
+                ->orderByDesc('id')
+                ->first();
+                if (!empty($tax_item)) {
+                    if (!empty($tax)) {
+                        $tax = $tax->setting;
+                    }
+                    else {
+                        $tax = $this->settings
+                        ->create([
+                            'name' => 'tax',
+                            'setting' => 'included',
+                        ]);
+                        $tax = $tax->setting;
+                    }
+                    // if ($tax_item->type == 'precentage') { 
+                    //     $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
+                    // }
+                    // else{ 
+                    //     $amount_product = $amount_product + $tax_item->amount;
+                    // }
+                }
+                // if (!empty($discount_item)) {
+                //     if ($discount_item->type == 'precentage') { 
+                //         $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
+                //     }
+                //     else{ 
+                //         $amount_product = $amount_product - $discount_item->amount;
+                //     }
+                // } 
+            }
+        } 
+        $order->cart = json_encode($order_details);
+        if($request->order_status){
+            $order->prepration_status = $request->order_status;
+        }
+        $order->save();
+
+        return [
+            'payment' => $order,
+            'orderItems' => $order_details,
+            'items' => $items,
+        ];
+    }
+
+    public function order_format($order, $locale = "en"){
+        $order_data = [];
+        foreach ($order->cart ?? $order as $key => $item) {
+            if(isset($item->product)){
+                $product = $item->product[0]->product;
+                $product->name = TranslationTbl::
+                where("locale", $locale)
+                ->where("key", $product->name)
+                ->orderByDesc("id")
+                ->first()->value ?? $product->name;
+                $product->description = TranslationTbl::
+                where("locale", $locale)
+                ->where("key", $product->description)
+                ->orderByDesc("id")
+                ->first()->value ?? $product->description;
+                unset($product->addons);
+                unset($product->variations);
+                $variation = [];
+                $addons = [];
+                // $item->addons->addon->count = $item->addons->count;
+                // $item->variations->variation->options = $item->variations->options;
+                foreach ($item->variations as $key => $element) {
+                    $options = [];
+                    foreach ($element->options as $value) {
+                        $value->name = TranslationTbl::
+                        where("locale", $locale)
+                        ->where("key", $value->name)
+                        ->orderByDesc("id")
+                        ->first()->value ?? $value->name;
+                        $options[] = $value;
+                    }
+                    $element->variation->options = $options;
+                    unset($element->options);
+                    $element->variation->name = TranslationTbl::
+                    where("locale", $locale)
+                    ->where("key", $element->variation->name)
+                    ->orderByDesc("id")
+                    ->first()->value ?? $element->variation->name;
+                    $variation[] = $element->variation; 
+                }
+                foreach ($item->addons as $key => $element) {
+                    $element->addon->count = $element->count;
+                    unset($element->count);
+                    $element->addon->name = TranslationTbl::
+                    where("locale", $locale)
+                    ->where("key", $element->addon->name)
+                    ->orderByDesc("id")
+                    ->first()->value ?? $element->addon->name;
+                    $addons[] = $element->addon;
+                }
+                $order_data[$key] = $product;
+                $order_data[$key]->cart_id = $order->id;
+                $order_data[$key]->product_index = $key;
+                $order_data[$key]->count = $item->product[0]->count;
+                $order_data[$key]->prepration = $order->prepration_status ?? $item->product[0]->prepration ?? null;
+                $order_data[$key]->excludes = $item->excludes;
+                $order_data[$key]->extras = $item->extras;
+                $order_data[$key]->variation_selected = $variation;
+                $order_data[$key]->addons_selected = $addons;
+            }
+
+            return array_values($order_data);
+        }
+    }
+
+    public function takeaway_order_format($order){
+        $order_data = [];
+        foreach ($order->order_details ?? $order as $key => $item) {
+            $product = $item->product[0]->product;
+            $product->notes = $item->product[0]->notes;
+            $product->count = $item->product[0]->count;
+            unset($product->addons);
+            unset($product->variations);
+            $variation = [];
+            $addons = [];
+            // $item->addons->addon->count = $item->addons->count;
+            // $item->variations->variation->options = $item->variations->options;
+            foreach ($item->variations as $key => $element) {
+                $element->variation->options = $element->options;
+                unset($element->options);
+                $variation[] = $element->variation;
+            }
+            foreach ($item->addons as $key => $element) {
+                $element->addon->count = $element->count;
+                unset($element->count);
+                $addons[] = $element->addon;
+            }
+            $order_data[$key] = $product;
+            $order_data[$key]->cart_id = $order->id; 
+            $order_data[$key]->count = $item->product[0]->count; 
+            $order_data[$key]->excludes = $item->excludes;
+            $order_data[$key]->extras = $item->extras;
+            $order_data[$key]->variation_selected = $variation;
+            $order_data[$key]->addons_selected = $addons;
+        }
+
+        return $order_data;
+    }
+
     public function takeaway_kitchen_format($order){
         $order_data = [];
         $kitchen_order = [];
@@ -1829,7 +852,8 @@ class OrderController extends Controller
                     $query->where('categories.id', $product['category_id'])
                     ->orWhere('categories.id', $product['sub_category_id']);
                 });
-            }) 
+            })
+            ->where('branch_id', auth()->user()->branch_id)
             ->first();
             if(!empty($kitchen) && $kitchen->type == "kitchen"){ 
                 $locale = Setting::
@@ -1936,5 +960,170 @@ class OrderController extends Controller
             "kitchen_items" => $kitchen_items,
             "kitchen_order" => $kitchen_order,
         ];
+    }
+
+
+    public function dine_in_print($order, $locale = "ar", $key = 0){
+        $order_data = [];
+        foreach ($order->cart ?? $order as $key => $item) {
+            if(isset($item->product)){
+                $product = $item->product[0]->product;
+                // Kitchen
+                $kitchen = $this->kitchen
+                ->where(function($q) use($product){
+                    $q->whereHas('products', function($query) use ($product){
+                        $query->where('products.id', $product->id);
+                    })
+                    ->orWhereHas('category', function($query) use ($product){
+                        $query->where('categories.id', $product->category_id)
+                        ->orWhere('categories.id', $product->sub_category_id);
+                    });
+                })
+                ->where('branch_id', auth()->user()->branch_id)
+                ->first();
+                if(!empty($kitchen) && $kitchen->type == "kitchen"){ 
+                    $locale = Setting::
+                    where("name", "kitchen_lang")
+                    ->first()?->setting ?? 'ar';
+                }
+                elseif(!empty($kitchen) && $kitchen->type == "brista"){ 
+                    $locale = Setting::
+                    where("name", "brista_lang")
+                    ->first()?->setting ?? 'ar';
+                }
+
+                $product_name =  TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $product->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $product->name;
+                unset($product->addons);
+                unset($product->variations);
+                $variation = [];
+                $addons = [];
+                $excludes = [];
+                $extras = [];
+                foreach ($item->variations as $key => $element) {
+                    $options_items = $element->options;
+                    $options = [];
+                    foreach ($options_items as $value) {
+                        $option_element = TranslationTbl::
+                        where("locale", $locale)
+                        ->where('key', $value->name)
+                        ->orderByDesc("id")
+                        ->first()
+                        ?->value ?? $value->name;
+                        $options[] = ["id" => $value->id, "name" => $option_element];
+                    }  
+                    $variation_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $element?->variation?->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $element?->variation?->name;
+                    $variation[] = [
+                        "id" => $element?->variation?->id, 
+                        'name' => $variation_element,
+                        'options' => $options,
+                    ]; 
+                } 
+                foreach ($item->addons as $key => $element) {
+                    $element->addon->count = $element->count;
+                    unset($element->count);
+                    $addon_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $element->addon->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $element->addon->name;
+                    $addons[] = [
+                        "id" => $element->addon->id, 
+                        'name' => $addon_element,
+                        'count' => $element->addon->count,
+                    ];
+                }
+                foreach ($item->excludes as $element) {
+                    $exclude_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $element->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $element->name;
+                    $excludes[] = [
+                        "id" => $element->id,
+                        'name' => $exclude_element
+                    ];
+                }
+                foreach ($item->extras as $element) {
+                    $extra_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $element->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $element->name;
+                    $extras[] = [
+                        "id" => $element->id,
+                        'name' => $extra_element,
+                    ];
+                } 
+                // $item->addons->addon->count = $item->addons->count;
+                // $item->variations->variation->options = $item->variations->options;
+                $order_data[$key]['id'] = $product->id;
+                $order_data[$key]['name'] = $product_name;
+                $order_data[$key]['weight'] = $product->weight_status;
+                $order_data[$key]['category_id'] = $product->category_id;
+                $order_data[$key]['sub_category_id'] = $product->sub_category_id;
+                $order_data[$key]['notes'] = $item->product[0]->notes;
+                $order_data[$key]['count'] = $item->product[0]->count;
+                $order_data[$key]['cart_id'] = $order->id;
+                $order_data[$key]['excludes'] = $excludes;
+                $order_data[$key]['extras'] = $extras;
+                $order_data[$key]['variation_selected'] = $variation;
+                $order_data[$key]['addons_selected'] = $addons;
+            }
+
+            return array_values($order_data);
+        }
+    }
+
+    public function kitechen_cart($item, $kitchen_order){ 
+        // foreach ($item as $element) {
+        //     $kitchen_item = KitchenItem::create([
+        //         "kitchen_order_id" => $kitchen_order->id,
+        //         "product_id" => $element['id'],
+        //        // 'note' => $element->note,
+        //     ]);
+        //     foreach ($element['extras'] as $value) {
+        //         KItemExtra::create([
+        //             "kitchen_item_id" => $kitchen_item->id,
+        //             "extra_id" => $value['id'],
+        //         ]);
+        //     }
+        //     foreach ($element['excludes'] as $value) {
+        //         KItemExclude::create([
+        //             "kitchen_item_id" => $kitchen_item->id,
+        //             "exclude_id" => $value['id'],
+        //         ]);
+        //     }
+        //     foreach ($element['addons_selected'] as $value) {
+        //         KItemAddon::create([
+        //             "kitchen_item_id" => $kitchen_item->id,
+        //             "addon_id" => $value['id'],
+        //         ]);
+        //     }
+        //     foreach ($element['variation_selected'] as $value) {
+        //         $variation = KItemVriation::create([
+        //             "kitchen_item_id" => $kitchen_item->id,
+        //             "variation_id" => $value['id'],
+        //         ]);
+        //         foreach ($value['options'] as $value_item) {
+        //             KItemOption::create([
+        //                 "kitchen_variation_id" => $variation->id,
+        //                 "option_id" => $value_item['id'],
+        //             ]);
+        //         }
+        //     }
+        // }
     }
 }
