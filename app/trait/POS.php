@@ -51,6 +51,7 @@ trait POS
         'due_module',
         'module_order_number',
         "service_fees",
+        "service_fees_id",
     ];
 
     public function take_away_make_order($request, $paymob = 0){

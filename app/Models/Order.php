@@ -23,6 +23,7 @@ class Order extends Model
         'rate',
         'comment',
         'service_fees',
+        'service_fees_id',
         'pos',
         'user_id',
         'branch_id',
@@ -76,7 +77,7 @@ class Order extends Model
         'due_module',
         'transfer_from_id',
         'void_id',
-        'void_reason',
+        'void_reason', 
         "is_read",
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
@@ -89,6 +90,10 @@ class Order extends Model
         return $this->created_at->format('H:i:s');
     }
 
+    public function service_fees_item(){
+        return $this->belongsTo(ServiceFees::class, 'service_fees_id');
+    }
+    
     public function transfer_from(){
         return $this->belongsTo(Branch::class, 'transfer_from_id');
     }

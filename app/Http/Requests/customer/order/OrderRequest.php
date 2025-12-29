@@ -44,6 +44,9 @@ class OrderRequest extends FormRequest
             'products.*.note' => ['sometimes'],
             'sechedule_slot_id' => ['exists:schedule_slots,id'],
             'coupon_id' => ['exists:coupons,id'],
+
+            'service_fees_id' => ["exists:service_fees,id"],
+            'service_fees' => ["numeric"],
         ];
     }
 

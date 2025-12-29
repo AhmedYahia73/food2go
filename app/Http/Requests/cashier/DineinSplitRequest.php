@@ -41,7 +41,7 @@ class DineinSplitRequest extends FormRequest
             'free_discount' => ['numeric', 'sometimes'],
             'due_module' => ['numeric', 'sometimes'],
             'module_order_number' => ['sometimes'],
-                      'products' => ['required', 'array'],
+            'products' => ['required', 'array'],
             'products.*.product_id' => ['exists:products,id', 'required'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],
@@ -54,6 +54,9 @@ class DineinSplitRequest extends FormRequest
 
             'products.*.price' => ['numeric', 'required'],
             'products.*.addons.*.price' => ['numeric', 'required'],
+
+            'service_fees_id' => ["exists:service_fees,id"],
+            'service_fees' => ["numeric"],
         ];
     }
 

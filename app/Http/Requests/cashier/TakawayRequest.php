@@ -57,6 +57,9 @@ class TakawayRequest extends FormRequest
             'free_discount' => ['numeric', 'sometimes'],
             'due_module' => ['numeric', 'sometimes'],
             'module_order_number' => ['sometimes'],
+
+            'service_fees_id' => ["exists:service_fees,id"],
+            'service_fees' => ["numeric"],
         ];
     }
 

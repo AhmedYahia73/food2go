@@ -59,6 +59,9 @@ class DeliveryRequest extends FormRequest
             'due_module' => ['numeric', 'sometimes'],
             'module_id' => ['exists:group_products,id'],
             'module_order_number' => ['sometimes'],
+
+            'service_fees_id' => ["exists:service_fees,id"],
+            'service_fees' => ["numeric"],
         ];
     }
 

@@ -142,7 +142,11 @@ trait OrderFormat
             "order_date" => $order->created_at->format('Y-m-d'),
             "order_time" => $order->created_at->format('h:i A'),
             "status_payment" => $order->status_payment,
-            "service_fees" => $order->service_fees,
+            "service_fees_item" => [
+                'id' => $order?->service_fees_item?->id ?? null,
+                'type' => $order?->service_fees_item?->type ?? null,
+                'amount' => $order?->service_fees_item?->amount ?? null,
+            ],
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch
@@ -321,6 +325,11 @@ trait OrderFormat
             "order_date" => $order->created_at->format('Y-m-d'),
             "order_time" => $order->created_at->format('h:i A'),
             "status_payment" => $order->status_payment,
+            "service_fees_item" => [
+                'id' => $order?->service_fees_item?->id ?? null,
+                'type' => $order?->service_fees_item?->type ?? null,
+                'amount' => $order?->service_fees_item?->amount ?? null,
+            ],
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch
