@@ -15,6 +15,8 @@ use App\Http\Controllers\api\admin\deal_order\DealOrderController;
 
 use App\Http\Controllers\api\admin\banner\BannerController;
 
+use App\Http\Controllers\api\admin\bundle\BundleController;
+
 use App\Http\Controllers\api\admin\point_offers\PointOffersController;
 
 use App\Http\Controllers\api\admin\report\ReportController;
@@ -160,6 +162,17 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
     
+    Route::controller(BundleController::class)
+    ->prefix('bundles')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');
+        Route::get('/bundle_item/{id}', 'bundle_item');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
     Route::controller(InventoryMaterialController::class)
     ->prefix('inventory/material')->group(function(){
         Route::get('/lists', 'lists');
