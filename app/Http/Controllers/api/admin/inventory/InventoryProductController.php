@@ -205,15 +205,15 @@ class InventoryProductController extends Controller
             ],400);
         }
   
-        $product_item = PurchaseProduct::
-        where("id", $id)
-        ->first();
         $InventoryList = InventoryList::
         where("id", $id)
         ->with("store")
         ->first();
         $arr_items = [];
         foreach ($request->products as $item) {
+            $product_item = PurchaseProduct::
+            where("id", $item['id'])
+            ->first();
             $cost = 0;
             $stock = $this->stocks
             ->where("product_id", $item['id'])

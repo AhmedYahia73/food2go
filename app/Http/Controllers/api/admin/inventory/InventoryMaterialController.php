@@ -199,6 +199,9 @@ class InventoryMaterialController extends Controller
         ->with("store")
         ->first();
         foreach ($request->materials as $item) {
+            $material_item = Material::
+            where("id", $item['id'])
+            ->first();
             $cost = 0;
             $stock = $this->stocks
             ->where("material_id", $item['id'])
