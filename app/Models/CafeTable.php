@@ -20,6 +20,7 @@ class CafeTable extends Model
         'is_merge',
         'main_table_id',
         'preparation_num',
+        'start_timer',
     ];
     protected $appends = ['qr_code_link'];
 

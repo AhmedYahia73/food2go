@@ -18,6 +18,11 @@ class Bundle extends Model
     ];
     protected $appends = ['image_link'];
 
+    public function translations()
+    {
+        return $this->morphMany(TranslationTbl::class, 'translatable');
+    }
+
     public function getImageLinkAttribute(){
         if(isset($this->attributes['image'])){
             return url("storage/" . $this->attributes['image']);

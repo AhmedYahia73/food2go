@@ -1192,11 +1192,24 @@ class CashierMakeOrderController extends Controller
         ->orWhere('main_table_id', $id)
         ->pluck('id')
         ->toArray();
-        $this->cafe_table
-        ->whereIn('id', $tables_ids)
-        ->update([
-            'current_status' => $request->current_status
-        ]);
+        $table_item = $this->cafe_table
+        ->where('id', $id) 
+        ->first();
+        if($request->current_status == "not_available_pre_order" || $table_item?->current_status == "available"){
+            $this->cafe_table
+            ->whereIn('id', $tables_ids)
+            ->update([
+                'start_timer' => now(),
+                'current_status' => $request->current_status
+            ]);
+        }
+        else{
+            $this->cafe_table
+            ->whereIn('id', $tables_ids)
+            ->update([
+                'current_status' => $request->current_status
+            ]);
+        }
 
         return response()->json([
             'success' => $request->current_status

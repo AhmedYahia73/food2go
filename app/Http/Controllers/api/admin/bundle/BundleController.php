@@ -116,8 +116,14 @@ class BundleController extends Controller
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
-            'name' => ['required'],
-            'description' => ['sometimes'],
+            'bundle_names' => ['required', "array"],
+            'bundle_names.*.tranlation_id' => ['required'],
+            'bundle_names.*.tranlation_name' => ['required', "exists:translations,name"],
+            'bundle_names.*.name' => ['required'],
+            'bundle_descriptions' => ["array"],
+            'bundle_descriptions.*.tranlation_id' => ['required'],
+            'bundle_descriptions.*.tranlation_name' => ['required', "exists:translations,name"],
+            'bundle_descriptions.*.description' => ['required'],
             'image' => ['required'],
             'discount_id' => ['sometimes', 'exists:discounts,id'],
             'tax_id' => ['sometimes', 'exists:taxes,id'],
@@ -133,10 +139,12 @@ class BundleController extends Controller
             ],400);
         }
 
+        $bundle_names = $request->bundle_names[0];
+        $bundle_descriptions = $request->bundle_descriptions ? $request->bundle_descriptions[0] : [];
         $imag_path = $this->upload($request, 'image', 'admin/bundle');
         $bundle = Bundle::create([
-            'name' => $request->name,
-            'description' => $request->description ?? null,
+            'name' => $bundle_names['name'],
+            'description' => isset($bundle_descriptions['description']) ? $bundle_descriptions['description'] : null,
             'image' => $imag_path,
             'discount_id' => $request->discount_id,
             'tax_id' => $request->tax_id,
@@ -145,6 +153,26 @@ class BundleController extends Controller
             'points' => $request->points,
         ]);
         $bundle->products()->attach($request->products);
+        foreach ($request->bundle_names as $item) {
+            if (!empty($item['name'])) {
+                $bundle->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $bundle_names['name'],
+                    'value' => $item['name']
+                ]);
+            }
+        }
+        if($request->bundle_descriptions){ 
+            foreach ($request->bundle_descriptions as $item) {
+                if (!empty($item['bundle_descriptions'])) {
+                    $bundle->translations()->create([
+                        'locale' => $item['tranlation_name'],
+                        'key' => $bundle_descriptions['description'],
+                        'value' => $item['description']
+                    ]);
+                }
+            }
+        }
 
         return response()->json([
             "success" => "You add bundle success"
@@ -170,6 +198,8 @@ class BundleController extends Controller
             ],400);
         }
 
+        $bundle_names = $request->bundle_names[0];
+        $bundle_descriptions = $request->bundle_descriptions ? $request->bundle_descriptions[0] : [];
         $bundle = Bundle::
         where("id", $id)
         ->first();
@@ -184,8 +214,8 @@ class BundleController extends Controller
             $this->deleteImage($bundle->image);
         }
         $bundle->update([
-            'name' => $request->name,
-            'description' => $request->description ?? null,
+            'name' => $bundle_names['name'],
+            'description' => isset($bundle_descriptions['description']) ? $bundle_descriptions['description'] : null,
             'image' => $request->image ? $imag_path : $bundle->image,
             'discount_id' => $request->discount_id,
             'tax_id' => $request->tax_id,
@@ -194,6 +224,27 @@ class BundleController extends Controller
             'points' => $request->points,
         ]);
         $bundle->products()->sync($request->products);
+
+        foreach ($request->bundle_names as $item) {
+            if (!empty($item['name'])) {
+                $bundle->translations()->create([
+                    'locale' => $item['tranlation_name'],
+                    'key' => $bundle_names['name'],
+                    'value' => $item['name']
+                ]);
+            }
+        }
+        if($request->bundle_descriptions){ 
+            foreach ($request->bundle_descriptions as $item) {
+                if (!empty($item['bundle_descriptions'])) {
+                    $bundle->translations()->create([
+                        'locale' => $item['tranlation_name'],
+                        'key' => $bundle_descriptions['description'],
+                        'value' => $item['description']
+                    ]);
+                }
+            }
+        }
 
         return response()->json([
             "success" => "You update bundle success"
