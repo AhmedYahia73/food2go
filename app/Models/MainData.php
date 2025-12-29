@@ -23,6 +23,7 @@ class MainData extends Model
         'third_color',
         'instagram',
         'facebook',
+        "continues_status",
     ];
     protected $appends = ['image1_link', 'image2_link', 
     'image3_link', 'image4_link', 'image5_link', 'image6_link'

@@ -15,6 +15,7 @@ use App\Models\FinantiolAcounting;
 use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
 use App\Models\GroupProduct;
+use App\Models\Setting;
 use App\Models\Expense;
 
 class CashierReportsController extends Controller
@@ -23,7 +24,7 @@ class CashierReportsController extends Controller
     private Order $orders, private PaymentMethod $payment_methods
     , private TimeSittings $TimeSittings, private FinantiolAcounting $financial_account,
     private OrderFinancial $order_financial, private CashierBalance $cashier_balance,
-    private Expense $expenses){}
+    private Expense $expenses, private Setting $settings){}
     
     public function cashier_reports(Request $request){
     //     $cashier_balance = $this->cashier_balance;
@@ -522,9 +523,9 @@ class CashierReportsController extends Controller
        ->orderBy('payment_method_id')
        ->where('status', 1)
        ->get();
-    //    return response()->json([
-    //     'orders' => $orders
-    //    ]);
+        //    return response()->json([
+        //     'orders' => $orders
+        //    ]);
         $shifts_data = [];
         foreach ($cashier_shift as $item) {
             $orders_shift = $orders->where('shift', $item->shift)->values();
@@ -646,9 +647,9 @@ class CashierReportsController extends Controller
        ->orderBy('payment_method_id')
        ->where('status', 1)
        ->get();
-    //    return response()->json([
-    //     'orders' => $orders
-    //    ]);
+        //    return response()->json([
+        //     'orders' => $orders
+        //    ]);
         $shifts_data = [];
         foreach ($cashier_shift as $item) {
             $orders_shift = $orders->where('shift', $item->shift)->values();
@@ -1112,6 +1113,134 @@ class CashierReportsController extends Controller
         ]);
     }
 
+    public function order_history(Request $request){
+        $validator = Validator::make($request->all(), [
+            'password' => ['required'],
+            'date' => ['date'], 
+            'date_to' => ['date'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        if(!password_verify($request->input('password'), $request->user()->password)){
+            return response()->json([
+                "errors" => "password is wrong",
+            ], 400);  
+        }
+        if(!$request->user()->manger){
+            return response()->json([
+                "errors" => "You are not manager",
+            ], 400);  
+        }
+
+        if ($time_sittings->count() > 0) {
+            $from_time = $time_sittings[0]->from;
+            $date_to = $request->date_to; 
+            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = $request->date . ' ' . $from_time;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+            if ($start >= $end) {
+                $end = $end->addDay();
+            } 
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+        } 
+        else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+
+        $orders = $this->orders
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        })
+        ->where(function($query){
+            $query->where("take_away_status", "pick_up")
+            ->where("order_type", "take_away")
+            ->orWhere("delivery_status", "done")
+            ->where("order_type", "delivery")
+            ->orWhere("order_type", "dine_in");
+
+        })
+        ->whereBetween("created_at", [$start, $end]) 
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_active', 1)
+        ->where('amount', "<=", $fake_order_limit)
+        ->orderByDesc('id')
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+            $query->select('id', 'zone_id')
+            ->with('zone:id,zone');
+        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+        ->get()
+        ->map(function($item) use($delivery_time){
+            $order_type = "";
+            $food_preparion_time = "00:00";
+            if ($item->order_type == "dine_in") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                $order_type = "pickup";
+            }
+            elseif ($item->order_type == "take_away") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                $order_type = $item->take_away_status;
+            }
+            elseif ($item->order_type == "delivery") {
+                $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                $time2 = Carbon::parse($delivery_time);
+                $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                $result = gmdate('i:s', $totalSeconds);
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
+                $order_type = $item->delivery_status;
+            }
+            return [ 
+                'id' => $item->id,
+                'order_number' => $item->order_number,
+                'created_at' => $item->created_at,
+                'amount' => $item->amount,
+                'operation_status' => $item->operation_status,
+                'order_type' => $item->order_type,
+                'order_status' => $order_type,
+                'type' => $item->pos ? 'Point of Sale' : "Online Order",
+                'source' => $item->source,
+                'status' => $item->status,
+                'points' => $item->points, 
+                'rejected_reason' => $item->rejected_reason,
+                'transaction_id' => $item->transaction_id,
+                'food_preparion_time' => $food_preparion_time,
+                'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+                'branch' => ['name' => $item?->branch?->name, ],
+                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                'admin' => ['name' => $item?->admin?->name,],
+                'payment_method' => ['id' => $item?->payment_method?->id,
+                                    'name' => $item?->payment_method?->name],
+                'financial_accountigs' => $item->financial_accountigs,
+                'schedule' => ['name' => $item?->schedule?->name],
+                'delivery' => ['name' => $item?->delivery?->name], 
+            ];
+        });
+
+        return response()->json([
+            "orders" => $orders, 
+        ]);
+    }
+
     public function shifts_cashiers($shift_item){
         
         if(auth()->user()->report != "unactive"){
@@ -1389,6 +1518,379 @@ class CashierReportsController extends Controller
             'perimission' => false,
             'financial_accounts' => null, 
             'cashier_man' => $shift_item?->cashier_man ?? null,
+        ]);
+    }
+
+    public function order_today(Request $request){
+        $validator = Validator::make($request->all(), [
+            'password' => ['required'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }//
+        $fake_order_password = Setting::
+        where("name", "fake_order_password")
+        ->first()?->setting ?? null; 
+        if(empty($fake_order_password) || !password_verify($request->input('password'), $request->user()->password)){
+            return response()->json([
+                "errors" => "password is wrong",
+            ], 400);  
+        } 
+
+        $fake_order_precentage = Setting::
+        where("name", "fake_order_precentage")
+        ->first()?->setting ?? null;
+        $fake_order_limit = Setting::
+        where("name", "fake_order_limit")
+        ->first()?->setting ?? null;
+        $fake_order_status = Setting::
+        where("name", "fake_order_status")
+        ->first()?->setting ?? null;
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        if ($time_sittings->count() > 0) {
+            $from_time = $time_sittings[0]->from;
+            $date_to = date("Y-m-d"); 
+            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date("Y-m-d") . ' ' . $from_time;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+            if ($start >= $end) {
+                $end = $end->addDay();
+            } 
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+
+        // ___________________________________________________________
+        
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
+        $orders = $this->orders
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        })
+        ->where(function($query){
+            $query->where("take_away_status", "pick_up")
+            ->where("order_type", "take_away")
+            ->orWhere("delivery_status", "done")
+            ->where("order_type", "delivery")
+            ->orWhere("order_type", "dine_in");
+
+        })
+        ->whereBetween("created_at", [$start, $end]) 
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_active', 1) 
+        ->orderByDesc('id')
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+            $query->select('id', 'zone_id')
+            ->with('zone:id,zone');
+        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+        ->get()
+        ->map(function($item) use($delivery_time){
+            $order_type = "";
+            $food_preparion_time = "00:00";
+            if ($item->order_type == "dine_in") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                $order_type = "pickup";
+            }
+            elseif ($item->order_type == "take_away") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                $order_type = $item->take_away_status;
+            }
+            elseif ($item->order_type == "delivery") {
+                $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                $time2 = Carbon::parse($delivery_time);
+                $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                $result = gmdate('i:s', $totalSeconds);
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
+                $order_type = $item->delivery_status;
+            }
+            return [ 
+                'id' => $item->id,
+                'order_number' => $item->order_number,
+                'created_at' => $item->created_at,
+                'amount' => $item->amount,
+                'operation_status' => $item->operation_status,
+                'order_type' => $item->order_type,
+                'order_status' => $order_type,
+                'type' => $item->pos ? 'Point of Sale' : "Online Order",
+                'source' => $item->source,
+                'status' => $item->status,
+                'points' => $item->points, 
+                'rejected_reason' => $item->rejected_reason,
+                'transaction_id' => $item->transaction_id,
+                'food_preparion_time' => $food_preparion_time,
+                'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+                'branch' => ['name' => $item?->branch?->name, ],
+                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                'admin' => ['name' => $item?->admin?->name,],
+                'payment_method' => ['id' => $item?->payment_method?->id,
+                                    'name' => $item?->payment_method?->name],
+                'financial_accountigs' => $item->financial_accountigs,
+                'schedule' => ['name' => $item?->schedule?->name],
+                'delivery' => ['name' => $item?->delivery?->name], 
+            ];
+        });
+
+        return response()->json([
+            "orders" => $orders, 
+        ]);
+    }
+
+    public function filter_fake_order(Request $request){
+        $validator = Validator::make($request->all(), [
+            'date' => ['date'], 
+            'date_to' => ['date'], 
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        } 
+
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        if ($time_sittings->count() > 0) {
+            $from_time = $time_sittings[0]->from;
+            $date_to = date("Y-m-d"); 
+            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date("Y-m-d") . ' ' . $from_time;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+            if ($start >= $end) {
+                $end = $end->addDay();
+            } 
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+        $fake_order_precentage = Setting::
+        where("name", "fake_order_precentage")
+        ->first()?->setting ?? 100;
+        $fake_order_limit = Setting::
+        where("name", "fake_order_limit")
+        ->first()?->setting ?? 10000000;
+        $fake_order_precentage = intval($fake_order_precentage);
+        $fake_order_limit = intval($fake_order_limit);
+        if ($time_sittings->count() > 0) {
+            $from_time = $time_sittings[0]->from;
+            $date_to = $request->date_to; 
+            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = $request->date . ' ' . $from_time;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+            if ($start >= $end) {
+                $end = $end->addDay();
+            } 
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+
+        // ___________________________________________________________
+        
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
+        $orders = $this->orders
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        })
+        ->where(function($query){
+            $query->where("take_away_status", "pick_up")
+            ->where("order_type", "take_away")
+            ->orWhere("delivery_status", "done")
+            ->where("order_type", "delivery")
+            ->orWhere("order_type", "dine_in");
+
+        })
+        ->whereBetween("created_at", [$start, $end]) 
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where('order_active', 1)
+        ->where('amount', "<=", $fake_order_limit)
+        ->orderByDesc('id')
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+            $query->select('id', 'zone_id')
+            ->with('zone:id,zone');
+        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+        ->get()
+        ->map(function($item) use($delivery_time){
+            $order_type = "";
+            $food_preparion_time = "00:00";
+            if ($item->order_type == "dine_in") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                $order_type = "pickup";
+            }
+            elseif ($item->order_type == "take_away") {
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                $order_type = $item->take_away_status;
+            }
+            elseif ($item->order_type == "delivery") {
+                $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                $time2 = Carbon::parse($delivery_time);
+                $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                $result = gmdate('i:s', $totalSeconds);
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
+                $order_type = $item->delivery_status;
+            }
+            return [ 
+                'id' => $item->id,
+                'order_number' => $item->order_number,
+                'created_at' => $item->created_at,
+                'amount' => $item->amount,
+                'operation_status' => $item->operation_status,
+                'order_type' => $item->order_type,
+                'order_status' => $order_type,
+                'type' => $item->pos ? 'Point of Sale' : "Online Order",
+                'source' => $item->source,
+                'status' => $item->status,
+                'points' => $item->points, 
+                'rejected_reason' => $item->rejected_reason,
+                'transaction_id' => $item->transaction_id,
+                'food_preparion_time' => $food_preparion_time,
+                'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+                'branch' => ['name' => $item?->branch?->name, ],
+                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                'admin' => ['name' => $item?->admin?->name,],
+                'payment_method' => ['id' => $item?->payment_method?->id,
+                                    'name' => $item?->payment_method?->name],
+                'financial_accountigs' => $item->financial_accountigs,
+                'schedule' => ['name' => $item?->schedule?->name],
+                'delivery' => ['name' => $item?->delivery?->name], 
+            ];
+        })->filter(function ($order, $index) use($fake_order_precentage) {
+            $positionInBlock = $index % 10;
+            return $positionInBlock < ($fake_order_precentage / 10);
+        });
+        $orders2 = $this->orders
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        })
+        ->where(function($query){
+            $query->where("take_away_status", "!=", "pick_up")
+            ->where("order_type", "take_away")
+            ->orWhere("delivery_status", "!=", "done")
+            ->where("order_type", "delivery");
+
+        })
+        ->whereBetween("created_at", [$start, $end]) 
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->orderByDesc('id')
+        ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+            $query->select('id', 'zone_id')
+            ->with('zone:id,zone');
+        }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+        'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+        ->get()
+        ->map(function($item) use($delivery_time){
+            $order_type = "";
+            $food_preparion_time = "00:00";
+            if ($item->order_type == "dine_in") {
+                $order_type = "pickup";
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+            }
+            elseif ($item->order_type == "take_away") {
+                $order_type = $item->take_away_status;
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+            }
+            elseif ($item->order_type == "delivery") {
+                $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+                $time2 = Carbon::parse($delivery_time);
+                $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+                $result = gmdate('i:s', $totalSeconds);
+                $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
+                $order_type = $item->delivery_status;
+            }
+            return [ 
+                'id' => $item->id,
+                'order_number' => $item->order_number,
+                'created_at' => $item->created_at,
+                'preparing_time' => $item->created_at,
+                'amount' => $item->amount,
+                'operation_status' => $item->operation_status,
+                'order_type' => $item->order_type,
+                'type' => $item->pos ? 'Point of Sale' : "Online Order",
+                'order_status' => $order_type,
+                'source' => $item->source,
+                'status' => $item->status,
+                'points' => $item->points, 
+                'food_preparion_time' => $food_preparion_time, 
+                'rejected_reason' => $item->rejected_reason,
+                'transaction_id' => $item->transaction_id,
+                'user' => [
+                    'f_name' => $item?->user?->f_name,
+                    'l_name' => $item?->user?->l_name,
+                    'phone' => $item?->user?->phone],
+                'branch' => ['name' => $item?->branch?->name, ],
+                'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                'admin' => ['name' => $item?->admin?->name,],
+                'payment_method' => ['id' => $item?->payment_method?->id,
+                                    'name' => $item?->payment_method?->name],
+                'financial_accountigs' => $item->financial_accountigs,
+                'schedule' => ['name' => $item?->schedule?->name],
+                'delivery' => ['name' => $item?->delivery?->name], 
+            ];
+        });
+        $orders = collect($orders);
+        $orders2 = collect($orders2);
+
+        $orders = $orders->merge($orders2)
+        ->sortByDesc('id')
+        ->values();
+
+        return response()->json([
+            "orders" => $orders, 
         ]);
     }
 }

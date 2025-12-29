@@ -157,6 +157,7 @@ class KitchenController extends Controller
         // Keys
         // name, password, branch_id, status, type[kitchen, brista]
         // print_status, print_name, print_ip
+        // print_type => 
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'password' => 'required',
@@ -167,6 +168,7 @@ class KitchenController extends Controller
             'status' => 'required|boolean',
             'type' => 'required|in:kitchen,brista',
             'preparing_time' => 'required|date_format:H:i:s',
+            "print_type" => "required|in:usb,network",
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -194,6 +196,7 @@ class KitchenController extends Controller
             'print_ip' => 'sometimes',
             'status' => 'required|boolean',
             'preparing_time' => 'required|date_format:H:i:s',
+            "print_type" => "required|in:usb,network",
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

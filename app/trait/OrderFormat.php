@@ -128,7 +128,7 @@ trait OrderFormat
             "rate" => $order->rate,
             "comment" => $order->comment,
             "order_status" => $order->order_status,
-            "payment" => $order->payment_method_id !== 2 ? "Paid" : "UnPaid",
+            "payment" => $order->payment_method_id != 2 ? "Paid" : "UnPaid",
             "order_type" => $order->order_type,
             "total_tax" => $order->total_tax,
             "total_discount" => $order->total_discount,
@@ -142,6 +142,7 @@ trait OrderFormat
             "order_date" => $order->created_at->format('Y-m-d'),
             "order_time" => $order->created_at->format('h:i A'),
             "status_payment" => $order->status_payment,
+            "service_fees" => $order->service_fees,
             "branch" => [
                 "id" => $order?->branch?->id ?? null,
                 "name" => $order?->branch

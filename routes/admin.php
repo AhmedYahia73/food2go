@@ -65,6 +65,7 @@ use App\Http\Controllers\api\admin\void_order\VoidOrderController;
 
 use App\Http\Controllers\api\admin\order_precentage\OrderPrecentageController;
 
+use App\Http\Controllers\api\admin\settings\fake_order\FakeOrderController;
 use App\Http\Controllers\api\admin\settings\ScheduleSlotController;
 use App\Http\Controllers\api\admin\settings\ExtraController;
 use App\Http\Controllers\api\admin\settings\ExcludeController;
@@ -889,6 +890,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::delete('/delete/{id}', 'delete')->middleware('can:delete_extra');
         });
 
+        Route::controller(FakeOrderController::class)
+        ->prefix('fake_order')->group(function(){
+            Route::get('/', 'view');
+            Route::put('/status', 'status');
+            Route::post('/update', 'update');
+        });
+        
         Route::controller(LanguageSettingController::class)
         ->prefix('lang_setting')->group(function(){
             Route::get('/', 'view');

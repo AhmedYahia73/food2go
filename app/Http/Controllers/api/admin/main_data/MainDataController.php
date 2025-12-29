@@ -39,6 +39,7 @@ class MainDataController extends Controller
             'name' => 'required',
             'ar_name' => 'required',
             'logo' => 'required',
+            "continues_status"  => "required|boolean",
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -57,6 +58,7 @@ class MainDataController extends Controller
             'third_color' => $request->third_color ?? null,
             'instagram' => $request->instagram ?? null,
             'facebook' => $request->facebook ?? null,
+            "continues_status" => $request->continues_status ?? 1,
         ];
         if (empty($main_data)) {
             if (!empty($request->logo) && !is_string($request->logo)) {
