@@ -1783,8 +1783,7 @@ class OrderController extends Controller
                 'order' => json_encode($item),
                 'type' => $order->order_type,
                 'order_id' => $order->id,
-            ]);
-            $this->kitechen_cart($item, $kitchen_order );
+            ]); 
         }
         $order_kitchen = array_values($order_kitchen);
         foreach ($order_kitchen as $key => $value) {
