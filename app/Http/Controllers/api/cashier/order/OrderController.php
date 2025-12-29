@@ -1278,7 +1278,6 @@ class OrderController extends Controller
             "orders" => $orders
         ]);
     }
-    
 
     public function preparing_takeaway($request, $id){
         $order = $this->order
