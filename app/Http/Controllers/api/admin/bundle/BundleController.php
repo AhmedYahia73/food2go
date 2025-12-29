@@ -11,11 +11,12 @@ use App\Models\Bundle;
 use App\Models\Discount;
 use App\Models\Tax;
 use App\Models\Translation;
+use App\Models\TranslationTbl;
 
 class BundleController extends Controller
 {
     public function __construct(private Bundle $bundles,
-    private Translation $translations,){}
+    private Translation $translations, private TranslationTbl $translation_tbl){}
     use image;
 
     public function view(Request $request){
