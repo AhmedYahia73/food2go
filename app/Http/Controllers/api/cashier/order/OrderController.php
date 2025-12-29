@@ -30,6 +30,7 @@ use App\Models\VariationProduct;
 use App\Models\OptionProduct;
 use App\Models\CashierMan;
 use App\Models\VoidReason;
+use App\Models\LogOrder;
 
 class OrderController extends Controller
 {
@@ -41,7 +42,7 @@ class OrderController extends Controller
     private ExcludeProduct $excludes, private Addon $addons,
     private ExtraProduct $extras, private VariationProduct $variation,
     private OptionProduct $options, private CashierMan $cashier_man,
-    private VoidReason $void_reasons){}
+    private VoidReason $void_reasons, private LogOrder $log_order){}
     use Recipe;
     use POS;
     use OrderFormat;
