@@ -181,8 +181,15 @@ class BundleController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'name' => ['required'],
-            'description' => ['sometimes'],
+          
+            'bundle_names' => ['required', "array"],
+            'bundle_names.*.tranlation_id' => ['required'],
+            'bundle_names.*.tranlation_name' => ['required', "exists:translations,name"],
+            'bundle_names.*.name' => ['required'],
+            'bundle_descriptions' => ["array"],
+            'bundle_descriptions.*.tranlation_id' => ['required'],
+            'bundle_descriptions.*.tranlation_name' => ['required', "exists:translations,name"],
+            'bundle_descriptions.*.description' => ['required'],
             'image' => ['required'],
             'discount_id' => ['sometimes', 'exists:discounts,id'],
             'tax_id' => ['sometimes', 'exists:taxes,id'],
