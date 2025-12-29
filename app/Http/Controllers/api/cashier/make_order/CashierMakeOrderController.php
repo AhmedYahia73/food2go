@@ -1392,6 +1392,10 @@ class CashierMakeOrderController extends Controller
         ->whereIn('id', $request->cart_ids)
         ->where("prepration_status", "!=", "watting")
         ->first();
+        $cashier_man = $this->cashier_man
+        ->where('my_id', $request->manager_id)
+        ->first();
+
         if(!empty($order_cart)){
             $validator = Validator::make($request->all(), [  
                 'table_id' => 'required|exists:cafe_tables,id',
@@ -1402,22 +1406,19 @@ class CashierMakeOrderController extends Controller
                 return response()->json([
                     'errors' => $validator->errors(),
                 ],400);
+            } 
+            if(empty($cashier_man) || !password_verify($request->input('manager_password'), $cashier_man->password)){
+                return response()->json([
+                    'errors' => 'id or password is wrong'
+                ], 400);
+            }
+            if(!$cashier_man->void_order){
+                return response()->json([
+                    'errors' => "You don't have this premission"
+                ], 400);
             }
         }
-
-        $cashier_man = $this->cashier_man
-        ->where('my_id', $request->manager_id)
-        ->first();
-        if(empty($cashier_man) || !password_verify($request->input('manager_password'), $cashier_man->password)){
-            return response()->json([
-                'errors' => 'id or password is wrong'
-            ], 400);
-        }
-        if(!$cashier_man->void_order){
-            return response()->json([
-                'errors' => "You don't have this premission"
-            ], 400);
-        }
+ 
         $order_cart = $this->order_cart
         ->whereIn('id', $request->cart_ids)
         ->delete();
