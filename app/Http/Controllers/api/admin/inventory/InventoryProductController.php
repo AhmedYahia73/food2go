@@ -263,6 +263,8 @@ class InventoryProductController extends Controller
                 "category" => $one_item?->category?->name,
                 "product" => $one_item?->product?->name,
             ];
+            $stock->quantity = $item['quantity'];
+            $stock->save();
         }
 
         return response()->json([
