@@ -161,6 +161,7 @@ class PurchaseController extends Controller
             'quintity' => ['required', 'numeric'],
             'receipt' => ['required'],
             'date' => ['required', 'date'],
+            'financial' => ['array'],
             'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
             'financial.*.amount' => ['required', 'numeric'],
         ]);
@@ -189,20 +190,22 @@ class PurchaseController extends Controller
         }
         $purchase = $this->purchases
         ->create($purchaseRequest);
-        foreach ($request->financial as $item) {
-            $this->purchase_financial
-            ->create([
-                'purchase_id' => $purchase->id,
-                'financial_id' => $item['id'],
-                'amount' => $item['amount'],
-            ]);
+        if($request->financial){
+            foreach ($request->financial as $item) {
+                $this->purchase_financial
+                ->create([
+                    'purchase_id' => $purchase->id,
+                    'financial_id' => $item['id'],
+                    'amount' => $item['amount'],
+                ]);
 
-            $financial = FinantiolAcounting::
-            where("id", $item['id'])
-            ->first();
-            if($financial){
-                $financial->balance -= $item['amount'];
-                $financial->save();
+                $financial = FinantiolAcounting::
+                where("id", $item['id'])
+                ->first();
+                if($financial){
+                    $financial->balance -= $item['amount'];
+                    $financial->save();
+                }
             }
         }
         // deduct from stock
@@ -270,6 +273,8 @@ class PurchaseController extends Controller
             'total_coast' => ['required', 'numeric'],
             'quintity' => ['required', 'numeric'],
             'date' => ['required', 'date'],
+
+            'financial' => ['array'],
             'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
             'financial.*.amount' => ['required', 'numeric'],
         ]);
@@ -322,20 +327,22 @@ class PurchaseController extends Controller
         $this->purchase_financial
         ->where('purchase_id', $id)
         ->delete();
-        foreach ($request->financial as $item) {
-            $this->purchase_financial
-            ->create([
-                'purchase_id' => $id,
-                'financial_id' => $item['id'],
-                'amount' => $item['amount'],
-            ]);
+        if($request->financial){
+            foreach ($request->financial as $item) {
+                $this->purchase_financial
+                ->create([
+                    'purchase_id' => $id,
+                    'financial_id' => $item['id'],
+                    'amount' => $item['amount'],
+                ]);
 
-            $financial = FinantiolAcounting::
-            where("id", $item['id'])
-            ->first();
-            if($financial){
-                $financial->balance -= $item['amount'];
-                $financial->save();
+                $financial = FinantiolAcounting::
+                where("id", $item['id'])
+                ->first();
+                if($financial){
+                    $financial->balance -= $item['amount'];
+                    $financial->save();
+                }
             }
         }
         
