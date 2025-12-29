@@ -251,6 +251,8 @@ class InventoryMaterialController extends Controller
                 "category" => $one_item?->category?->name ?? null,
                 "material" => $one_item?->material?->name ?? null,
             ];
+            $stock->quantity = $item['quantity'];
+            $stock->save();
         }
 
         return response()->json([
