@@ -224,6 +224,7 @@ class BundleController extends Controller
             'points' => $request->points,
         ]);
         $bundle->products()->sync($request->products);
+        $bundle->translations()->delete();
 
         foreach ($request->bundle_names as $item) {
             if (!empty($item['name'])) {
