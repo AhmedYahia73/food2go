@@ -32,7 +32,7 @@ class PurchaseController extends Controller
     public function view(Request $request){
         $purchases = $this->purchases
         ->with('category', 'product', 'admin', 'store', 'unit', 
-        'material', 'material_category')
+        'material', 'material_category', 'financial')
         ->get()
         ->map(function($item){
             return [
