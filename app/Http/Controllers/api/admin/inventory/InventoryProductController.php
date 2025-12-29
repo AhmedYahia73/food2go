@@ -269,6 +269,7 @@ class InventoryProductController extends Controller
             ];
             if(!empty($stock)){
                 $stock->quantity = $item['quantity'];
+                $stock->actual_quantity = $item['quantity'];
                 $stock->save();
             }
             else{
