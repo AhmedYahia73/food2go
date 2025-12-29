@@ -56,7 +56,14 @@ class PurchaseController extends Controller
                 'admin' => $item?->admin?->name,
                 'store' => $item?->store?->name,
                 'type' => $item->type,
-                'financial' => $item?->financial,
+                'financial' => $item?->financial
+                ?->map(function($element){
+                    return [
+                        'id' => $element->id,
+                        'name' => $element->name,
+                        'amount' => $element?->pivot?->amount,
+                    ];
+                })
             ];
         });
 
