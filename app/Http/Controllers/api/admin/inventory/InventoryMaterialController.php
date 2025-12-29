@@ -202,6 +202,7 @@ class InventoryMaterialController extends Controller
             $cost = 0;
             $stock = $this->stocks
             ->where("material_id", $item['id'])
+            ->where("store_id", $InventoryList?->store_id)
             ->first();
             $stock_quintity = $stock->quantity ?? 0; 
             $purchase = $this->purchase
@@ -251,8 +252,20 @@ class InventoryMaterialController extends Controller
                 "category" => $one_item?->category?->name ?? null,
                 "material" => $one_item?->material?->name ?? null,
             ];
-            $stock->quantity = $item['quantity'];
-            $stock->save();
+            if(!empty($stock)){
+                $stock->quantity = $item['quantity'];
+                $stock->save();
+            }
+            else{
+                $this->stocks 
+                ->create([
+                    "category_id" => $material_item->category_id,
+                    "material_id" => $item['id'], 
+                    "store_id" => $InventoryList?->store_id,
+                    "quantity" => $item['quantity'],
+                    "actual_quantity" => $item['quantity'],
+                ]);
+            }
         }
 
         return response()->json([

@@ -197,7 +197,7 @@ class InventoryProductController extends Controller
         $validator = Validator::make($request->all(), [
             'products' => 'required|array',
             'products.*.id' => 'required|exists:purchase_products,id',
-            'products.*.quantity' => 'required|numeric',
+            'products.*.quantity' => 'required|numeric', 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -205,6 +205,9 @@ class InventoryProductController extends Controller
             ],400);
         }
   
+        $product_item = PurchaseProduct::
+        where("id", $id)
+        ->first();
         $InventoryList = InventoryList::
         where("id", $id)
         ->with("store")
@@ -214,6 +217,7 @@ class InventoryProductController extends Controller
             $cost = 0;
             $stock = $this->stocks
             ->where("product_id", $item['id'])
+            ->where("store_id", $InventoryList?->store_id)
             ->first();
             $stock_quintity = $stock->quantity ?? 0;
             $purchase = $this->purchase
@@ -263,8 +267,20 @@ class InventoryProductController extends Controller
                 "category" => $one_item?->category?->name,
                 "product" => $one_item?->product?->name,
             ];
-            $stock->quantity = $item['quantity'];
-            $stock->save();
+            if(!empty($stock)){
+                $stock->quantity = $item['quantity'];
+                $stock->save();
+            }
+            else{
+                $this->stocks 
+                ->create([
+                    "category_id" => $product_item->category_id,
+                    "product_id" => $item['id'], 
+                    "store_id" => $InventoryList?->store_id,
+                    "quantity" => $item['quantity'],
+                    "actual_quantity" => $item['quantity'],
+                ]);
+            }
         }
 
         return response()->json([
