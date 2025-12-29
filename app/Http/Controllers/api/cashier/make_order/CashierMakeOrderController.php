@@ -1393,19 +1393,16 @@ class CashierMakeOrderController extends Controller
         ->where("prepration_status", "!=", "watting")
         ->first();
         if(!empty($order_cart)){
-            return response()->json([
-                'errors' => 'Orders must be waiting',
-            ], 400);
-        }
-        $validator = Validator::make($request->all(), [  
-            'table_id' => 'required|exists:cafe_tables,id',
-            'manager_id' => 'required',
-            'manager_password' => 'required', 
-        ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
+            $validator = Validator::make($request->all(), [  
+                'table_id' => 'required|exists:cafe_tables,id',
+                'manager_id' => 'required',
+                'manager_password' => 'required', 
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ],400);
+            }
         }
 
         $cashier_man = $this->cashier_man
