@@ -1753,8 +1753,6 @@ class OrderController extends Controller
         ]);
     }
 
-    
-
     public function preparing_takeaway($id){
         $order = $this->orders
         ->where('id', $id)
@@ -1801,8 +1799,7 @@ class OrderController extends Controller
             'kitchen_items' => $order_kitchen,
         ];
     }
-    
-	 
+
     public function takeaway_kitchen_format($order){
         $order_data = [];
         $kitchen_order = [];
