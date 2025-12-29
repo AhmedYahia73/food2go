@@ -72,8 +72,10 @@ class PurchaseProductController extends Controller
         $product = $this->product 
         ->with("stock")
         ->get()
-        ->map(function($item) use($stocks, $purchase){
-            $stock = $item?->stock?->quantity ?? 0;
+        ->map(function($item) use($stocks, $purchase, $request){
+            $stock = $item?->stock_items
+            ?->where("store_id", $request->store_id)
+            ?->first()?->quantity ?? 0;
             $quantity_stock = $stock;
             $purchase = $purchase
             ->where("product_id", $item->id)

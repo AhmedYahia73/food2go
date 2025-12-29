@@ -24,4 +24,8 @@ class PurchaseProduct extends Model
     public function stock(){
         return $this->hasOne(PurchaseStock::class, 'product_id');
     }
+
+    public function stock_items(){
+        return $this->hasMany(PurchaseStock::class, 'product_id');
+    }
 }
