@@ -1015,6 +1015,7 @@ class OrderController extends Controller
                 'cashier_man_id' => $request->user()->id,
                 'cashier_id' => $request->user()->cashier_id,
             ]);
+            $this->preparing_takeaway($request, $id);
         }
         elseif($request->order_status == 'canceled'){
             // Key
@@ -1276,5 +1277,54 @@ class OrderController extends Controller
         return response()->json([
             "orders" => $orders
         ]);
+    }
+    
+
+    public function preparing_takeaway($request, $id){
+        $order = $this->order
+        ->where('id', $id)
+        ->first();  
+        $order_kitchen = [];
+        
+        $order_data = $this->takeaway_kitchen_format($order);
+        $order_items = collect($order_data['order_data']);
+        $kitchen_items = $order_data['kitchen_items'];
+        $kitchen_order = collect($order_data['kitchen_order']);
+  
+        foreach ($kitchen_order as $key => $item) {
+            $order_kitchen[$key] = [
+                "id" => $kitchen_items[$key]->id,
+                "name" => $kitchen_items[$key]->name,
+                "print_name" => $kitchen_items[$key]->print_name,
+                "print_ip" => $kitchen_items[$key]->print_ip,
+                "print_status" => $kitchen_items[$key]->print_status,
+                "print_type" => $kitchen_items[$key]->print_type,
+                "order" => $item,
+                "order_type" => $order->order_type,
+            ];
+            $kitchen_order = $this->kitchen_order
+            ->create([
+                'kitchen_id' => $key,
+                'order' => json_encode($item),
+                'type' => $order->order_type,
+                'order_id' => $order->id,
+            ]);
+            $this->kitechen_cart($item, $kitchen_order );
+        }
+        $order_kitchen = array_values($order_kitchen);
+        foreach ($order_kitchen as $key => $value) {
+            $items = collect($order_kitchen[$key]['order']);
+            $peice_items = $items
+            ->where("weight", 0)->sum("count");
+            $weight_items = $items
+            ->where("weight", 1)->count();
+            
+            $order_kitchen[$key]['order_count'] = $peice_items + $weight_items;
+        }
+
+        return [
+            'success' => $order_items,
+            'kitchen_items' => $order_kitchen,
+        ];
     }
 }
