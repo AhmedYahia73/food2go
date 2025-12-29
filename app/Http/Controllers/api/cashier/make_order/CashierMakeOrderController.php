@@ -1690,7 +1690,7 @@ class CashierMakeOrderController extends Controller
             $products[] = [
                 'count' => $count,
                 'price' => $price,
-                'note' => $note,
+                'note' => $item['note'],
                 'name' => $name,
                 'total' => $total,
                 "addons" => $addons,
