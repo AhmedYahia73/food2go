@@ -19,10 +19,11 @@ use App\Models\User;
 use App\Models\TimeSittings; 
 use App\Models\KitchenOrder;
 use App\Models\CompanyInfo;
+use App\Models\Kitchen;
+use App\Models\TranslationTbl;
 
 use App\trait\Recipe;
-use App\trait\OrderFormat;
-use App\trait\PlaceOrder;
+use App\trait\OrderFormat; 
 
 class OrderController extends Controller
 {
@@ -30,8 +31,7 @@ class OrderController extends Controller
     private Branch $branches, private Setting $settings, private User $user,
     private LogOrder $log_order, private TimeSittings $TimeSittings
     , private CompanyInfo $company_info, private KitchenOrder $kitchen_order){}
-    use OrderFormat;
-    use PlaceOrder;
+    use OrderFormat; 
     use Recipe;
 
     public function transfer_branch(Request $request, $id){
@@ -1556,6 +1556,10 @@ class OrderController extends Controller
                 'order_number' => $request->order_number ?? null,
             ]);
         }
+
+        if ($request->order_status == 'confirmed') { 
+            $this->preparing_takeaway($id);
+        }
         elseif($request->order_status == 'canceled'){
             // Key
             // admin_cancel_reason
@@ -1796,6 +1800,141 @@ class OrderController extends Controller
         return [
             'success' => $order_items,
             'kitchen_items' => $order_kitchen,
+        ];
+    }
+    
+	 
+    public function takeaway_kitchen_format($order){
+        $order_data = [];
+        $kitchen_order = [];
+        $kitchen_items = [];
+        foreach ($order->order_details ?? $order as $key => $item) {
+            $locale = 'ar';
+            $product = collect([]);
+            $product['id'] = $item->product[0]->product->id;
+            $product['name'] = $item->product[0]->product->name;
+            $product['category_id'] = $item->product[0]->product->category_id;
+            $product['sub_category_id'] = $item->product[0]->product->sub_category_id;
+            $product['notes'] = $item->product[0]->notes;
+            $product['count'] = $item->product[0]->count;
+            $product['weight'] = $item->product[0]->product->weight_status;
+
+            // kitchen
+            $kitchen = Kitchen::
+            where(function($q) use($product){
+                $q->whereHas('products', function($query) use ($product){
+                    $query->where('products.id', $product['id']);
+                })
+                ->orWhereHas('category', function($query) use ($product){
+                    $query->where('categories.id', $product['category_id'])
+                    ->orWhere('categories.id', $product['sub_category_id']);
+                });
+            }) 
+            ->first();
+            if(!empty($kitchen) && $kitchen->type == "kitchen"){ 
+                $locale = Setting::
+                where("name", "kitchen_lang")
+                ->first()?->setting ?? 'ar';
+            }
+            elseif(!empty($kitchen) && $kitchen->type == "brista"){ 
+                $locale = Setting::
+                where("name", "brista_lang")
+                ->first()?->setting ?? 'ar';
+            }
+
+            $product['name'] = TranslationTbl::
+            where("locale", $locale)
+            ->where('key', $product['name'])
+            ->orderByDesc("id")
+            ->first()
+            ?->value ?? $product['name'];
+
+            $variation = [];
+            $addons = [];
+            $excludes = [];
+            $extras = [];
+            // $item->addons->addon->count = $item->addons->count;
+            // $item->variations->variation->options = $item->variations->options;
+            foreach ($item->variations as $key => $element) {
+                $options_items = $element->options;
+                $options = [];
+                foreach ($options_items as $value) {
+                    $option_element = TranslationTbl::
+                    where("locale", $locale)
+                    ->where('key', $value->name)
+                    ->orderByDesc("id")
+                    ->first()
+                    ?->value ?? $value->name;
+                    $options[] = ["id" => $value->id, "name" => $option_element];
+                }  
+                $variation_element = TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $element?->variation?->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $element?->variation?->name;
+                $variation[] = [
+					"id" => $element?->variation?->id, 
+                    'name' => $variation_element,
+                    'options' => $options,
+                ]; 
+            } 
+            foreach ($item->addons as $key => $element) {
+                $element->addon->count = $element->count;
+                unset($element->count);
+                $addon_element = TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $element->addon->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $element->addon->name;
+                $addons[] = [
+					"id" => $element->addon->id, 
+                    'name' => $addon_element,
+                    'count' => $element->addon->count,
+                ];
+            }
+            foreach ($item->excludes as $element) {
+                $exclude_element = TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $element->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $element->name;
+                $excludes[] = [
+					"id" => $element->id,
+					'name' => $exclude_element
+				];
+            }
+            foreach ($item->extras as $element) {
+                $extra_element = TranslationTbl::
+                where("locale", $locale)
+                ->where('key', $element->name)
+                ->orderByDesc("id")
+                ->first()
+                ?->value ?? $element->name;
+                $extras[] = [
+					"id" => $element->id,
+					'name' => $extra_element,
+				];
+            } 
+            $order_data[$key] = $product;
+            $order_data[$key]['cart_id'] = $order->id; 
+            $order_data[$key]['count'] = $item->product[0]->count; 
+            $order_data[$key]['excludes'] = $excludes;
+            $order_data[$key]['extras'] = $extras;
+            $order_data[$key]['variation_selected'] = $variation;
+            $order_data[$key]['addons_selected'] = $addons;
+            if(!empty($kitchen)){
+                $kitchen_items[$kitchen->id] = $kitchen;
+                $kitchen_order[$kitchen->id][] = $order_data[$key];
+            }
+        }
+
+        return [
+            "order_data" => $order_data,
+            "kitchen_items" => $kitchen_items,
+            "kitchen_order" => $kitchen_order,
         ];
     }
 }
