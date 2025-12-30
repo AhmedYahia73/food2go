@@ -28,7 +28,7 @@ class DineinItemRequest extends FormRequest
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
             'captain_id' => ['sometimes', 'exists:captain_orders,id'],
-            'products' => ['required_unless:order_pending,1,true', 'array'],
+            'products' => ['array'],
             'products.*.product_id' => ['exists:products,id', 'required_unless:order_pending,1,true'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],
@@ -38,6 +38,9 @@ class DineinItemRequest extends FormRequest
             'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
             'products.*.count' => ['numeric', 'required', 'required_unless:order_pending,1,true'],
             'products.*.note' => ['sometimes'], 
+
+            'bundles' => ['array'],
+            'bundles.*' => ['required', 'exists:bundles,id'],
 
             'products.*.price' => ['numeric', 'required_unless:order_pending,1,true'],
             'products.*.addons.*.price' => ['numeric', 'required_unless:order_pending,1,true'],

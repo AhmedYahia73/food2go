@@ -28,7 +28,11 @@ class DineinOrderRequest extends FormRequest
             'amount' => ['required', 'numeric'], 
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'], 
-            'products' => ['required', 'array'],
+
+            'bundles' => ['array'],
+            'bundles.*' => ['required', 'exists:bundles,id'],
+
+            'products' => ['array'],
             'products.*.product_id' => ['exists:products,id', 'required'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],

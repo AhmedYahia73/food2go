@@ -4,7 +4,8 @@ namespace App\trait;
 
 use App\Models\Payment;
 use App\Models\FinantiolAcounting;
-use App\Models\BranchOff; 
+use App\Models\BranchOff;
+use App\Models\Bundle;
 
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -51,7 +52,7 @@ trait POS
         'due_module',
         'module_order_number',
         "service_fees",
-        "service_fees_id",
+        "service_fees_id", 
     ];
 
     public function take_away_make_order($request, $paymob = 0){
@@ -80,6 +81,7 @@ trait POS
        // $points = 0;
         $items = [];
         $order_details = [];
+        $bundle_arr = [];
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $product) {
@@ -121,7 +123,7 @@ trait POS
                     }
                 }
             }
-        } 
+        }
         // $orderRequest['points'] = $points;
         $order = $this->order
         ->create($orderRequest);
@@ -267,6 +269,30 @@ trait POS
             }
         }
 
+        if(isset($request->bundles)){
+            foreach ($request->bundles as $bundle_item) {
+                $bundle = Bundle::
+                where("id", $bundle_item)
+                ->with("products")
+                ->first();
+                $bundle_arr[] = [
+                    "id" => $bundle->id,
+                    "name" => $bundle->name,
+                    "price" => $bundle->price,
+                    "discount" => $bundle?->discount?->name,
+                    "tax" => $bundle?->tax?->name,
+                    "price" => $bundle->price,
+                    "products" => $bundle?->products
+                    ?->map(function($item){
+                        return [
+                            "id" => $item->id,
+                            "name" => $item->name,
+                        ];
+                    })
+                ];
+            }
+        }
+        
         return ['order_details' => $order_details];
     }
 

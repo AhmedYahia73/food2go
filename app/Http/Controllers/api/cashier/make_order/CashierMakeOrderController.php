@@ -264,40 +264,40 @@ class CashierMakeOrderController extends Controller
     
         // return response()->json(['message' => 'Receipt printed successfully']);
                 
-    try {
-        $connector = new WindowsPrintConnector("XP-370B"); 
-        // $connector = new NetworkPrintConnector("192.168.1.15", 9100); 
-        // Windows printer share name
-        // OR use NetworkPrintConnector("192.168.0.100", 9100);
+        try {
+            $connector = new WindowsPrintConnector("XP-370B"); 
+            // $connector = new NetworkPrintConnector("192.168.1.15", 9100); 
+            // Windows printer share name
+            // OR use NetworkPrintConnector("192.168.0.100", 9100);
 
-        $printer = new Printer($connector);
-        $printer->pulse();  // This command sends a pulse to open the cash drawer
-        // Print receipt content
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("My Store\n");
-        $printer->text("123 Market Street\n");
-        $printer->text("Tel: 0123456789\n");
-        $printer->feed();
+            $printer = new Printer($connector);
+            $printer->pulse();  // This command sends a pulse to open the cash drawer
+            // Print receipt content
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("My Store\n");
+            $printer->text("123 Market Street\n");
+            $printer->text("Tel: 0123456789\n");
+            $printer->feed();
 
-        $printer->setJustification(Printer::JUSTIFY_LEFT);
-        $printer->text("Item        Qty    Price\n");
-        $printer->text("--------------------------\n");
-        $printer->text("Coffee       2     40.00\n");
-        $printer->text("Donut        1     15.00\n");
-        $printer->text("--------------------------\n");
-        $printer->setJustification(Printer::JUSTIFY_RIGHT);
-        $printer->text("TOTAL:       55.00\n");
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("Item        Qty    Price\n");
+            $printer->text("--------------------------\n");
+            $printer->text("Coffee       2     40.00\n");
+            $printer->text("Donut        1     15.00\n");
+            $printer->text("--------------------------\n");
+            $printer->setJustification(Printer::JUSTIFY_RIGHT);
+            $printer->text("TOTAL:       55.00\n");
 
-        $printer->feed(2);
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("Thank you!\n");
-        $printer->cut();
-        $printer->close();
+            $printer->feed(2);
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("Thank you!\n");
+            $printer->cut();
+            $printer->close();
 
-        return response()->json(['message' => 'Printed successfully']);
-    } catch (\Exception $e) {
-        return response()->json(['errors' => 'Failed to print: ' . $e->getMessage()], 500);
-    }
+            return response()->json(['message' => 'Printed successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => 'Failed to print: ' . $e->getMessage()], 500);
+        }
     }
     
 
@@ -1195,8 +1195,8 @@ class CashierMakeOrderController extends Controller
         $table_item = $this->cafe_table
         ->where('id', $id) 
         ->first();
-//,,not_available_with_order, 
-// reserved, not_available_pre_order, not_available_but_checkout
+        //,,not_available_with_order, 
+        // reserved, not_available_pre_order, not_available_but_checkout
         
         if($table_item->current_status == "reserved" && $request?->current_status != "not_available_pre_order" 
         && $request?->current_status != "available" ){
@@ -1295,8 +1295,9 @@ class CashierMakeOrderController extends Controller
             'success' => 'You update status success',
             'kitchen_items' => $kitchen_items
         ]);
-    } 
-// kitchen_lang, brista_lang
+    }
+    
+    // kitchen_lang, brista_lang
     public function preparing_delivery($request, $id){
         $order = $this->order
         ->where('id', $id)

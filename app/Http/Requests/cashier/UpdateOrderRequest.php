@@ -27,7 +27,11 @@ class UpdateOrderRequest extends FormRequest
             'amount' => ['required', 'numeric'],
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'],
-            'products' => ['required_if:order_pending,false', 'array'],
+
+            'bundles' => ['array'],
+            'bundles.*' => ['required', 'exists:bundles,id'],
+
+            'products' => ['array'],
             'products.*.product_id' => ['exists:products,id', 'required_if:order_pending,false'],
             'products.*.exclude_id.*' => ['exists:exclude_products,id'],
             'products.*.extra_id.*' => ['exists:extra_products,id'],

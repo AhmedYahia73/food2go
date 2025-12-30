@@ -29,7 +29,11 @@ class TakawayRequest extends FormRequest
             'total_discount' => ['required', 'numeric'],
             'notes' => 'sometimes',
             'source' => 'sometimes',
-            'products' => ['required_unless:order_pending,1,true', 'array'],
+
+            'bundles' => ['array'],
+            'bundles.*' => ['required', 'exists:bundles,id'],
+
+            'products' => ['array'],
             'products.*.product_id' => ['exists:products,id', 'required_unless:order_pending,1,true'],
 
             'products.*.price' => ['numeric', 'required_unless:order_pending,1,true'],

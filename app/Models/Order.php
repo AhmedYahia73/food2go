@@ -79,6 +79,7 @@ class Order extends Model
         'void_id',
         'void_reason', 
         "is_read",
+        "bundle_id",
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
@@ -96,6 +97,10 @@ class Order extends Model
     
     public function transfer_from(){
         return $this->belongsTo(Branch::class, 'transfer_from_id');
+    }
+    
+    public function bundle(){
+        return $this->belongsTo(Bundle::class, 'bundle_id');
     }
 
     public function group_module(){

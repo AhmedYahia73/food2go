@@ -344,7 +344,7 @@ class PurchaseTransferController extends Controller
                 ->first();
                 $this->material_stock
                 ->create([
-                    'category_id' => $request->category_id,
+                    'category_id' => $request->category_material_id,
                     'material_id' => $request->material_id,
                     'store_id' => $request->from_store_id,
                     'quantity' => -$request->quintity,
@@ -365,7 +365,7 @@ class PurchaseTransferController extends Controller
             if(empty($to_store)){
                 $this->material_stock
                 ->create([
-                    'category_id' => $request->category_id,
+                    'category_id' => $request->category_material_id,
                     'material_id' => $request->material_id,
                     'store_id' => $request->to_store_id,
                     'quantity' => $request->quintity,
