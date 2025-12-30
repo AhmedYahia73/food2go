@@ -38,7 +38,7 @@ class SignupController extends Controller
         $customer_login = Setting::
         where("name", "customer_login")
         ->first()?->setting ?? null;
-        if(empty($customer_login)){ 
+        if(empty($customer_login)&& empty($request->email)){ 
             return response()->json([
                 "errors" => "email is required"
             ], 400); 
