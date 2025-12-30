@@ -1582,8 +1582,7 @@ class CashierReportsController extends Controller
         $orders = $this->orders
         ->where(function($query){
             $query->where('pos', 1)
-            ->orWhere('pos', 0)
-            ->where('order_status', '!=', 'pending');
+            ->orWhere('pos', 0);
         })
         ->where(function($query){
             $query->where("take_away_status", "pick_up")
