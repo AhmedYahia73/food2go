@@ -47,6 +47,7 @@ class OrderController extends Controller
         ->first();
 
         return response()->json([
+            "id" => $service_fees_model?->id ?? null,
             "type" => $service_fees_model?->type ?? "value",
             "amount" => $service_fees_model?->amount ?? 0,
         ]);
