@@ -119,7 +119,6 @@ class CashierMakeOrderController extends Controller
         ->get();
         if ($time_sittings->count() > 0) {
             $from = $time_sittings[0]->from;
-            
             $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
             $hours = $time_sittings[$time_sittings->count() - 1]->hours;
             $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
@@ -130,19 +129,20 @@ class CashierMakeOrderController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			if($start >= $end){
+			if($start >= now()){
                 $start = $start->subDay();
 			}
+
             // if ($start > $end) {
             //     $end = Carbon::parse($from)->addHours($hours)->subDay();
             // }
             // else{
             //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // }
+            // } format('Y-m-d H:i:s')
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
+        } 
 
         $all_orders = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
