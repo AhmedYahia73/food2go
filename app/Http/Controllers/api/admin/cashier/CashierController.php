@@ -110,6 +110,9 @@ class CashierController extends Controller
             'cashier_names.*.name' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
+            'print_name' => ["required"], 
+            'print_port' => ["sometimes"],
+            'print_ip' => ["required"],
             "print_type" => 'required|in:usb,network',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
@@ -122,6 +125,10 @@ class CashierController extends Controller
         $default = $cashier_names[0]["name"];
         $cashier = $this->cashier
         ->create([
+            'print_name' => $request->print_name ?? null,
+            'print_port' => $request->print_port ?? null,
+            'print_ip' => $request->print_ip ?? null,
+            "print_type" => $request->print_type ?? null,
             "name" => $default,
             "branch_id" => $request->branch_id,
             "status" => $request->status,
@@ -152,6 +159,9 @@ class CashierController extends Controller
             'cashier_names.*.name' => 'required',
             'branch_id' => 'required|exists:branches,id',
             "print_type" => 'required|in:usb,network',
+            'print_name' => ["required"], 
+            'print_port' => ["sometimes"],
+            'print_ip' => ["required"],
             'status' => 'required|boolean',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
@@ -171,6 +181,10 @@ class CashierController extends Controller
             ], 400);
         }
         $cashier->update([
+            'print_name' => $request->print_name ?? $cashier->print_name,
+            'print_port' => $request->print_port ?? $cashier->print_port,
+            'print_ip' => $request->print_ip ?? $cashier->print_ip,
+            "print_type" => $request->print_type ?? $cashier->print_type,
             "name" => $default,
             "branch_id" => $request->branch_id,
             "status" => $request->status,
