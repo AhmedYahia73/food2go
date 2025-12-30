@@ -34,6 +34,7 @@ use App\Models\CheckoutRequest;
 use App\Models\FinantiolAcounting;
 use App\Models\CashierMan;
 use App\Models\Discount;
+use App\Models\Bundle;
 use App\Models\Kitchen;
 
 use App\trait\image;
@@ -53,7 +54,7 @@ class CaptainMakeOrderController extends Controller
     private OrderCart $order_cart, private Zone $zone,
     private FinantiolAcounting $financial_account, private Discount $discount,
     private KitchenOrder $kitchen_order, private CheckoutRequest $checkout_request_query,
-    private Kitchen $kitchen, private CashierMan $cashier_man){}
+    private Kitchen $kitchen, private CashierMan $cashier_man, private Bundle $bundle){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -980,6 +981,35 @@ class CaptainMakeOrderController extends Controller
                 "amount" => $item->amount,
             ];
         });
+        $bundles = $this->bundle
+        ->where("status", 1)
+        ->with("products", "discount", "tax", "translations")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "image" => $item->image_link,
+                "price" => $item->price,
+                "discount" => [
+                    "name" => $item?->discount?->name ?? null,
+                    "type" => $item?->discount?->type ?? null,
+                    "amount" => $item?->discount?->amount ?? null,
+                ],
+                "tax" => [
+                    "name" => $item?->tax?->name ?? null,
+                    "type" => $item?->tax?->type ?? null,
+                    "amount" => $item?->tax?->amount ?? null,
+                ],
+                "products" => $item->products
+                ->map(function($element){
+                    return [
+                        "id" => $element->id,
+                        "name" => $element->name,
+                    ];
+                }), 
+            ];
+        });
 
         return response()->json([
             'categories' => $categories,
@@ -989,6 +1019,7 @@ class CaptainMakeOrderController extends Controller
             'favourite_products_weight' => $favourite_products_weight, 
             'cafe_location' => $cafe_location,
             'discounts' => $discounts,
+            'bundles' => $bundles,
         ]);
     }
 
