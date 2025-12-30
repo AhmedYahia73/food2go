@@ -1220,8 +1220,13 @@ class CashierMakeOrderController extends Controller
                 'errors' => "Status must reserved or not_available_pre_order"
             ], 400);
         }
-
-        if($table_item->current_status == "not_available_pre_order" || $request?->current_status == "available"){
+        if($request?->current_status != "not_available_with_order"){
+            return response()->json([
+                'errors' => "status updated after checkout"
+            ], 400);
+        }
+        // _______________________________________________________________
+        if($request->current_status == "not_available_pre_order" || $request?->current_status == "available"){
             $this->cafe_table
             ->whereIn('id', $tables_ids)
             ->update([
