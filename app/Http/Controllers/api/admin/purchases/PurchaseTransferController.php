@@ -348,7 +348,7 @@ class PurchaseTransferController extends Controller
                     'material_id' => $request->material_id,
                     'store_id' => $request->from_store_id,
                     'quantity' => -$request->quintity,
-                    'unit_id' => -$product->unit_id,
+                    'unit_id' => $request->unit_id,
                     "actual_quantity" => -$request->quintity,
                 ]);
             }
