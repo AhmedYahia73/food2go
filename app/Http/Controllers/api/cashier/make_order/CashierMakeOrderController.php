@@ -1195,6 +1195,32 @@ class CashierMakeOrderController extends Controller
         $table_item = $this->cafe_table
         ->where('id', $id) 
         ->first();
+//,,not_available_with_order, 
+// reserved, not_available_pre_order, not_available_but_checkout
+        
+        if($request->current_status == "reserved" && $table_item?->current_status != "not_available_pre_order" 
+        && $table_item?->current_status != "available" ){
+            return response()->json([
+                'errors' => "Status must be pre order or available"
+            ], 400);
+        }
+        if($request->current_status == "not_available_pre_order" && $table_item?->current_status != "available" ){
+            return response()->json([
+                'errors' => "Status must available"
+            ], 400);
+        }
+        if($request->current_status == "not_available_but_checkout" && $table_item?->current_status != "available" ){
+            return response()->json([
+                'errors' => "Status must available"
+            ], 400);
+        }
+        if($request->current_status == "available" && $table_item?->current_status != "reserved" &&
+        $table_item?->current_status != "not_available_pre_order"){
+            return response()->json([
+                'errors' => "Status must reserved or not_available_pre_order"
+            ], 400);
+        }
+
         if($request->current_status == "not_available_pre_order" || $table_item?->current_status == "available"){
             $this->cafe_table
             ->whereIn('id', $tables_ids)
