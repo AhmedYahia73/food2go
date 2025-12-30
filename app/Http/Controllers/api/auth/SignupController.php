@@ -46,7 +46,7 @@ class SignupController extends Controller
         else{
             $customer_login = json_decode($customer_login);
             $customer_login = $customer_login->verification;
-            if($customer_login == "email"){
+            if($customer_login == "email" && empty($request->email)){
                 return response()->json([
                     "errors" => "email is required"
                 ], 400);

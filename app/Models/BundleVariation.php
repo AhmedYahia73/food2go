@@ -12,7 +12,7 @@ class BundleVariation extends Model
     ];
 
     public function variations(){
-        return $this->belongsTo();
+        return $this->belongsTo(VariationProduct::class, 'variation_id');
     }
 
     public function options(){
