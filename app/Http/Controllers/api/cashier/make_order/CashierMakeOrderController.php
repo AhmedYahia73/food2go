@@ -1220,7 +1220,7 @@ class CashierMakeOrderController extends Controller
                 'errors' => "Status must reserved or not_available_pre_order"
             ], 400);
         }
-        if($request?->current_status != "not_available_with_order"){
+        if($request?->current_status == "not_available_with_order"){
             return response()->json([
                 'errors' => "status updated after checkout"
             ], 400);
