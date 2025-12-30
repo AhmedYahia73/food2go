@@ -18,6 +18,7 @@ class Kitchen extends Model
         'type',
         'print_name',
         'print_type',
+        'print_port',
         'print_ip',
         'print_status',
         'preparing_time',
