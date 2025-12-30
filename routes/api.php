@@ -39,6 +39,10 @@ Route::prefix('admin/auth')->controller(LoginController::class)->group(function(
     Route::post('login', 'admin_login');
 });
 
+Route::prefix('cashier/printer_cashier')->controller(LoginController::class)->group(function(){
+    Route::get('printer_cashier/{id}', 'printer_cashier');
+});
+
 Route::prefix('cashier/auth')->controller(LoginController::class)->group(function(){
     Route::post('login', 'cashier_login');
 });

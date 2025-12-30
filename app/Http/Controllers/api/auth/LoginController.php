@@ -514,6 +514,17 @@ class LoginController extends Controller
         }
     }
 
+    public function printer_cashier(Request $request, $id){
+        $printer = $this->cashier_machine
+        ->select("print_name", "print_type", "print_port", "print_ip")
+        ->where("id", $id)
+        ->first();
+
+        return response()->json([
+            "printer" => $printer
+        ]);
+    }
+
     public function start_shift(Request $request){
         $validation = Validator::make($request->all(), [
             "cashier_id" => "exists:cashiers,id",
