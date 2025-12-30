@@ -351,6 +351,9 @@ class DeliveryBalanceController extends Controller
         $total= 0 ;
         foreach ($orders as $item) {
             $this->order_financials
+            ->where("order_id", $item->id)
+            ->delete();
+            $this->order_financials
             ->create([
                 "order_id" => $item->id,
                 "amount" => $item->amount,
