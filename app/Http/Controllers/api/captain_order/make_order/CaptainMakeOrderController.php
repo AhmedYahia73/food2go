@@ -985,10 +985,13 @@ class CaptainMakeOrderController extends Controller
         ->where("status", 1)
         ->with("products", "discount", "tax", "translations")
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
-                "name" => $item->name,
+                "name" => $item->translations
+                ->where('key', $item->name)
+                ->where("locale", $locale)
+                ->first()?->value ?? $item->name,
                 "image" => $item->image_link,
                 "price" => $item->price,
                 "discount" => [
@@ -1005,7 +1008,10 @@ class CaptainMakeOrderController extends Controller
                 ->map(function($element){
                     return [
                         "id" => $element->id,
-                        "name" => $element->name,
+                        "name" => $element->translations
+                        ->where('key', $element->name)
+                        ->where("locale", $locale)
+                        ->first()?->value ?? $element->name,
                     ];
                 }), 
             ];
