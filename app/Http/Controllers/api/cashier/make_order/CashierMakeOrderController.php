@@ -130,7 +130,7 @@ class CashierMakeOrderController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			if($start >= now()){
+			if($start >= $end){
                 $start = $start->subDay();
 			}
             // if ($start > $end) {
