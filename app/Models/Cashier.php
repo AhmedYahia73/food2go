@@ -15,6 +15,10 @@ class Cashier extends Model
         'cashier_active',
         'cashier_id',
         'status',
+        'print_name',
+        'print_type',
+        'print_port',
+        'print_ip',
     ];
 
     public function branch(){
