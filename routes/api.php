@@ -40,7 +40,7 @@ Route::prefix('admin/auth')->controller(LoginController::class)->group(function(
 });
 
 Route::prefix('cashier/printer_cashier')->controller(LoginController::class)->group(function(){
-    Route::get('printer_cashier/{id}', 'printer_cashier');
+    Route::get('{id}', 'printer_cashier');
 });
 
 Route::prefix('cashier/auth')->controller(LoginController::class)->group(function(){
