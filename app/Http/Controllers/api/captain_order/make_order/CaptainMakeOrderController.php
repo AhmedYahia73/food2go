@@ -1005,7 +1005,7 @@ class CaptainMakeOrderController extends Controller
                     "amount" => $item?->tax?->amount ?? null,
                 ],
                 "products" => $item->products
-                ->map(function($element){
+                ->map(function($element) use($locale){
                     return [
                         "id" => $element->id,
                         "name" => $element->translations
