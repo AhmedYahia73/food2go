@@ -784,7 +784,7 @@ class CashierReportsController extends Controller
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
             ->where("order_type", "delivery")
-            ->where("")
+            ->where("due_from_delivery", 0)
             ->pluck('id')
             ->toArray();
             $dine_in_orders = Order::
@@ -1259,6 +1259,7 @@ class CashierReportsController extends Controller
             select("id")
             ->where('shift', $shift_item->shift)
             ->where("order_type", "delivery")
+            ->where("due_from_delivery", 0)
             ->pluck('id')
             ->toArray();
             $dine_in_orders = Order::
