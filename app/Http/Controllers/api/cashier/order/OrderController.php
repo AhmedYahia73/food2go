@@ -261,6 +261,7 @@ class OrderController extends Controller
                 "delivery",
             ];
             return response()->json([
+                "state" => 1,
                 "orders" => $orders,
                 "order_type" => $order_type, 
             ]);
@@ -346,6 +347,7 @@ class OrderController extends Controller
             return response()->json([
                 "orders" => $orders,
                 "order_type" => $order_type, 
+                "state" => 2,
             ]);
         }
         elseif($request->password == $fake_order_password){
@@ -471,7 +473,8 @@ class OrderController extends Controller
 
             return response()->json([
                 "orders" => $orders, 
-                "order_type" => $order_type, 
+                "order_type" => $order_type,
+                "state" => 3,
             ]);
         }
 
