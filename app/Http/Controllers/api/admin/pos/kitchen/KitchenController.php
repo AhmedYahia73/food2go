@@ -159,7 +159,7 @@ class KitchenController extends Controller
         // print_status, print_name, print_ip
         // print_type => 
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'required|unique:kitchens,name',
             'password' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'print_status' => 'required|boolean',
@@ -189,7 +189,7 @@ class KitchenController extends Controller
         // Keys
         // name, password, branch_id, status
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'required|unique:kitchens,name,' . $id,
             'branch_id' => 'required|exists:branches,id',
             'print_status' => 'required|boolean',
             'print_name' => 'sometimes',
