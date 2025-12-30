@@ -362,11 +362,7 @@ class OrderController extends Controller
             ->first()?->setting ?? null;
             $time_sittings = $this->TimeSittings 
             ->get();
-            if ($time_sittings->count() > 0) {
-            
-                $time_sittings = $this->TimeSittings 
-                ->get();
-                if ($time_sittings->count() > 0) {
+            if ($time_sittings->count() > 0) { 
                     $from = $time_sittings[0]->from;
                     $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
                     $hours = $time_sittings[$time_sittings->count() - 1]->hours;
@@ -391,8 +387,7 @@ class OrderController extends Controller
                 } else {
                     $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
                     $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-                } 
-            }
+                }  
             // ___________________________________________________________
             
             $delivery_time = $this->settings
