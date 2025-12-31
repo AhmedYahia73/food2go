@@ -426,7 +426,7 @@ class OrderController extends Controller
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
-            }) 
+            })
             ->where('order_active', 1) 
             ->orderByDesc('id')
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){

@@ -43,6 +43,7 @@ class DineinSplitRequest extends FormRequest
             'module_order_number' => ['sometimes'],
 
             'bundles' => ['array'],
+            'bundles.*.count' => ['required', "numeric"],
             'bundles.*.id' => ['required', 'exists:bundles,id'],
             'bundles.*.variation' => ['required', 'array'],
             'bundles.*.variation.*.id' => ['required', 'exists:variation_products,id'],

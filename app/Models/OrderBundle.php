@@ -9,6 +9,7 @@ class OrderBundle extends Model
     protected $fillable = [
         "order_id",
         "bundle_id",
+        "count",
     ];
 
     public function bundle(){

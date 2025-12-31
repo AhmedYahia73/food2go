@@ -29,6 +29,7 @@ class UpdateOrderRequest extends FormRequest
             'total_discount' => ['required', 'numeric'],
 
             'bundles' => ['array'],
+            'bundles.*.count' => ['required', "numeric"],
             'bundles.*.id' => ['required', 'exists:bundles,id'],
             'bundles.*.variation' => ['required', 'array'],
             'bundles.*.variation.*.id' => ['required', 'exists:variation_products,id'],

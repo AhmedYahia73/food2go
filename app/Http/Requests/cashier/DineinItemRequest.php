@@ -30,6 +30,7 @@ class DineinItemRequest extends FormRequest
             'captain_id' => ['sometimes', 'exists:captain_orders,id'],
 
             'bundles' => ['array'],
+            'bundles.*.count' => ['required', "numeric"],
             'bundles.*.id' => ['required', 'exists:bundles,id'],
             'bundles.*.variation' => ['required', 'array'],
             'bundles.*.variation.*.id' => ['required', 'exists:variation_products,id'],

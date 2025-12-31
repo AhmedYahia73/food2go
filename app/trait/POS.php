@@ -160,6 +160,7 @@ trait POS
             foreach ($request->bundles as $bundle) {
                 $order_bundle_id = OrderBundle::create([
                     "bundle_id" => $bundle['id'],
+                    "count" => $bundle['count'],
                     "order_id" => $order->id
                 ]);
                 foreach ($bundle['variation'] as $var_element) {
@@ -517,6 +518,7 @@ trait POS
             foreach ($request->bundles as $bundle) {
                 $order_bundle_id = OrderBundle::create([
                     "bundle_id" => $bundle['id'],
+                    "count" => $bundle['count'],
                     "order_id" => $order->id
                 ]);
                 foreach ($bundle['variation'] as $var_element) {
@@ -752,6 +754,7 @@ trait POS
             foreach ($request->bundles as $bundle) {
                 $order_bundle_id = OrderBundle::create([
                     "bundle_id" => $bundle['id'],
+                    "count" => $bundle['count'],
                     "order_id" => $order->id
                 ]);
                 foreach ($bundle['variation'] as $var_element) {
@@ -993,6 +996,7 @@ trait POS
                 foreach ($request->bundles as $bundle) {
                     $order_bundle_id = OrderBundle::create([
                         "bundle_id" => $bundle['id'],
+                        "count" => $bundle['count'],
                         "order_id" => $order->id
                     ]);
                     foreach ($bundle['variation'] as $var_element) {
