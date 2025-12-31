@@ -21,9 +21,7 @@ class BundleController extends Controller
     use image;
 
     public function view(Request $request){
-        $bundles = $this->bundles
-        ->with("products.variations", "products.variations.variation.options.bundle_options", 
-        "bundle_variations", 'discount', 'tax')
+        $bundles = $this->bundles  
         ->get()
         ->map(function($item){
             return [
@@ -51,11 +49,11 @@ class BundleController extends Controller
                                 ->where("product_id", $element->id)
 								->first()
                                 ? 1 : 0,
-                                "variation" => $value?->name,
-                                "type" => $value?->type,
-                                "min" => $value?->min,
-                                "max" => $value?->max,
-                                "required" => $value?->required,
+                                "variation" => $value?->variation?->name,
+                                "type" => $value?->variation?->type,
+                                "min" => $value?->variation?->min,
+                                "max" => $value?->variation?->max,
+                                "required" => $value?->variation?->required,
                                 "options" => $value?->options
                                 ->map(function($new_item) use($item){
                                     return [
