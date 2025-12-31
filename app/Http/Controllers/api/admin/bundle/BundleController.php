@@ -46,7 +46,7 @@ class BundleController extends Controller
                             return [
                                 "id" => $value->id,
                                 "variation_selected" => $item->bundle_variations
-                                ->where("product_id", $element->id)
+                                ->where("product_id", $value->id)
                                 ? 1 : 0,
                                 "variation" => $value?->variation?->name,
                                 "type" => $value?->variation?->type,
