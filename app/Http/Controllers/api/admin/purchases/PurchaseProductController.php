@@ -87,7 +87,6 @@ class PurchaseProductController extends Controller
                 if($quantity_stock > 0){
                     $count++;
                     $cost += $element->total_coast / $element->quintity;
-                    $last_cost = $element->total_coast / $element->quintity;
                 }
                 else{
                     break;
@@ -95,6 +94,7 @@ class PurchaseProductController extends Controller
                 $quantity_stock -= $element->quintity;
             }
             $cost /= ($count == 0 ? 1 : $count);
+            $last_cost = isset($purchase[0]) ? $purchase[0]->total_coast / $purchase[0]->quintity : 0;
             return [
                 'id' => $item->id,
                 'name' => $item->name,
