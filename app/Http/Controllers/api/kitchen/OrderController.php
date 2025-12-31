@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\trait\Notifications; 
 
 use App\Models\KitchenOrder;
+use App\Models\TranslationTbl;
 use App\Models\OrderCart;
 use App\Models\Order;
 use App\Models\Waiter;
@@ -20,59 +21,94 @@ class OrderController extends Controller
 
     public function kitchen_orders(Request $request)
     {
+        // TranslationTbl
         $kitchen_order = $this->kitchen_order
-            ->where('kitchen_id', $request->user()->id)
-            ->where('status', 0)
-            ->get()
-            ->map(function ($item) {
-                $orders = [];
+        ->where('kitchen_id', $request->user()->id)
+        ->where('status', 0)
+        ->get();
+        $locale = $request->locale ?? "en";
+        $kitchen_arr = [];
+        foreach ($kitchen_order as $item) { 
+            $orders = [];
 
-                foreach ($item->order as $orderItem) {
-                    $orderData = collect($orderItem);
+            foreach ($item->order as $orderItem) {
+                $orderData = collect($orderItem);
+  
+                $addons_selected = collect($orderData->get('addons_selected', []))
+                ->map(fn($addon) => [
+                        "name" => TranslationTbl::
+                        where("locale", $locale)
+                        ->where("key", $addon->name)
+                        ->orderByDesc("id")
+                        ->first()?->value ?? $addon->name,
+                        "count" => $addon->count,
+                    ]
+                );
 
-                    $addons_selected = collect($orderData->get('addons_selected', []))
-                        ->map(fn($addon) => collect($addon)->only(['name', 'count']));
+                $excludes = collect($orderData->get('excludes', [])) 
+                ->map(fn($exclude) => [
+                        "name" => TranslationTbl::
+                        where("locale", $locale)
+                        ->where("key", $exclude->name)
+                        ->orderByDesc("id")
+                        ->first()?->value ?? $exclude->name, 
+                    ]
+                );
 
-                    $excludes = collect($orderData->get('excludes', []))
-                        ->map(fn($exclude) => collect($exclude)->only(['name']));
+                $extras = collect($orderData->get('extras', [])) 
+                ->map(fn($extra) => [
+                        "name" => TranslationTbl::
+                        where("locale", $locale)
+                        ->where("key", $extra->name)
+                        ->orderByDesc("id")
+                        ->first()?->value ?? $extra->name, 
+                    ]
+                );
 
-                    $extras = collect($orderData->get('extras', []))
-                        ->map(fn($extra) => collect($extra)->only(['name']));
+                $variation_selected = collect($orderData->get('variation_selected', []))
+                ->map(fn($variation) => [
+                        "name" => TranslationTbl::
+                        where("locale", $locale)
+                        ->where("key", $variation->name)
+                        ->orderByDesc("id")
+                        ->first()?->value ?? $variation->name,
+                        'type' => $variation->type ?? null,
+                        'options' => collect($variation->options ?? [])
+                        ->map(fn($opt) => [
+                                "name" => TranslationTbl::
+                                where("locale", $locale)
+                                ->where("key", $opt->name)
+                                ->orderByDesc("id")
+                                ->first()?->value ?? $opt->name, 
+                            ]
+                        )
+                    ]
+                ); 
 
-                    $variation_selected = collect($orderData->get('variation_selected', []))
-                        ->map(function ($variation) {
-                            return [
-                                'name' => $variation->name ?? null,
-                                'type' => $variation->type ?? null,
-                                'options' => collect($variation->options ?? [])
-                                    ->map(fn($opt) => ['name' => $opt->name ?? null])
-                            ];
-                        });
+                $order = $orderData->only([
+                    'name', 'id', 'count', 'price', 'price_after_discount', 
+                    'price_after_tax', 'notes'
+                ]);
 
-                    $order = $orderData->only([
-                        'name', 'id', 'count', 'price', 'price_after_discount', 
-                        'price_after_tax', 'notes'
-                    ]);
+                $order['addons_selected'] = $addons_selected;
+                $order['excludes'] = $excludes;
+                $order['extras'] = $extras;
+                $order['variation_selected'] = $variation_selected;
 
-                    $order['addons_selected'] = $addons_selected;
-                    $order['excludes'] = $excludes;
-                    $order['extras'] = $extras;
-                    $order['variation_selected'] = $variation_selected;
+                $orders[] = $order;
+            }
 
-                    $orders[] = $order;
-                }
-
-                return [
-                    'id' => $item->id,
-                    'order' => $orders,
-                    'table' => $item->table,
-                    'type' => $item->type,
-                    'created_at' => $item->created_at,
-                ];
-            });
+            $kitchen_arr[] = [
+                'id' => $item->id,
+                'order' => $orders,
+                'table' => $item->table,
+                'type' => $item->type,
+                'created_at' => $item->created_at,
+            ]; 
+        }
 
         return response()->json([
-            'kitchen_order' => $kitchen_order
+            'kitchen_order' => $kitchen_arr
         ]);
     }
 
