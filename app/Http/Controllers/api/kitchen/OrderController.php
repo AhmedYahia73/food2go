@@ -22,93 +22,83 @@ class OrderController extends Controller
     public function kitchen_orders(Request $request)
     {
         // TranslationTbl
-        $kitchen_order = $this->kitchen_order
-        ->where('kitchen_id', $request->user()->id)
-        ->where('status', 0)
-        ->get();
-        $locale = $request->locale ?? "en";
-        $kitchen_arr = [];
-        foreach ($kitchen_order as $item) { 
-            $orders = [];
+        $kitchen_orders = $this->kitchen_order
+            ->where('kitchen_id', $request->user()->id)
+            ->where('status', 0)
+            ->get();
 
-            foreach ($item->order as $orderItem) {
-                $orderData = collect($orderItem);
-  
-                $addons_selected = collect($orderData->get('addons_selected', []))
-                ->map(fn($addon) => [
-                        "name" => TranslationTbl::
-                        where("locale", $locale)
-                        ->where("key", $addon->name)
-                        ->orderByDesc("id")
-                        ->first()?->value ?? $addon->name,
-                        "count" => $addon->count,
-                    ]
-                );
+        $locale = $request->locale ?? 'en';
 
-                $excludes = collect($orderData->get('excludes', [])) 
-                ->map(fn($exclude) => [
-                        "name" => TranslationTbl::
-                        where("locale", $locale)
-                        ->where("key", $exclude->name)
-                        ->orderByDesc("id")
-                        ->first()?->value ?? $exclude->name, 
-                    ]
-                );
+        /*
+        |--------------------------------------------------------------------------
+        | Load translations once
+        |--------------------------------------------------------------------------
+        */
+        $translations = TranslationTbl::where('locale', $locale)
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy('key')
+            ->map(fn ($rows) => $rows->first()->value);
 
-                $extras = collect($orderData->get('extras', [])) 
-                ->map(fn($extra) => [
-                        "name" => TranslationTbl::
-                        where("locale", $locale)
-                        ->where("key", $extra->name)
-                        ->orderByDesc("id")
-                        ->first()?->value ?? $extra->name, 
-                    ]
-                );
+        /*
+        |--------------------------------------------------------------------------
+        | Build response
+        |--------------------------------------------------------------------------
+        */
+        $result = $kitchen_orders->map(function ($item) use ($translations) {
 
-                $variation_selected = collect($orderData->get('variation_selected', []))
-                ->map(fn($variation) => [
-                        "name" => TranslationTbl::
-                        where("locale", $locale)
-                        ->where("key", $variation->name)
-                        ->orderByDesc("id")
-                        ->first()?->value ?? $variation->name,
-                        'type' => $variation->type ?? null,
-                        'options' => collect($variation->options ?? [])
-                        ->map(fn($opt) => [
-                                "name" => TranslationTbl::
-                                where("locale", $locale)
-                                ->where("key", $opt->name)
-                                ->orderByDesc("id")
-                                ->first()?->value ?? $opt->name, 
-                            ]
-                        )
-                    ]
-                ); 
+            $translate = fn ($key) => $translations[$key] ?? $key;
 
-                $order = $orderData->only([
-                    'name', 'id', 'count', 'price', 'price_after_discount', 
-                    'price_after_tax', 'notes'
-                ]);
+            $orders = collect($item->order)->map(function ($orderItem) use ($translate) {
 
-                $order['addons_selected'] = $addons_selected;
-                $order['excludes'] = $excludes;
-                $order['extras'] = $extras;
-                $order['variation_selected'] = $variation_selected;
+                return [
+                    'id' => $orderItem->id,
+                    'name' => $translate($orderItem->name),
+                    'count' => $orderItem->count,
+                    'price' => $orderItem->price,
+                    'price_after_discount' => $orderItem->price_after_discount,
+                    'price_after_tax' => $orderItem->price_after_tax,
+                    'notes' => $orderItem->notes,
 
-                $orders[] = $order;
-            }
+                    'addons_selected' => collect($orderItem->addons_selected ?? [])
+                        ->map(fn ($addon) => [
+                            'name' => $translate($addon->name),
+                            'count' => $addon->count,
+                        ]),
 
-            $kitchen_arr[] = [
+                    'excludes' => collect($orderItem->excludes ?? [])
+                        ->map(fn ($exclude) => [
+                            'name' => $translate($exclude->name),
+                        ]),
+
+                    'extras' => collect($orderItem->extras ?? [])
+                        ->map(fn ($extra) => [
+                            'name' => $translate($extra->name),
+                        ]),
+
+                    'variation_selected' => collect($orderItem->variation_selected ?? [])
+                        ->map(fn ($variation) => [
+                            'name' => $translate($variation->name),
+                            'type' => $variation->type ?? null,
+                            'options' => collect($variation->options ?? [])
+                                ->map(fn ($opt) => [
+                                    'name' => $translate($opt->name),
+                                ]),
+                        ]),
+                ];
+            });
+
+            return [
                 'id' => $item->id,
                 'order' => $orders,
                 'table' => $item->table,
                 'type' => $item->type,
                 'created_at' => $item->created_at,
-            ]; 
-        }
+            ];
+        });
 
         return response()->json([
-            'kitchen_order' => $kitchen_arr
+            'kitchen_order' => $result
         ]);
     }
 
