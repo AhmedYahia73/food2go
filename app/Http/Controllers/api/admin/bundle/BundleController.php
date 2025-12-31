@@ -22,7 +22,7 @@ class BundleController extends Controller
 
     public function view(Request $request){
         $bundles = $this->bundles
-        ->with("products.variations.variation", "products.variations.variation.options.bundle_options", 
+        ->with("products.variations", "products.variations.variation.options.bundle_options", 
         "bundle_variations", 'discount', 'tax')
         ->get()
         ->map(function($item){
