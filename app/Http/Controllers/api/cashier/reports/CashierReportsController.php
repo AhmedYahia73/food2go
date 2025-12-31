@@ -1048,10 +1048,8 @@ class CashierReportsController extends Controller
         } 
 
         return response()->json([
-            'perimission' => false,
-            'financial_accounts' => null,
-            'report_role' => $request->user()->report,
-        ]);
+            'errors' => "password wrong", 
+        ], 400);
     }
 
     public function shifts_today(Request $request){
