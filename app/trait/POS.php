@@ -7,6 +7,10 @@ use App\Models\FinantiolAcounting;
 use App\Models\BranchOff;
 use App\Models\Bundle;
 
+use App\Models\OrderBundle;
+use App\Models\OrderOptionBundle;
+use App\Models\OrderVariationBundle;
+
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -151,7 +155,28 @@ trait POS
         }
         $order_details = $this->order_details($request, $order, $locale);
         $order->order_details = json_encode($order_details['order_details']);
-        $order->save();
+        $order->save();      
+        if(isset($request->bundles)){
+            foreach ($request->bundles as $bundle) {
+                $order_bundle_id = OrderBundle::create([
+                    "bundle_id" => $bundle['id'],
+                    "order_id" => $order->id
+                ]);
+                foreach ($bundle['variation'] as $var_element) {
+                    OrderVariationBundle::create([
+                        "order_bundle_id" => $order_bundle_id->id,
+                        "variation_id" => $var_element['id'],
+                    ]);
+                    foreach ($var_element['options'] as $option) {
+                        OrderOptionBundle::create([
+                            "order_bundle_id" => $order_bundle_id->id,
+                            "variation_id" => $var_element['id'],
+                            "option_id" => $option,
+                        ]);
+                    }
+                }
+            }
+        }
 
         return [
             'order' => $order, 
@@ -487,7 +512,28 @@ trait POS
                     }
                 } 
             }
-        } 
+        }       
+        if(isset($request->bundles)){
+            foreach ($request->bundles as $bundle) {
+                $order_bundle_id = OrderBundle::create([
+                    "bundle_id" => $bundle['id'],
+                    "order_id" => $order->id
+                ]);
+                foreach ($bundle['variation'] as $var_element) {
+                    OrderVariationBundle::create([
+                        "order_bundle_id" => $order_bundle_id->id,
+                        "variation_id" => $var_element['id'],
+                    ]);
+                    foreach ($var_element['options'] as $option) {
+                        OrderOptionBundle::create([
+                            "order_bundle_id" => $order_bundle_id->id,
+                            "variation_id" => $var_element['id'],
+                            "option_id" => $option,
+                        ]);
+                    }
+                }
+            }
+        }
         $order->order_details = json_encode($order_details);
         $order->save();
 
@@ -589,6 +635,8 @@ trait POS
                 }
             }
         }
+
+
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
@@ -699,6 +747,29 @@ trait POS
                 } 
             }
         } 
+         
+        if(isset($request->bundles)){
+            foreach ($request->bundles as $bundle) {
+                $order_bundle_id = OrderBundle::create([
+                    "bundle_id" => $bundle['id'],
+                    "order_id" => $order->id
+                ]);
+                foreach ($bundle['variation'] as $var_element) {
+                    OrderVariationBundle::create([
+                        "order_bundle_id" => $order_bundle_id->id,
+                        "variation_id" => $var_element['id'],
+                    ]);
+                    foreach ($var_element['options'] as $option) {
+                        OrderOptionBundle::create([
+                            "order_bundle_id" => $order_bundle_id->id,
+                            "variation_id" => $var_element['id'],
+                            "option_id" => $option,
+                        ]);
+                    }
+                }
+            }
+        }
+
         $order->order_details = json_encode($order_details);
         $order->save();
         $order->load(['user:id,f_name,l_name,phone', 'address']);
@@ -916,6 +987,28 @@ trait POS
                         }
                     }
                 } 
+            }
+         
+            if(isset($request->bundles)){
+                foreach ($request->bundles as $bundle) {
+                    $order_bundle_id = OrderBundle::create([
+                        "bundle_id" => $bundle['id'],
+                        "order_id" => $order->id
+                    ]);
+                    foreach ($bundle['variation'] as $var_element) {
+                        OrderVariationBundle::create([
+                            "order_bundle_id" => $order_bundle_id->id,
+                            "variation_id" => $var_element['id'],
+                        ]);
+                        foreach ($var_element['options'] as $option) {
+                            OrderOptionBundle::create([
+                                "order_bundle_id" => $order_bundle_id->id,
+                                "variation_id" => $var_element['id'],
+                                "option_id" => $option,
+                            ]);
+                        }
+                    }
+                }
             }
             $order->order_details = json_encode($order_details);
             $order->save();
