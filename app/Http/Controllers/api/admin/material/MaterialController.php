@@ -68,10 +68,12 @@ class MaterialController extends Controller
             $quantity_stock = $stock;
             $cost = 0;
             $count = 0;
+            $last_cost = 0; 
             foreach ($purchase as $element) {
                 if($quantity_stock > 0){
                     $count++;
-                    $cost = $element->total_coast / $element->quintity;
+                    $cost += $element->total_coast / $element->quintity;
+                    $last_cost = $element->total_coast / $element->quintity;
                 }
                 else{
                     break;
@@ -89,6 +91,9 @@ class MaterialController extends Controller
                 'min_stock' => $item->min_stock,
                 "stock" => $stock,
                 "cost" => $cost, 
+                "last_cost" => $last_cost,
+                "total_cost" => $cost * $stock,
+                "total_last_cost" => $last_cost * $stock,
             ];
         }); 
         $categories = $this->categories
@@ -99,6 +104,8 @@ class MaterialController extends Controller
         return response()->json([
             'materials' => $product,
             'categories' => $categories,
+            "total_cost" => collect($product)->sum("total_cost"),
+            "total_last_cost" => collect($product)->sum("total_last_cost"),
         ]);
     }
     
