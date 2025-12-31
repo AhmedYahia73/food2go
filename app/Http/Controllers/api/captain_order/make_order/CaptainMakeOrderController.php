@@ -1013,7 +1013,7 @@ class CaptainMakeOrderController extends Controller
                         ->where("locale", $locale)
                         ->first()?->value ?? $element->name,
                         "variations" => $element->variations
-                        ->map(function($value) use($element, $item){
+                        ->map(function($value) use($element, $item, $locale){
                             return [
                                 "id" => $value->id,
                                 "variation_selected" => $item->bundle_variations
@@ -1029,7 +1029,7 @@ class CaptainMakeOrderController extends Controller
                                 "max" => $value?->max,
                                 "required" => $value?->required,
                                 "options" => $value?->options
-                                ->map(function($new_item) use($item){
+                                ->map(function($new_item) use($item, $locale){
                                     return [
                                         "id" => $new_item->id,
                                         "name" => $new_item->translations
