@@ -1012,7 +1012,41 @@ class CaptainMakeOrderController extends Controller
                         ->where('key', $element->name)
                         ->where("locale", $locale)
                         ->first()?->value ?? $element->name,
-                    ];
+                        "variations" => $element->variations
+                        ->map(function($value) use($element, $item){
+                            return [
+                                "id" => $value->id,
+                                "variation_selected" => $item->bundle_variations
+                                ->where("product_id", $element->id)
+								->first()
+                                ? 1 : 0,
+                                "variation" => $value->translations
+                                ->where('key', $value->name)
+                                ->where("locale", $locale)
+                                ->first()?->value ?? $value->name, 
+                                "type" => $value?->type,
+                                "min" => $value?->min,
+                                "max" => $value?->max,
+                                "required" => $value?->required,
+                                "options" => $value?->options
+                                ->map(function($new_item) use($item){
+                                    return [
+                                        "id" => $new_item->id,
+                                        "name" => $new_item->translations
+                                        ->where('key', $new_item->name)
+                                        ->where("locale", $locale)
+                                        ->first()?->value ?? $new_item->name, 
+                                        "price" => $new_item->price,
+                                        "selected" => $new_item->bundle_options
+                                        ->where("bundle_id", $item->id)
+										->first()
+                                        ? 1 : 0,
+                                    ];
+                                }),
+                            ];
+                        })
+                    ]; 
+                //________________________
                 }), 
             ];
         });
