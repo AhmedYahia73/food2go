@@ -690,6 +690,20 @@ class CashierMakeOrderController extends Controller
                 "count" => $product_item->count,
             ];
         }
+        if($request->bundles){
+            foreach ($request->bundles as $item) {
+                $products = Bundle::
+                where("id", $item['id'])
+                ->with("products")
+                ->first()?->products ?? [];
+                foreach ($products as $element) {
+                    $products[] = [
+                        "id" => $element->id,
+                        "count" => $item['count'],
+                    ]; 
+                }
+            }
+        }
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
             return response()->json([
@@ -1007,6 +1021,20 @@ class CashierMakeOrderController extends Controller
                 "count" => $product_item->count,
             ];
         }
+        if($request->bundles){
+            foreach ($request->bundles as $item) {
+                $products = Bundle::
+                where("id", $item['id'])
+                ->with("products")
+                ->first()?->products ?? [];
+                foreach ($products as $element) {
+                    $products[] = [
+                        "id" => $element->id,
+                        "count" => $item['count'],
+                    ]; 
+                }
+            }
+        }
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
             return response()->json([
@@ -1143,6 +1171,20 @@ class CashierMakeOrderController extends Controller
                 "id" => $product_item->product->id,
                 "count" => $product_item->count,
             ];
+        }
+        if($request->bundles){
+            foreach ($request->bundles as $item) {
+                $products = Bundle::
+                where("id", $item['id'])
+                ->with("products")
+                ->first()?->products ?? [];
+                foreach ($products as $element) {
+                    $products[] = [
+                        "id" => $element->id,
+                        "count" => $item['count'],
+                    ]; 
+                }
+            }
         }
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
@@ -1297,6 +1339,20 @@ class CashierMakeOrderController extends Controller
                     "id" => $product_item->product->id,
                     "count" => $product_item->count,
                 ];
+            }
+            if($request->bundles){
+                foreach ($request->bundles as $item) {
+                    $products = Bundle::
+                    where("id", $item['id'])
+                    ->with("products")
+                    ->first()?->products ?? [];
+                    foreach ($products as $element) {
+                        $products[] = [
+                            "id" => $element->id,
+                            "count" => $item['count'],
+                        ]; 
+                    }
+                }
             }
             $errors = $this->pull_recipe($products, $request->user()->branch_id); 
             if(!$errors['success']){
