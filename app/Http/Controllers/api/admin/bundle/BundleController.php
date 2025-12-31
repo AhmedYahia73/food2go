@@ -11,17 +11,19 @@ use App\Models\Bundle;
 use App\Models\Discount;
 use App\Models\Tax;
 use App\Models\Translation;
+use App\Models\Product;
 use App\Models\TranslationTbl;
 
 class BundleController extends Controller
 {
-    public function __construct(private Bundle $bundles,
+    public function __construct(private Bundle $bundles, private Product $product,
     private Translation $translations, private TranslationTbl $translation_tbl){}
     use image;
 
     public function view(Request $request){
         $bundles = $this->bundles
-        ->with("products", 'discount', 'tax')
+        ->with("products.variations.variation", "products.variations.variation.options.bundle_options", 
+        "bundle_variations", 'discount', 'tax')
         ->get()
         ->map(function($item){
             return [
@@ -83,16 +85,45 @@ class BundleController extends Controller
         get();
         $taxes = Tax::
         get();
+        $products = Product::
+        with("variations.options")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "variations" => $item?->variations?->map(function($element){
+                    return [
+                        "id" => $element->id,
+                        'name' => $element->name,
+                        'type' => $element->type,
+                        'min' => $element->min,
+                        'max' => $element->max,
+                        'required' => $element->required,
+                        'options' => $element->options
+                        ->where("status", 1)
+                        ->map(function($value){
+                            return [
+                                'name' => $value->name,
+                                'price' => $value->price,
+                            ];
+                        }),
+                    ];
+                }),
+            ];
+        });
 
         return response()->json([
             "discounts" => $discounts,
             "taxes" => $taxes,
+            "products" => $products,
         ]);
     }
 
     public function bundle_item(Request $request, $id){
         $bundle = $this->bundles
-        ->with("products", 'discount', 'tax')
+        ->with("products.variations.variation", "products.variations.variation.options.bundle_options", 
+        "bundle_variations", 'discount', 'tax')
         ->where("id", $id)
         ->first();
         
@@ -142,12 +173,40 @@ class BundleController extends Controller
             'discount' => $bundle?->discount?->name,
             'tax' => $bundle?->tax?->name,
             'products' => $bundle?->products
-            ?->map(function($element){
+            ?->map(function($element) use($bundle){
                 return [
                     "id" => $element->id,
                     "name" => $element->name,
+                    "variations" => $element->variations
+                    ->map(function($value) use($element, $bundle){
+                        return [
+                            "id" => $value->id,
+                            "variation_selected" => $bundle->bundle_variations
+                            ->where("product_id", $element->id)
+                            ->first()
+                            ? 1 : 0,
+                            "variation" => $value?->variation?->name,
+                            "type" => $value?->variation?->type,
+                            "min" => $value?->variation?->min,
+                            "max" => $value?->variation?->max,
+                            "required" => $value?->variation?->required,
+                            "options" => $value?->options
+                            ->map(function($new_item) use($bundle){
+                                return [
+                                    "id" => $new_item->id,
+                                    "name" => $new_item->name,
+                                    "price" => $new_item->price,
+                                    "selected" => $new_item->bundle_options
+                                    ->where("bundle_id", $bundle->id)
+                                    ->first()
+                                    ? 1 : 0,
+                                ];
+                            }),
+                        ];
+                    })
                 ];
             })
+            
         ]);
     }
 
