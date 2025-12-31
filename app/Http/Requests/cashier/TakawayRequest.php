@@ -33,9 +33,9 @@ class TakawayRequest extends FormRequest
             'bundles' => ['array'],
             'bundles.*.id' => ['required', 'exists:bundles,id'],
             'bundles.*.variation' => ['required', 'array'],
-            'bundles.*.variation.id' => ['required', 'exists:variation_products,id'],
-            'bundles.*.variation.options' => ['required', 'array'],
-            'bundles.*.variation.options.*' => ['required', 'exits:option_products,id'],
+            'bundles.*.variation.*.id' => ['required', 'exists:variation_products,id'],
+            'bundles.*.variation.*.options' => ['required', 'array'],
+            'bundles.*.variation.*.options.*' => ['required', 'exits:option_products,id'],
 
             'products' => ['array'],
             'products.*.product_id' => ['exists:products,id', 'required_unless:order_pending,1,true'],
