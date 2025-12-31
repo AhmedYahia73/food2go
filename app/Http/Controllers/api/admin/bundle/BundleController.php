@@ -37,11 +37,11 @@ class BundleController extends Controller
                 'discount' => $item?->discount?->name,
                 'tax' => $item?->tax?->name,
                 'products' => $item?->products
-                ?->map(function($element){
+                ?->map(function($element) use($item){
                     return [
                         "id" => $element->id,
                         "name" => $element->name,
-                        "variations" => $element->bundle_variations
+                        "variations" => $item->bundle_variations
                         ->where("product_id", $element->id)
                         ->map(function($value) use($element){
                             return [
