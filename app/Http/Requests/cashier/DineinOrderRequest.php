@@ -30,7 +30,11 @@ class DineinOrderRequest extends FormRequest
             'total_discount' => ['required', 'numeric'], 
 
             'bundles' => ['array'],
-            'bundles.*' => ['required', 'exists:bundles,id'],
+            'bundles.*.id' => ['required', 'exists:bundles,id'],
+            'bundles.*.variation' => ['required', 'array'],
+            'bundles.*.variation.id' => ['required', 'exists:variation_products,id'],
+            'bundles.*.variation.options' => ['required', 'array'],
+            'bundles.*.variation.options.*' => ['required', 'exits:option_products,id'],
 
             'products' => ['array'],
             'products.*.product_id' => ['exists:products,id', 'required'],
@@ -61,7 +65,6 @@ class DineinOrderRequest extends FormRequest
             'source' => 'sometimes',
             'module_order_number' => ['sometimes'],
             'table_id' => ['required', 'exists:cafe_tables,id'],
-
         ];
     }
 
