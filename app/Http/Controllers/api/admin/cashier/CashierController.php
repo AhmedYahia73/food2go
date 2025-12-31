@@ -125,10 +125,10 @@ class CashierController extends Controller
         $default = $cashier_names[0]["name"];
         $cashier = $this->cashier
         ->create([
-            'print_name' => $request->print_name ?? null,
-            'print_port' => $request->print_port ?? null,
-            'print_ip' => $request->print_ip ?? null,
-            "print_type" => $request->print_type ?? null,
+            // 'print_name' => $request->print_name ?? null,
+            // 'print_port' => $request->print_port ?? null,
+            // 'print_ip' => $request->print_ip ?? null,
+            // "print_type" => $request->print_type ?? null,
             "name" => $default,
             "branch_id" => $request->branch_id,
             "status" => $request->status,
