@@ -17,9 +17,7 @@ class PreparationController extends Controller
     use OrderFormat;
     
     public function preparation_orders(Request $request){
-        $locale = $this->settings
-        ->where("name", "setting_lang")
-        ->first()?->setting ?? 'en';
+        $locale = $request->locale ?? "en";
         $orders_query = $this->orders
         ->where("order_type", "!=", "dine_in")
         ->where(function($query){
