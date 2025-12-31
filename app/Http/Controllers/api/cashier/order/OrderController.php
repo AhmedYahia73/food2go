@@ -108,15 +108,7 @@ class OrderController extends Controller
                 ->orWhere("order_type", "dine_in");
 
             })
-            ->where(function($query){
-                $query->where("take_away_status", "pick_up")
-                ->where("order_type", "take_away")
-                ->orWhere("delivery_status", "done")
-                ->where("order_type", "delivery")
-                ->orWhere("order_type", "dine_in");
-
-            })
-            ->where("shift", $request->user()->shift_number) 
+            //->where("shift", $request->user()->shift_number) 
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -292,7 +284,7 @@ class OrderController extends Controller
                 ->orWhere("order_type", "dine_in");
 
             })
-            ->where("shift", $request->user()->shift_number) 
+            //->where("shift", $request->user()->shift_number) 
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
