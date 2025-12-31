@@ -52,6 +52,7 @@ use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
 use App\Models\CashierShift;
 use App\Models\CashierMan;
+use App\Models\Bundle;
 use App\Models\Delivery;
 use App\Models\DiscountModule;
 use App\Models\CheckoutRequest;// dicount_id
@@ -416,6 +417,20 @@ class CashierMakeOrderController extends Controller
                 "id" => $product_item->product->id,
                 "count" => $product_item->count,
             ]; 
+        }
+        if($request->bundles){
+            foreach ($request->bundles as $item) {
+                $products = Bundle::
+                where("id", $item['id'])
+                ->with("products")
+                ->first()?->products ?? [];
+                foreach ($products as $element) {
+                    $products[] = [
+                        "id" => $element->id,
+                        "count" => $item['count'],
+                    ]; 
+                }
+            }
         }
         $errors = $this->pull_recipe($products, $request->branch_id);
         if(!$errors['success']){
