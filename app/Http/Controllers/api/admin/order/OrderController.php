@@ -1559,6 +1559,10 @@ class OrderController extends Controller
 
         if ($request->order_status == 'confirmed') { 
             $this->preparing_takeaway($id);
+            $order->update([
+                'order_status' => $request->order_status,
+                'order_number' => $request->order_number ?? null,
+            ]);
         }
         elseif($request->order_status == 'canceled'){
             // Key
