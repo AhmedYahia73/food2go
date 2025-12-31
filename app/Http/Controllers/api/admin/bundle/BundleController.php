@@ -46,21 +46,23 @@ class BundleController extends Controller
                             return [
                                 "id" => $value->id,
                                 "variation_selected" => $item->bundle_variations
-                                ->where("product_id", $value->id)
+                                ->where("product_id", $element->id)
+								->first()
                                 ? 1 : 0,
                                 "variation" => $value?->variation?->name,
                                 "type" => $value?->variation?->type,
                                 "min" => $value?->variation?->min,
                                 "max" => $value?->variation?->max,
                                 "required" => $value?->variation?->required,
-                                "options" => $element?->variations?->options
-                                ->map(function($new_item) use($value){
+                                "options" => $value?->options
+                                ->map(function($new_item) use($item){
                                     return [
                                         "id" => $new_item->id,
                                         "name" => $new_item->name,
                                         "price" => $new_item->price,
-                                        "selected" => $value?->options
-                                        ?->where("option_id", $new_item->id)
+                                        "selected" => $new_item->bundle_options
+                                        ->where("bundle_id", $item->id)
+										->first()
                                         ? 1 : 0,
                                     ];
                                 }),

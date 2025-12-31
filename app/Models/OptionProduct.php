@@ -25,6 +25,10 @@ class OptionProduct extends Model
         return $this->hasMany(GroupOptionPrice::class, "option_id");
     }
 
+    public function bundle_options(){
+        return $this->hasMany(BundleOption::class, 'option_id');
+    }
+
     public function group_product_status(){
         return $this->belongsToMany(GroupProduct::class, "product_group_product", "product_id", "group_product_id", 'product_id', 'id');
     }

@@ -28,10 +28,6 @@ class VariationProduct extends Model
     public function options(){
         return $this->hasMany(OptionProduct::class, 'variation_id');
     }
-
-    public function bundle_options(){
-        return $this->hasMany(BundleOption::class, 'variation_id');
-    }
     
     public function translations()
     {
