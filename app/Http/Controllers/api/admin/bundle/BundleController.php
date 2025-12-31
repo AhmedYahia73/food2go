@@ -287,7 +287,7 @@ class BundleController extends Controller
                     foreach ($element['options'] as $key => $value) {
                         BundleOption::create([
                             'bundle_id' => $bundle->id,
-                            'variation_id' => $variation_bundle->id,
+                            'variation_id' => $element['id'],
                             'option_id' => $value, 
                         ]);
                     }
@@ -387,7 +387,7 @@ class BundleController extends Controller
                     foreach ($element['options'] as $key => $value) {
                         BundleOption::create([
                             'bundle_id' => $bundle->id,
-                            'variation_id' => $variation_bundle->id,
+                            'variation_id' => $element['id'],
                             'option_id' => $value, 
                         ]);
                     }
