@@ -53,11 +53,11 @@ class BundleController extends Controller
                                 ->where("product_id", $element->id)
 								->first()
                                 ? 1 : 0,
-                                "variation" => $value?->variation?->name,
-                                "type" => $value?->variation?->type,
-                                "min" => $value?->variation?->min,
-                                "max" => $value?->variation?->max,
-                                "required" => $value?->variation?->required,
+                                "variation" => $value?->name,
+                                "type" => $value?->type,
+                                "min" => $value?->min,
+                                "max" => $value?->max,
+                                "required" => $value?->required,
                                 "options" => $value?->options
                                 ->map(function($new_item) use($item){
                                     return [
@@ -187,11 +187,11 @@ class BundleController extends Controller
                             ->where("product_id", $element->id)
                             ->first()
                             ? 1 : 0,
-                            "variation" => $value?->variation?->name,
-                            "type" => $value?->variation?->type,
-                            "min" => $value?->variation?->min,
-                            "max" => $value?->variation?->max,
-                            "required" => $value?->variation?->required,
+                            "variation" => $value?->name,
+                            "type" => $value?->type,
+                            "min" => $value?->min,
+                            "max" => $value?->max,
+                            "required" => $value?->required,
                             "options" => $value?->options
                             ->map(function($new_item) use($bundle){
                                 return [
@@ -378,12 +378,20 @@ class BundleController extends Controller
         $bundle->products()->sync(array_column($request->products, "id"));
         foreach ($request->products as $item) {
             if(isset($item['variation'])){
+                BundleVariation::
+                where("bundle_id", $bundle->id)
+                ->where("product_id", $item['id'])
+                ->delete();
                 foreach ($item['variation'] as $element) {
                     $variation_bundle = BundleVariation::create([
                         'bundle_id' => $bundle->id,
                         'variation_id' => $element['id'],
                         'product_id' => $item['id'],
                     ]);
+                    BundleOption::
+                    where("bundle_id", $bundle->id)
+                    ->where("variation_id", $element['id'])
+                    ->delete();
                     foreach ($element['options'] as $key => $value) {
                         BundleOption::create([
                             'bundle_id' => $bundle->id,
