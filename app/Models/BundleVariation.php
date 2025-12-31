@@ -9,9 +9,10 @@ class BundleVariation extends Model
     protected $fillable = [
         'bundle_id',
         'variation_id',
+        'product_id',
     ];
 
-    public function variations(){
+    public function variation(){
         return $this->belongsTo(VariationProduct::class, 'variation_id');
     }
 

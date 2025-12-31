@@ -89,7 +89,6 @@ class OrderController extends Controller
         $fake_order_password = Setting::
         where("name", "fake_order_password")
         ->first()?->setting ?? null;
-
         if($request->password == $password){
             $order_recentage = $this->settings
             ->where("name", "order_precentage")
@@ -377,7 +376,6 @@ class OrderController extends Controller
                     if($start >= now()){
                         $start = $start->subDay();
                     }
-
                     // if ($start > $end) {
                     //     $end = Carbon::parse($from)->addHours($hours)->subDay();
                     // }
@@ -395,19 +393,6 @@ class OrderController extends Controller
             ->first()
             ->setting ?? "00:00:00";
             $orders = $this->orders
-            ->where(function($query){
-                $query->where('pos', 1)
-                ->orWhere('pos', 0)
-                ->where('order_status', '!=', 'pending');
-            })
-            ->where(function($query){
-                $query->where("take_away_status", "pick_up")
-                ->where("order_type", "take_away")
-                ->orWhere("delivery_status", "done")
-                ->where("order_type", "delivery")
-                ->orWhere("order_type", "dine_in");
-
-            })
             ->whereBetween("created_at", [$start, $end]) 
             ->where(function($query) {
                 $query->where('status', 1)

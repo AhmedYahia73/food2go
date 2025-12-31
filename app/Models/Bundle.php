@@ -30,6 +30,10 @@ class Bundle extends Model
         return null;
     }
 
+    public function bundle_variations(){
+        return $this->hasMany(BundleVariation::class, "bundle_id");
+    }
+
     public function products(){
         return $this->belongsToMany(Product::class, 'bundle_product', 'bundle_id', 'product_id');
     }
