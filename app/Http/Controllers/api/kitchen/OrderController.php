@@ -180,15 +180,75 @@ class OrderController extends Controller
     }
 
     public function notification(Request $request){
-        $kitchen_order = $this->kitchen_order
+        
+        // TranslationTbl
+        $kitchen_orders = $this->kitchen_order
         ->where('kitchen_id', $request->user()->id)
         ->where('read_status', false)
         ->where('status', 0)
-        ->get()
-        ->map(function($item){
+        ->get();
+
+        $locale = $request->locale ?? 'en';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load translations once
+        |--------------------------------------------------------------------------
+        */
+        $translations = TranslationTbl::where('locale', $locale)
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy('key')
+            ->map(fn ($rows) => $rows->first()->value);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Build response
+        |--------------------------------------------------------------------------
+        */
+        $result = $kitchen_orders->map(function ($item) use ($translations) {
+
+            $translate = fn ($key) => $translations[$key] ?? $key;
+
+            $orders = collect($item->order)->map(function ($orderItem) use ($translate) {
+
+                return [
+                    'id' => $orderItem->id,
+                    'name' => $translate($orderItem->name),
+                    'count' => $orderItem->count,  
+                    'notes' => $orderItem->notes,
+
+                    'addons_selected' => collect($orderItem->addons_selected ?? [])
+                        ->map(fn ($addon) => [
+                            'name' => $translate($addon->name),
+                            'count' => $addon->count,
+                        ]),
+
+                    'excludes' => collect($orderItem->excludes ?? [])
+                        ->map(fn ($exclude) => [
+                            'name' => $translate($exclude->name),
+                        ]),
+
+                    'extras' => collect($orderItem->extras ?? [])
+                        ->map(fn ($extra) => [
+                            'name' => $translate($extra->name),
+                        ]),
+
+                    'variation_selected' => collect($orderItem->variation_selected ?? [])
+                        ->map(fn ($variation) => [
+                            'name' => $translate($variation->name),
+                            'type' => $variation->type ?? null,
+                            'options' => collect($variation->options ?? [])
+                                ->map(fn ($opt) => [
+                                    'name' => $translate($opt->name),
+                                ]),
+                        ]),
+                ];
+            });
+
             return [
                 'id' => $item->id,
-                'order' => $item->order,
+                'order' => $orders,
                 'table' => $item->table,
                 'type' => $item->type,
                 'created_at' => $item->created_at,
@@ -196,8 +256,8 @@ class OrderController extends Controller
         });
 
         return response()->json([
-            'kitchen_order' => $kitchen_order
-        ]);
+            'kitchen_order' => $result
+        ]); 
     }
 
     public function read_status(Request $request, $id){
