@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use App\trait\image;
 
 use App\Models\Bundle;
+use App\Models\BundleOption;
+use App\Models\BundleVariation;
 use App\Models\Discount;
 use App\Models\Tax;
 use App\Models\Translation;
@@ -22,6 +24,8 @@ class BundleController extends Controller
 
     public function view(Request $request){
         $bundles = $this->bundles  
+        ->with("products.variations", "products.variations.options.bundle_options", 
+        "bundle_variations", 'discount', 'tax')
         ->get()
         ->map(function($item){
             return [
@@ -120,7 +124,7 @@ class BundleController extends Controller
 
     public function bundle_item(Request $request, $id){
         $bundle = $this->bundles
-        ->with("products.variations.variation", "products.variations.variation.options.bundle_options", 
+        ->with("products.variations", "products.variations.options.bundle_options", 
         "bundle_variations", 'discount', 'tax')
         ->where("id", $id)
         ->first();
@@ -246,7 +250,11 @@ class BundleController extends Controller
             'status' => ['required', 'boolean'],
             'points' => ['required', 'numeric'],
             'products' => ['required', 'array'],
-            'products.*' => ['required', 'exists:products,id'],
+            'products.*.id' => ['required', 'exists:products,id'],
+            'products.*.variation' => ['array'],
+            'products.*.variation.*.id' => ['required', 'exists:variation_products,id'],
+            'products.*.variation.*.options' => ['required', 'array'],
+            'products.*.variation.*.options.*' => ['required', 'exists:option_products,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -267,7 +275,25 @@ class BundleController extends Controller
             'status' => $request->status,
             'points' => $request->points,
         ]);
-        $bundle->products()->attach($request->products);
+        $bundle->products()->attach(array_column($request->products, "id"));
+        foreach ($request->products as $item) {
+            if(isset($item['variation'])){
+                foreach ($item['variation'] as $element) {
+                    $variation_bundle = BundleVariation::create([
+                        'bundle_id' => $bundle->id,
+                        'variation_id' => $element['id'],
+                        'product_id' => $item['id'],
+                    ]);
+                    foreach ($element['options'] as $key => $value) {
+                        BundleOption::create([
+                            'bundle_id' => $bundle->id,
+                            'variation_id' => $variation_bundle->id,
+                            'option_id' => $value, 
+                        ]);
+                    }
+                }
+            }
+        }
         foreach ($request->bundle_names as $item) {
             if (!empty($item['name'])) {
                 $bundle->translations()->create([
@@ -312,7 +338,11 @@ class BundleController extends Controller
             'status' => ['required', 'boolean'],
             'points' => ['required', 'numeric'],
             'products' => ['required', 'array'],
-            'products.*' => ['required', 'exists:products,id'],
+            'products.*.id' => ['required', 'exists:products,id'],
+            'products.*.variation' => ['array'],
+            'products.*.variation.*.id' => ['required', 'exists:variation_products,id'],
+            'products.*.variation.*.options' => ['required', 'array'],
+            'products.*.variation.*.options.*' => ['required', 'exists:option_products,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -345,7 +375,25 @@ class BundleController extends Controller
             'status' => $request->status,
             'points' => $request->points,
         ]);
-        $bundle->products()->sync($request->products);
+        $bundle->products()->sync(array_column($request->products, "id"));
+        foreach ($request->products as $item) {
+            if(isset($item['variation'])){
+                foreach ($item['variation'] as $element) {
+                    $variation_bundle = BundleVariation::create([
+                        'bundle_id' => $bundle->id,
+                        'variation_id' => $element['id'],
+                        'product_id' => $item['id'],
+                    ]);
+                    foreach ($element['options'] as $key => $value) {
+                        BundleOption::create([
+                            'bundle_id' => $bundle->id,
+                            'variation_id' => $variation_bundle->id,
+                            'option_id' => $value, 
+                        ]);
+                    }
+                }
+            }
+        }
         $bundle->translations()->delete();
 
         foreach ($request->bundle_names as $item) {
