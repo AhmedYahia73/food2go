@@ -5,12 +5,19 @@ namespace App\Http\Controllers\api\admin\recipe;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+ 
+use App\Models\PurchaseCategory;
+use App\Models\Unit;
+use App\Models\PurchaseProduct;
 
 use App\Models\VariationRecipe;
 use App\Models\VariationProduct;
 
 class VariationRecipeController extends Controller
 { 
+    public function __construct(private PurchaseCategory $category,
+    private PurchaseProduct $product, private Unit $units){}
+
     public function view_variations($id){
         $variations = VariationProduct::
         where("product_id", $id)
@@ -33,6 +40,22 @@ class VariationRecipeController extends Controller
         return response()->json([
             "variations" => $variations
         ]);
+    }
+
+    public function lists(Request $request){
+        
+        $categories = $this->category
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
+        $products = $this->product
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
+        $units = $this->units
+        ->select("id", "name")
+        ->where("status", 1)
+        ->get();
     }
 
     public function view_recipes($id){
