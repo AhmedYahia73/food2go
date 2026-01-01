@@ -81,6 +81,7 @@ class BundleController extends Controller
                         ->where("status", 1)
                         ->map(function($value){
                             return [
+                                'id' => $value->id,
                                 'name' => $value->name,
                                 'price' => $value->price,
                             ];
