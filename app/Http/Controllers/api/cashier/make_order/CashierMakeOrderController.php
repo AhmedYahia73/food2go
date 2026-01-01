@@ -840,12 +840,12 @@ class CashierMakeOrderController extends Controller
             $item->bundles = $item->bundles
             ?->map(function($bundle_item){
                 return [
-                    'name' => $item?->bundles?->bundle?->name,
-                    'image' => $item?->bundles?->bundle?->image_link,
-                    'price' => $item?->bundles?->bundle?->price,
-                    'discount' => $item?->bundles?->bundle?->discount,
-                    'tax' => $item?->bundles?->bundle?->tax,
-                    'variations' => $item?->bundles?->variations
+                    'name' => $bundle_item?->bundle?->name,
+                    'image' => $bundle_item?->bundle?->image_link,
+                    'price' => $bundle_item?->bundle?->price,
+                    'discount' => $bundle_item?->bundle?->discount,
+                    'tax' => $bundle_item?->bundle?->tax,
+                    'variations' => $bundle_item?->variations
                     ?->map(function($element){
                         return [
                             "name" => $element?->variation?->name,
