@@ -34,6 +34,27 @@ class SocialMediaController extends Controller
         ]);
     }
 
+    public function status(Request $request, $id){
+        $validator = Validator::make($request->all(), [ 
+            'status' => ['required', 'boolean'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        SocialMedia::
+        where("id", $id)
+        ->update([
+            "status" => $request->status,
+        ]);
+
+        return response()->json([
+            "success" => "You update status success"
+        ]);
+    }
+
     public function create(Request $request){
         $validator = Validator::make($request->all(), [ 
             'icon' => ['required'],
