@@ -153,6 +153,9 @@ use App\Http\Controllers\api\admin\inventory\InventoryProductController;
 
 use App\Http\Controllers\api\admin\recipe\VariationRecipeController;
 
+use App\Http\Controllers\api\admin\taxes\TaxProductController;
+use App\Http\Controllers\api\admin\social_media\SocialMediaController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
@@ -163,7 +166,26 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
+    // SocialMediaController
+
+    Route::controller(BundleController::class)
+    ->prefix('bundles')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');
+        Route::get('/bundle_item/{id}', 'bundle_item');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
     
+    Route::controller(TaxProductController::class)
+    ->prefix('tax_product')->group(function(){
+        Route::get('/view_products/{id}', 'view');
+        Route::get('/lists', 'lists'); 
+        Route::post('/selecte_products', 'selecte_products');
+    });
+
     Route::controller(VariationRecipeController::class)
     ->prefix('variation_recipe')->group(function(){
         Route::get('/view_variations/{id}', 'view_variations');

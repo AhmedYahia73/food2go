@@ -286,7 +286,7 @@ class BundleController extends Controller
         }
         if($request->bundle_descriptions){ 
             foreach ($request->bundle_descriptions as $item) {
-                if (!empty($item['bundle_descriptions'])) {
+                if (!empty($item['description'])) {
                     $bundle->translations()->create([
                         'locale' => $item['tranlation_name'],
                         'key' => $bundle_descriptions['description'],
@@ -396,7 +396,7 @@ class BundleController extends Controller
         }
         if($request->bundle_descriptions){ 
             foreach ($request->bundle_descriptions as $item) {
-                if (!empty($item['bundle_descriptions'])) {
+                if (!empty($item['description'])) {
                     $bundle->translations()->create([
                         'locale' => $item['tranlation_name'],
                         'key' => $bundle_descriptions['description'],
