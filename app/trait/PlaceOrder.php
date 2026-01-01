@@ -797,76 +797,10 @@ trait PlaceOrder
                 $order_data[$key]->addons_selected = $addons; 
             }
 
+            $order_data[$key]->bundles = $order->bundles_items;
             return array_values($order_data);
         }
-    }
-
-    public function order_tabl_format($order, $locale = "en"){
-        $order_data = [];
-
-        foreach ($order->cart as $key => $item) {
-            if(isset($item->product)){
-                $product = $item->product[0]->product;
-                $product->name = TranslationTbl::
-                where("locale", $locale)
-                ->where("key", $product->name)
-                ->orderByDesc("id")
-                ->first()->value ?? $product->name;
-                $product->description = TranslationTbl::
-                where("locale", $locale)
-                ->where("key", $product->description)
-                ->orderByDesc("id")
-                ->first()->value ?? $product->description;
-                unset($product->addons);
-                unset($product->variations);
-                $variation = [];
-                $addons = [];
-                // $item->addons->addon->count = $item->addons->count;
-                // $item->variations->variation->options = $item->variations->options;
-                foreach ($item->variations as $key => $element) {
-                    $options = [];
-                    foreach ($element->options as $value) {
-                        $value->name = TranslationTbl::
-                        where("locale", $locale)
-                        ->where("key", $value->name)
-                        ->orderByDesc("id")
-                        ->first()->value ?? $value->name;
-                        $options[] = $value;
-                    }
-                    $element->variation->options = $options;
-                    unset($element->options);
-                    $element->variation->name = TranslationTbl::
-                    where("locale", $locale)
-                    ->where("key", $element->variation->name)
-                    ->orderByDesc("id")
-                    ->first()->value ?? $element->variation->name;
-                    $variation[] = $element->variation; 
-                }
-                foreach ($item->addons as $key => $element) {
-                    $element->addon->count = $element->count;
-                    unset($element->count);
-                    $element->addon->name = TranslationTbl::
-                    where("locale", $locale)
-                    ->where("key", $element->addon->name)
-                    ->orderByDesc("id")
-                    ->first()->value ?? $element->addon->name;
-                    $addons[] = $element->addon;
-                }
-                $order_data[$key] = $product;
-                $order_data[$key]->cart_id = $order->id;
-                $order_data[$key]->product_index = $key;
-                $order_data[$key]->count = $item->product[0]->count;
-                $order_data[$key]->prepration = $order->prepration_status ?? $item->product[0]->prepration ?? null;
-                $order_data[$key]->excludes = $item->excludes;
-                $order_data[$key]->extras = $item->extras;
-                $order_data[$key]->variation_selected = $variation;
-                $order_data[$key]->addons_selected = $addons; 
-            }
-
-            $order_data[$key]->bundles = $item['bundles_items'];
-            return array_values($order_data);
-        }
-    }
+    } 
 
     public function takeaway_order_format($order){
         $order_data = [];
