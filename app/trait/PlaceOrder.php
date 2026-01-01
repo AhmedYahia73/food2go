@@ -803,10 +803,10 @@ trait PlaceOrder
 
     public function order_tabl_format($order, $locale = "en"){
         $order_data = [];
-        
-        foreach ($order as $key => $item) {
-            if(isset($item->cart->product)){
-                $product = $item->cart->product[0]->product;
+
+        foreach ($order->cart as $key => $item) {
+            if(isset($item->product)){
+                $product = $item->product[0]->product;
                 $product->name = TranslationTbl::
                 where("locale", $locale)
                 ->where("key", $product->name)
@@ -821,9 +821,9 @@ trait PlaceOrder
                 unset($product->variations);
                 $variation = [];
                 $addons = [];
-                // $item->cart->addons->addon->count = $item->cart->addons->count;
-                // $item->cart->variations->variation->options = $item->cart->variations->options;
-                foreach ($item->cart->variations as $key => $element) {
+                // $item->addons->addon->count = $item->addons->count;
+                // $item->variations->variation->options = $item->variations->options;
+                foreach ($item->variations as $key => $element) {
                     $options = [];
                     foreach ($element->options as $value) {
                         $value->name = TranslationTbl::
@@ -842,7 +842,7 @@ trait PlaceOrder
                     ->first()->value ?? $element->variation->name;
                     $variation[] = $element->variation; 
                 }
-                foreach ($item->cart->addons as $key => $element) {
+                foreach ($item->addons as $key => $element) {
                     $element->addon->count = $element->count;
                     unset($element->count);
                     $element->addon->name = TranslationTbl::
@@ -855,15 +855,15 @@ trait PlaceOrder
                 $order_data[$key] = $product;
                 $order_data[$key]->cart_id = $order->id;
                 $order_data[$key]->product_index = $key;
-                $order_data[$key]->count = $item->cart->product[0]->count;
-                $order_data[$key]->prepration = $order->prepration_status ?? $item->cart->product[0]->prepration ?? null;
-                $order_data[$key]->excludes = $item->cart->excludes;
-                $order_data[$key]->extras = $item->cart->extras;
+                $order_data[$key]->count = $item->product[0]->count;
+                $order_data[$key]->prepration = $order->prepration_status ?? $item->product[0]->prepration ?? null;
+                $order_data[$key]->excludes = $item->excludes;
+                $order_data[$key]->extras = $item->extras;
                 $order_data[$key]->variation_selected = $variation;
-                $order_data[$key]->addons_selected = $addons;
-                $order_data[$key]->bundles = $item->cart->bundles_items ?? [];
+                $order_data[$key]->addons_selected = $addons; 
             }
 
+            $order_data[$key]->bundles = $item->bundles_items;
             return array_values($order_data);
         }
     }
