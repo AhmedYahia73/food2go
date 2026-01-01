@@ -70,7 +70,7 @@ class TaxProductController extends Controller
         ]);
         
         Product::
-        whereId("id", $request->products)
+        whereIn("id", $request->products)
         ->update([
             "tax_id" => $request->tax_id,
         ]);
