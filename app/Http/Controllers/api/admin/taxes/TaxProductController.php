@@ -57,6 +57,7 @@ class TaxProductController extends Controller
         return response()->json([
             "products" => $products,
             "taxes" => $taxes,
+            "categories" => $categories,
         ]);
     }
  
