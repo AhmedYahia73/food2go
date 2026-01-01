@@ -707,12 +707,16 @@ trait PlaceOrder
                     "count" => $bundle_item["count"],
                 ]);
                 foreach ($bundle_item['variation'] as  $variation_element) {
+                    $order_variation = OrderCartBVariation::create([
+                        "order_cart_id" => $order->id,
+                        "variation_id" => $variation_element['id'],
+                        "order_cart_b_id" => $order_cart_b->id,
+                    ]);
                     foreach ($variation_element['options'] as $option_element) {
-                        OrderCartBVariation::create([
+                        OrderCartBOption::create([
                             "order_cart_id" => $order->id,
-                            "variation_id" => $variation_element['id'],
+                            "variation_bundle_id" => $order_variation->id,
                             "option_id" => $option_element,
-                            "order_cart_b_id" => $order_cart_b->id,
                         ]);
                     }
                 }
