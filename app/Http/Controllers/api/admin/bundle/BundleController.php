@@ -39,41 +39,7 @@ class BundleController extends Controller
                 'status' => $item->status,
                 'points' => $item->points,
                 'discount' => $item?->discount?->name,
-                'tax' => $item?->tax?->name,
-                'products' => $item?->products
-                ?->map(function($element) use($item){
-                    return [
-                        "id" => $element->id,
-                        "name" => $element->name,
-                        "variations" => $element->variations
-                        ->map(function($value) use($element, $item){
-                            return [
-                                "id" => $value->id,
-                                "variation_selected" => $item->bundle_variations
-                                ->where("product_id", $element->id)
-								->first()
-                                ? 1 : 0,
-                                "variation" => $value?->name,
-                                "type" => $value?->type,
-                                "min" => $value?->min,
-                                "max" => $value?->max,
-                                "required" => $value?->required,
-                                "options" => $value?->options
-                                ->map(function($new_item) use($item){
-                                    return [
-                                        "id" => $new_item->id,
-                                        "name" => $new_item->name,
-                                        "price" => $new_item->price,
-                                        "selected" => $new_item->bundle_options
-                                        ->where("bundle_id", $item->id)
-										->first()
-                                        ? 1 : 0,
-                                    ];
-                                }),
-                            ];
-                        })
-                    ];
-                })
+                'tax' => $item?->tax?->name, 
             ];
         });
 
