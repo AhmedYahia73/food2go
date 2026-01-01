@@ -12,6 +12,8 @@ use App\Models\KItemAddon;
 use App\Models\KItemVriation;
 use App\Models\Setting;
 use App\Models\KItemOption;
+use App\Models\OrderCartBundle; 
+use App\Models\OrderCartBVariation; 
 use App\Models\Kitchen; 
 
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -499,26 +501,7 @@ trait PlaceOrder
         if($request->order_pending){
             $orderRequest['order_active'] = 0;
         }
-        // Check if product is found
-        // if($request->table_id){
-        //     $order_carts = $this->order_cart
-        //     ->where('table_id', $request->table_id)
-        //     ->get();
-        //     foreach ($order_carts as $item) {
-        //         $carts = $item->cart;
-        //         foreach ($carts as $element) {
-        //             $old_product_id = $element->product[0]->product->id;
-        //             $new_product_id = $request->products[0]->product_id;
-        //             $old_product_notes = $element->product[0]->notes;
-        //             $new_product_notes = $request->products[0]->note;
-        //             if(count($element->product) > 0 && $old_product_id == $new_product_id
-        //             && $old_product_notes == $new_product_notes){
-        //                 $old_addons = $element->addons;
-        //                 $new_addons = $request->products[0]->addons;
-        //             }
-        //         }
-        //     }
-        // }
+        
         $orderRequest['points'] = $points;
         $order = $this->order_cart
         ->create($orderRequest);
@@ -715,7 +698,25 @@ trait PlaceOrder
                 //     }
                 // } 
             }
-        } 
+        }
+        if(isset($request->bundles)){
+            foreach ($request->bundles as $bundle_item) {
+                OrderCartBundle::create([
+                    "bundle_id" => $bundle_item["id"],
+                    "order_cart_id" => $order->id,
+                    "count" => $bundle_item["count"],
+                ]);
+                foreach ($bundle_item['variation'] as  $variation_element) {
+                    foreach ($variation_element['options'] as $option_element) {
+                        OrderCartBVariation::create([
+                            "order_cart_id" => $order->id,
+                            "variation_id" => $variation_element['id'],
+                            "option_id" => $option_element,
+                        ]);
+                    }
+                }
+            }
+        }
         $order->cart = json_encode($order_details);
         if($request->order_status){
             $order->prepration_status = $request->order_status;
