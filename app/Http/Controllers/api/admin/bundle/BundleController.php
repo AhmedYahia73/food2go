@@ -13,6 +13,7 @@ use App\Models\BundleVariation;
 use App\Models\Discount;
 use App\Models\Tax;
 use App\Models\Translation;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\TranslationTbl;
 
@@ -53,6 +54,14 @@ class BundleController extends Controller
         get();
         $taxes = Tax::
         get();
+        $categories = Category::
+        get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
         $products = Product::
         with("variations.options")
         ->get()
@@ -85,6 +94,7 @@ class BundleController extends Controller
             "discounts" => $discounts,
             "taxes" => $taxes,
             "products" => $products,
+            "categories" => $categories,
         ]);
     }
 
