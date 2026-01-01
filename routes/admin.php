@@ -171,7 +171,6 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(SocialMediaController::class)
     ->prefix('social_media')->group(function(){
         Route::get('/', 'view');
-        Route::get('/lists', 'lists');
         Route::get('/social_item/{id}', 'social_item');
         Route::put('/status/{id}', 'status');
         Route::post('/add', 'create');
