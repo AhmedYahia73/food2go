@@ -155,6 +155,8 @@ class BundleController extends Controller
                 return [
                     "id" => $element->id,
                     "name" => $element->name,
+                    "category_id" => $element->category_id,
+                    "sub_category_id" => $element->sub_category_id,
                     "variations" => $element->variations
                     ->map(function($value) use($element, $bundle){
                         return [

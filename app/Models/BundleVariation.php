@@ -9,7 +9,7 @@ class BundleVariation extends Model
     protected $fillable = [
         'bundle_id',
         'variation_id',
-        'product_id',
+        'product_id', 
     ];
 
     public function variation(){
