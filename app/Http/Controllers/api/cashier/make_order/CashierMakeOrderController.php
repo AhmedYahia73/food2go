@@ -866,8 +866,10 @@ class CashierMakeOrderController extends Controller
             $order_item = $this->order_format($item, $key); 
             $orders = $orders->merge($order_item);
         }
-        $bundles = $orders
-        ->pluck('bundles');
+        $bundles = clone $orders
+        ->pluck('bundles')
+        ->filter(fn ($bundle) => count($bundle) > 0)
+        ->values();
         $orders = $orders->map(fn ($item) => collect($item)->except('bundles'));
 
         return response()->json([
