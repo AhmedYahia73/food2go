@@ -701,7 +701,7 @@ trait PlaceOrder
         }
         if(isset($request->bundles)){
             foreach ($request->bundles as $bundle_item) {
-                OrderCartBundle::create([
+                $order_cart_b = OrderCartBundle::create([
                     "bundle_id" => $bundle_item["id"],
                     "order_cart_id" => $order->id,
                     "count" => $bundle_item["count"],
@@ -712,6 +712,7 @@ trait PlaceOrder
                             "order_cart_id" => $order->id,
                             "variation_id" => $variation_element['id'],
                             "option_id" => $option_element,
+                            "order_cart_b_id" => $order_cart_b->id,
                         ]);
                     }
                 }

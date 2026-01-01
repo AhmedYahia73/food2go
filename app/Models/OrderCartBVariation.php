@@ -10,6 +10,7 @@ class OrderCartBVariation extends Model
         "order_cart_id",
         "variation_id",
         "option_id",
+        "order_cart_b_id",
     ];
 
     public function option(){
