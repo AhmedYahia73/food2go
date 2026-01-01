@@ -110,11 +110,20 @@ class VariationRecipeController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $variation = VariationRecipe::
-        where("id", $id)
-        ->with(["options", "store_category:id,name", 
-        "store_product:id,name", "unit:id,name"])
-        ->first();
+
+        $variation = VariationRecipe::create([
+            'option_id' => $request->option_id,
+            'variation_id' => $request->variation_id,
+            'unit_id' => $request->unit_id,
+            'weight' => $request->weight,
+            'store_category_id' => $request->store_category_id,
+            'store_product_id' => $request->store_product_id,
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            "success" => "You add recipe success",
+        ]);
     }
 
     public function modify(Request $request, $id){
@@ -132,9 +141,46 @@ class VariationRecipeController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+
+        $variation = VariationRecipe::
+        where("id", $id)
+        ->first();
+        if(empty($variation)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+
+        $variation->update([
+            'option_id' => $request->option_id,
+            'variation_id' => $request->variation_id,
+            'unit_id' => $request->unit_id,
+            'weight' => $request->weight,
+            'store_category_id' => $request->store_category_id,
+            'store_product_id' => $request->store_product_id,
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            "success" => "You update recipe success",
+        ]);
     }
 
     public function delete(Request $request, $id){
         
+        $variation = VariationRecipe::
+        where("id", $id)
+        ->first();
+        if(empty($variation)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        }
+        
+        $variation->delete();
+
+        return response()->json([
+            "success" => "You delete recipe success",
+        ]);
     }
 }

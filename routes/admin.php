@@ -151,6 +151,8 @@ use App\Http\Controllers\api\admin\notification\NotificationController;
 use App\Http\Controllers\api\admin\inventory\InventoryMaterialController;
 use App\Http\Controllers\api\admin\inventory\InventoryProductController;
 
+use App\Http\Controllers\api\admin\recipe\VariationRecipeController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
@@ -162,6 +164,18 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
     
+    Route::controller(VariationRecipeController::class)
+    ->prefix('variation_recipe')->group(function(){
+        Route::get('/view_variations/{id}', 'view_variations');
+        Route::get('/view_recipes/{id}', 'view_recipes');
+        Route::get('/lists', 'lists');
+        Route::get('/recipe_item/{id}', 'bundle_item');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
     Route::controller(BundleController::class)
     ->prefix('bundles')->group(function(){
         Route::get('/', 'view');
