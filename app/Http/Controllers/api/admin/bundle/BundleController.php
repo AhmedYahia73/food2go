@@ -312,7 +312,7 @@ class BundleController extends Controller
             'bundle_descriptions.*.tranlation_id' => ['required'],
             'bundle_descriptions.*.tranlation_name' => ['required', "exists:translations,name"],
             'bundle_descriptions.*.description' => ['required'],
-            'image' => ['required'],
+            'image' => ['sometimes'],
             'discount_id' => ['sometimes', 'exists:discounts,id'],
             'tax_id' => ['sometimes', 'exists:taxes,id'],
             'price' => ['required', 'numeric'],
