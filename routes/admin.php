@@ -168,6 +168,17 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // DeliveryBalanceGate,
     // SocialMediaController
 
+    Route::controller(SocialMediaController::class)
+    ->prefix('social_media')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/lists', 'lists');
+        Route::get('/social_item/{id}', 'social_item');
+        Route::put('/status/{id}', 'status');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+
     Route::controller(BundleController::class)
     ->prefix('bundles')->group(function(){
         Route::get('/', 'view');
@@ -178,7 +189,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/update/{id}', 'modify');
         Route::delete('/delete/{id}', 'delete');
     });
-    
+
     Route::controller(TaxProductController::class)
     ->prefix('tax_product')->group(function(){
         Route::get('/view_products/{id}', 'view');
