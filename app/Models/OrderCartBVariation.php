@@ -8,12 +8,15 @@ class OrderCartBVariation extends Model
 {
     protected $fillable = [
         "order_cart_id",
-        "variation_id",
-        "option_id",
+        "variation_id", 
         "order_cart_b_id",
     ];
 
-    public function option(){
-        return $this->belongsTo(OptionProduct::class, 'option_id');
+    public function variation(){
+        return $this->belongsTo(VariationProduct::class, 'variation_id');
+    }
+
+    public function options(){
+        return $this->hasMany(OrderCartBOption::class, 'variation_bundle_id');
     }
 }

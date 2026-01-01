@@ -15,4 +15,8 @@ class OrderCartBundle extends Model
     public function bundle(){
         return $this->belongsTo(Bundle::class, 'bundle_id');
     }
+
+    public function variations(){
+        return $this->hasMany(OrderCartBVariation::class, 'order_cart_b_id');
+    }
 }

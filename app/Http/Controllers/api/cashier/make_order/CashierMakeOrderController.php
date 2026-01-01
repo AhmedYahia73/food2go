@@ -824,6 +824,7 @@ class CashierMakeOrderController extends Controller
         ->toArray();
         $order_cart = $this->order_cart
         ->whereIn('table_id', $tables_ids)
+        ->with("")
         ->get();
         $orders = collect([]);
         foreach ($order_cart as $key => $item) {
