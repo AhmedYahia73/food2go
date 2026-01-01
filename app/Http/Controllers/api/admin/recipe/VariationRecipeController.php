@@ -66,7 +66,7 @@ class VariationRecipeController extends Controller
     public function view_recipes($id){
         $variations = VariationRecipe::
         where("option_id", $id)
-        ->with(["options", "store_category:id,name", 
+        ->with(["option", "store_category:id,name", 
         "store_product:id,name", "unit:id,name"])
         ->get()
         ->map(function($item){
@@ -75,13 +75,7 @@ class VariationRecipeController extends Controller
                 "weight" => $item->weight,
                 "status" => $item->status, 
                 "variation" => $item?->variation?->name,
-                "options" => $item->options
-                ->map(function($element){
-                    return [
-                        "id" => $element->id,
-                        "name" => $element->name,
-                    ];
-                }),
+                "option" => $item?->option?->name,
                 "store_category" => $item->store_category,
                 "store_product" => $item->store_product,
                 "unit" => $item->unit,
