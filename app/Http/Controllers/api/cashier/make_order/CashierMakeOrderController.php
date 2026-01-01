@@ -868,7 +868,7 @@ class CashierMakeOrderController extends Controller
         }
 
         return response()->json([
-            'success' => $orders
+            'success' => $orders,
         ]);
     }
 

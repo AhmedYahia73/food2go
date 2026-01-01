@@ -794,6 +794,7 @@ trait PlaceOrder
                 $order_data[$key]->extras = $item->extras;
                 $order_data[$key]->variation_selected = $variation;
                 $order_data[$key]->addons_selected = $addons;
+                $order_data[$key]->bundles = $item->bundles ?? null;
             }
 
             return array_values($order_data);
