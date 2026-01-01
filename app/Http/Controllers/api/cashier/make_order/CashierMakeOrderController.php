@@ -866,10 +866,12 @@ class CashierMakeOrderController extends Controller
             $order_item = $this->order_format($item, $key); 
             $orders = $orders->merge($order_item);
         }
-        $bundles = collect($orders)->pluck("bundles");
-        foreach ($orders as &$item) {
-            unset($item['bundles']);
-        }
+        $bundles = $orders
+        ->pluck('bundles')
+        ->filter(fn ($bundle) => !empty($bundle))
+        ->values();
+        $orders = $orders->map(fn ($item) => collect($item)->except('bundles'));
+
         return response()->json([
             'success' => $orders,
             'bundles' => collect($orders)->pluck("bundles"),
