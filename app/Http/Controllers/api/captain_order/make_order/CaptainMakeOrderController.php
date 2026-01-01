@@ -793,7 +793,7 @@ class CaptainMakeOrderController extends Controller
             ->filter(function($item) use($category_off){
                 return !$category_off->contains($item->id);
             });
-            $item->forget("sub_categories");
+            $item->unsetRelation('sub_categories');
             return $item;
         })
         ->filter(function($item) use($category_off){
