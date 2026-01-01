@@ -837,25 +837,28 @@ class CashierMakeOrderController extends Controller
         }])
         ->get()
         ->map(function($item){
-            $item->bundle = [
-                'name' => $item?->bundles?->bundle?->name,
-                'image' => $item?->bundles?->bundle?->image_link,
-                'price' => $item?->bundles?->bundle?->price,
-                'discount' => $item?->bundles?->bundle?->discount,
-                'tax' => $item?->bundles?->bundle?->tax,
-                'variations' => $item?->bundles?->variations
-                ?->map(function($element){
-                    return [
-                        "name" => $element?->variation?->name,
-                        "options" => $element?->options
-                        ?->map(function($element2){
-                            return [
-                                "name" => $element2?->option?->name
-                            ];
-                        }),
-                    ];
-                })
-            ];
+            $item->bundles = $item->bundles
+            ?->map(function($bundle_item){
+                return [
+                    'name' => $item?->bundles?->bundle?->name,
+                    'image' => $item?->bundles?->bundle?->image_link,
+                    'price' => $item?->bundles?->bundle?->price,
+                    'discount' => $item?->bundles?->bundle?->discount,
+                    'tax' => $item?->bundles?->bundle?->tax,
+                    'variations' => $item?->bundles?->variations
+                    ?->map(function($element){
+                        return [
+                            "name" => $element?->variation?->name,
+                            "options" => $element?->options
+                            ?->map(function($element2){
+                                return [
+                                    "name" => $element2?->option?->name
+                                ];
+                            }),
+                        ];
+                    })
+                ];
+            });
             return $item;
         });
         $orders = collect([]);
