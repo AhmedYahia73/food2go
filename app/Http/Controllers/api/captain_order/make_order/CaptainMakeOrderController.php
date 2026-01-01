@@ -789,14 +789,12 @@ class CaptainMakeOrderController extends Controller
         ->orderBy("priority") 
         ->get()
         ->map(function($item) use($category_off){
-           
-            $item->setAttribute(
-                'sub_category',
-                $item->sub_categories
-                    ->filter(fn ($sub) => !$category_off->contains($sub->id))
-                    ->values()
-            );
+            $sub_category = clone $item->sub_categories
+            ->filter(function($item) use($category_off){
+                return !$category_off->contains($item->id);
+            });
             $item->unsetRelation('sub_categories');
+            $item->sub_categories = $item->sub_categories;
             return $item;
         })
         ->filter(function($item) use($category_off){
