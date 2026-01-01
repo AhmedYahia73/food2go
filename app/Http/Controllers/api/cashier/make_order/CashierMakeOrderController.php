@@ -837,7 +837,7 @@ class CashierMakeOrderController extends Controller
         }])
         ->get()
         ->map(function($item){
-            $item->bundles = $item->bundles
+            $item->bundles_items = $item->bundles
             ?->map(function($bundle_item){
                 return [
                     'name' => $bundle_item?->bundle?->name,
