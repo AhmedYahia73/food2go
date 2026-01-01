@@ -30,4 +30,8 @@ class OrderCart extends Model
     public function table(){
         return $this->belongsTo(CafeTable::class, 'table_id');
     }
+
+    public function bundles(){
+        return $this->hasMany(OrderCartBundle::class, 'order_cart_id');
+    }
 }
