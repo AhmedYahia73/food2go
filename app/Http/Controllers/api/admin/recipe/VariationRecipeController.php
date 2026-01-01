@@ -75,7 +75,13 @@ class VariationRecipeController extends Controller
                 "weight" => $item->weight,
                 "status" => $item->status, 
                 "variation" => $item?->variation?->name,
-                "option" => $item?->option?->name,
+                "options" => $item->options
+                ->map(function($element){
+                    return [
+                        "id" => $element->id,
+                        "name" => $element->name,
+                    ];
+                }),
                 "store_category" => $item->store_category,
                 "store_product" => $item->store_product,
                 "unit" => $item->unit,
