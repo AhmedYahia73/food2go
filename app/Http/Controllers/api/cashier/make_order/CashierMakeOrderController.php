@@ -863,7 +863,7 @@ class CashierMakeOrderController extends Controller
         });
         $orders = collect([]);
         foreach ($order_cart as $key => $item) {
-            $order_item = $this->order_format($item, $key); 
+            $order_item = $this->order_tabl_format($item, $key); 
             $orders = $orders->merge($order_item);
         }
 
