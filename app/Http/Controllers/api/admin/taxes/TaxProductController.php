@@ -55,7 +55,7 @@ class TaxProductController extends Controller
         $validator = Validator::make($request->all(), [
             'products' => ['required', 'array'],
             'products.*' => ['required', 'exists:products,id'],
-            'tax_id' => ["required", "exists:purchase_products,id"],
+            'tax_id' => ["required", "exists:taxes,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
