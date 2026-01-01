@@ -120,6 +120,16 @@ class VariationRecipeController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+
+        $variation = VariationRecipe::
+        where("id", $id) 
+        ->update([
+            "status" => $request->status
+        ]);
+
+        return response()->json([
+            "success" => "You update status success",
+        ]);
     }
 
 
