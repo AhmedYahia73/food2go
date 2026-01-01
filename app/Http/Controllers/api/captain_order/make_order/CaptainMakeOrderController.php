@@ -785,9 +785,17 @@ class CaptainMakeOrderController extends Controller
         }])
         ->withLocale($locale)
         ->where('status', 1)
-        ->orderBy("priority")
-        ->where('category_id', null)
+        ->whereNull('category_id')
+        ->orderBy("priority") 
         ->get()
+        ->map(function($item) use($category_off){
+            $item->sub_category = $item->sub_categories
+            ->filter(function($item) use($category_off){
+                return !$category_off->contains($item->id);
+            });
+            $item->forget("sub_categories");
+            return $item;
+        })
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
         });
