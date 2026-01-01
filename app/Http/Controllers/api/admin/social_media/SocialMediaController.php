@@ -13,7 +13,7 @@ class SocialMediaController extends Controller
 { 
     use image;
 
-    public function view(Request $request, $id){
+    public function view(Request $request){
          $social_media = SocialMedia::
          select("id", "icon", "name", "link", "status")
          ->get();
