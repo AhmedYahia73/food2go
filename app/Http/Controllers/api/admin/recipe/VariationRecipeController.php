@@ -42,8 +42,7 @@ class VariationRecipeController extends Controller
         ]);
     }
 
-    public function lists(Request $request){
-        
+    public function lists(Request $request){ 
         $categories = $this->category
         ->select("id", "name")
         ->where("status", 1)
@@ -56,6 +55,12 @@ class VariationRecipeController extends Controller
         ->select("id", "name")
         ->where("status", 1)
         ->get();
+
+        return response()->json([ 
+            "store_categories" => $categories,
+            "store_products" => $products,
+            "units" => $units,
+        ]);
     }
 
     public function view_recipes($id){
