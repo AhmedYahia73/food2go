@@ -863,7 +863,7 @@ trait PlaceOrder
                 $order_data[$key]->addons_selected = $addons; 
             }
 
-            $order_data[$key]->bundles = $item->bundles_items;
+            $order_data[$key]->bundles = $item['bundles_items'];
             return array_values($order_data);
         }
     }
