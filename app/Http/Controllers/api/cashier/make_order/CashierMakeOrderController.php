@@ -869,7 +869,8 @@ class CashierMakeOrderController extends Controller
         $bundles = $orders
         ->pluck('bundles')
         ->filter(fn ($bundle) => count($bundle) > 0)
-        ->values();
+        ->values()
+        ->flatten(1);
         $orders = $orders->map(fn ($item) => collect($item)->except('bundles'));
 
         return response()->json([
