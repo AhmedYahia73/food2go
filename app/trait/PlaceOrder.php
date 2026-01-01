@@ -803,6 +803,7 @@ trait PlaceOrder
 
     public function order_tabl_format($order, $locale = "en"){
         $order_data = [];
+        
         foreach ($order as $key => $item) {
             if(isset($item->cart->product)){
                 $product = $item->cart->product[0]->product;
