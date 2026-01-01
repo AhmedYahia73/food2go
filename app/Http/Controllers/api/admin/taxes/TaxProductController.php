@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Tax;
 use App\Models\Product;
+use App\Models\Category;
 
 class TaxProductController extends Controller
 {
@@ -30,6 +31,14 @@ class TaxProductController extends Controller
     }
 
     public function lists(Request $request){
+        $categories = Category::
+        get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
         $products = Product::
         whereNull("tax_id")
         ->get()
