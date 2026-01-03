@@ -83,7 +83,7 @@ class VariationRecipeController extends Controller
         });
 
         return response()->json([
-            "variations" => $variations
+            "recipes" => $variations
         ]);
     }
 
@@ -187,12 +187,9 @@ class VariationRecipeController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-
-        $variation_ids = VariationProduct::
-        where("product_id", $id)
-        ->pluck("id");
+ 
         $variation = VariationRecipe::
-        whereIn("variation_id", $variation_ids)
+        where("variation_id", $id)
         ->delete();  
 
         foreach ($request->variations as $variation_item) {
