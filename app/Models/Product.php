@@ -53,6 +53,10 @@ class Product extends Model
         ->first();
     }
 
+    public function pos_pricing(){
+        return $this->hasMany(ProductPosPricing::class, "product_id");
+    }
+
     public function recipes(){
         return $this->hasMany(Recipe::class, 'product_id');
     }

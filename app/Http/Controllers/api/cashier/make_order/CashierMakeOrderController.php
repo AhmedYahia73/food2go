@@ -347,6 +347,11 @@ class CashierMakeOrderController extends Controller
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
         ]);
+        if(!$request->user()->delivery){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        }
         if($request->dicount_id || $request->free_discount){
             if(!$request->user()->discount_perimission && $request->dicount_id){
                 return response()->json([
@@ -620,6 +625,11 @@ class CashierMakeOrderController extends Controller
             'status' => 1,
             'take_away_status' => 'preparing',
         ]);
+        if(!$request->user()->take_away){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        }
         $errors = $this->finantion_validation($request);
         if(isset($errors['errors'])){
             return response()->json([
@@ -779,6 +789,11 @@ class CashierMakeOrderController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        if(!$request->user()->dine_in){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        }
         $request->merge([
             'branch_id' => $request->user()->branch_id,
             'user_id' => 'empty',
@@ -805,6 +820,11 @@ class CashierMakeOrderController extends Controller
 
     public function dine_in_table_carts(Request $request, $id){
         // /cashier/dine_in_table_carts/{id}
+        if(!$request->user()->dine_in){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        }
         $tables_ids = $this->cafe_table
         ->where('id', $id)
         ->orWhere('main_table_id', $id)
@@ -966,6 +986,11 @@ class CashierMakeOrderController extends Controller
         // Keys
         // date, amount, total_tax, total_discount
         // notes, payment_method_id, table_id
+        if(!$request->user()->dine_in){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        }
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
             'order_type' => 'dine_in',
@@ -1153,6 +1178,11 @@ class CashierMakeOrderController extends Controller
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
+        if(!$request->user()->dine_in){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        }
         $request->merge([
             'branch_id' => $request->user()->branch_id, 
             'order_type' => 'dine_in',

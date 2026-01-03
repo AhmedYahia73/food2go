@@ -17,7 +17,7 @@ class CashierMan extends Model
         'take_away',
         'dine_in',
         'real_order',
-        'take_away',
+        'delivery',
         'user_name',
         'password',
         'status',

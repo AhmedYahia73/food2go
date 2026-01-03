@@ -135,13 +135,15 @@ class VariationRecipeController extends Controller
 
     public function create(Request $request){ 
         $validator = Validator::make($request->all(), [
-            'variation_id' => ['required', 'exists:variation_products,id'],
-            'option_id' => ['required', 'exists:option_products,id'],
-            'store_product_id' => ["required", "exists:purchase_products,id"],
-            'store_category_id' => ["required", "exists:purchase_categories,id"],
-            'unit_id' => ['required', 'exists:units,id'],
-            'weight' => ['required', 'numeric'],
-            'status' => ['required', 'boolean'],
+            "variations" => ["required", "array"],
+            'variations.*.id' => ['required', 'exists:variation_products,id'],
+            'variations.*.options' => ['required', 'array'],
+            'variations.*.options.*.id' => ['required', 'exists:option_products,id'],
+            'variations.*.options.*.store_product_id' => ["required", "exists:purchase_products,id"],
+            'variations.*.options.*.store_category_id' => ["required", "exists:purchase_categories,id"],
+            'variations.*.options.*.unit_id' => ['required', 'exists:units,id'],
+            'variations.*.options.*.weight' => ['required', 'numeric'],
+            'variations.*.options.*.status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -149,15 +151,19 @@ class VariationRecipeController extends Controller
             ],400);
         }
 
-        $variation = VariationRecipe::create([
-            'option_id' => $request->option_id,
-            'variation_id' => $request->variation_id,
-            'unit_id' => $request->unit_id,
-            'weight' => $request->weight,
-            'store_category_id' => $request->store_category_id,
-            'store_product_id' => $request->store_product_id,
-            'status' => $request->status,
-        ]);
+        foreach ($request->variations as $variation_item) {
+            foreach ($variation_item['options'] as $option_item) {
+                $variation = VariationRecipe::create([
+                    'option_id' => $option_item['id'],
+                    'variation_id' => $variation_item['id'],
+                    'unit_id' => $option_item['unit_id'],
+                    'weight' => $option_item['weight'],
+                    'store_category_id' => $option_item['store_category_id'],
+                    'store_product_id' => $option_item['store_product_id'],
+                    'status' => $option_item['status'],
+                ]);
+            }
+        }
 
         return response()->json([
             "success" => "You add recipe success",
@@ -166,13 +172,15 @@ class VariationRecipeController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'variation_id' => ['required', 'exists:variation_products,id'],
-            'option_id' => ['required', 'exists:option_products,id'],
-            'store_product_id' => ["required", "exists:purchase_products,id"],
-            'store_category_id' => ["required", "exists:purchase_categories,id"],
-            'unit_id' => ['required', 'exists:units,id'],
-            'weight' => ['required', 'numeric'],
-            'status' => ['required', 'boolean'],
+            "variations" => ["required", "array"],
+            'variations.*.id' => ['required', 'exists:variation_products,id'],
+            'variations.*.options' => ['required', 'array'],
+            'variations.*.options.*.id' => ['required', 'exists:option_products,id'],
+            'variations.*.options.*.store_product_id' => ["required", "exists:purchase_products,id"],
+            'variations.*.options.*.store_category_id' => ["required", "exists:purchase_categories,id"],
+            'variations.*.options.*.unit_id' => ['required', 'exists:units,id'],
+            'variations.*.options.*.weight' => ['required', 'numeric'],
+            'variations.*.options.*.status' => ['required', 'boolean'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -180,24 +188,26 @@ class VariationRecipeController extends Controller
             ],400);
         }
 
+        $variation_ids = VariationProduct::
+        where("product_id", $id)
+        ->pluck("id");
         $variation = VariationRecipe::
-        where("id", $id)
-        ->first();
-        if(empty($variation)){
-            return response()->json([
-                "errors" => "id is wrong"
-            ], 400);
-        }
+        whereIn("variation_id", $variation_ids)
+        ->delete();  
 
-        $variation->update([
-            'option_id' => $request->option_id,
-            'variation_id' => $request->variation_id,
-            'unit_id' => $request->unit_id,
-            'weight' => $request->weight,
-            'store_category_id' => $request->store_category_id,
-            'store_product_id' => $request->store_product_id,
-            'status' => $request->status,
-        ]);
+        foreach ($request->variations as $variation_item) {
+            foreach ($variation_item['options'] as $option_item) {
+                $variation = VariationRecipe::create([
+                    'option_id' => $option_item['id'],
+                    'variation_id' => $variation_item['id'],
+                    'unit_id' => $option_item['unit_id'],
+                    'weight' => $option_item['weight'],
+                    'store_category_id' => $option_item['store_category_id'],
+                    'store_product_id' => $option_item['store_product_id'],
+                    'status' => $option_item['status'],
+                ]);
+            }
+        } 
 
         return response()->json([
             "success" => "You update recipe success",
