@@ -1828,9 +1828,10 @@ class OrderController extends Controller
         $kitchen_items = [];
         foreach ($order->bundles as $item) {
             $locale = 'ar'; 
-            $product = collect([]);
-            $products = $item?->bundle?->products ?? [];
-            foreach ($products as $element) {
+            $bundle_products = $item?->bundle_products;
+            foreach ($bundle_products as $bundle_product) {
+                $product = collect([]);
+                $element = $bundle_product->products;
                 $product['id'] = $element->id;
                 $product['category_id'] = $element->category_id;
                 $product['sub_category_id'] = $element->sub_category_id;
@@ -1870,8 +1871,31 @@ class OrderController extends Controller
                 $addons = [];
                 $excludes = [];
                 $extras = [];
-                $variations = $item->
-                .....
+                $variations = $bundle_product->variations;
+                $variations = $bundle_product->variations;
+                foreach ($variations as $variation_element) {
+                    $options = [];
+                    $options_items = $variation_element->options;
+                    $variation_name = $variation_element->variation
+                    ->translations
+                    ->where("locale", $locale)
+                    ->where("key", $variation_element->variation->name)
+                    ->first()?->value ?? $variation_element->variation->name;
+                    foreach ($options_items as $element_option) {
+                        $options[] = [
+                            "id" => $element_option->id,
+                            "name" => $element_option->translations
+                            ->where("locale", $locale)
+                            ->where("key", $element_option->name)
+                            ->first()?->value ?? $element_option->name,
+                        ];
+                    }
+                    $variation[] = [
+                        "id" => $variation_element?->variation_id, 
+                        'name' => $variation_name,
+                        'options' => $options,
+                    ]; 
+                }
             }
         }
         foreach ($order->order_details ?? $order as $key => $item) {
