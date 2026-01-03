@@ -1559,9 +1559,27 @@ class OrderController extends Controller
 
         if ($request->order_status == 'confirmed') { 
             $this->preparing_takeaway($id);
+            if($order->order_type == "take_away"){
+                $order->update([
+                    'order_status' => $request->order_status,
+                    'order_number' => $request->order_number ?? null,
+                    "take_away_status" => "preparing",
+                ]);
+            }
+            elseif($order->order_type == "delivery"){
+                $order->update([
+                    'order_status' => $request->order_status,
+                    'order_number' => $request->order_number ?? null,
+                    "delivery_status" => "preparing",
+                ]);
+            }
+            else{
+                $order->update([
+                    'order_status' => $request->order_status,
+                    'order_number' => $request->order_number ?? null,
+                ]);
+            }
             $order->update([
-                'order_status' => $request->order_status,
-                'order_number' => $request->order_number ?? null,
             ]);
         }
         elseif($request->order_status == 'canceled'){
@@ -1808,6 +1826,54 @@ class OrderController extends Controller
         $order_data = [];
         $kitchen_order = [];
         $kitchen_items = [];
+        foreach ($order->bundles as $item) {
+            $locale = 'ar'; 
+            $product = collect([]);
+            $products = $item?->bundle?->products ?? [];
+            foreach ($products as $element) {
+                $product['id'] = $element->id;
+                $product['category_id'] = $element->category_id;
+                $product['sub_category_id'] = $element->sub_category_id;
+                $product['notes'] = null;
+                $product['count'] = $item->count;
+                $product['weight'] = $element->weight_status;
+                    
+                // kitchen
+                $kitchen = Kitchen::
+                where(function($q) use($product){
+                    $q->whereHas('products', function($query) use ($product){
+                        $query->where('products.id', $product['id']);
+                    })
+                    ->orWhereHas('category', function($query) use ($product){
+                        $query->where('categories.id', $product['category_id'])
+                        ->orWhere('categories.id', $product['sub_category_id']);
+                    });
+                }) 
+                ->first();
+                if(!empty($kitchen) && $kitchen->type == "kitchen"){ 
+                    $locale = Setting::
+                    where("name", "kitchen_lang")
+                    ->first()?->setting ?? 'ar';
+                }
+                elseif(!empty($kitchen) && $kitchen->type == "brista"){ 
+                    $locale = Setting::
+                    where("name", "brista_lang")
+                    ->first()?->setting ?? 'ar';
+                }
+
+                $product['name'] = $element->translations
+                ->where("locale", $locale)
+                ->where("key", $element->name)
+                ->first()?->value ?? $element->name;
+
+                $variation = [];
+                $addons = [];
+                $excludes = [];
+                $extras = [];
+                $variations = $item->
+                .....
+            }
+        }
         foreach ($order->order_details ?? $order as $key => $item) {
             $locale = 'ar';
             $product = collect([]);

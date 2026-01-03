@@ -9,6 +9,7 @@ class OrderVariationBundle extends Model
     protected $fillable = [
         "order_bundle_id",
         "variation_id",
+        "order_bundle_p_id",
     ];
 
     public function order_bundle(){
@@ -17,5 +18,9 @@ class OrderVariationBundle extends Model
 
     public function variation(){
         return $this->belongsTo(VariationProduct::class, 'variation_id');
+    }
+
+    public function options(){
+        return $this->hasMany(OrderOptionBundle::class, 'option_id');
     }
 }

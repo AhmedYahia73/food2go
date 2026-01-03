@@ -1151,6 +1151,35 @@ class OrderController extends Controller
             }
         }
 
+        if ($request->order_status == 'confirmed') { 
+            $this->preparing_takeaway($id);
+            if($order->order_type == "take_away"){
+                $order->update([
+                    'order_status' => $request->order_status,
+                    'order_number' => $request->order_number ?? null,
+                    'cashier_man_id' => $request->user()->id,
+                    'cashier_id' => $request->user()->cashier_id,
+                    "take_away_status" => "preparing",
+                ]);
+            }
+            elseif($order->order_type == "delivery"){
+                $order->update([
+                    'order_status' => $request->order_status,
+                    'order_number' => $request->order_number ?? null,
+                    'cashier_man_id' => $request->user()->id,
+                    'cashier_id' => $request->user()->cashier_id,
+                    "delivery_status" => "preparing",
+                ]);
+            }
+            else{
+                $order->update([
+                    'order_status' => $request->order_status,
+                    'order_number' => $request->order_number ?? null,
+                    'cashier_man_id' => $request->user()->id,
+                    'cashier_id' => $request->user()->cashier_id,
+                ]);
+            }
+        }
         if ($request->order_status == 'processing') { 
             $order->update([
                 'order_status' => $request->order_status,
@@ -1158,7 +1187,6 @@ class OrderController extends Controller
                 'cashier_man_id' => $request->user()->id,
                 'cashier_id' => $request->user()->cashier_id,
             ]);
-            $this->preparing_takeaway($request, $id);
         }
         elseif($request->order_status == 'canceled'){
             // Key

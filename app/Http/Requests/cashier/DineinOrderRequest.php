@@ -29,13 +29,16 @@ class DineinOrderRequest extends FormRequest
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'], 
 
+
             'bundles' => ['array'],
             'bundles.*.count' => ['required', "numeric"],
             'bundles.*.id' => ['required', 'exists:bundles,id'],
-            'bundles.*.variation' => ['required', 'array'],
-            'bundles.*.variation.*.id' => ['required', 'exists:variation_products,id'],
-            'bundles.*.variation.*.options' => ['required', 'array'],
-            'bundles.*.variation.*.options.*' => ['required', 'exists:option_products,id'],
+            'bundles.*.products' => ['required', 'array'],
+            'bundles.*.products.*.id' => ['required', 'exists:products,id'],
+            'bundles.*.products.*.variation' => ['required', 'array'],
+            'bundles.*.products.*.variation.*.id' => ['required', 'exists:variation_products,id'],
+            'bundles.*.products.*.variation.*.options' => ['required', 'array'],
+            'bundles.*.products.*.variation.*.options.*' => ['required', 'exists:option_products,id'],
 
             'products' => ['array'],
             'products.*.product_id' => ['exists:products,id', 'required'],

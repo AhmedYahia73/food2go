@@ -89,8 +89,7 @@ class HomeController extends Controller
         ->where("name", "delivery_time")
         ->first()
         ->setting ?? "00:00:00";
-        $orders = $this->order
-        ->where('pos', 1)
+        $orders = $this->order 
         ->where('order_active', 1)
         ->with("branch:id,name,food_preparion_time")
         ->where('cashier_man_id', $request->user()->id)
@@ -123,15 +122,24 @@ class HomeController extends Controller
                 "created_at" => $item->created_at,
                 "order_details" => $item->order_details,  
                 "order_type" => $item->order_type, 
-                "order_status" => $order_status,  
+                "order_status" => $order_status, 
+                "type" => $item->pos ? "Point of Sale" : "Online", 
             ];
         });
         $take_away = $orders->where('order_type', 'take_away')
         ->where('take_away_status', '!=', 'pick_up')
+        ->where('order_status', '!=', 'delivered')
+        ->where('order_status', '!=', 'returned')
+        ->where('order_status', '!=', 'faild_to_deliver')
+        ->where('order_status', '!=', 'canceled')
         ->values();
         $dine_in = $orders->where('order_type', 'dine_in')
         ->values();
         $delivery = $orders->where('order_type', 'delivery')
+        ->where('order_status', '!=', 'delivered')
+        ->where('order_status', '!=', 'returned')
+        ->where('order_status', '!=', 'faild_to_deliver')
+        ->where('order_status', '!=', 'canceled')
         ->values();
         // if($orders->order_type == 'take_away'){
         //     $orders->take_away_status = 'preparing';

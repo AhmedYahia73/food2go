@@ -9,7 +9,8 @@ class OrderOptionBundle extends Model
     protected $fillable = [
         "order_bundle_id",
         "variation_id",
-        "option_id",
+        "order_bundle_p_id",
+        "option_id", 
     ];
 
     public function option(){

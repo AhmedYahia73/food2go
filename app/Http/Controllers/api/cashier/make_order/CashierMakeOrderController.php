@@ -586,9 +586,18 @@ class CashierMakeOrderController extends Controller
                 $delivery->balance -= $order->amount;
                 $delivery->save();
             }
+        } 
+        if($order->delivery_status == "preparing"){
+            $order->update([
+                'order_status' => "confirmed",
+                "delivery_status" => $request->delivery_status,
+            ]);
         }
-        $order->delivery_status = $request->delivery_status;
-        $order->save();
+        else{
+            $order->update([ 
+                "delivery_status" => $request->delivery_status,
+            ]);
+        }
 
         return response()->json([
             'success' => 'You change status success'
@@ -1406,9 +1415,11 @@ class CashierMakeOrderController extends Controller
                 return response()->json([
                     "errors" => $errors['msg']
                 ], 400);
-        }    
+            }    
             $kitchen_items = $this->preparing_takeaway($request, $id);
             $kitchen_items = $kitchen_items['kitchen_items'];
+  
+            $order->order_status = "confirmed";
         }
         $order->take_away_status = $request->take_away_status;
         $order->save();
@@ -1422,6 +1433,7 @@ class CashierMakeOrderController extends Controller
     // kitchen_lang, brista_lang
     public function preparing_delivery($request, $id){
         $order = $this->order
+        ->with("bundles")
         ->where('id', $id)
         ->first();
         $order_data = $this->takeaway_kitchen_format($order);
@@ -1469,6 +1481,7 @@ class CashierMakeOrderController extends Controller
 
     public function preparing_takeaway($request, $id){
         $order = $this->order
+        ->with("bundles")
         ->where('id', $id)
         ->first();  
         $order_kitchen = [];

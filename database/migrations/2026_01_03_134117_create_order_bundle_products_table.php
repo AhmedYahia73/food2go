@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_option_bundles', function (Blueprint $table) {
+        Schema::create('order_bundle_products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_bundle_id')->nullable()->constrained('order_bundles')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('variation_id')->nullable()->constrained('variation_products')->onUpdate('cascade')->onDelete('set null');
-            $table->foreignId('option_id')->nullable()->constrained('option_products')->onUpdate('cascade')->onDelete('set null');
-            $table->foreignId('order_bundle_p_id')->nullable()->constrained('order_bundle_products')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('product_id')->nullable()->constrained('products')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_option_bundles');
+        Schema::dropIfExists('order_bundle_products');
     }
 };
