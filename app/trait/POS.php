@@ -164,17 +164,26 @@ trait POS
                     "count" => $bundle['count'],
                     "order_id" => $order->id
                 ]);
-                foreach ($bundle['variation'] as $var_element) {
-                    OrderVariationBundle::create([
+                foreach ($bundle['products'] as $product) {
+                    $product_item = OrderBundleProduct::
+                    create([
                         "order_bundle_id" => $order_bundle_id->id,
-                        "variation_id" => $var_element['id'],
+                        "product_id" => $product['id'],
                     ]);
-                    foreach ($var_element['options'] as $option) {
-                        OrderOptionBundle::create([
+                    foreach ($product['variation'] as $var_element) {
+                        OrderVariationBundle::create([
                             "order_bundle_id" => $order_bundle_id->id,
                             "variation_id" => $var_element['id'],
-                            "option_id" => $option,
+                            "order_bundle_p_id" => $product_item->id,
                         ]);
+                        foreach ($var_element['options'] as $option) {
+                            OrderOptionBundle::create([
+                                "order_bundle_id" => $order_bundle_id->id,
+                                "variation_id" => $var_element['id'],
+                                "option_id" => $option,
+                                "order_bundle_p_id" => $product_item->id,
+                            ]);
+                        }
                     }
                 }
             }
