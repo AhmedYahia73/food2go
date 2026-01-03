@@ -31,6 +31,21 @@ class ProductPOSPricingController extends Controller
             "modules" => $modules,
         ]);
     }
+
+    public function price_item($id){
+        $product_pricing = Product::
+        with("pos_pricing")
+        ->where("id", $id)
+        ->first(); 
+
+        return response()->json([
+            "id" => $product_pricing->id,
+            "name" => $product_pricing->name,
+            "price" => $product_pricing->pos_pricing
+            ->where("module", $module)
+            ->first()?->price ?? $product_pricing->price,
+        ]);
+    }
     
     public function update(Request $request){
         $validator = Validator::make($request->all(), [

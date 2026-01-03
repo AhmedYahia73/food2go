@@ -156,6 +156,8 @@ use App\Http\Controllers\api\admin\recipe\VariationRecipeController;
 use App\Http\Controllers\api\admin\taxes\TaxProductController;
 use App\Http\Controllers\api\admin\social_media\SocialMediaController;
 
+use App\Http\Controllers\api\admin\product_pos_pricing\ProductPOSPricingController;
+
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(ProfileController::class)
@@ -167,6 +169,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
     // SocialMediaController
+
+    Route::controller(ProductPOSPricingController::class)
+    ->prefix('product_pos_pricing')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/social_item/{id}', 'social_item');
+        Route::post('/update', 'update');
+    });
 
     Route::controller(SocialMediaController::class)
     ->prefix('social_media')->group(function(){
