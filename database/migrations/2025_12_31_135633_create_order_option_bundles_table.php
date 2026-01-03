@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('order_bundle_id')->nullable()->constrained('order_bundles')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('variation_id')->nullable()->constrained('variation_products')->onUpdate('cascade')->onDelete('set null');
             $table->foreignId('option_id')->nullable()->constrained('option_products')->onUpdate('cascade')->onDelete('set null');
-            $table->foreignId('order_bundle_p_id')->nullable()->constrained('order_bundle_products')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }
