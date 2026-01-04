@@ -34,15 +34,15 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(DeliveryBalanceController::class)
     ->prefix('delivery_balance')->group(function(){
         Route::get('/lists', 'lists');
-        Route::get('/all_orders', 'orders')->middleware('can:delivery_all_orders');
-        Route::get('/current_orders', 'current_orders')->middleware('can:delivery_current_orders');
+        Route::get('/all_orders', 'orders');
+        Route::get('/current_orders', 'current_orders');
         Route::get('/order_history', 'order_history');
 
-        Route::post('/filter_current_orders', 'filter_current_orders')->middleware('can:delivery_current_orders');
-        Route::get('/faild_orders', 'faild_orders')->middleware('can:delivery_faild_orders');
-        Route::post('/confirm_faild_order', 'confirm_faild_order')->middleware('can:delivery_confirm_faild_order');
-        Route::post('/pay_orders', 'pay_orders')->middleware('can:delivery_pay_orders');
-        Route::post('/orders_delivery', 'orders_delivery')->middleware('can:orders_delivery');
+        Route::post('/filter_current_orders', 'filter_current_orders');
+        Route::get('/faild_orders', 'faild_orders');
+        Route::post('/confirm_faild_order', 'confirm_faild_order');
+        Route::post('/pay_orders', 'pay_orders');
+        Route::post('/orders_delivery', 'orders_delivery');
     });
 
     Route::controller(CashierMakeOrderController::class)
