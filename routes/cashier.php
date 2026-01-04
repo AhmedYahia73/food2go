@@ -20,6 +20,7 @@ use App\Http\Controllers\api\cashier\expenses_list\ExpensesListController;
 use App\Http\Controllers\api\captain_order\make_order\CaptainMakeOrderController;
 use App\Http\Controllers\api\cashier\group_products\GroupProductController;
 use App\Http\Controllers\api\cashier\delivery_balance\DeliveryBalanceController;
+use App\Http\Controllers\api\admin\delivery\SinglePageDeliveryController;
 
 use App\Http\Controllers\api\auth\LoginController;
 
@@ -31,6 +32,13 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/preparation_num', 'preparation_num');
     });
  
+
+    Route::controller(SinglePageDeliveryController::class)
+    ->prefix('delivery/single_page')->group(function(){
+        Route::get('/orders', 'orders');
+        Route::post('/orders_delivery', 'orders_delivery');
+    });
+
     Route::controller(DeliveryBalanceController::class)
     ->prefix('delivery_balance')->group(function(){
         Route::get('/lists', 'lists');
