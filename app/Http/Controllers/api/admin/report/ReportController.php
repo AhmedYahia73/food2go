@@ -1600,13 +1600,18 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id)
             ->where("is_void", "!=", 1)
             ->sum("amount");
-            $discount = Order::
-            selectRaw("Sum(total_discount) + Sum(coupon_discount)+ Sum(free_discount) AS total")
-            ->where("order_status", "!=", "faild_to_deliver")
-            ->where("order_status", "!=", "canceled") 
-            ->where("branch_id", $request->branch_id)
-            ->where("is_void", "!=", 1)
-            ->sum("total");
+            $discount = Order::whereNotIn('order_status', ['faild_to_deliver', 'canceled'])
+            ->where('branch_id', $request->branch_id)
+            ->where(function ($q) {
+                $q->where('is_void', 0)
+                ->orWhereNull('is_void');
+            })
+            ->selectRaw("
+                COALESCE(SUM(total_discount),0) +
+                COALESCE(SUM(coupon_discount),0) +
+                COALESCE(SUM(free_discount),0) AS total
+            ")
+            ->value('total');
             $online_web = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
@@ -1649,31 +1654,32 @@ class ReportController extends Controller
             $count_orders = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
-            ->where("branch_id", $request->branch_id)
             ->count();
             $avg_orders = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled")
-            ->where("branch_id", $request->branch_id)
             ->where("is_void", "!=", 1)
             ->avg("amount");
             $total_orders = Order:: 
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled")
-            ->where("branch_id", $request->branch_id)
             ->where("is_void", "!=", 1)
             ->sum("amount");
-            $discount = Order::
-            selectRaw("Sum(total_discount) + Sum(coupon_discount)+ Sum(free_discount) AS total")
-            ->where("order_status", "!=", "faild_to_deliver")
-            ->where("order_status", "!=", "canceled") 
-            ->where("branch_id", $request->branch_id)
-            ->where("is_void", "!=", 1)
-            ->sum("total");
+            $discount = Order::whereNotIn('order_status', ['faild_to_deliver', 'canceled'])
+            ->where('branch_id', $request->branch_id)
+            ->where(function ($q) {
+                $q->where('is_void', 0)
+                ->orWhereNull('is_void');
+            })
+            ->selectRaw("
+                COALESCE(SUM(total_discount),0) +
+                COALESCE(SUM(coupon_discount),0) +
+                COALESCE(SUM(free_discount),0) AS total
+            ")
+            ->value('total');
             $online_web = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
-            ->where("branch_id", $request->branch_id)
             ->where("is_void", "!=", 1)
             ->where("pos", 0)
             ->where("source", "web")
@@ -1681,7 +1687,6 @@ class ReportController extends Controller
             $online_mobile = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
-            ->where("branch_id", $request->branch_id)
             ->where("is_void", "!=", 1)
             ->where("pos", 0)
             ->where("source", "mobile")
@@ -1689,21 +1694,18 @@ class ReportController extends Controller
             $dine_in = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
-            ->where("branch_id", $request->branch_id)
             ->where("is_void", "!=", 1)
             ->where("order_type", "dine_in") 
             ->sum("amount");
             $delivery = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
-            ->where("branch_id", $request->branch_id)
             ->where("is_void", "!=", 1)
             ->where("order_type", "delivery") 
             ->sum("amount");
             $take_away = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
-            ->where("branch_id", $request->branch_id)
             ->where("is_void", "!=", 1)
             ->where("order_type", "take_away") 
             ->sum("amount");
