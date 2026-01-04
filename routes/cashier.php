@@ -19,6 +19,7 @@ use App\Http\Controllers\api\cashier\order\OrderController;
 use App\Http\Controllers\api\cashier\expenses_list\ExpensesListController;
 use App\Http\Controllers\api\captain_order\make_order\CaptainMakeOrderController;
 use App\Http\Controllers\api\cashier\group_products\GroupProductController;
+use App\Http\Controllers\api\cashier\delivery_balance\DeliveryBalanceController;
 
 use App\Http\Controllers\api\auth\LoginController;
 
@@ -30,6 +31,19 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/preparation_num', 'preparation_num');
     });
  
+    Route::controller(DeliveryBalanceController::class)
+    ->prefix('delivery_balance')->group(function(){
+        Route::get('/lists', 'lists');
+        Route::get('/all_orders', 'orders')->middleware('can:delivery_all_orders');
+        Route::get('/current_orders', 'current_orders')->middleware('can:delivery_current_orders');
+        Route::get('/order_history', 'order_history');
+
+        Route::post('/filter_current_orders', 'filter_current_orders')->middleware('can:delivery_current_orders');
+        Route::get('/faild_orders', 'faild_orders')->middleware('can:delivery_faild_orders');
+        Route::post('/confirm_faild_order', 'confirm_faild_order')->middleware('can:delivery_confirm_faild_order');
+        Route::post('/pay_orders', 'pay_orders')->middleware('can:delivery_pay_orders');
+        Route::post('/orders_delivery', 'orders_delivery')->middleware('can:orders_delivery');
+    });
 
     Route::controller(CashierMakeOrderController::class)
     ->group(function(){
