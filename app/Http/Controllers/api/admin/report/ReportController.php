@@ -18,7 +18,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseStock;
 use App\Models\Expense;
 use App\Models\FinancialHistory;
-use App\Models\CashierShift;
+use App\Models\CashierShift; 
 
 class ReportController extends Controller
 {
@@ -1570,6 +1570,155 @@ class ReportController extends Controller
             'expenses_total' => $expenses_total, 
             'expenses' => $expenses_items, 
             'online_order' => $online_order, 
+        ]);
+    }
+
+    public function instate_order_report(Request $request){
+        $validator = Validator::make($request->all(), [
+            'branch_id' => ['exists:branches,id'], 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        if($request->branch_id){
+            $count_orders = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled")
+            ->where("branch_id", $request->branch_id)
+            ->count();
+            $avg_orders = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled")
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->avg("amount");
+            $total_orders = Order:: 
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled")
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->sum("amount");
+            $discount = Order::
+            selectRaw("Sum(total_discount) + Sum(coupon_discount)+ Sum(free_discount) AS total")
+            ->where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->sum("total");
+            $online_web = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("pos", 0)
+            ->where("source", "web")
+            ->sum("amount");
+            $online_mobile = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("pos", 0)
+            ->where("source", "mobile")
+            ->sum("amount");
+            $dine_in = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("order_type", "dine_in") 
+            ->sum("amount");
+            $delivery = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("order_type", "delivery") 
+            ->sum("amount");
+            $take_away = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("order_type", "take_away") 
+            ->sum("amount");
+        }
+        else{ 
+            $count_orders = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->count();
+            $avg_orders = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled")
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->avg("amount");
+            $total_orders = Order:: 
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled")
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->sum("amount");
+            $discount = Order::
+            selectRaw("Sum(total_discount) + Sum(coupon_discount)+ Sum(free_discount) AS total")
+            ->where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->sum("total");
+            $online_web = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("pos", 0)
+            ->where("source", "web")
+            ->sum("amount");
+            $online_mobile = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("pos", 0)
+            ->where("source", "mobile")
+            ->sum("amount");
+            $dine_in = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("order_type", "dine_in") 
+            ->sum("amount");
+            $delivery = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("order_type", "delivery") 
+            ->sum("amount");
+            $take_away = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->where("is_void", "!=", 1)
+            ->where("order_type", "take_away") 
+            ->sum("amount");
+        }
+
+        return response()->json([
+            "total_orders" => $total_orders,
+            "avg_orders" => $avg_orders,
+            "count_orders" => $count_orders,
+            "discount" => $discount,
+            "online_web" => $online_web,
+            "online_mobile" => $online_mobile,
+            "dine_in" => $dine_in,
+            "delivery" => $delivery,
+            "take_away" => $take_away,
         ]);
     }
 }
