@@ -65,6 +65,7 @@ class AddressController extends Controller
         return response()->json([
             'cities' => $cities,
             'zones' => $zones,
+            1
         ]);
     }
 
