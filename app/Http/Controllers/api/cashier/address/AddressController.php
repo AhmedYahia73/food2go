@@ -16,15 +16,30 @@ class AddressController extends Controller
     
     public function customer_address($id){
         // /cashier/address/customer_address/{id}
+        $locale = $request->locale ?? "ar";
         $address = $this->address
         ->with('zone.city:id,name')
         ->whereHas('users', function($query) use($id){
             $query->where('users.id', $id);
         })
-        ->first();
+        ->first(); 
         $zones = $this->zone
         ->where('status', 1)
-        ->get();
+        ->with("translations")
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "city_id" => $item->city_id,
+                "branch_id" => $item->branch_id,
+                "price" => $item->price,
+                "zone" => $item->translations
+                ->where("locale", $locale)
+                ->where("key", $item->zone)
+                ->first()?->value ?? $item->zone,
+                "status" => $item->status,
+            ]; 
+        });
 
         return response()->json([
             'address' => $address,
@@ -34,13 +49,28 @@ class AddressController extends Controller
     
     public function address($id){
         // /cashier/address/item/{id}
+        $locale = $request->locale ?? "ar";
         $address = $this->address
         ->with('zone.city:id,name')
         ->where('id', $id)
         ->first();
         $zones = $this->zone
         ->where('status', 1)
-        ->get();
+        ->with("translations")
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "city_id" => $item->city_id,
+                "branch_id" => $item->branch_id,
+                "price" => $item->price,
+                "zone" => $item->translations
+                ->where("locale", $locale)
+                ->where("key", $item->zone)
+                ->first()?->value ?? $item->zone,
+                "status" => $item->status,
+            ]; 
+        });
 
         return response()->json([
             'address' => $address,

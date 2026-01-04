@@ -30,14 +30,37 @@ class AddressController extends Controller
     }
 
     public function lists(Request $request){
+        $locale = $request->locale ?? "ar";
         $cities = $this->cities
         ->select('id', 'name')
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [ 
+                "name" => $item->translations
+                ->where("locale", $locale)
+                ->where("key", $item->name)
+                ->first()?->value ?? $item->name,
+                "status" => $item->status,
+            ]; 
+        });
         $zones = $this->zones
         ->select('id', 'zone', 'city_id')
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "city_id" => $item->city_id,
+                "branch_id" => $item->branch_id,
+                "price" => $item->price,
+                "zone" => $item->translations
+                ->where("locale", $locale)
+                ->where("key", $item->zone)
+                ->first()?->value ?? $item->zone,
+                "status" => $item->status,
+            ]; 
+        });
 
         return response()->json([
             'cities' => $cities,
