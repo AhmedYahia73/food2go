@@ -948,8 +948,22 @@ class CashierMakeOrderController extends Controller
             ->where('branch_id', $request->user()->branch_id)
             ->first(); 
             if(!empty($kitchen)){
-                $kitchen_items[$kitchen->id] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $element;
+                $kitchens = Kitchen::
+                where(function($q) use($element){
+                    $q->whereHas('products', function($query) use ($element){
+                        $query->where('products.id', $element['id']);
+                    })
+                    ->orWhereHas('category', function($query) use ($element){
+                        $query->where('categories.id', $element['category_id'])
+                        ->orWhere('categories.id', $element['sub_category_id']);
+                    });
+                })
+                ->where('branch_id', $request->user()->branch_id)
+                ->get();
+                foreach ($kitchens as $kitchen) {
+                    $kitchen_items[$kitchen->id] = $kitchen;
+                    $kitchen_order[$kitchen->id][] = $element;
+                }
             }
         }
         foreach ($kitchen_order as $key => $item) {

@@ -957,9 +957,23 @@ trait PlaceOrder
             $order_data[$key]['extras'] = $extras;
             $order_data[$key]['variation_selected'] = $variation;
             $order_data[$key]['addons_selected'] = $addons;
-            if(!empty($kitchen)){
-                $kitchen_items[$kitchen->id] = $kitchen;
-                $kitchen_order[$kitchen->id][] = $order_data[$key];
+            if(!empty($kitchen)){ 
+                $kitchens = Kitchen::
+                where(function($q) use($product){
+                    $q->whereHas('products', function($query) use ($product){
+                        $query->where('products.id', $product['id']);
+                    })
+                    ->orWhereHas('category', function($query) use ($product){
+                        $query->where('categories.id', $product['category_id'])
+                        ->orWhere('categories.id', $product['sub_category_id']);
+                    });
+                })
+                ->where('branch_id', auth()->user()->branch_id)
+                ->get();
+                foreach ($kitchens as $kitchen) {
+                    $kitchen_items[$kitchen->id] = $kitchen;
+                    $kitchen_order[$kitchen->id][] = $order_data[$key];
+                }
             }
         }
 
