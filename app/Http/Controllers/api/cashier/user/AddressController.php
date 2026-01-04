@@ -37,6 +37,7 @@ class AddressController extends Controller
         ->get()
         ->map(function($item) use($locale){
             return [ 
+                "id" => $item->id,
                 "name" => $item->translations
                 ->where("locale", $locale)
                 ->where("key", $item->name)
