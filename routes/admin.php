@@ -291,6 +291,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/all_orders', 'orders')->middleware('can:delivery_all_orders');
         Route::get('/current_orders', 'current_orders')->middleware('can:delivery_current_orders');
         Route::get('/order_history', 'order_history');
+        Route::get('/orders_delivery', 'orders_delivery');
 
         Route::post('/filter_current_orders', 'filter_current_orders')->middleware('can:delivery_current_orders');
         Route::get('/faild_orders', 'faild_orders')->middleware('can:delivery_faild_orders');

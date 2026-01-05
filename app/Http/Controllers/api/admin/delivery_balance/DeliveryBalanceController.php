@@ -16,6 +16,7 @@ use App\Models\Cashier;
 use App\Models\CashierMan;
 use App\Models\Delivery;
 use App\Models\FinantiolAcounting;
+use App\Models\DeliveryBalanceHistory;
 
 class DeliveryBalanceController extends Controller
 {
@@ -368,7 +369,15 @@ class DeliveryBalanceController extends Controller
             ]);
             $total += $item->amount;
         }
-        $financial_accounting->increment('balance', $total); 
+        $financial_accounting->increment('balance', $total);
+        DeliveryBalanceHistory::create([
+            'amount' => $total,
+            'delivery_id' => $orders[0]->delivery_id,
+            'financial_id' => $request->financial_id,
+            'branch_id' => $request->branch_id,
+            'cashier_man_id' => $request->cashier_man_id,
+            'cashier_id' => $request->cashier_id,
+        ]);
 
         return response()->json([
             "success" => "You payment orders success"
@@ -434,5 +443,34 @@ class DeliveryBalanceController extends Controller
         return response()->json([
             "orders" => $orders
         ]);
+    }
+
+    public function delivery_history(Request $request){
+        $history = DeliveryBalanceHistory::
+        with("branch", "delivery", "financial_accountigs", "cashier_man",
+        "casheir")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "amount" => $item->amount,
+                'delivery_id' => $item->delivery_id,
+                'financial_id' => $item->financial_id,
+                'branch_id' => $item->branch_id,
+                'cashier_man_id' => $item->cashier_man_id,
+                'cashier_id' => $item->cashier_id,
+                
+                'delivery' => $item?->delivery?->f_name . ' ' . $item?->delivery?->l_name ?? null,
+                'financial' => $item?->financial_accountigs?->name ?? null,
+                'branch' => $item?->branch?->name ?? null,
+                'cashier_man' => $item?->cashier_man?->user_name ?? null,
+                'cashier' => $item?->casheir?->name ?? null,
+                "id" => $item->id,
+                "id" => $item->id,
+                "id" => $item->id,
+                "id" => $item->id,
+                "id" => $item->id,
+            ];
+        });
     }
 }

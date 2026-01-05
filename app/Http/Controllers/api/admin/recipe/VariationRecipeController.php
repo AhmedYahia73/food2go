@@ -48,7 +48,7 @@ class VariationRecipeController extends Controller
         ->where("status", 1)
         ->get();
         $products = $this->product
-        ->select("id", "name")
+        ->select("id", "name", "category_id", "sub_category_id")
         ->where("status", 1)
         ->get();
         $units = $this->units
@@ -72,6 +72,8 @@ class VariationRecipeController extends Controller
         ->map(function($item){
             return [
                 "id" => $item->id,
+                "variation_id" => $item->variation_id,
+                "option_id" => $item->option_id,
                 "weight" => $item->weight,
                 "status" => $item->status, 
                 "variation" => $item?->variation?->name,
