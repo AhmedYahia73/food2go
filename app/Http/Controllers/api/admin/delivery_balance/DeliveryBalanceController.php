@@ -465,12 +465,11 @@ class DeliveryBalanceController extends Controller
                 'branch' => $item?->branch?->name ?? null,
                 'cashier_man' => $item?->cashier_man?->user_name ?? null,
                 'cashier' => $item?->casheir?->name ?? null,
-                "id" => $item->id,
-                "id" => $item->id,
-                "id" => $item->id,
-                "id" => $item->id,
-                "id" => $item->id,
             ];
         });
+
+        return response()->json([
+            "history" => $history
+        ]);
     }
 }
