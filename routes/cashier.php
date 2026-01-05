@@ -45,6 +45,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/all_orders', 'orders');
         Route::get('/current_orders', 'current_orders');
         Route::get('/order_history', 'order_history');
+        Route::get('/delivery_history', 'delivery_history');
 
         Route::post('/filter_current_orders', 'filter_current_orders');
         Route::get('/faild_orders', 'faild_orders');

@@ -16,6 +16,7 @@ use App\Models\Cashier;
 use App\Models\CashierMan;
 use App\Models\Delivery;
 use App\Models\FinantiolAcounting;
+use App\Models\DeliveryBalanceHistory;
 
 class DeliveryBalanceController extends Controller
 {
@@ -412,6 +413,34 @@ class DeliveryBalanceController extends Controller
 
         return response()->json([
             "orders" => $orders
+        ]);
+    }
+    
+
+    public function delivery_history(Request $request){
+        $history = DeliveryBalanceHistory::
+        with("branch", "delivery", "financial_accountigs",
+        "casheir")
+        ->where("cashier_man_id", $request->user()->id)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "amount" => $item->amount,
+                'delivery_id' => $item->delivery_id,
+                'financial_id' => $item->financial_id,
+                'branch_id' => $item->branch_id,
+                'cashier_id' => $item->cashier_id,
+                
+                'delivery' => $item?->delivery?->f_name . ' ' . $item?->delivery?->l_name ?? null,
+                'financial' => $item?->financial_accountigs?->name ?? null,
+                'branch' => $item?->branch?->name ?? null,
+                'cashier' => $item?->casheir?->name ?? null,
+            ];
+        });
+
+        return response()->json([
+            "history" => $history
         ]);
     }
 }
