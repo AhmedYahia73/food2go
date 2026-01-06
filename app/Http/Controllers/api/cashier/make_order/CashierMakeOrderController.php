@@ -2036,6 +2036,9 @@ class CashierMakeOrderController extends Controller
         ->where("id", "<=", $id)
         ->count();
 
-        return $count_order;
+        return [$count_order,
+    $start->format("Y-m-d H:i"),
+    $end->format("Y-m-d H:i"),
+    ];
     }
 }
