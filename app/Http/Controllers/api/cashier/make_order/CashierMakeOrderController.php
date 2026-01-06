@@ -2031,8 +2031,7 @@ class CashierMakeOrderController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
 
-        $count_order = $this->order 
-        ->orderByDesc('id')
+        $count_order = $this->order
         ->whereBetween('created_at', [$start, $end])
         ->where("id", "<=", $id)
         ->count();
