@@ -380,7 +380,7 @@ class CustomerController extends Controller
         $customer_login = Setting::
         where("name", "customer_login")
         ->first()?->setting ?? null;
-        if(empty($customer_login)){ 
+        if(empty($customer_login) && empty($request->email)){ 
             return response()->json([
                 "errors" => "email is required"
             ], 400); 
@@ -388,7 +388,7 @@ class CustomerController extends Controller
         else{
             $customer_login = json_decode($customer_login);
             $customer_login = $customer_login->verification;
-            if($customer_login == "email"){
+            if($customer_login == "email" && empty($request->email)){
                 return response()->json([
                     "errors" => "email is required"
                 ], 400);
