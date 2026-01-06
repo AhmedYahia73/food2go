@@ -103,7 +103,7 @@ class OrderController extends Controller
             ->where(function($query){
                 $query->where("take_away_status", "pick_up")
                 ->where("order_type", "take_away")
-                ->orWhere("delivery_status", "done")
+                ->orWhere("delivery_status", "delivered")
                 ->where("order_type", "delivery")
                 ->orWhere("order_type", "dine_in");
 
@@ -278,7 +278,7 @@ class OrderController extends Controller
             ->where(function($query){
                 $query->where("take_away_status", "pick_up")
                 ->where("order_type", "take_away")
-                ->orWhere("delivery_status", "done")
+                ->orWhere("delivery_status", "delivered")
                 ->where("order_type", "delivery")
                 ->orWhere("order_type", "dine_in");
 
@@ -408,7 +408,7 @@ class OrderController extends Controller
             ->where(function($query){
                 $query->where("take_away_status", "pick_up")
                 ->where("order_type", "take_away")
-                ->orWhere("delivery_status", "done")
+                ->orWhere("delivery_status", "delivered")
                 ->where("order_type", "delivery")
                 ->orWhere("order_type", "dine_in");
 
