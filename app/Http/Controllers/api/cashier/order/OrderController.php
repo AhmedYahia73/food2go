@@ -121,7 +121,7 @@ class OrderController extends Controller
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
             'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
-            ->map(function($item) use($delivery_time){
+            ->map(function($item, $key) use($delivery_time){
                 $order_type = "";
                 $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
@@ -143,7 +143,7 @@ class OrderController extends Controller
                 }
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->order_number,
+                    'order_number' => $key + 1,
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -296,7 +296,7 @@ class OrderController extends Controller
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
             'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
-            ->map(function($item) use($delivery_time){
+            ->map(function($item, $key) use($delivery_time){
                 $order_type = "";
                 $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
@@ -318,7 +318,7 @@ class OrderController extends Controller
                 }
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->order_number,
+                    'order_number' => $key + 1,
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -426,7 +426,7 @@ class OrderController extends Controller
             }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
             'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
             ->get()
-            ->map(function($item) use($delivery_time){
+            ->map(function($item, $key) use($delivery_time){
                 $order_type = "";
                 $food_preparion_time = "00:00";
                 if ($item->order_type == "dine_in") {
@@ -447,8 +447,8 @@ class OrderController extends Controller
                     $order_type = $item->delivery_status;
                 }
                 return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number,
+                    'id' => $item->id, 
+                    'order_number' => $key + 1,
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,

@@ -449,7 +449,7 @@ class CashierMakeOrderController extends Controller
         if($request->order_pending){
             return response()->json([
                 'success' => "You draft order success", 
-                'order_number' => $order['payment']['order_number'],
+                'order_number' => $this->order_num_today($order['payment']['id']),
                 'order_id' => $order['payment']['id'],
             ]); 
         }
@@ -468,8 +468,8 @@ class CashierMakeOrderController extends Controller
             "success" => $this->checkout_data($request),
             'order_note' => $request->notes ?? null,
             'kitchen_items' => $kitchen_items,
-            'kitchen_items_count' => count($kitchen_items),
-            'order_number' => $order['order']->order_number,
+            'kitchen_items_count' => count($kitchen_items), 
+            'order_number' => $this->order_num_today($order['order']->id),
             'order_id' => $order['order']->id,
             "financials" => $financials,
             "address" => $address,
@@ -730,7 +730,7 @@ class CashierMakeOrderController extends Controller
                 "errors" => $errors['msg']
             ], 400);
         } 
-        $order['order']['order_number'] = $order['order']->order_number;
+        $order['order']['order_number'] = $this->order_num_today($order['order']->id); 
         $type = "تيك اواى";
         $caheir_name = $request->user()->user_name;
         $address = Branch::where("id", $request->user()->branch_id)
@@ -742,7 +742,7 @@ class CashierMakeOrderController extends Controller
         if($request->order_pending){
             return response()->json([
                 'success' => "You draft order success", 
-                'order_number' => $order['order']['order_number'],
+                'order_number' => $this->order_num_today($order['order']['id']), 
                 'order_id' => $order['order']['id'],
             ]); 
         }
@@ -757,7 +757,7 @@ class CashierMakeOrderController extends Controller
             "success" => $this->checkout_data($request),
             'order_note' => $request->notes ?? null,
             "kitchen_items" => $kitchen_items,  
-            "order_number" => $order['order']->order_number,
+            'order_number' => $this->order_num_today($order['order']->id), 
             'type' => $type,
             'caheir_name' => $caheir_name,
             "subtotal" => $request->amount,
@@ -1149,8 +1149,8 @@ class CashierMakeOrderController extends Controller
  
         if($request->order_pending){
             return response()->json([
-                'success' => "You draft order success", 
-                'order_number' => $order['payment']['order_number'],
+                'success' => "You draft order success",  
+                'order_number' => $this->order_num_today($order['payment']['id']), 
                 'order_id' => $order['payment']['id'],
             ]); 
         }
@@ -1168,8 +1168,8 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => $this->checkout_data($request), 
-            'order_note' => $request->notes ?? null,
-            'order_number' => $order['payment']['order_number'],
+            'order_note' => $request->notes ?? null, 
+            'order_number' => $this->order_num_today($order['payment']['id']), 
             'order_id' => $order['payment']['id'],
             "financials" => $financials,
             "subtotal" => $request->amount,
@@ -1255,8 +1255,8 @@ class CashierMakeOrderController extends Controller
         $order = $this->dine_in_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
-        }
-        $order_number = $order['payment']['order_number'];
+        } 
+        $order_number = $this->order_num_today($order['payment']['id']);
         $order_id = $order['payment']['id'];
         $order['payment']['cart'] = $order['payment']['order_details'];
         // $order = $this->order_format(($order['payment']), 0);
@@ -1302,8 +1302,8 @@ class CashierMakeOrderController extends Controller
  
         if($request->order_pending){
             return response()->json([
-                'success' => "You draft order success", 
-                'order_number' => $order['payment']['order_number'],
+                'success' => "You draft order success",  
+                'order_number' => $this->order_num_today($order['payment']['id']), 
                 'order_id' => $order_id,
             ]); 
         }
@@ -1323,8 +1323,7 @@ class CashierMakeOrderController extends Controller
             "success" => $this->checkout_data($request),
             'order_note' => $request->notes ?? null,
             'order_number' => $order_number,
-            'order_id' => $order_id,
-            'order_id' => $order_number,
+            'order_id' => $order_id, 
             "subtotal" => $request->amount,
             'financials' => $financials,
             "service_fees" => $request->service_fees ?? null,
@@ -1711,13 +1710,13 @@ class CashierMakeOrderController extends Controller
         ->orderByDesc("id")
         ->limit(3)
         ->get()
-        ->map(function($item){
+        ->map(function($item, $key){
             return [
                 "id" => $item->id,
                 "amount" => $item->amount,
                 "total_discount" => $item->total_discount,
-                "coupon_discount" => $item->coupon_discount,
-                "order_number" => $item->order_number,
+                "coupon_discount" => $item->coupon_discount, 
+                'order_number' => $key + 1,
                 "order_details" => $item->order_details,
                 "date" => $item->created_at->format("Y-m-d"),
                 "time" => $item->created_at->format("H:i:s"),
@@ -2007,5 +2006,37 @@ class CashierMakeOrderController extends Controller
         return [
             "success" => true
         ];
+    }
+
+    public function order_num_today($id){
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			} 
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
+
+        $count_order = $this->order 
+        ->orderByDesc('id')
+        ->whereBetween('created_at', [$start, $end])
+        ->where("id", "<=", $id)
+        ->count();
+
+        return $count_order;
     }
 }
