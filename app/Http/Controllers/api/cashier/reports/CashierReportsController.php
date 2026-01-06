@@ -1580,14 +1580,16 @@ class CashierReportsController extends Controller
         $orders = $this->orders
         ->where(function($query){
             $query->where('pos', 1)
-            ->orWhere('pos', 0);
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
         })
         ->where(function($query){
             $query->where("take_away_status", "pick_up")
             ->where("order_type", "take_away")
             ->orWhere("delivery_status", "delivered")
             ->where("order_type", "delivery")
-            ->orWhere("order_type", "dine_in");
+            ->orWhere("order_type", "dine_in")
+            ->orWhere('pos', 0);
 
         })
         ->whereBetween("created_at", [$start, $end]) 

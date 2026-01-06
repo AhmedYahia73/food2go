@@ -105,7 +105,8 @@ class OrderController extends Controller
                 ->where("order_type", "take_away")
                 ->orWhere("delivery_status", "delivered")
                 ->where("order_type", "delivery")
-                ->orWhere("order_type", "dine_in");
+                ->orWhere("order_type", "dine_in")
+                ->orWhere('pos', 0);
 
             })
             //->where("shift", $request->user()->shift_number) 
@@ -280,7 +281,8 @@ class OrderController extends Controller
                 ->where("order_type", "take_away")
                 ->orWhere("delivery_status", "delivered")
                 ->where("order_type", "delivery")
-                ->orWhere("order_type", "dine_in");
+                ->orWhere("order_type", "dine_in")
+                ->orWhere('pos', 0);
 
             })
             //->where("shift", $request->user()->shift_number) 
@@ -410,7 +412,8 @@ class OrderController extends Controller
                 ->where("order_type", "take_away")
                 ->orWhere("delivery_status", "delivered")
                 ->where("order_type", "delivery")
-                ->orWhere("order_type", "dine_in");
+                ->orWhere("order_type", "dine_in")
+                ->orWhere('pos', 0);
 
             })
             ->whereBetween("created_at", [$start, $end]) 
