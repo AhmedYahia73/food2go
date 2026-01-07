@@ -1914,9 +1914,12 @@ class ReportController extends Controller
             if($request->products){
                 $products_item = $products_item->filter(function ($product) use ($item, $request) {
                     return ($product['category_id'] == $item->id
-                        || $product['sub_category_id'] == $item->id)
-                        && in_array($product['id'], $request->products);
+                    || $product['sub_category_id'] == $item->id)
+                    && in_array($product['id'], $request->products);
                 });
+                if(empty($products_item)){
+                    continue;
+                }
             }
             else{
                 $products_item = $products_item->filter(function ($product) use ($item, $request) {
