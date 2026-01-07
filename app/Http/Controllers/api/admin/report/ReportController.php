@@ -1917,7 +1917,7 @@ class ReportController extends Controller
                     || $product['sub_category_id'] == $item->id)
                     && in_array($product['id'], $request->products);
                 });
-                if(empty($products_item)){
+                if(count($products_item) == 0){
                     continue;
                 }
             }
