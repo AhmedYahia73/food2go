@@ -1860,6 +1860,8 @@ class ReportController extends Controller
                 "id" => $item->id,
                 "category" => $item->name,
                 "products" => $products_item,
+                "products_count" => $products_item->sum("count"),
+                "products_price" => $products_item->sum("price"),
             ];
         }
 
