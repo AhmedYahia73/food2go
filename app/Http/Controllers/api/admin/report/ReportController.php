@@ -1924,7 +1924,7 @@ class ReportController extends Controller
                         || $product['sub_category_id'] == $item->id;
                 });
             }
-             
+             $products_item = $products_item->values();
             $data[] = [
                 "id" => $item->id,
                 "category" => $item->name,
