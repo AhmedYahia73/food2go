@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\CashierMan;
 use App\Models\Cashier; 
+use App\Models\Category; 
 use App\Models\OrderFinancial;
 use App\Models\FinantiolAcounting;
 use App\Models\Branch;
@@ -19,6 +20,7 @@ use App\Models\PurchaseStock;
 use App\Models\Expense;
 use App\Models\FinancialHistory;
 use App\Models\CashierShift; 
+use App\Models\OrderDetail; 
 
 class ReportController extends Controller
 {
@@ -1765,6 +1767,100 @@ class ReportController extends Controller
             "dine_in" => $dine_in,
             "delivery" => $delivery,
             "take_away" => $take_away,
+        ]);
+    }
+
+    public function product_report(Request $request){
+        $orders = Order::
+        where("is_void", 0) 
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        })
+        ->where(function($query){
+            $query->where("take_away_status", "pick_up")
+            ->where("order_type", "take_away")
+            ->orWhere("delivery_status", "delivered")
+            ->where("order_type", "delivery")
+            ->orWhere("order_type", "dine_in")
+            ->orWhere('pos', 0);
+
+        })
+        // ->whereBetween("created_at", [$start, $end]) 
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_active', 1)
+        ->get();
+        $products = [];
+        foreach ($orders as $item) {
+            $details = $item->order_details_data;
+            foreach ($details as $element) {
+                $price = 0;
+                foreach ($element['variations'] as $key => $value) {
+                    foreach ($value['options'] as $key => $option) {
+                        $price += $option['price_after_tax'] 
+                        - $option['price']
+                        + $option['after_disount'];
+                    }
+                }
+                foreach ($element['extras'] as $key => $extra) {
+                        $price += $extra['price_after_tax'] 
+                        - $extra['price']
+                        + $extra['price_after_discount'];
+                }
+                $price += $element['product'][0]['product']['price_after_tax'] 
+                    - $element['product'][0]['product']['price']
+                    + $element['product'][0]['product']['price_after_discount'];
+                $count = $element['product'][0]['count'];
+                $product_id = $element['product'][0]['product']['id'];
+               
+                if(isset($products[$product_id])){
+                    $products[$product_id]["price"] += $price * $count;
+                    $products[$product_id]["count"] += $count;
+                }
+                else{ 
+                    $category_id = $element['product'][0]['product']['category_id'];
+                    $sub_category_id = $element['product'][0]['product']['sub_category_id'];
+                    // $category = Category::
+                    // where("id", $category_id)
+                    // ->first()?->name;
+                    // $sub_category = Category::
+                    // where("id", $sub_category_id)
+                    // ->first()?->name;
+                    $products[$product_id] = [
+                        "id" => $product_id,
+                        "name" => $element['product'][0]['product']['name'],
+                        "category_id" => $category_id,
+                        "sub_category_id" => $sub_category_id, 
+                        "price" => $price * $count,
+                        "count" => $count, 
+                    ];
+                }
+            }
+        }
+        $categories = Category::
+        where("status", 1)
+        ->get();
+        $products = collect($products);
+        $data = [];
+        foreach ($categories as $key => $item) {
+            $products_item = $products
+            ->where("category_id", $item->id)
+            ->orWhere("sub_category_id", $item->id)
+            ->sortByDesc("price")
+            ->values();
+            $data[] = [
+                "id" => $item->id,
+                "category" => $item->name,
+                "products" => $products_item,
+            ];
+        }
+
+        return response()->json([
+            "data" => $data
         ]);
     }
 }

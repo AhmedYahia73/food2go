@@ -470,7 +470,7 @@ class CashierMakeOrderController extends Controller
             'kitchen_items' => $kitchen_items,
             'kitchen_items_count' => count($kitchen_items), 
             'order_number' => $this->order_num_today($order['order']->id),
-            'order_id' => $order['order']->id,
+            'order_id' => $this->order_num_today($order['order']->id),
             "financials" => $financials,
             "address" => $address,
             "delivery_fees" => $delivery_fees,
@@ -1170,7 +1170,7 @@ class CashierMakeOrderController extends Controller
             'success' => $this->checkout_data($request), 
             'order_note' => $request->notes ?? null, 
             'order_number' => $this->order_num_today($order['payment']['id']), 
-            'order_id' => $order['payment']['id'],
+            'order_id' => $this->order_num_today($order['payment']['id']), 
             "financials" => $financials,
             "subtotal" => $request->amount,
             "reaturant_name" => $reaturant_name,
@@ -1257,7 +1257,7 @@ class CashierMakeOrderController extends Controller
             return response()->json($order, 400);
         } 
         $order_number = $this->order_num_today($order['payment']['id']);
-        $order_id = $order['payment']['id'];
+        $order_id = $order_number;
         $order['payment']['cart'] = $order['payment']['order_details'];
         // $order = $this->order_format(($order['payment']), 0);
       // Pull Pecipe
@@ -1324,6 +1324,7 @@ class CashierMakeOrderController extends Controller
             'order_note' => $request->notes ?? null,
             'order_number' => $order_number,
             'order_id' => $order_id, 
+            'order_id' => $this->order_num_today($order['payment']['id']), 
             "subtotal" => $request->amount,
             'financials' => $financials,
             "service_fees" => $request->service_fees ?? null,
