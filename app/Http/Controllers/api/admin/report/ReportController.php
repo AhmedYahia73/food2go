@@ -1797,47 +1797,49 @@ class ReportController extends Controller
         $products = [];
         foreach ($orders as $item) {
             $details = $item->order_details_data;
-            foreach ($details as $element) {
-                $price = 0;
-                foreach ($element['variations'] as $key => $value) {
-                    foreach ($value['options'] as $key => $option) {
-                        $price += $option['price_after_tax'] 
-                        - $option['price']
-                        + $option['after_disount'];
+            if(!empty($details)){
+                foreach ($details as $element) {
+                    $price = 0;
+                    foreach ($element['variations'] as $key => $value) {
+                        foreach ($value['options'] as $key => $option) {
+                            $price += $option['price_after_tax'] 
+                            - $option['price']
+                            + $option['after_disount'];
+                        }
                     }
-                }
-                foreach ($element['extras'] as $key => $extra) {
-                        $price += $extra['price_after_tax'] 
-                        - $extra['price']
-                        + $extra['price_after_discount'];
-                }
-                $price += $element['product'][0]['product']['price_after_tax'] 
-                    - $element['product'][0]['product']['price']
-                    + $element['product'][0]['product']['price_after_discount'];
-                $count = $element['product'][0]['count'];
-                $product_id = $element['product'][0]['product']['id'];
-               
-                if(isset($products[$product_id])){
-                    $products[$product_id]["price"] += $price * $count;
-                    $products[$product_id]["count"] += $count;
-                }
-                else{ 
-                    $category_id = $element['product'][0]['product']['category_id'];
-                    $sub_category_id = $element['product'][0]['product']['sub_category_id'];
-                    // $category = Category::
-                    // where("id", $category_id)
-                    // ->first()?->name;
-                    // $sub_category = Category::
-                    // where("id", $sub_category_id)
-                    // ->first()?->name;
-                    $products[$product_id] = [
-                        "id" => $product_id,
-                        "name" => $element['product'][0]['product']['name'],
-                        "category_id" => $category_id,
-                        "sub_category_id" => $sub_category_id, 
-                        "price" => $price * $count,
-                        "count" => $count, 
-                    ];
+                    foreach ($element['extras'] as $key => $extra) {
+                            $price += $extra['price_after_tax'] 
+                            - $extra['price']
+                            + $extra['price_after_discount'];
+                    }
+                    $price += $element['product'][0]['product']['price_after_tax'] 
+                        - $element['product'][0]['product']['price']
+                        + $element['product'][0]['product']['price_after_discount'];
+                    $count = $element['product'][0]['count'];
+                    $product_id = $element['product'][0]['product']['id'];
+                
+                    if(isset($products[$product_id])){
+                        $products[$product_id]["price"] += $price * $count;
+                        $products[$product_id]["count"] += $count;
+                    }
+                    else{ 
+                        $category_id = $element['product'][0]['product']['category_id'];
+                        $sub_category_id = $element['product'][0]['product']['sub_category_id'];
+                        // $category = Category::
+                        // where("id", $category_id)
+                        // ->first()?->name;
+                        // $sub_category = Category::
+                        // where("id", $sub_category_id)
+                        // ->first()?->name;
+                        $products[$product_id] = [
+                            "id" => $product_id,
+                            "name" => $element['product'][0]['product']['name'],
+                            "category_id" => $category_id,
+                            "sub_category_id" => $sub_category_id, 
+                            "price" => $price * $count,
+                            "count" => $count, 
+                        ];
+                    }
                 }
             }
         }
