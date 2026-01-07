@@ -1850,8 +1850,10 @@ class ReportController extends Controller
         $data = [];
         foreach ($categories as $key => $item) {
             $products_item = $products
-            ->where("category_id", $item->id)
-            ->orWhere("sub_category_id", $item->id)
+            ->filter(function ($product) use ($item) {
+                return $product['category_id'] == $item->id
+                    || $product['sub_category_id'] == $item->id;
+            })
             ->sortByDesc("price")
             ->values();
             $data[] = [
