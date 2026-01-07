@@ -1583,8 +1583,7 @@ class ReportController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
-        
+        } 
 
         $time_sittings = TimeSittings::
         get();
@@ -1771,6 +1770,54 @@ class ReportController extends Controller
     }
 
     public function product_report(Request $request){
+        $validator = Validator::make($request->all(), [
+            'branch_id' => ['exists:branches,id'], 
+            'from' => ['date'], 
+            'to' => ['date'],
+            'sort' => ['in:desc,asc'],
+            'products' => ['array'],
+            'products.*' => ['exists:products,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $start = Carbon::parse("1999-05-05 00:00:00");
+        $end = now();
+        if($request->from || $request->to){
+            
+            $time_sittings = TimeSittings:: 
+            get();
+            if ($time_sittings->count() > 0) { 
+                $from = $time_sittings[0]->from;
+                $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+                $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+                $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+                $from = date('Y-m-d') . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                }
+
+                // if ($start > $end) {
+                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+                // }
+                // else{
+                //     $end = Carbon::parse($from)->addHours(intval($hours));
+                // } format('Y-m-d H:i:s')
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
+            } 
+            $start = Carbon::parse($request->from ?? "1999-05-05" . ' ' . $start->format('H:i:s'));
+            $end = Carbon::parse($request->to ?? date("Y-m-d") . ' ' . $end->format('H:i:s'));
+        }
         $orders = Order::
         where("is_void", 0) 
         ->where(function($query){
@@ -1792,8 +1839,15 @@ class ReportController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where('order_active', 1)
-        ->get();
+        ->where('order_active', 1);
+        if($request->from || $request->to){
+            $orders = $orders 
+            ->whereBetween("created_at", [$start, $end]);
+        }
+        if($request->branch_id){
+            $orders = $orders->where("branch_id", $request->branch_id);
+        }
+        $orders->get();
         $products = [];
         foreach ($orders as $item) {
             $details = $item->order_details_data;
@@ -1849,13 +1903,28 @@ class ReportController extends Controller
         $products = collect($products);
         $data = [];
         foreach ($categories as $key => $item) {
-            $products_item = $products
-            ->filter(function ($product) use ($item) {
-                return $product['category_id'] == $item->id
-                    || $product['sub_category_id'] == $item->id;
-            })
-            ->sortByDesc("price")
-            ->values();
+            if(!$request->sort || $request->sort == "desc"){
+                $products_item = $products
+                ->sortByDesc("price");
+            }
+            else{ 
+                $products_item = $products
+                ->sortBy("price");
+            }
+            if($request->products){
+                $products_item = $products_item->filter(function ($product) use ($item, $request) {
+                    return ($product['category_id'] == $item->id
+                        || $product['sub_category_id'] == $item->id)
+                        && in_array($product['id'], $request->products);
+                });
+            }
+            else{
+                $products_item = $products_item->filter(function ($product) use ($item, $request) {
+                    return $product['category_id'] == $item->id
+                        || $product['sub_category_id'] == $item->id;
+                });
+            }
+             
             $data[] = [
                 "id" => $item->id,
                 "category" => $item->name,
