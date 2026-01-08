@@ -1453,7 +1453,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function preparing_takeaway($request, $id){
+    public function preparing_takeaway($id){
         $order = $this->order
         ->where('id', $id)
         ->first();  
