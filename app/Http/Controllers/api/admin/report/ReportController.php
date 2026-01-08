@@ -663,7 +663,8 @@ class ReportController extends Controller
 
         // Order
         $orders = Order::
-        orderByDesc("id");
+        orderByDesc("id")
+        ->where("is_void", 0);
 
         if($request->from || $request->to){ 
             $time_sittings = TimeSittings:: 
@@ -777,7 +778,8 @@ class ReportController extends Controller
 
         // Order
         $orders = Order::
-        select("id");
+        select("id")
+        ->where("is_void", 0);
         $expenses = $this->expenses;
         $start = Carbon::parse('1111-01-01');
         $end = now();
@@ -906,20 +908,24 @@ class ReportController extends Controller
         // Order
         $order_count = Order::
         where('shift', $shift->shift)
+        ->where("is_void", 0)
         ->count();
         $take_away_orders = Order::
         where('shift', $shift->shift)
         ->where("order_type", "take_away")
+        ->where("is_void", 0)
         ->pluck('id')
         ->toArray();
         $delivery_orders = Order::
         where('shift', $shift->shift)
         ->where("order_type", "delivery")
+        ->where("is_void", 0)
         ->pluck('id')
         ->toArray();
         $dine_in_orders = Order::
         where('shift', $shift->shift)
         ->where("order_type", "dine_in")
+        ->where("is_void", 0)
         ->pluck('id')
         ->toArray();
          
@@ -938,6 +944,7 @@ class ReportController extends Controller
         $online_order_paid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
         ->where("pos", 0)
+        ->where("is_void", 0)
         ->where('shift', $shift->shift)
         ->where(function($query){
             $query->where("payment_method_id", "!=", 2)
@@ -953,6 +960,7 @@ class ReportController extends Controller
         $online_order_unpaid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
         ->where("pos", 0) 
+        ->where("is_void", 0)
         ->where('shift', $shift->shift)
         ->where("payment_method_id", 2)
         ->whereDoesntHave("financial_accountigs")
@@ -1177,16 +1185,20 @@ class ReportController extends Controller
         $end = now();
         // Order
         $order_count = Order::
-        select("id");
+        select("id")
+        ->where("is_void", 0);
         $take_away_orders = Order::
         select("id") 
-        ->where("order_type", "take_away");
+        ->where("order_type", "take_away")
+        ->where("is_void", 0);
         $delivery_orders = Order::
         select("id") 
-        ->where("order_type", "delivery");
+        ->where("order_type", "delivery")
+        ->where("is_void", 0);
         $dine_in_orders = Order::
         select("id") 
-        ->where("order_type", "dine_in");
+        ->where("order_type", "dine_in")
+        ->where("is_void", 0);
          
         $expenses = $this->expenses
         ->with("financial_account");
@@ -1198,6 +1210,7 @@ class ReportController extends Controller
         $online_order_paid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
         ->where("pos", 0)
+        ->where("is_void", 0)
         ->where(function($query){
             $query->where("payment_method_id", "!=", 2)
             ->where(function($q){
@@ -1212,6 +1225,7 @@ class ReportController extends Controller
         $online_order_unpaid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
         ->where("pos", 0) 
+        ->where("is_void", 0)
         ->where("payment_method_id", 2)
         ->where(function($q){
             $q->where("status", 1)
@@ -1615,6 +1629,7 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled")
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0) 
             ->count();
             $avg_orders = Order::
             where("order_status", "!=", "faild_to_deliver")
@@ -1691,6 +1706,7 @@ class ReportController extends Controller
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
             ->whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0) 
             ->count();
             $avg_orders = Order::
             where("order_status", "!=", "faild_to_deliver")
@@ -1711,6 +1727,7 @@ class ReportController extends Controller
                 $q->where('is_void', 0)
                 ->orWhereNull('is_void');
             })
+            ->where("is_void", 0) 
             ->selectRaw("
                 COALESCE(SUM(total_discount),0) +
                 COALESCE(SUM(coupon_discount),0) +
