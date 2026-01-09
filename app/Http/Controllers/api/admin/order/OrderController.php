@@ -71,8 +71,7 @@ class OrderController extends Controller
     }
 
     public function void_orders(Request $request){
-         // https://bcknd.food2go.online/admin/order
-       
+        // https://bcknd.food2go.online/admin/order
         if ($request->user()->role == "admin") {
             $orders = $this->orders
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
@@ -87,10 +86,10 @@ class OrderController extends Controller
             }, 'admin', 'payment_method',
             'schedule', 'delivery'])
             ->get()
-            ->map(function($item){
+            ->map(function($item, $key){
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->order_number,
+                    'order_number' => $item->id - app('first_order'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -139,7 +138,7 @@ class OrderController extends Controller
             ->map(function($item){
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->order_number,
+                    'order_number' => $item->id - app('first_order'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -232,7 +231,7 @@ class OrderController extends Controller
             ->map(function($item){
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->order_number,
+                    'order_number' => $item->id - app('first_order'),
                     'created_at' => $item->created_at,
                     'transfer_from' => $item?->transfer_from?->name,
                     'amount' => $item->amount,
@@ -283,7 +282,7 @@ class OrderController extends Controller
             ->map(function($item){
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->order_number,
+                    'order_number' => $item->id - app('first_order'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'rate' => $item->rate,
@@ -421,7 +420,7 @@ class OrderController extends Controller
 		->map(function($item){
 			return [ 
 				'id' => $item->id,
-				'order_number' => $item->order_number,
+                'order_number' => $item->id - app('first_order'),
 				'created_at' => $item->created_at,
 				'amount' => $item->amount,
 				'operation_status' => $item->operation_status,

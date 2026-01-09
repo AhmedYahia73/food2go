@@ -158,8 +158,32 @@ use App\Http\Controllers\api\admin\social_media\SocialMediaController;
 
 use App\Http\Controllers\api\admin\product_pos_pricing\ProductPOSPricingController;
 
+use App\Models\TimeSittings;
+use App\Models\Order;
+use Illuminate\Support\Facades\App;
+use Carbon\Carbon;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
+    App::singleton('first_order', function(){
+ 
+        $time_sittings = TimeSittings:: 
+        get();
+        if ($time_sittings->count() > 0) {
+            $from = $time_sittings[0]->from;
+            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+          
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+        } 
+ 
+        $first_order = Order:: 
+        where('created_at', '>=', $start)
+        ->first()?->id ?? 1; 
+
+        return $first_order - 1;
+    });
     Route::controller(ProfileController::class)
     ->prefix('profile')->group(function(){
         Route::get('/', 'profile')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);

@@ -144,7 +144,7 @@ class OrderController extends Controller
                 }
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $key + 1,
+                    'order_number' => $key + app('first_order'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
