@@ -671,18 +671,22 @@ class ReportController extends Controller
             get();
             $items = [];
             $count = 0;
-            $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
             foreach ($time_sittings as $item) {
                 $items[$item->branch_id][] = $item;
             }
             foreach ($items as $item) {
-                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
                     $count = count($item);
                     $to = $item[$count - 1];
                 } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
             }
             if ($time_sittings->count() > 0) {
-                $from = $to->from;
+                $from = $from->from;
                 $end = $request->to . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
@@ -792,20 +796,25 @@ class ReportController extends Controller
              
             $time_sittings = TimeSittings::
             get();
+         
             $items = [];
             $count = 0;
-            $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
             foreach ($time_sittings as $item) {
                 $items[$item->branch_id][] = $item;
             }
             foreach ($items as $item) {
-                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
                     $count = count($item);
                     $to = $item[$count - 1];
                 } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
             }
             if ($time_sittings->count() > 0) {
-                $from = $to->from;
+                $from = $from->from;
                 $end = $request->to . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
@@ -1244,20 +1253,25 @@ class ReportController extends Controller
             
             $time_sittings = TimeSittings::
             get();
+ 
             $items = [];
             $count = 0;
-            $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
             foreach ($time_sittings as $item) {
                 $items[$item->branch_id][] = $item;
             }
             foreach ($items as $item) {
-                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
                     $count = count($item);
                     $to = $item[$count - 1];
                 } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
             }
             if ($time_sittings->count() > 0) {
-                $from = $to->from;
+                $from = $from->from;
                 $end = $request->to . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
@@ -1612,20 +1626,25 @@ class ReportController extends Controller
 
         $time_sittings = TimeSittings::
         get();
+    
         $items = [];
         $count = 0;
-        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
         foreach ($time_sittings as $item) {
             $items[$item->branch_id][] = $item;
         }
         foreach ($items as $item) {
-            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
                 $count = count($item);
                 $to = $item[$count - 1];
             } 
+            if($from->from > $item[0]->from){
+                $from = $item[0];
+            }
         }
         if ($time_sittings->count() > 0) {
-            $from = $to->from;
+            $from = $from->from;
             $end = date('Y-m-d') . ' ' . $to->from;
             $hours = $to->hours;
             $minutes = $to->minutes;
@@ -1838,20 +1857,25 @@ class ReportController extends Controller
         
         $time_sittings = TimeSittings::
         get();
+      
         $items = [];
         $count = 0;
-        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
         foreach ($time_sittings as $item) {
             $items[$item->branch_id][] = $item;
         }
         foreach ($items as $item) {
-            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
                 $count = count($item);
                 $to = $item[$count - 1];
             } 
+            if($from->from > $item[0]->from){
+                $from = $item[0];
+            }
         }
         if ($time_sittings->count() > 0) {
-            $from = $to->from;
+            $from = $from->from;
             $end = $request->to . ' ' . $to->from;
             $hours = $to->hours;
             $minutes = $to->minutes;
