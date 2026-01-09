@@ -1870,7 +1870,7 @@ class ReportController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
         $orders = Order::
-        ->where(function($query){
+        where(function($query){
             $query->where('pos', 1)
             ->orWhere('pos', 0)
             ->where('order_status', '!=', 'pending');
