@@ -1139,6 +1139,7 @@ class OrderController extends Controller
             $old_index = array_search($order->order_status, $arr);
         }
 
+        $kitchen = null;
         if($old_status == "pending"){
             $order_details = $order->order_details;
             $products = [];
@@ -1158,7 +1159,7 @@ class OrderController extends Controller
         }
 
         if ($request->order_status == 'confirmed') { 
-            $this->preparing_takeaway($id);
+            $kitchen = $this->preparing_takeaway($id);
             if($order->order_type == "take_away"){
                 $order->update([
                     'order_status' => $request->order_status,
@@ -1230,7 +1231,8 @@ class OrderController extends Controller
         }
 
         return response()->json([
-            'order_status' => $request->order_status
+            'order_status' => $request->order_status,
+            "kitchen" => $kitchen,
         ]);
     }
 
