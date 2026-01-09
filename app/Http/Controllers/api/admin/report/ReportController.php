@@ -728,7 +728,7 @@ class ReportController extends Controller
         ->map(function($item){
         return [ 
             'id' => $item->id,
-            'order_number' => $item->order_number,
+            'order_number' => $item->id - app('first_order_today'),
             'created_at' => $item->created_at,
             'amount' => $item->amount,
             'operation_status' => $item->operation_status,
@@ -755,11 +755,7 @@ class ReportController extends Controller
     });
 
         return response()->json([
-            'orders' => $orders,
-			
-			
-		 $start->format("Y-m-d H:i"),
-		 $end->format("Y-m-d H:i"),
+            'orders' => $orders, 
         ]);
     }
     

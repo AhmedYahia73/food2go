@@ -155,7 +155,11 @@ class CashierMakeOrderController extends Controller
         ->orderByDesc('id')
         ->whereBetween('created_at', [$start, $end])
         ->where('order_active', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->order_number = $item->id - app("first_order_today");
+            return $item;
+        });
         $delivery_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -167,7 +171,11 @@ class CashierMakeOrderController extends Controller
         ->where('order_type', 'delivery')
         ->whereBetween('created_at', [$start, $end])
         ->where('order_active', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->order_number = $item->id - app("first_order_today");
+            return $item;
+        });
         $take_away_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -179,7 +187,11 @@ class CashierMakeOrderController extends Controller
         ->where('order_type', 'take_away')
         ->whereBetween('created_at', [$start, $end])
         ->where('order_active', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->order_number = $item->id - app("first_order_today");
+            return $item;
+        });
         $dine_in_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -191,7 +203,11 @@ class CashierMakeOrderController extends Controller
         ->where('order_type', 'dine_in')
         ->whereBetween('created_at', [$start, $end])
         ->where('order_active', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->order_number = $item->id - app("first_order_today");
+            return $item;
+        });
         $car_slow_order = $this->order
         ->select('id', 'date', 'user_id', 'branch_id', 'amount', 'service_fees',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -203,7 +219,11 @@ class CashierMakeOrderController extends Controller
         ->where('order_type', 'car_slow')
         ->whereBetween('created_at', [$start, $end])
         ->where('order_active', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->order_number = $item->id - app("first_order_today");
+            return $item;
+        });
         $orders = [
             'delivery' => $delivery_order,
             'take_away' => $take_away_order,
@@ -222,7 +242,11 @@ class CashierMakeOrderController extends Controller
         ->whereNull('delivery_id')
         ->whereBetween('created_at', [$start, $end])
         ->where('order_active', 1)
-        ->get();
+        ->get()
+        ->map(function($item){
+            $item->order_number = $item->id - app("first_order_today");
+            return $item;
+        });
 
         return response()->json([
             'all_orders' => $all_orders,

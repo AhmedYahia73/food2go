@@ -282,7 +282,7 @@ class OrderController extends Controller
             ->map(function($item){
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->id - app('first_order_yesteday'),
+                    'order_number' => $item->id - app('first_order_today'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'rate' => $item->rate,
