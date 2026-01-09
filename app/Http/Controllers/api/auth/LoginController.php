@@ -498,6 +498,18 @@ class LoginController extends Controller
             ->first();
             $preparation_num_status = $this->company_info
             ->first()?->preparation_num_status; 
+            
+            $notification_sound = $this->settings
+            ->where('name', 'notification_sound')
+            ->orderByDesc('id')
+            ->first();
+            if (empty($notification_sound)) {
+                $notification_sound = null;
+            }
+            else{
+                $notification_sound = url('storage/' . $notification_sound->setting);
+            } 
+
             return response()->json([
                 'cashier' => $user,
                 'token' => $user->token,
@@ -507,6 +519,7 @@ class LoginController extends Controller
                 "resturant_logo" => url('storage/' . $resturant_name?->logo),
                 'preparation_num_status' => $preparation_num_status,
                 "receipt_design" => $receipt_design,
+                "notification_sound" => $notification_sound
             ], 200);
         }
         else {  
