@@ -13,6 +13,7 @@ use App\Http\Requests\cashier\UpdateOrderRequest;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CancelOrderMail;
 use App\trait\POS;
+use App\trait\PlaceOrder;
 
 use App\Models\Order;
 use App\Models\OrderFinancial;
@@ -46,6 +47,7 @@ class OrderController extends Controller
     use Recipe;
     use POS;
     use OrderFormat;
+    use PlaceOrder;
 
     public function void_lists(Request $request){
         $void_reasons = $this->void_reasons
