@@ -663,8 +663,7 @@ class ReportController extends Controller
 
         // Order
         $orders = Order::
-        orderByDesc("id")
-        ->where("is_void", 0);
+        orderByDesc("id");
 
         if($request->from || $request->to){ 
             $time_sittings = TimeSittings:: 
@@ -897,28 +896,24 @@ class ReportController extends Controller
         }
         // Order
         $order_count = Order::
-        where('shift', $shift->shift)
-        ->where("is_void", 0)
+        where('shift', $shift->shift) 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->count();
         $take_away_orders = Order::
         where('shift', $shift->shift)
-        ->where("order_type", "take_away")
-        ->where("is_void", 0)
+        ->where("order_type", "take_away") 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->pluck('id')
         ->toArray();
         $delivery_orders = Order::
         where('shift', $shift->shift)
-        ->where("order_type", "delivery")
-        ->where("is_void", 0)
+        ->where("order_type", "delivery") 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->pluck('id')
         ->toArray();
         $dine_in_orders = Order::
         where('shift', $shift->shift)
-        ->where("order_type", "dine_in")
-        ->where("is_void", 0)
+        ->where("order_type", "dine_in") 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->pluck('id')
         ->toArray();
@@ -937,8 +932,7 @@ class ReportController extends Controller
         ->groupBy("financial_account_id");
         $online_order_paid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
-        ->where("pos", 0)
-        ->where("is_void", 0)
+        ->where("pos", 0) 
         ->where('shift', $shift->shift)
         ->where(function($query){
             $query->where("payment_method_id", "!=", 2)
@@ -953,8 +947,7 @@ class ReportController extends Controller
         ->groupBy("order_type");
         $online_order_unpaid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
-        ->where("pos", 0) 
-        ->where("is_void", 0)
+        ->where("pos", 0)  
         ->where('shift', $shift->shift)
         ->where("payment_method_id", 2)
         ->whereDoesntHave("financial_accountigs")
@@ -1179,23 +1172,19 @@ class ReportController extends Controller
         $end = now();
         // Order
         $order_count = Order::
-        select("id")
-        ->where("is_void", 0)
+        select("id") 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]);
         $take_away_orders = Order::
         select("id") 
-        ->where("order_type", "take_away")
-        ->where("is_void", 0)
+        ->where("order_type", "take_away") 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]);
         $delivery_orders = Order::
         select("id") 
-        ->where("order_type", "delivery")
-        ->where("is_void", 0)
+        ->where("order_type", "delivery") 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]);
         $dine_in_orders = Order::
         select("id") 
-        ->where("order_type", "dine_in")
-        ->where("is_void", 0)
+        ->where("order_type", "dine_in") 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]);
          
         $expenses = $this->expenses
@@ -1207,8 +1196,7 @@ class ReportController extends Controller
         ->groupBy("financial_account_id");
         $online_order_paid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
-        ->where("pos", 0)
-        ->where("is_void", 0)
+        ->where("pos", 0) 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->where(function($query){
             $query->where("payment_method_id", "!=", 2)
@@ -1223,8 +1211,7 @@ class ReportController extends Controller
         ->groupBy("order_type");
         $online_order_unpaid = $this->orders
         ->selectRaw("payment_method_id, SUM(amount) AS amount")
-        ->where("pos", 0) 
-        ->where("is_void", 0)
+        ->where("pos", 0)  
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->where("payment_method_id", 2)
         ->where(function($q){
@@ -1237,27 +1224,39 @@ class ReportController extends Controller
 
         if($request->from || $request->to){
             
-            $time_sittings = TimeSittings:: 
+            $time_sittings = TimeSittings::
             get();
-            if ($time_sittings->count() > 0) { 
-                $from = $time_sittings[0]->from;
-                $end = $request->to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-                $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-                $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+            $items = [];
+            $count = 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+            foreach ($time_sittings as $item) {
+                $items[$item->branch_id][] = $item;
+            }
+            foreach ($items as $item) {
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                    $count = count($item);
+                    $to = $item[$count - 1];
+                } 
+            }
+            if ($time_sittings->count() > 0) {
+                $from = $to->from;
+                $end = $request->to . ' ' . $to->from;
+                $hours = $to->hours;
+                $minutes = $to->minutes;
                 $from = $request->from . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                if ($start->format("H:i") >= $end->format("H:i")) {
+                if ($start >= $end) {
                     $end = $end->addDay();
                 }
                 if($start >= now()){
                     $start = $start->subDay();
-                }
+                } 
             } else {
-                $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
-                $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
-            }  
+                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            } 
   
             $expenses = $expenses
             ->where("created_at", ">=", $start)
@@ -1595,24 +1594,34 @@ class ReportController extends Controller
 
         $time_sittings = TimeSittings::
         get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+        }
         if ($time_sittings->count() > 0) {
-            $from_time = $time_sittings[0]->from;
-            $date_to = $request->date_to; 
-            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = $request->date . ' ' . $from_time;
+            $from = $to->from;
+            $end = date('Y-m-d') . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
 			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-			$sart_time = Carbon::parse(date("Y-m-d") . " " . $start->format("H:i:s"));
-			$end_time = Carbon::parse(date("Y-m-d") . " " . $end->format("H:i:s"));
-            if ($sart_time >= $end_time) {
+            if ($start >= $end) {
                 $end = $end->addDay();
-            } 
+            }
 			if($start >= now()){
                 $start = $start->subDay();
 			}
+ 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
@@ -1623,7 +1632,7 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled")
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", 0) 
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->count();
             $avg_orders = Order::
@@ -1631,7 +1640,7 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled")
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+            
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->avg("amount");
             $total_orders = Order:: 
@@ -1639,16 +1648,13 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled")
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+            
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("amount");
             $discount = Order::whereNotIn('order_status', ['faild_to_deliver', 'canceled'])
             ->where('branch_id', $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where(function ($q) {
-                $q->where('is_void', 0)
-                ->orWhereNull('is_void');
-            })
+      
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->selectRaw("
                 COALESCE(SUM(total_discount),0) +
@@ -1661,7 +1667,7 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled") 
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("pos", 0)
             ->where("source", "web")
@@ -1671,7 +1677,7 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled") 
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+    
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("pos", 0)
             ->where("source", "mobile")
@@ -1681,7 +1687,7 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled") 
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+          
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "dine_in") 
             ->sum("amount");
@@ -1690,7 +1696,7 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled") 
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+          
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "delivery") 
             ->sum("amount");
@@ -1699,7 +1705,7 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled") 
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+          
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "take_away") 
             ->sum("amount");
@@ -1709,31 +1715,27 @@ class ReportController extends Controller
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", 0) 
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->count();
             $avg_orders = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled")
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+          
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->avg("amount");
             $total_orders = Order:: 
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled")
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+          
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("amount");
             $discount = Order::whereNotIn('order_status', ['faild_to_deliver', 'canceled'])
             ->where('branch_id', $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            ->where(function ($q) {
-                $q->where('is_void', 0)
-                ->orWhereNull('is_void');
-            })
-            ->where("is_void", 0) 
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->selectRaw("
                 COALESCE(SUM(total_discount),0) +
@@ -1745,7 +1747,7 @@ class ReportController extends Controller
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("pos", 0)
             ->where("source", "web")
@@ -1754,7 +1756,7 @@ class ReportController extends Controller
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("pos", 0)
             ->where("source", "mobile")
@@ -1763,7 +1765,7 @@ class ReportController extends Controller
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "dine_in") 
             ->sum("amount");
@@ -1771,7 +1773,7 @@ class ReportController extends Controller
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "delivery") 
             ->sum("amount");
@@ -1779,7 +1781,7 @@ class ReportController extends Controller
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
             ->whereBetween("created_at", [$start, $end]) 
-            ->where("is_void", "!=", 1)
+ 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "take_away") 
             ->sum("amount");
@@ -1815,41 +1817,40 @@ class ReportController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        $start = Carbon::parse("1999-05-05 00:00:00");
-        $end = now();
-        if($request->from || $request->to){
-            
-            $time_sittings = TimeSittings:: 
-            get();
-            if ($time_sittings->count() > 0) { 
-                $from = $time_sittings[0]->from;
-                $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-                $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-                $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-                $from = date('Y-m-d') . ' ' . $from;
-                $start = Carbon::parse($from);
-                $end = Carbon::parse($end);
-                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                if ($start >= $end) {
-                    $end = $end->addDay();
-                }
-                if($start >= now()){
-                    $start = $start->subDay();
-                }
-
-                // if ($start > $end) {
-                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-                // }
-                // else{
-                //     $end = Carbon::parse($from)->addHours(intval($hours));
-                // } format('Y-m-d H:i:s')
-            } else {
-                $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
-                $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
-            } 
-            $start = Carbon::parse($request->from ?? "1999-05-05" . ' ' . $start->format('H:i:s'));
-            $end = Carbon::parse($request->to ?? date("Y-m-d") . ' ' . $end->format('H:i:s'));
+        
+        $time_sittings = TimeSittings::
+        get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
         }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+        }
+        if ($time_sittings->count() > 0) {
+            $from = $to->from;
+            $end = $request->to . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = $request->from . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+            if($start >= now()){
+                $start = $start->subDay();
+            } 
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
         $orders = Order::
         where("is_void", 0) 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])

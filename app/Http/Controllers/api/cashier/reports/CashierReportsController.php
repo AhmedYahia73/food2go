@@ -1074,26 +1074,38 @@ class CashierReportsController extends Controller
 
         $time_sittings = $this->TimeSittings 
         ->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+        }
         if ($time_sittings->count() > 0) {
-            $from_time = $time_sittings[0]->from;
-            $date_to = $request->date_to; 
-            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = $request->date . ' ' . $from_time;
+            $from = $to->from;
+            $end = date("Y-m-d") . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date("Y-m-d") . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
-            } 
+            }
 			if($start >= now()){
                 $start = $start->subDay();
 			}
+ 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
+        } 
 
         $cashier_shifts = $this->cashier_shift
         ->with('cashier_man:id,shift_number,user_name')
@@ -1135,27 +1147,40 @@ class CashierReportsController extends Controller
             ], 400);  
         }
 
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+        }
         if ($time_sittings->count() > 0) {
-            $from_time = $time_sittings[0]->from;
-            $date_to = $request->date_to; 
-            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = $request->date . ' ' . $from_time;
+            $from = $to->from;
+            $end = $request->date_to . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = $request->date . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
-            } 
+            }
 			if($start >= now()){
                 $start = $start->subDay();
 			}
-        } 
-        else {
+ 
+        } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
+        } 
 
         $orders = $this->orders
         ->where(function($query){
@@ -1245,15 +1270,13 @@ class CashierReportsController extends Controller
         if(auth()->user()->report != "unactive"){
             $order_count = Order::
             select("id")
-            ->where('shift', $shift_item->shift)
-            ->where("is_void", 0)
+            ->where('shift', $shift_item->shift) 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->count(); 
             $take_away_orders = Order::
             select("id")
             ->where('shift', $shift_item->shift)
-            ->where("order_type", "take_away")
-            ->where("is_void", 0)
+            ->where("order_type", "take_away") 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
             ->toArray();
@@ -1262,15 +1285,13 @@ class CashierReportsController extends Controller
             ->where('shift', $shift_item->shift)
             ->where("order_type", "delivery")
             ->where("due_from_delivery", 0)
-            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
-            ->where("is_void", 0)
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
             ->pluck('id')
             ->toArray();
             $dine_in_orders = Order::
             select("id")
             ->where('shift', $shift_item->shift)
-            ->where("order_type", "dine_in")
-            ->where("is_void", 0)
+            ->where("order_type", "dine_in") 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
             ->toArray(); 
@@ -1556,28 +1577,42 @@ class CashierReportsController extends Controller
         $fake_order_status = Setting::
         where("name", "fake_order_status")
         ->first()?->setting ?? null;
+        
+   
         $time_sittings = $this->TimeSittings 
         ->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+        }
         if ($time_sittings->count() > 0) {
-            $from_time = $time_sittings[0]->from;
-            $date_to = date("Y-m-d"); 
-            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date("Y-m-d") . ' ' . $from_time;
+            $from = $to->from;
+            $end = date('Y-m-d') . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
-            } 
+            }
 			if($start >= now()){
                 $start = $start->subDay();
 			}
+ 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
+        } 
 
         // ___________________________________________________________
         
@@ -1678,27 +1713,37 @@ class CashierReportsController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         } 
-
+ 
         $time_sittings = $this->TimeSittings 
         ->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1] > $to) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+        }
         if ($time_sittings->count() > 0) {
-            $from_time = $time_sittings[0]->from;
-            $date_to = $request->date_to; 
-            $end = $date_to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = $request->date . ' ' . $from_time;
+            $from = $to->from;
+            $end = $request->date_to . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = $request->date . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
 			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-			$sart_time = Carbon::parse(date("Y-m-d") . " " . $start->format("H:i:s"));
-			$end_time = Carbon::parse(date("Y-m-d") . " " . $end->format("H:i:s"));
-            if ($sart_time >= $end_time) {
+            if ($start >= $end) {
                 $end = $end->addDay();
-            } 
+            }
 			if($start >= now()){
                 $start = $start->subDay();
 			}
+ 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
