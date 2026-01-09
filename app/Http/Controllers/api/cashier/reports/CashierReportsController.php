@@ -1271,13 +1271,13 @@ class CashierReportsController extends Controller
             $order_count = Order::
             select("id")
             ->where('shift', $shift_item->shift) 
-            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+             
             ->count(); 
             $take_away_orders = Order::
             select("id")
             ->where('shift', $shift_item->shift)
             ->where("order_type", "take_away") 
-            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+             
             ->pluck('id')
             ->toArray();
             $delivery_orders = Order::
@@ -1285,14 +1285,14 @@ class CashierReportsController extends Controller
             ->where('shift', $shift_item->shift)
             ->where("order_type", "delivery")
             ->where("due_from_delivery", 0)
-            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+              
             ->pluck('id')
             ->toArray();
             $dine_in_orders = Order::
             select("id")
             ->where('shift', $shift_item->shift)
             ->where("order_type", "dine_in") 
-            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+             
             ->pluck('id')
             ->toArray(); 
 
