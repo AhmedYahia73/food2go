@@ -667,8 +667,8 @@ class ReportController extends Controller
 
         if($request->from || $request->to){ 
             
-            $time_sittings = $this->TimeSittings 
-            ->get();
+            $time_sittings = TimeSittings::
+            get();
             $items = [];
             $count = 0;
             $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
@@ -790,8 +790,8 @@ class ReportController extends Controller
         $end = Carbon::parse($end);
         if($request->from || $request->to){
              
-            $time_sittings = $this->TimeSittings 
-            ->get();
+            $time_sittings = TimeSittings::
+            get();
             $items = [];
             $count = 0;
             $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
