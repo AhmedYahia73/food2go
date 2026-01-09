@@ -198,6 +198,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
         } 
  
+        $start = $start->subDay();
         $first_order = Order:: 
         where('created_at', '>=', $start)
         ->first()?->id ?? 1; 
