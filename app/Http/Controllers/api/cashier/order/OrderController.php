@@ -147,7 +147,7 @@ class OrderController extends Controller
                 }
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->id + app('first_order_today'),
+                    'order_number' => $item->id - app('first_order_today'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -323,7 +323,7 @@ class OrderController extends Controller
                 }
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->id + app('first_order_today'),
+                    'order_number' => $item->id - app('first_order_today'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -454,7 +454,7 @@ class OrderController extends Controller
                 }
                 return [ 
                     'id' => $item->id, 
-                    'order_number' => $item->id + app('first_order_today'),
+                    'order_number' => $item->id - app('first_order_today'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -581,7 +581,7 @@ class OrderController extends Controller
 
             return [ 
                 'id' => $item->id,
-                'order_number' => $item->id + app('first_order_today'),
+                'order_number' => $item->id - app('first_order_today'),
                 'created_at' => $item->created_at,
                 'amount' => $item->amount,
                 'operation_status' => $item->operation_status,
@@ -1426,7 +1426,7 @@ class OrderController extends Controller
             }
             return [ 
                 'id' => $item->id,
-                'order_number' => $item->id + app('first_order_today'),
+                'order_number' => $item->id - app('first_order_today'),
                 'created_at' => $item->created_at,
                 'amount' => $item->amount,
                 'operation_status' => $item->operation_status,
