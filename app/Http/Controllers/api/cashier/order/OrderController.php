@@ -1454,7 +1454,7 @@ class OrderController extends Controller
     }
 
     public function preparing_takeaway($id){
-        $order = $this->order
+        $order = $this->orders
         ->where('id', $id)
         ->first();  
         $order_kitchen = [];
