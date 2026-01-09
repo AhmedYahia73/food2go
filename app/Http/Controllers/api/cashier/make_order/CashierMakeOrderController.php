@@ -157,7 +157,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $item->id - app("first_order_today");
+            $item->order_number => $order->id - app("first_order_today");
             return $item;
         });
         $delivery_order = $this->order
@@ -173,7 +173,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $item->id - app("first_order_today");
+            $item->order_number => $order->id - app("first_order_today");
             return $item;
         });
         $take_away_order = $this->order
@@ -189,7 +189,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $item->id - app("first_order_today");
+            $item->order_number => $order->id - app("first_order_today");
             return $item;
         });
         $dine_in_order = $this->order
@@ -205,7 +205,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $item->id - app("first_order_today");
+            $item->order_number = $item->id - 
             return $item;
         });
         $car_slow_order = $this->order
@@ -221,7 +221,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $item->id - app("first_order_today");
+            $item->order_number => $order->id - app("first_order_today");
             return $item;
         });
         $orders = [
@@ -244,7 +244,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $item->id - app("first_order_today");
+            $item->order_number => $order->id - app("first_order_today");
             return $item;
         });
 
@@ -2033,34 +2033,7 @@ class CashierMakeOrderController extends Controller
         ];
     }
 
-    public function order_num_today($id){
-        $time_sittings = $this->TimeSittings 
-        ->get();
-        if ($time_sittings->count() > 0) {
-            $from = $time_sittings[0]->from;
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-            if ($start >= $end) {
-                $end = $end->addDay();
-            }
-			if($start >= now()){
-                $start = $start->subDay();
-			} 
-        } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        } 
-
-        $count_order = $this->order
-        ->whereBetween('created_at', [$start, $end])
-        ->where("id", "<=", $id)
-        ->count();
-
-        return $count_order;
+    public function order_num_today($id){ 
+        return $id - app("first_order_today");
     }
 }
