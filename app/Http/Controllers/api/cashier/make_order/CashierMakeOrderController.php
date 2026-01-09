@@ -157,7 +157,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number => $order->id - app("first_order_today");
+            $item->order_number = $order->id - app("first_order_today");
             return $item;
         });
         $delivery_order = $this->order
@@ -173,7 +173,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number => $order->id - app("first_order_today");
+            $item->order_number = $order->id - app("first_order_today");
             return $item;
         });
         $take_away_order = $this->order
@@ -189,7 +189,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number => $order->id - app("first_order_today");
+            $item->order_number = $order->id - app("first_order_today");
             return $item;
         });
         $dine_in_order = $this->order
@@ -205,7 +205,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $item->id - 
+            $item->order_number = $order->id - app("first_order_today");
             return $item;
         });
         $car_slow_order = $this->order
@@ -221,7 +221,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number => $order->id - app("first_order_today");
+            $item->order_number = $order->id - app("first_order_today");
             return $item;
         });
         $orders = [
@@ -244,7 +244,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number => $order->id - app("first_order_today");
+            $item->order_number = $order->id - app("first_order_today");
             return $item;
         });
 
