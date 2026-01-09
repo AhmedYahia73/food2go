@@ -31,6 +31,7 @@ use App\Models\VariationProduct;
 use App\Models\OptionProduct;
 use App\Models\CashierMan;
 use App\Models\VoidReason;
+use App\Models\KitchenOrder;
 use App\Models\LogOrder;
 
 class OrderController extends Controller
@@ -1477,8 +1478,8 @@ class OrderController extends Controller
                 "order" => $item,
                 "order_type" => $order->order_type,
             ];
-            $kitchen_order = $this->kitchen_order
-            ->create([
+            $kitchen_order = KitchenOrder::
+            create([
                 'kitchen_id' => $key,
                 'order' => json_encode($item),
                 'type' => $order->order_type,
