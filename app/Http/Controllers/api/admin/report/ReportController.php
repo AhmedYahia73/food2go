@@ -671,14 +671,14 @@ class ReportController extends Controller
             get();
             if ($time_sittings->count() > 0) { 
                 $from = $time_sittings[0]->from;
-                $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+                $end = $request->to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
                 $hours = $time_sittings[$time_sittings->count() - 1]->hours;
                 $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-                $from = date('Y-m-d') . ' ' . $from;
+                $from = $request->from . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                if ($start >= $end) {
+                if ($start->format("H:i") >= $end->format("H:i")) {
                     $end = $end->addDay();
                 }
                 if($start >= now()){
@@ -694,9 +694,7 @@ class ReportController extends Controller
             } else {
                 $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
                 $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
-            } 
-            $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
-            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
+            }  
             $orders = $orders
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end);
@@ -757,7 +755,11 @@ class ReportController extends Controller
     });
 
         return response()->json([
-            'orders' => $orders
+            'orders' => $orders,
+			
+			
+		 $start->format("Y-m-d H:i"),
+		 $end->format("Y-m-d H:i"),
         ]);
     }
     
@@ -791,32 +793,23 @@ class ReportController extends Controller
             get();
             if ($time_sittings->count() > 0) { 
                 $from = $time_sittings[0]->from;
-                $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+                $end = $request->to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
                 $hours = $time_sittings[$time_sittings->count() - 1]->hours;
                 $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-                $from = date('Y-m-d') . ' ' . $from;
+                $from = $request->from . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                if ($start >= $end) {
+                if ($start->format("H:i") >= $end->format("H:i")) {
                     $end = $end->addDay();
                 }
                 if($start >= now()){
                     $start = $start->subDay();
                 }
-
-                // if ($start > $end) {
-                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-                // }
-                // else{
-                //     $end = Carbon::parse($from)->addHours(intval($hours));
-                // } format('Y-m-d H:i:s')
             } else {
                 $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
                 $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
-            } 
-            $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
-            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
+            }  
 
             $orders = $orders
             ->where("created_at", ">=", $start)
@@ -1252,32 +1245,23 @@ class ReportController extends Controller
             get();
             if ($time_sittings->count() > 0) { 
                 $from = $time_sittings[0]->from;
-                $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+                $end = $request->to . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
                 $hours = $time_sittings[$time_sittings->count() - 1]->hours;
                 $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-                $from = date('Y-m-d') . ' ' . $from;
+                $from = $request->from . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                if ($start >= $end) {
+                if ($start->format("H:i") >= $end->format("H:i")) {
                     $end = $end->addDay();
                 }
                 if($start >= now()){
                     $start = $start->subDay();
                 }
-
-                // if ($start > $end) {
-                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-                // }
-                // else{
-                //     $end = Carbon::parse($from)->addHours(intval($hours));
-                // } format('Y-m-d H:i:s')
             } else {
                 $start = Carbon::parse(date('Y-m-d') . ' ' . ' 00:00:00');
                 $end = Carbon::parse(date('Y-m-d') . ' ' . ' 23:59:59');
-            } 
-            $start = Carbon::parse($request->from . ' ' . $start->format('H:i:s'));
-            $end = Carbon::parse($request->to . ' ' . $end->format('H:i:s'));
+            }  
   
             $expenses = $expenses
             ->where("created_at", ">=", $start)
@@ -1596,7 +1580,10 @@ class ReportController extends Controller
             'total_amount' => $total_amount, 
             'expenses_total' => $expenses_total, 
             'expenses' => $expenses_items, 
-            'online_order' => $online_order, 
+            'online_order' => $online_order,
+			
+		 $start->format("Y-m-d H:i"),
+		 $end->format("Y-m-d H:i"),
         ]);
     }
 
@@ -1812,6 +1799,9 @@ class ReportController extends Controller
             "dine_in" => $dine_in,
             "delivery" => $delivery,
             "take_away" => $take_away,
+			
+		 $start->format("Y-m-d H:i"),
+		 $end->format("Y-m-d H:i"),
         ]);
     }
 
