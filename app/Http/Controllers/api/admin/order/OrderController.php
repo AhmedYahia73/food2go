@@ -89,7 +89,7 @@ class OrderController extends Controller
             ->map(function($item, $key){
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->id - app('first_order_yesteday'),
+                    'order_number' => $item->id - app('first_order_yesterday'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -138,7 +138,7 @@ class OrderController extends Controller
             ->map(function($item){
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->id - app('first_order_yesteday'),
+                    'order_number' => $item->id - app('first_order_yesterday'),
                     'created_at' => $item->created_at,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
@@ -231,7 +231,7 @@ class OrderController extends Controller
             ->map(function($item){
                 return [ 
                     'id' => $item->id,
-                    'order_number' => $item->id - app('first_order_yesteday'),
+                    'order_number' => $item->id - app('first_order_yesterday'),
                     'created_at' => $item->created_at,
                     'transfer_from' => $item?->transfer_from?->name,
                     'amount' => $item->amount,
@@ -420,7 +420,7 @@ class OrderController extends Controller
 		->map(function($item){
 			return [ 
 				'id' => $item->id,
-                'order_number' => $item->id - app('first_order_yesteday'),
+                'order_number' => $item->id - app('first_order_yesterday'),
 				'created_at' => $item->created_at,
 				'amount' => $item->amount,
 				'operation_status' => $item->operation_status,

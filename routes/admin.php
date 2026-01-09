@@ -184,7 +184,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
         return $first_order - 1;
     });
-    App::singleton('first_order_yesteday', function(){
+    App::singleton('first_order_yesterday', function(){
  
         $time_sittings = TimeSittings:: 
         get();
