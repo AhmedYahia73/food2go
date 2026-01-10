@@ -15,6 +15,7 @@ use App\Models\FinantiolAcounting;
 use App\Models\Branch;
 use App\Models\TimeSittings;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseStock;
 use App\Models\Expense;
@@ -1853,7 +1854,9 @@ class ReportController extends Controller
 
     public function product_report(Request $request){
         $validator = Validator::make($request->all(), [
-            'branch_id' => ['exists:branches,id'], 
+            'branch_id' => ['exists:branches,id'],
+            'cashier_id' => ['exists:cashiers,id'],
+            'cashier_man_id' => ['exists:cashier_men,id'],
             'from' => ['date'], 
             'to' => ['date'],
             'sort' => ['in:desc,asc'],
@@ -1866,6 +1869,7 @@ class ReportController extends Controller
             ],400);
         }
         
+        $locale = $request->locale ?? "ar";
         $time_sittings = TimeSittings::
         get();
       
@@ -1934,6 +1938,12 @@ class ReportController extends Controller
         if($request->branch_id){
             $orders = $orders->where("branch_id", $request->branch_id);
         }
+        if($request->cashier_id){
+            $orders = $orders->where("cashier_id", $request->cashier_id);
+        }
+        if($request->cashier_man_id){
+            $orders = $orders->where("cashier_man_id", $request->cashier_man_id);
+        }
         $orders = $orders->get();
         $products = [];
         foreach ($orders as $item) {
@@ -1972,9 +1982,25 @@ class ReportController extends Controller
                         // $sub_category = Category::
                         // where("id", $sub_category_id)
                         // ->first()?->name;
+                        
+                        $product_name_item = $element['product'][0]['product']['name'];
+                        if($locale != "en"){ 
+                            $product_name = Product::
+                            where("id", $product_id)
+                            ->with("translations")
+                            ->first();
+                            $product_name = $product_name
+                            ->translations
+                            ->where("locale", $locale)
+                            ->where("key", $product_name_item)
+                            ->first()?->value ?? $product_name_item;
+                        }
+                        else{
+                            $product_name = $product_name_item;
+                        }
                         $products[$product_id] = [
                             "id" => $product_id,
-                            "name" => $element['product'][0]['product']['name'],
+                            "name" => $product_name,
                             "category_id" => $category_id,
                             "sub_category_id" => $sub_category_id, 
                             "price" => $price * $count,
@@ -1986,7 +2012,17 @@ class ReportController extends Controller
         }
         $categories = Category::
         where("status", 1)
-        ->get();
+        ->with("translations")
+        ->get()
+        ->map(function($item) use($locale){
+            $item->name = $item
+            ->translations
+            ->where("locale", $locale)
+            ->where("key", $item->name)
+            ->first()?->value ?? $item->name;
+
+            return $item;
+        });
         $products = collect($products);
         $data = [];
         foreach ($categories as $key => $item) {
