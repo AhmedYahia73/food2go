@@ -775,6 +775,20 @@ class CashierReportsController extends Controller
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
             ->count();
+            
+            $void_order_count = Order::  
+            where("is_void", 1)     
+            ->where("branch_id", $request->user()->branch_id)
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->count();
+            $void_order_sum = Order::  
+            where("is_void", 1)    
+            ->where("branch_id", $request->user()->branch_id)
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->sum("amount");
+
             $take_away_orders = Order::
             select("id")
             ->where('cashier_man_id', $request->user()->id)
@@ -1045,6 +1059,8 @@ class CashierReportsController extends Controller
                     'expenses' => $expenses, 
                     'online_order' => $online_order,
                     'report_role' => $request->user()->report,
+                    "void_order_count" => $void_order_count,
+                    "void_order_sum" => $void_order_sum,
                 ]);
             }
             elseif($request->user()->report == "financial"){

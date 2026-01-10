@@ -1208,6 +1208,13 @@ class ReportController extends Controller
         // Order
         $order_count = Order::
         select("id") ;
+    
+        $void_order_count = Order:: 
+        whereBetween("created_at", [$start, $end]) 
+        ->where("is_void", 1);
+        $void_order_sum = Order:: 
+        whereBetween("created_at", [$start, $end]) 
+        ->where("is_void", 1);
         $take_away_orders = Order::
         select("id") 
         ->where("order_type", "take_away") 
@@ -1305,6 +1312,12 @@ class ReportController extends Controller
                 $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
             } 
   
+            $void_order_count = $void_order_count 
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+            $void_order_sum = $void_order_sum 
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
             $expenses = $expenses
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end);
@@ -1333,6 +1346,10 @@ class ReportController extends Controller
         }
         if($request->cashier_id){ 
 
+            $void_order_count = $void_order_count 
+            ->where("cashier_id", $request->cashier_id);
+            $void_order_sum = $void_order_sum 
+            ->where("cashier_id", $request->cashier_id);
             $expenses = $expenses
             ->where("cashier_id", $request->cashier_id);
             $order_count = $order_count
@@ -1352,6 +1369,10 @@ class ReportController extends Controller
             ->where("cashier_id", $request->cashier_id);
         }
         if($request->branch_id){ 
+            $void_order_count = $void_order_count 
+            ->where("branch_id", $request->branch_id);
+            $void_order_sum = $void_order_sum 
+            ->where("branch_id", $request->branch_id);
             $expenses = $expenses
             ->where("branch_id", $request->branch_id);
             $order_count = $order_count
@@ -1370,6 +1391,10 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id);
         }
         if($request->cashier_man_id){
+            $void_order_count = $void_order_count 
+            ->where("cashier_man_id", $request->cashier_man_id);
+            $void_order_sum = $void_order_sum 
+            ->where("cashier_man_id", $request->cashier_man_id);
             $expenses = $expenses
             ->where("cashier_man_id", $request->cashier_man_id);
             $order_count = $order_count
@@ -1389,6 +1414,14 @@ class ReportController extends Controller
             ->where("cashier_man_id", $request->cashier_man_id); 
         }
         if($request->financial_id){
+            $void_order_count = $void_order_count 
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
+            $void_order_sum = $void_order_sum 
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
             $expenses = $expenses
             ->where("financial_account_id", $request->financial_id);
             $order_count = $order_count
@@ -1616,6 +1649,11 @@ class ReportController extends Controller
             ->values();
         }
 
+        $void_order_count = $void_order_count 
+        ->count();
+        $void_order_sum = $void_order_sum 
+        ->sum("amount");
+
         return response()->json([ 
             'financial_accounts' => $financial_accounts,
             'order_count' => $order_count,
@@ -1623,9 +1661,8 @@ class ReportController extends Controller
             'expenses_total' => $expenses_total, 
             'expenses' => $expenses_items, 
             'online_order' => $online_order,
-			
-		 $start->format("Y-m-d H:i"),
-		 $end->format("Y-m-d H:i"),
+            'void_order_count' => $void_order_count,
+            'void_order_sum' => $void_order_sum, 
         ]);
     }
 
@@ -1757,8 +1794,18 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "take_away") 
+            ->sum("amount"); 
+            $void_order_count = Order:: 
+            whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 1)   
+            ->where("branch_id", $request->branch_id) 
+            ->count();
+            $void_order_sum = Order:: 
+            whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 1)    
+            ->where("branch_id", $request->branch_id)
             ->sum("amount");
-             
+
             return response()->json([
                 "total_orders" => $total_orders,
                 "avg_orders" => $avg_orders,
@@ -1769,6 +1816,8 @@ class ReportController extends Controller
                 "dine_in" => $dine_in,
                 "delivery" => $delivery,
                 "take_away" => $take_away,
+                "void_order_count" => $void_order_count,
+                "void_order_sum" => $void_order_sum,
                     
                 $start->format("Y-m-d H:i"),
                 $end->format("Y-m-d H:i"),
@@ -1857,6 +1906,17 @@ class ReportController extends Controller
                 ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                 ->where("order_type", "take_away") 
                 ->sum("amount");
+                $void_order_count = Order:: 
+                whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 1)   
+                ->where("branch_id", $item->id)  
+                ->count();
+                $void_order_sum = Order:: 
+                whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 1)   
+                ->where("branch_id", $item->id) 
+                ->sum("amount");
+                
                 $data[] = [ 
                     "Branch" => $item->name,
                     "total_orders" => $total_orders,
@@ -1868,6 +1928,8 @@ class ReportController extends Controller
                     "dine_in" => $dine_in,
                     "delivery" => $delivery,
                     "take_away" => $take_away,
+                    "void_order_count" => $void_order_count,
+                    "void_order_sum" => $void_order_sum,
                 ];
             }
             $count_orders = Order::
@@ -1944,7 +2006,15 @@ class ReportController extends Controller
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "take_away") 
             ->sum("amount");
-            
+            $void_order_count = Order:: 
+            whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 1)  
+            ->count();
+            $void_order_sum = Order:: 
+            whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 1)  
+            ->sum("amount");
+
             return response()->json([
                 "data" => $data,
                 "total_orders" => $total_orders,
@@ -1956,6 +2026,8 @@ class ReportController extends Controller
                 "dine_in" => $dine_in,
                 "delivery" => $delivery,
                 "take_away" => $take_away,
+                "void_order_count" => $void_order_count,
+                "void_order_sum" => $void_order_sum,
             ]);
         }
     }
