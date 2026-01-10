@@ -2039,8 +2039,8 @@ class ReportController extends Controller
             }
             if($request->products){
                 $products_item = $products_item->filter(function ($product) use ($item, $request) {
-                    return ($product['category_id'] == $item->id
-                    || $product['sub_category_id'] == $item->id)
+                    return ($product['category_id'] == $item['id']
+                    || $product['sub_category_id'] == $item['id'])
                     && in_array($product['id'], $request->products);
                 });
                 if(count($products_item) == 0){
@@ -2049,14 +2049,14 @@ class ReportController extends Controller
             }
             else{
                 $products_item = $products_item->filter(function ($product) use ($item, $request) {
-                    return $product['category_id'] == $item->id
-                        || $product['sub_category_id'] == $item->id;
+                    return $product['category_id'] == $item['id']
+                        || $product['sub_category_id'] == $item['id'];
                 });
             }
              $products_item = $products_item->values();
             $data[] = [
-                "id" => $item->id,
-                "category" => $item->name,
+                "id" => $item['id'],
+                "category" => $item['name'],
                 "products" => $products_item,
                 "products_count" => $products_item->sum("count"),
                 "products_price" => $products_item->sum("price"),
