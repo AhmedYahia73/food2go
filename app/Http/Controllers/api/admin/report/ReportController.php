@@ -2438,4 +2438,102 @@ class ReportController extends Controller
             'logo_link' => $logo_link,
         ]); 
     }
+
+    public function dine_in_report(Request $request){
+        $validator = Validator::make($request->all(), [
+            'branch_id' => ['exists:branches,id'],
+            'from' => ['date'], 
+            'to' => ['date'],
+            'table_id' => ['exists:cafe_tables,id'],
+            'hall_id' => ['exists:cafe_locations,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $orders = Order::
+        where("order_type", "dine_in")
+        ->where("is_void", 0) ;
+        
+        if($request->from || $request->to){
+            
+            $time_sittings = TimeSittings::
+            get();
+ 
+            $items = [];
+            $count = 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+            foreach ($time_sittings as $item) {
+                $items[$item->branch_id][] = $item;
+            }
+            foreach ($items as $item) {
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                    $count = count($item);
+                    $to = $item[$count - 1];
+                } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
+            }
+            if ($time_sittings->count() > 0) {
+                $from = $from->from;
+                $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+                $hours = $to->hours;
+                $minutes = $to->minutes;
+                $from = $request->from ?? "1999-05-05" . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                } 
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            } 
+            $orders = $orders 
+            ->whereBetween("created_at", [$start, $end]);
+        }
+        if($request->branch_id){
+            $orders = $orders->where("branch_id", $request->branch_id);
+        }
+        if($request->table_id){
+            $orders = $orders->where("table_id", $request->table_id);
+        }
+        if($request->hall_id){
+            $orders = $orders->whereHas("table", function($query) use($request){
+                $query->where("location_id", $request->hall_id);
+            });
+        }
+        $captain_orders = $orders
+        ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, captain_id, cafe_locations.name")
+        ->with("captain:id,name")
+        ->groupBy("captain_id");
+        $table_orders = $orders
+        ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, captain_id, cafe_locations.name")
+        ->groupBy("captain_id");
+        $hall_orders = $orders
+        ->leftJoin('cafe_tables', 'orders.table_id', '=', 'cafe_tables.id')
+        ->leftJoin('cafe_locations', 'cafe_tables.location_id', '=', 'cafe_locations.id')
+        ->selectRaw('
+            COUNT(orders.id) AS order_count,
+            SUM(orders.amount) AS sum_order,
+            cafe_locations.id AS location_id,
+            cafe_locations.name AS location_name
+        ')
+        ->groupBy('cafe_locations.id', 'cafe_locations.name')
+        ->get();
+
+        return response()->json([
+            "captain_orders" => $captain_orders,
+            "table_orders" => $table_orders,
+            "hall_orders" => $hall_orders,
+        ]);
+    }
 }
