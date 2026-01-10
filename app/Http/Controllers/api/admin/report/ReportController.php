@@ -23,6 +23,8 @@ use App\Models\FinancialHistory;
 use App\Models\CashierShift; 
 use App\Models\OrderDetail; 
 use App\Models\CompanyInfo; 
+use App\Models\CafeTable; 
+use App\Models\CafeLocation; 
 
 use App\trait\OrderFormat; 
 
@@ -642,12 +644,20 @@ class ReportController extends Controller
         $branches = Branch::
         select("id", "name")
         ->get();  
+        $halls = CafeLocation::
+        select("id", "name")
+        ->get();  
+        $tables = CafeTable::
+        select("id", "table_number")
+        ->get();  
 
         return response()->json([
             "cashier_man" => $cashier_man,
             "cashier" => $cashier,
             "financial_account" => $financial_account,
             "branches" => $branches,
+            "halls" => $halls,
+            "tables" => $tables,
         ]);
     }
 
