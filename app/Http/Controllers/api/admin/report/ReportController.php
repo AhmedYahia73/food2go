@@ -2367,7 +2367,7 @@ class ReportController extends Controller
 
         $orders = Order::
         with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
-        'branch', 'delivery']);
+        'branch', 'delivery', "financial_accountigs"]);
         if($request->branch_id){
             $orders = $orders
             ->where("branch_id", $request->branch_id);

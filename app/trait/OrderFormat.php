@@ -319,6 +319,12 @@ trait OrderFormat
                 "order_number" => $order->order_number,
                 "rejected_reason" => $order->rejected_reason,
                 "transaction_id" => $order->transaction_id,
+                "financial_accountigs" => $order->map(function($element){
+                    return [
+                        "id" => $element->id,
+                        "name" => $element->name,
+                    ];
+                }),
                 "customer_cancel_reason" => $order->customer_cancel_reason,
                 "source" => $order->source,
                 "order_date" => $order->created_at->format('Y-m-d'),
