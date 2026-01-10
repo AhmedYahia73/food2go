@@ -126,6 +126,11 @@ class PreparationManController extends Controller
             'password' => 'sometimes',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
+            'print_name' => ['sometimes'],
+            'print_ip' => ['sometimes'],
+            'print_status' => ['sometimes', 'boolean'],
+            'print_type' => ['sometimes', 'in:usb,network'],
+            'print_port' => ['sometimes'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
