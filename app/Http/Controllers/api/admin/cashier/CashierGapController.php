@@ -30,6 +30,7 @@ class CashierGapController extends Controller
         with("cashier", "cashier_man")
         ->get()
         ->map(function($item){
+            $date = $item?->shift?->created_at ?? $item->created_at;
             return [
                 "id" => $item->id,
                 "amount" => $item->amount,
@@ -37,7 +38,7 @@ class CashierGapController extends Controller
                 "cashier_man_id" => $item->cashier_man_id,
                 "cashier" => $item?->cashier?->name,
                 "cashier_man" => $item?->cashier_man?->user_name,
-                "date" => $item?->shift?->created_at ?? $item->created_at,
+                "date" => $date->format("Y-m-d"),
             ];
         });
 
