@@ -2014,15 +2014,15 @@ class ReportController extends Controller
         where("status", 1)
         ->with("translations")
         ->get()
-        ->map(function($item) use($locale){
-            $name = $item
+        ->map(function($element) use($locale){
+            $name = $element
             ->translations
             ->where("locale", $locale)
-            ->where("key", $item->name)
-            ->first()?->value ?? $item->name;
+            ->where("key", $element->name)
+            ->first()?->value ?? $element->name;
 
             return [
-                "id" => $item->id,
+                "id" => $element->id,
                 "name" => $name,
             ];
         });
