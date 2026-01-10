@@ -736,10 +736,10 @@ class ReportController extends Controller
         }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
         'schedule:id,name', 'delivery', "financial_accountigs:id,name"])
         ->get()
-        ->map(function($item){
+        ->map(function($item, $key){
             return [ 
                 'id' => $item->id,
-                'order_number' => $item->id - app('first_order_today'),
+                'order_number' => $key + 1,
                 'created_at' => $item->created_at,
                 'amount' => $item->amount,
                 'operation_status' => $item->operation_status,
