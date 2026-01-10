@@ -2501,10 +2501,10 @@ class ReportController extends Controller
             ->whereBetween("orders.created_at", [$start, $end]);
         }
         if($request->branch_id){
-            $orders = $orders->where("branch_id", $request->branch_id);
+            $orders = $orders->where("orders.branch_id", $request->branch_id);
         }
         if($request->table_id){
-            $orders = $orders->where("table_id", $request->table_id);
+            $orders = $orders->where("orders.table_id", $request->table_id);
         }
         if($request->hall_id){
             $orders = $orders->whereHas("table", function($query) use($request){
