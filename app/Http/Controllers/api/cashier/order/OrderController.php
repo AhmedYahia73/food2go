@@ -508,6 +508,10 @@ class OrderController extends Controller
  
         $time_sittings = $this->TimeSittings 
         ->get();
+        $delivery_time = $this->settings
+        ->where("name", "delivery_time")
+        ->first()
+        ->setting ?? "00:00:00";
         $items = [];
         $count = 0;
         $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
