@@ -259,6 +259,7 @@ class OrderController extends Controller
                     'points' => $item->points, 
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
+                    'payment' => $item->payment_method_id == 2 && $item->operation_status != "delivered"? "UnPaid" : "Paid",
                     'rate' => $item->rate,
                     'user' => [
                         'f_name' => $item?->user?->f_name,
@@ -307,6 +308,7 @@ class OrderController extends Controller
                     'order_status' => $item->order_status,
                     'transfer_from' => $item?->transfer_from?->name,
                     'source' => $item->source,
+                    'payment' => $item->payment_method_id == 2 && $item->operation_status != "delivered"? "UnPaid" : "Paid",
                     'status' => $item->status,
                     'points' => $item->points, 
                     'rejected_reason' => $item->rejected_reason,

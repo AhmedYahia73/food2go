@@ -159,6 +159,8 @@ class OrderController extends Controller
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
                     'food_preparion_time' => $food_preparion_time,
+                    'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
+                    || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
                     'user' => [
                         'f_name' => $item?->user?->f_name,
                         'l_name' => $item?->user?->l_name,
@@ -344,6 +346,8 @@ class OrderController extends Controller
                     'admin' => ['name' => $item?->admin?->name,],
                     'payment_method' => ['id' => $item?->payment_method?->id,
                                         'name' => $item?->payment_method?->name],
+                    'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
+                    || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
                     'financial_accountigs' => $item->financial_accountigs,
                     'schedule' => ['name' => $item?->schedule?->name],
                     'delivery' => ['name' => $item?->delivery?->name], 
@@ -478,6 +482,8 @@ class OrderController extends Controller
                     'financial_accountigs' => $item->financial_accountigs,
                     'schedule' => ['name' => $item?->schedule?->name],
                     'delivery' => ['name' => $item?->delivery?->name], 
+                    'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
+                    || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
                 ];
             });
             $order_type = [
@@ -592,6 +598,7 @@ class OrderController extends Controller
                 'points' => $item->points, 
                 'rejected_reason' => $item->rejected_reason,
                 'transaction_id' => $item->transaction_id,
+                'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered") ? "UnPaid" : "Paid",
                 'user' => [
                     'f_name' => $item?->user?->f_name,
                     'l_name' => $item?->user?->l_name,
