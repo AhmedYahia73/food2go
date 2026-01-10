@@ -642,7 +642,9 @@ class CashierReportsController extends Controller
         ->get();
        $orders = $this->orders
         ->where('order_active', 1)
-       ->whereNotNull('shift')
+       ->whereNotNull('shift') 
+        ->where("is_void", 0)  
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
        ->orderByDesc('shift')
        ->orderBy('payment_method_id')
        ->where('status', 1)
@@ -776,7 +778,9 @@ class CashierReportsController extends Controller
             select("id")
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
-            ->where("order_type", "take_away")
+            ->where("order_type", "take_away") 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
             ->toArray();
             $delivery_orders = Order::
@@ -785,6 +789,8 @@ class CashierReportsController extends Controller
             ->where('shift', $request->user()->shift_number)
             ->where("order_type", "delivery")
             ->where("due_from_delivery", 0)
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
             ->toArray();
             $dine_in_orders = Order::
@@ -792,6 +798,8 @@ class CashierReportsController extends Controller
             ->where('cashier_man_id', $request->user()->id)
             ->where('shift', $request->user()->shift_number)
             ->where("order_type", "dine_in")
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
             ->toArray();
             
@@ -1287,7 +1295,8 @@ class CashierReportsController extends Controller
             select("id")
             ->where('shift', $shift_item->shift)
             ->where("order_type", "take_away") 
-             
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
             ->toArray();
             $delivery_orders = Order::
@@ -1296,6 +1305,8 @@ class CashierReportsController extends Controller
             ->where("order_type", "delivery")
             ->where("due_from_delivery", 0)
               
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
             ->toArray();
             $dine_in_orders = Order::
@@ -1303,6 +1314,8 @@ class CashierReportsController extends Controller
             ->where('shift', $shift_item->shift)
             ->where("order_type", "dine_in") 
              
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
             ->toArray(); 
 
@@ -1439,6 +1452,8 @@ class CashierReportsController extends Controller
             $online_order_paid = $this->orders
             ->selectRaw("payment_method_id, SUM(amount) AS amount")
             ->where("pos", 0)
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where(function($query){
                 $query->where("payment_method_id", "!=", 2)
                 ->where(function($q){
@@ -1468,6 +1483,8 @@ class CashierReportsController extends Controller
                 $q->where("status", 1)
                 ->orWhereNull("status");
             }) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where('shift', $shift_item->shift)
             ->with("payment_method")
             ->groupBy("payment_method_id")
