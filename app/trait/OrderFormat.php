@@ -319,7 +319,8 @@ trait OrderFormat
                 "order_number" => $order->order_number,
                 "rejected_reason" => $order->rejected_reason,
                 "transaction_id" => $order->transaction_id,
-                "financial_accountigs" => $order->map(function($element){
+                "financial_accountigs" => $order->financial_accountigs
+                ->map(function($element){
                     return [
                         "id" => $element->id,
                         "name" => $element->name,
