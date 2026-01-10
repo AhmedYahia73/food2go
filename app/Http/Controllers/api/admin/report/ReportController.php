@@ -2514,10 +2514,12 @@ class ReportController extends Controller
         $captain_orders = $orders
         ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, captain_id, cafe_locations.name")
         ->with("captain:id,name")
-        ->groupBy("captain_id");
+        ->groupBy("captain_id")
+        ->get();
         $table_orders = $orders
         ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, captain_id, cafe_locations.name")
-        ->groupBy("captain_id");
+        ->groupBy("captain_id")
+        ->get();
         $hall_orders = $orders
         ->leftJoin('cafe_tables', 'orders.table_id', '=', 'cafe_tables.id')
         ->leftJoin('cafe_locations', 'cafe_tables.location_id', '=', 'cafe_locations.id')
