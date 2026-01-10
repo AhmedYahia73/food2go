@@ -1103,7 +1103,7 @@ class CashierReportsController extends Controller
                 'cashier_id' => $request->user()->cashier_id,
                 'cashier_man_id' => $request->user()->id,
                 'amount' => $request->amount,
-                'shift' => $shift,
+                'shift' => $request->user()->shift_number,
             ]);
 
             return response()->json([
