@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('cashier_gaps', function (Blueprint $table) {
             $table->id();
             $table->float("amount");
-            $table->integer("shift");
             $table->foreignId('cashier_id')->nullable()->constrained('cashiers')->onUpdate('cascade')->onDelete('set null');
             $table->foreignId('cashier_man_id')->nullable()->constrained('cashier_men')->onUpdate('cascade')->onDelete('set null');
             $table->integer("shift")->nullable();
