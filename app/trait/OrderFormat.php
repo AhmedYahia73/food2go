@@ -203,7 +203,7 @@ trait OrderFormat
         $order_arr = [];
         foreach ($orders as $order) {
             if(empty($order->order_details_data)){
-                return null;
+                continue;
             }
             $products = [];
             foreach ($order->order_details_data as $item) {
