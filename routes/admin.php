@@ -158,6 +158,8 @@ use App\Http\Controllers\api\admin\social_media\SocialMediaController;
 
 use App\Http\Controllers\api\admin\product_pos_pricing\ProductPOSPricingController;
 
+use App\Http\Controllers\api\admin\cashier\CashierGapController;
+
 use App\Models\TimeSittings;
 use App\Models\Order;
 use Illuminate\Support\Facades\App;
@@ -214,6 +216,12 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
     // SocialMediaController
+
+    Route::controller(CashierGapController::class)
+    ->prefix('cashier_gap')->group(function(){
+        Route::get('/lists', 'lists');
+        Route::get('/', 'cashier_gap');
+    });
 
     Route::controller(ProductPOSPricingController::class)
     ->prefix('product_pos_pricing')->group(function(){

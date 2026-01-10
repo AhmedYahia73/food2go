@@ -16,6 +16,7 @@ use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
 use App\Models\GroupProduct;
 use App\Models\Setting;
+use App\Models\CashierGap;
 use App\Models\Expense;
 
 class CashierReportsController extends Controller
@@ -1091,9 +1092,22 @@ class CashierReportsController extends Controller
             })
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum('amount');
+            $gap = $total_orders - $request->amount;
+            $gap = $gap > 0 ? $gap : 0;
+            $shift = CashierShift::
+            where("cashier_man_id", $request->user()->id)
+            ->where("cashier_id", $request->user()->cashier_id)
+            ->orderByDesc("id")
+            ->first()?->shift ?? null;
+            CashierGap::create([
+                'cashier_id' => $request->user()->cashier_id,
+                'cashier_man_id' => $request->user()->id,
+                'amount' => $request->amount,
+                'shift' => $shift,
+            ]);
 
             return response()->json([
-                "total_orders" => $total_orders,
+                "gap" => $gap,
             ]);
         }
 
