@@ -24,10 +24,13 @@ use App\Models\CashierShift;
 use App\Models\OrderDetail; 
 use App\Models\CompanyInfo; 
 
+use App\trait\OrderFormat; 
+
 class ReportController extends Controller
 {
     public function __construct(private Expense $expenses,
     private Order $orders, private CashierShift $cashier_shift){}
+    use OrderFormat; 
 
     public function view_raise_product(){
         $products = OrderDetail::
