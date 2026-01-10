@@ -2498,7 +2498,7 @@ class ReportController extends Controller
                 $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
             } 
             $orders = $orders 
-            ->whereBetween("created_at", [$start, $end]);
+            ->whereBetween("orders.created_at", [$start, $end]);
         }
         if($request->branch_id){
             $orders = $orders->where("branch_id", $request->branch_id);
