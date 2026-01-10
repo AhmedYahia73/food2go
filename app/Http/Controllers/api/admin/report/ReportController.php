@@ -22,6 +22,7 @@ use App\Models\Expense;
 use App\Models\FinancialHistory;
 use App\Models\CashierShift; 
 use App\Models\OrderDetail; 
+use App\Models\CompanyInfo; 
 
 class ReportController extends Controller
 {
@@ -1294,10 +1295,10 @@ class ReportController extends Controller
             }
             if ($time_sittings->count() > 0) {
                 $from = $from->from;
-                $end = $request->to . ' ' . $to->from;
+                $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
-                $from = $request->from . ' ' . $from;
+                $from = $request->from ?? "1999-05-05" . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
@@ -2345,5 +2346,93 @@ class ReportController extends Controller
         return response()->json([
             "data" => $data
         ]);
+    }
+
+    public function invoices_filter(Request $request){
+        $validator = Validator::make($request->all(), [
+            'branch_id' => ['exists:branches,id'],
+            'cashier_id' => ['exists:cashiers,id'],
+            'from' => ['date'], 
+            'to' => ['date'],
+            'financial_id' => ['exists:cashiers,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $orders = Order::
+        with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
+        'branch', 'delivery']);
+        if($request->branch_id){
+            $orders = $orders
+            ->where("branch_id", $request->branch_id);
+        }
+        if($request->cashier_id){
+            $orders = $orders
+            ->where("cashier_id", $request->cashier_id);
+        }
+        if($request->financial_id){
+            $orders = $orders
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            }); 
+        }
+        
+        if($request->from || $request->to){
+            
+            $time_sittings = TimeSittings::
+            get();
+ 
+            $items = [];
+            $count = 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+            foreach ($time_sittings as $item) {
+                $items[$item->branch_id][] = $item;
+            }
+            foreach ($items as $item) {
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                    $count = count($item);
+                    $to = $item[$count - 1];
+                } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
+            }
+            if ($time_sittings->count() > 0) {
+                $from = $from->from;
+                $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+                $hours = $to->hours;
+                $minutes = $to->minutes;
+                $from = $request->from ?? "1999-05-05" . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                } 
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            } 
+            $orders = $orders 
+            ->whereBetween("created_at", [$start, $end]);
+        }
+        $orders = $orders->get();
+        $locale = $request->locale ?? "en";
+        $invoices = $this->invoice_format($orders, $locale);
+
+        $logo_link = CompanyInfo::
+        first()?->logo_link;
+
+        return response()->json([
+            'invoices' => $invoices,
+            'logo_link' => $logo_link,
+        ]); 
     }
 }
