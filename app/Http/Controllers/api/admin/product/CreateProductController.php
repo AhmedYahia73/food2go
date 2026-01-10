@@ -78,6 +78,15 @@ class CreateProductController extends Controller
         // product_names[{product_name, tranlation_id, tranlation_name}]
         // product_descriptions[{product_description, tranlation_id, tranlation_name}]
         //  أول عنصر هو default language
+        
+        $validator = Validator::make($request->all(), [
+            'product_code' => 'unique:products,product_code'
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $product_id = 0;
         try{
             $default = $request->product_names[0];
@@ -285,7 +294,8 @@ class CreateProductController extends Controller
         // variations[][options][][extra_price], 
         // product_names[{product_name, tranlation_id, tranlation_name}]
         // product_descriptions[{product_description, tranlation_id, tranlation_name}]
-        //  أول عنصر هو default language
+        //  أول عنصر هو default language   
+  
         $extra_num = [];
         $default = $request->product_names[0];
         $default_description = $request->product_descriptions[0] ?? null;
@@ -296,6 +306,14 @@ class CreateProductController extends Controller
         $product = $this->products->
         where('id', $id)
         ->first(); // get product
+        $validator = Validator::make($request->all(), [
+            'product_code' => 'nullable|unique:products,product_code,' . $product->id
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $product->group_products()->sync($request->upsaling_group_id ?? []);
         if (!empty($product->translations)) {
         $product->translations()->delete();            # code...
