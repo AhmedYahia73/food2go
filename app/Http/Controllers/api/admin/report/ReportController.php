@@ -1758,8 +1758,118 @@ class ReportController extends Controller
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "take_away") 
             ->sum("amount");
+             
+            return response()->json([
+                "total_orders" => $total_orders,
+                "avg_orders" => $avg_orders,
+                "count_orders" => $count_orders,
+                "discount" => $discount,
+                "online_web" => $online_web,
+                "online_mobile" => $online_mobile,
+                "dine_in" => $dine_in,
+                "delivery" => $delivery,
+                "take_away" => $take_away,
+                    
+                $start->format("Y-m-d H:i"),
+                $end->format("Y-m-d H:i"),
+            ]);
         }
         else{ 
+            $data = [];
+            $branches = Branch::get();
+            foreach ($branches as $item) {
+                $count_orders = Order:: 
+                where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end])  
+                ->count();
+                $avg_orders = Order::
+                where("order_status", "!=", "faild_to_deliver")
+                ->where("order_status", "!=", "canceled")
+                ->where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end])  
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->avg("amount");
+                $total_orders = Order:: 
+                where("order_status", "!=", "faild_to_deliver")
+                ->where("order_status", "!=", "canceled")
+                ->where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+                
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->sum("amount");
+                $discount = Order::whereNotIn('order_status', ['faild_to_deliver', 'canceled'])
+                ->where('branch_id', $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+        
+                
+                ->selectRaw("
+                    COALESCE(SUM(total_discount),0) +
+                    COALESCE(SUM(coupon_discount),0) +
+                    COALESCE(SUM(free_discount),0) AS total
+                ")
+                ->value('total');
+                $online_web = Order::
+                where("order_status", "!=", "faild_to_deliver")
+                ->where("order_status", "!=", "canceled") 
+                ->where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->where("pos", 0)
+                ->where("source", "web")
+                ->sum("amount");
+                $online_mobile = Order::
+                where("order_status", "!=", "faild_to_deliver")
+                ->where("order_status", "!=", "canceled") 
+                ->where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->where("pos", 0)
+                ->where("source", "mobile")
+                ->sum("amount");
+                $dine_in = Order::
+                where("order_status", "!=", "faild_to_deliver")
+                ->where("order_status", "!=", "canceled") 
+                ->where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->where("order_type", "dine_in") 
+                ->sum("amount");
+                $delivery = Order::
+                where("order_status", "!=", "faild_to_deliver")
+                ->where("order_status", "!=", "canceled") 
+                ->where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->where("order_type", "delivery") 
+                ->sum("amount");
+                $take_away = Order::
+                where("order_status", "!=", "faild_to_deliver")
+                ->where("order_status", "!=", "canceled") 
+                ->where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->where("order_type", "take_away") 
+                ->sum("amount");
+                $data[] = [ 
+                    "Branch" => $item->name,
+                    "total_orders" => $total_orders,
+                    "avg_orders" => $avg_orders,
+                    "count_orders" => $count_orders,
+                    "discount" => $discount,
+                    "online_web" => $online_web,
+                    "online_mobile" => $online_mobile,
+                    "dine_in" => $dine_in,
+                    "delivery" => $delivery,
+                    "take_away" => $take_away,
+                ];
+            }
             $count_orders = Order::
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
@@ -1834,22 +1944,20 @@ class ReportController extends Controller
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "take_away") 
             ->sum("amount");
+            
+            return response()->json([
+                "data" => $data,
+                "total_orders" => $total_orders,
+                "avg_orders" => $avg_orders,
+                "count_orders" => $count_orders,
+                "discount" => $discount,
+                "online_web" => $online_web,
+                "online_mobile" => $online_mobile,
+                "dine_in" => $dine_in,
+                "delivery" => $delivery,
+                "take_away" => $take_away,
+            ]);
         }
-
-        return response()->json([
-            "total_orders" => $total_orders,
-            "avg_orders" => $avg_orders,
-            "count_orders" => $count_orders,
-            "discount" => $discount,
-            "online_web" => $online_web,
-            "online_mobile" => $online_mobile,
-            "dine_in" => $dine_in,
-            "delivery" => $delivery,
-            "take_away" => $take_away,
-			
-		 $start->format("Y-m-d H:i"),
-		 $end->format("Y-m-d H:i"),
-        ]);
     }
 
     public function product_report_lists(Request $request){
