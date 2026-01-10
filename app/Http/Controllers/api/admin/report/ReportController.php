@@ -2015,13 +2015,16 @@ class ReportController extends Controller
         ->with("translations")
         ->get()
         ->map(function($item) use($locale){
-            $item->name = $item
+            $name = $item
             ->translations
             ->where("locale", $locale)
             ->where("key", $item->name)
             ->first()?->value ?? $item->name;
 
-            return $item;
+            return [
+                "id" => $item->id,
+                "name" => $name,
+            ];
         });
         $products = collect($products);
         $data = [];
