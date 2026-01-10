@@ -182,8 +182,8 @@ class OrderController extends Controller
         ->get();
         $items = [];
         $count = 0;
-        $to = isset($time_sittings[0]) ? $time_sittings[0]->from : 0; 
-        $from = isset($time_sittings[0]) ? $time_sittings[0]->from : 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
         foreach ($time_sittings as $item) {
             $items[$item->branch_id][] = $item;
         }
