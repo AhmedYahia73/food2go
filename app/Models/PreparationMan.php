@@ -15,7 +15,13 @@ class PreparationMan extends Model
         'name',
         'password',
         'branch_id',
-        'status',
+        'status', 
+        'print_name',
+        'print_ip',
+        'print_status',
+        'print_type',
+        'print_port',
+
     ];
     protected $appends = ['role'];
 
