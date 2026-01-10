@@ -537,6 +537,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('reports')->group(function(){
         Route::get('/lists', 'lists');
         Route::post('/invoices_filter', 'invoices_filter');
+        Route::post('/dine_in_report', 'dine_in_report');
         Route::get('/instate_order_report', 'instate_order_report');
         Route::get('/view_raise_product', 'view_raise_product');
         Route::post('/filter_raise_product', 'filter_raise_product');
