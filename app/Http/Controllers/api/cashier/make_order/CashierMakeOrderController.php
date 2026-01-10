@@ -1737,7 +1737,7 @@ class CashierMakeOrderController extends Controller
         ->get()
         ->map(function($item, $key){
             return [
-                "id" => $item->id,
+                "id" => $item->id - app("first_order_today"),
                 "amount" => $item->amount,
                 "total_discount" => $item->total_discount,
                 "coupon_discount" => $item->coupon_discount, 
