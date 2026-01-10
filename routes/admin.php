@@ -555,6 +555,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/financial_reports', 'financial_reports');
         Route::get('/cashier_report/{id}', 'cashier_report');
         Route::get('/product_report', 'product_report');
+        Route::get('/product_report_lists', 'product_report_lists');
     });
     
     Route::controller(DiscountModuleController::class)
