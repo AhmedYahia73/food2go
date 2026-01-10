@@ -1852,6 +1852,91 @@ class ReportController extends Controller
         ]);
     }
 
+    public function product_report_lists(Request $request){
+        $locale = $request->locale ?? "ar";
+        $products = Product:: 
+        with("translations")
+        ->get()
+        ->map(function($element) use($locale){
+            $name = $element
+            ->translations
+            ->where("locale", $locale)
+            ->where("key", $element->name)
+            ->first()?->value ?? $element->name;
+
+            return [
+                "id" => $element->id,
+                "name" => $name, 
+                'category_id' => $element->category_id,
+                'sub_category_id' => $element->sub_category_id,
+            ];
+        });
+        
+        $categories = Category:: 
+        with("translations")
+        ->get()
+        ->map(function($element) use($locale){
+            $name = $element
+            ->translations
+            ->where("locale", $locale)
+            ->where("key", $element->name)
+            ->first()?->value ?? $element->name;
+
+            return [
+                "id" => $element->id,
+                "name" => $name,
+            ];
+        });
+        
+        $branches = Branch:: 
+        with("translations")
+        ->get()
+        ->map(function($element) use($locale){
+            $name = $element
+            ->translations
+            ->where("locale", $locale)
+            ->where("key", $element->name)
+            ->first()?->value ?? $element->name;
+
+            return [
+                "id" => $element->id,
+                "name" => $name,
+            ];
+        });
+        $cashiers = Cashier::
+        with("translations")
+        ->get()
+        ->map(function($element) use($locale){
+            $name = $element
+            ->translations
+            ->where("locale", $locale)
+            ->where("key", $element->name)
+            ->first()?->value ?? $element->name;
+
+            return [
+                "id" => $element->id,
+                "name" => $name,
+            ];
+        });
+        $cashier_men = CashierMan:: 
+        get()
+        ->map(function($element){ 
+
+            return [
+                "id" => $element->id,
+                "user_name" => $element->user_name,
+            ];
+        });
+
+        return response()->json([
+            "products" => $products,
+            "categories" => $categories,
+            "branches" => $branches,
+            "cashiers" => $cashiers,
+            "cashier_men" => $cashier_men,
+        ]);
+    }
+
     public function product_report(Request $request){
         $validator = Validator::make($request->all(), [
             'branch_id' => ['exists:branches,id'],
@@ -2011,8 +2096,7 @@ class ReportController extends Controller
             }
         }
         $categories = Category::
-        where("status", 1)
-        ->with("translations")
+        with("translations")
         ->get()
         ->map(function($element) use($locale){
             $name = $element
