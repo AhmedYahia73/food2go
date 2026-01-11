@@ -716,10 +716,11 @@ class ReportController extends Controller
                     $start = $start->subDay();
                 }
     
-            } else {
-                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
             } 
+            // else {
+            //     $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            //     $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            // } 
             $orders = $orders
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end);
