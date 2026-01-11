@@ -193,7 +193,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
             $hours = $to->hours;
             $minutes = $to->minutes;
-            $from = $request->from ?? "1999-05-05" . ' ' . $from;
+            $from = ($request->from ?? "1999-05-05") . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
             $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);

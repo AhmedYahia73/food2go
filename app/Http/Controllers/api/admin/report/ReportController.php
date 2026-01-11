@@ -1317,17 +1317,13 @@ class ReportController extends Controller
                 $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
-                $from = $request->from ?? "1999-05-05" . ' ' . $from;
+                $from = ($request->from ?? "199-05-05") . ' ' . $from; 
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
-                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
                 if ($start >= $end) {
                     $end = $end->addDay();
                 }
-                if($start >= now()){
-                    $start = $start->subDay();
-                    $end = $end->subDay();
-                } 
             } else {
                 $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
                 $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
@@ -2462,7 +2458,7 @@ class ReportController extends Controller
                 $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
-                $from = $request->from ?? "1999-05-05" . ' ' . $from;
+                $from = ($request->from ?? "1999-05-05") . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
@@ -2536,7 +2532,7 @@ class ReportController extends Controller
                 $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
-                $from = $request->from ?? "1999-05-05" . ' ' . $from;
+                $from = ($request->from ?? "1999-05-05") . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
