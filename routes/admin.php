@@ -535,6 +535,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(ReportController::class)
     ->prefix('reports')->group(function(){
+        Route::get('/branches_list', 'branches_list');
         Route::get('/lists_report', 'lists_report');
         Route::post('/invoices_filter', 'invoices_filter');
         Route::post('/dine_in_report', 'dine_in_report');

@@ -1683,6 +1683,17 @@ class ReportController extends Controller
         ]);
     }
 
+    public function branches_list(){
+        $branches = Branch::
+        select("id", "name")
+        ->where("status", 1)
+        ->get();
+
+        return response()->json([
+            "branches" => $branches,
+        ]);
+    }
+
     public function instate_order_report(Request $request){
         $validator = Validator::make($request->all(), [
             'branch_id' => ['exists:branches,id'], 
