@@ -784,6 +784,8 @@ class ReportController extends Controller
 
         return response()->json([
             'orders' => $orders, 
+            "start" => $start,
+            "end" => $end,
         ]);
     }
     
