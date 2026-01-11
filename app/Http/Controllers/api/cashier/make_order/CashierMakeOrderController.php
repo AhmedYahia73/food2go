@@ -24,6 +24,7 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 
 use App\Events\PrintOrder;
  
+use App\Models\Address;
 use App\Models\Order;
 use App\Models\CompanyInfo;
 use App\Models\UserDue;
@@ -363,6 +364,9 @@ class CashierMakeOrderController extends Controller
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
+        $delivery_fees = Address::
+        where("id", $request->address_id)
+        ->first()?->zone?->price ?? 0;
         $request->merge([
             'branch_id' => $request->user()->branch_id, 
             'order_type' => 'delivery',
@@ -370,6 +374,7 @@ class CashierMakeOrderController extends Controller
             'shift' => $request->user()->shift_number,
             'pos' => 1,
             'cash_with_delivery' => $request->cash_with_delivery ?? false,
+            "delivery_fees" => $delivery_fees,
         ]);
         if(!$request->user()->delivery){
             return response()->json([

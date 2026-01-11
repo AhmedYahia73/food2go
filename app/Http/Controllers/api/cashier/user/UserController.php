@@ -37,6 +37,7 @@ class UserController extends Controller
 
     public function user(Request $request, $id){
         $user = $this->user
+		->select("id", "f_name", "l_name", "image", "phone", "phone_2")
         ->where('status', 1)
         ->where('id', $id)
         ->with(['address' => function($query){

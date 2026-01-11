@@ -62,6 +62,7 @@ class Order extends Model
         'source',
         'take_away_status',
         'delivery_status',
+        'delivery_fees',
         'coupon_id',
         'from_table_order',
         'due',

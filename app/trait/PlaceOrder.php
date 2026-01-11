@@ -49,6 +49,7 @@ trait PlaceOrder
         'captain_id',
         "service_fees",
         "service_fees_id",
+        "delivery_fees",
     ];
     protected $orderRequest = ['user_id', 'cart'];
     protected $priceCycle;

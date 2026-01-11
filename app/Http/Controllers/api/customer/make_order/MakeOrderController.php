@@ -75,8 +75,10 @@ class MakeOrderController extends Controller
             ->where('id', $request->address_id)
             ->first();
             $branch_id = $address?->zone?->branch_id ?? null;
+            $delivery_fees = $address?->zone?->price ?? 0;
             $request->merge([
                 'branch_id' => $branch_id,
+                'delivery_fees' => $delivery_fees,
             ]);
         }
         $branche = $this->branches
