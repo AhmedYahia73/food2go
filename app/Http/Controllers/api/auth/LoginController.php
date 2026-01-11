@@ -9,6 +9,7 @@ use App\Http\Requests\auth\SignupRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Google_Client;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\MainData; 
 use App\Models\Admin;
