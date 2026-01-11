@@ -1739,9 +1739,9 @@ class ReportController extends Controller
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			if($start >= now()){
-                $start = $start->subDay();
-			}
+			// if($start >= now()){
+            //     $start = $start->subDay();
+			// }
  
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
