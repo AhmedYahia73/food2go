@@ -1413,7 +1413,7 @@ class ReportController extends Controller
             $void_order_sum = $void_order_sum 
             ->where("cashier_man_id", $request->cashier_man_id);
             $expenses = $expenses
-            ->where("cashier_man_id", $request->cashier_man_id);
+            ->where("cahier_man_id", $request->cashier_man_id);
             $order_count = $order_count
             ->where("cashier_man_id", $request->cashier_man_id);
             $take_away_orders = $take_away_orders
@@ -1424,7 +1424,7 @@ class ReportController extends Controller
             ->where("cashier_man_id", $request->cashier_man_id); 
             
             $expenses_items = $expenses_items
-            ->where("cashier_man_id", $request->cashier_man_id); 
+            ->where("cahier_man_id", $request->cashier_man_id); 
             $online_order_paid = $online_order_paid
             ->where("cashier_man_id", $request->cashier_man_id); 
             $online_order_unpaid = $online_order_unpaid
