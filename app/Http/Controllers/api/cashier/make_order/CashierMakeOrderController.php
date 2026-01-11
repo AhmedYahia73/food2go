@@ -787,6 +787,7 @@ class CashierMakeOrderController extends Controller
             'order_note' => $request->notes ?? null,
             "kitchen_items" => $kitchen_items,  
             'order_number' => $this->order_num_today($order['order']->id), 
+            'new' => app("first_order_today"), 
             'type' => $type,
             'caheir_name' => $caheir_name,
             "subtotal" => $request->amount,
