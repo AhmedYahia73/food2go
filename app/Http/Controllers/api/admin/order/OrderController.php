@@ -229,7 +229,7 @@ class OrderController extends Controller
             ,'order_status', 'order_type',
             'delivery_id', 'address_id', 'source',
             'payment_method_id', 'rate', 'transfer_from_id',
-            'status', 'points', 'rejected_reason', 'transaction_id')
+            'status', 'points', 'rejected_reason', 'transaction_id', "delivery_fees")
             ->where('pos', 0)
             ->whereBetween('created_at', [$start, $end])
             ->whereNull('captain_id')
@@ -254,6 +254,7 @@ class OrderController extends Controller
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
                     'order_status' => $item->order_status,
+                    'delivery_fees' => $item->delivery_fees,
                     'source' => $item->source,
                     'status' => $item->status,
                     'points' => $item->points, 
@@ -280,7 +281,7 @@ class OrderController extends Controller
             ,'order_status',
             'delivery_id', 'address_id', 'source', 'transfer_from_id',
             'payment_method_id', 'order_type', 'rate',
-            'status', 'points', 'rejected_reason', 'transaction_id')
+            'status', 'points', 'rejected_reason', 'transaction_id', "delivery_fees")
             ->where('pos', 0)
             ->where("branch_id", $request->user()->id)
             ->whereBetween('created_at', [$start, $end])
@@ -306,6 +307,7 @@ class OrderController extends Controller
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
                     'order_status' => $item->order_status,
+                    'delivery_fees' => $item->delivery_fees,
                     'transfer_from' => $item?->transfer_from?->name,
                     'source' => $item->source,
                     'payment' => $item->payment_method_id == 2 && $item->operation_status != "delivered"? "UnPaid" : "Paid",

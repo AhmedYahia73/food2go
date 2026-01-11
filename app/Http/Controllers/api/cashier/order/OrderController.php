@@ -156,6 +156,7 @@ class OrderController extends Controller
                     'source' => $item->source,
                     'status' => $item->status,
                     'points' => $item->points, 
+                    "delivery_fees" => $item->delivery_fees,
                     'rejected_reason' => $item->rejected_reason,
                     'transaction_id' => $item->transaction_id,
                     'food_preparion_time' => $food_preparion_time,
@@ -329,6 +330,7 @@ class OrderController extends Controller
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
+                    "delivery_fees" => $item->delivery_fees,
                     'order_status' => $order_type,
                     'type' => $item->pos ? 'Point of Sale' : "Online Order",
                     'source' => $item->source,
@@ -459,6 +461,7 @@ class OrderController extends Controller
                     'id' => $item->id, 
                     'order_number' => $item->id - app('first_order_today'),
                     'created_at' => $item->created_at,
+                    "delivery_fees" => $item->delivery_fees,
                     'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
                     'order_type' => $item->order_type,
@@ -576,7 +579,7 @@ class OrderController extends Controller
         ,'order_status', 'order_type',
         'delivery_id', 'address_id', 'source',
         'payment_method_id', 
-        'status', 'points', 'rejected_reason', 'transaction_id')
+        'status', 'points', 'rejected_reason', 'transaction_id', "delivery_fees")
         ->where('pos', 0)
         ->where('branch_id', $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
@@ -621,6 +624,7 @@ class OrderController extends Controller
                 'points' => $item->points, 
                 'rejected_reason' => $item->rejected_reason,
                 'transaction_id' => $item->transaction_id,
+                "delivery_fees" => $item->delivery_fees,
                 'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered") ? "UnPaid" : "Paid",
                 'user' => [
                     'f_name' => $item?->user?->f_name,

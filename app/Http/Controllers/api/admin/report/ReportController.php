@@ -1317,7 +1317,10 @@ class ReportController extends Controller
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
                 if ($start >= $end) {
                     $end = $end->addDay();
-                } 
+                }
+                // if($start >= now()){
+                //     $start = $start->subDay();
+                // } 
             } else {
                 $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
                 $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
