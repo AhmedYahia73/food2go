@@ -207,12 +207,12 @@ class LoginController extends Controller
         // if ($validation->fails()) {
         //     return response()->json($validation->errors(), 422);
         // }
-        DB::table('orders')
-        ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
-        ->leftJoin('zones', 'addresses.zone_id', '=', 'zones.id')
-        ->update([
-            'orders.delivery_fees' => DB::raw('zones.price')
-        ]);
+DB::table('orders')
+    ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
+    ->leftJoin('zones', 'addresses.zone_id', '=', 'zones.id')
+    ->update([
+        'orders.delivery_fees' => DB::raw('COALESCE(zones.price, 0)')
+    ]);
         $user = $this->admin
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)
