@@ -9,11 +9,9 @@ use App\Http\Requests\auth\SignupRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Google_Client;
-use Illuminate\Support\Facades\DB;
 
 use App\Models\MainData; 
 use App\Models\Admin;
-use App\Models\Order;
 use App\Models\Delivery;
 use App\Models\CaptainOrder;
 use App\Models\CashierMan;
@@ -33,6 +31,7 @@ use App\Models\FinantiolAcounting;
 use App\Models\CompanyInfo;
 use App\Models\PreparationMan;
 use App\Models\ReceiptDesign;
+use App\Models\Order;
 
 class LoginController extends Controller
 {
@@ -207,12 +206,6 @@ class LoginController extends Controller
         // if ($validation->fails()) {
         //     return response()->json($validation->errors(), 422);
         // }
-DB::table('orders')
-    ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
-    ->leftJoin('zones', 'addresses.zone_id', '=', 'zones.id')
-    ->update([
-        'orders.delivery_fees' => DB::raw('COALESCE(zones.price, 0)')
-    ]);
         $user = $this->admin
         ->where('email', $request->email)
         ->orWhere('phone', $request->email)

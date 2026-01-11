@@ -1812,6 +1812,13 @@ class ReportController extends Controller
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "take_away") 
             ->sum("amount"); 
+            $delivery_fees = Order:: 
+            where("branch_id", $request->branch_id)
+            ->whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->sum("delivery_fees"); 
+   
             $void_order_count = Order:: 
             whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 1)   
@@ -1840,6 +1847,7 @@ class ReportController extends Controller
                 "void_order_count" => $void_order_count,
                 "void_order_sum" => $void_order_sum,
                 "total_tax" => $total_tax,
+                "delivery_fees" => $delivery_fees,
                     
                 $start->format("Y-m-d H:i"),
                 $end->format("Y-m-d H:i"),
@@ -1941,8 +1949,14 @@ class ReportController extends Controller
                 $total_tax = Order:: 
                 where("branch_id", $item->id)
                 ->whereBetween("created_at", [$start, $end])  
-                ->sum("total_tax");
-                
+                ->sum("total_tax"); 
+                $delivery_fees = Order:: 
+                where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->sum("delivery_fees"); 
+
                 $data[] = [ 
                     "Branch" => $item->name,
                     "total_orders" => $total_orders,
@@ -1957,6 +1971,7 @@ class ReportController extends Controller
                     "void_order_count" => $void_order_count,
                     "void_order_sum" => $void_order_sum,
                     "total_tax" => $total_tax,
+                    "delivery_fees" => $delivery_fees,
                 ];
             }
             $count_orders = Order::
@@ -2041,7 +2056,12 @@ class ReportController extends Controller
             ->sum("amount");
             $total_tax = Order:: 
             whereBetween("created_at", [$start, $end])  
-            ->sum("total_tax");
+            ->sum("total_tax"); 
+            $delivery_fees = Order:: 
+            whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->sum("delivery_fees"); 
 
             return response()->json([
                 "data" => $data,
@@ -2057,6 +2077,7 @@ class ReportController extends Controller
                 "void_order_count" => $void_order_count,
                 "void_order_sum" => $void_order_sum,
                 "total_tax" => $total_tax,
+                "delivery_fees" => $delivery_fees,
             ]);
         }
     }
