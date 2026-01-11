@@ -1768,15 +1768,14 @@ class ReportController extends Controller
             ->where("order_status", "!=", "canceled")
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
-            
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("amount");
             $discount = Order::whereNotIn('order_status', ['faild_to_deliver', 'canceled'])
             ->where('branch_id', $request->branch_id)
-            ->whereBetween("created_at", [$start, $end]) 
-      
-             
+            ->whereBetween("created_at", [$start, $end])
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->selectRaw("
                 COALESCE(SUM(total_discount),0) +
                 COALESCE(SUM(coupon_discount),0) +
@@ -1850,6 +1849,8 @@ class ReportController extends Controller
             $total_tax = Order:: 
             where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end])  
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("total_tax");
 
             return response()->json([
@@ -1899,8 +1900,8 @@ class ReportController extends Controller
                 $discount = Order::whereNotIn('order_status', ['faild_to_deliver', 'canceled'])
                 ->where('branch_id', $item->id)
                 ->whereBetween("created_at", [$start, $end]) 
-        
-                
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                 ->selectRaw("
                     COALESCE(SUM(total_discount),0) +
                     COALESCE(SUM(coupon_discount),0) +
@@ -1966,7 +1967,9 @@ class ReportController extends Controller
                 ->sum("amount");
                 $total_tax = Order:: 
                 where("branch_id", $item->id)
-                ->whereBetween("created_at", [$start, $end])  
+                ->whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
                 ->sum("total_tax"); 
                 $delivery_fees = Order:: 
                 where("branch_id", $item->id)
@@ -2074,6 +2077,8 @@ class ReportController extends Controller
             ->sum("amount");
             $total_tax = Order:: 
             whereBetween("created_at", [$start, $end])  
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("total_tax"); 
             $delivery_fees = Order:: 
             whereBetween("created_at", [$start, $end]) 
