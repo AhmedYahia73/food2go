@@ -765,6 +765,7 @@ class ReportController extends Controller
                 'points' => $item->points, 
                 'rejected_reason' => $item->rejected_reason,
                 'transaction_id' => $item->transaction_id,
+                'delivery_fees' => $item->delivery_fees,
                 'user' => [
                     'f_name' => $item?->user?->f_name,
                     'l_name' => $item?->user?->l_name,
