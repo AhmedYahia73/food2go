@@ -1680,8 +1680,8 @@ class ReportController extends Controller
             'online_order' => $online_order,
             'void_order_count' => $void_order_count,
             'void_order_sum' => $void_order_sum, 
-            'start' => $start, 
-            'end' => $end, 
+            'start' => $start->format("Y-m-d H:i"), 
+            'end' => $end->format("Y-m-d H:i"), 
         ]);
     }
 
