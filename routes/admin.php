@@ -171,7 +171,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
    
         $time_sittings = TimeSittings::
         get();
-    
+
         $items = [];
         $count = 0;
         $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
@@ -190,20 +190,19 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         }
         if ($time_sittings->count() > 0) {
             $from = $from->from;
-            $end = date('Y-m-d') . ' ' . $to->from;
+            $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
             $hours = $to->hours;
             $minutes = $to->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
+            $from = $request->from ?? "1999-05-05" . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			// if($start >= now()){
-            //     $start = $start->subDay();
-			// }
- 
+            if($start >= now()){
+                $start = $start->subDay();
+            } 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
@@ -248,9 +247,10 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			// if($start >= now()){
-            //     $start = $start->subDay();
-			// }
+			if($start >= now()){
+                $start = $start->subDay();
+                $end = $end->subDay();
+			}
  
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');

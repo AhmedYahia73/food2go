@@ -712,9 +712,10 @@ class ReportController extends Controller
                 if ($start >= $end) {
                     $end = $end->addDay();
                 }
-                // if($start >= now()){
-                //     $start = $start->subDay();
-                // }
+                if($start >= now()){
+                    $start = $start->subDay();
+                    $end = $end->subDay();
+                }
     
             } 
             else {
@@ -845,7 +846,8 @@ class ReportController extends Controller
                     $end = $end->addDay();
                 }
                 if($start >= now()){
-                    $start = $start->subDay();
+                    $start = $start->subDay(); 
+                    $end = $end->subDay();
                 }
     
             } else {
@@ -1320,9 +1322,10 @@ class ReportController extends Controller
                 if ($start >= $end) {
                     $end = $end->addDay();
                 }
-                // if($start >= now()){
-                //     $start = $start->subDay();
-                // } 
+                if($start >= now()){
+                    $start = $start->subDay();
+                    $end = $end->subDay();
+                } 
             } else {
                 $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
                 $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
@@ -1736,12 +1739,14 @@ class ReportController extends Controller
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
 			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+			
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			// if($start >= now()){
-            //     $start = $start->subDay();
-			// }
+			if($start >= now()){
+                 $start = $start->subDay();
+                $end = $end->subDay();
+			 }
  
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
