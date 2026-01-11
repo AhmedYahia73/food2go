@@ -795,7 +795,7 @@ trait POS
 
         $order->order_details = json_encode($order_details);
         $order->save();
-        $order->load(['user:id,f_name,l_name,phone', 'address']);
+        $order->load(['user:id,f_name,l_name,phone', 'address.zone:id,zone,price']);
 
         return [
             'order' => $order, 
