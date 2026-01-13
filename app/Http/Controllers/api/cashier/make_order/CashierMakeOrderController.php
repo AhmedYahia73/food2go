@@ -964,7 +964,6 @@ class CashierMakeOrderController extends Controller
             $order_item = collect($order_item);
 
             $element = $order_item[0];
-            $kitchen_order = [];
             $kitchen = $this->kitchen
             ->where(function($q) use($element){
                 $q->whereHas('products', function($query) use ($element){
