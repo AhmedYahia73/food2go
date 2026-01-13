@@ -1013,8 +1013,9 @@ class CashierMakeOrderController extends Controller
         }
         $kitchen_items = array_values($kitchen_items); 
         foreach ($kitchen_items as $key => $value) {
-            foreach ($value as $val_key => $value_item) {
-                $items = collect($value_item['order']);
+            $value_items = $value["order"];
+            foreach ($value_items as $val_key => $value_item) {
+                $items = collect($value_item);
                 $peice_items = $items
                 ->where("weight", 0)->count() > 0 ? $items
                 ->where("weight", 0)['count'] : 0; 
