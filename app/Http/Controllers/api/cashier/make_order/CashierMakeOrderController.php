@@ -1008,23 +1008,35 @@ class CashierMakeOrderController extends Controller
                     'cart_id' => $value['cart_id'],
                 ]);
             }
+
             $orders[] = $item[0];
-            $kitchen_items[$key]['order'] = $item;
+
+            // نضيف order للـ model بطريقة صحيحة
+            $kitchen_items[$key]->order = $item;
         }
+
         $kitchen_items = array_values($kitchen_items); 
-        foreach ($kitchen_items as $key => $value) {
-            $value_items = $value["order"];
+
+        foreach ($kitchen_items as $k => $kitchen) {
+
+            $value_items = $kitchen->order;
+
             foreach ($value_items as $val_key => $value_item) {
+
                 $items = collect($value_item);
-                $peice_items = $items
-                ->where("weight", 0)->count() > 0 ? $items
-                ->where("weight", 0)['count'] : 0; 
-                $weight_items = $items
-                ->where("weight", 1)->count() > 0 ? 1 : 0;
-                
-                $kitchen_items[$key]["order"][$val_key]->order_count = $peice_items + $weight_items;
+
+                $peice_items = $items->where("weight", 0)->count() > 0
+                    ? $items->where("weight", 0)['count']
+                    : 0;
+
+                $weight_items = $items->where("weight", 1)->count() > 0 ? 1 : 0;
+
+                $value_items[$val_key]['order_count'] = $peice_items + $weight_items;
             }
+
+            $kitchen->order = $value_items;
         }
+
         
         return response()->json([
             'success' => 'You perpare success',
