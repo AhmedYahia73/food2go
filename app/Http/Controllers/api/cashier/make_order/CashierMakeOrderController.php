@@ -989,6 +989,7 @@ class CashierMakeOrderController extends Controller
                 })
                 ->where('branch_id', $request->user()->branch_id)
                 ->get();
+                $element['cart_id'] = $value['cart_id'];
                 foreach ($kitchens as $kitchen) {
                     $kitchen_items[$kitchen->id] = $kitchen;
                     $kitchen_order[$kitchen->id][] = $element;
@@ -1004,7 +1005,7 @@ class CashierMakeOrderController extends Controller
                     'kitchen_id' => $key,
                     'order' => json_encode([$order_element]),
                     'type' => 'dine_in',
-                    'cart_id' => $value['cart_id'],
+                    'cart_id' => $item['cart_id'],
                 ]);
             }
 
