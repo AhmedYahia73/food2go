@@ -1017,7 +1017,7 @@ class CashierMakeOrderController extends Controller
                 $weight_items = $items
                 ->where("weight", 1)->count() > 0 ? 1 : 0;
                 
-                $kitchen_items[$key]["order"][$val_key]['order_count'] = $peice_items + $weight_items;
+                $kitchen_items[$key]["order"][$val_key]->order_count = $peice_items + $weight_items;
             }
         }
         
