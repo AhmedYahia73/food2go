@@ -43,6 +43,9 @@ class CompanyController extends Controller
         ->where("name", "web_site_qr")
         ->first()?->setting;
         $qr_code = url('storage/' . $qr_code);
+        $scale = Setting::
+        where("name", "scale")
+        ->first()->setting ?? null;
 
         return response()->json([
             'company_info' => $company_info,
@@ -50,6 +53,7 @@ class CompanyController extends Controller
             'maintenance' => $maintenance,
             'website' => $website,
             'qr_code' => $qr_code,
+            'scale' => $scale,
         ]);
     }
 
@@ -198,6 +202,25 @@ class CompanyController extends Controller
             }
         }
         
+        if(!empty($request->scale)){ 
+            $scale = Setting::
+            where("name", "scale")
+            ->first();
+            if($scale){
+                $scale
+                ->update([
+                    "setting" => $request->scale
+                ]);
+            }
+            else{
+                $this->settings
+                ->create([
+                    'name' => "scale",
+                    "setting" => $request->scale,
+                ]);
+            }
+        }
+
         return response()->json([
             'company_info' => $company_info,
             'maintenance' => $maintenance,

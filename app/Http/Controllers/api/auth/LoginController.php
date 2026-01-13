@@ -509,9 +509,13 @@ class LoginController extends Controller
             else{
                 $notification_sound = url('storage/' . $notification_sound->setting);
             } 
+            $scale = Setting::
+            where("name", "scale")
+            ->first()->setting ?? null;
 
             return response()->json([
                 'cashier' => $user,
+                'scale' => $scale,
                 'token' => $user->token,
                 'start_shift' => $start_shift,
                 'financial_account' => $financial_account,
