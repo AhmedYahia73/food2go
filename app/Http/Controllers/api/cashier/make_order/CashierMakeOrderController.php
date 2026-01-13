@@ -996,16 +996,20 @@ class CashierMakeOrderController extends Controller
                 }
             }
         }
+        $orders = [];
         foreach ($kitchen_order as $key => $item) {
-            $this->kitchen_order
-            ->create([
-                'table_id' => $request->table_id,
-                'kitchen_id' => $key,
-                'order' => json_encode($item),
-                'type' => 'dine_in',
-                'cart_id' => $value['cart_id'],
-            ]);
-            $kitchen_items[$key]['order'][] = $item[0];
+            foreach ($item as $order_element) {
+                $this->kitchen_order
+                ->create([
+                    'table_id' => $request->table_id,
+                    'kitchen_id' => $key,
+                    'order' => json_encode([$order_element]),
+                    'type' => 'dine_in',
+                    'cart_id' => $value['cart_id'],
+                ]);
+            }
+            $orders[] = $item[0];
+            $kitchen_items[$key]['order'] = $item;
         }
         $kitchen_items = array_values($kitchen_items); 
         foreach ($kitchen_items as $key => $value) {
