@@ -80,7 +80,7 @@ class CreateProductController extends Controller
         //  أول عنصر هو default language
         
         $validator = Validator::make($request->all(), [
-            'product_code' => 'unique:products,product_code'
+            'product_code' => 'nullable|unique:products,product_code'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

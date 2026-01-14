@@ -49,9 +49,10 @@ class ProductPOSPricingController extends Controller
     
     public function update(Request $request){
         $validator = Validator::make($request->all(), [
-            'module' => 'required|in:take_away,dine_in,delivery',
-            'product_id' => 'required|exists:products,id',
-            'price' => 'required|numeric',
+            'items' => ['required', 'array'],
+            'items.*.module' => 'required|in:take_away,dine_in,delivery',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.price' => 'required|numeric',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -59,20 +60,22 @@ class ProductPOSPricingController extends Controller
             ],400);
         }
 
-        $product_pricing = ProductPosPricing::
-        where("module", $request->module)
-        ->where("product_id", $request->product_id)
-        ->first();
-        if(!empty($product_pricing)){
-            $product_pricing->price = $request->price;
-            $product_pricing->save();
-        }
-        else{
-            ProductPosPricing::create([
-                "module" => $request->module,
-                "product_id" => $request->product_id,
-                "price" => $request->price,
-            ]);
+        foreach ($request->items as $item) {
+            $product_pricing = ProductPosPricing::
+            where("module", $item->module)
+            ->where("product_id", $item->product_id)
+            ->first();
+            if(!empty($product_pricing)){
+                $product_pricing->price = $item->price;
+                $product_pricing->save();
+            }
+            else{
+                ProductPosPricing::create([
+                    "module" => $item->module,
+                    "product_id" => $item->product_id,
+                    "price" => $item->price,
+                ]);
+            }
         }
 
         return response()->json([
