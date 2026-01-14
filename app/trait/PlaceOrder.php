@@ -536,23 +536,23 @@ trait PlaceOrder
                 // Add product price
                // $amount_product += $product_item->price;
 
-                $this->order_details
-                ->create([
-                    'order_id' => $order->id,
-                    'product_id' => $product['product_id'],
-                    'count' => $product['count'],
-                    'product_index' => $key,
-                ]); // Add product with count
+                // $this->order_details
+                // ->create([
+                //     'order_id' => $order->id,
+                //     'product_id' => $product['product_id'],
+                //     'count' => $product['count'],
+                //     'product_index' => $key,
+                // ]); // Add product with count
                 if (isset($product['exclude_id'])) {
                     foreach ($product['exclude_id'] as $exclude) {
-                        $this->order_details
-                        ->create([
-                            'order_id' => $order->id,
-                            'product_id' => $product['product_id'],
-                            'exclude_id' => $exclude,
-                            'count' => $product['count'],
-                            'product_index' => $key,
-                        ]); // Add excludes
+                        // $this->order_details
+                        // ->create([
+                        //     'order_id' => $order->id,
+                        //     'product_id' => $product['product_id'],
+                        //     'exclude_id' => $exclude,
+                        //     'count' => $product['count'],
+                        //     'product_index' => $key,
+                        // ]); // Add excludes
                         
                         $exclude = $this->excludes
                         ->where('id', $exclude)
@@ -566,15 +566,15 @@ trait PlaceOrder
                 } 
                 if (isset($product['addons'])) {
                     foreach ($product['addons'] as $addon) {
-                        $this->order_details
-                        ->create([
-                            'order_id' => $order->id,
-                            'product_id' => $product['product_id'],
-                            'addon_id' => $addon['addon_id'],
-                            'count' => $product['count'],
-                            'addon_count' => $addon['count'],
-                            'product_index' => $key,
-                        ]); // Add excludes
+                        // $this->order_details
+                        // ->create([
+                        //     'order_id' => $order->id,
+                        //     'product_id' => $product['product_id'],
+                        //     'addon_id' => $addon['addon_id'],
+                        //     'count' => $product['count'],
+                        //     'addon_count' => $addon['count'],
+                        //     'product_index' => $key,
+                        // ]); // Add excludes
                         
                         $addon_item = $this->addons
                         ->where('id', $addon['addon_id'])
@@ -591,14 +591,14 @@ trait PlaceOrder
                 } 
                 if (isset($product['extra_id'])) {
                     foreach ($product['extra_id'] as $extra) {
-                        $this->order_details
-                        ->create([
-                            'order_id' => $order->id,
-                            'product_id' => $product['product_id'],
-                            'extra_id' => $extra,
-                            'count' => $product['count'],
-                            'product_index' => $key,
-                        ]); // Add extra
+                        // $this->order_details
+                        // ->create([
+                        //     'order_id' => $order->id,
+                        //     'product_id' => $product['product_id'],
+                        //     'extra_id' => $extra,
+                        //     'count' => $product['count'],
+                        //     'product_index' => $key,
+                        // ]); // Add extra
                         $extra_item = $this->extras
                         ->where('id', $extra)
                         ->withLocale($locale)
@@ -611,14 +611,14 @@ trait PlaceOrder
                 }
                 if (isset($product['product_extra_id'])) {
                     foreach ($product['product_extra_id'] as $extra) {
-                        $this->order_details
-                        ->create([
-                            'order_id' => $order->id,
-                            'product_id' => $product['product_id'],
-                            'extra_id' => $extra,
-                            'count' => $product['count'],
-                            'product_index' => $key,
-                        ]); // Add extra
+                        // $this->order_details
+                        // ->create([
+                        //     'order_id' => $order->id,
+                        //     'product_id' => $product['product_id'],
+                        //     'extra_id' => $extra,
+                        //     'count' => $product['count'],
+                        //     'product_index' => $key,
+                        // ]); // Add extra
                         
                         $extra_item = $this->extras
                         ->where('id', $extra)
@@ -632,17 +632,17 @@ trait PlaceOrder
                 }
                 if (isset($product['variation'])) {
                     foreach ($product['variation'] as $variation) {
-                        foreach ($variation['option_id'] as $option_id) {
-                            $this->order_details
-                            ->create([
-                                'order_id' => $order->id,
-                                'product_id' => $product['product_id'],
-                                'variation_id' => $variation['variation_id'],
-                                'option_id' => $option_id,
-                                'count' => $product['count'],
-                                'product_index' => $key,
-                            ]); // Add variations & options
-                        }
+                        // foreach ($variation['option_id'] as $option_id) {
+                        //     $this->order_details
+                        //     ->create([
+                        //         'order_id' => $order->id,
+                        //         'product_id' => $product['product_id'],
+                        //         'variation_id' => $variation['variation_id'],
+                        //         'option_id' => $option_id,
+                        //         'count' => $product['count'],
+                        //         'product_index' => $key,
+                        //     ]); // Add variations & options
+                        // }
                         $variations = $this->variation
                         ->where('id', $variation['variation_id'])
                         ->withLocale($locale)
