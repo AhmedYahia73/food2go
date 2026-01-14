@@ -1579,6 +1579,7 @@ class OrderController extends Controller
 
         if ($request->order_status == 'confirmed') { 
             $kitchen = $this->preparing_takeaway($id);
+            $kitchen = $kitchen['order_kitchen'];
             if($order->order_type == "take_away"){
                 $order->update([
                     'order_status' => $request->order_status,
@@ -1638,7 +1639,9 @@ class OrderController extends Controller
 
         return response()->json([
             'order_status' => $request->order_status,
-            'kitchen' => $kitchen
+            'kitchen' => $kitchen,
+            "date" => $order?->created_at,
+            "order_number" => $order->id - app('first_order_yesterday'),
         ]);
     }
 
@@ -1811,6 +1814,8 @@ class OrderController extends Controller
             $order_kitchen[$key] = [
                 "id" => $kitchen_items[$key]->id,
                 "name" => $kitchen_items[$key]->name,
+                "type" => $kitchen_items[$key]?->type ?? null,
+                "type" => $kitchen_items[$key]?->type ?? null,
                 "print_name" => $kitchen_items[$key]->print_name,
                 "print_ip" => $kitchen_items[$key]->print_ip,
                 "print_status" => $kitchen_items[$key]->print_status,

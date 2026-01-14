@@ -1542,6 +1542,7 @@ class CashierMakeOrderController extends Controller
             $kitchen_items[$key] = [
                 "id" => $kitchen_items[$key]->id,
                 "name" => $kitchen_items[$key]->name,
+                "type" => $kitchen_items[$key]?->type ?? null,
                 "print_name" => $kitchen_items[$key]->print_name,
                 "print_ip" => $kitchen_items[$key]->print_ip,
                 "print_status" => $kitchen_items[$key]->print_status,
@@ -1592,6 +1593,7 @@ class CashierMakeOrderController extends Controller
             $order_kitchen[$key] = [
                 "id" => $kitchen_items[$key]->id,
                 "name" => $kitchen_items[$key]->name,
+                "type" => $kitchen_items[$key]?->type ?? null,
                 "print_name" => $kitchen_items[$key]->print_name,
                 "print_ip" => $kitchen_items[$key]->print_ip,
                 "print_status" => $kitchen_items[$key]->print_status,
