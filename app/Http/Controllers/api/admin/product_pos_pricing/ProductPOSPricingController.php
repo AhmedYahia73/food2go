@@ -62,18 +62,18 @@ class ProductPOSPricingController extends Controller
 
         foreach ($request->items as $item) {
             $product_pricing = ProductPosPricing::
-            where("module", $item->module)
-            ->where("product_id", $item->product_id)
+            where("module", $item['module'])
+            ->where("product_id", $item['product_id'])
             ->first();
             if(!empty($product_pricing)){
-                $product_pricing->price = $item->price;
+                $product_pricing->price = $item['price'];
                 $product_pricing->save();
             }
             else{
                 ProductPosPricing::create([
-                    "module" => $item->module,
-                    "product_id" => $item->product_id,
-                    "price" => $item->price,
+                    "module" => $item['module'],
+                    "product_id" => $item['product_id'],
+                    "price" => $item['price'],
                 ]);
             }
         }
