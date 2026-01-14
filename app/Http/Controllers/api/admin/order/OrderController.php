@@ -1579,7 +1579,7 @@ class OrderController extends Controller
 
         if ($request->order_status == 'confirmed') { 
             $kitchen = $this->preparing_takeaway($id);
-            $kitchen = $kitchen['order_kitchen'];
+            $kitchen = $kitchen['kitchen_items'];
             if($order->order_type == "take_away"){
                 $order->update([
                     'order_status' => $request->order_status,
