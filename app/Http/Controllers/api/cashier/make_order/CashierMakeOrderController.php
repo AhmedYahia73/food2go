@@ -953,6 +953,9 @@ class CashierMakeOrderController extends Controller
         
         $kitchen_order = [];
         $kitchen_items = [];
+        $table_number = CafeTable::
+        where("id", $request->table_id)
+        ->first()?->table_number ?? null;
         foreach ($request->preparing as $value) {
             $order_cart = $this->order_cart
             ->where('id', $value['cart_id'])
@@ -1026,8 +1029,8 @@ class CashierMakeOrderController extends Controller
                 $items = collect($value_item);
 
                 $peice_items = $items->where("weight", 0)->count() > 0
-                    ? $items->where("weight", 0)['count']
-                    : 0;
+                ? $items->where("weight", 0)['count']
+                : 0;
 
                 $weight_items = $items->where("weight", 1)->count() > 0 ? 1 : 0;
 
@@ -1040,7 +1043,8 @@ class CashierMakeOrderController extends Controller
         
         return response()->json([
             'success' => 'You perpare success',
-            "kitchen_items" => $kitchen_items
+            "kitchen_items" => $kitchen_items,
+            "table_number" => $table_number
         ]);
     }
 
