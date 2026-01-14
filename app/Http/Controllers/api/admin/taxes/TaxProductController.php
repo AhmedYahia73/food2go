@@ -63,7 +63,7 @@ class TaxProductController extends Controller
  
     public function selecte_products(Request $request){
         $validator = Validator::make($request->all(), [
-            'products' => ['required', 'array'],
+            'products' => ['array'],
             'products.*' => ['required', 'exists:products,id'],
             'tax_id' => ["required", "exists:taxes,id"],
         ]);
