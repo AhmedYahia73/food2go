@@ -925,18 +925,17 @@ class CashierMakeOrderController extends Controller
         foreach ($order_cart as $key => $item) {
             $order_item = $this->order_format($item, $key); 
             $newItem = collect($order_item);
-            $index = $items->search(function ($item) use ($newItem) {
+            $index = $orders->search(function ($item) use ($newItem) {
                 return $item->variation_selected == $newItem->variation_selected
                     && $item->id == $newItem->id && $item->extras == $newItem->extras
                     && $item->excludes == $newItem->excludes && $item->extras == $newItem->extras;
             });
 
             if ($index !== false) {
-                $items[$index]->count += $newItem->count++;
+                $orders[$index]->count += $newItem->count++;
             } else {
-                $items->push($newItem);
+                $orders = $orders->merge($newItem);
             } 
-            $orders = $orders->merge($newItem);
         }
         $bundles = $orders
         ->pluck('bundles')
