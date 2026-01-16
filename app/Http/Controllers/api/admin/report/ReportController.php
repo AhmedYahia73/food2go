@@ -2194,6 +2194,7 @@ class ReportController extends Controller
         $validator = Validator::make($request->all(), [
             'branch_id' => ['exists:branches,id'],
             'cashier_id' => ['exists:cashiers,id'],
+            'category_id' => ['exists:categories,id'],
             'cashier_man_id' => ['exists:cashier_men,id'],
             'from' => ['date'], 
             'to' => ['date'],
@@ -2349,8 +2350,12 @@ class ReportController extends Controller
             }
         }
         $categories = Category::
-        with("translations")
-        ->get()
+        with("translations");
+        if($request->category_id){
+            $categories = $categories
+            ->where("id", $request->category_id);
+        }
+        $categories->get()
         ->map(function($element) use($locale){
             $name = $element
             ->translations

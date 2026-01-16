@@ -111,7 +111,7 @@ class OrderController extends Controller
             //     ->orWhere("order_type", "dine_in")
             //     ->orWhere('pos', 0);
             // })
-            //->where("shift", $request->user()->shift_number) 
+            ->where("branch_id", $request->user()->branch_id) 
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -296,6 +296,7 @@ class OrderController extends Controller
                 ->orWhereNull('status');
             }) 
             ->where('order_active', 1)
+            ->where("branch_id", $request->user()->branch_id) 
             ->orderByDesc('id')
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
                 $query->select('id', 'zone_id')
@@ -424,6 +425,7 @@ class OrderController extends Controller
             //     ->orWhere('pos', 0);
 
             // })
+            ->where("branch_id", $request->user()->branch_id) 
             ->whereBetween("created_at", [$start, $end]) 
             ->where(function($query) {
                 $query->where('status', 1)
