@@ -16,7 +16,7 @@ use App\Http\Resources\ProductResource;
 use App\Mail\CashierLimitExceeded;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
-
+use Illuminate\Support\Arr;
 // ____________________________________________________
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
@@ -921,9 +921,22 @@ class CashierMakeOrderController extends Controller
             return $item;
         });
         $orders = collect([]);
+        $arr = [];
         foreach ($order_cart as $key => $item) {
             $order_item = $this->order_format($item, $key); 
-            $orders = $orders->merge($order_item);
+            $newItem = collect($order_item);
+            $index = $items->search(function ($item) use ($newItem) {
+                return $item->variation_selected == $newItem->variation_selected
+                    && $item->id == $newItem->id && $item->extras == $newItem->extras
+                    && $item->excludes == $newItem->excludes && $item->extras == $newItem->extras;
+            });
+
+            if ($index !== false) {
+                $items[$index]->count += $newItem->count++;
+            } else {
+                $items->push($newItem);
+            } 
+            $orders = $orders->merge($newItem);
         }
         $bundles = $orders
         ->pluck('bundles')
