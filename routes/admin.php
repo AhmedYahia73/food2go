@@ -218,7 +218,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
  
         $time_sittings = TimeSittings::
         get();
-    
+
         $items = [];
         $count = 0;
         $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
@@ -237,25 +237,25 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         }
         if ($time_sittings->count() > 0) {
             $from = $from->from;
-            $end = date('Y-m-d') . ' ' . $to->from;
+            $end = date("Y-m-d") . ' ' . $to->from;
             $hours = $to->hours;
             $minutes = $to->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
+            $from = date("Y-m-d") . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			if($start >= now()){
+            if($start >= now()){
                 $start = $start->subDay();
-                $end = $end->subDay();
-			}
- 
+            } 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
+        $start = $start->subDay();
+ 
         $first_order = Order:: 
         where('created_at', '>=', $start)
         ->first()?->id ?? 1; 
