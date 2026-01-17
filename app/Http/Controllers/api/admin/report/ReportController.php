@@ -963,7 +963,16 @@ class ReportController extends Controller
         $delivery_orders = Order::
         where('shift', $shift->shift)
         ->where("order_type", "delivery") 
+        ->where("is_void", 0)
+        ->where("due_from_delivery", 0)
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->pluck('id')
+        ->toArray();
+        $out_delivery_orders = Order::
+        where('shift', $shift->shift)
+        ->where("order_type", "delivery") 
         ->where("is_void", 0)  
+        ->where("due_from_delivery", 1)  
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->pluck('id')
         ->toArray();
@@ -1026,6 +1035,13 @@ class ReportController extends Controller
         ->with("financials")
         ->groupBy("financial_id") 
         ->get();
+
+        $out_delivery_financial_accounts = OrderFinancial::
+        selectRaw("financial_id ,SUM(amount) as total_amount")
+        ->whereIn("order_id", $out_delivery_orders)
+        ->with("financials")
+        ->groupBy("financial_id") 
+        ->get();
         $take_away_financial_accounts = OrderFinancial::
         selectRaw("financial_id ,SUM(amount) as total_amount")
         ->whereIn("order_id", $take_away_orders)
@@ -1040,6 +1056,27 @@ class ReportController extends Controller
         ->get();
         $financial_accounts = [];
         $total_amount = 0;
+        foreach ($delivery_financial_accounts as $item) {
+            $total_amount += $item->total_amount;
+            if(isset($financial_accounts[$item->financial_id])){
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name,
+                    "total_amount_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_delivery'], 
+                    "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                    "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                ];
+            }
+            else{
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name, 
+                    "total_amount_delivery" => $item->total_amount ,
+                    "total_amount_take_away" => 0,
+                    "total_amount_dine_in" => 0,
+                ];
+            }
+        }
         foreach ($delivery_financial_accounts as $item) {
             $total_amount += $item->total_amount;
             if(isset($financial_accounts[$item->financial_id])){
@@ -1247,6 +1284,14 @@ class ReportController extends Controller
         select("id") 
         ->where("order_type", "delivery") 
         ->where("is_void", 0)  
+        ->where("due_from_delivery", 0)
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+         ;
+        $out_delivery_orders = Order::
+        select("id") 
+        ->where("order_type", "delivery") 
+        ->where("is_void", 0)  
+        ->where("due_from_delivery", 1)
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
          ;
         $dine_in_orders = Order::
@@ -1349,6 +1394,9 @@ class ReportController extends Controller
             $delivery_orders = $delivery_orders
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end); 
+            $out_delivery_orders = $out_delivery_orders
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);  
             $dine_in_orders = $dine_in_orders
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end);
@@ -1377,6 +1425,8 @@ class ReportController extends Controller
             ->where("cashier_id", $request->cashier_id);
             $delivery_orders = $delivery_orders
             ->where("cashier_id", $request->cashier_id);
+            $out_delivery_orders = $out_delivery_orders
+            ->where("cashier_id", $request->cashier_id);
             $dine_in_orders = $dine_in_orders
             ->where("cashier_id", $request->cashier_id);
 
@@ -1400,6 +1450,8 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id);
             $delivery_orders = $delivery_orders
             ->where("branch_id", $request->branch_id);
+            $out_delivery_orders = $out_delivery_orders
+            ->where("branch_id", $request->branch_id);
             $dine_in_orders = $dine_in_orders
             ->where("branch_id", $request->branch_id);
             $expenses_items = $expenses_items
@@ -1421,6 +1473,8 @@ class ReportController extends Controller
             $take_away_orders = $take_away_orders
             ->where("cashier_man_id", $request->cashier_man_id);
             $delivery_orders = $delivery_orders
+            ->where("cashier_man_id", $request->cashier_man_id);
+            $out_delivery_orders = $out_delivery_orders
             ->where("cashier_man_id", $request->cashier_man_id);
             $dine_in_orders = $dine_in_orders
             ->where("cashier_man_id", $request->cashier_man_id); 
@@ -1452,6 +1506,10 @@ class ReportController extends Controller
                 $query->where("finantiol_acountings.id", $request->financial_id);
             });
             $delivery_orders = $delivery_orders
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
+            $out_delivery_orders = $out_delivery_orders
             ->whereHas("financial_accountigs", function($query) use($request){
                 $query->where("finantiol_acountings.id", $request->financial_id);
             });
@@ -1488,6 +1546,9 @@ class ReportController extends Controller
         $delivery_orders = $delivery_orders
         ->pluck('id')
         ->toArray();
+        $out_delivery_orders = $out_delivery_orders 
+        ->pluck('id')
+        ->toArray();
         $dine_in_orders = $dine_in_orders
         ->pluck('id')
         ->toArray();
@@ -1495,6 +1556,12 @@ class ReportController extends Controller
         $delivery_financial_accounts = OrderFinancial::
         selectRaw("financial_id ,SUM(amount) as total_amount")
         ->whereIn("order_id", $delivery_orders)
+        ->with("financials")
+        ->groupBy("financial_id") 
+        ->get();
+        $out_delivery_financial_accounts = OrderFinancial::
+        selectRaw("financial_id ,SUM(amount) as total_amount")
+        ->whereIn("order_id", $out_delivery_orders)
         ->with("financials")
         ->groupBy("financial_id") 
         ->get();
@@ -1521,6 +1588,7 @@ class ReportController extends Controller
                     "total_amount_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_delivery'], 
                     "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
                     "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                    "total_amount_out_delivery" => $financial_accounts[$item->financial_id]['total_amount_out_delivery'],
                 ];
             }
             else{
@@ -1530,6 +1598,7 @@ class ReportController extends Controller
                     "total_amount_delivery" => $item->total_amount ,
                     "total_amount_take_away" => 0,
                     "total_amount_dine_in" => 0,
+                    "total_amount_out_delivery" => 0,
                 ];
             }
         }
@@ -1542,6 +1611,7 @@ class ReportController extends Controller
                     "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'], 
                     "total_amount_take_away" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_take_away'],
                     "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                    "total_amount_out_delivery" => $financial_accounts[$item->financial_id]['total_amount_out_delivery'],
                 ];
             }
             else{
@@ -1551,6 +1621,7 @@ class ReportController extends Controller
                     "total_amount_delivery" => 0 ,
                     "total_amount_take_away" => $item->total_amount,
                     "total_amount_dine_in" => 0,
+                    "total_amount_out_delivery" => 0,
                 ];
             }
         }
@@ -1563,6 +1634,7 @@ class ReportController extends Controller
                     "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'], 
                     "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
                     "total_amount_dine_in" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                    "total_amount_out_delivery" => $financial_accounts[$item->financial_id]['total_amount_out_delivery'],
                 ];
             }
             else{
@@ -1572,6 +1644,30 @@ class ReportController extends Controller
                     "total_amount_delivery" => 0 ,
                     "total_amount_take_away" => 0,
                     "total_amount_dine_in" => $item->total_amount,
+                    "total_amount_out_delivery" => 0,
+                ];
+            }
+        }
+        foreach ($out_delivery_financial_accounts as $item) {
+            $total_amount += $item->total_amount;
+            if(isset($financial_accounts[$item->financial_id])){
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name,
+                    "total_amount_delivery" => $financial_accounts[$item->financial_id]['total_amount_delivery'], 
+                    "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
+                    "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
+                    "total_amount_out_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_out_delivery'],
+                ];
+            }
+            else{
+                $financial_accounts[$item->financial_id] = [
+                    "financial_id" => $item->financial_id,
+                    "financial_name" => $item?->financials?->name,
+                    "total_amount_delivery" => 0 ,
+                    "total_amount_take_away" => 0,
+                    "total_amount_dine_in" => 0,
+                    "total_amount_out_delivery" => $item->total_amount,
                 ];
             }
         }
@@ -1586,6 +1682,7 @@ class ReportController extends Controller
                     "total_amount_delivery" => $financial_accounts[$item->financial_account_id]['total_amount_delivery'] - $item->amount, 
                     "total_amount_take_away" => $financial_accounts[$item->financial_account_id]['total_amount_take_away'],
                     "total_amount_dine_in" => $financial_accounts[$item->financial_account_id]['total_amount_dine_in'],
+                    "total_amount_out_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_out_delivery'],
                 ];
             }
             else{
@@ -1595,6 +1692,7 @@ class ReportController extends Controller
                     "total_amount_delivery" => -$item->amount ,
                     "total_amount_take_away" => 0,
                     "total_amount_dine_in" => 0,
+                    "total_amount_out_delivery" => 0,
                 ];
             }
         }
@@ -1824,6 +1922,17 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "delivery") 
+            ->where("due_from_delivery", 0)
+            ->sum("amount");
+            $out_of_delivery = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->where("branch_id", $request->branch_id)
+            ->whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->where("order_type", "delivery") 
+            ->where("due_from_delivery", 1)
             ->sum("amount");
             $take_away = Order::
             where("order_status", "!=", "faild_to_deliver")
@@ -1874,6 +1983,7 @@ class ReportController extends Controller
                 "online_mobile" => $online_mobile,
                 "dine_in" => $dine_in,
                 "delivery" => $delivery,
+                "out_of_delivery" => $out_of_delivery,
                 "take_away" => $take_away,
                 "void_order_count" => $void_order_count,
                 "void_order_sum" => $void_order_sum,
@@ -1957,6 +2067,17 @@ class ReportController extends Controller
                 ->where("is_void", 0)  
                 ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                 ->where("order_type", "delivery") 
+                ->where("due_from_delivery", 0)
+                ->sum("amount");
+                $out_of_delivery = Order::
+                where("order_status", "!=", "faild_to_deliver")
+                ->where("order_status", "!=", "canceled") 
+                ->where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end]) 
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->where("order_type", "delivery") 
+                ->where("due_from_delivery", 1)
                 ->sum("amount");
                 $take_away = Order::
                 where("order_status", "!=", "faild_to_deliver")
@@ -2006,6 +2127,7 @@ class ReportController extends Controller
                     "online_web" => $online_web,
                     "online_mobile" => $online_mobile,
                     "dine_in" => $dine_in,
+                    "out_of_delivery" => $out_of_delivery,
                     "delivery" => $delivery,
                     "take_away" => $take_away,
                     "void_order_count" => $void_order_count,
@@ -2077,6 +2199,16 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "delivery") 
+            ->where("due_from_delivery", 0)
+            ->sum("amount");
+            $out_of_delivery = Order::
+            where("order_status", "!=", "faild_to_deliver")
+            ->where("order_status", "!=", "canceled") 
+            ->whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->where("order_type", "delivery") 
+            ->where("due_from_delivery", 1)
             ->sum("amount");
             $take_away = Order::
             where("order_status", "!=", "faild_to_deliver")
@@ -2121,6 +2253,7 @@ class ReportController extends Controller
                 "online_mobile" => $online_mobile,
                 "dine_in" => $dine_in,
                 "delivery" => $delivery,
+                "out_of_delivery" => $out_of_delivery,
                 "take_away" => $take_away,
                 "void_order_count" => $void_order_count,
                 "void_order_sum" => $void_order_sum,
