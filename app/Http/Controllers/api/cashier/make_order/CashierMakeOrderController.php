@@ -60,6 +60,7 @@ use App\Models\CheckoutRequest;// dicount_id
 use App\Models\FinantiolAcounting;
 use App\Models\DiscountEmail;
 use App\Models\GroupProduct;
+use App\Models\TaxModule;
 use Illuminate\Support\Facades\Storage;
 
 use App\trait\image;
@@ -83,7 +84,7 @@ class CashierMakeOrderController extends Controller
     private CashierMan $cashier_man, private UserDue $user_due,
     private DiscountModule $discount_module, private FinantiolAcounting $financial_account,
     private CheckoutRequest $checkout_request_query, private GroupProduct $group_products,
-    private CompanyInfo $company_info){}
+    private CompanyInfo $company_info, private TaxModule $tax_module){}
     use image;
     use PlaceOrder;
     use PaymentPaymob;
@@ -1768,6 +1769,38 @@ class CashierMakeOrderController extends Controller
         return response()->json([
             "discount" => $discount_module->discount,
             "module" => $discount_module?->module?->select("module", "type"),
+        ]);
+    }
+
+    public function tax_module(Request $request){
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+            'type' => 'required|in:web,app',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $tax_module = $this->tax_module
+        ->with('module')
+        ->whereHas("module", function($query) use($request){
+            $query->where("branch_id", $request->branch_id)
+            ->whereIn("type", [$request->type, "all"]);
+        })
+        ->where("status", 1)
+        ->first();
+        if(empty($tax_module)){
+            return response()->json([
+                "discount" => 0,
+                "module" => null,
+            ]);
+        }
+
+        return response()->json([
+            "discount" => $tax_module->discount,
+            "module" => $tax_module?->module?->select("module", "type"),
         ]);
     }
 
