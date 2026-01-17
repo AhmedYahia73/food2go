@@ -2356,7 +2356,7 @@ class ReportController extends Controller
             $categories = $categories
             ->where("id", $request->category_id);
         }
-        $categories->get()
+        $categories = $categories->get()
         ->map(function($element) use($locale){
             $name = $element
             ->translations
