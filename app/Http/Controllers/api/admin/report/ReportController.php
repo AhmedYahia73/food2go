@@ -2399,7 +2399,7 @@ class ReportController extends Controller
              $products_item = $products_item->values();
             $data[] = [
                 "id" =>  data_get($item, 'id'),
-                "category" => $item['name'],
+                "category" => data_get($item, 'name'),
                 "products" => $products_item,
                 "products_count" => $products_item->sum("count"),
                 "products_price" => $products_item->sum("price"),
