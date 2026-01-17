@@ -115,6 +115,8 @@ use App\Http\Controllers\api\admin\profile\ProfileController;
 
 use App\Http\Controllers\api\admin\discount_module\DiscountModuleController;
 
+use App\Http\Controllers\api\admin\tax_module\TaxModuleController;
+
 use App\Http\Controllers\api\admin\discount_code\DiscountCodeController;
 
 use App\Http\Controllers\api\admin\notification_sound\NotificationSoundController;
@@ -616,6 +618,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/product_report_lists', 'product_report_lists');
     });
     
+    Route::controller(TaxModuleController::class)
+    ->prefix('tax_module')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'tax_item');
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
+    });
+     
     Route::controller(DiscountModuleController::class)
     ->prefix('discount_module')->group(function(){
         Route::get('/', 'view')->middleware('can:view_discount_module');

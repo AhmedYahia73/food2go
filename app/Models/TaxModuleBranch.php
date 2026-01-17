@@ -6,5 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class TaxModuleBranch extends Model
 {
-    //
+    // module => take_away, dine_in, delivery
+    // all, app, web
+    protected $fillable = [
+        'tax_module_id',
+        'branch_id',
+        'module',
+        'type',
+    ];
+
+    public function branch(){
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
 }

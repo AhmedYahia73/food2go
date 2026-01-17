@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('tax_modules', function (Blueprint $table) {
             $table->id();
+            $table->float("tax");
+            $table->boolean("status")->default(1);
             $table->timestamps();
         });
     }
