@@ -28,6 +28,12 @@ class PreparationManController extends Controller
                     "id" => $item?->branch?->id,
                     "name" => $item?->branch?->name,
                 ], 
+        
+                'print_name' => $item->print_name,
+                'print_ip' => $item->print_ip,
+                'print_status' => $item->print_status,
+                'print_type' => $item->print_type,
+                'print_port' => $item->print_port,
             ];
         });
 
@@ -66,7 +72,12 @@ class PreparationManController extends Controller
                 "branch" => [
                     "id" => $preparation_man?->branch?->id,
                     "name" => $preparation_man?->branch?->name,
-                ], 
+                ],  
+                'print_name' => $preparation_man->print_name,
+                'print_ip' => $preparation_man->print_ip,
+                'print_status' => $preparation_man->print_status,
+                'print_type' => $preparation_man->print_type,
+                'print_port' => $preparation_man->print_port,
             ]
         ]);
     }
