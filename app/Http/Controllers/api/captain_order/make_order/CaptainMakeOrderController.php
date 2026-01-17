@@ -72,6 +72,10 @@ class CaptainMakeOrderController extends Controller
                 "name" => $item->name,
             ];
         });
+
+        return response()->json([
+            "captain_orders" => $captain_orders
+        ]);
     }
 
     public function notification_order(Request $request){
