@@ -28,6 +28,7 @@ class DineinOrderRequest extends FormRequest
             'amount' => ['required', 'numeric'], 
             'total_tax' => ['required', 'numeric'],
             'total_discount' => ['required', 'numeric'], 
+            'captain_id' => ['sometimes', 'exists:captain_orders,id'],
 
 
             'bundles' => ['array'],

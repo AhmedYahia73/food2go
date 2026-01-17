@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     
     Route::controller(CaptainMakeOrderController::class)
     ->group(function(){
+        Route::get('/captain_orders', 'captain_orders');
         Route::post('/preparation_num', 'preparation_num');
     });
  

@@ -36,6 +36,7 @@ use App\Models\CashierMan;
 use App\Models\Discount;
 use App\Models\Bundle;
 use App\Models\Kitchen;
+use App\Models\CaptainOrder;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -60,7 +61,18 @@ class CaptainMakeOrderController extends Controller
     use PaymentPaymob;
     use Notifications;
 
-
+    public function captain_orders(Request $request){
+        $captain_orders = CaptainOrder::
+        where("branch_id", $request->user()->branch_id)
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+    }
 
     public function notification_order(Request $request){
         $validator = Validator::make($request->all(), [
