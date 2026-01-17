@@ -1478,6 +1478,8 @@ class ReportController extends Controller
         ->get();
         $total_tax = $order_count
         ->sum("total_tax");
+        $service_fees = $order_count
+        ->sum("service_fees"); 
         $order_count = $order_count
         ->count();
         $take_away_orders = $take_away_orders
@@ -1677,6 +1679,7 @@ class ReportController extends Controller
 
         return response()->json([ 
             "total_tax" => $total_tax,
+            "service_fees" => $service_fees,
             'financial_accounts' => $financial_accounts,
             'order_count' => $order_count,
             'total_amount' => $total_amount, 
@@ -1854,9 +1857,16 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("total_tax");
+            $service_fees = Order:: 
+            where("branch_id", $request->branch_id)
+            ->whereBetween("created_at", [$start, $end])  
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->sum("service_fees");
 
             return response()->json([
                 "total_orders" => $total_orders,
+                "service_fees" => $service_fees,
                 "avg_orders" => $avg_orders,
                 "count_orders" => $count_orders,
                 "discount" => $discount,
@@ -1979,8 +1989,15 @@ class ReportController extends Controller
                 ->where("is_void", 0)  
                 ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                 ->sum("delivery_fees"); 
+                $service_fees = Order:: 
+                where("branch_id", $item->id)
+                ->whereBetween("created_at", [$start, $end])  
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->sum("service_fees");
 
                 $data[] = [ 
+                    "service_fees" => $service_fees,
                     "Branch" => $item->name,
                     "total_orders" => $total_orders,
                     "avg_orders" => $avg_orders,
@@ -2087,9 +2104,15 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("delivery_fees"); 
+            $service_fees = Order:: 
+            whereBetween("created_at", [$start, $end])  
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->sum("service_fees");
 
             return response()->json([
                 "data" => $data,
+                "service_fees" => $service_fees,
                 "total_orders" => $total_orders,
                 "avg_orders" => $avg_orders,
                 "count_orders" => $count_orders,
