@@ -2382,7 +2382,7 @@ class ReportController extends Controller
             }
             if($request->products){
                 $products_item = $products_item->filter(function ($product) use ($item, $request) {
-                    return ($product['category_id'] == $item->id ?? $item['id'])
+                    return ($product['category_id'] == $item->id ?? $item['id']
                     || $product['sub_category_id'] ==  $item->id ?? $item['id'])
                     && in_array($product['id'], $request->products);
                 });
