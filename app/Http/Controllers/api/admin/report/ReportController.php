@@ -751,11 +751,11 @@ class ReportController extends Controller
             ->with('zone:id,zone');
         }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
         'schedule:id,name', 'delivery', "financial_accountigs:id,name"])
-        ->get()
-        ->map(function($item, $key){
+        ->get();
+        $orders = $orders->map(function($item, $key, $orders){
             return [ 
                 'id' => $item->id,
-                'order_number' => $key + 1,
+                'order_number' => $orders->count() - $key,
                 'created_at' => $item->created_at,
                 'amount' => $item->amount,
                 'operation_status' => $item->operation_status,
