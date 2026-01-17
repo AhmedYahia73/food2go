@@ -75,6 +75,7 @@ class ServiceFeesController extends Controller
 
     public function create(Request $request){
         $validator = Validator::make($request->all(), [
+            'title' => ['required'],
             'type' => ['required', 'in:precentage,value'],
             'amount' => ['required', 'numeric'],
             'module' => ['required', 'in:pos,online'],
@@ -100,6 +101,7 @@ class ServiceFeesController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
+            'title' => ['required'],
             'type' => ['required', 'in:precentage,value'],
             'amount' => ['required', 'numeric'],
             'module' => ['required', 'in:pos,online'],
@@ -124,6 +126,7 @@ class ServiceFeesController extends Controller
         }
         $service_fees->branches()->sync($request->branches);
         $service_fees->update([
+            "title" => $request->title,
             "type" => $request->type,
             "amount" => $request->amount,
             "module" => $request->module,

@@ -25,6 +25,7 @@ use App\Models\OrderDetail;
 use App\Models\CompanyInfo; 
 use App\Models\CafeTable; 
 use App\Models\CafeLocation; 
+use App\Models\Setting; 
 
 use App\trait\OrderFormat; 
 

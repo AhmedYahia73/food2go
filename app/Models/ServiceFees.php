@@ -10,6 +10,7 @@ class ServiceFees extends Model
     use HasFactory;
 
     protected $fillable = [
+        'title',
         'type',
         'amount',
         'module',
