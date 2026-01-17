@@ -752,10 +752,11 @@ class ReportController extends Controller
         }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
         'schedule:id,name', 'delivery', "financial_accountigs:id,name"])
         ->get();
-        $orders = $orders->map(function($item, $key, $orders){
+        $order_count = $orders->count();
+        $orders = $orders->map(function($item, $key) use($order_count){
             return [ 
                 'id' => $item->id,
-                'order_number' => $orders->count() - $key,
+                'order_number' => $order_count - $key,
                 'created_at' => $item->created_at,
                 'amount' => $item->amount,
                 'operation_status' => $item->operation_status,
