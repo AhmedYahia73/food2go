@@ -1671,25 +1671,48 @@ class ReportController extends Controller
                 ];
             }
         }
+        // $expenses_total = 0;
+        // foreach ($expenses as $item) {
+        //     $expenses_total += $item->amount;
+        //     $total_amount -= $item->amount;
+        //     if(isset($financial_accounts[$item->financial_account_id])){
+        //         $financial_accounts[$item->financial_account_id] = [
+        //             "financial_id" => $item->financial_account_id,
+        //             "financial_name" => $item?->financial_account?->name,
+        //             "total_amount_delivery" => $financial_accounts[$item->financial_account_id]['total_amount_delivery'] - $item->amount, 
+        //             "total_amount_take_away" => $financial_accounts[$item->financial_account_id]['total_amount_take_away'],
+        //             "total_amount_dine_in" => $financial_accounts[$item->financial_account_id]['total_amount_dine_in'],
+        //             "total_amount_out_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_out_delivery'],
+        //         ];
+        //     }
+        //     else{
+        //         $financial_accounts[$item->financial_account_id] = [
+        //             "financial_id" => $item->financial_account_id,
+        //             "financial_name" => $item?->financial_account?->name,
+        //             "total_amount_delivery" => -$item->amount ,
+        //             "total_amount_take_away" => 0,
+        //             "total_amount_dine_in" => 0,
+        //             "total_amount_out_delivery" => 0,
+        //         ];
+        //     }
+        // }
         $expenses_total = 0;
         foreach ($expenses as $item) {
             $expenses_total += $item->amount;
             $total_amount -= $item->amount;
-            if(isset($financial_accounts[$item->financial_account_id])){
-                $financial_accounts[$item->financial_account_id] = [
-                    "financial_id" => $item->financial_account_id,
-                    "financial_name" => $item?->financial_account?->name,
-                    "total_amount_delivery" => $financial_accounts[$item->financial_account_id]['total_amount_delivery'] - $item->amount, 
-                    "total_amount_take_away" => $financial_accounts[$item->financial_account_id]['total_amount_take_away'],
-                    "total_amount_dine_in" => $financial_accounts[$item->financial_account_id]['total_amount_dine_in'],
-                    "total_amount_out_delivery" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_out_delivery'],
-                ];
-            }
-            else{
-                $financial_accounts[$item->financial_account_id] = [
-                    "financial_id" => $item->financial_account_id,
-                    "financial_name" => $item?->financial_account?->name,
-                    "total_amount_delivery" => -$item->amount ,
+
+            $acc_id = $item->financial_account_id;
+
+            if (isset($financial_accounts[$acc_id])) {
+                // تحديث الحساب الموجود مسبقاً
+                $financial_accounts[$acc_id]['total_amount_delivery'] -= $item->amount;
+                // ملاحظة: يمكنك إنقاصها من الإجمالي العام للحساب بدلاً من قسم التوصيل فقط
+            } else {
+                // إنشاء سجل جديد في حال لم يكن هناك طلبات لهذا الحساب المالي
+                $financial_accounts[$acc_id] = [
+                    "financial_id" => $acc_id,
+                    "financial_name" => $item->financial_account->name ?? 'N/A',
+                    "total_amount_delivery" => -$item->amount, 
                     "total_amount_take_away" => 0,
                     "total_amount_dine_in" => 0,
                     "total_amount_out_delivery" => 0,
