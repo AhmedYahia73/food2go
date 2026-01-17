@@ -37,6 +37,7 @@ use App\Models\Discount;
 use App\Models\Bundle;
 use App\Models\Kitchen;
 use App\Models\CaptainOrder;
+use App\Models\ProductPosPricing;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -777,12 +778,14 @@ class CaptainMakeOrderController extends Controller
         // /captain/lists
         $validator = Validator::make($request->all(), [
             'branch_id' => 'required|exists:branches,id',
+            'module' => 'in:take_away,dine_in,delivery'
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         } 
+        $module = $request->module ?? null;
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = $request->branch_id;
         $branch_off = $this->branch_off
@@ -841,10 +844,16 @@ class CaptainMakeOrderController extends Controller
         ->where('item_type', '!=', 'online') 
         ->where('status', 1)
         ->get()
-        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
+        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
             //get count of sales of product to detemine stock
-            $product->price = $product?->product_pricing->where('branch_id', $branch_id)
-            ->first()?->price ?? $product->price;
+            $new_price = $product?->product_pricing
+            ->where('module', $branch_id)
+            ->first()?->price;
+            if(empty($new_price)){
+                $new_price = $product?->pos_pricing->where('module', $module)
+                ->first()?->price ?? $product->price;
+            }
+            $product->price = $new_price ?? $product->price;
             $product->favourite = false;
             if ($product->stock_type == 'fixed') {
                 $product->count = $product->sales_count->sum('count');
@@ -927,8 +936,15 @@ class CaptainMakeOrderController extends Controller
         ->get()
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
             //get count of sales of product to detemine stock
-            $product->price = $product?->product_pricing->where('branch_id', $branch_id)
-            ->first()?->price ?? $product->price;
+            
+            $new_price = $product?->product_pricing
+            ->where('module', $branch_id)
+            ->first()?->price;
+            if(empty($new_price)){
+                $new_price = $product?->pos_pricing->where('module', $module)
+                ->first()?->price ?? $product->price;
+            }
+            $product->price = $new_price ?? $product->price;
             $product->favourite = false;
             if ($product->stock_type == 'fixed') {
                 $product->count = $product->sales_count->sum('count');
