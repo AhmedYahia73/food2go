@@ -847,7 +847,7 @@ class CaptainMakeOrderController extends Controller
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
             //get count of sales of product to detemine stock
             $new_price = $product?->product_pricing
-            ->where('module', $branch_id)
+            ->where('branch_id', $branch_id)
             ->first()?->price;
             if(empty($new_price)){
                 $new_price = $product?->pos_pricing->where('module', $module)
@@ -934,11 +934,11 @@ class CaptainMakeOrderController extends Controller
         ->where("favourite", 1)
         ->where('status', 1)
         ->get()
-        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
+        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
             //get count of sales of product to detemine stock
             
             $new_price = $product?->product_pricing
-            ->where('module', $branch_id)
+            ->where('branch_id', $branch_id)
             ->first()?->price;
             if(empty($new_price)){
                 $new_price = $product?->pos_pricing->where('module', $module)
