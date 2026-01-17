@@ -924,17 +924,21 @@ class CashierMakeOrderController extends Controller
         $arr = [];
         foreach ($order_cart as $key => $item) {
             $order_item = $this->order_format($item, $key); 
-            $newItem = collect($order_item);
-            $index = $orders->search(function ($item) use ($newItem) {
-                return $item->variation_selected == $newItem->variation_selected
-                    && $item->id == $newItem->id && $item->extras == $newItem->extras
-                    && $item->excludes == $newItem->excludes && $item->extras == $newItem->extras;
-            });
+            $newItem = collect($order_item[0]);
+           $index = $orders->search(function ($item) use ($newItem) {
+				return data_get($item, 'variation_selected') == data_get($newItem, 'variation_selected')
+					&& data_get($item, 'id') == data_get($newItem, 'id')
+					&& data_get($item, 'extras') == data_get($newItem, 'extras')
+					&& data_get($item, 'excludes') == data_get($newItem, 'excludes')
+					&& data_get($item, 'prepration') == data_get($newItem, 'prepration');
+			});
+			
+            if ($index != false) { 
+				$added   = data_get($newItem, 'count');
 
-            if ($index !== false) {
-                $orders[$index]->count += $newItem->count++;
+				$orders[$index]['count'] += $added;
             } else {
-                $orders = $orders->merge($newItem);
+                $orders = $orders->push($newItem);
             } 
         }
         $bundles = $orders
@@ -955,6 +959,7 @@ class CashierMakeOrderController extends Controller
             'preparing' => 'required',
             'preparing.*.cart_id' => 'required|exists:order_carts,id',
             'preparing.*.status' => 'required|in:preparing,preparation,done,pick_up',
+            'preparing.*.count' => 'required|numeric',
             'table_id' => 'required|exists:cafe_tables,id',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -1008,7 +1013,8 @@ class CashierMakeOrderController extends Controller
                 })
                 ->where('branch_id', $request->user()->branch_id)
                 ->get();
-                $element['cart_id'] = $value['cart_id'];
+                $element['cart_id'] = $value['cart_id']; 
+                $element['count'] = $request->count; 
                 foreach ($kitchens as $kitchen) {
                     $kitchen_items[$kitchen->id] = $kitchen;
                     $kitchen_order[$kitchen->id][] = $element;
