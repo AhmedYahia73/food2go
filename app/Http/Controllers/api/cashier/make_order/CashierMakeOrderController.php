@@ -1793,13 +1793,13 @@ class CashierMakeOrderController extends Controller
         ->first();
         if(empty($tax_module)){
             return response()->json([
-                "discount" => 0,
+                "tax" => 0,
                 "module" => null,
             ]);
         }
 
         return response()->json([
-            "discount" => $tax_module->discount,
+            "tax" => $tax_module->tax,
             "module" => $tax_module?->module?->select("module", "type"),
         ]);
     }
