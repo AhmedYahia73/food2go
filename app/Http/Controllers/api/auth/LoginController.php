@@ -261,12 +261,29 @@ class LoginController extends Controller
                 ]);
             }
 
+            $receipt_design = ReceiptDesign::
+            first();
+            $receipt_design = [
+                'logo' => $receipt_design->logo ?? 1,
+                'name' => $receipt_design->name ?? 1,
+                'address' => $receipt_design->address ?? 1,
+                'branch' => $receipt_design->branch ?? 1,
+                'phone' => $receipt_design->phone ?? 1,
+                'cashier_name' => $receipt_design->cashier_name ?? 1,
+                'footer' => $receipt_design->footer ?? 1,
+                'taxes' => $receipt_design->taxes ?? 1,
+                'services' => $receipt_design->services ?? 1,
+                'table_num' => $receipt_design->table_num ?? 1,
+                'preparation_num' => $receipt_design->preparation_num ?? 1,
+            ];
+
             return response()->json([
                 'admin' => $user,
                 'token' => $user->token,
                 'role' => $role,
                 "r_online_noti" => $r_online_noti,
                 "order_lang" => $order_lang->setting,
+                "receipt_design" => $receipt_design,
             ], 200);
         }
         else { 
