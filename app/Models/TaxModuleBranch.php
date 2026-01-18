@@ -18,4 +18,8 @@ class TaxModuleBranch extends Model
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');
     }
+
+    public function products(){
+        return $this->belongsToMany(Branch::class, 'branch_id');
+    }
 }
