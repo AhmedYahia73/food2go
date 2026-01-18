@@ -2574,9 +2574,6 @@ class ReportController extends Controller
 
         return response()->json([
             "data" => $data,
-            "products" => $products,
-            "start" => $start->format("Y-m-d H:i"),
-            "end" => $end->format("Y-m-d H:i"),
         ]);
     }
 

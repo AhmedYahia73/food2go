@@ -137,6 +137,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->group(function(){
         Route::get('/profile', 'view');
         Route::post('/profile/update', 'update');
+        Route::get('/printer', 'printer');
+        Route::post('/printer_update', 'printer_update');
     });
 
     Route::controller(DealOrderController::class)
