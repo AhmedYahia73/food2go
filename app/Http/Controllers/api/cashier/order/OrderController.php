@@ -1444,7 +1444,7 @@ class OrderController extends Controller
             $product['notes'] = $item->product[0]->notes;
             $product['count'] = $item->product[0]->count;
             $product['weight'] = $item->product[0]->product->weight_status;
-            $product['variations'] = $item->variationss;
+            $product['variations'] = $item->variations;
             $product['addons'] = $item->addons;
             $product['excludes'] = $item->excludes;
             $product['extras'] = $item->extras;
