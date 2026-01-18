@@ -365,6 +365,12 @@ class CashierMakeOrderController extends Controller
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
+        if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
+        && !$request->repeated){
+            return response()->json([
+                "errors" => "order is repeated"
+            ], 400);
+        }
         $delivery_fees = Address::
         where("id", $request->address_id)
         ->first()?->zone?->price ?? 0;
@@ -646,6 +652,12 @@ class CashierMakeOrderController extends Controller
         // notes, payment_method_id, order_type
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
+        if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
+        && !$request->repeated){
+            return response()->json([
+                "errors" => "order is repeated"
+            ], 400);
+        }
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
             'order_type' => 'take_away',
@@ -811,7 +823,7 @@ class CashierMakeOrderController extends Controller
         // notes
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
- 
+  
         $validator = Validator::make($request->all(), [
             'table_id' => 'required|exists:cafe_tables,id',
         ]);
@@ -1076,6 +1088,12 @@ class CashierMakeOrderController extends Controller
         // Keys
         // date, amount, total_tax, total_discount
         // notes, payment_method_id, table_id
+        if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
+        && !$request->repeated){
+            return response()->json([
+                "errors" => "order is repeated"
+            ], 400);
+        }
         if(!$request->user()->dine_in){
             return response()->json([
                 "errors" => "You do not have this premission"
@@ -1268,6 +1286,12 @@ class CashierMakeOrderController extends Controller
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
+        if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
+        && !$request->repeated){
+            return response()->json([
+                "errors" => "order is repeated"
+            ], 400);
+        }
         if(!$request->user()->dine_in){
             return response()->json([
                 "errors" => "You do not have this premission"
@@ -2121,5 +2145,19 @@ class CashierMakeOrderController extends Controller
 
     public function order_num_today($id){ 
         return $id - app("first_order_today");
+    }
+
+    public function last_order($amount, $total_tax, $total_discount){
+        $order = Order::
+        orderByDesc()
+        ->first();
+        if(auth()->user()->id == $order?->cashier_man_id &&
+        $amount == $order?->amount && $total_tax == $order->total_tax
+        && $total_discount == $order->total_discount
+        &&  now()->lessThanOrEqualTo(
+        Carbon::parse($order?->created_at ?? '1999-05-05')->addMinutes(1))){
+            return true;
+        }
+        return false;
     }
 }
