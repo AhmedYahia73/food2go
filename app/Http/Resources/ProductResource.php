@@ -34,9 +34,6 @@ class ProductResource extends JsonResource
     
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
-            $price = empty($this->tax) ? $this->price: 
-            ($this->tax->type == 'value' ? $this->price + $this->tax->amount 
-            : $this->price + $this->tax->amount * $this->price / 100);
             
             if (!empty($this->discount)) {
                 if ($this->discount->type == 'precentage') {
@@ -44,9 +41,15 @@ class ProductResource extends JsonResource
                 } else {
                     $discount = $price - $this->discount->amount;
                 }
+                $price = empty($this->tax) ? $discount: 
+                ($this->tax->type == 'value' ? $discount + $this->tax->amount 
+                : $discount + $this->tax->amount * $discount / 100);
             }
             else{
                 $discount = $price;
+                $price = empty($this->tax) ? $discount: 
+                ($this->tax->type == 'value' ? $discount + $this->tax->amount 
+                : $discount + $this->tax->amount * $discount / 100);
             }
             $tax = $price;
             return [
@@ -63,8 +66,8 @@ class ProductResource extends JsonResource
                 'number' => $this->number,
                 'price' => $price,
                 'price_after_discount' => $discount,
-                'price_after_tax' => $tax,
-                'final_price' =>  $discount * ($tax - $price) / 100 + $discount,
+                'price_after_tax' => $price,
+                'final_price' =>  $tax,
                 'discount_val' => $price - $discount,
                 'tax_val' => round($tax - $price, 2),
                 'product_time_status' => $this->product_time_status,
@@ -97,17 +100,6 @@ class ProductResource extends JsonResource
         } 
         else {
             $price = $this->price;
-            
-            if (!empty($this->tax)) {
-                if ($this->tax->type == 'precentage') {
-                    $tax = $price + $this->tax->amount * $price / 100;
-                } else {
-                    $tax = $price + $this->tax->amount;
-                }
-            }
-            else{
-                $tax = $price;
-            }
 
             if (!empty($this->discount)) {
                 if ($this->discount->type == 'precentage') {
@@ -118,6 +110,17 @@ class ProductResource extends JsonResource
             }
             else{
                 $discount = $price;
+            }
+            
+            if (!empty($this->tax)) {
+                if ($this->tax->type == 'precentage') {
+                    $tax = $discount + $this->tax->amount * $discount / 100;
+                } else {
+                    $tax = $discount + $this->tax->amount;
+                }
+            }
+            else{
+                $tax = $discount;
             }
             return [
                 'id' => $this->id,
@@ -135,7 +138,7 @@ class ProductResource extends JsonResource
                 'price' => $price,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
-                'final_price' =>  $discount * ($tax - $price) / 100 + $discount,
+                'final_price' =>  $price,
                 'discount_val' => $price - $discount,
                 'tax_val' => round($tax - $price, 2),
                 'product_time_status' => $this->product_time_status,

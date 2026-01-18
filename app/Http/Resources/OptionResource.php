@@ -17,10 +17,6 @@ class OptionResource extends JsonResource
         
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
-            $price = empty($this?->product?->tax) ? $this->price: 
-            ($this?->product?->tax->type == 'value' ? $this->price 
-            : $this->price + $this?->product?->tax->amount * $this->price / 100);
-            $total_option_price = $price + $this?->product?->price;
             
             if (!empty($this?->product?->discount)) {
                 if ($this?->product?->discount->type == 'precentage') {
@@ -32,6 +28,10 @@ class OptionResource extends JsonResource
             else{
                 $discount = $total_option_price;
             }
+            $price = empty($this?->product?->tax) ? $discount: 
+            ($this?->product?->tax->type == 'value' ? $discount 
+            : $discount + $this?->product?->tax->amount * $discount / 100);
+            $total_option_price = $price + $this?->product?->price;
             $tax = $price;
             return [
                 'id' => $this->id,
@@ -40,7 +40,7 @@ class OptionResource extends JsonResource
                 'total_option_price' => $total_option_price,
                 'after_disount' => $discount,
                 'price_after_tax' => $tax,
-                'final_price' =>  $discount * ($tax - $price) / 100 + $discount,
+                'final_price' =>  $tax,
                 'discount_val' => $price - $discount,
                 'tax_val' => $tax - $price,
                 'product_id' => $this?->product_id,
@@ -57,16 +57,6 @@ class OptionResource extends JsonResource
             $total_option_price = $price + $this?->product?->price;
             
             
-            if (!empty($this?->product?->tax)) {
-                if ($this?->product?->tax->type == 'precentage') {
-                    $tax = $price + $this?->product?->tax->amount * $price / 100;
-                } else {
-                    $tax = $price;
-                }
-            }
-            else{
-                $tax = $price;
-            }
             if (!empty($this?->product?->discount)) {
                 if ($this?->product?->discount->type == 'precentage') {
                     $discount = $total_option_price - $this?->product?->discount->amount * $total_option_price / 100;
@@ -77,6 +67,16 @@ class OptionResource extends JsonResource
             else{
                 $discount = $total_option_price;
             }
+            if (!empty($this?->product?->tax)) {
+                if ($this?->product?->tax->type == 'precentage') {
+                    $tax = $discount + $this?->product?->tax->amount * $discount / 100;
+                } else {
+                    $tax = $discount;
+                }
+            }
+            else{
+                $tax = $discount;
+            }
             return [
                 'id' => $this->id,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
@@ -84,7 +84,7 @@ class OptionResource extends JsonResource
                 'total_option_price' => $total_option_price,
                 'after_disount' => $discount, 
                 'price_after_tax' => $tax,
-                'final_price' =>  $discount * ($tax - $price) / 100 + $discount,
+                'final_price' =>  $price,
                 'discount_val' => $price - $discount,
                 'tax_val' => $tax - $price,
                 'product_id' => $this?->product_id,

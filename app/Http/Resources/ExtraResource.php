@@ -18,9 +18,6 @@ class ExtraResource extends JsonResource
     {
         $locale = app()->getLocale(); // Use the application's current locale
        if ($this->product?->taxes?->setting == 'included') {
-            $price = empty($this->product->tax) ? $this->price: 
-            ($this->product->tax->type == 'value' ? $this->price 
-            : $this->price + $this->product->tax->amount * $this->price / 100);
             
             if (!empty($this->product->discount) && $this->product->discount->type == 'precentage') {
                 $discount = $price - $this->product->discount->amount * $price / 100;
@@ -28,12 +25,15 @@ class ExtraResource extends JsonResource
             else{
                 $discount = $price;
             }
+            $price = empty($this->product->tax) ? $discount: 
+            ($this->product->tax->type == 'value' ? $discount 
+            : $discount + $this->product->tax->amount * $discount / 100);
             $tax = $price;
             return [
                 'id' => $this->id,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
-                'final_price' =>  $discount * ($tax - $price) / 100 + $discount,
+                'final_price' =>  $tax,
                 'name' => TranslationTbl::where('key', $this->name)
                 ->where('locale', $locale)->first()?->value ?? $this->name,
                 'product_id' => $this->product_id,
@@ -47,27 +47,27 @@ class ExtraResource extends JsonResource
         else{
             $price = $this->price;
             
-            if (!empty($this->product->tax)) {
-                if ($this->product->tax->type == 'precentage') {
-                    $tax = $price + $this->product->tax->amount * $price / 100;
-                } else {
-                    $tax = $price;
-                }
-            }
-            else{
-                $tax = $price;
-            }
             if (!empty($this->product->discount) && $this->product->discount->type == 'precentage') {
                 $discount = $price - $this->product->discount->amount * $price / 100;
             }
             else{
                 $discount = $price;
             }
+            if (!empty($this->product->tax)) {
+                if ($this->product->tax->type == 'precentage') {
+                    $tax = $discount + $this->product->tax->amount * $discount / 100;
+                } else {
+                    $tax = $discount;
+                }
+            }
+            else{
+                $tax = $discount;
+            }
             return [
                 'id' => $this->id,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
-                'final_price' =>  $discount * ($tax - $price) / 100 + $discount,
+                'final_price' =>  $price,
                 'name' => TranslationTbl::where('key', $this->name)
                 ->where('locale', $locale)->first()?->value ?? $this->name,
                 'product_id' => $this->product_id,
