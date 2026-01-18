@@ -1433,12 +1433,26 @@ class OrderController extends Controller
         $order->void_financial_id = $request->financial_id;
         $order->is_void = 1;
         $order->save();
+        $products = [];
+        foreach ($order->order_details as $item) {
+            
+            $product = [];
+            $product['id'] = $item->product[0]->product->id;
+            $product['name'] = $item->product[0]->product->name;
+            $product['category_id'] = $item->product[0]->product->category_id;
+            $product['sub_category_id'] = $item->product[0]->product->sub_category_id;
+            $product['notes'] = $item->product[0]->notes;
+            $product['count'] = $item->product[0]->count;
+            $product['weight'] = $item->product[0]->product->weight_status;
+            $products[] = $product;
+        }
         $financial_account = $this->financial_account
         ->where("id", $request->financial_id)
         ->decrement('balance', $order->amount);
 
         return response()->json([
-            "success" => "You void order success"
+            "success" => "You void order success",
+            "products" => $products
         ]);
     }
 
