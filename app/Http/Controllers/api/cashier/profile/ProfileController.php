@@ -61,7 +61,7 @@ class ProfileController extends Controller
     public function printer_update(Request $request){
         $validator = Validator::make($request->all(), [
             'print_name' => 'sometimes',
-            'print_type' => 'sometimes|', 
+            'print_type' => 'sometimes|in:usb,network', 
             'print_port' => 'sometimes',
             'print_ip' => 'sometimes',
         ]);
