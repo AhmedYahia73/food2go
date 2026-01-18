@@ -67,7 +67,7 @@ class ExtraResource extends JsonResource
                 'id' => $this->id,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
-                'final_price' =>  $price,
+                'final_price' =>  $tax,
                 'name' => TranslationTbl::where('key', $this->name)
                 ->where('locale', $locale)->first()?->value ?? $this->name,
                 'product_id' => $this->product_id,

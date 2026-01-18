@@ -84,7 +84,7 @@ class OptionResource extends JsonResource
                 'total_option_price' => $total_option_price,
                 'after_disount' => $discount, 
                 'price_after_tax' => $tax,
-                'final_price' =>  $price,
+                'final_price' =>  $tax,
                 'discount_val' => $price - $discount,
                 'tax_val' => $tax - $price,
                 'product_id' => $this?->product_id,
