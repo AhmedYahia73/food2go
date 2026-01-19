@@ -494,45 +494,47 @@ class HomeController extends Controller
             $time_sittings = TimeSittings::
             where("branch_id", $request->branch_id)
             ->get();
-            $items = [];
-            $count = $time_sittings->count();
-            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
-            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
-         
-            $to = $time_sittings[$count - 1]; 
-            $from = $time_sittings[0]; 
-            if ($time_sittings->count() > 0) {
-                $from = $from->from;
-                $end = date('Y-m-d') . ' ' . $to->from;
-                $hours = $to->hours;
-                $minutes = $to->minutes;
-                $from = date('Y-m-d') . ' ' . $from;
-                $start = Carbon::parse($from);
-                $end = Carbon::parse($end);
-                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
-                if ($start >= $end) {
-                    $end = $end->addDay();
-                }
-                if($start >= now()){
-                    $start = $start->subDay();
-                    $end = $end->subDay();
-                }
+            if($time_sittings->count() > 0){
+                $items = [];
+                $count = $time_sittings->count();
+                $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+                $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+            
+                $to = $time_sittings[$count - 1]; 
+                $from = $time_sittings[0]; 
+                if ($time_sittings->count() > 0) {
+                    $from = $from->from;
+                    $end = date('Y-m-d') . ' ' . $to->from;
+                    $hours = $to->hours;
+                    $minutes = $to->minutes;
+                    $from = date('Y-m-d') . ' ' . $from;
+                    $start = Carbon::parse($from);
+                    $end = Carbon::parse($end);
+                    $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
+                    if ($start >= $end) {
+                        $end = $end->addDay();
+                    }
+                    if($start >= now()){
+                        $start = $start->subDay();
+                        $end = $end->subDay();
+                    }
 
-                // if ($start > $end) {
-                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-                // }
-                // else{
-                //     $end = Carbon::parse($from)->addHours(intval($hours));
-                // } format('Y-m-d H:i:s')
-            } else {
-                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-            } 
-            if(!($start <= now() && $end >= now())){ 
-                $open_from = $this->arabicTime($start);
-                $open_to = $this->arabicTime($end);
-                $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;
-                $open = false; 
+                    // if ($start > $end) {
+                    //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+                    // }
+                    // else{
+                    //     $end = Carbon::parse($from)->addHours(intval($hours));
+                    // } format('Y-m-d H:i:s')
+                } else {
+                    $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                    $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+                } 
+                if(!($start <= now() && $end >= now())){ 
+                    $open_from = $this->arabicTime($start);
+                    $open_to = $this->arabicTime($end);
+                    $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;
+                    $open = false; 
+                }
             }
         }
         $branch_off = $this->branch_off
