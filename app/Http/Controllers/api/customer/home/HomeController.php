@@ -11,6 +11,7 @@ use App\Http\Resources\ProductResource;
 use App\Http\Resources\AddonResource;
 use Illuminate\Support\Facades\Http;
 
+use App\Models\TimeSittings;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
@@ -476,6 +477,8 @@ class HomeController extends Controller
     public function categories(Request $request){
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;
+        $close_message = '';
+        $open = true;
         if ($request->branch_id && !empty($request->branch_id)) {
             $branch_id = $request->branch_id;
         }
@@ -484,6 +487,62 @@ class HomeController extends Controller
             ->where('id', $request->address_id)
             ->first();
             $branch_id = $address?->zone?->branch_id;
+        }
+        if($request->branch_id){    
+            
+            $time_sittings = TimeSittings::
+            where("branch_id", $request->branch_id)
+            ->get();
+            $items = [];
+            $count = 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+        
+            foreach ($time_sittings as $item) {
+                if( $item[count($item) - 1]->from > $to->from){
+                    $count = count($item);
+                    $to = $item[$count - 1];
+                } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
+            }
+            if ($time_sittings->count() > 0) {
+                $from = $from->from;
+                $end = date('Y-m-d') . ' ' . $to->from;
+                $hours = $to->hours;
+                $minutes = $to->minutes;
+                $from = date('Y-m-d') . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                }
+
+                // if ($start > $end) {
+                //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+                // }
+                // else{
+                //     $end = Carbon::parse($from)->addHours(intval($hours));
+                // } format('Y-m-d H:i:s')
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            } 
+            if(!($start <= now() && $end >= now())){
+                $open_from = Carbon::parse($time_sitting[0]->from);
+                $open_to = Carbon::parse($time_sitting[$time_sitting->count() - 1]->from);
+                $open_to = $open_to->addHours($time_sitting[$time_sitting->count() - 1]->hours)
+                ->addMinutes($time_sitting[$time_sitting->count() - 1]->minutes);
+                $open_from = $this->arabicTime($open_from);
+                $open_to = $this->arabicTime($open_to);
+                $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;
+                $open = false;
+            }
         }
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
@@ -522,7 +581,9 @@ class HomeController extends Controller
         });
 
         return response()->json([
-            'categories' => $categories->values()
+            'categories' => $categories->values(),
+            "open" => $open,
+            "close_message" => $close_message
         ]);
     }
 
@@ -1434,5 +1495,11 @@ class HomeController extends Controller
         return response()->json([
             'menue_images' => $menue_images
         ]);
+    }
+    
+    public function arabicTime($carbonTime) {
+        $time = $carbonTime->format('h:i');
+        $period = $carbonTime->format('A') === 'AM' ? 'ص' : 'م';
+        return $time . ' ' . $period;
     }
 }
