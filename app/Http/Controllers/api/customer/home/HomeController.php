@@ -494,19 +494,12 @@ class HomeController extends Controller
             where("branch_id", $request->branch_id)
             ->get();
             $items = [];
-            $count = 0;
+            $count = $time_sittings->count();
             $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
             $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
-        
-            foreach ($time_sittings as $item) {
-                if( $item[count($item) - 1]->from > $to->from){
-                    $count = count($item);
-                    $to = $item[$count - 1];
-                } 
-                if($from->from > $item[0]->from){
-                    $from = $item[0];
-                }
-            }
+         
+            $to = $time_sittings[$count - 1]; 
+            $from = $time_sittings[0]; 
             if ($time_sittings->count() > 0) {
                 $from = $from->from;
                 $end = date('Y-m-d') . ' ' . $to->from;
