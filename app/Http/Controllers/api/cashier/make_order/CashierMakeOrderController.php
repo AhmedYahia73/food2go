@@ -2149,7 +2149,7 @@ class CashierMakeOrderController extends Controller
 
     public function last_order($amount, $total_tax, $total_discount){
         $order = Order::
-        orderByDesc()
+        orderByDesc("id")
         ->first();
         if(auth()->user()->id == $order?->cashier_man_id &&
         $amount == $order?->amount && $total_tax == $order->total_tax
