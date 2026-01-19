@@ -34,7 +34,7 @@ class ProductResource extends JsonResource
     
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
-            
+            $price = $this->price;
             if (!empty($this->discount)) {
                 if ($this->discount->type == 'precentage') {
                     $discount = $price - $this->discount->amount * $price / 100;

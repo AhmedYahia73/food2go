@@ -19,6 +19,7 @@ class ExtraResource extends JsonResource
         $locale = app()->getLocale(); // Use the application's current locale
        if ($this->product?->taxes?->setting == 'included') {
             
+            $price = $this->price;
             if (!empty($this->product->discount) && $this->product->discount->type == 'precentage') {
                 $discount = $price - $this->product->discount->amount * $price / 100;
             }
