@@ -1960,7 +1960,6 @@ class ReportController extends Controller
             ->whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
-            ->where("order_type", "delivery") 
             ->where("due_from_delivery", 1)
             ->sum("amount");
             $take_away = Order::
@@ -2112,7 +2111,6 @@ class ReportController extends Controller
                 ->where("is_void", 0)  
                 ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                 ->where("order_type", "delivery") 
-                ->where("due_from_delivery", 0)
                 ->sum("amount");
                 $take_away = Order::
                 where("order_status", "!=", "faild_to_deliver")
@@ -2249,7 +2247,6 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "delivery") 
-            ->where("due_from_delivery", 0)
             ->sum("amount");
             $take_away = Order::
             where("order_status", "!=", "faild_to_deliver")
