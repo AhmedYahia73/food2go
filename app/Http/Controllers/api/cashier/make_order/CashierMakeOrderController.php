@@ -1087,13 +1087,7 @@ class CashierMakeOrderController extends Controller
         // /cashier/dine_in_payment
         // Keys
         // date, amount, total_tax, total_discount
-        // notes, payment_method_id, table_id
-        if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
-        && !$request->repeated){
-            return response()->json([
-                "errors" => "order is repeated"
-            ], 400);
-        }
+        // notes, payment_method_id, table_id 
         if(!$request->user()->dine_in){
             return response()->json([
                 "errors" => "You do not have this premission"
@@ -1285,13 +1279,7 @@ class CashierMakeOrderController extends Controller
         // source, financials[{id, amount, description}], cash_with_delivery
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
-        // variation[{variation_id, option_id[]}], count}]
-        if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
-        && !$request->repeated){
-            return response()->json([
-                "errors" => "order is repeated"
-            ], 400);
-        }
+        // variation[{variation_id, option_id[]}], count}] 
         if(!$request->user()->dine_in){
             return response()->json([
                 "errors" => "You do not have this premission"
