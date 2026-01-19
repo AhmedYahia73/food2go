@@ -76,16 +76,14 @@ class SinglePageDeliveryController extends Controller
         $orders = $this->ordersModel
         ->where("order_type", "delivery")
         ->whereNull("delivery_id")
-        ->with(['branch', 'user', 'cashier_man']) // مهم لتجنب N+1
-        ->paginate(10); // غير الرقم حسب احتياجك
-
-        $orders->getCollection()->transform(function ($item) {
+        ->get()
+        ->map(function($item){
             return [
                 "id" => $item->id,
-                "amount" => $item->amount,
+                "amount" => $item->amount, 
                 "order_number" => $item->order_number,
                 "source" => $item->source,
-                "branch" => $item?->branch?->name,
+                "branch" =>  $item?->branch?->name,
                 "user" => [
                     "name" => $item?->user?->name,
                     "phone" => $item?->user?->phone,
@@ -97,8 +95,9 @@ class SinglePageDeliveryController extends Controller
             ];
         });
 
-        return response()->json($orders);
-
+        return response()->json([
+            "orders" => $orders,
+        ]);
     }
     
     public function current_orders(Request $request, $id){
