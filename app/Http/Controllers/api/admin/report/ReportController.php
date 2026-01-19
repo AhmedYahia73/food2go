@@ -1895,12 +1895,14 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
+            ->where("due_from_delivery", 0)
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("amount");
             $discount = Order::whereNotIn('order_status', ['faild_to_deliver', 'canceled'])
             ->where('branch_id', $request->branch_id)
             ->whereBetween("created_at", [$start, $end])
             ->where("is_void", 0)  
+            ->where("due_from_delivery", 0)
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->selectRaw("
                 COALESCE(SUM(total_discount),0) +
@@ -1914,6 +1916,7 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
+            ->where("due_from_delivery", 0)
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("pos", 0)
             ->where("source", "web")
@@ -1924,6 +1927,7 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
+            ->where("due_from_delivery", 0)
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("pos", 0)
             ->where("source", "mobile")
@@ -1934,6 +1938,7 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
+            ->where("due_from_delivery", 0)
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "dine_in") 
             ->sum("amount");
@@ -1943,6 +1948,7 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
+            ->where("due_from_delivery", 0)
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "delivery") 
             ->where("due_from_delivery", 0)
