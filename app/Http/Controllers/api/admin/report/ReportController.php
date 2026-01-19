@@ -971,7 +971,7 @@ class ReportController extends Controller
         $out_delivery_orders = Order::
         where('shift', $shift->shift)
         ->where("order_type", "delivery") 
-        ->where("is_void", 0)  
+        ->where("is_void", 0)   
         ->where("due_from_delivery", 1)  
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->pluck('id')
@@ -1953,6 +1953,7 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
+            ->where("order_type", "delivery") 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("due_from_delivery", 1)
             ->sum("amount");
@@ -2098,6 +2099,7 @@ class ReportController extends Controller
                 ->where("branch_id", $item->id)
                 ->whereBetween("created_at", [$start, $end]) 
                 ->where("is_void", 0)  
+                ->where("due_from_delivery", 1) 
                 ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                 ->where("order_type", "delivery") 
                 ->sum("amount");
@@ -2227,6 +2229,7 @@ class ReportController extends Controller
             where("order_status", "!=", "faild_to_deliver")
             ->where("order_status", "!=", "canceled") 
             ->whereBetween("created_at", [$start, $end]) 
+            ->where("due_from_delivery", 1)
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->where("order_type", "delivery") 
