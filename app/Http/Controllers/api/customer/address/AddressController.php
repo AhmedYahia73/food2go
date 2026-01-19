@@ -171,6 +171,8 @@ class AddressController extends Controller
                 "image_link" => $item->image_link,
                 "cover_image_link" => $item->cover_image_link,
                 "map" => $item->map,
+                "block_reason" => $item->block_reason,
+                "status" => $item->status,
             ];
         });
 

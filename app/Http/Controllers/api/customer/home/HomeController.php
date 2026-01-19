@@ -509,12 +509,13 @@ class HomeController extends Controller
                 $from = date('Y-m-d') . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
-                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
                 if ($start >= $end) {
                     $end = $end->addDay();
                 }
                 if($start >= now()){
                     $start = $start->subDay();
+                    $end = $end->subDay();
                 }
 
                 // if ($start > $end) {
@@ -527,15 +528,11 @@ class HomeController extends Controller
                 $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
                 $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
             } 
-            if(!($start <= now() && $end >= now())){
-                $open_from = Carbon::parse($time_sitting[0]->from);
-                $open_to = Carbon::parse($time_sitting[$time_sitting->count() - 1]->from);
-                $open_to = $open_to->addHours($time_sitting[$time_sitting->count() - 1]->hours)
-                ->addMinutes($time_sitting[$time_sitting->count() - 1]->minutes);
-                $open_from = $this->arabicTime($open_from);
-                $open_to = $this->arabicTime($open_to);
+            if(!($start <= now() && $end >= now())){ 
+                $open_from = $this->arabicTime($start);
+                $open_to = $this->arabicTime($end);
                 $close_message = 'مواعيد العمل من ' . $open_from . ' الى ' . $open_to;
-                $open = false;
+                $open = false; 
             }
         }
         $branch_off = $this->branch_off
