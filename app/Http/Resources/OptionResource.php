@@ -21,13 +21,13 @@ class OptionResource extends JsonResource
             $total_option_price = $price + $this?->product?->price;
             if (!empty($this?->product?->discount)) {
                 if ($this?->product?->discount->type == 'precentage') {
-                    $discount = $total_option_price - $this?->product?->discount->amount * $total_option_price / 100;
+                    $discount = $price - $this?->product?->discount->amount * $price / 100;
                 } else {
-                    $discount = $total_option_price;
+                    $discount = $price;
                 }
             }
             else{
-                $discount = $total_option_price;
+                $discount = $price;
             }
             $price = empty($this?->product?->tax) ? $discount: 
             ($this?->product?->tax->type == 'value' ? $discount 
@@ -60,13 +60,13 @@ class OptionResource extends JsonResource
             
             if (!empty($this?->product?->discount)) {
                 if ($this?->product?->discount->type == 'precentage') {
-                    $discount = $total_option_price - $this?->product?->discount->amount * $total_option_price / 100;
+                    $discount = $price - $this?->product?->discount->amount * $price / 100;
                 } else {
-                    $discount = $total_option_price;
+                    $discount = $price;
                 }
             }
             else{
-                $discount = $total_option_price;
+                $discount = $price;
             }
             if (!empty($this?->product?->tax)) {
                 if ($this?->product?->tax->type == 'precentage') {
