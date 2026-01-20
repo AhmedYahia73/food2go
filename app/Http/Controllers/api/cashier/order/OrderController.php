@@ -1455,6 +1455,7 @@ class OrderController extends Controller
             $product['addons'] = $item->addons;
             $product['excludes'] = $item->excludes;
             $product['extras'] = $item->extras;
+            $product['final_price_options'] = $final_price_options;
             $products[] = $product;
         }
         $financial_account = $this->financial_account
