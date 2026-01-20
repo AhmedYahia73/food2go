@@ -1447,6 +1447,7 @@ class OrderController extends Controller
             $product['name'] = $item->product[0]->product->name;
             $product['final_price'] = $final_price; 
             $product['category_id'] = $item->product[0]->product->category_id;
+            $product['category_id'] = $item->product[0]->product->category_id;
             $product['sub_category_id'] = $item->product[0]->product->sub_category_id;
             $product['notes'] = $item->product[0]->notes;
             $product['count'] = $item->product[0]->count;
@@ -1454,8 +1455,7 @@ class OrderController extends Controller
             $product['variations'] = $item->variations;
             $product['addons'] = $item->addons;
             $product['excludes'] = $item->excludes;
-            $product['extras'] = $item->extras;
-            $product['final_price_options'] = $final_price_options;
+            $product['extras'] = $item->extras; 
             $products[] = $product;
         }
         $financial_account = $this->financial_account
@@ -1464,7 +1464,8 @@ class OrderController extends Controller
 
         return response()->json([
             "success" => "You void order success",
-            "products" => $products
+            "products" => $products,
+            "service_fees" => $order->service_fees,
         ]);
     }
 
