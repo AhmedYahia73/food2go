@@ -1436,11 +1436,11 @@ class OrderController extends Controller
         $products = [];
         foreach ($order->order_details as $item) {
             $final_price_products = $item->product[0]->product->final_price;
-            $final_price_options = collect($item->variations)->pluck("options");
+            $final_price_options = collect($item->variations)->pluck("options")->flatten(1);
             $final_price_options = collect($final_price_options)->sum("final_price");
             $final_price_extra = collect($item->extras)->sum("final_price");
             $final_price_addons = collect($item->addons)->pluck("addon")->sum("final_price");
-            $final_price = $final_price_options + $final_price_extra + $final_price_addons;
+            $final_price = $final_price_options + $final_price_extra + $final_price_addons + $final_price_products;
             $final_price = $item->product[0]->count * $final_price;
             $product = [];
             $product['id'] = $item->product[0]->product->id;
