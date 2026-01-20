@@ -21,6 +21,7 @@ class CafeTable extends Model
         'main_table_id',
         'preparation_num',
         'start_timer',
+        'order',
     ];
     protected $appends = ['qr_code_link'];
 
