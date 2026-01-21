@@ -24,6 +24,7 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 
 use App\Events\PrintOrder;
  
+use App\Models\ServiceFees;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\CompanyInfo;
@@ -373,7 +374,30 @@ class CashierMakeOrderController extends Controller
         }
         $delivery_fees = Address::
         where("id", $request->address_id)
-        ->first()?->zone?->price ?? 0;
+        ->first()?->zone?->price ?? 0;   
+        if(!$request->service_fees){
+            if(empty($request?->service_fees_id)){
+                $service_fees = ServiceFees::
+                where("module", "pos")
+                ->whereHas("branches", function($query){
+                    $query->where("branches.id", auth()->user()->branch_id);
+                })
+                ->first();
+            }
+            else{ 
+                $service_fees = ServiceFees::
+                where("id", $request?->service_fees_id)
+                ->first();
+            }
+            $service_amount = $service_fees?->amount ?? 0;
+            if($request->type == "precentage"){
+                $service_amount = $service_amount * $request->amount / 100;
+            } 
+            
+            $request->merge([
+                'service_fees' => $service_amount, 
+            ]);
+        }
         $request->merge([
             'branch_id' => $request->user()->branch_id, 
             'order_type' => 'delivery',
@@ -657,6 +681,29 @@ class CashierMakeOrderController extends Controller
             return response()->json([
                 "errors" => "order is repeated"
             ], 400);
+        }
+        if(!$request->service_fees){
+            if(empty($request?->service_fees_id)){
+                $service_fees = ServiceFees::
+                where("module", "pos")
+                ->whereHas("branches", function($query){
+                    $query->where("branches.id", auth()->user()->branch_id);
+                })
+                ->first();
+            }
+            else{ 
+                $service_fees = ServiceFees::
+                where("id", $request?->service_fees_id)
+                ->first();
+            }
+            $service_amount = $service_fees?->amount ?? 0;
+            if($request->type == "precentage"){
+                $service_amount = $service_amount * $request->amount / 100;
+            } 
+            
+            $request->merge([
+                'service_fees' => $service_amount, 
+            ]);
         }
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
@@ -1093,6 +1140,29 @@ class CashierMakeOrderController extends Controller
                 "errors" => "You do not have this premission"
             ], 400);
         }
+        if(!$request->service_fees){
+            if(empty($request?->service_fees_id)){
+                $service_fees = ServiceFees::
+                where("module", "pos")
+                ->whereHas("branches", function($query){
+                    $query->where("branches.id", auth()->user()->branch_id);
+                })
+                ->first();
+            }
+            else{ 
+                $service_fees = ServiceFees::
+                where("id", $request?->service_fees_id)
+                ->first();
+            }
+            $service_amount = $service_fees?->amount ?? 0;
+            if($request->type == "precentage"){
+                $service_amount = $service_amount * $request->amount / 100;
+            } 
+            
+            $request->merge([
+                'service_fees' => $service_amount, 
+            ]);
+        }
         $request->merge([  
             'branch_id' => $request->user()->branch_id,
             'order_type' => 'dine_in',
@@ -1280,6 +1350,29 @@ class CashierMakeOrderController extends Controller
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}] 
+        if(!$request->service_fees){
+            if(empty($request?->service_fees_id)){
+                $service_fees = ServiceFees::
+                where("module", "pos")
+                ->whereHas("branches", function($query){
+                    $query->where("branches.id", auth()->user()->branch_id);
+                })
+                ->first();
+            }
+            else{ 
+                $service_fees = ServiceFees::
+                where("id", $request?->service_fees_id)
+                ->first();
+            }
+            $service_amount = $service_fees?->amount ?? 0;
+            if($request->type == "precentage"){
+                $service_amount = $service_amount * $request->amount / 100;
+            } 
+            
+            $request->merge([
+                'service_fees' => $service_amount, 
+            ]);
+        }
         if(!$request->user()->dine_in){
             return response()->json([
                 "errors" => "You do not have this premission"
