@@ -38,6 +38,8 @@ class CasheirManRequest extends FormRequest
             'report' => ['required', 'in:unactive,financial,all'],
             'free_discount' => ['sometimes', "boolean"],
             'manger' => ['sometimes', "boolean"],
+            'service_fees'=> ['sometimes', "boolean"],
+            'total_tax'=> ['sometimes', "boolean"],
         ];
     }
 

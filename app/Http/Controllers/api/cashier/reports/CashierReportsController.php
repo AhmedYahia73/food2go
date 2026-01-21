@@ -769,6 +769,65 @@ class CashierReportsController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        
+        $gap = 0;
+        if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password)) ||
+        $request->user()->enter_amount && password_verify($request->input('password'), $request->user()->password)) {
+            $validator = Validator::make($request->all(), [
+                'amount' => ['required', 'numeric'], 
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ],400);
+            }
+
+            $total_orders = Order::
+            select("id")
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->where("is_void", 0)
+            ->where("due_from_delivery", 0)
+            ->where("due", 0)
+            ->where("due_module", 0)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            }) 
+            ->where(function($query){
+                $query->where('pos', 1)
+                ->orWhere('pos', 0)
+                ->where('order_status', '!=', 'pending');
+            })
+            ->where(function($query){
+                $query->where("take_away_status", "pick_up")
+                ->where("order_type", "take_away")
+                ->orWhere("delivery_status", "delivered")
+                ->where("order_type", "delivery")
+                ->orWhere("order_type", "dine_in")
+                ->orWhere('pos', 0);
+            })
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->sum('amount');
+            $gap = $total_orders - $request->amount;
+            $gap = $gap > 0 ? $gap : 0;
+            $shift = CashierShift::
+            where("cashier_man_id", $request->user()->id)
+            ->where("cashier_id", $request->user()->cashier_id)
+            ->orderByDesc("id")
+            ->first()?->shift ?? null;
+            CashierGap::create([
+                'cashier_id' => $request->user()->cashier_id,
+                'cashier_man_id' => $request->user()->id,
+                'amount' => $request->amount,
+                'shift' => $request->user()->shift_number,
+            ]);  
+        }   
+        if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password))) {
+            return response()->json([
+                "gap" => $gap,
+            ]);
+        }
         if($request->user()->report != "unactive" && password_verify($request->input('password'), $request->user()->password)){
             $order_count = Order::
             select("id")
@@ -1049,7 +1108,7 @@ class CashierReportsController extends Controller
                         "module" => $item?->group_module?->name,
                     ];
                 });
-                return response()->json([
+                $arr = [
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
                     'order_count' => $order_count,
@@ -1061,71 +1120,136 @@ class CashierReportsController extends Controller
                     'report_role' => $request->user()->report,
                     "void_order_count" => $void_order_count,
                     "void_order_sum" => $void_order_sum,
-                ]);
+                ];
+                if($request->user()->service_fees){
+                    $service_fees = Order::
+                    select("id")
+                    ->where('cashier_man_id', $request->user()->id)
+                    ->where('shift', $request->user()->shift_number)
+                    ->where("is_void", 0)
+                    ->where("due_from_delivery", 0)
+                    ->where(function($query) {
+                        $query->where('status', 1)
+                        ->orWhereNull('status');
+                    }) 
+                    ->where(function($query){
+                        $query->where('pos', 1)
+                        ->orWhere('pos', 0)
+                        ->where('order_status', '!=', 'pending');
+                    })
+                    ->where(function($query){
+                        $query->where("take_away_status", "pick_up")
+                        ->where("order_type", "take_away")
+                        ->orWhere("delivery_status", "delivered")
+                        ->where("order_type", "delivery")
+                        ->orWhere("order_type", "dine_in")
+                        ->orWhere('pos', 0);
+                    })
+                    ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                    ->sum('service_fees');
+                    $arr['service_fees'] = $service_fees;
+                }
+                if($request->user()->total_tax){
+                    $total_tax = Order::
+                    select("id")
+                    ->where('cashier_man_id', $request->user()->id)
+                    ->where('shift', $request->user()->shift_number)
+                    ->where("is_void", 0)
+                    ->where("due_from_delivery", 0)
+                    ->where(function($query) {
+                        $query->where('status', 1)
+                        ->orWhereNull('status');
+                    }) 
+                    ->where(function($query){
+                        $query->where('pos', 1)
+                        ->orWhere('pos', 0)
+                        ->where('order_status', '!=', 'pending');
+                    })
+                    ->where(function($query){
+                        $query->where("take_away_status", "pick_up")
+                        ->where("order_type", "take_away")
+                        ->orWhere("delivery_status", "delivered")
+                        ->where("order_type", "delivery")
+                        ->orWhere("order_type", "dine_in")
+                        ->orWhere('pos', 0);
+                    })
+                    ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                    ->sum('total_tax');
+                    $arr['total_tax'] = $total_tax;
+                } 
+                if($request->user()->enter_amount){
+                    $arr['gap'] = $gap;
+                }
+                return response()->json($arr);
             }
             elseif($request->user()->report == "financial"){
-                return response()->json([
+                $arr = [
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
                     'report_role' => $request->user()->report,
-                ]);
+                ];
+                if($request->user()->enter_amount){
+                    $arr['gap'] = $gap;
+                }
+                if($request->user()->service_fees){
+                    $service_fees = Order::
+                    select("id")
+                    ->where('cashier_man_id', $request->user()->id)
+                    ->where('shift', $request->user()->shift_number)
+                    ->where("is_void", 0)
+                    ->where("due_from_delivery", 0)
+                    ->where(function($query) {
+                        $query->where('status', 1)
+                        ->orWhereNull('status');
+                    }) 
+                    ->where(function($query){
+                        $query->where('pos', 1)
+                        ->orWhere('pos', 0)
+                        ->where('order_status', '!=', 'pending');
+                    })
+                    ->where(function($query){
+                        $query->where("take_away_status", "pick_up")
+                        ->where("order_type", "take_away")
+                        ->orWhere("delivery_status", "delivered")
+                        ->where("order_type", "delivery")
+                        ->orWhere("order_type", "dine_in")
+                        ->orWhere('pos', 0);
+                    })
+                    ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                    ->sum('service_fees');
+                    $arr['service_fees'] = $service_fees;
+                }
+                if($request->user()->total_tax){
+                    $total_tax = Order::
+                    select("id")
+                    ->where('cashier_man_id', $request->user()->id)
+                    ->where('shift', $request->user()->shift_number)
+                    ->where("is_void", 0)
+                    ->where("due_from_delivery", 0)
+                    ->where(function($query) {
+                        $query->where('status', 1)
+                        ->orWhereNull('status');
+                    }) 
+                    ->where(function($query){
+                        $query->where('pos', 1)
+                        ->orWhere('pos', 0)
+                        ->where('order_status', '!=', 'pending');
+                    })
+                    ->where(function($query){
+                        $query->where("take_away_status", "pick_up")
+                        ->where("order_type", "take_away")
+                        ->orWhere("delivery_status", "delivered")
+                        ->where("order_type", "delivery")
+                        ->orWhere("order_type", "dine_in")
+                        ->orWhere('pos', 0);
+                    })
+                    ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                    ->sum('total_tax');
+                    $arr['total_tax'] = $total_tax;
+                } 
+                return response()->json($arr);
             }
         } 
-        elseif ($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password)) {
-            $validator = Validator::make($request->all(), [
-                'amount' => ['required', 'numeric'], 
-            ]);
-            if ($validator->fails()) { // if Validate Make Error Return Message Error
-                return response()->json([
-                    'errors' => $validator->errors(),
-                ],400);
-            }
-
-            $total_orders = Order::
-            select("id")
-            ->where('cashier_man_id', $request->user()->id)
-            ->where('shift', $request->user()->shift_number)
-            ->where("is_void", 0)
-            ->where("due_from_delivery", 0)
-            ->where("due", 0)
-            ->where("due_module", 0)
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            }) 
-            ->where(function($query){
-                $query->where('pos', 1)
-                ->orWhere('pos', 0)
-                ->where('order_status', '!=', 'pending');
-            })
-            ->where(function($query){
-                $query->where("take_away_status", "pick_up")
-                ->where("order_type", "take_away")
-                ->orWhere("delivery_status", "delivered")
-                ->where("order_type", "delivery")
-                ->orWhere("order_type", "dine_in")
-                ->orWhere('pos', 0);
-            })
-            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
-            ->sum('amount');
-            $gap = $total_orders - $request->amount;
-            $gap = $gap > 0 ? $gap : 0;
-            $shift = CashierShift::
-            where("cashier_man_id", $request->user()->id)
-            ->where("cashier_id", $request->user()->cashier_id)
-            ->orderByDesc("id")
-            ->first()?->shift ?? null;
-            CashierGap::create([
-                'cashier_id' => $request->user()->cashier_id,
-                'cashier_man_id' => $request->user()->id,
-                'amount' => $request->amount,
-                'shift' => $request->user()->shift_number,
-            ]);
-
-            return response()->json([
-                "gap" => $gap,
-            ]);
-        }
 
         return response()->json([
             'errors' => "password wrong", 

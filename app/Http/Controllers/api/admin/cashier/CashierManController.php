@@ -51,6 +51,8 @@ class CashierManController extends Controller
                 'online_order' => $item->online_order,
                 'report' => $item->report,
                 "free_discount" => $item->free_discount,
+                'service_fees'=> $item->service_fees,
+                'total_tax'=> $item->total_tax,
             ];
         });
         $branches = $this->branch

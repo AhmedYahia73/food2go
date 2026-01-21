@@ -29,6 +29,9 @@ class CashierMan extends Model
         'report',
         'free_discount',
         'shift_number',
+        'service_fees',
+        'total_tax',
+        'enter_amount',
         'manger',
     ];
     protected $appends = ['role', 'image_link'];
