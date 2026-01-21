@@ -101,6 +101,8 @@ class CashierMakeOrderController extends Controller
             return [
                 "id" => $item->id,
                 "table_number" => $item->table_number,
+                "captain_id" => $item->captain_id,
+                "captain_name" => $item?->captain?->name ?? null,
             ];
         });
         $captain_order = CaptainOrder::
@@ -1273,12 +1275,14 @@ class CashierMakeOrderController extends Controller
         ->toArray();
         $order_carts = $this->order_cart
         ->whereIn('table_id', $tables_ids)
-        ->get();
-        if(isset($order_carts[0])){
-            $request->merge([  
-                'captain_id' => $request->captain_id,  
-            ]); 
-        }
+        ->get(); 
+        $tables_item = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->orWhere('main_table_id', $request->table_id)
+        ->first();
+        $request->merge([  
+            'captain_id' => $tables_item->captain_id,  
+        ]);  
         $orders = collect([]);
         $product = [];
         foreach ($order_carts as $key => $item) {
@@ -1484,6 +1488,13 @@ class CashierMakeOrderController extends Controller
         ->whereIn('id', $request->cart_id)
         ->get();
         
+        $tables_item = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->orWhere('main_table_id', $request->table_id)
+        ->first();
+        $request->merge([  
+            'captain_id' => $tables_item->captain_id,  
+        ]);  
         $order = $this->dine_in_make_order($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);

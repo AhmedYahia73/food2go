@@ -36,6 +36,10 @@ class CafeTable extends Model
         return $this->hasMany(CheckoutRequest::class, 'table_id');
     }
 
+    public function captain(){
+        return $this->belongsTo(CaptainOrder::class, 'captain_id');
+    }
+
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');
     }
