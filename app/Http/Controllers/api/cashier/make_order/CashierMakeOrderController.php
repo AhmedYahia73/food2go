@@ -137,6 +137,10 @@ class CashierMakeOrderController extends Controller
         ->update([
             "captain_id" => $request->captain_id,
         ]);
+
+        return response()->json([
+            "success" => "You assign captain order success"
+        ]);
     }
 
     public function status_lists(){ 
