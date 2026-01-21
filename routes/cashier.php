@@ -59,6 +59,9 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->group(function(){
         Route::post('/view_user_order', 'view_user_order');
 
+        Route::get('/table_lists', 'table_lists');
+        Route::post('/assign_table_captain', 'assign_table_captain');
+
         Route::post('/tax_module', 'tax_module');
         Route::get('/lists', 'lists');
         Route::get('/status_lists', 'status_lists')->withOutMiddleware(['auth:sanctum', 'IsCashier']);

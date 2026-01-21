@@ -37,6 +37,7 @@ use App\Models\ProductSale;
 use App\Models\Product;
 use App\Models\ExcludeProduct;
 use App\Models\ExtraProduct;
+use App\Models\CaptainOrder;
 use App\Models\Addon;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
@@ -91,6 +92,52 @@ class CashierMakeOrderController extends Controller
     use PaymentPaymob;
     use POS;
     use Recipe; 
+
+    public function table_lists(){
+        $cafe_tables = $this->cafe_table
+        ->where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "table_number" => $item->table_number,
+            ];
+        });
+        $captain_order = CaptainOrder::
+        where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+                "phone" => $item->phone,
+                "user_name" => $item->user_name,
+            ];
+        });
+
+        return response()->json([
+            "cafe_tables" => $cafe_tables,
+            "captain_order" => $captain_order,
+        ]);
+    }
+
+    public function assign_table_captain(Request $request){
+        
+        $validator = Validator::make($request->all(), [
+            'captain_id' => 'required|exists:captain_orders,id',
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $tables_ids = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->update([
+            "captain_id" => $request->captain_id,
+        ]);
+    }
 
     public function status_lists(){ 
         $take_away_status = ['watting', 'preparing', 'preparation', 'done', 'pick_up'];
