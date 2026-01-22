@@ -19,15 +19,21 @@ class TaxProductController extends Controller
         where("tax_id", $id)
         ->with("products")
         ->first()
-        ->products ?? []
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "name" => $item->name,
-                "category_id" => $item->category_id,
-                "sub_category_id" => $item->sub_category_id,
-            ];
-        });
+        ->products;
+        if($products->count() > 0){
+            $products = $products
+            ->map(function($item){
+                return [
+                    "id" => $item->id,
+                    "name" => $item->name,
+                    "category_id" => $item->category_id,
+                    "sub_category_id" => $item->sub_category_id,
+                ];
+            });
+        }
+        else{
+            $products = [];
+        }
 
         return response()->json([
             "products" => $products
