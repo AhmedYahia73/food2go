@@ -839,7 +839,7 @@ class CaptainMakeOrderController extends Controller
                 }])
                 ->withLocale($locale);
             }]);
-        }, 'sales_count', 'tax'])
+        }, 'sales_count', 'tax', 'tax_module.module'])
         ->withLocale($locale)
         ->where('item_type', '!=', 'online') 
         ->where('status', 1)
@@ -852,20 +852,6 @@ class CaptainMakeOrderController extends Controller
             if(empty($new_price)){
                 $new_price = $product?->pos_pricing->where('module', $module)
                 ->first()?->price ?? $product->price;
-            }
-            $tax_module = $product->tax_module
-            ->map(function ($taxItem) use ($module) {
-
-                return $taxItem->module
-                    ->where('module', $module)
-                    ->first()?->tax;
-
-            })
-            ->filter()
-            ->first();
-            if(!empty($tax_module)){
-                unset($product->tax);
-                $product->tax = $tax_module;
             }
             $product->price = $new_price ?? $product->price;
             $product->favourite = false;
@@ -903,6 +889,20 @@ class CaptainMakeOrderController extends Controller
               
                 return $addon;
             });
+            $tax_module = $product->tax_module
+            ->map(function ($taxItem) use ($module) {
+
+                return $taxItem->module
+                    ->where('module', $module)
+                    ->first()?->tax;
+
+            })
+            ->filter()
+            ->first();
+            if(!empty($tax_module)){
+                unset($product->tax);
+                $product->tax = $tax_module;
+            }
             return $product;
         })->filter();
         $cafe_location = $this->cafe_location
@@ -942,7 +942,7 @@ class CaptainMakeOrderController extends Controller
                 }])
                 ->withLocale($locale);
             }]);
-        }, 'sales_count', 'tax'])
+        }, 'sales_count', 'tax', 'tax_module.module'])
         ->withLocale($locale)
         ->where('item_type', '!=', 'online') 
         ->where("favourite", 1)
@@ -1008,6 +1008,20 @@ class CaptainMakeOrderController extends Controller
               
                 return $addon;
             });
+            $tax_module = $product->tax_module
+            ->map(function ($taxItem) use ($module) {
+
+                return $taxItem->module
+                    ->where('module', $module)
+                    ->first()?->tax;
+
+            })
+            ->filter()
+            ->first();
+            if(!empty($tax_module)){
+                unset($product->tax);
+                $product->tax = $tax_module;
+            }
             return $product;
         })->filter();
         $cafe_location = $this->cafe_location
