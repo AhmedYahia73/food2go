@@ -53,6 +53,7 @@ class CashierManController extends Controller
                 "free_discount" => $item->free_discount,
                 'service_fees'=> $item->service_fees,
                 'total_tax'=> $item->total_tax,
+                'enter_amount'=> $item->enter_amount,
             ];
         });
         $branches = $this->branch
