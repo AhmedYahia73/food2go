@@ -8,10 +8,13 @@ class TaxModule extends Model
 {
 
     protected $fillable = [
-        'tax',
+        'tax_id',
         'status',
     ];
 
+    public function tax(){
+        return $this->belongsTo(Tax::class, 'tax_id');
+    }
     public function module(){
         return $this->hasMany(TaxModuleBranch::class, 'tax_module_id');
     }

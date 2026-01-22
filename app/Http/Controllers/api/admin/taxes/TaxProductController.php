@@ -9,13 +9,17 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Tax;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\TaxModule;
+use App\Models\TaxModuleBranch;
 
 class TaxProductController extends Controller
 {
     public function view(Request $request, $id){
-        $products = Product::
+        $products = TaxModule::
         where("tax_id", $id)
-        ->get()
+        ->with("products")
+        ->first()
+        ->products
         ->map(function($item){
             return [
                 "id" => $item->id,
@@ -66,7 +70,8 @@ class TaxProductController extends Controller
             'products' => ['array'],
             'products.*' => ['required', 'exists:products,id'],
             'tax_id' => ["required", "exists:taxes,id"],
-            'tax_modules' => ["required", "in:all,take_away,dine_in,delivery"],
+            'tax_modules' => ["required", "array"],
+            'tax_modules.*' => ["required", "in:take_away,dine_in,delivery"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -74,13 +79,45 @@ class TaxProductController extends Controller
             ],400);
         }
         
+        $taxes = TaxModule::
+        where("tax_id", $request->tax_id)
+        ->first();
+        if(empty($taxes)){
+            $tax_module = TaxModule::create([
+                "tax_id" => $request->tax_id,
+                "status" => 1
+            ]);
+            $modules = $request->tax_modules;
+            foreach ($modules as $item) {
+                TaxModuleBranch::create([
+                    "tax_module_id" => $tax_module->id,
+                    "module" => $item,
+                    "type" => "all"
+                ]);
+            }
+            $tax_module->products()->attach($request->products ?? []);
+        }
+        else{ 
+            $modules = $request->tax_modules;
+            TaxModuleBranch::
+            where("tax_module_id", $taxes->id)
+            ->delete();
+            foreach ($modules as $item) {
+                TaxModuleBranch::create([
+                    "tax_module_id" => $taxes->id,
+                    "module" => $item,
+                    "type" => "all"
+                ]);
+            }
+            $taxes->products()->sync($request->products ?? []);
+        }
         Product::
         where("tax_id", $request->tax_id)
         ->update([
             "tax_id" => null,
         ]);
         
-        Product::
+         Product::
         whereIn("id", $request->products ?? [])
         ->update([
             "tax_id" => $request->tax_id,
