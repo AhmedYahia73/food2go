@@ -19,7 +19,7 @@ class TaxProductController extends Controller
         where("tax_id", $id)
         ->with("products")
         ->first()
-        ->products
+        ->products ?? []
         ->map(function($item){
             return [
                 "id" => $item->id,
