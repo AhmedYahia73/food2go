@@ -47,6 +47,10 @@ class Product extends Model
     ];
     protected $appends = ['image_link', 'orders_count', 'taxes', 'orders_count_branch'];
 
+    public function tax_module(){
+        return $this->belongsToMany(TaxModule::class, 'tax_module_product', 'product_id', 'tax_module_id');
+    }
+
     public function getTaxesAttribute(){
         return Setting::where('name', 'tax')
         ->orderByDesc('id')

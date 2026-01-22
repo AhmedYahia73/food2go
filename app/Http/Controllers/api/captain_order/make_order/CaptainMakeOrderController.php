@@ -853,6 +853,20 @@ class CaptainMakeOrderController extends Controller
                 $new_price = $product?->pos_pricing->where('module', $module)
                 ->first()?->price ?? $product->price;
             }
+            $tax_module = $product->tax_module
+            ->map(function ($taxItem) use ($module) {
+
+                return $taxItem->module
+                    ->where('module', $module)
+                    ->first()?->tax;
+
+            })
+            ->filter()
+            ->first();
+            if(!empty($tax_module)){
+                unset($product->tax);
+                $product->tax = $tax_module;
+            }
             $product->price = $new_price ?? $product->price;
             $product->favourite = false;
             if ($product->stock_type == 'fixed') {
@@ -937,6 +951,20 @@ class CaptainMakeOrderController extends Controller
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
             //get count of sales of product to detemine stock
             
+            $tax_module = $product->tax_module
+            ->map(function ($taxItem) use ($module) {
+
+                return $taxItem->module
+                    ->where('module', $module)
+                    ->first()?->tax;
+
+            })
+            ->filter()
+            ->first();
+            if(!empty($tax_module)){
+                unset($product->tax);
+                $product->tax = $tax_module;
+            }
             $new_price = $product?->product_pricing
             ->where('branch_id', $branch_id)
             ->first()?->price;
