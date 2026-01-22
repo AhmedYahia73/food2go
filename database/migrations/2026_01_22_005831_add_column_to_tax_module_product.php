@@ -29,6 +29,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tax_module_product', function (Blueprint $table) {
+            
+            $table->dropForeign(['tax_module_id']);
             $table->foreign('tax_module_id')
                   ->references('id')
                   ->on('tax_module_branches')
