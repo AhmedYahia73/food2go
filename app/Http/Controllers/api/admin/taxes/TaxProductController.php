@@ -19,8 +19,8 @@ class TaxProductController extends Controller
         where("tax_id", $id)
         ->with("products")
         ->first()
-        ->products;
-        if($products->count() > 0){
+        ?->products;
+        if($products && $products->count() > 0){
             $products = $products
             ->map(function($item){
                 return [
@@ -116,19 +116,7 @@ class TaxProductController extends Controller
                 ]);
             }
             $taxes->products()->sync($request->products ?? []);
-        }
-        Product::
-        where("tax_id", $request->tax_id)
-        ->update([
-            "tax_id" => null,
-        ]);
-        
-         Product::
-        whereIn("id", $request->products ?? [])
-        ->update([
-            "tax_id" => $request->tax_id,
-            "tax_modules" => $request->tax_modules,
-        ]);
+        } 
 
         return response()->json([
             "success" => "You select products to this tax success"
