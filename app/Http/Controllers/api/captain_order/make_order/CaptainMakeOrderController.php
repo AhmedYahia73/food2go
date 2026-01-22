@@ -779,7 +779,7 @@ class CaptainMakeOrderController extends Controller
         $validator = Validator::make($request->all(), [
             'branch_id' => 'required|exists:branches,id',
             'module' => 'in:take_away,dine_in,delivery'
-        ]);
+        ]);//tax_modules all,take_away,dine_in,delivery
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),

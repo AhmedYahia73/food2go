@@ -66,6 +66,7 @@ class TaxProductController extends Controller
             'products' => ['array'],
             'products.*' => ['required', 'exists:products,id'],
             'tax_id' => ["required", "exists:taxes,id"],
+            'tax_modules' => ["required", "in:all,take_away,dine_in,delivery"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -83,6 +84,7 @@ class TaxProductController extends Controller
         whereIn("id", $request->products ?? [])
         ->update([
             "tax_id" => $request->tax_id,
+            "tax_modules" => $request->tax_modules,
         ]);
 
         return response()->json([

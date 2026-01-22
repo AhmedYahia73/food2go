@@ -15,4 +15,8 @@ class TaxModule extends Model
     public function module(){
         return $this->hasMany(TaxModuleBranch::class, 'tax_module_id');
     }
+
+    public function products(){
+        return $this->belongsToMany(Product::class, 'tax_module_product', 'tax_module_id', 'product_id');
+    }
 }
