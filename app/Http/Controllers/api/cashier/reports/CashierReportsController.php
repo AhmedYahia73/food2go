@@ -1109,22 +1109,26 @@ class CashierReportsController extends Controller
                     ];
                 });
                 
-                $captain_order = $this->orders
-                ->selectRaw("SUM(order_financials.amount) AS total_financial")
-                ->leftJoin("order_financials", "orders.id" ,"order_financials.order_id")
-                ->leftJoin("finantiol_acountings", "finantiol_acountings.id" ,"order_financials.financial_id")
-                ->where("pos", 1)
-                ->with("financial_accountigs", "captain")
-                ->whereNotNull("orders.captain_id")  
-                ->where(function($q){
-                    $q->where("orders.status", 1)
-                    ->orWhereNull("orders.status");
-                }) 
-                //->where('orders.shift', $request->user()->shift_number)
-                ->where("orders.is_void", 0)   
-                ->groupBy("orders.captain_id")
-                ->groupBy("finantiol_acountings.id")
-                ->get();
+     $captain_order = $this->orders
+    ->selectRaw("
+        orders.captain_id, 
+        finantiol_acountings.id as financial_id,
+        finantiol_acountings.name as financial_name, 
+        SUM(order_financials.amount) AS total_financial
+    ")
+    ->join("order_financials", "orders.id", "=", "order_financials.order_id")
+    ->join("finantiol_acountings", "finantiol_acountings.id", "=", "order_financials.financial_id")
+    ->where("orders.pos", 1)
+    ->whereNotNull("orders.captain_id")
+    ->where(function($q) {
+        $q->where("orders.status", 1)
+          ->orWhereNull("orders.status");
+    })
+   // ->where('orders.shift', $request->user()->shift_number)
+    ->where("orders.is_void", 0)
+    ->with('captain') // لجلب بيانات الكابتن (الاسم وغيره) من العلاقة
+    ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
+    ->get();
                 $arr = [
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
@@ -1202,22 +1206,26 @@ class CashierReportsController extends Controller
             }
             elseif($request->user()->report == "financial"){
                 
-                $captain_order = $this->orders
-                ->selectRaw("SUM(order_financials.amount) AS total_financial")
-                ->leftJoin("order_financials", "orders.id" ,"order_financials.order_id")
-                ->leftJoin("finantiol_acountings", "finantiol_acountings.id" ,"order_financials.financial_id")
-                ->where("pos", 1)
-                ->with("financial_accountigs", "captain")
-                ->whereNotNull("orders.captain_id")  
-                ->where(function($q){
-                    $q->where("orders.status", 1)
-                    ->orWhereNull("orders.status");
-                }) 
-                //->where('orders.shift', $request->user()->shift_number)
-                ->where("orders.is_void", 0)   
-                ->groupBy("orders.captain_id")
-                ->groupBy("finantiol_acountings.id")
-                ->get();
+               $captain_order = $this->orders
+    ->selectRaw("
+        orders.captain_id, 
+        finantiol_acountings.id as financial_id,
+        finantiol_acountings.name as financial_name, 
+        SUM(order_financials.amount) AS total_financial
+    ")
+    ->join("order_financials", "orders.id", "=", "order_financials.order_id")
+    ->join("finantiol_acountings", "finantiol_acountings.id", "=", "order_financials.financial_id")
+    ->where("orders.pos", 1)
+    ->whereNotNull("orders.captain_id")
+    ->where(function($q) {
+        $q->where("orders.status", 1)
+          ->orWhereNull("orders.status");
+    })
+   // ->where('orders.shift', $request->user()->shift_number)
+    ->where("orders.is_void", 0)
+    ->with('captain') // لجلب بيانات الكابتن (الاسم وغيره) من العلاقة
+    ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
+    ->get();
                 $arr = [
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
