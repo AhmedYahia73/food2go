@@ -1110,7 +1110,7 @@ class CashierReportsController extends Controller
                 });
                 
                 $captain_order = $this->orders
-                ->selectRaw("payment_method_id, SUM(order_financials.amount) AS total_financial")
+                ->selectRaw("SUM(order_financials.amount) AS total_financial")
                 ->leftJoin("order_financials", "orders.id" ,"order_financials.order_id")
                 ->leftJoin("finantiol_acountings", "finantiol_acountings.id" ,"order_financials.financial_id")
                 ->where("pos", 1)
@@ -1203,7 +1203,7 @@ class CashierReportsController extends Controller
             elseif($request->user()->report == "financial"){
                 
                 $captain_order = $this->orders
-                ->selectRaw("payment_method_id, SUM(order_financials.amount) AS total_financial")
+                ->selectRaw("SUM(order_financials.amount) AS total_financial")
                 ->leftJoin("order_financials", "orders.id" ,"order_financials.order_id")
                 ->leftJoin("finantiol_acountings", "finantiol_acountings.id" ,"order_financials.financial_id")
                 ->where("pos", 1)
