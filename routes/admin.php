@@ -1037,6 +1037,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/', 'view')->middleware('can:view_product');
             Route::get('/products_in_category/{id}', 'products_in_category');
             Route::get('/item/{id}', 'product')->middleware('can:edit_product');
+            Route::get('/status/{id}', 'status')->middleware('can:edit_product');
             Route::get('/reviews', 'reviews')->middleware('can:view_product');
             Route::put('/order_of_product/{id}', 'order_of_product')->middleware('can:edit_product'); 
         });

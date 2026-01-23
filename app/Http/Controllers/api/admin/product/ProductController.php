@@ -244,4 +244,30 @@ class ProductController extends Controller
             'success' => 'You update order success'
         ]);
     }
+
+    public function status(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        } 
+        
+        $current_product = $this->products
+        ->where('id', $id)
+        ->first();
+        if(empty($current_product)){
+            return response()->json([
+                "errors" => "id is wrong"
+            ], 400);
+        } 
+
+        $current_product->update(['status' => $request->status]);
+
+        return response()->json([
+            'success' => 'You update status success'
+        ]);
+    }
 }
