@@ -1120,7 +1120,7 @@ class CashierReportsController extends Controller
                     $q->where("orders.status", 1)
                     ->orWhereNull("orders.status");
                 }) 
-                ->where('orders.shift', $request->user()->shift_number)
+                //->where('orders.shift', $request->user()->shift_number)
                 ->where("orders.is_void", 0)   
                 ->groupBy("orders.captain_id")
                 ->groupBy("finantiol_acountings.id")
@@ -1213,7 +1213,7 @@ class CashierReportsController extends Controller
                     $q->where("orders.status", 1)
                     ->orWhereNull("orders.status");
                 }) 
-                ->where('orders.shift', $request->user()->shift_number)
+                //->where('orders.shift', $request->user()->shift_number)
                 ->where("orders.is_void", 0)   
                 ->groupBy("orders.captain_id")
                 ->groupBy("finantiol_acountings.id")
