@@ -1108,6 +1108,24 @@ class CashierReportsController extends Controller
                         "module" => $item?->group_module?->name,
                     ];
                 });
+                
+                $captain_order = $this->orders
+                ->selectRaw("payment_method_id, SUM(order_financials.amount) AS total_financial")
+                ->leftJoin("order_financials", "orders.id" ,"order_financials.order_id")
+                ->leftJoin("finantiol_acountings", "finantiol_acountings.id" ,"order_financials.financial_id")
+                ->where("pos", 1)
+                ->with("financial_accountigs", "captain")
+                ->whereNotNull("captain_id")  
+                ->where(function($q){
+                    $q->where("status", 1)
+                    ->orWhereNull("status");
+                }) 
+                ->where('shift', $request->user()->shift_number)
+                ->where("is_void", 0)  
+                ->with("payment_method")
+                ->groupBy("orders.captain_id")
+                ->groupBy("finantiol_acountings.id")
+                ->get();
                 $arr = [
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
@@ -1120,6 +1138,7 @@ class CashierReportsController extends Controller
                     'report_role' => $request->user()->report,
                     "void_order_count" => $void_order_count,
                     "void_order_sum" => $void_order_sum,
+                    "captain_order" => $captain_order
                 ];
                 if($request->user()->service_fees){
                     $service_fees = Order::
@@ -1183,10 +1202,29 @@ class CashierReportsController extends Controller
                 return response()->json($arr);
             }
             elseif($request->user()->report == "financial"){
+                
+                $captain_order = $this->orders
+                ->selectRaw("payment_method_id, SUM(order_financials.amount) AS total_financial")
+                ->leftJoin("order_financials", "orders.id" ,"order_financials.order_id")
+                ->leftJoin("finantiol_acountings", "finantiol_acountings.id" ,"order_financials.financial_id")
+                ->where("pos", 1)
+                ->with("financial_accountigs", "captain")
+                ->whereNotNull("captain_id")  
+                ->where(function($q){
+                    $q->where("status", 1)
+                    ->orWhereNull("status");
+                }) 
+                ->where('shift', $request->user()->shift_number)
+                ->where("is_void", 0)  
+                ->with("payment_method")
+                ->groupBy("orders.captain_id")
+                ->groupBy("finantiol_acountings.id")
+                ->get();
                 $arr = [
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
                     'report_role' => $request->user()->report,
+                    'captain_order' => $captain_order,
                 ];
                 if($request->user()->enter_amount){
                     $arr['gap'] = $gap;
