@@ -807,8 +807,9 @@ class CaptainMakeOrderController extends Controller
         ->whereNull('category_id')
         ->orderBy("priority") 
         ->get()
-        ->map(function($item) use($category_off){
+        ->map(function($item) use($category_off, $locale){
             $sub_category = clone $item->sub_categories
+            ->withLocale($locale)
             ->filter(function($item) use($category_off){
                 return !$category_off->contains($item->id);
             });
