@@ -892,9 +892,12 @@ class CaptainMakeOrderController extends Controller
             $tax_module = $product->tax_module
             ->map(function ($taxItem) use ($module) {
 
-                return $taxItem->module
-                    ->where('module', $module)
-                    ->first()?->tax;
+                $isFound = $taxItem->module
+				->where('module', $module)
+				->first();
+				if($isFound){
+					return $taxItem->tax;
+				}
 
             })
             ->filter()
@@ -951,12 +954,16 @@ class CaptainMakeOrderController extends Controller
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
             //get count of sales of product to detemine stock
             
+          
             $tax_module = $product->tax_module
             ->map(function ($taxItem) use ($module) {
 
-                return $taxItem->module
-                    ->where('module', $module)
-                    ->first()?->tax;
+                $isFound = $taxItem->module
+				->where('module', $module)
+				->first();
+				if($isFound){
+					return $taxItem->tax;
+				}
 
             })
             ->filter()
@@ -1008,12 +1015,16 @@ class CaptainMakeOrderController extends Controller
               
                 return $addon;
             });
+         
             $tax_module = $product->tax_module
             ->map(function ($taxItem) use ($module) {
 
-                return $taxItem->module
-                    ->where('module', $module)
-                    ->first()?->tax;
+                $isFound = $taxItem->module
+				->where('module', $module)
+				->first();
+				if($isFound){
+					return $taxItem->tax;
+				}
 
             })
             ->filter()
