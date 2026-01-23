@@ -88,6 +88,14 @@ class TaxProductController extends Controller
         $taxes = TaxModule::
         where("tax_id", $request->tax_id)
         ->first();
+        $old_tax_module = TaxModule::
+        whereHas("products", function($query) use ($request){
+            $query->whereIn("products.id", $request->products);
+        })
+        ->get();
+        foreach ($old_tax_module as $element) {
+            $element->products()->detach($request->products);
+        }
         if(empty($taxes)){
             $tax_module = TaxModule::create([
                 "tax_id" => $request->tax_id,
