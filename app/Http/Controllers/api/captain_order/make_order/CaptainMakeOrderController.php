@@ -808,13 +808,11 @@ class CaptainMakeOrderController extends Controller
         ->orderBy("priority") 
         ->get()
         ->map(function($item) use($category_off, $locale){
-            $sub_category = clone $item->sub_categories
-            ->withLocale($locale)
+            $sub_category = clone $item->sub_categories 
             ->filter(function($item) use($category_off){
                 return !$category_off->contains($item->id);
-            });
-            $item->unsetRelation('sub_categories');
-            $item->sub_categories = $item->sub_categories;
+            }); 
+            $item->sub_categories = $sub_category;
             return $item;
         })
         ->filter(function($item) use($category_off){
