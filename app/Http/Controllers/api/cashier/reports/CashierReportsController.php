@@ -1124,7 +1124,7 @@ class CashierReportsController extends Controller
                     $q->where("orders.status", 1)
                     ->orWhereNull("orders.status");
                 })
-            // ->where('orders.shift', $request->user()->shift_number)
+                ->where('orders.shift', $request->user()->shift_number)
                 ->where("orders.is_void", 0)
                 ->with('captain') // لجلب بيانات الكابتن (الاسم وغيره) من العلاقة
                 ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
