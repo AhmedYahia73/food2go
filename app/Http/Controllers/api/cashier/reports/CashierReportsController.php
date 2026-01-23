@@ -1115,14 +1115,13 @@ class CashierReportsController extends Controller
                 ->leftJoin("finantiol_acountings", "finantiol_acountings.id" ,"order_financials.financial_id")
                 ->where("pos", 1)
                 ->with("financial_accountigs", "captain")
-                ->whereNotNull("captain_id")  
+                ->whereNotNull("orders.captain_id")  
                 ->where(function($q){
-                    $q->where("status", 1)
-                    ->orWhereNull("status");
+                    $q->where("orders.status", 1)
+                    ->orWhereNull("orders.status");
                 }) 
-                ->where('shift', $request->user()->shift_number)
-                ->where("is_void", 0)  
-                ->with("payment_method")
+                ->where('orders.shift', $request->user()->shift_number)
+                ->where("orders.is_void", 0)   
                 ->groupBy("orders.captain_id")
                 ->groupBy("finantiol_acountings.id")
                 ->get();
@@ -1209,14 +1208,13 @@ class CashierReportsController extends Controller
                 ->leftJoin("finantiol_acountings", "finantiol_acountings.id" ,"order_financials.financial_id")
                 ->where("pos", 1)
                 ->with("financial_accountigs", "captain")
-                ->whereNotNull("captain_id")  
+                ->whereNotNull("orders.captain_id")  
                 ->where(function($q){
-                    $q->where("status", 1)
-                    ->orWhereNull("status");
+                    $q->where("orders.status", 1)
+                    ->orWhereNull("orders.status");
                 }) 
-                ->where('shift', $request->user()->shift_number)
-                ->where("is_void", 0)  
-                ->with("payment_method")
+                ->where('orders.shift', $request->user()->shift_number)
+                ->where("orders.is_void", 0)   
                 ->groupBy("orders.captain_id")
                 ->groupBy("finantiol_acountings.id")
                 ->get();
