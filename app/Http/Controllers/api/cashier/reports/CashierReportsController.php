@@ -896,9 +896,17 @@ class CashierReportsController extends Controller
             
             $due_module = Order:: 
             where("due_module", ">", 0)
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("due_module");
             $due_user = Order:: 
             where("due", 1)
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("amount");
 
             $take_away_financial_accounts = OrderFinancial::
