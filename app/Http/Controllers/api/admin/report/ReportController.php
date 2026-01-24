@@ -2341,7 +2341,7 @@ class ReportController extends Controller
             $paid_module = Order::
             selectRaw("SUM(order_financials.amount) as total_amount, financial_id")
             ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
-            ->whereBetween("orders.created_at", [$start, $end]) 
+            //->whereBetween("orders.created_at", [$start, $end]) 
             ->where("is_void", 0)
             ->with("financials")
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
