@@ -2342,11 +2342,12 @@ class ReportController extends Controller
             selectRaw("SUM(order_financials.amount) as total_amount, finantiol_acountings.name")
             ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
             ->leftJoin("finantiol_acountings", "finantiol_acountings.id", "order_financials.financial_id")
-            //->whereBetween("orders.created_at", [$start, $end]) 
+           // ->whereBetween("orders.created_at", [$start, $end]) 
             ->where("is_void", 0) 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
             ->whereNotNull("module_id")
-            ->groupBy("financial_id")
+            ->groupBy("financial_id",
+        "finantiol_acountings.name")
             ->get();
             $due_user = Order:: 
             whereBetween("created_at", [$start, $end]) 
