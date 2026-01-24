@@ -2875,4 +2875,116 @@ class ReportController extends Controller
             "hall_orders" => $hall_orders,
         ]);
     }
+
+    public function group_module_report(Request $request){ 
+        $validator = Validator::make($request->all(), [
+            'branch_id' => ['exists:branches,id'],
+            'from' => ['date'], 
+            'to' => ['date'],
+            'financial_id' => ['exists:finantiol_acountings,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $paid_module = Order::
+        selectRaw("SUM(order_financials.amount) as total_amount, finantiol_acountings.name, financial_id")
+        ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
+        ->leftJoin("finantiol_acountings", "finantiol_acountings.id", "order_financials.financial_id")
+        ->where("is_void", 0) 
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+        ->whereNotNull("module_id")
+        ->groupBy("financial_id",
+        "finantiol_acountings.name");
+        $unpaid_module = Order::
+        where("is_void", 0) 
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+        ->whereNotNull("module_id") ;
+        $count_module = Order:: 
+        where("is_void", 0) 
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+        ->whereNotNull("module_id");
+        
+        if($request->from || $request->to){
+            
+            $time_sittings = TimeSittings::
+            get();
+ 
+            $items = [];
+            $count = 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+            foreach ($time_sittings as $item) {
+                $items[$item->branch_id][] = $item;
+            }
+            foreach ($items as $item) {
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                    $count = count($item);
+                    $to = $item[$count - 1];
+                } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
+            }
+            if ($time_sittings->count() > 0) {
+                $from = $from->from;
+                $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+                $hours = $to->hours;
+                $minutes = $to->minutes;
+                $from = ($request->from ?? "1999-05-05") . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                } 
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            } 
+            $paid_module = $paid_module 
+            ->whereBetween("orders.created_at", [$start, $end]);
+            $unpaid_module = $unpaid_module 
+            ->whereBetween("orders.created_at", [$start, $end]);
+            $count_module = $count_module 
+            ->whereBetween("orders.created_at", [$start, $end]);
+        }
+        if($request->branch_id){
+            $paid_module = $paid_module 
+            ->whereBetween("orders.branch_id", $request->branch_id);
+            $unpaid_module = $unpaid_module 
+            ->whereBetween("orders.branch_id", $request->branch_id);
+            $count_module = $count_module 
+            ->whereBetween("orders.branch_id", $request->branch_id);
+        }
+        if($request->financial_id){
+            $paid_module = $paid_module 
+            ->where("financial_id", $request->financial_id);
+            $unpaid_module = $unpaid_module  
+            ->whereHas("financials", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
+            $count_module = $count_module  
+            ->whereHas("financials", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });
+        }
+        
+        $paid_module = $paid_module
+        ->get();
+        $unpaid_module = $unpaid_module
+        ->sum("due_module");
+        $count_module = $count_module
+        ->count();
+
+        return response()->json([
+            "paid_module" => $paid_module,
+            "unpaid_module" => $unpaid_module,
+            "count_module" => $count_module,
+        ]);
+    }
 }
