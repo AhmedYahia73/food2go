@@ -1301,6 +1301,12 @@ class ReportController extends Controller
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
          ;
          
+                
+        $due_module = Order:: 
+        where("due_module", ">", 0);
+        $due_user = Order:: 
+        where("due", 1);
+             
         $expenses = $this->expenses
         ->with("financial_account");
         
@@ -1376,6 +1382,12 @@ class ReportController extends Controller
                 $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
             } 
   
+            $due_module = $due_module
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
+            $due_user = $due_user
+            ->where("created_at", ">=", $start)
+            ->where("created_at", "<=", $end);
             $void_order_count = $void_order_count 
             ->where("created_at", ">=", $start)
             ->where("created_at", "<=", $end);
@@ -1430,6 +1442,11 @@ class ReportController extends Controller
             $dine_in_orders = $dine_in_orders
             ->where("cashier_id", $request->cashier_id);
 
+            $due_module = $due_module
+            ->where("cashier_id", $request->cashier_id);
+            $due_user = $due_user
+            ->where("cashier_id", $request->cashier_id);
+
             $expenses_items = $expenses_items
             ->where("cashier_id", $request->cashier_id);
             $online_order_paid = $online_order_paid
@@ -1460,6 +1477,10 @@ class ReportController extends Controller
             ->where("branch_id", $request->branch_id);
             $online_order_unpaid = $online_order_unpaid
             ->where("branch_id", $request->branch_id);
+            $due_module = $due_module
+            ->where("branch_id", $request->branch_id);
+            $due_user = $due_user
+            ->where("branch_id", $request->branch_id);
         }
         if($request->cashier_man_id){
             $void_order_count = $void_order_count 
@@ -1477,6 +1498,10 @@ class ReportController extends Controller
             $out_delivery_orders = $out_delivery_orders
             ->where("cashier_man_id", $request->cashier_man_id);
             $dine_in_orders = $dine_in_orders
+            ->where("cashier_man_id", $request->cashier_man_id); 
+            $due_module = $due_module
+            ->where("cashier_man_id", $request->cashier_man_id); 
+            $due_user = $due_user
             ->where("cashier_man_id", $request->cashier_man_id); 
             
             $expenses_items = $expenses_items
@@ -1517,6 +1542,14 @@ class ReportController extends Controller
             ->whereHas("financial_accountigs", function($query) use($request){
                 $query->where("finantiol_acountings.id", $request->financial_id);
             });  
+            $due_module = $due_module
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });  
+            $due_user = $due_user
+            ->whereHas("financial_accountigs", function($query) use($request){
+                $query->where("finantiol_acountings.id", $request->financial_id);
+            });  
             
             $expenses_items = $expenses_items
             ->where("financial_account_id", $request->financial_id);
@@ -1531,7 +1564,11 @@ class ReportController extends Controller
         }
         // ____________________________________________________________
     
-        
+    
+        $due_module = $due_module
+        ->sum("due_module");  
+        $due_user = $due_user
+        ->sum("amount");  
         $expenses = $expenses  
         ->get();
         $total_tax = $order_count
@@ -1797,8 +1834,10 @@ class ReportController extends Controller
         ->count();
         $void_order_sum = $void_order_sum 
         ->sum("amount");
-
+ 
         return response()->json([ 
+            "due_module" => $due_module,
+            "due_user" => $due_user,
             "total_tax" => $total_tax,
             "service_fees" => $service_fees,
             'financial_accounts' => $financial_accounts,

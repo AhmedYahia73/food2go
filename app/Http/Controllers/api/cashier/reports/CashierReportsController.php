@@ -893,6 +893,14 @@ class CashierReportsController extends Controller
             ->with("financials")
             ->groupBy("financial_id") 
             ->get();
+            
+            $due_module = Order:: 
+            where("due_module", ">", 0)
+            ->sum("due_module");
+            $due_user = Order:: 
+            where("due", 1)
+            ->sum("amount");
+
             $take_away_financial_accounts = OrderFinancial::
             selectRaw("financial_id ,SUM(amount) as total_amount")
             ->whereIn("order_id", $take_away_orders)
@@ -1141,7 +1149,9 @@ class CashierReportsController extends Controller
                     'report_role' => $request->user()->report,
                     "void_order_count" => $void_order_count,
                     "void_order_sum" => $void_order_sum,
-                    "captain_order" => $captain_order
+                    "captain_order" => $captain_order,
+                    "due_module" => $due_module,
+                    "due_user" => $due_user,
                 ];
                 if($request->user()->service_fees){
                     $service_fees = Order::
@@ -1231,6 +1241,8 @@ class CashierReportsController extends Controller
                     'financial_accounts' => $financial_accounts,
                     'report_role' => $request->user()->report,
                     'captain_order' => $captain_order,
+                    "due_module" => $due_module,
+                    "due_user" => $due_user,
                 ];
                 if($request->user()->enter_amount){
                     $arr['gap'] = $gap;
