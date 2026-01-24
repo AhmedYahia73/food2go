@@ -2042,8 +2042,9 @@ class ReportController extends Controller
             ->where("due_module", ">", 0)
             ->sum("due_module");
             $paid_module = Order::
-            selectRaw("SUM(amount) as total_amount, financial_id")
+            selectRaw("SUM(order_financials.amount) as total_amount, financial_id")
             ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
+            ->where("branch_id", $request->branch_id)
             ->whereBetween("orders.created_at", [$start, $end]) 
             ->where("is_void", 0)
             ->with("financials")
@@ -2338,7 +2339,7 @@ class ReportController extends Controller
             ->where("due_module", ">", 0)
             ->sum("due_module");
             $paid_module = Order::
-            selectRaw("SUM(amount) as total_amount, financial_id")
+            selectRaw("SUM(order_financials.amount) as total_amount, financial_id")
             ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
             ->whereBetween("orders.created_at", [$start, $end]) 
             ->where("is_void", 0)
