@@ -87,6 +87,11 @@ class Order extends Model
     protected $hidden = [
         'pivot', 
     ];
+
+    public function financials(){
+        return $this->belongsToMany(FinantiolAcounting::class, 'order_financials', "order_id", "financial_id");
+    }
+
     public function getdateAttribute(){
         return $this->created_at->format('H:i:s');
     }
