@@ -2034,8 +2034,24 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("service_fees");
+            $due_module = Order:: 
+            where("branch_id", $request->branch_id)
+            ->whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+            ->where("due_module", ">", 0)
+            ->sum("due_module");
+            $due_user = Order:: 
+            where("branch_id", $request->branch_id)
+            ->whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+            ->where("due", 1)
+            ->sum("amount");
 
             return response()->json([
+                "due_module" => $due_module,
+                "due_user" => $due_user,
                 "total_orders" => $total_orders,
                 "service_fees" => $service_fees,
                 "avg_orders" => $avg_orders,
@@ -2304,8 +2320,22 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("service_fees");
+            $due_module = Order:: 
+            whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+            ->where("due_module", ">", 0)
+            ->sum("due_module");
+            $due_user = Order:: 
+            whereBetween("created_at", [$start, $end]) 
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+            ->where("due", 1)
+            ->sum("amount");
 
             return response()->json([
+                "due_module" => $due_module,
+                "due_user" => $due_user,
                 "data" => $data,
                 "service_fees" => $service_fees,
                 "total_orders" => $total_orders,
