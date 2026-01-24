@@ -2955,11 +2955,11 @@ class ReportController extends Controller
         }
         if($request->branch_id){
             $paid_module = $paid_module 
-            ->whereBetween("orders.branch_id", $request->branch_id);
+            ->where("orders.branch_id", $request->branch_id);
             $unpaid_module = $unpaid_module 
-            ->whereBetween("orders.branch_id", $request->branch_id);
+            ->where("orders.branch_id", $request->branch_id);
             $count_module = $count_module 
-            ->whereBetween("orders.branch_id", $request->branch_id);
+            ->where("orders.branch_id", $request->branch_id);
         }
         if($request->financial_id){
             $paid_module = $paid_module 
