@@ -2041,6 +2041,16 @@ class ReportController extends Controller
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
             ->where("due_module", ">", 0)
             ->sum("due_module");
+            $paid_module = Order::
+            selectRaw("SUM(amount) as total_amount, financial_id")
+            ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
+            ->whereBetween("orders.created_at", [$start, $end]) 
+            ->where("is_void", 0)
+            ->with("financials")
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+            ->whereNotNull("module_id")
+            ->groupBy("financial_id")
+            ->get();
             $due_user = Order:: 
             where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
@@ -2067,6 +2077,7 @@ class ReportController extends Controller
                 "void_order_sum" => $void_order_sum,
                 "total_tax" => $total_tax,
                 "delivery_fees" => $delivery_fees,
+                "paid_module" => $paid_module,
                     
                 $start->format("Y-m-d H:i"),
                 $end->format("Y-m-d H:i"),
@@ -2326,6 +2337,16 @@ class ReportController extends Controller
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
             ->where("due_module", ">", 0)
             ->sum("due_module");
+            $paid_module = Order::
+            selectRaw("SUM(amount) as total_amount, financial_id")
+            ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
+            ->whereBetween("orders.created_at", [$start, $end]) 
+            ->where("is_void", 0)
+            ->with("financials")
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+            ->whereNotNull("module_id")
+            ->groupBy("financial_id")
+            ->get();
             $due_user = Order:: 
             whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
@@ -2352,6 +2373,7 @@ class ReportController extends Controller
                 "void_order_sum" => $void_order_sum,
                 "total_tax" => $total_tax,
                 "delivery_fees" => $delivery_fees,
+                "paid_module" => $paid_module,
             ]);
         }
     }
