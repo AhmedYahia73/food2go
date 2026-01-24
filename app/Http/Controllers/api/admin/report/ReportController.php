@@ -2042,16 +2042,26 @@ class ReportController extends Controller
             ->where("due_module", ">", 0)
             ->sum("due_module");
             $paid_module = Order::
-            selectRaw("SUM(order_financials.amount) as total_amount, financial_id")
-            ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
+            selectRaw("SUM(order_financials.amount) as total_amount, finantiol_acountings.name")
             ->where("branch_id", $request->branch_id)
+            ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
+            ->leftJoin("finantiol_acountings", "finantiol_acountings.id", "order_financials.financial_id")
             ->whereBetween("orders.created_at", [$start, $end]) 
-            ->where("is_void", 0)
-            ->with("financials")
+            ->where("is_void", 0) 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
             ->whereNotNull("module_id")
-            ->groupBy("financial_id")
+            ->groupBy("financial_id",
+            "finantiol_acountings.name")
             ->get();
+            $order_module = Order:: 
+            where("branch_id", $request->branch_id)
+            ->whereBetween("orders.created_at", [$start, $end]) 
+            ->where("is_void", 0) 
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+            ->whereNotNull("module_id")
+            ->groupBy("financial_id",
+            "finantiol_acountings.name")
+            ->count();
             $due_user = Order:: 
             where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end]) 
@@ -2079,7 +2089,7 @@ class ReportController extends Controller
                 "total_tax" => $total_tax,
                 "delivery_fees" => $delivery_fees,
                 "paid_module" => $paid_module,
-                    
+                "order_module" => $order_module, 
                 $start->format("Y-m-d H:i"),
                 $end->format("Y-m-d H:i"),
             ]);
@@ -2342,13 +2352,22 @@ class ReportController extends Controller
             selectRaw("SUM(order_financials.amount) as total_amount, finantiol_acountings.name")
             ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
             ->leftJoin("finantiol_acountings", "finantiol_acountings.id", "order_financials.financial_id")
-           // ->whereBetween("orders.created_at", [$start, $end]) 
+            ->whereBetween("orders.created_at", [$start, $end]) 
             ->where("is_void", 0) 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
             ->whereNotNull("module_id")
             ->groupBy("financial_id",
-        "finantiol_acountings.name")
+            "finantiol_acountings.name")
             ->get();
+            $order_module = Order:: 
+            where("branch_id", $request->branch_id)
+            ->whereBetween("orders.created_at", [$start, $end]) 
+            ->where("is_void", 0) 
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
+            ->whereNotNull("module_id")
+            ->groupBy("financial_id",
+            "finantiol_acountings.name")
+            ->count();
             $due_user = Order:: 
             whereBetween("created_at", [$start, $end]) 
             ->where("is_void", 0)  
@@ -2376,6 +2395,7 @@ class ReportController extends Controller
                 "total_tax" => $total_tax,
                 "delivery_fees" => $delivery_fees,
                 "paid_module" => $paid_module,
+                "order_module" => $order_module,
             ]);
         }
     }
