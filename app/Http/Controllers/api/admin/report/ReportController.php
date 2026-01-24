@@ -2058,9 +2058,7 @@ class ReportController extends Controller
             ->whereBetween("orders.created_at", [$start, $end]) 
             ->where("is_void", 0) 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
-            ->whereNotNull("module_id")
-            ->groupBy("financial_id",
-            "finantiol_acountings.name")
+            ->whereNotNull("module_id") 
             ->count();
             $due_user = Order:: 
             where("branch_id", $request->branch_id)
@@ -2364,9 +2362,7 @@ class ReportController extends Controller
             ->whereBetween("orders.created_at", [$start, $end]) 
             ->where("is_void", 0) 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
-            ->whereNotNull("module_id")
-            ->groupBy("financial_id",
-            "finantiol_acountings.name")
+            ->whereNotNull("module_id") 
             ->count();
             $due_user = Order:: 
             whereBetween("created_at", [$start, $end]) 
