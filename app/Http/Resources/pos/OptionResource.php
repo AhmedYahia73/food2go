@@ -12,78 +12,65 @@ class OptionResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
-    {    
-        $total_discount = 0;
-        $total_tax = 0;
-        $locale = app()->getLocale(); // Use the application's current locale
-        if ($this->taxes->setting == 'included') {
-            $price = $this->price;
-            if (!empty($this->product->discount) && $this->product->discount->type == 'precentage') {
-                $discount = $price - $this->product->discount->amount * $price / 100;
-                $total_discount = $this->product->discount->amount * $price / 100;
-            }
-            else{
-                $discount = $price;
-                $total_discount = $this->product->discount->amount;
-            }
-            $price = empty($this->product->tax) ? $discount: 
-            ($this->product->tax->type == 'value' ? $discount 
-            : $discount + $this->product->tax->amount * $discount / 100);
-            $tax = $price;
-            $total_tax = 0;
-             
-            return [
-                'id' => $this->id,
-                'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
-                'price' => $this->price,
-                'total_discount' => $total_discount,
-                'total_tax' => $total_tax ,
-                'final_price' =>  $tax,
-                'product_id' => $this?->product_id,
-                'variation_id' => $this->variation_id,
-                'status' => $this->status,
-            ];
-        }
-        else{
-            $price = $this->price;
+public function toArray(Request $request): array
+{
+    $price = $this->price;
+    $total_discount = 0;
+    $total_tax = 0;
 
-            if (!empty($this->product->discount)) {
-                if ($this->product->discount->type == 'precentage') {
-                    $discount = $price - $this->product->discount->amount * $price / 100;
-                    $total_discount = $this->product->discount->amount * $price / 100;
-                } else {
-                    $discount = $price - $this->product->discount->amount;
-                    $total_discount = $this->product->discount->amount;
-                }
-            }
-            else{
-                $discount = $price;
-            }
-            
-            if (!empty($this->product->tax)) {
-                if ($this->product->tax->type == 'precentage') {
-                    $tax = $discount + $this->product->tax->amount * $discount / 100;
-                    $total_tax = $this->product->tax->amount * $discount / 100;
-                } else {
-                    $tax = $discount + $this->product->tax->amount;
-                    $total_tax = $this->product->tax->amount;
-                }
-            }
-            else{
-                $tax = $discount;
-            }
-            return [
-                'id' => $this->id,
-                'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
-                'price' => $this->price,
-                'total_discount' => $total_discount,
-                'total_tax' => $total_tax ,
-                'final_price' =>  $tax,
-                'product_id' => $this?->product_id,
-                'variation_id' => $this->variation_id,
-                'status' => $this->status,
-            ];
+    $product = $this->product;
+    $discountModel = $product?->discount;
+    $taxModel = $product?->tax;
+    $taxSetting = $this->taxes?->setting; // included | excluded
+
+    /** --------------------
+     * APPLY DISCOUNT
+     * -------------------- */
+    if ($discountModel) {
+        if ($discountModel->type === 'percentage') {
+            $total_discount = ($discountModel->amount * $price) / 100;
+        } else {
+            $total_discount = $discountModel->amount;
         }
     }
+
+    $price_after_discount = max($price - $total_discount, 0);
+
+    /** --------------------
+     * APPLY TAX
+     * -------------------- */
+    if ($taxModel) {
+        if ($taxModel->type === 'percentage') {
+            $total_tax = ($taxModel->amount * $price_after_discount) / 100;
+        } else {
+            $total_tax = $taxModel->amount;
+        }
+    }
+
+    /** --------------------
+     * FINAL PRICE
+     * -------------------- */
+    if ($taxSetting === 'included') {
+        $final_price = $price_after_discount;
+        $total_tax = 0;
+    } else {
+        $final_price = $price_after_discount + $total_tax;
+    }
+
+    return [
+        'id' => $this->id,
+        'name' => $this->translations
+            ->where('key', $this->name)
+            ->first()?->value ?? $this->name,
+
+        'price' => $this->price,
+        'total_discount' => round($total_discount, 2),
+        'total_tax' => round($total_tax, 2),
+        'final_price' => round($final_price, 2),
+
+        'product_id' => $this->product_id,
+        'variation_id' => $this->variation_id,
+        'status' => $this->status,
+    ];
+}
 }
