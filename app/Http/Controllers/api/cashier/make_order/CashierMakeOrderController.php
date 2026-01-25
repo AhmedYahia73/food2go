@@ -908,7 +908,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([ 
             "success" => $this->checkout_data($request),
-            "service_fees_title" => $service_fees?->title, 
+            "service_fees_title" => $service_fees?->title ?? null, 
             'order_note' => $request->notes ?? null,
             "kitchen_items" => $kitchen_items,  
             'order_number' => $this->order_num_today($order['order']->id), 
