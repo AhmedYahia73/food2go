@@ -50,7 +50,7 @@ class ProductPOSPricingController extends Controller
     public function update(Request $request){
         $validator = Validator::make($request->all(), [
             'items' => ['required', 'array'],
-            'items.*.module' => 'required|in:take_away,dine_in,delivery',
+            'items.*.module' => 'required|in:take_away,dine_in,delivery,all',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.price' => 'required|numeric',
         ]);
@@ -61,20 +61,29 @@ class ProductPOSPricingController extends Controller
         }
 
         foreach ($request->items as $item) {
-            $product_pricing = ProductPosPricing::
-            where("module", $item['module'])
-            ->where("product_id", $item['product_id'])
-            ->first();
-            if(!empty($product_pricing)){
-                $product_pricing->price = $item['price'];
-                $product_pricing->save();
-            }
-            else{
-                ProductPosPricing::create([
-                    "module" => $item['module'],
-                    "product_id" => $item['product_id'],
+            if($item['module'] == "all"){
+                Product::
+                where("id", $item['product_id'])
+                ->update([
                     "price" => $item['price'],
                 ]);
+            }
+            else{
+                $product_pricing = ProductPosPricing::
+                where("module", $item['module'])
+                ->where("product_id", $item['product_id'])
+                ->first();
+                if(!empty($product_pricing)){
+                    $product_pricing->price = $item['price'];
+                    $product_pricing->save();
+                }
+                else{
+                    ProductPosPricing::create([
+                        "module" => $item['module'],
+                        "product_id" => $item['product_id'],
+                        "price" => $item['price'],
+                    ]);
+                }
             }
         }
 
