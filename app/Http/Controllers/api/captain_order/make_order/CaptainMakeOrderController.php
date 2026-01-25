@@ -9,6 +9,7 @@ use App\Http\Requests\customer\order\OrderRequest as CustomerOrderRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\pos\ProductResource as NewProductResource;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -1060,10 +1061,10 @@ class CaptainMakeOrderController extends Controller
         $favourite_products_weight = $favourite_products->where("weight_status", 1)
         ->values();
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products_count); 
-        $favourite_products = ProductResource::collection($favourite_products_count); 
-        $favourite_products_weight = ProductResource::collection($favourite_products_weight); 
-        $products_weight = ProductResource::collection($products_weight); 
+        $products = NewProductResource::collection($products_count); 
+        $favourite_products = NewProductResource::collection($favourite_products_count); 
+        $favourite_products_weight = NewProductResource::collection($favourite_products_weight); 
+        $products_weight = NewProductResource::collection($products_weight); 
         $discounts = $this->discount
         ->get()
         ->map(function($item){
