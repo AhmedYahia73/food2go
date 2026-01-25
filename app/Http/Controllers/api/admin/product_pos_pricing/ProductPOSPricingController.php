@@ -67,6 +67,54 @@ class ProductPOSPricingController extends Controller
                 ->update([
                     "price" => $item['price'],
                 ]);
+                // ________________ 1 ________________________
+                $product_pricing = ProductPosPricing::
+                where("module", "take_away")
+                ->where("product_id", $item['product_id'])
+                ->first();
+                if(!empty($product_pricing)){
+                    $product_pricing->price = $item['price'];
+                    $product_pricing->save();
+                }
+                else{
+                    ProductPosPricing::create([
+                        "module" => "take_away",
+                        "product_id" => $item['product_id'],
+                        "price" => $item['price'],
+                    ]);
+                }
+                // ________________ 2 ________________________
+                $product_pricing = ProductPosPricing::
+                where("module", "dine_in")
+                ->where("product_id", $item['product_id'])
+                ->first();
+                if(!empty($product_pricing)){
+                    $product_pricing->price = $item['price'];
+                    $product_pricing->save();
+                }
+                else{
+                    ProductPosPricing::create([
+                        "module" => "dine_in",
+                        "product_id" => $item['product_id'],
+                        "price" => $item['price'],
+                    ]);
+                }
+                // ________________ 3 ________________________
+                $product_pricing = ProductPosPricing::
+                where("module", "delivery")
+                ->where("product_id", $item['product_id'])
+                ->first();
+                if(!empty($product_pricing)){
+                    $product_pricing->price = $item['price'];
+                    $product_pricing->save();
+                }
+                else{
+                    ProductPosPricing::create([
+                        "module" => "delivery",
+                        "product_id" => $item['product_id'],
+                        "price" => $item['price'],
+                    ]);
+                }
             }
             else{
                 $product_pricing = ProductPosPricing::
