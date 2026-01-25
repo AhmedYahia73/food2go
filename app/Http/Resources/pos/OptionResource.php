@@ -27,7 +27,7 @@ public function toArray(Request $request): array
      * APPLY DISCOUNT
      * -------------------- */
     if ($discountModel) {
-        if ($discountModel->type === 'percentage') {
+        if ($discountModel->type === 'precentage') {
             $total_discount = ($discountModel->amount * $price) / 100;
         } else {
             $total_discount = $discountModel->amount;
@@ -40,7 +40,7 @@ public function toArray(Request $request): array
      * APPLY TAX
      * -------------------- */
     if ($taxModel) {
-        if ($taxModel->type === 'percentage') {
+        if ($taxModel->type === 'precentage') {
             $total_tax = ($taxModel->amount * $price_after_discount) / 100;
         } else {
             $total_tax = $taxModel->amount;

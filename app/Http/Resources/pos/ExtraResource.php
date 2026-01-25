@@ -29,7 +29,7 @@ class ExtraResource extends JsonResource
 
         $price = $this->price;
 
-        if ($discountModel && $discountModel->type === 'percentage') {
+        if ($discountModel && $discountModel->type === 'precentage') {
             $total_discount = $discountModel->amount * $price / 100;
             $discount = $price - $total_discount;
         } elseif ($discountModel) {
@@ -39,7 +39,7 @@ class ExtraResource extends JsonResource
             $discount = $price;
         }
 
-        $price = ($taxModel && $taxModel->type === 'percentage')
+        $price = ($taxModel && $taxModel->type === 'precentage')
             ? $discount + ($taxModel->amount * $discount / 100)
             : $discount;
 
@@ -66,7 +66,7 @@ class ExtraResource extends JsonResource
     $price = $this->price;
 
     if ($discountModel) {
-        if ($discountModel->type === 'percentage') {
+        if ($discountModel->type === 'precentage') {
             $total_discount = $discountModel->amount * $price / 100;
             $discount = $price - $total_discount;
         } else {
@@ -78,7 +78,7 @@ class ExtraResource extends JsonResource
     }
 
     if ($taxModel) {
-        if ($taxModel->type === 'percentage') {
+        if ($taxModel->type === 'precentage') {
             $total_tax = $taxModel->amount * $discount / 100;
             $tax = $discount + $total_tax;
         } else {
