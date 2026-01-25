@@ -427,7 +427,12 @@ class CashierMakeOrderController extends Controller
         }
         $delivery_fees = Address::
         where("id", $request->address_id)
-        ->first()?->zone?->price ?? 0;   
+        ->first()?->zone?->price ?? 0; 
+        if(!empty($request?->service_fees_id)){
+            $service_fees = ServiceFees::
+            where("id", $request?->service_fees_id)
+            ->first(); 
+        } 
         if(!$request->service_fees){
             if(empty($request?->service_fees_id)){
                 $service_fees = ServiceFees::
@@ -579,6 +584,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             "success" => $this->checkout_data($request),
+            "service_fees_title" => $service_fees?->title,  
             'order_note' => $request->notes ?? null,
             'kitchen_items' => $kitchen_items,
             'kitchen_items_count' => count($kitchen_items), 
@@ -735,6 +741,11 @@ class CashierMakeOrderController extends Controller
                 "errors" => "order is repeated"
             ], 400);
         }
+        if(!empty($request?->service_fees_id)){
+            $service_fees = ServiceFees::
+            where("id", $request?->service_fees_id)
+            ->first(); 
+        } 
         if(!$request->service_fees){
             if(empty($request?->service_fees_id)){
                 $service_fees = ServiceFees::
@@ -897,6 +908,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([ 
             "success" => $this->checkout_data($request),
+            "service_fees_title" => $service_fees?->title, 
             'order_note' => $request->notes ?? null,
             "kitchen_items" => $kitchen_items,  
             'order_number' => $this->order_num_today($order['order']->id), 
@@ -1193,6 +1205,11 @@ class CashierMakeOrderController extends Controller
                 "errors" => "You do not have this premission"
             ], 400);
         }
+        if(!empty($request?->service_fees_id)){
+            $service_fees = ServiceFees::
+            where("id", $request?->service_fees_id)
+            ->first(); 
+        } 
         if(!$request->service_fees){
             if(empty($request?->service_fees_id)){
                 $service_fees = ServiceFees::
@@ -1381,6 +1398,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => $this->checkout_data($request), 
+            "service_fees_title" => $service_fees?->title,  
             'order_note' => $request->notes ?? null, 
             'order_number' => $this->order_num_today($order['payment']['id']), 
             'order_id' => $this->order_num_today($order['payment']['id']), 
@@ -1404,7 +1422,13 @@ class CashierMakeOrderController extends Controller
         // source, financials[{id, amount, description}], cash_with_delivery
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
-        // variation[{variation_id, option_id[]}], count}] 
+        // variation[{variation_id, option_id[]}], count}]
+        
+        if(!empty($request?->service_fees_id)){
+            $service_fees = ServiceFees::
+            where("id", $request?->service_fees_id)
+            ->first(); 
+        }
         if(!$request->service_fees){
             if(empty($request?->service_fees_id)){
                 $service_fees = ServiceFees::
@@ -1564,6 +1588,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             "success" => $this->checkout_data($request),
+            "service_fees_title" => $service_fees?->title,
             'order_note' => $request->notes ?? null,
             'order_number' => $order_number,
             'order_id' => $order_id, 
