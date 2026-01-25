@@ -584,7 +584,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             "success" => $this->checkout_data($request),
-            "service_fees_title" => $service_fees?->title,  
+            "service_fees_title" => $service_fees?->title ?? null,  
             'order_note' => $request->notes ?? null,
             'kitchen_items' => $kitchen_items,
             'kitchen_items_count' => count($kitchen_items), 
@@ -1398,7 +1398,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             'success' => $this->checkout_data($request), 
-            "service_fees_title" => $service_fees?->title,  
+            "service_fees_title" => $service_fees?->title ?? null,  
             'order_note' => $request->notes ?? null, 
             'order_number' => $this->order_num_today($order['payment']['id']), 
             'order_id' => $this->order_num_today($order['payment']['id']), 
@@ -1588,7 +1588,7 @@ class CashierMakeOrderController extends Controller
 
         return response()->json([
             "success" => $this->checkout_data($request),
-            "service_fees_title" => $service_fees?->title,
+            "service_fees_title" => $service_fees?->title ?? null,
             'order_note' => $request->notes ?? null,
             'order_number' => $order_number,
             'order_id' => $order_id, 
