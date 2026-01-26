@@ -772,7 +772,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/transfer_branch/{id}', 'transfer_branch')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/count', 'count_orders')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::post('/data', 'orders_data')->middleware('can:view_order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
-        Route::post('/notification', 'notification')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
+        Route::get('/notification', 'notification')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::post('/filter', 'order_filter')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/branches', 'branches')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/order/{id}', 'order')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
