@@ -1116,7 +1116,7 @@ class CashierReportsController extends Controller
                 ->join('group_products', 'group_products.id', '=', 'orders.module_id')
                 ->with("group_module")
                 ->groupBy("module_id", 'group_products.name')
-                //->where('shift', $request->user()->shift_number)
+                ->where('shift', $request->user()->shift_number)
                 ->get()
                 ->map(function($item){
                     return [
@@ -1803,7 +1803,7 @@ class CashierReportsController extends Controller
                 ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module, group_products.name AS module_name")
                 ->join('group_products', 'group_products.id', '=', 'orders.module_id')
                 ->groupBy("module_id", 'module_name')
-                //->where('shift', $request->user()->shift_number)
+                ->where('shift', $request->user()->shift_number)
                 ->get()
                 ->map(function($item){
                     return [
