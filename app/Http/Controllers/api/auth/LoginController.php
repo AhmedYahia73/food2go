@@ -562,6 +562,8 @@ class LoginController extends Controller
     public function start_shift(Request $request){
         $validation = Validator::make($request->all(), [
             "cashier_id" => "exists:cashiers,id",
+            "amount" => 'required|numeric',
+            "financial_id" => 'required|exists:finantiol_acountings,id',
             // 'fcm_token' => 'required',
         ]);
         if ($validation->fails()) {
@@ -576,6 +578,8 @@ class LoginController extends Controller
             'start_time' => now(),
             'cashier_man_id' => $request->user()->id,
             'cashier_id' => $request->cashier_id,
+            'amount' => $request->amount,
+            'financial_id' => $request->financial_id,
         ]);
         $request->user()->shift_number = $shift_number;
         $request->user()->save();
