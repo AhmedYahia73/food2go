@@ -771,6 +771,11 @@ class CashierReportsController extends Controller
         }
         
         $gap = 0;
+        $cashier_shift = $this->cashier_shift
+        ->where("shift", auth()->user()->shift_number)
+        ->where("cashier_man_id", auth()->user()->id)
+        ->with("financial")
+        ->first();
         if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password)) ||
         $request->user()->enter_amount && password_verify($request->input('password'), $request->user()->password)) {
             $validator = Validator::make($request->all(), [
@@ -808,7 +813,7 @@ class CashierReportsController extends Controller
                 ->orWhere('pos', 0);
             })
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
-            ->sum('amount');
+            ->sum('amount') + $cashier_shift->amount;
             $gap = $total_orders - $request->amount;
             $gap = $gap > 0 ? $gap : 0;
             $shift = CashierShift::
@@ -1146,6 +1151,10 @@ class CashierReportsController extends Controller
                 ->with('captain') // لجلب بيانات الكابتن (الاسم وغيره) من العلاقة
                 ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
                 ->get();
+                $start_balance = [
+                    "amount" => $cashier_shift->amount,
+                    "financial" => $cashier_shift?->financial?->name,
+                ];
                 $arr = [
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
@@ -1161,6 +1170,7 @@ class CashierReportsController extends Controller
                     "captain_order" => $captain_order,
                     "due_module" => $due_module,
                     "due_user" => $due_user,
+                    "start_balance" => $start_balance,
                 ];
                 if($request->user()->service_fees){
                     $service_fees = Order::
@@ -1245,6 +1255,10 @@ class CashierReportsController extends Controller
                 ->with('captain') // لجلب بيانات الكابتن (الاسم وغيره) من العلاقة
                 ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
                 ->get();
+                $start_balance = [
+                    "amount" => $cashier_shift->amount,
+                    "financial" => $cashier_shift?->financial?->name,
+                ];
                 $arr = [
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
@@ -1252,6 +1266,7 @@ class CashierReportsController extends Controller
                     'captain_order' => $captain_order,
                     "due_module" => $due_module,
                     "due_user" => $due_user,
+                    "start_balance" => $start_balance,
                 ];
                 if($request->user()->enter_amount){
                     $arr['gap'] = $gap;
