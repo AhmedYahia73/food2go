@@ -16,6 +16,8 @@ class CashierShift extends Model
         'cashier_man_id',
         'cashier_id',
         'free_discount',
+        'amount',
+        'financial_id',
     ];
 
     public function cashier_man(){
