@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\TaxModuleBranch;
 use App\Models\TaxModule;
+use App\Models\FinantiolAcounting;
 use App\Models\Branch;
 
 class TaxModuleController extends Controller
@@ -54,6 +55,31 @@ class TaxModuleController extends Controller
             "branches" => $branches,
             "modules" => $modules,
             "type" => $type,
+        ]);
+    }
+
+    public function lists(){ 
+        $branches = $this->branches
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+        $financial = FinantiolAcounting::
+        where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+        return response()->json([
+            "branches" => $branches,
+            "financial" => $financial,
         ]);
     }
 

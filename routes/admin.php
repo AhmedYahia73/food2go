@@ -622,6 +622,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(TaxModuleController::class)
     ->prefix('tax_module')->group(function(){
         Route::get('/', 'view');
+        Route::get('/lists', 'lists');
         Route::get('/item/{id}', 'tax_item');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
