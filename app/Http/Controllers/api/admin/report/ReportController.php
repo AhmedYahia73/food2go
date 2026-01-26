@@ -2043,7 +2043,7 @@ class ReportController extends Controller
             ->sum("due_module");
             $paid_module = Order::
             selectRaw("SUM(order_financials.amount) as total_amount, finantiol_acountings.name")
-            ->where("branch_id", $request->branch_id)
+            ->where("orders.branch_id", $request->branch_id)
             ->leftJoin("order_financials", "order_financials.order_id", "orders.id")
             ->leftJoin("finantiol_acountings", "finantiol_acountings.id", "order_financials.financial_id")
             ->whereBetween("orders.created_at", [$start, $end]) 
