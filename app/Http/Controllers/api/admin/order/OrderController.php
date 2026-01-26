@@ -1053,59 +1053,62 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/admin/order/notification
         // Key
         // orders
-        $total = 0;
-        if ($request->user()->role == "admin") {
-            if ($request->orders) {
-                $old_orders = $request->orders;
-                $new_orders = $this->orders
-                ->where('pos', 0)
-                ->whereNull('captain_id')
-                ->where(function($query) {
-                    $query->where('status', 1)
-                    ->orWhereNull('status');
-                })
-                ->count();
-                $total = $new_orders - $old_orders;
-            }
+        if ($request->user()->role == "admin") { 
             $new_orders = $this->orders
             ->where('pos', 0)
+            ->where('is_read_admin', 0)
             ->whereNull('captain_id')
+            ->where("created_at", ">=", now()->subMinutes(30))
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
             })
-            ->orderByDesc('id')
-            ->limit($total)->pluck('id');
+            ->pluck('id');
+            $total = $new_orders->count();
         }
-        else{
-            if ($request->orders) {
-                $old_orders = $request->orders;
-                $new_orders = $this->orders
-                ->where('pos', 0)
-                ->whereNull('captain_id')
-                ->where("branch_id", $request->user()->id)
-                ->where(function($query) {
-                    $query->where('status', 1)
-                    ->orWhereNull('status');
-                })
-                ->count();
-                $total = $new_orders - $old_orders;
-            }
+        else{ 
             $new_orders = $this->orders
             ->where('pos', 0)
+            ->where('is_read_admin', 0)
+            ->where("created_at", ">=", now()->subMinutes(30))
             ->whereNull('captain_id')
             ->where("branch_id", $request->user()->id)
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
             })
-            ->orderByDesc('id')
-            ->limit($total)->pluck('id');
+            ->pluck('id');
+            $total = $new_orders->count(); 
         }
 
         return response()->json([
             'new_orders' => $total,
             'order_id' => $new_orders->last() ?? null,
+        ]);
+    }
+
+    public function is_read(Request $request){
+        // https://bcknd.food2go.online/admin/order/notification
+        
+        $validator = Validator::make($request->all(), [ 
+            'order_id' => 'required|exists:orders,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        
+        $this->orders
+        ->where("id", $request->order_id)
+        ->orWhere("created_at", ">=", now()->subMinutes(30))
+        ->where("pos", 0)
+        ->update([
+            "is_read_admin" => 1
+        ]);
+
+        return response()->json([
+            'success' => "order is read success", 
         ]);
     }
 
