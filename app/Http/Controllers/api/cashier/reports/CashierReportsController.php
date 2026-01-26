@@ -1804,7 +1804,7 @@ class CashierReportsController extends Controller
                 ->join('group_products', 'group_products.id', '=', 'orders.module_id')
                 ->with("group_module")
                 ->groupBy("module_id", 'group_modules.name')
-                ->where('shift', $request->user()->shift_number)
+                //->where('shift', $request->user()->shift_number)
                 ->get()
                 ->map(function($item){
                     return [
