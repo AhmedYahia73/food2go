@@ -1799,24 +1799,19 @@ class CashierReportsController extends Controller
 
             if(auth()->user()->report == "all"){      
                 
-            $group_modules = $this->orders
-    ->from('orders as o')
-    ->join('group_products as gp', 'gp.id', '=', 'o.module_id')
-  //  ->where('o.shift', $request->user()->shift_number)
-    ->groupBy('o.module_id', 'gp.name')
-    ->selectRaw('
-        o.module_id,
-        SUM(o.amount) as amount,
-        SUM(o.due_module) as due_module,
-        gp.name as module_name
-    ')
-    ->get()
-    ->map(fn ($item) => [
-        'amount' => $item->amount,
-        'due' => $item->due_module,
-        'module' => $item->module_name,
-    ]);
-
+                $group_modules = $this->orders
+                ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module, group_products.name AS module_name")
+                ->join('group_products', 'group_products.id', '=', 'orders.module_id')
+                ->groupBy("module_id", 'module_name')
+                //->where('shift', $request->user()->shift_number)
+                ->get()
+                ->map(function($item){
+                    return [
+                        "amount" => $item->amount,
+                        "due" => $item->due_module,
+                        "module" => $item?->module_name,
+                    ];
+                });
                 return response()->json([ 
                     'financial_accounts' => $financial_accounts,
                     'order_count' => $order_count,
