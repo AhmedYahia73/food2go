@@ -1800,7 +1800,7 @@ class CashierReportsController extends Controller
             if(auth()->user()->report == "all"){      
                 
                 $group_modules = $this->orders
-                ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module, group_products.name AS module_name")
+                ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module, name AS module_name")
                 ->join('group_products', 'group_products.id', '=', 'orders.module_id')
                 ->groupBy("module_id", 'module_name')
                 //->where('shift', $request->user()->shift_number)
