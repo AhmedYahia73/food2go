@@ -1110,18 +1110,19 @@ class CashierReportsController extends Controller
                 'un_paid' => array_values($unpaid_online_order),
             ];
 
-            if($request->user()->report == "all"){      
+            if($request->user()->report == "all"){
                 $group_modules = $this->orders
-                ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module")
+                ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module, group_products.name AS module_name")
+                ->join('group_products', 'group_products.id', '=', 'orders.module_id')
                 ->with("group_module")
-                ->groupBy("module_id")
+                ->groupBy("module_id", 'group_modules.name')
                 ->where('shift', $request->user()->shift_number)
                 ->get()
                 ->map(function($item){
                     return [
                         "amount" => $item->amount,
                         "due" => $item->due_module,
-                        "module" => $item?->group_module?->name,
+                        "module" => $item?->module_name,
                     ];
                 });
                 
@@ -1797,17 +1798,19 @@ class CashierReportsController extends Controller
             ];
 
             if(auth()->user()->report == "all"){      
+                
                 $group_modules = $this->orders
-                ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module")
+                ->selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module, group_products.name AS module_name")
+                ->join('group_products', 'group_products.id', '=', 'orders.module_id')
                 ->with("group_module")
-                ->groupBy("module_id")
-                ->where('shift', $shift_item->shift)
+                ->groupBy("module_id", 'group_modules.name')
+                ->where('shift', $request->user()->shift_number)
                 ->get()
                 ->map(function($item){
                     return [
                         "amount" => $item->amount,
                         "due" => $item->due_module,
-                        "module" => $item?->group_module?->name,
+                        "module" => $item?->module_name,
                     ];
                 });
                 return response()->json([ 
