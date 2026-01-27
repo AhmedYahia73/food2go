@@ -40,6 +40,7 @@ class CasheirManRequest extends FormRequest
             'manger' => ['sometimes', "boolean"],
             'service_fees'=> ['sometimes', "boolean"],
             'total_tax'=> ['sometimes', "boolean"],
+            'enter_amount'=> ['sometimes', "boolean"],
         ];
     }
 
