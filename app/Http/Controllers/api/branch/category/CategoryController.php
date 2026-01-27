@@ -24,6 +24,10 @@ class CategoryController extends Controller
                 ->count() > 0 ? 0 : 1,
             ];
         });
+        
+        return response()->json([
+            'categories' => $categories
+        ]);
     }
      
     public function branch_category_status(Request $request, $id){
@@ -71,6 +75,10 @@ class CategoryController extends Controller
                 ->count() > 0 ? 0 : 1,
             ];
         });
+        
+        return response()->json([
+            'products' => $products
+        ]);
     }
      
     public function branch_products_status(Request $request, $id){
