@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Category;
+use App\Models\BranchOff;
 use App\Models\Product;
 
 class CategoryController extends Controller
@@ -44,14 +45,14 @@ class CategoryController extends Controller
         }
 
         if ($request->status) {
-            $branch_off = $this->branch_off
-            ->where('branch_id', $request->user()->id)
+            $branch_off = BranchOff::
+            where('branch_id', $request->user()->id)
             ->where('category_id', $id)
             ->delete();
         } 
         else {
-            $this->branch_off
-            ->create([
+            BranchOff::
+            create([
                 'branch_id' => $request->user()->id,
                 'category_id' => $id
             ]);
@@ -95,14 +96,14 @@ class CategoryController extends Controller
         }
 
         if ($request->status) {
-            $branch_off = $this->branch_off
-            ->where('branch_id', $request->user()->id)
+            $branch_off = BranchOff::
+            where('branch_id', $request->user()->id)
             ->where('product_id', $id)
             ->delete();
         } 
         else {
-            $this->branch_off
-            ->create([
+            BranchOff::
+            create([
                 'branch_id' => $request->user()->id,
                 'product_id' => $id
             ]);
