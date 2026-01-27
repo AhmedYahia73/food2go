@@ -23,6 +23,10 @@ class Category extends Model
     ];
     protected $appends = ['image_link', 'banner_link'];
 
+    public function category_off(){
+        return $this->hasMany(BranchOff::class, "category_id");
+    }
+
     public function getImageLinkAttribute(){
         return url('storage/' . $this->attributes['image']);
     }

@@ -18,9 +18,18 @@ use App\Http\Controllers\api\branch\expenses\ExpenseController;
 use App\Http\Controllers\api\branch\financial\FinancialController;
 use App\Http\Controllers\api\branch\kitchen\KitchenConroller;
 use App\Http\Controllers\api\branch\profile\ProfileController;
+use App\Http\Controllers\api\branch\category\CategoryController;
 
 Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     // 
+    Route::controller(CategoryController::class)
+    ->group(function(){
+        Route::get('/branch_categories', 'categories'); 
+        Route::put('/branch_category_status/{id}', 'branch_category_status'); 
+        Route::get('/branch_products', 'products'); 
+        Route::put('/branch_products_status/{id}', 'branch_products_status'); 
+    });
+    
     Route::controller(CashierController::class)->prefix('cashier')->group(function(){
         Route::get('/', 'view'); 
         Route::put('/status/{id}', 'status'); 
