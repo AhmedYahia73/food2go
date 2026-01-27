@@ -1056,6 +1056,7 @@ class OrderController extends Controller
         if ($request->user()->role == "admin") { 
             $new_orders = $this->orders
             ->where('pos', 0)
+            ->orderByDesc("id")
             ->where('is_read_admin', 0)
             ->whereNull('captain_id')
             ->where("created_at", ">=", now()->subMinutes(30))
@@ -1069,6 +1070,7 @@ class OrderController extends Controller
         else{ 
             $new_orders = $this->orders
             ->where('pos', 0)
+            ->orderByDesc("id")
             ->where('is_read_admin', 0)
             ->where("created_at", ">=", now()->subMinutes(30))
             ->whereNull('captain_id')
@@ -1083,7 +1085,7 @@ class OrderController extends Controller
 
         return response()->json([
             'new_orders' => $total,
-            'order_id' => $new_orders->last() ?? null,
+            'order_id' => $new_orders ?? null,
         ]);
     }
 
