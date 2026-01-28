@@ -151,7 +151,8 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::get('/invoice/{id}', 'invoice');
         Route::get('/user_details/{id}', 'user_details');
         Route::put('/status/{id}', 'status');
-        Route::post('/notification', 'notification');
+        Route::get('/notification', 'notification');
+        Route::post('/is_read', 'is_read');
         Route::post('/delivery', 'delivery');
         Route::post('/order_log', 'order_log');
         Route::post('/order_filter_date', 'order_filter_date');
