@@ -771,8 +771,46 @@ class CashierReportsController extends Controller
         }
         
         $gap = 0;
-        $start_amount = 0; 
-        $expenses = 0; 
+
+        $total_orders = Order::
+        select("id")
+        ->where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("is_void", 0)
+        ->where("due_from_delivery", 0)
+        ->where("due", 0)
+        ->where("due_module", 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        })
+        ->where(function($query){
+            $query->where("take_away_status", "pick_up")
+            ->where("order_type", "take_away")
+            ->orWhere("delivery_status", "delivered")
+            ->where("order_type", "delivery")
+            ->orWhere("order_type", "dine_in")
+            ->orWhere('pos', 0);
+        })
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->sum('amount');
+        
+        $shift = $this->cashier_shift
+        ->where('shift', $request->user()->shift_number)
+        ->where('cashier_man_id', $request->user()->id)
+        ->first();
+        $expenses = $this->expenses
+        ->where('created_at', '>=', $shift->start_time ?? now())
+        ->where('created_at', '<=', $shift->end_time ?? now())
+        ->sum('amount');
+        $start_amount = $shift->amount; 
+        $expenses = $expenses;
+        $net_cash_drawer = $total_orders + $start_amount - $expenses;
         $cashier_shift = $this->cashier_shift
         ->where("shift", auth()->user()->shift_number)
         ->where("cashier_man_id", auth()->user()->id)
@@ -788,46 +826,7 @@ class CashierReportsController extends Controller
                     'errors' => $validator->errors(),
                 ],400);
             }
-
-            $total_orders = Order::
-            select("id")
-            ->where('cashier_man_id', $request->user()->id)
-            ->where('shift', $request->user()->shift_number)
-            ->where("is_void", 0)
-            ->where("due_from_delivery", 0)
-            ->where("due", 0)
-            ->where("due_module", 0)
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            }) 
-            ->where(function($query){
-                $query->where('pos', 1)
-                ->orWhere('pos', 0)
-                ->where('order_status', '!=', 'pending');
-            })
-            ->where(function($query){
-                $query->where("take_away_status", "pick_up")
-                ->where("order_type", "take_away")
-                ->orWhere("delivery_status", "delivered")
-                ->where("order_type", "delivery")
-                ->orWhere("order_type", "dine_in")
-                ->orWhere('pos', 0);
-            })
-            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
-            ->sum('amount');
-            
-            $shift = $this->cashier_shift
-            ->where('shift', $request->user()->shift_number)
-            ->where('cashier_man_id', $request->user()->id)
-            ->first();
-            $expenses = $this->expenses
-            ->where('created_at', '>=', $shift->start_time ?? now())
-            ->where('created_at', '<=', $shift->end_time ?? now())
-            ->sum('amount');
-            $start_amount = $shift->amount; 
-            $expenses = $expenses;
-            $gap = $total_orders + $start_amount - $expenses;
+            $gap = $net_cash_drawer - $request->amount;
             $gap = $gap > 0 ? $gap : 0;
             $shift = CashierShift::
             where("cashier_man_id", $request->user()->id)
@@ -846,6 +845,7 @@ class CashierReportsController extends Controller
                 "start_amount" => $start_amount,
                 "expenses" => $expenses, 
                 "total_orders" => $total_orders, 
+                "net_cash_drawer" => $net_cash_drawer,
                 "gap" => $gap,
             ]);
         }
@@ -1172,6 +1172,7 @@ class CashierReportsController extends Controller
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
+                    "net_cash_drawer" => $net_cash_drawer,
                     "start_amount" => $start_amount,
                     "expenses" => $expenses, 
                     'perimission' => true,
@@ -1279,6 +1280,7 @@ class CashierReportsController extends Controller
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
+                    "net_cash_drawer" => $net_cash_drawer,
                     "start_amount" => $start_amount,
                     "expenses" => $expenses, 
                     "total_orders" => $total_orders, 
