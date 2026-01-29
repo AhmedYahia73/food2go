@@ -1230,7 +1230,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
                 Route::post('/add_custom', 'add_custom')->middleware('can:edit_time_slot'); 
                 Route::post('/add_times', 'add_times')->middleware('can:edit_time_slot'); 
                 Route::post('/update_times/{id}', 'update_times')->middleware('can:edit_time_slot'); 
-                Route::post('/delete_times/{id}', 'delete_times')->middleware('can:edit_time_slot'); 
+                Route::delete('/delete_times/{id}', 'delete_times')->middleware('can:edit_time_slot'); 
             });
 
             Route::controller(CustomerLoginController::class)
