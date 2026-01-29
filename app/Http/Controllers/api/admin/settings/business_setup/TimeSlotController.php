@@ -186,5 +186,18 @@ class TimeSlotController extends Controller
             'request' => $request->all(),
         ]);
     }
+
+    public function delete_times(Request $request, $id){
+        // https://bcknd.food2go.online/admin/settings/business_setup/time_slot/delete_times/{id} 
+
+        $time_setting = $this->time_setting
+        ->where('id', $id)
+        ->delete();
+        
+
+        return response()->json([
+            'success' => "You delete data success",
+        ]);
+    }
     
 }
