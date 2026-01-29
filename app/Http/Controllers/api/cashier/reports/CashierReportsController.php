@@ -1171,6 +1171,8 @@ class CashierReportsController extends Controller
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
+                    "start_amount" => $start_amount,
+                    "expenses" => $expenses, 
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
                     'order_count' => $order_count,
@@ -1275,6 +1277,8 @@ class CashierReportsController extends Controller
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
+                    "start_amount" => $start_amount,
+                    "expenses" => $expenses, 
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
                     'report_role' => $request->user()->report,
