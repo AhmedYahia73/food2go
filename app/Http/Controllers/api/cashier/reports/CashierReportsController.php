@@ -815,7 +815,7 @@ class CashierReportsController extends Controller
                 ->orWhere('pos', 0);
             })
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
-            ->sum('amount') + $cashier_shift->amount;
+            ->sum('amount');
             
             $shift = $this->cashier_shift
             ->where('shift', $request->user()->shift_number)
@@ -845,6 +845,7 @@ class CashierReportsController extends Controller
             return response()->json([
                 "start_amount" => $start_amount,
                 "expenses" => $expenses, 
+                "total_orders" => $total_orders, 
                 "gap" => $gap,
             ]);
         }
@@ -1177,7 +1178,8 @@ class CashierReportsController extends Controller
                     'financial_accounts' => $financial_accounts,
                     'order_count' => $order_count,
                     'total_amount' => $total_amount, 
-                    'expenses_total' => $expenses_total, 
+                    'expenses_total' => $expenses_total,
+                    "total_orders" => $total_orders,  
                     'group_modules' => $group_modules, 
                     'expenses' => $expenses, 
                     'online_order' => $online_order,
@@ -1279,6 +1281,7 @@ class CashierReportsController extends Controller
                 $arr = [
                     "start_amount" => $start_amount,
                     "expenses" => $expenses, 
+                    "total_orders" => $total_orders, 
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
                     'report_role' => $request->user()->report,
