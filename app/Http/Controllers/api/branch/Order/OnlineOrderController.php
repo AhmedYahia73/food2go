@@ -45,6 +45,7 @@ class OnlineOrderController extends Controller
             'branch_id' => $request->branch_id,
             'operation_status' => 'pending',
             'admin_id' => null,
+            'is_read_admin' => 0,
             "transfer_from_id" => $orders->branch_id
         ]);
 

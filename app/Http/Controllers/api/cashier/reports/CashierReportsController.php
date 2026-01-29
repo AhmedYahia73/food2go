@@ -771,6 +771,8 @@ class CashierReportsController extends Controller
         }
         
         $gap = 0;
+        $start_amount = 0; 
+        $expenses = 0; 
         $cashier_shift = $this->cashier_shift
         ->where("shift", auth()->user()->shift_number)
         ->where("cashier_man_id", auth()->user()->id)
@@ -814,7 +816,18 @@ class CashierReportsController extends Controller
             })
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum('amount') + $cashier_shift->amount;
-            $gap = $total_orders - $request->amount;
+            
+            $shift = $this->cashier_shift
+            ->where('shift', $request->user()->shift_number)
+            ->where('cashier_man_id', $request->user()->id)
+            ->first();
+            $expenses = $this->expenses
+            ->where('created_at', '>=', $shift->start_time ?? now())
+            ->where('created_at', '<=', $shift->end_time ?? now())
+            ->sum('amount');
+            $start_amount = $shift->amount; 
+            $expenses = $expenses;
+            $gap = $total_orders + $start_amount - $expenses;
             $gap = $gap > 0 ? $gap : 0;
             $shift = CashierShift::
             where("cashier_man_id", $request->user()->id)
@@ -830,6 +843,8 @@ class CashierReportsController extends Controller
         }   
         if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password))) {
             return response()->json([
+                "start_amount" => $start_amount,
+                "expenses" => $expenses, 
                 "gap" => $gap,
             ]);
         }

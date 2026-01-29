@@ -143,7 +143,8 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::post('/approve_offer', 'approve_offer');
     });
     
-    Route::controller(OnlineOrderController::class)->prefix('online_order')->group(function(){
+    Route::controller(OnlineOrderController::class)
+    ->prefix('online_order')->group(function(){
         Route::get('/', 'orders');
         Route::get('/count_orders', 'count_orders');
         Route::post('/transfer_branch', 'transfer_branch');
