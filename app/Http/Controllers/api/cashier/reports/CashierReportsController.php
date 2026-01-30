@@ -822,8 +822,17 @@ class CashierReportsController extends Controller
             ->join("cafe_tables", "orders.table_id", "=", "cafe_tables.id")
             ->join("cafe_locations", "cafe_tables.location_id", "=", "cafe_locations.id")
             ->whereNotNull("orders.table_id")
+            ->where("orders.branch_id", $request->user()->branch_id)
+            ->where('orders.cashier_man_id', $request->user()->id)
+            ->where('orders.shift', $request->user()->shift_number)
             ->groupBy("cafe_locations.id", "cafe_locations.name")
-            ->get();
+            ->get()
+            ->map(function($item){
+                return [
+                    "order_count" => $order_count,
+                    "hall_name" => $hall_name,
+                ];
+            });
         }
         if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password)) ||
         $request->user()->enter_amount && password_verify($request->input('password'), $request->user()->password)) {
