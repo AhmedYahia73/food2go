@@ -3009,7 +3009,15 @@ class ReportController extends Controller
             cafe_locations.name as hall_name,
             finantiol_acountings.id as account_id,
             finantiol_acountings.name as account_name,
-            SUM(order_financials.amount) as amount
+            COALESCE(
+                SUM(
+                    CASE 
+                        WHEN orders.id IS NOT NULL 
+                        THEN order_financials.amount 
+                        ELSE 0 
+                    END
+                ), 
+            0) as amount
         ")
         ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
         ->leftJoin('orders', function ($join) use ($request, $time_sittings) {
