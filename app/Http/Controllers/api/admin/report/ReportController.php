@@ -3043,7 +3043,8 @@ class ReportController extends Controller
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
 
-        $orders = Order::whereNotNull("table_id")->where("is_void", 0);
+        $orders = Order::whereNotNull("table_id")->where("is_void", 0)
+        ->with("financial_amount.financials");
 
         if($request->from){
             $orders = $orders->where("created_at", ">=", $start);
@@ -3060,7 +3061,7 @@ class ReportController extends Controller
 
         $orders = $orders->get();
 
-        $location = CafeLocation::with("tables", "financial_amount.financials")
+        $location = CafeLocation::with("tables")
             ->get()
             ->map(function($item) use($orders){ 
                 $count = 0;
