@@ -177,6 +177,10 @@ class Order extends Model
         return $this->belongsToMany(FinantiolAcounting::class, 'order_financials', 'order_id', 'financial_id');
     }
 
+    public function financial_amount(){
+        return $this->hasMany(OrderFinancial::class, 'order_id');
+    }
+
     public function captain(){
         return $this->belongsTo(CaptainOrder::class, 'captain_id');
     }
