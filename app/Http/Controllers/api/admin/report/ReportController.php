@@ -3080,7 +3080,7 @@ class ReportController extends Controller
                     ->map(function($group) {
                         return [
                             "sum" => $group->sum("amount"),
-                            "financial" => $group->financials->name
+                            "financial" => $group->financials->first()->name
                         ];
                     });
                 
