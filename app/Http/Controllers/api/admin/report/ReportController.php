@@ -3078,7 +3078,10 @@ class ReportController extends Controller
                     ->flatten(1)
                     ->groupBy("financial_id")
                     ->map(function($group) {
-                        return $group->sum("amount");
+                        return [
+                            "sum" => $group->sum("amount"),
+                            "financial" => $group->financials->name
+                        ];
                     });
                 
                 return [
