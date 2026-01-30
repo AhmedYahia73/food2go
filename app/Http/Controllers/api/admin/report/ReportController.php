@@ -3000,6 +3000,9 @@ class ReportController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
+        
+        $time_sittings = TimeSittings::
+        get();
         $rows = CafeLocation::query()
         ->selectRaw("
             cafe_locations.id as hall_id,
@@ -3009,12 +3012,59 @@ class ReportController extends Controller
             COALESCE(SUM(order_financials.amount), 0) as amount
         ")
         ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
-        ->leftJoin('orders', function ($join) use ($request) {
+        ->leftJoin('orders', function ($join) use ($request, $time_sittings) {
+            
             $join->on('orders.table_id', '=', 'cafe_tables.id')
-                //->where('orders.branch_id', $request->user()->branch_id)
-                //->where('orders.cashier_man_id', $request->user()->id)
-                ->where('orders.is_void', 0);
-               // ->where('orders.shift', $request->user()->shift_number);
+            ->where('orders.is_void', 0);
+            if($request->from || $request->to){
+                
+
+                $items = [];
+                $count = 0;
+                $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+                $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+                foreach ($time_sittings as $item) {
+                    $items[$item->branch_id][] = $item;
+                }
+                foreach ($items as $item) {
+                    if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                        $count = count($item);
+                        $to = $item[$count - 1];
+                    } 
+                    if($from->from > $item[0]->from){
+                        $from = $item[0];
+                    }
+                }
+                if ($time_sittings->count() > 0) {
+                    $from = $from->from;
+                    $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+                    $hours = $to->hours;
+                    $minutes = $to->minutes;
+                    $from = ($request->from ?? "1999-05-05") . ' ' . $from;
+                    $start = Carbon::parse($from);
+                    $end = Carbon::parse($end);
+                    $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                    if ($start >= $end) {
+                        $end = $end->addDay();
+                    }
+                    if($start >= now()){
+                        $start = $start->subDay();
+                    } 
+                } else {
+                    $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                    $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+                }
+                $join
+                ->whereBetween("orders.created_at", [$start, $end]);
+            }
+            if($request->cashier_man_id){
+                $join
+                ->where("cashier_man_id", $request->cashier_man_id);
+            }
+            if($request->branch_id){
+                $join
+                ->where("branch_id", $request->branch_id);
+            } 
         })
         ->leftJoin('order_financials', 'order_financials.order_id', '=', 'orders.id')
         ->leftJoin(
@@ -3030,57 +3080,6 @@ class ReportController extends Controller
             'finantiol_acountings.name'
         );
 
-        if($request->from || $request->to){
-            
-            $time_sittings = TimeSittings::
-            get();
-
-            $items = [];
-            $count = 0;
-            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
-            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
-            foreach ($time_sittings as $item) {
-                $items[$item->branch_id][] = $item;
-            }
-            foreach ($items as $item) {
-                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
-                    $count = count($item);
-                    $to = $item[$count - 1];
-                } 
-                if($from->from > $item[0]->from){
-                    $from = $item[0];
-                }
-            }
-            if ($time_sittings->count() > 0) {
-                $from = $from->from;
-                $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
-                $hours = $to->hours;
-                $minutes = $to->minutes;
-                $from = ($request->from ?? "1999-05-05") . ' ' . $from;
-                $start = Carbon::parse($from);
-                $end = Carbon::parse($end);
-                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                if ($start >= $end) {
-                    $end = $end->addDay();
-                }
-                if($start >= now()){
-                    $start = $start->subDay();
-                } 
-            } else {
-                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-            }
-            $rows = $rows
-            ->whereBetween("orders.created_at", [$start, $end]);
-        }
-        if($request->cashier_man_id){
-            $rows = $rows
-            ->where("cashier_man_id", $request->cashier_man_id);
-        }
-        if($request->branch_id){
-            $rows = $rows
-            ->where("branch_id", $request->branch_id);
-        }
         $rows = $rows->get();
         $hall_orders = $rows
             ->groupBy('hall_id')
