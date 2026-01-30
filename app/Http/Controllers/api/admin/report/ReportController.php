@@ -2987,4 +2987,41 @@ class ReportController extends Controller
             "count_module" => $count_module,
         ]);
     }
+
+    public function hall_reports(){ 
+        $halls = CafeLocation::query()
+        ->selectRaw("
+            cafe_locations.id as hall_id,
+            cafe_locations.name as hall_name,
+            finantiol_acountings.id as account_id,
+            finantiol_acountings.name as account_name,
+            COALESCE(SUM(order_financials.amount), 0) as amount
+        ")
+        ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
+        ->leftJoin('orders', function ($join) use ($request) {
+            $join->on('orders.table_id', '=', 'cafe_tables.id')
+                ->where('orders.branch_id', $request->user()->branch_id)
+                ->where('orders.cashier_man_id', $request->user()->id)
+                ->where('orders.is_void', 0)
+                ->where('orders.shift', $request->user()->shift_number);
+        })
+        ->leftJoin('order_financials', 'order_financials.order_id', '=', 'orders.id')
+        ->leftJoin(
+            'finantiol_acountings',
+            'finantiol_acountings.id',
+            '=',
+            'order_financials.financial_id'
+        )
+        ->groupBy(
+            'cafe_locations.id',
+            'cafe_locations.name',
+            'finantiol_acountings.id',
+            'finantiol_acountings.name'
+        )
+        ->get();
+
+        return response()->json([
+            "halls" => $halls
+        ]);
+    }
 }
