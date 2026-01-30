@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 use App\Models\Order;
+use App\Models\CafeLocation;
 use App\Models\CashierShift;
 use App\Models\PaymentMethod;
 use App\Models\TimeSittings;
@@ -817,22 +818,21 @@ class CashierReportsController extends Controller
         ->with("financial")
         ->first();
         if($request->user()->hall_orders){
-            $hall_orders = $this->orders
-            ->selectRaw("count(orders.id) as order_count, cafe_locations.name as hall_name")
-            ->join("cafe_tables", "orders.table_id", "=", "cafe_tables.id")
-            ->join("cafe_locations", "cafe_tables.location_id", "=", "cafe_locations.id")
-            ->whereNotNull("orders.table_id")
-            ->where("orders.branch_id", $request->user()->branch_id)
-            ->where('orders.cashier_man_id', $request->user()->id)
-            ->where('orders.shift', $request->user()->shift_number)
-            ->groupBy("cafe_locations.id", "cafe_locations.name")
-            ->get()
-            ->map(function($item){
-                return [
-                    "order_count" => $order_count,
-                    "hall_name" => $hall_name,
-                ];
-            });
+            $hall_orders = CafeLocation::query()
+            ->selectRaw("
+                cafe_locations.id as hall_id,
+                cafe_locations.name as hall_name,
+                COUNT(orders.id) as order_count
+            ")
+            ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
+            ->leftJoin('orders', function ($join) use ($request) {
+                $join->on('orders.table_id', '=', 'cafe_tables.id')
+                    ->where('orders.branch_id', $request->user()->branch_id)
+                    ->where('orders.cashier_man_id', $request->user()->id)
+                    ->where('orders.shift', $request->user()->shift_number);
+            })
+            ->groupBy('cafe_locations.id', 'cafe_locations.name')
+            ->get();
         }
         if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password)) ||
         $request->user()->enter_amount && password_verify($request->input('password'), $request->user()->password)) {
