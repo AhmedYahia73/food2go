@@ -829,6 +829,7 @@ class CashierReportsController extends Controller
                 $join->on('orders.table_id', '=', 'cafe_tables.id')
                     ->where('orders.branch_id', $request->user()->branch_id)
                     ->where('orders.cashier_man_id', $request->user()->id)
+                    ->where('orders.is_void', 0)
                     ->where('orders.shift', $request->user()->shift_number);
             })
             ->groupBy('cafe_locations.id', 'cafe_locations.name')
