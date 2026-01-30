@@ -3012,10 +3012,14 @@ class ReportController extends Controller
             COALESCE(SUM(order_financials.amount), 0) as amount
         ")
         ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
-        ->leftJoin('orders', function ($join) use ($request, $time_sittings) {
+        ->leftJoin('orders', function ($join)  {
             
             $join->on('orders.table_id', '=', 'cafe_tables.id')
             ->where('orders.is_void', 0);
+        })
+        ->leftJoin('order_financials', function($join) use ($request, $time_sittings){
+
+            $join->on('order_financials.order_id', '=', 'orders.id');
             if($request->from || $request->to){
                 
 
@@ -3055,18 +3059,17 @@ class ReportController extends Controller
                     $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
                 }
                 $join
-                ->whereBetween("orders.created_at", [$start, $end]);
+                ->whereBetween("order_financials.created_at", [$start, $end]);
             }
             if($request->cashier_man_id){
                 $join
-                ->where("cashier_man_id", $request->cashier_man_id);
+                ->where("orders.cashier_man_id", $request->cashier_man_id);
             }
             if($request->branch_id){
                 $join
-                ->where("branch_id", $request->branch_id);
+                ->where("orders.branch_id", $request->branch_id);
             } 
-        })
-        ->leftJoin('order_financials', 'order_financials.order_id', '=', 'orders.id')
+        } )
         ->leftJoin(
             'finantiol_acountings',
             'finantiol_acountings.id',
