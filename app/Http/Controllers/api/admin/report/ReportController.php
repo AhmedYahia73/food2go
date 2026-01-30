@@ -2989,7 +2989,7 @@ class ReportController extends Controller
     }
 
     public function hall_reports(Request $request){ 
-        $halls = CafeLocation::query()
+        $rows = CafeLocation::query()
         ->selectRaw("
             cafe_locations.id as hall_id,
             cafe_locations.name as hall_name,
@@ -3019,9 +3019,28 @@ class ReportController extends Controller
             'finantiol_acountings.name'
         )
         ->get();
+        $hall_orders = $rows
+            ->groupBy('hall_id')
+            ->map(function ($items) {
+                return [
+                    'hall_id'   => $items->first()->hall_id,
+                    'hall_name' => $items->first()->hall_name,
+                    'accounts'  => $items
+                        ->whereNotNull('account_id')
+                        ->map(function ($row) {
+                            return [
+                                'account_id'   => $row->account_id,
+                                'account_name' => $row->account_name,
+                                'amount'       => $row->amount,
+                            ];
+                        })
+                        ->values(),
+                ];
+            })
+            ->values();
 
         return response()->json([
-            "halls" => $halls
+            "halls" => $hall_orders
         ]);
     }
 }
