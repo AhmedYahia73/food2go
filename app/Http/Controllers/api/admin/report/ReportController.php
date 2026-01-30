@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 
 use App\Models\CashierMan;
 use App\Models\Cashier; 
@@ -3000,98 +2999,110 @@ class ReportController extends Controller
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        } 
-        $time_sittings = TimeSittings::get();
-
-        $items = [];
-        $count = 0;
-        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
-        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
-
-        foreach ($time_sittings as $item) {
-            $items[$item->branch_id][] = $item;
         }
-
-        foreach ($items as $item) {
-            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from)){
-                $count = count($item);
-                $to = $item[$count - 1];
-            } 
-            if($from->from > $item[0]->from){
-                $from = $item[0];
-            }
-        }
-
-        if ($time_sittings->count() > 0) {
-            $from = $from->from;
-            $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
-            $hours = $to->hours;
-            $minutes = $to->minutes;
-            $from = ($request->from ?? "1999-05-05") . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+        
+        $time_sittings = TimeSittings::
+        get();
+        $rows = CafeLocation::query()
+        ->selectRaw("
+            cafe_locations.id as hall_id,
+            cafe_locations.name as hall_name,
+            finantiol_acountings.id as account_id,
+            finantiol_acountings.name as account_name,
+            COALESCE(SUM(order_financials.amount), 0) as amount
+        ")
+        ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
+        ->leftJoin('orders', function ($join) use ($request, $time_sittings) {
             
-            if ($start >= $end) {
-                $end = $end->addDay();
-            }
-            if($start >= now()){
-                $start = $start->subDay();
-            } 
-        } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        } 
+            $join->on('orders.table_id', '=', 'cafe_tables.id')
+            ->where('orders.is_void', 0);
+            if($request->from || $request->to){
+                
 
-        $orders = Order::whereNotNull("table_id")->where("is_void", 0)
-        ->with("financial_amount.financials");
-
-        if($request->from){
-            $orders = $orders->where("created_at", ">=", $start);
-        }
-        if($request->to){
-            $orders = $orders->where("created_at", "<=", $end);
-        }
-        if($request->cashier_man_id){
-            $orders = $orders->where("cashier_man_id", $request->cashier_man_id);
-        }
-        if($request->branch_id){
-            $orders = $orders->where("branch_id", $request->branch_id);
-        }
-
-        $orders = $orders->get();
-
-        $location = CafeLocation::with("tables")
-            ->get()
-            ->map(function($item) use($orders){ 
+                $items = [];
                 $count = 0;
-                $order_items = [];
-                
-                $item->tables->each(function($element) use(&$count, $orders, &$order_items){
-                    $elementOrders = $orders->where("table_id", $element->id);
-                    $count += $elementOrders->count();
-                    $order_items = array_merge($order_items, $elementOrders->all());
-                });
-                
-                $amount = collect($order_items)
-                    ->pluck('financial_amount')
-                    ->flatten(1)
-                    ->groupBy("financial_id")
-                    ->map(function($group) {
-                        return [
-                            "sum" => $group->sum("amount"),
-                            "financial" => $group->first()->financials->name
-                        ];
-                    });
-                
+                $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+                $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+                foreach ($time_sittings as $item) {
+                    $items[$item->branch_id][] = $item;
+                }
+                foreach ($items as $item) {
+                    if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                        $count = count($item);
+                        $to = $item[$count - 1];
+                    } 
+                    if($from->from > $item[0]->from){
+                        $from = $item[0];
+                    }
+                }
+                if ($time_sittings->count() > 0) {
+                    $from = $from->from;
+                    $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+                    $hours = $to->hours;
+                    $minutes = $to->minutes;
+                    $from = ($request->from ?? "1999-05-05") . ' ' . $from;
+                    $start = Carbon::parse($from);
+                    $end = Carbon::parse($end);
+                    $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                    if ($start >= $end) {
+                        $end = $end->addDay();
+                    }
+                    if($start >= now()){
+                        $start = $start->subDay();
+                    } 
+                } else {
+                    $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                    $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+                }
+                $join
+                ->whereBetween("orders.created_at", [$start, $end]);
+            }
+            if($request->cashier_man_id){
+                $join
+                ->where("cashier_man_id", $request->cashier_man_id);
+            }
+            if($request->branch_id){
+                $join
+                ->where("branch_id", $request->branch_id);
+            } 
+        })
+        ->leftJoin('order_financials', 'order_financials.order_id', '=', 'orders.id')
+        ->leftJoin(
+            'finantiol_acountings',
+            'finantiol_acountings.id',
+            '=',
+            'order_financials.financial_id'
+        )
+        ->groupBy(
+            'cafe_locations.id',
+            'cafe_locations.name',
+            'finantiol_acountings.id',
+            'finantiol_acountings.name'
+        );
+
+        $rows = $rows->get();
+        $hall_orders = $rows
+            ->groupBy('hall_id')
+            ->map(function ($items) {
                 return [
-                    "name" => $item->name,
-                    "order_count" => $count,
-                    "order_sum" => $amount,
+                    'hall_id'   => $items->first()->hall_id,
+                    'hall_name' => $items->first()->hall_name,
+                    'accounts'  => $items
+                        ->whereNotNull('account_id')
+                        ->map(function ($row) {
+                            return [
+                                'account_id'   => $row->account_id,
+                                'account_name' => $row->account_name,
+                                'amount'       => $row->amount,
+                            ];
+                        })
+                        ->values(),
                 ];
-            });
+            })
+            ->values();
+
         return response()->json([
-            "halls" => $location
+            "halls" => $hall_orders
         ]);
     }
 }
