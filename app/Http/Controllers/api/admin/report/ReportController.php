@@ -2988,7 +2988,7 @@ class ReportController extends Controller
         ]);
     }
 
-    public function hall_reports(){ 
+    public function hall_reports(Request $request){ 
         $halls = CafeLocation::query()
         ->selectRaw("
             cafe_locations.id as hall_id,
