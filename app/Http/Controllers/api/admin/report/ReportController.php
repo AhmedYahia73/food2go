@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\CashierMan;
 use App\Models\Cashier; 
@@ -3104,5 +3105,108 @@ class ReportController extends Controller
         return response()->json([
             "halls" => $hall_orders
         ]);
+        // $validator = Validator::make($request->all(), [
+        //     'branch_id' => ['exists:branches,id'],
+        //     'from' => ['date'], 
+        //     'to' => ['date'],
+        //     'cashier_man_id' => ['exists:cashier_men,id'],
+        // ]);
+        // if ($validator->fails()) { // if Validate Make Error Return Message Error
+        //     return response()->json([
+        //         'errors' => $validator->errors(),
+        //     ],400);
+        // } 
+        // $time_sittings = TimeSittings::get();
+
+        // $items = [];
+        // $count = 0;
+        // $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        // $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+
+        // foreach ($time_sittings as $item) {
+        //     $items[$item->branch_id][] = $item;
+        // }
+
+        // foreach ($items as $item) {
+        //     if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from)){
+        //         $count = count($item);
+        //         $to = $item[$count - 1];
+        //     } 
+        //     if($from->from > $item[0]->from){
+        //         $from = $item[0];
+        //     }
+        // }
+
+        // if ($time_sittings->count() > 0) {
+        //     $from = $from->from;
+        //     $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+        //     $hours = $to->hours;
+        //     $minutes = $to->minutes;
+        //     $from = ($request->from ?? "1999-05-05") . ' ' . $from;
+        //     $start = Carbon::parse($from);
+        //     $end = Carbon::parse($end);
+        //     $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            
+        //     if ($start >= $end) {
+        //         $end = $end->addDay();
+        //     }
+        //     if($start >= now()){
+        //         $start = $start->subDay();
+        //     } 
+        // } else {
+        //     $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+        //     $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        // } 
+
+        // $orders = Order::whereNotNull("table_id")->where("is_void", 0)
+        // ->with("financial_amount.financials");
+
+        // if($request->from){
+        //     $orders = $orders->where("created_at", ">=", $start);
+        // }
+        // if($request->to){
+        //     $orders = $orders->where("created_at", "<=", $end);
+        // }
+        // if($request->cashier_man_id){
+        //     $orders = $orders->where("cashier_man_id", $request->cashier_man_id);
+        // }
+        // if($request->branch_id){
+        //     $orders = $orders->where("branch_id", $request->branch_id);
+        // }
+
+        // $orders = $orders->get();
+
+        // $location = CafeLocation::with("tables")
+        //     ->get()
+        //     ->map(function($item) use($orders){ 
+        //         $count = 0;
+        //         $order_items = [];
+                
+        //         $item->tables->each(function($element) use(&$count, $orders, &$order_items){
+        //             $elementOrders = $orders->where("table_id", $element->id);
+        //             $count += $elementOrders->count();
+        //             $order_items = array_merge($order_items, $elementOrders->all());
+        //         });
+                
+        //         $amount = collect($order_items)
+        //             ->pluck('financial_amount')
+        //             ->flatten(1)
+        //             ->groupBy("financial_id")
+        //             ->map(function($group) {
+        //                 return [
+        //                     "sum" => $group->sum("amount"),
+        //                     "financial" => $group->first()->financials->name
+        //                 ];
+        //             });
+                
+        //         return [
+        //             "name" => $item->name,
+        //             "order_count" => $count,
+        //             "order_sum" => $amount,
+        //         ];
+        //     });
+        // return response()->json([
+        //     "halls" => $location
+        // ]);
     }
 }
