@@ -3001,42 +3001,46 @@ class ReportController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        
-        $time_sittings = TimeSittings::
-        get();
-        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
-        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
-        foreach ($time_sittings as $item) {
-            $items[$item->branch_id][] = $item;
-        }
-        foreach ($items as $item) {
-            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
-                $count = count($item);
-                $to = $item[$count - 1];
-            } 
-            if($from->from > $item[0]->from){
-                $from = $item[0];
+         
+            
+            $time_sittings = TimeSittings::
+            get();
+ 
+            $items = [];
+            $count = 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+            foreach ($time_sittings as $item) {
+                $items[$item->branch_id][] = $item;
             }
-        }
-        if ($time_sittings->count() > 0) {
-            $from = $from->from;
-            $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
-            $hours = $to->hours;
-            $minutes = $to->minutes;
-            $from = ($request->from ?? "1999-05-05") . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-            if ($start >= $end) {
-                $end = $end->addDay();
+            foreach ($items as $item) {
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                    $count = count($item);
+                    $to = $item[$count - 1];
+                } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
             }
-            if($start >= now()){
-                $start = $start->subDay();
+            if ($time_sittings->count() > 0) {
+                $from = $from->from;
+                $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+                $hours = $to->hours;
+                $minutes = $to->minutes;
+                $from = ($request->from ?? "1999-05-05") . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                } 
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
             } 
-        } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
         $rows = CafeLocation::query()
         ->selectRaw("
             cafe_locations.id as hall_id,
