@@ -617,7 +617,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/cashier_report/{id}', 'cashier_report');
         Route::get('/product_report', 'product_report');
         Route::get('/product_report_lists', 'product_report_lists');
-        Route::get('/hall_reports', 'hall_reports');
+        Route::post('/hall_reports', 'hall_reports');
     });
     
     Route::controller(TaxModuleController::class)

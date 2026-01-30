@@ -2989,6 +2989,17 @@ class ReportController extends Controller
     }
 
     public function hall_reports(Request $request){ 
+        $validator = Validator::make($request->all(), [
+            'branch_id' => ['exists:branches,id'],
+            'from' => ['date'], 
+            'to' => ['date'],
+            'cashier_man_id' => ['exists:cashier_men,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $rows = CafeLocation::query()
         ->selectRaw("
             cafe_locations.id as hall_id,
@@ -3017,8 +3028,60 @@ class ReportController extends Controller
             'cafe_locations.name',
             'finantiol_acountings.id',
             'finantiol_acountings.name'
-        )
-        ->get();
+        );
+
+        if($request->from || $request->to){
+            
+            $time_sittings = TimeSittings::
+            get();
+
+            $items = [];
+            $count = 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+            foreach ($time_sittings as $item) {
+                $items[$item->branch_id][] = $item;
+            }
+            foreach ($items as $item) {
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                    $count = count($item);
+                    $to = $item[$count - 1];
+                } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
+                }
+            }
+            if ($time_sittings->count() > 0) {
+                $from = $from->from;
+                $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+                $hours = $to->hours;
+                $minutes = $to->minutes;
+                $from = ($request->from ?? "1999-05-05") . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                } 
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            }
+            $rows = $rows
+            ->whereBetween("orders.created_at", [$start, $end]);
+        }
+        if($request->cashier_man_id){
+            $rows = $rows
+            ->where("cashier_man_id", $request->cashier_man_id);
+        }
+        if($request->branch_id){
+            $rows = $rows
+            ->where("branch_id", $request->branch_id);
+        }
+        $rows = $rows->get();
         $hall_orders = $rows
             ->groupBy('hall_id')
             ->map(function ($items) {
