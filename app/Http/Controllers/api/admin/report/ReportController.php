@@ -3007,88 +3007,30 @@ class ReportController extends Controller
         ->selectRaw("
             cafe_locations.id as hall_id,
             cafe_locations.name as hall_name,
-            finantiol_acountings.id as account_id,
-            finantiol_acountings.name as account_name,
-            COALESCE(
-                SUM(
-                    CASE 
-                        WHEN orders.id IS NOT NULL 
-                        THEN order_financials.amount 
-                        ELSE 0 
-                    END
-                ), 
-            0) as amount
+            fa.id as account_id,
+            fa.name as account_name,
+            COALESCE(order_amounts.total_amount, 0) as amount
         ")
         ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
-        ->leftJoin('orders', function ($join) use ($request, $time_sittings) {
-            
-            $join->on('orders.table_id', '=', 'cafe_tables.id')
-            ->where('orders.is_void', 0);
-            if($request->from || $request->to){
-                
-
-                $items = [];
-                $count = 0;
-                $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
-                $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
-                foreach ($time_sittings as $item) {
-                    $items[$item->branch_id][] = $item;
-                }
-                foreach ($items as $item) {
-                    if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
-                        $count = count($item);
-                        $to = $item[$count - 1];
-                    } 
-                    if($from->from > $item[0]->from){
-                        $from = $item[0];
-                    }
-                }
-                if ($time_sittings->count() > 0) {
-                    $from = $from->from;
-                    $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
-                    $hours = $to->hours;
-                    $minutes = $to->minutes;
-                    $from = ($request->from ?? "1999-05-05") . ' ' . $from;
-                    $start = Carbon::parse($from);
-                    $end = Carbon::parse($end);
-                    $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                    if ($start >= $end) {
-                        $end = $end->addDay();
-                    }
-                    if($start >= now()){
-                        $start = $start->subDay();
-                    } 
-                } else {
-                    $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-                    $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-                }
-                $join
-                ->whereBetween("orders.created_at", [$start, $end]);
-            }
-            if($request->cashier_man_id){
-                $join
-                ->where("cashier_man_id", $request->cashier_man_id);
-            }
-            if($request->branch_id){
-                $join
-                ->where("branch_id", $request->branch_id);
-            } 
+        ->leftJoin(DB::raw("(
+            SELECT 
+                ct.location_id,
+                of.financial_id,
+                SUM(of.amount) as total_amount
+            FROM orders o
+            INNER JOIN cafe_tables ct ON o.table_id = ct.id
+            INNER JOIN order_financials of ON of.order_id = o.id
+            WHERE o.is_void = 0
+            " . ($request->from || $request->to ? "AND o.created_at BETWEEN '{$start}' AND '{$end}'" : "") . "
+            " . ($request->cashier_man_id ? "AND o.cashier_man_id = {$request->cashier_man_id}" : "") . "
+            " . ($request->branch_id ? "AND o.branch_id = {$request->branch_id}" : "") . "
+            GROUP BY ct.location_id, of.financial_id
+        ) as order_amounts"), function($join) {
+            $join->on('order_amounts.location_id', '=', 'cafe_locations.id');
         })
-        ->leftJoin('order_financials', 'order_financials.order_id', '=', 'orders.id')
-        ->leftJoin(
-            'finantiol_acountings',
-            'finantiol_acountings.id',
-            '=',
-            'order_financials.financial_id'
-        )
-        ->groupBy(
-            'cafe_locations.id',
-            'cafe_locations.name',
-            'finantiol_acountings.id',
-            'finantiol_acountings.name'
-        );
-
-        $rows = $rows->get();
+        ->leftJoin('finantiol_acountings as fa', 'fa.id', '=', 'order_amounts.financial_id')
+        ->whereNotNull('order_amounts.financial_id')
+        ->get();
         $hall_orders = $rows
             ->groupBy('hall_id')
             ->map(function ($items) {
