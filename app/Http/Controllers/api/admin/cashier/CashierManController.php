@@ -54,6 +54,7 @@ class CashierManController extends Controller
                 'service_fees'=> $item->service_fees,
                 'total_tax'=> $item->total_tax,
                 'enter_amount'=> $item->enter_amount,
+                'hall_orders'=> $item->hall_orders,
             ];
         });
         $branches = $this->branch

@@ -41,6 +41,7 @@ class CasheirManRequest extends FormRequest
             'service_fees'=> ['sometimes', "boolean"],
             'total_tax'=> ['sometimes', "boolean"],
             'enter_amount'=> ['sometimes', "boolean"],
+            'hall_orders'=> ['sometimes', "boolean"],
         ];
     }
 

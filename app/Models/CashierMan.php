@@ -33,6 +33,7 @@ class CashierMan extends Model
         'total_tax',
         'enter_amount',
         'manger',
+        "hall_orders",
     ];
     protected $appends = ['role', 'image_link'];
 

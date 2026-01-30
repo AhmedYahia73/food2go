@@ -816,6 +816,15 @@ class CashierReportsController extends Controller
         ->where("cashier_man_id", auth()->user()->id)
         ->with("financial")
         ->first();
+        if($request->user()->hall_orders){
+            $hall_orders = $this->orders
+            ->selectRaw("count(orders.id) as order_count, cafe_locations.name as hall_name")
+            ->join("cafe_tables", "orders.table_id", "=", "cafe_tables.id")
+            ->join("cafe_locations", "cafe_tables.location_id", "=", "cafe_locations.id")
+            ->whereNotNull("orders.table_id")
+            ->groupBy("cafe_locations.id", "cafe_locations.name")
+            ->get();
+        }
         if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password)) ||
         $request->user()->enter_amount && password_verify($request->input('password'), $request->user()->password)) {
             $validator = Validator::make($request->all(), [
@@ -841,13 +850,17 @@ class CashierReportsController extends Controller
             ]);  
         }   
         if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password))) {
-            return response()->json([
+            $arr = [
                 "start_amount" => $start_amount,
                 "expenses" => $expenses, 
                 "total_orders" => $total_orders, 
                 "net_cash_drawer" => $net_cash_drawer,
-                "gap" => $gap,
-            ]);
+                "gap" => $gap, 
+            ];
+            if(isset($hall_orders)){
+                $arr['hall_orders'] = $hall_orders;
+            }
+            return response()->json($arr);
         }
         if($request->user()->report != "unactive" && password_verify($request->input('password'), $request->user()->password)){
             $order_count = Order::
@@ -1192,6 +1205,9 @@ class CashierReportsController extends Controller
                     "due_user" => $due_user,
                     "start_balance" => $start_balance,
                 ];
+                if(isset($hall_orders)){
+                    $arr['hall_orders'] = $hall_orders;
+                }
                 if($request->user()->service_fees){
                     $service_fees = Order::
                     select("id")
@@ -1292,6 +1308,9 @@ class CashierReportsController extends Controller
                     "due_user" => $due_user,
                     "start_balance" => $start_balance,
                 ];
+                if(isset($hall_orders)){
+                    $arr['hall_orders'] = $hall_orders;
+                }
                 if($request->user()->enter_amount){
                     $arr['gap'] = $gap;
                 }
