@@ -224,5 +224,6 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
         Route::post('/order_today', 'order_today');
         Route::get('/filter_fake_order', 'filter_fake_order');
+        Route::get('/captain_order_report_instance', 'captain_order_report_instance');
     }); 
 });

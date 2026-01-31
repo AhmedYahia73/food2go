@@ -19,6 +19,7 @@ use App\Models\GroupProduct;
 use App\Models\Setting;
 use App\Models\CashierGap;
 use App\Models\Expense;
+use App\Models\CaptainOrder;
 
 class CashierReportsController extends Controller
 {
@@ -845,8 +846,7 @@ class CashierReportsController extends Controller
                     'errors' => $validator->errors(),
                 ],400);
             }
-            $gap = $net_cash_drawer - $request->amount;
-            $gap = $gap > 0 ? $gap : 0;
+            $gap = $net_cash_drawer - $request->amount; 
             $shift = CashierShift::
             where("cashier_man_id", $request->user()->id)
             ->where("cashier_id", $request->user()->cashier_id)
@@ -2202,5 +2202,43 @@ class CashierReportsController extends Controller
         return response()->json([
             "orders" => $orders, 
         ]);
+    }
+
+    public function captain_order_report_instance($id){
+        $orders = Order::
+        whereHas("table", function($query) use($id){
+            $query->whereHas("location", function($q) use($id){
+                $q->where("cafe_locations.id", $id);
+            });
+        })
+        ->with("captain", "financials")
+        ->where("shift", $request->user()->shift_number)
+        ->get();
+        $captainOrders = $orders->groupBy('captain.id');
+
+        $result = $captainOrders->map(function($orders, $captainId) {
+            $captain = $orders->first()->captain;
+            
+            // For each captain, collect all financials and count orders per financial
+            $financialOrders = $orders
+                ->flatMap(fn($order) => $order->financials->map(fn($financial) => [
+                    'id'       => $financial->id,
+                    'name'     => $financial->name,
+                    'order_id' => $order->id,
+                ]))
+                ->groupBy('id')
+                ->map(fn($items) => [
+                    'id'          => $items->first()['id'],
+                    'name'        => $items->first()['name'],
+                    'orders_count' => $items->count(),
+                ]);
+
+            return [
+                'captain_id'   => $captain->id,
+                'captain_name' => $captain->name,
+                'orders_count' => $orders->count(),
+                'financials'   => $financialOrders->values(),
+            ];
+});
     }
 }
