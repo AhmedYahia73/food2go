@@ -3053,6 +3053,7 @@ class ReportController extends Controller
             ->leftJoin('orders', 'cafe_tables.id', '=', 'orders.table_id')
             ->leftJoin('order_financials', 'orders.id', '=', 'order_financials.order_id')
             ->leftJoin('finantiol_acountings', 'order_financials.financial_id', '=', 'finantiol_acountings.id')
+            ->where("is_void", 0)
             ->select(
                 'cafe_locations.id as location_id',
                 'cafe_locations.name as location_name',
