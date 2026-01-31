@@ -1220,8 +1220,7 @@ class CashierReportsController extends Controller
                     select("id")
                     ->where('cashier_man_id', $request->user()->id)
                     ->where('shift', $request->user()->shift_number)
-                    ->where("is_void", 0)
-                    ->where("due_from_delivery", 0)
+                    ->where("is_void", 0) 
                     ->where(function($query) {
                         $query->where('status', 1)
                         ->orWhereNull('status');
@@ -1246,8 +1245,7 @@ class CashierReportsController extends Controller
                     select("id")
                     ->where('cashier_man_id', $request->user()->id)
                     ->where('shift', $request->user()->shift_number)
-                    ->where("is_void", 0)
-                    ->where("due_from_delivery", 0)
+                    ->where("is_void", 0) 
                     ->where(function($query) {
                         $query->where('status', 1)
                         ->orWhereNull('status');
@@ -1323,8 +1321,7 @@ class CashierReportsController extends Controller
                     select("id")
                     ->where('cashier_man_id', $request->user()->id)
                     ->where('shift', $request->user()->shift_number)
-                    ->where("is_void", 0)
-                    ->where("due_from_delivery", 0)
+                    ->where("is_void", 0) 
                     ->where(function($query) {
                         $query->where('status', 1)
                         ->orWhereNull('status');
@@ -1350,8 +1347,7 @@ class CashierReportsController extends Controller
                     select("id")
                     ->where('cashier_man_id', $request->user()->id)
                     ->where('shift', $request->user()->shift_number)
-                    ->where("is_void", 0)
-                    ->where("due_from_delivery", 0)
+                    ->where("is_void", 0) 
                     ->where(function($query) {
                         $query->where('status', 1)
                         ->orWhereNull('status');
