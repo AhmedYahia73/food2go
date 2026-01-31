@@ -2214,7 +2214,9 @@ class CashierReportsController extends Controller
         ->with("captain", "financials")
         //->where("shift", $request->user()->shift_number)
         ->get();
-        $captainOrders = $orders->groupBy('captain.id');
+        $captainOrders = $orders
+        ->filter(fn($order) => $order->captain !== null)
+        ->groupBy('captain.id');
 
         $result = $captainOrders->map(function($orders, $captainId) {
             $captain = $orders->first()->captain;
