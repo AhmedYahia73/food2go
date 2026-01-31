@@ -17,6 +17,7 @@ class FinantiolAcounting extends Model
         'balance',
         'status',
         'logo',
+        "main",
     ];
     protected $appends = ['logo_link'];
     protected $hidden = [

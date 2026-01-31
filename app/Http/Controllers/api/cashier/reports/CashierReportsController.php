@@ -778,27 +778,24 @@ class CashierReportsController extends Controller
         select("id")
         ->where('cashier_man_id', $request->user()->id)
         ->where('shift', $request->user()->shift_number)
-        ->where("is_void", 0)
-        ->where("due_from_delivery", 0)
+        ->where("is_void", 0) 
         ->where("due", 0)
         ->where("due_module", 0)
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
         }) 
+        ->where(function($query) {
+            $query->where('due_from_delivery', 0)
+            ->where('order_type', "delivery")
+            ->orwhere('due_from_delivery', 1)
+            ->where('order_type', "!=", "delivery");
+        }) 
         ->where(function($query){
             $query->where('pos', 1)
             ->orWhere('pos', 0)
             ->where('order_status', '!=', 'pending');
-        })
-        ->where(function($query){
-            $query->where("take_away_status", "pick_up")
-            ->where("order_type", "take_away")
-            ->orWhere("delivery_status", "delivered")
-            ->where("order_type", "delivery")
-            ->orWhere("order_type", "dine_in")
-            ->orWhere('pos', 0);
-        })
+        }) 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->sum('amount');
         
@@ -1233,15 +1230,13 @@ class CashierReportsController extends Controller
                         $query->where('pos', 1)
                         ->orWhere('pos', 0)
                         ->where('order_status', '!=', 'pending');
-                    })
-                    ->where(function($query){
-                        $query->where("take_away_status", "pick_up")
-                        ->where("order_type", "take_away")
-                        ->orWhere("delivery_status", "delivered")
-                        ->where("order_type", "delivery")
-                        ->orWhere("order_type", "dine_in")
-                        ->orWhere('pos', 0);
-                    })
+                    }) 
+                    ->where(function($query) {
+                        $query->where('due_from_delivery', 0)
+                        ->where('order_type', "delivery")
+                        ->orwhere('due_from_delivery', 1)
+                        ->where('order_type', "!=", "delivery");
+                    }) 
                     ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                     ->sum('service_fees');
                     $arr['service_fees'] = $service_fees;
@@ -1262,14 +1257,13 @@ class CashierReportsController extends Controller
                         ->orWhere('pos', 0)
                         ->where('order_status', '!=', 'pending');
                     })
-                    ->where(function($query){
-                        $query->where("take_away_status", "pick_up")
-                        ->where("order_type", "take_away")
-                        ->orWhere("delivery_status", "delivered")
-                        ->where("order_type", "delivery")
-                        ->orWhere("order_type", "dine_in")
-                        ->orWhere('pos', 0);
-                    })
+      
+                    ->where(function($query) {
+                        $query->where('due_from_delivery', 0)
+                        ->where('order_type', "delivery")
+                        ->orwhere('due_from_delivery', 1)
+                        ->where('order_type', "!=", "delivery");
+                    }) 
                     ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                     ->sum('total_tax');
                     $arr['total_tax'] = $total_tax;
@@ -1340,14 +1334,13 @@ class CashierReportsController extends Controller
                         ->orWhere('pos', 0)
                         ->where('order_status', '!=', 'pending');
                     })
-                    ->where(function($query){
-                        $query->where("take_away_status", "pick_up")
-                        ->where("order_type", "take_away")
-                        ->orWhere("delivery_status", "delivered")
-                        ->where("order_type", "delivery")
-                        ->orWhere("order_type", "dine_in")
-                        ->orWhere('pos', 0);
-                    })
+         
+                    ->where(function($query) {
+                        $query->where('due_from_delivery', 0)
+                        ->where('order_type', "delivery")
+                        ->orwhere('due_from_delivery', 1)
+                        ->where('order_type', "!=", "delivery");
+                    }) 
                     ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                     ->sum('service_fees');
                     $arr['service_fees'] = $service_fees;
@@ -1368,14 +1361,13 @@ class CashierReportsController extends Controller
                         ->orWhere('pos', 0)
                         ->where('order_status', '!=', 'pending');
                     })
-                    ->where(function($query){
-                        $query->where("take_away_status", "pick_up")
-                        ->where("order_type", "take_away")
-                        ->orWhere("delivery_status", "delivered")
-                        ->where("order_type", "delivery")
-                        ->orWhere("order_type", "dine_in")
-                        ->orWhere('pos', 0);
-                    })
+    
+                    ->where(function($query) {
+                        $query->where('due_from_delivery', 0)
+                        ->where('order_type', "delivery")
+                        ->orwhere('due_from_delivery', 1)
+                        ->where('order_type', "!=", "delivery");
+                    }) 
                     ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
                     ->sum('total_tax');
                     $arr['total_tax'] = $total_tax;
