@@ -2239,6 +2239,10 @@ class CashierReportsController extends Controller
                 'orders_count' => $orders->count(),
                 'financials'   => $financialOrders->values(),
             ];
-});
+        });
+
+        return response()->json([
+            "data" => $result
+        ]);
     }
 }
