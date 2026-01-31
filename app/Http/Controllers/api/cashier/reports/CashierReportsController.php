@@ -2212,7 +2212,7 @@ class CashierReportsController extends Controller
             });
         })
         ->with("captain", "financials")
-        //->where("shift", $request->user()->shift_number)
+        ->where("shift", $request->user()->shift_number)
         ->get();
         $captainOrders = $orders
         ->filter(fn($order) => $order->captain !== null)
@@ -2244,7 +2244,7 @@ class CashierReportsController extends Controller
         });
 
         return response()->json([
-            "data" => $result
+            "data" => $result->values()
         ]);
     }
 }
