@@ -2204,7 +2204,7 @@ class CashierReportsController extends Controller
         ]);
     }
 
-    public function captain_order_report_instance($id){
+    public function captain_order_report_instance(Request $request, $id){
         $orders = Order::
         whereHas("table", function($query) use($id){
             $query->whereHas("location", function($q) use($id){
@@ -2212,7 +2212,7 @@ class CashierReportsController extends Controller
             });
         })
         ->with("captain", "financials")
-        ->where("shift", $request->user()->shift_number)
+        //->where("shift", $request->user()->shift_number)
         ->get();
         $captainOrders = $orders->groupBy('captain.id');
 
