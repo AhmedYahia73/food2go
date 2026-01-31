@@ -59,4 +59,8 @@ class CafeTable extends Model
     public function order_cart(){
         return $this->hasMany(OrderCart::class, 'table_id');
     }
+
+    public function orders(){
+        return $this->hasMany(Order::class, 'table_id');
+    }
 }
