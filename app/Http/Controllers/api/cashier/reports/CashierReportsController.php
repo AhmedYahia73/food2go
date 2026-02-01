@@ -843,7 +843,30 @@ class CashierReportsController extends Controller
                     'errors' => $validator->errors(),
                 ],400);
             }
-            $gap = $net_cash_drawer - $request->amount; 
+            $main_financial_id = FinantiolAcounting::
+            where("main", 1)
+            ->first()?->id ?? 0;
+            
+            $orders_ids = Order::
+            select("id")
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->pluck('id')
+            ->toArray();
+            
+            $total_financial_accounts = OrderFinancial::
+            selectRaw("financial_id ,SUM(amount) as total_amount")
+            ->whereIn("order_id", $orders_ids)
+            ->where("financial_id", $main_financial_id) 
+            ->sum("amount");
+            $cash_expenses = $this->expenses
+            ->where('created_at', '>=', $shift->start_time ?? now())
+            ->where('created_at', '<=', $shift->end_time ?? now())
+            ->where("financial_account_id", $main_financial_id)
+            ->sum('amount');
+            $gap = $total_financial_accounts - $cash_expenses - $request->amount; 
             $shift = CashierShift::
             where("cashier_man_id", $request->user()->id)
             ->where("cashier_id", $request->user()->cashier_id)
