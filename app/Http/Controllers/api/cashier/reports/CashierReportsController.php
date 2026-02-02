@@ -9,17 +9,17 @@ use Carbon\Carbon;
 
 use App\Models\Order;
 use App\Models\CafeLocation;
+use App\Models\FinantiolAcounting;
+use App\Models\CaptainOrder;
 use App\Models\CashierShift;
 use App\Models\PaymentMethod;
 use App\Models\TimeSittings;
-use App\Models\FinantiolAcounting;
 use App\Models\OrderFinancial;
 use App\Models\CashierBalance;
 use App\Models\GroupProduct;
 use App\Models\Setting;
 use App\Models\CashierGap;
-use App\Models\Expense;
-use App\Models\CaptainOrder;
+use App\Models\Expense; 
 
 class CashierReportsController extends Controller
 {
@@ -2275,6 +2275,7 @@ class CashierReportsController extends Controller
             cafe_locations.name as hall_name,
             COUNT(orders.id) as order_count
         ")
+        ->where("cafe_locations.branch_id", $request->user()->branch_id)
         ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
         ->leftJoin('orders', function ($join) use ($request) {
             $join->on('orders.table_id', '=', 'cafe_tables.id')
@@ -2297,6 +2298,41 @@ class CashierReportsController extends Controller
 
         return response()->json([
             "hall_orders" => $hall_orders
+        ]);
+    }
+
+    public function captain_lists(Request $request){
+        $halls = CafeLocation::
+        where("branch_id", $request->user()->branch_id)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+        $financial_accounts = FinantiolAcounting:: 
+        get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+        $captain_orders = CaptainOrder::
+        where("branch_id", $request->user()->branch_id)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+        return response()->json([
+            "halls" => $halls,
+            "financial_accounts" => $financial_accounts,
+            "captain_orders" => $captain_orders,
         ]);
     }
 }
