@@ -830,9 +830,19 @@ class CashierMakeOrderController extends Controller
         $kitchen_items = [];
         if($request->order_pending){
             $order = $this->take_away_make_order($request);
+            if(isset($order["errors"])){
+                return response()->json([
+                    "errors" => $order["errors"]
+                ]);
+            }
         }
         else{
             $order = $this->take_away_make_order($request);
+            if(isset($order["errors"])){
+                return response()->json([
+                    "errors" => $order["errors"]
+                ]);
+            }
             if(!$request->order_pending){
                 $kitchen_items = $this->preparing_takeaway($request, $order['order']->id);
                 $kitchen_items = $kitchen_items['kitchen_items'];
