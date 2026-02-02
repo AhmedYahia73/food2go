@@ -2283,6 +2283,7 @@ class CashierReportsController extends Controller
             ->where('orders.is_void', 0)
             ->where('orders.shift', $request->user()->shift_number);
         })
+        ->leftJoin('order_financials', 'order_financials.order_id', '=', 'orders.id')
         ->groupBy('cafe_locations.id', 'cafe_locations.name');
         if($request->captain_id){
             $hall_orders = $hall_orders
@@ -2290,9 +2291,7 @@ class CashierReportsController extends Controller
         }
         if($request->financial_id){
             $hall_orders = $hall_orders
-            ->whereHas("financial_amount", function($query) use($request){
-                $query->where("order_financials.id", $request->financial_id);
-            });
+            ->where("order_financials.financial_id", $request->financial_id);
         }
         $hall_orders = $hall_orders->get();
 
