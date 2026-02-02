@@ -12,10 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('captain_orders', function (Blueprint $table) {
-            $table->string("print_name")->nullable();
-            $table->string("print_port")->nullable();
+ 
+            $table->string("print_name")->nullable(); 
+            $table->string("print_port")->default("9100");
             $table->string("print_ip")->nullable();
-            $table->string("print_type")->nullable();
+            $table->enum("print_type", ["usb", "network"])->default("usb");
         });
     }
 
