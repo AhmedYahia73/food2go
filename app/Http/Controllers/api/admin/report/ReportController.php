@@ -3088,7 +3088,7 @@ class ReportController extends Controller
             'cafe_locations.branch_id',
             'finantiol_acountings.id',
             'finantiol_acountings.name',
-            'branches.id',
+            'branches.branch_name',
         );
 
         $results = $query->get();
@@ -3100,6 +3100,7 @@ class ReportController extends Controller
                 'location_id' => $first->location_id,
                 'location_name' => $first->location_name,
                 'branch_id' => $first->branch_id,
+                'branch_name' => $first->branch_name,
                 'financial_accounts' => $items->filter(function ($item) {
                     return $item->financial_id !== null;
                 })->map(function ($item) {
