@@ -22,7 +22,12 @@ class CaptainOrder extends Model
         'status',
         'waiter',
         'fcm_token',
+        'print_name',
+        'print_port',
+        'print_ip',
+        'print_type',
     ];
+    
     protected $appends = ['role', 'image_link'];
 
     public function getImageLinkAttribute(){

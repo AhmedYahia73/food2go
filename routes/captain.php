@@ -6,6 +6,8 @@ use App\Http\Controllers\api\captain_order\make_order\CaptainMakeOrderController
 use App\Http\Controllers\api\captain_order\table_order\TableOrderController;
 use App\Http\Controllers\api\captain_order\profile\ProfileController;
 
+use App\Http\Controllers\api\captain_order\captain\CaptainOrderController;
+
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 
 Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
@@ -13,6 +15,12 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     ->group(function(){
         Route::get('profile', 'view');
         Route::post('update_profile', 'update_profile');
+    });
+
+    Route::controller(CaptainOrderController::class)
+    ->prefix('captain')->group(function(){
+        Route::get('/', 'view');
+        Route::put('/update', 'update');
     });
 
     Route::controller(CaptainMakeOrderController::class)
