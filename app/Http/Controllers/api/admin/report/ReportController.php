@@ -2848,17 +2848,17 @@ class ReportController extends Controller
                 $query->where("location_id", $request->hall_id);
             });
         }
-        $captain_orders = $orders
-        ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, captain_id")
+        $captain_orders = (clone $orders)
+        ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, orders.captain_id")
         ->with("captain:id,name")
-        ->groupBy("captain_id")
+        ->groupBy("orders.captain_id")
         ->get();
-        $table_orders = $orders
-        ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, table_id")
+        $table_orders = (clone $orders)
+        ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, orders.table_id")
         ->with("table:id,table_number")
-        ->groupBy("table_id")
+        ->groupBy("orders.table_id")
         ->get();
-        $hall_orders = $orders
+        $hall_orders = (clone $orders)
         ->leftJoin('cafe_tables', 'orders.table_id', '=', 'cafe_tables.id')
         ->leftJoin('cafe_locations', 'cafe_tables.location_id', '=', 'cafe_locations.id')
         ->selectRaw('
