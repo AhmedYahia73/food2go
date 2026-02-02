@@ -41,21 +41,27 @@ class TaxProductController extends Controller
     }
 
     public function lists(Request $request){
+        $locale = $request->locale ?? "en";
         $categories = Category::
-        get()
-        ->map(function($item){
+        with("translations")
+        ->get()
+        ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
-                "name" => $item->name,
+                "name" => $locale == "en" ? $item->name :
+                $item->translations->where("locale", $locale)
+                ->where("key", $item->name)->first()?->value ?? $item->name,
             ];
         });
         $products = Product::
         whereNull("tax_id")
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
-                "name" => $item->name,
+                "name" => $locale == "en" ? $item->name :
+                $item->translations->where("locale", $locale)
+                ->where("key", $item->name)->first()?->value ?? $item->name,
                 "category_id" => $item->category_id,
                 "sub_category_id" => $item->sub_category_id,
             ];
