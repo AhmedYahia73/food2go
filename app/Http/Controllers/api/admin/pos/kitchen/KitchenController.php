@@ -60,8 +60,9 @@ class KitchenController extends Controller
         ]);
     }
     
-    public function lists(){
+    public function lists(Request $request){
         // /admin/pos/kitchens/lists
+        $locale = $request->locale ?? "en";
         $data = $this->kitchen
         ->with('branch', 'products')
         ->where('status', 1)
@@ -76,11 +77,31 @@ class KitchenController extends Controller
         ->orderBy('order')
         ->get();
         $products = $this->products
+        ->with("translations")
         ->whereNull('kitchen_id')
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "name" => $locale == "en" ? $item->name :
+                $item->translations->where("locale", $locale)
+                ->where("key", $item->name)->first()?->value ?? $item->name,
+                "category_id" => $item->category_id,
+                "sub_category_id" => $item->sub_category_id,
+            ];
+        });
         $category = $this->category
+        ->with("translations")
         ->where('status', 1)
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "name" => $locale == "en" ? $item->name :
+                $item->translations->where("locale", $locale)
+                ->where("key", $item->name)->first()?->value ?? $item->name,
+            ];
+        });
 
         return response()->json([
             'kitchens' => $kitchens,
