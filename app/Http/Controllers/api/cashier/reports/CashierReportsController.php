@@ -2259,7 +2259,7 @@ class CashierReportsController extends Controller
         ]);
     }
 
-    public function captain_report(){
+    public function captain_report(Request $request){
         $validator = Validator::make($request->all(), [
             'captain_id' => ['exists:captain_orders,id'],
             'financial_id' => ['exists:finantiol_acountings,id'],
