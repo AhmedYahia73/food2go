@@ -3053,6 +3053,7 @@ class ReportController extends Controller
             ->leftJoin('orders', 'cafe_tables.id', '=', 'orders.table_id')
             ->leftJoin('order_financials', 'orders.id', '=', 'order_financials.order_id')
             ->leftJoin('finantiol_acountings', 'order_financials.financial_id', '=', 'finantiol_acountings.id')
+            ->leftJoin('branches', 'cafe_locations.id', '=', 'branches.id')
             ->where("is_void", 0)
             ->select(
                 'cafe_locations.id as location_id',
@@ -3060,6 +3061,7 @@ class ReportController extends Controller
                 'cafe_locations.branch_id',
                 'finantiol_acountings.id as financial_id',
                 'finantiol_acountings.name as financial_name',
+                'branches.name as branch_name',
                 DB::raw('COALESCE(SUM(order_financials.amount), 0) as total_amount')
             );
 
@@ -3085,7 +3087,8 @@ class ReportController extends Controller
             'cafe_locations.name',
             'cafe_locations.branch_id',
             'finantiol_acountings.id',
-            'finantiol_acountings.name'
+            'finantiol_acountings.name',
+            'branches.id',
         );
 
         $results = $query->get();
