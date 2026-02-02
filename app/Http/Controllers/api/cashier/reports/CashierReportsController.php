@@ -2258,4 +2258,46 @@ class CashierReportsController extends Controller
             "data" => $result->values()
         ]);
     }
+
+    public function captain_report(){
+        $validator = Validator::make($request->all(), [
+            'captain_id' => ['exists:captain_orders,id'],
+            'financial_id' => ['exists:finantiol_acountings,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $hall_orders = CafeLocation::query()
+        ->selectRaw("
+            cafe_locations.id as hall_id,
+            cafe_locations.name as hall_name,
+            COUNT(orders.id) as order_count
+        ")
+        ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
+        ->leftJoin('orders', function ($join) use ($request) {
+            $join->on('orders.table_id', '=', 'cafe_tables.id')
+            ->where('orders.branch_id', $request->user()->branch_id)
+            ->where('orders.cashier_man_id', $request->user()->id)
+            ->where('orders.is_void', 0)
+            ->where('orders.shift', $request->user()->shift_number);
+        })
+        ->groupBy('cafe_locations.id', 'cafe_locations.name');
+        if($request->captain_id){
+            $hall_orders = $hall_orders
+            ->where("captain_id", $request->captain_id);
+        }
+        if($request->financial_id){
+            $hall_orders = $hall_orders
+            ->whereHas("financial_amount", function($query) use($request){
+                $query->where("order_financials.id", $request->financial_id);
+            });
+        }
+        $hall_orders = $hall_orders->get();
+
+        return response()->json([
+            "hall_orders" => $hall_orders
+        ]);
+    }
 }
