@@ -2855,35 +2855,52 @@ class ReportController extends Controller
         }
         if($request->financial_id){ 
             $captain_orders = (clone $orders)
-            ->selectRaw("count(*) AS order_count, orders.captain_id")
+            ->selectRaw("
+                count(*) AS order_count, 
+                orders.captain_id,
+                (SELECT SUM(of.amount) 
+                FROM order_financials of 
+                WHERE of.order_id = orders.id 
+                AND of.financial_id = ?) AS sum_order
+            ", [$request->financial_id])
             ->with("captain:id,name")
             ->whereHas("financial_amount", function($query) use($request){
                 $query->where("financial_id", $request->financial_id);
             })
-            ->withSum(['financial_amount as sum_order'], 'amount')
             ->groupBy("orders.captain_id")
             ->get();
-            $table_orders = (clone $orders)
-            ->selectRaw("count(*) AS order_count, orders.table_id")
+
+        $table_orders = (clone $orders)
+            ->selectRaw("
+                count(*) AS order_count, 
+                orders.table_id,
+                (SELECT SUM(of.amount) 
+                FROM order_financials of 
+                WHERE of.order_id = orders.id 
+                AND of.financial_id = ?) AS sum_order
+            ", [$request->financial_id])
             ->with("table:id,table_number")
             ->whereHas("financial_amount", function($query) use($request){
                 $query->where("financial_id", $request->financial_id);
             })
-            ->withSum(['financial_amount as sum_order'], 'amount')
             ->groupBy("orders.table_id")
             ->get();
-            $hall_orders = (clone $orders)
+
+        $hall_orders = (clone $orders)
             ->leftJoin('cafe_tables', 'orders.table_id', '=', 'cafe_tables.id')
             ->leftJoin('cafe_locations', 'cafe_tables.location_id', '=', 'cafe_locations.id')
-            ->selectRaw('
+            ->selectRaw("
                 COUNT(orders.id) AS order_count, 
                 cafe_locations.id AS location_id,
-                cafe_locations.name AS location_name
-            ')
+                cafe_locations.name AS location_name,
+                (SELECT SUM(of.amount) 
+                FROM order_financials of 
+                WHERE of.order_id = orders.id 
+                AND of.financial_id = ?) AS sum_order
+            ", [$request->financial_id])
             ->whereHas("financial_amount", function($query) use($request){
                 $query->where("financial_id", $request->financial_id);
             })
-            ->withSum(['financial_amount as sum_order'], 'amount')
             ->groupBy('cafe_locations.id', 'cafe_locations.name')
             ->get();
         }
