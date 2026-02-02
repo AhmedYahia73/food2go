@@ -2287,7 +2287,7 @@ class CashierReportsController extends Controller
         ->groupBy('cafe_locations.id', 'cafe_locations.name');
         if($request->captain_id){
             $hall_orders = $hall_orders
-            ->where("captain_id", $request->captain_id);
+            ->where("orders.captain_id", $request->captain_id);
         }
         if($request->financial_id){
             $hall_orders = $hall_orders
