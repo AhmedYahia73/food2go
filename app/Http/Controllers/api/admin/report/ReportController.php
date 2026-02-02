@@ -2783,6 +2783,8 @@ class ReportController extends Controller
             'to' => ['date'],
             'table_id' => ['exists:cafe_tables,id'],
             'hall_id' => ['exists:cafe_locations,id'],
+            'captain_id' => ['exists:captain_orders,id'],
+            'financial_id' => ['exists:finantiol_acountings,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -2843,32 +2845,71 @@ class ReportController extends Controller
         if($request->table_id){
             $orders = $orders->where("orders.table_id", $request->table_id);
         }
+        if($request->captain_id){
+            $orders = $orders->where("orders.captain_id", $request->captain_id);
+        }
         if($request->hall_id){
             $orders = $orders->whereHas("table", function($query) use($request){
                 $query->where("location_id", $request->hall_id);
             });
         }
-        $captain_orders = (clone $orders)
-        ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, orders.captain_id")
-        ->with("captain:id,name")
-        ->groupBy("orders.captain_id")
-        ->get();
-        $table_orders = (clone $orders)
-        ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, orders.table_id")
-        ->with("table:id,table_number")
-        ->groupBy("orders.table_id")
-        ->get();
-        $hall_orders = (clone $orders)
-        ->leftJoin('cafe_tables', 'orders.table_id', '=', 'cafe_tables.id')
-        ->leftJoin('cafe_locations', 'cafe_tables.location_id', '=', 'cafe_locations.id')
-        ->selectRaw('
-            COUNT(orders.id) AS order_count,
-            SUM(orders.amount) AS sum_order,
-            cafe_locations.id AS location_id,
-            cafe_locations.name AS location_name
-        ')
-        ->groupBy('cafe_locations.id', 'cafe_locations.name')
-        ->get();
+        if($request->financial_id){ 
+            $captain_orders = (clone $orders)
+            ->selectRaw("count(*) AS order_count, orders.captain_id")
+            ->with("captain:id,name")
+            ->whereHas("financial_amount", function($query) use($request){
+                $query->where("financial_id", $request->financial_id);
+            })
+            ->withSum(['financial_amount as sum_order'], 'amount')
+            ->groupBy("orders.captain_id")
+            ->get();
+            $table_orders = (clone $orders)
+            ->selectRaw("count(*) AS order_count, orders.table_id")
+            ->with("table:id,table_number")
+            ->whereHas("financial_amount", function($query) use($request){
+                $query->where("financial_id", $request->financial_id);
+            })
+            ->withSum(['financial_amount as sum_order'], 'amount')
+            ->groupBy("orders.table_id")
+            ->get();
+            $hall_orders = (clone $orders)
+            ->leftJoin('cafe_tables', 'orders.table_id', '=', 'cafe_tables.id')
+            ->leftJoin('cafe_locations', 'cafe_tables.location_id', '=', 'cafe_locations.id')
+            ->selectRaw('
+                COUNT(orders.id) AS order_count, 
+                cafe_locations.id AS location_id,
+                cafe_locations.name AS location_name
+            ')
+            ->whereHas("financial_amount", function($query) use($request){
+                $query->where("financial_id", $request->financial_id);
+            })
+            ->withSum(['financial_amount as sum_order'], 'amount')
+            ->groupBy('cafe_locations.id', 'cafe_locations.name')
+            ->get();
+        }
+        else{ 
+            $captain_orders = (clone $orders)
+            ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, orders.captain_id")
+            ->with("captain:id,name")
+            ->groupBy("orders.captain_id")
+            ->get();
+            $table_orders = (clone $orders)
+            ->selectRaw("count(*) AS order_count, sum(amount) AS sum_order, orders.table_id")
+            ->with("table:id,table_number")
+            ->groupBy("orders.table_id")
+            ->get();
+            $hall_orders = (clone $orders)
+            ->leftJoin('cafe_tables', 'orders.table_id', '=', 'cafe_tables.id')
+            ->leftJoin('cafe_locations', 'cafe_tables.location_id', '=', 'cafe_locations.id')
+            ->selectRaw('
+                COUNT(orders.id) AS order_count,
+                SUM(orders.amount) AS sum_order,
+                cafe_locations.id AS location_id,
+                cafe_locations.name AS location_name
+            ')
+            ->groupBy('cafe_locations.id', 'cafe_locations.name')
+            ->get();
+        }
 
         return response()->json([
             "captain_orders" => $captain_orders,
