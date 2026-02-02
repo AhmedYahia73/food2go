@@ -44,6 +44,14 @@ class CategoryController extends Controller
             $item->name = $item->translations->where('key', $item->name)
             ->where('locale', $locale)->first()?->value ?? $item->name; 
             unset($item->translations);
+            $sub_categories = $item->sub_categories
+            ->map(function($element) use($locale){
+                $element->name = $element->translations->where('key', $element->name)
+                ->where('locale', $locale)->first()?->value ?? $element->name; 
+                unset($element->translations);
+                return $element;
+            });
+            $item->sub_categories = $sub_categories;
             return $item;
         });
         $sub_categories = $this->categories

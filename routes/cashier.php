@@ -211,7 +211,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/item/{id}', 'address');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
-    }); // lists,
+    });
     Route::controller(LoginController::class)
     ->prefix('/shift')->group(function(){
         Route::post('/open', 'start_shift');
