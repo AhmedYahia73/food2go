@@ -3088,7 +3088,7 @@ class ReportController extends Controller
             'cafe_locations.branch_id',
             'finantiol_acountings.id',
             'finantiol_acountings.name',
-            'branches.branch_name',
+            'branches.name',
         );
 
         $results = $query->get();
