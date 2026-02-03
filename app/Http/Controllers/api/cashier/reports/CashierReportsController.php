@@ -1211,7 +1211,7 @@ class CashierReportsController extends Controller
                 ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
                 ->get();
                 $start_balance = [
-                    "amount" => $cashier_shift->amount,
+                    "amount" => $cashier_shift->amount ?? 0,
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
