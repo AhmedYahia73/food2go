@@ -91,9 +91,9 @@ class PendingOrderController extends Controller
             ], 400);
         } 
         $order_item = $this->main_order_details_format($id, $locale);
-        // $this->orders
-        // ->where('id', $id)
-        // ->delete();
+        $this->orders
+        ->where('id', $id)
+        ->delete();
 
         return response()->json([
 			'id' => $order->id,
