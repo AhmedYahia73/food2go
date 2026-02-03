@@ -382,13 +382,14 @@ class CashierMakeOrderController extends Controller
     }
     
 
-    public function get_order($id){
+    public function get_order(Request $request, $id){
         // /get_order/{id}
+        $locale = $request->locale ?? "en";
         $order = $this->order
         ->select('id', 'order_details')
         ->where('id', $id)
         ->first();
-        $data = $this->order_format($order->order_details, 0);
+        $data = $this->order_format($order->order_details, $locale);
 
         return response()->json([
             'order' => $data
