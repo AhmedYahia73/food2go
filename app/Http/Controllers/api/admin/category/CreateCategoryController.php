@@ -9,6 +9,7 @@ use App\trait\image;
 use App\trait\translaion;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\Addon;
 
 class CreateCategoryController extends Controller
@@ -151,6 +152,11 @@ class CreateCategoryController extends Controller
         }
 
         $category->addons()->sync($request->addons_id);
+        Product::
+        where("sub_category_id", $id)
+        ->update([
+            "category_id", $category->category_id
+        ]);
         // update addons
 
         return response()->json([
