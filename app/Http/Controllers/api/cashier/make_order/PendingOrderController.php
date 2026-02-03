@@ -11,6 +11,8 @@ use App\Models\TimeSittings;
 
 class PendingOrderController extends Controller
 {
+    use OrderFormat;
+    
     public function __construct(private Order $orders,
     private TimeSittings $TimeSittings){}
 
