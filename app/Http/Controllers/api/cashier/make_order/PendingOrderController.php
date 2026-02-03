@@ -5,7 +5,7 @@ namespace App\Http\Controllers\api\cashier\make_order;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-
+use App\trait\OrderFormat;
 use App\Models\Order;
 use App\Models\TimeSittings;
 
@@ -72,6 +72,8 @@ class PendingOrderController extends Controller
     }
 
     public function get_order(Request $request, $id){
+        $locale = $request->locale ?? "en";
+
         $order = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
         'order_status', 'order_type', 'payment_status', 'total_tax', 'total_discount',
@@ -86,14 +88,15 @@ class PendingOrderController extends Controller
                 'errors' => 'id is not found'
             ], 400);
         } 
-        $this->orders
-        ->where('id', $id)
-        ->delete();
+        $order_details = $this->order_details_format($id, $locale);
+        // $this->orders
+        // ->where('id', $id)
+        // ->delete();
 
         return response()->json([
 			'id' => $order->id,
 			'amount' => $order->amount,
-			'order_details' => $order->order_details,
+			'order_details' => $order_details,
 			'order_number' => $order->order_number,
 			'notes' => $order->notes,
 		]);
