@@ -90,7 +90,7 @@ class PendingOrderController extends Controller
                 'errors' => 'id is not found'
             ], 400);
         } 
-        $order_item = $this->order_details_format($id, $locale);
+        $order_item = $this->main_order_details_format($id, $locale);
         // $this->orders
         // ->where('id', $id)
         // ->delete();
