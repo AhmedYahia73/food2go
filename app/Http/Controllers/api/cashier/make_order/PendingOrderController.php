@@ -90,7 +90,7 @@ class PendingOrderController extends Controller
                 'errors' => 'id is not found'
             ], 400);
         } 
-        $order_details = $this->order_details_format($id, $locale);
+        $order_item = $this->order_details_format($id, $locale);
         // $this->orders
         // ->where('id', $id)
         // ->delete();
@@ -99,7 +99,7 @@ class PendingOrderController extends Controller
 			'id' => $order->id,
 			'amount' => $order->amount,
 			'order' => $order->order_details,
-			'order_details' => $order_details,
+			'order_details' => $order_item['order_details'],
 			'order_number' => $order->order_number,
 			'notes' => $order->notes,
 		]);
