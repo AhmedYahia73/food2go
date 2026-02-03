@@ -155,7 +155,7 @@ class CreateCategoryController extends Controller
         Product::
         where("sub_category_id", $id)
         ->update([
-            "category_id", $category->category_id
+            "category_id"=> $category->category_id
         ]);
         // update addons
 
