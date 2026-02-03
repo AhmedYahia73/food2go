@@ -12,7 +12,7 @@ use App\Models\TimeSittings;
 class PendingOrderController extends Controller
 {
     use OrderFormat;
-    
+
     public function __construct(private Order $orders,
     private TimeSittings $TimeSittings){}
 
@@ -98,6 +98,7 @@ class PendingOrderController extends Controller
         return response()->json([
 			'id' => $order->id,
 			'amount' => $order->amount,
+			'order' => $order->order_details,
 			'order_details' => $order_details,
 			'order_number' => $order->order_number,
 			'notes' => $order->notes,
