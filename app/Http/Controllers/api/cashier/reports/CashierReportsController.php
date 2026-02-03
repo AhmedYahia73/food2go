@@ -807,7 +807,7 @@ class CashierReportsController extends Controller
         ->where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
         ->sum('amount');
-        $start_amount = $shift->amount; 
+        $start_amount = $shift->amount ?? 0; 
         $expenses = $expenses;
         $net_cash_drawer = $total_orders + $start_amount - $expenses;
         $cashier_shift = $this->cashier_shift
