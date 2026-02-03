@@ -2338,4 +2338,87 @@ class CashierMakeOrderController extends Controller
         }
         return false;
     }
+
+    public function print_takeaway_order(TakawayRequest $request){
+               if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
+        && !$request->repeated){
+            return response()->json([
+                "errors" => "order is repeated"
+            ], 400);
+        }
+        if(!empty($request?->service_fees_id)){
+            $service_fees = ServiceFees::
+            where("id", $request?->service_fees_id)
+            ->first(); 
+        } 
+        if(!$request->service_fees){
+            if(empty($request?->service_fees_id)){
+                $service_fees = ServiceFees::
+                where("module", "pos")
+                ->whereHas("branches", function($query){
+                    $query->where("branches.id", auth()->user()->branch_id);
+                })
+                ->first();
+            }
+            else{ 
+                $service_fees = ServiceFees::
+                where("id", $request?->service_fees_id)
+                ->first();
+            }
+            $service_amount = $service_fees?->amount ?? 0;
+            if($request->type == "precentage"){
+                $service_amount = $service_amount * $request->amount / 100;
+            } 
+            
+            $request->merge([
+                'service_fees' => $service_amount, 
+            ]);
+        }
+        $request->merge([  
+            'branch_id' => $request->user()->branch_id,
+            'order_type' => 'take_away',
+            'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
+            'pos' => 1,
+            'status' => 1,
+            'take_away_status' => 'preparing',
+        ]);
+        if(!$request->user()->take_away){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        } 
+        
+        $type = "تيك اواى";
+        $caheir_name = $request->user()->user_name;
+        $address = Branch::where("id", $request->user()->branch_id)
+        ->first()?->address;
+        //_________________________________
+         
+        // _________________________________
+  
+        $reaturant_name = $this->company_info
+        ->first()?->name; 
+
+        return response()->json([ 
+            "success" => $this->checkout_data($request),
+            "service_fees_title" => $service_fees?->title ?? null, 
+            'order_note' => $request->notes ?? null,
+            "kitchen_items" => [],  
+            'order_number' => null, 
+            'new' => null, 
+            'type' => $type,
+            'caheir_name' => $caheir_name,
+            "subtotal" => $request->amount,
+            'address' => $address,
+            'financials' => [],
+            'reaturant_name' => $reaturant_name,
+            'date' => now(),
+            "module_order_number" => $request->module_order_number ?? null,
+            "service_fees" => $request->service_fees ?? null,
+            "total_tax" => $request->total_tax ?? 0,
+            "total_discount" => $request->total_discount ?? 0,
+            "print_type" => $request->user()?->cashier?->print_type ?? null,
+        ]);
+    }
 }

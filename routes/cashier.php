@@ -65,6 +65,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CashierMakeOrderController::class)
     ->group(function(){
         Route::post('/view_user_order', 'view_user_order');
+        
+        Route::post('/print_takeaway_order', 'print_takeaway_order');
 
         Route::get('/table_lists', 'table_lists');
         Route::post('/assign_table_captain', 'assign_table_captain');
