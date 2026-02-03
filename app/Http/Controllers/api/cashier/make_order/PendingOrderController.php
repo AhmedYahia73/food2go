@@ -98,8 +98,8 @@ class PendingOrderController extends Controller
         return response()->json([
 			'id' => $order->id,
 			'amount' => $order->amount,
-			'order' => $order->order_details,
-			'order_details' => $order_item['order_details'],
+			'order' => $order_item['order_details'],
+			'order_details' => $order->order_details,
 			'order_number' => $order->order_number,
 			'notes' => $order->notes,
 		]);

@@ -1032,7 +1032,7 @@ trait OrderFormat
                 "addons" => $addons,
                 "addons" => $addons,
                 "variations" => $variations,
-                "product" => [["product" => $product]],
+                "product" => $product,
             ];
             $products[] = $product_item;
         }
