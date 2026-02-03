@@ -2422,4 +2422,31 @@ class CashierMakeOrderController extends Controller
             "print_type" => $request->user()?->cashier?->print_type ?? null,
         ]);
     }
+
+    public function free_discount_check(Request $request){ 
+        $validator = Validator::make($request->all(), [
+            'password' => 'required', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        
+        if(!$request->user()->free_discount){
+            return response()->json([
+                'errors' => "You don't have perimission to make discount"
+            ], 400);
+        }
+        if (!$request->password || 
+        !password_verify($request->input('password'), $request->user()->password)) {
+            return response()->json([
+                'errors' => 'Password is wrong'
+            ], 400);
+        } 
+
+        return response()->json([
+            "success" => "You add data success"
+        ]);
+    }
 }
