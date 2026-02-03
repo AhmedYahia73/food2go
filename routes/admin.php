@@ -1047,6 +1047,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
         Route::controller(CreateProductController::class)->group(function(){
             Route::post('/add', 'create')->middleware('can:add_product'); 
+            Route::post('/create_product_excel', 'create_product_excel')->middleware('can:add_product'); 
             Route::post('/import_excel', 'import_excel')->middleware('can:edit_product'); 
             Route::post('/update/{id}', 'modify')->middleware('can:edit_product'); 
             Route::put('/update_price/{id}', 'update_price')->middleware('can:edit_product'); 
