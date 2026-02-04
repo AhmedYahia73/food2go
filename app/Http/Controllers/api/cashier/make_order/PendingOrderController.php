@@ -17,34 +17,45 @@ class PendingOrderController extends Controller
     private TimeSittings $TimeSittings){}
 
     public function get_pending_orders(Request $request){ 
-        $time_sittings = $this->TimeSittings 
-        ->get();
+     
+        $time_sittings = TimeSittings::
+        get();
+
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if($from->from > $item[0]->from){
+                $from = $item[0];
+            }
+        }
         if ($time_sittings->count() > 0) {
-            $from = $time_sittings[0]->from;
-            
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
+            $from = $from->from;
+            $end = date("Y-m-d") . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date("Y-m-d") . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			if($start >= now()){
+            if($start >= now()){
                 $start = $start->subDay();
-			}
-            // if ($start > $end) {
-            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // }
+            } 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        }
+        } 
 
         $all_orders = $this->orders
         ->select('id', 'date', 'user_id', 'branch_id', 'amount',
