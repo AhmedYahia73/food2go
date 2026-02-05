@@ -43,7 +43,8 @@ class CompanyRequest extends FormRequest
             'ios_switch' => ['boolean'],
             'preparation_num_status' => ['boolean'],
             'show_map' => ['boolean'],
-            "scale" => ['numeric']
+            "scale" => ['numeric'],
+            "report_time" => ['numeric'],
         ];
     }
     // migrate --path=/database/migrations/2025_02_23_124537_add_columns_to_company_infos.php

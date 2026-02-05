@@ -29,6 +29,7 @@ class TakawayRequest extends FormRequest
             'total_discount' => ['required', 'numeric'],
             'notes' => 'sometimes',
             'source' => 'sometimes',
+            'prepare_order' => "boolean",
 
 
             'bundles' => ['array'],

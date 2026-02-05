@@ -59,6 +59,7 @@ trait POS
         "service_fees",
         "service_fees_id", 
         "delivery_fees", 
+        "prepare_order",
     ];
 
     public function take_away_make_order($request, $paymob = 0){

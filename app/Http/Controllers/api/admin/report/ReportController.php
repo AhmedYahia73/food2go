@@ -25,7 +25,7 @@ use App\Models\CashierShift;
 use App\Models\OrderDetail; 
 use App\Models\CompanyInfo; 
 use App\Models\CafeTable; 
-use App\Models\CafeLocation; 
+use App\Models\CafeLocation;
 use App\Models\Setting; 
 
 use App\trait\OrderFormat; 
@@ -1901,17 +1901,10 @@ class ReportController extends Controller
             $minutes = $to->minutes;
             $from = date('Y-m-d') . ' ' . $from;
             $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-			
-            if ($start >= $end) {
-                $end = $end->addDay();
-            }
-			if($start >= now()){
-                 $start = $start->subDay();
-                $end = $end->subDay();
-			 }
- 
+            $report_time = CompanyInfo::
+            first()?->report_time ?? 1;
+            $end = $start->copy()->subHours($report_time)->addDay();
+			 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');

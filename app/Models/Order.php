@@ -21,6 +21,7 @@ class Order extends Model
     protected $fillable = [
         'date',
         'rate',
+        'prepare_order',
         'comment',
         'service_fees',
         'service_fees_id',
@@ -80,6 +81,7 @@ class Order extends Model
         'void_id',
         'void_reason', 
         "is_read",
+        "prepare_order",
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];

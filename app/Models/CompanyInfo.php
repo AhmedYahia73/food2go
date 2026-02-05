@@ -32,6 +32,7 @@ class CompanyInfo extends Model
         'preparation_num_status',
         'cover_app_image',
         "show_map",
+        "report_time",
     ];
     protected $appends = ['logo_link', 'fav_icon_link', 'cover_app_image_link'];
 

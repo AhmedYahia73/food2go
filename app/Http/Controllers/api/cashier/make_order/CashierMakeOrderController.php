@@ -836,6 +836,10 @@ class CashierMakeOrderController extends Controller
                     "errors" => $order["errors"]
                 ]);
             }
+            if($request->prepare_order){
+                $kitchen_items = $this->preparing_takeaway($request, $order['order']->id);
+                $kitchen_items = $kitchen_items['kitchen_items'];
+            }
         }
         else{
             $order = $this->take_away_make_order($request);
@@ -844,7 +848,7 @@ class CashierMakeOrderController extends Controller
                     "errors" => $order["errors"]
                 ]);
             }
-            if(!$request->order_pending){
+            if($request->prepare_order){
                 $kitchen_items = $this->preparing_takeaway($request, $order['order']->id);
                 $kitchen_items = $kitchen_items['kitchen_items'];
             }
