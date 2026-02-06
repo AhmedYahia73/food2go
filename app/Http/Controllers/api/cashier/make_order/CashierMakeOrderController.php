@@ -1154,7 +1154,7 @@ class CashierMakeOrderController extends Controller
                 ->where('branch_id', $request->user()->branch_id)
                 ->get();
                 $element['cart_id'] = $value['cart_id']; 
-                $element['count'] = $request->count; 
+                $element['count'] = $value['count']; 
                 foreach ($kitchens as $kitchen) {
                     $kitchen_items[$kitchen->id] = $kitchen;
                     $kitchen_order[$kitchen->id][] = $element;
