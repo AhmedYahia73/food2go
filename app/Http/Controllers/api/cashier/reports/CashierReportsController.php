@@ -808,6 +808,7 @@ class CashierReportsController extends Controller
         $expenses = $expenses;
         $financial = FinantiolAcounting::
         where("main", 1)
+        ->where("branch_id", auth()->user()->branch_id)
         ->first();    
         $order_financial = OrderFinancial::
         where("financial_id", $financial->id)
