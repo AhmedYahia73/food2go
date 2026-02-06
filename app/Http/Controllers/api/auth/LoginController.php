@@ -459,7 +459,9 @@ class LoginController extends Controller
         ];
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
-        ->whereHas('branch')
+        ->whereHas('branch', function($query){
+            return $query->where("branches.id", auth()->user()->branch_id);
+        })
         ->where('status', 1)
         ->get(); 
         $user = $this->cashier

@@ -14,7 +14,7 @@ use App\Models\FinantiolAcounting;
 use App\Models\OrderFinancial;
 use App\Models\Order;  
 use App\Models\CashierShift;
-use App\Models\TimeSittings;
+use App\Models\TimeSittings; 
 use App\Models\Setting;
 
 class ExpensesListController extends Controller
@@ -143,8 +143,11 @@ class ExpensesListController extends Controller
         $financial_accounts = OrderFinancial:: 
         whereIn("order_id", $orders)  
         ->where("financial_id", $request->financial_account_id)
-        ->sum('amount'); 
-        $total_cash = $financial_accounts - $expenses;
+        ->sum('amount');
+        $start_amount = CashierShift::
+        where("shift", $request->user()->shift_number)
+        ->first()?->amount ?? 0;
+        $total_cash = $financial_accounts - $expenses + $start_amount;
         if($total_cash < $request->amount){
             return response()->json([
                 "errors" => "cash not enough"
