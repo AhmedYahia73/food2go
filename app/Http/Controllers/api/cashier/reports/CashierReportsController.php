@@ -806,7 +806,19 @@ class CashierReportsController extends Controller
         ->sum('amount');
         $start_amount = $shift->amount ?? 0; 
         $expenses = $expenses;
-        $net_cash_drawer = $total_orders + $start_amount - $expenses;
+        $financial = FinantiolAcounting::
+        where("main", 1)
+        ->first();
+        $order_financial = OrderFinancial::
+        where("financial_id", $financial->id)
+        ->sum("amount");
+        $expenses = $this->expenses
+        ->where("financial_account_id", $financial->id)
+        ->where('created_at', '>=', $shift->start_time ?? now())
+        ->where('created_at', '<=', $shift->end_time ?? now())
+        ->sum('amount');
+        $net_cash_drawer = $order_financial + $start_amount - $expenses;
+        $actual_total = $total_orders + $start_amount - $expenses;
         $cashier_shift = $this->cashier_shift
         ->where("shift", auth()->user()->shift_number)
         ->where("cashier_man_id", auth()->user()->id)
@@ -881,8 +893,9 @@ class CashierReportsController extends Controller
                 "start_amount" => $start_amount,
                 "expenses" => $expenses, 
                 "total_orders" => $total_orders, 
+                "actual_total" => $actual_total,
+                "gap" => $gap,
                 "net_cash_drawer" => $net_cash_drawer,
-                "gap" => $gap, 
             ];
             if(isset($hall_orders)){
                 $arr['hall_orders'] = $hall_orders;
@@ -1212,7 +1225,7 @@ class CashierReportsController extends Controller
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
-                    "net_cash_drawer" => $net_cash_drawer,
+                    "actual_total" => $actual_total,
                     "start_amount" => $start_amount,
                     "expenses" => $expenses, 
                     'perimission' => true,
@@ -1231,6 +1244,7 @@ class CashierReportsController extends Controller
                     "due_module" => $due_module,
                     "due_user" => $due_user,
                     "start_balance" => $start_balance,
+                    "net_cash_drawer" => $net_cash_drawer,
                 ];
                 if(isset($hall_orders)){
                     $arr['hall_orders'] = $hall_orders;
@@ -1318,7 +1332,7 @@ class CashierReportsController extends Controller
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
-                    "net_cash_drawer" => $net_cash_drawer,
+                    "actual_total" => $actual_total,
                     "start_amount" => $start_amount,
                     "expenses" => $expenses, 
                     "total_orders" => $total_orders, 
@@ -1329,6 +1343,7 @@ class CashierReportsController extends Controller
                     "due_module" => $due_module,
                     "due_user" => $due_user,
                     "start_balance" => $start_balance,
+                    "net_cash_drawer" => $net_cash_drawer,
                 ];
                 if(isset($hall_orders)){
                     $arr['hall_orders'] = $hall_orders;
