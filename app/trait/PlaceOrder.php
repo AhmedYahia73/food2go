@@ -1104,8 +1104,7 @@ trait PlaceOrder
                 $order_data[$key]['extras'] = $extras;
                 $order_data[$key]['variation_selected'] = $variation;
                 $order_data[$key]['addons_selected'] = $addons;
-            }
-dd(array_values($order_data));
+            } 
             return array_values($order_data);
         }
     }
