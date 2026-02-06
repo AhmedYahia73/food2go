@@ -457,17 +457,17 @@ class LoginController extends Controller
             'table_num' => $receipt_design->table_num ?? 1,
             'preparation_num' => $receipt_design->preparation_num ?? 1,
         ];
-        $financial_account = $this->financial_account
-        ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
-        ->whereHas('branch', function($query){
-            return $query->where("branches.id", auth()->user()->branch_id);
-        })
-        ->where('status', 1)
-        ->get(); 
         $user = $this->cashier
         ->where('user_name', $request->user_name)
         ->with('branch')
         ->first();
+        $financial_account = $this->financial_account
+        ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
+        ->whereHas('branch', function($query, $user){
+            return $query->where("branches.id", $user?->branch_id ?? 0);
+        })
+        ->where('status', 1)
+        ->get(); 
         if (empty($user)) {
             return response()->json([
                 'errors' => 'This user does not have the ability to login'
