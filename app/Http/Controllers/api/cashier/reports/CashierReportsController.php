@@ -808,9 +808,17 @@ class CashierReportsController extends Controller
         $expenses = $expenses;
         $financial = FinantiolAcounting::
         where("main", 1)
-        ->first();
+        ->first();    
         $order_financial = OrderFinancial::
         where("financial_id", $financial->id)
+        ->whereHas("order", function($query){
+            $query
+            ->where('cashier_man_id', $request->user()->id)
+            ->where('shift', $request->user()->shift_number)
+            ->where("is_void", 0) 
+            ->where("due", 0)
+            ->where("due_module", 0);
+        })
         ->sum("amount");
         $expenses = $this->expenses
         ->where("financial_account_id", $financial->id)
