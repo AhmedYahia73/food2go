@@ -1161,8 +1161,7 @@ class CashierMakeOrderController extends Controller
                 }
             }
         }
-        $orders = [];
-        dd($kitchen_order);
+        $orders = []; 
         foreach ($kitchen_order as $key => $item) {
             foreach ($item as $order_element) {
                 $this->kitchen_order
