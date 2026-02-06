@@ -463,7 +463,7 @@ class LoginController extends Controller
         ->first();
         $financial_account = $this->financial_account
         ->select('id', 'name', 'details', 'logo', 'description_status', 'discount')
-        ->whereHas('branch', function($query, $user){
+        ->whereHas('branch', function($query) use ($user){
             return $query->where("branches.id", $user?->branch_id ?? 0);
         })
         ->where('status', 1)
