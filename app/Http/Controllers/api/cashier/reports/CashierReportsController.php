@@ -813,8 +813,8 @@ class CashierReportsController extends Controller
         where("financial_id", $financial->id)
         ->whereHas("order", function($query){
             $query
-            ->where('cashier_man_id', $request->user()->id)
-            ->where('shift', $request->user()->shift_number)
+            ->where('cashier_man_id', auth()->user()->id)
+            ->where('shift', auth()->user()->shift_number)
             ->where("is_void", 0) 
             ->where("due", 0)
             ->where("due_module", 0);
