@@ -844,6 +844,7 @@ class CashierMakeOrderController extends Controller
             }
             if($request->prepare_order){
                 $kitchen_items = $this->preparing_takeaway($request, $order['order']->id);
+                $order['order']->take_away_status = "preparing";
                 $kitchen_items = $kitchen_items['kitchen_items'];
             }
         }
@@ -856,6 +857,7 @@ class CashierMakeOrderController extends Controller
             }
             if($request->prepare_order){
                 $kitchen_items = $this->preparing_takeaway($request, $order['order']->id);
+                $order['order']->take_away_status = "pick_up";
                 $kitchen_items = $kitchen_items['kitchen_items'];
             }
             if($request->due){
@@ -913,6 +915,7 @@ class CashierMakeOrderController extends Controller
          
         // _________________________________
 
+        $order['order']->save();
         if($request->order_pending){
             return response()->json([
                 "success" => $this->checkout_data($request),
@@ -938,6 +941,7 @@ class CashierMakeOrderController extends Controller
         }
         $financials = $this->get_financial($request, $locale);  
 
+        $order['order']->save();
         return response()->json([ 
             "success" => $this->checkout_data($request),
             "service_fees_title" => $service_fees?->title ?? null, 

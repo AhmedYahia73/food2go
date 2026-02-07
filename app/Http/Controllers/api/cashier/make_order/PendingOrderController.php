@@ -70,12 +70,20 @@ class PendingOrderController extends Controller
         ->where('order_active', 0)
         ->get()
 		->map(function($item){
+            $status = "pickup";
+            if($item->order_type == "take_away"){
+                $status = $item->take_away_status;
+            }
+            elseif($item->order_type == "delivery"){
+                $status = $item->delivery_status;
+            } 
 			return [
 				'id' => $item->id,
 				'amount' => $item->amount,
 				'order_details' => $item->order_details,
 				'order_number' => $item->order_number,
 				'notes' => $item->notes,
+				'status' => $status,
 			];
 		});
 
