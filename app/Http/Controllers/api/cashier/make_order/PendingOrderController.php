@@ -63,7 +63,7 @@ class PendingOrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id',
-		'order_details')
+		'order_details', 'take_away_status', 'delivery_status')
         ->where('branch_id', $request->user()->branch_id)
         ->orderByDesc('id')
         ->whereBetween('created_at', [$start, $end])
