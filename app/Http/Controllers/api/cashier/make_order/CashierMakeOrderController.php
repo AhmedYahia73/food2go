@@ -737,6 +737,11 @@ class CashierMakeOrderController extends Controller
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
         $financials = [];
+        $locale = Setting::
+        where("name", "setting_lang")
+        ->first()?->setting ?? 'en';
+        $reaturant_name = $this->company_info
+        ->first()?->name; 
         if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
         && !$request->repeated){
             return response()->json([
@@ -931,12 +936,7 @@ class CashierMakeOrderController extends Controller
                 'order_id' => $order['order']['id'],
             ]);
         }
-        $locale = Setting::
-        where("name", "setting_lang")
-        ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);  
-        $reaturant_name = $this->company_info
-        ->first()?->name; 
 
         return response()->json([ 
             "success" => $this->checkout_data($request),
