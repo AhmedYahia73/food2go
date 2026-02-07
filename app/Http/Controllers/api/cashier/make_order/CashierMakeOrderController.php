@@ -736,6 +736,7 @@ class CashierMakeOrderController extends Controller
         // notes, payment_method_id, order_type
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
+        $financials = [];
         if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
         && !$request->repeated){
             return response()->json([
@@ -906,7 +907,7 @@ class CashierMakeOrderController extends Controller
         //_________________________________
          
         // _________________________________
- 
+
         if($request->order_pending){
             return response()->json([
                 "success" => $this->checkout_data($request),
