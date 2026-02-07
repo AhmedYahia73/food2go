@@ -909,10 +909,26 @@ class CashierMakeOrderController extends Controller
  
         if($request->order_pending){
             return response()->json([
-                'success' => "You draft order success", 
-                'order_number' => $this->order_num_today($order['order']['id']), 
+                "success" => $this->checkout_data($request),
+                "service_fees_title" => $service_fees?->title ?? null, 
+                'order_note' => $request->notes ?? null,
+                "kitchen_items" => $kitchen_items,  
+                'order_number' => $this->order_num_today($order['order']->id), 
+                'new' => app("first_order_today"), 
+                'type' => $type,
+                'caheir_name' => $caheir_name,
+                "subtotal" => $request->amount,
+                'address' => $address,
+                'financials' => $financials,
+                'reaturant_name' => $reaturant_name,
+                'date' => now(),
+                "module_order_number" => $request->module_order_number ?? null,
+                "service_fees" => $request->service_fees ?? null,
+                "total_tax" => $request->total_tax ?? 0,
+                "total_discount" => $request->total_discount ?? 0,
+                "print_type" => $request->user()?->cashier?->print_type ?? null,
                 'order_id' => $order['order']['id'],
-            ]); 
+            ]);
         }
         $locale = Setting::
         where("name", "setting_lang")
