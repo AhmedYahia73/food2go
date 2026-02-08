@@ -254,6 +254,7 @@ class CashierReportController extends Controller
             $expenses = $expenses; 
             $actual_total = $total_orders + $start_amount - $expenses;
             $data[] = [
+                "start_amount" => $start_amount,
                 "start_shift" => $cashier_shift->start_time,
                 "end_shift" => $cashier_shift->end_time,
                 "expenses" => $expenses, 
