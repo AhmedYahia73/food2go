@@ -2474,4 +2474,76 @@ class CashierMakeOrderController extends Controller
             "success" => "You have this premission"
         ]);
     }
+
+    public function take_away_dine_in(DineinItemRequest $request){
+        // /cashier/take_away_dine_in
+        // Keys
+        // amount, total_tax, total_discount, table_id
+        // notes
+        // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
+        // variation[{variation_id, option_id[]}], count}]
+  
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        if(!$request->user()->dine_in){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        }
+        $request->merge([
+            'branch_id' => $request->user()->branch_id,
+            'user_id' => 'empty',
+            'order_type' => 'dine_in',
+            'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
+        ]);
+        $order = $this->make_order_multi_cart($request);
+        if (isset($order['errors']) && !empty($order['errors'])) {
+            return response()->json($order, 400);
+        }
+        $this->cafe_table
+        ->where('id', $request->table_id)
+        ->update([
+            'current_status' => 'not_available_with_order'
+        ]);
+        $order_data = $this->order_format($order['payment'], 0);
+ 
+        // 'amount' => ['required', 'numeric'],
+        // 'total_tax' => ['required', 'numeric'],
+        // 'total_discount' => ['required', 'numeric'],
+        // 'captain_id' => ['sometimes', 'exists:captain_orders,id'],
+
+        // 'bundles' => ['array'],
+        // 'bundles.*.count' => ['required', "numeric"],
+        // 'bundles.*.id' => ['required', 'exists:bundles,id'],
+        // 'bundles.*.variation' => ['required', 'array'],
+        // 'bundles.*.variation.*.id' => ['required', 'exists:variation_products,id'],
+        // 'bundles.*.variation.*.options' => ['required', 'array'],
+        // 'bundles.*.variation.*.options.*' => ['required', 'exists:option_products,id'],
+
+        // 'products' => ['array'],
+        // 'products.*.product_id' => ['exists:products,id', 'required_unless:order_pending,1,true'],
+        // 'products.*.exclude_id.*' => ['exists:exclude_products,id'],
+        // 'products.*.extra_id.*' => ['exists:extra_products,id'],
+        // 'products.*.addons.*.addon_id' => ['exists:addons,id', 'required_unless:order_pending,1,true'],
+        // 'products.*.addons.*.count' => ['numeric', 'required_unless:order_pending,1,true'],
+        // 'products.*.variation.*.variation_id' => ['exists:variation_products,id'],
+        // 'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
+        // 'products.*.count' => ['numeric', 'required', 'required_unless:order_pending,1,true'],
+        // 'products.*.note' => ['sometimes'],
+
+        // 'products.*.price' => ['numeric', 'required_unless:order_pending,1,true'],
+        // 'products.*.addons.*.price' => ['numeric', 'required_unless:order_pending,1,true'],
+
+        // 'sechedule_slot_id' => ['exists:schedule_slots,id'],
+        return response()->json([ 
+            "cart_id" => $order['payment']->id
+        ]);
+    }
 }

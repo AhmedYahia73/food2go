@@ -66,6 +66,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->group(function(){
         Route::post('/view_user_order', 'view_user_order');
         Route::post('/free_discount_check', 'free_discount_check');
+        Route::post('/take_away_dine_in', 'take_away_dine_in');
         
         Route::post('/print_takeaway_order', 'print_takeaway_order');
 

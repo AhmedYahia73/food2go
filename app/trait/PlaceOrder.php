@@ -737,6 +737,287 @@ trait PlaceOrder
         ];
     }
 
+    public function make_order_multi_cart($request, $paymob = 0){
+        $branch_off = BranchOff::
+        where('branch_id', $request->branch_id)
+        ->get();
+        $products_off = $branch_off->pluck('product_id')->filter()->values()->all();
+        $options_off = $branch_off->pluck('option_id')->filter()->values()->all();
+        $categories_off = $branch_off->pluck('category_id')->filter()->values()->all();
+        $orderRequest = $request->only($this->paymentRequest); 
+        $user = auth()->user(); 
+        if ($request->table_id) {
+            $orderRequest['table_id'] = $request->table_id;
+        }
+        if ($request->captain_id) {
+            $orderRequest['captain_id'] = $request->captain_id;
+        }
+        if ($request->cashier_id) {
+            $orderRequest['cashier_id'] = $request->cashier_id;
+        }
+        if ($request->cashier_man_id) {
+            $orderRequest['cashier_man_id'] = $request->cashier_man_id;
+        }
+        if ($request->shift) { 
+            $orderRequest['shift'] = $request->shift;
+        }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $points = 0;
+        $items = [];
+        $order_details = [];
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $product) {
+                $item = $this->products
+                ->where('id', $product['product_id'])
+                ->first();
+                if (in_array($item->id, $products_off) || 
+                in_array($item->category_id, $categories_off) ||
+                in_array($item->sub_category_id, $categories_off)) {
+                    return [
+                        'errors' => 'Product ' . $item->name . 
+                        ' is not found at this branch you can change branch or order'
+                    ];
+                }
+                if (!empty($item)) {
+                    $items[] = [ "name"=> $item->name,
+                            "amount_cents"=> $item->price,
+                            "description"=> $item->description,
+                            "quantity"=> $product['count']
+                        ];
+                    $points += $item->points * $product['count'];
+                    if (isset($product['variation'])) {
+                        foreach ($product['variation'] as $variation) {
+                            if ($variation['option_id']) {
+                                foreach ($variation['option_id'] as $option_id) {
+                                    $option_points = $this->options
+                                    ->where('id', $option_id)
+                                    ->first();
+                                    if (in_array($option_points->id, $options_off)) {
+                                        return [
+                                            'errors' => 'Option ' . $option_points->name . ' at product ' . $item->name . 
+                                            ' is not found at this branch you can change branch or order'
+                                        ];
+                                    }
+                                    $points += $option_points->points * $product['count'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if($request->order_pending){
+            $orderRequest['order_active'] = 0;
+        }
+        
+        $orderRequest['points'] = $points;
+        if (isset($request->products)) {
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
+            foreach ($request->products as $key => $product) {
+                //$amount_product = 0;
+                $order = $this->order_cart
+                ->create($orderRequest);
+                if(!empty($user)){
+                    $user->save();
+                }
+                $order_details[$key]['extras'] = [];
+                $order_details[$key]['addons'] = [];
+                $order_details[$key]['excludes'] = [];
+                $order_details[$key]['product'] = [];
+                $order_details[$key]['variations'] = [];
+
+                $product_item = $this->products
+                ->where('id', $product['product_id'])
+                ->withLocale($locale)
+                ->first();
+                $product_item = collect([$product_item]);
+                $product_item = ProductResource::collection($product_item);
+                $product_item = count($product_item) > 0 ? $product_item[0] : null; 
+                $order_details[$key]['product'][] = [
+                    'product' => $product_item,
+                    'count' => $product['count'],
+                    'prepration' => 'watting',
+                    'notes' => isset($product['note']) ? $product['note'] : null,
+                ]; 
+                if (isset($product['exclude_id'])) {
+                    foreach ($product['exclude_id'] as $exclude) {
+                
+                        $exclude = $this->excludes
+                        ->where('id', $exclude)
+                        ->withLocale($locale)
+                        ->first();
+                        $exclude = collect([$exclude]);
+                        $exclude = ExcludeResource::collection($exclude);
+                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
+                        $order_details[$key]['excludes'][] = $exclude;
+                    }
+                } 
+                if (isset($product['addons'])) {
+                    foreach ($product['addons'] as $addon) {
+                        // $this->order_details
+                        // ->create([
+                        //     'order_id' => $order->id,
+                        //     'product_id' => $product['product_id'],
+                        //     'addon_id' => $addon['addon_id'],
+                        //     'count' => $product['count'],
+                        //     'addon_count' => $addon['count'],
+                        //     'product_index' => $key,
+                        // ]); // Add excludes
+                        
+                        $addon_item = $this->addons
+                        ->where('id', $addon['addon_id'])
+                        ->withLocale($locale)
+                        ->first();
+                        $addon_item = collect([$addon_item]);
+                        $addon_item = AddonResource::collection($addon_item);
+                        $addon_item = count($addon_item) > 0 ? $addon_item[0] : null; 
+                        $order_details[$key]['addons'][] = [
+                            'addon' => $addon_item,
+                            'count' => $addon['count']
+                        ];
+                    }
+                } 
+                if (isset($product['extra_id'])) {
+                    foreach ($product['extra_id'] as $extra) {
+                        // $this->order_details
+                        // ->create([
+                        //     'order_id' => $order->id,
+                        //     'product_id' => $product['product_id'],
+                        //     'extra_id' => $extra,
+                        //     'count' => $product['count'],
+                        //     'product_index' => $key,
+                        // ]); // Add extra
+                        $extra_item = $this->extras
+                        ->where('id', $extra)
+                        ->withLocale($locale)
+                        ->first();
+                        $extra_item = collect([$extra_item]);
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null; 
+                        $order_details[$key]['extras'][] = $extra_item; 
+                    }
+                }
+                if (isset($product['product_extra_id'])) {
+                    foreach ($product['product_extra_id'] as $extra) {
+                        // $this->order_details
+                        // ->create([
+                        //     'order_id' => $order->id,
+                        //     'product_id' => $product['product_id'],
+                        //     'extra_id' => $extra,
+                        //     'count' => $product['count'],
+                        //     'product_index' => $key,
+                        // ]); // Add extra
+                        
+                        $extra_item = $this->extras
+                        ->where('id', $extra)
+                        ->withLocale($locale)
+                        ->first();
+                        $extra_item = collect([$extra_item]);
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null; 
+                        $order_details[$key]['extras'][] = $extra_item;  
+                    }
+                }
+                if (isset($product['variation'])) {
+                    foreach ($product['variation'] as $variation) {
+                        // foreach ($variation['option_id'] as $option_id) {
+                        //     $this->order_details
+                        //     ->create([
+                        //         'order_id' => $order->id,
+                        //         'product_id' => $product['product_id'],
+                        //         'variation_id' => $variation['variation_id'],
+                        //         'option_id' => $option_id,
+                        //         'count' => $product['count'],
+                        //         'product_index' => $key,
+                        //     ]); // Add variations & options
+                        // }
+                        $variations = $this->variation
+                        ->where('id', $variation['variation_id'])
+                        ->withLocale($locale)
+                        ->first();
+                        $variations = collect([$variations]);
+                        $options = $this->options
+                        ->whereIn('id', $variation['option_id'])
+                        ->withLocale($locale)
+                        ->get();
+                        $variations = VariationResource::collection($variations);
+                        $variations = count($variations) > 0 ? $variations[0] : null;
+                        $options = OptionResource::collection($options);
+                        $order_details[$key]['variations'][] = [
+                            'variation' => $variations,
+                            'options' => $options,
+                        ];
+                        // $order_details[$key]['excludes'] = [];
+                        // $order_details[$key]['variations'] = [];
+                        //$amount_product += $this->options
+                        // ->whereIn('id', $variation['option_id'])
+                        // ->sum('price');
+                    }
+                }
+                $discount_item = $product_item->discount;
+                $tax_item = $product_item->tax;
+                $tax = $this->settings
+                ->where('name', 'tax')
+                ->orderByDesc('id')
+                ->first();
+                if (!empty($tax_item)) {
+                    if (!empty($tax)) {
+                        $tax = $tax->setting;
+                    }
+                    else {
+                        $tax = $this->settings
+                        ->create([
+                            'name' => 'tax',
+                            'setting' => 'included',
+                        ]);
+                        $tax = $tax->setting;
+                    }
+                    // if ($tax_item->type == 'precentage') { 
+                    //     $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
+                    // }
+                    // else{ 
+                    //     $amount_product = $amount_product + $tax_item->amount;
+                    // }
+                } 
+                $order->cart = json_encode($order_details);
+                $order->save();
+            }
+        }
+        if(isset($request->bundles)){
+            foreach ($request->bundles as $bundle_item) {
+                $order_cart_b = OrderCartBundle::create([
+                    "bundle_id" => $bundle_item["id"],
+                    "order_cart_id" => $order->id,
+                    "count" => $bundle_item["count"],
+                ]);
+                foreach ($bundle_item['variation'] as  $variation_element) {
+                    $order_variation = OrderCartBVariation::create([
+                        "order_cart_id" => $order->id,
+                        "variation_id" => $variation_element['id'],
+                        "order_cart_b_id" => $order_cart_b->id,
+                    ]);
+                    foreach ($variation_element['options'] as $option_element) {
+                        OrderCartBOption::create([
+                            "order_cart_id" => $order->id,
+                            "variation_bundle_id" => $order_variation->id,
+                            "option_id" => $option_element,
+                        ]);
+                    }
+                }
+            }
+        }
+        if($request->order_status){
+            $order->prepration_status = $request->order_status;
+        }
+
+        return [
+            'payment' => $order,
+            'orderItems' => $order_details,
+            'items' => $items,
+        ];
+    }
+
     public function order_format($order, $locale = "en"){
         $order_data = [];
         foreach ($order->cart ?? $order as $key => $item) {
