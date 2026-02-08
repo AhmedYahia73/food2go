@@ -195,7 +195,7 @@ class CashierReportController extends Controller
         $cashier_shift = $this->cashier_shift
         ->with('cashier_man')
         ->where("id" , $id)
-        ->get();  
+        ->first();  
         $shifts_data = [];
         $data = [];
         $last_date = null; 
