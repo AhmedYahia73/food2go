@@ -2511,39 +2511,9 @@ class CashierMakeOrderController extends Controller
         ->where('id', $request->table_id)
         ->update([
             'current_status' => 'not_available_with_order'
-        ]);
-        $order_data = $this->order_format($order['payment'], 0);
- 
-        // 'amount' => ['required', 'numeric'],
-        // 'total_tax' => ['required', 'numeric'],
-        // 'total_discount' => ['required', 'numeric'],
-        // 'captain_id' => ['sometimes', 'exists:captain_orders,id'],
-
-        // 'bundles' => ['array'],
-        // 'bundles.*.count' => ['required', "numeric"],
-        // 'bundles.*.id' => ['required', 'exists:bundles,id'],
-        // 'bundles.*.variation' => ['required', 'array'],
-        // 'bundles.*.variation.*.id' => ['required', 'exists:variation_products,id'],
-        // 'bundles.*.variation.*.options' => ['required', 'array'],
-        // 'bundles.*.variation.*.options.*' => ['required', 'exists:option_products,id'],
-
-        // 'products' => ['array'],
-        // 'products.*.product_id' => ['exists:products,id', 'required_unless:order_pending,1,true'],
-        // 'products.*.exclude_id.*' => ['exists:exclude_products,id'],
-        // 'products.*.extra_id.*' => ['exists:extra_products,id'],
-        // 'products.*.addons.*.addon_id' => ['exists:addons,id', 'required_unless:order_pending,1,true'],
-        // 'products.*.addons.*.count' => ['numeric', 'required_unless:order_pending,1,true'],
-        // 'products.*.variation.*.variation_id' => ['exists:variation_products,id'],
-        // 'products.*.variation.*.option_id.*' => ['exists:option_products,id'],
-        // 'products.*.count' => ['numeric', 'required', 'required_unless:order_pending,1,true'],
-        // 'products.*.note' => ['sometimes'],
-
-        // 'products.*.price' => ['numeric', 'required_unless:order_pending,1,true'],
-        // 'products.*.addons.*.price' => ['numeric', 'required_unless:order_pending,1,true'],
-
-        // 'sechedule_slot_id' => ['exists:schedule_slots,id'],
+        ]); 
         return response()->json([ 
-            "cart_id" => $order['payment']->id
+            "cart_id" => $order['payment']
         ]);
     }
 }

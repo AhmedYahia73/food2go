@@ -741,6 +741,7 @@ trait PlaceOrder
         $branch_off = BranchOff::
         where('branch_id', $request->branch_id)
         ->get();
+        $ids = [];
         $products_off = $branch_off->pluck('product_id')->filter()->values()->all();
         $options_off = $branch_off->pluck('option_id')->filter()->values()->all();
         $categories_off = $branch_off->pluck('category_id')->filter()->values()->all();
@@ -982,6 +983,7 @@ trait PlaceOrder
                 } 
                 $order->cart = json_encode($order_details);
                 $order->save();
+                $ids[] = $order->id;
             }
         }
         if(isset($request->bundles)){
