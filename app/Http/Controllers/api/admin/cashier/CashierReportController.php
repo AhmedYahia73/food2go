@@ -122,15 +122,9 @@ class CashierReportController extends Controller
         $last_date = null;
         foreach ($cashier_shift as $item) { 
        
-            $shifts_data = $this->cashier_shift
-            ->whereDate("start_time" , $request->date)
-            ->get();
-            $shift_ids = $shifts_data
-            ->pluck("shift")
-            ->toArray();
             $total_orders = Order::
             select("id") 
-            ->whereIn('shift', $shift_ids)
+            ->whereIn('shift', $item->shift)
             ->where("is_void", 0) 
             ->where("due", 0)
             ->where("due_module", 0)
@@ -153,7 +147,7 @@ class CashierReportController extends Controller
             ->sum('amount');
             $count_orders = Order::
             select("id") 
-            ->whereIn('shift', $shift_ids)
+            ->whereIn('shift', $item->shift)
             ->where("is_void", 0) 
             ->where("due", 0)
             ->where("due_module", 0)
@@ -188,6 +182,7 @@ class CashierReportController extends Controller
                 "expenses" => $expenses, 
                 "actual_total" => $actual_total,
                 "total_orders" => $total_orders,
+                "start_amount" => $start_amount,
                 "count_orders" => $count_orders,
             ];
         } 
