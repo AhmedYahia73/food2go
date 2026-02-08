@@ -1014,7 +1014,7 @@ trait PlaceOrder
         }
 
         return [
-            'payment' => $order,
+            'payment' => $ids,
             'orderItems' => $order_details,
             'items' => $items,
         ];
