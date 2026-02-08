@@ -107,6 +107,7 @@ use App\Http\Controllers\api\admin\purchases\StoreManController;
 use App\Http\Controllers\api\admin\reciept_design\ReciptDesignController;
 
 use App\Http\Controllers\api\cashier\reports\CashierReportsController;
+use App\Http\Controllers\api\admin\cashier\CashierReportController as AdminCashierReportController;
 
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 use App\Http\Controllers\api\admin\table\TableOrderController;
@@ -1291,14 +1292,17 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         });
     });
 
+    Route::controller(AdminCashierReportController::class)
+    ->prefix('/reports')->group(function(){
+        Route::post('cashier_reports', 'cashier_reports');
+        Route::post('shifts_data', 'shifts_data');
+        Route::get('shift_details/{id}', 'shift_details');
+    }); 
+
     Route::controller(CashierReportsController::class)
     ->prefix('/reports')->group(function(){
         Route::get('shift_branch', 'shift_branch_reports');
         Route::get('shift_all_branch', 'shift_reports');
-        
-        Route::post('cashier_reports', 'cashier_reports');
-        Route::post('shifts_data', 'shifts_data');
-        Route::get('shift_details/{id}', 'shift_details');
 
         Route::get('shift_cashier_reports/{id}', 'shift_cashier_reports');
 
