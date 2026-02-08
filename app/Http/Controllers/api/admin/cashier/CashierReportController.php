@@ -124,7 +124,7 @@ class CashierReportController extends Controller
        
             $total_orders = Order::
             select("id") 
-            ->whereIn('shift', $item->shift)
+            ->where('shift', $item->shift)
             ->where("is_void", 0) 
             ->where("due", 0)
             ->where("due_module", 0)
@@ -147,7 +147,7 @@ class CashierReportController extends Controller
             ->sum('amount');
             $count_orders = Order::
             select("id") 
-            ->whereIn('shift', $item->shift)
+            ->where('shift', $item->shift)
             ->where("is_void", 0) 
             ->where("due", 0)
             ->where("due_module", 0)
