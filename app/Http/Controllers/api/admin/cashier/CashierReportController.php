@@ -45,16 +45,13 @@ class CashierReportController extends Controller
         $last_date = null;
         foreach ($cashier_shift as $item) {
             $date_format = Carbon::parse($item->start_time)->format("Y-m-d");
-
-            $shifts_data = $this->cashier_shift
-            ->whereDate("start_time" , $item->start_time)
-            ->get();
+ 
             $shift_num = $shifts_data
             ->pluck("shift")
             ->toArray();
             $total_orders = Order::
             select("id") 
-            ->whereIn('shift', $shift_num)
+            ->whereIn('shift', $item->shift)
             ->where("is_void", 0) 
             ->where("due", 0)
             ->where("due_module", 0)
@@ -77,9 +74,10 @@ class CashierReportController extends Controller
             ->sum('amount');
             
             $expenses = $this->expenses
-            ->whereDate('created_at', $date_format)
+            ->where('created_at', ">=", $item->from_date)
+            ->where('created_at', "<=", $item->to_date)
             ->sum('amount');
-            $start_amount = $shifts_data->sum('amount') ?? 0; 
+            $start_amount = $item->amount ?? 0; 
             $expenses = $expenses; 
             $actual_total = $total_orders + $start_amount - $expenses;
             if($last_date == $date_format){ 
