@@ -79,6 +79,7 @@ class CashierReportController extends Controller
             $actual_total = $total_orders + $start_amount - $expenses;
             if($last_date == $date_format){ 
                 $data[$date_format] = [
+                    "start_amount" => $start_amount + $data[$date_format]['start_amount'],
                     "expenses" => $expenses + $data[$date_format]['expenses'],
                     "date" => $last_date,
                     "actual_total" => $actual_total + $data[$date_format]['actual_total'],
@@ -87,6 +88,7 @@ class CashierReportController extends Controller
             }
             else{ 
                 $data[$date_format] = [
+                    "start_amount" => $start_amount,
                     "expenses" => $expenses,
                     "date" => $last_date,
                     "actual_total" => $actual_total,
