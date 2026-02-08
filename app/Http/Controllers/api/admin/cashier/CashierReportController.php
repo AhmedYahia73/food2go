@@ -35,8 +35,8 @@ class CashierReportController extends Controller
         $cashier_balance = $this->cashier_balance;
         $cashier_shift = $this->cashier_shift
         ->with('cashier_man')
-        ->whereDate("start_time", "<=", $request->from_date ?? Carbon::parse("1999-05-05"))
-        ->whereDate("start_time", ">=", now())
+        ->whereDate("start_time", ">=", $request->from_date ?? Carbon::parse("1999-05-05"))
+        ->whereDate("start_time", "<=", $request->to_date ?? now())
         ->get();  
         $shifts_data = [];
         $data = [];
