@@ -42,7 +42,7 @@ class CashierReportController extends Controller
         $data = [];
         $last_date = null;
         foreach ($cashier_shift as $item) {
-            $date_format = $item->start_time->format("Y-m-d");
+            $date_format = Carbon::parse($item->start_time)->format("Y-m-d");
             if($last_date == $date_format){
                 continue;
             }
