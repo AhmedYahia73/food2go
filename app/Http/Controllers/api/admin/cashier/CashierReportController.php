@@ -45,10 +45,7 @@ class CashierReportController extends Controller
         $last_date = null;
         foreach ($cashier_shift as $item) {
             $date_format = Carbon::parse($item->start_time)->format("Y-m-d");
-            if($last_date == $date_format){
-                continue;
-            }
-            $last_date = $date_format;
+
             $shifts_data = $this->cashier_shift
             ->whereDate("start_time" , $item->start_time)
             ->get();
@@ -85,17 +82,29 @@ class CashierReportController extends Controller
             $start_amount = $shifts_data->sum('amount') ?? 0; 
             $expenses = $expenses; 
             $actual_total = $total_orders + $start_amount - $expenses;
-            $data[] = [
-                "expenses" => $expenses,
-                "date" => $last_date,
-                "actual_total" => $actual_total,
-                "total_orders" => $total_orders,
-                "shift_num" => $shift_num
-            ];
+            if($last_date == $date_format){ 
+                $data[$date_format] = [
+                    "expenses" => $expenses + $data[$date_format]['expenses'],
+                    "date" => $last_date,
+                    "actual_total" => $actual_total + $data[$date_format]['actual_total'],
+                    "total_orders" => $total_orders + $data[$date_format]['total_orders'],
+                    "shift_num" => $shift_num
+                ];
+            }
+            else{ 
+                $data[$date_format] = [
+                    "expenses" => $expenses,
+                    "date" => $last_date,
+                    "actual_total" => $actual_total,
+                    "total_orders" => $total_orders,
+                    "shift_num" => $shift_num
+                ];
+            }
+            $last_date = $date_format;
         } 
 
         return response()->json([
-            'data' => $data,
+            'data' => array_values($data),
         ]);
     }
 
