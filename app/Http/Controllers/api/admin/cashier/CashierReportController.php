@@ -46,12 +46,9 @@ class CashierReportController extends Controller
         foreach ($cashier_shift as $item) {
             $date_format = Carbon::parse($item->start_time)->format("Y-m-d");
  
-            $shift_num = $shifts_data
-            ->pluck("shift")
-            ->toArray();
             $total_orders = Order::
             select("id") 
-            ->whereIn('shift', $item->shift)
+            ->where('shift', $item->shift)
             ->where("is_void", 0) 
             ->where("due", 0)
             ->where("due_module", 0)
