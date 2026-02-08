@@ -71,8 +71,8 @@ class CashierReportController extends Controller
             ->sum('amount');
             
             $expenses = $this->expenses
-            ->where('created_at', ">=", $item->from_date)
-            ->where('created_at', "<=", $item->to_date)
+            ->where('created_at', ">=", $item->start_time)
+            ->where('created_at', "<=", $item->end_time)
             ->sum('amount');
             $start_amount = $item->amount ?? 0; 
             $expenses = $expenses; 
