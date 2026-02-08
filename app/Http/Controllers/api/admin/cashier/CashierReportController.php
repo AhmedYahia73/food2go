@@ -72,7 +72,7 @@ class CashierReportController extends Controller
             
             $expenses = $this->expenses
             ->where('created_at', ">=", $item->start_time)
-            ->where('created_at', "<=", $item->end_time)
+            ->where('created_at', "<=", $item->end_time ?? Carbon::parse($item->start_time)->addHours(10))
             ->sum('amount');
             $start_amount = $item->amount ?? 0; 
             $expenses = $expenses; 
