@@ -35,127 +35,235 @@ class CashierReportController extends Controller
         $cashier_balance = $this->cashier_balance;
         $cashier_shift = $this->cashier_shift
         ->with('cashier_man')
-        ->get();
-        $orders = $this->orders
-        ->whereNotNull('shift')
-        ->where('order_type', '!=', 'delivery')
-        ->orderByDesc('shift')
-        ->orderBy('payment_method_id')
-        ->where('status', 1)
-        ->get();
-    //    return response()->json([
-    //     'orders' => $orders
-    //    ]);
+        ->whereDate("start_time", "<=", $request->from_date ?? Carbon::parse("1999-05-05"))
+        ->whereDate("start_time", ">=", now())
+        ->get();  
         $shifts_data = [];
+        $data = [];
+        $last_date = null;
         foreach ($cashier_shift as $item) {
-            $orders_shift = $orders->where('shift', $item->shift)->values();
-            $products_shift = collect([]);
-            foreach ($orders_shift as $key => $element) {
-                $products_element = collect($element->order_details)->count() > 0
-                ?collect($element->order_details)[0]?->product : null;
-                $products_element = collect($products_element)
-                ->map(function($item){
-                    return [
-                        'product_id' => $item?->product?->id ?? null,
-                        'product_item' => $item?->product?->name ?? null,
-                        'count' => $item?->count ?? 0,
-                    ];
-                });
-                if ($products_element->count() > 0) {
-                    $products_shift[] = $products_element;
-                }
+            $date_format = $item->start_time->format("Y-m-d");
+            if($last_date == $date_format){
+                continue;
             }
-            $products_shift = collect($products_shift)->flatten(1);
-            $products_items = [];
-            foreach ($products_shift as $element) {
-                if(isset($products_items[$element['product_id']])){
-                    $products_items[$element['product_id']] = [
-                        'product_id' => $element?->product?->id ?? null,
-                        'product_item' => $element?->product?->name ?? null,
-                        'count' => ($element?->count ?? 0) +( $products_items[$element['product_id']]?->count ?? 0),
-                    ];
-                }
-                else{
-                    $products_items[$element['product_id']] = [
-                        'product_id' => $element?->product?->id ?? null,
-                        'product_item' => $element?->product?->name ?? null,
-                        'count' => $element?->count ?? 0,
-                    ];
-                }
-            }
-            $products_items = collect($products_items)->sortByDesc('count');
-            $financial_account = $this->financial_account
-            ->where('status', 1)
+            $last_date = $date_format;
+            $shifts_data = $this->cashier_shift
+            ->whereDate("start_time" , $item->start_time)
             ->get();
-            $shifts_data[$item->shift] = [
-                'shift' => $item,
-                'orders' => $orders_shift,
-                'cashier_men' => $cashier_shift
-                ->where('shift', $item->shift)
-                ->pluck('cashier_man'),
-                'orders_count' => count($orders_shift),
-                'avarage_order' => count($orders_shift) > 0 ?
-                 $orders_shift->sum('amount') / count($orders_shift) : 0,
-                'product_items' => $products_items->values(),
-                'products_items_count' => count($products_items),
-                'cashier_men' => $cashier_shift
-                ->where('shift', $item->shift)
-                ->values()->map(function($cashier_item) use($orders_shift, $financial_account, $item, $cashier_balance){
-                    $shift_num = $item->shift;
-                    $cashier_item->cashier_orders = 
-                    $orders_shift->where('cashier_man_id', $cashier_item->cashier_man_id)
-                    ->values();
-                    $cashier_item->total_orders = $cashier_item->cashier_orders->sum('amount') + 
-                    $cashier_balance->where('shift_number', $shift_num)->sum('balance');
-                    // + delivery cash
-                    $financial_accounts_data = [];
-                    foreach ($financial_account as $item) {
-                        $financial_order = $this->order_financial
-                            ->with('order')
-                            ->where('financial_id', $item->id)
-                            ->whereHas('order', function($query) use($shift_num) {
-                                $query->where('shift', $shift_num);
-                            })
-                            ->get();
-                        $financial_accounts_data[] = [
-                            'financial_account' => $item->name,
-                            'amount' => ($financial_order?->sum('amount') ?? 0),
-                            'orders' => $financial_order?->pluck('order') ?? [],
-                        ];
-                    }
-                    $cashier_item->financial_accounts_data = $financial_accounts_data;
-
-                    return $cashier_item;
-                }),
-
+            $shift_ids = $shifts_data
+            ->pluck("shift")
+            ->toArray();
+            $total_orders = Order::
+            select("id") 
+            ->whereIn('shift', $shift_ids)
+            ->where("is_void", 0) 
+            ->where("due", 0)
+            ->where("due_module", 0)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            }) 
+            ->where(function($query) {
+                $query->where('due_from_delivery', 0)
+                ->where('order_type', "delivery")
+                ->orwhere('due_from_delivery', 1)
+                ->where('order_type', "!=", "delivery");
+            }) 
+            ->where(function($query){
+                $query->where('pos', 1)
+                ->orWhere('pos', 0)
+                ->where('order_status', '!=', 'pending');
+            }) 
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->sum('amount');
+            
+            $expenses = $this->expenses
+            ->whereDate('created_at', $item->start_time)
+            ->sum('amount');
+            $start_amount = $shifts_data->sum('amount') ?? 0; 
+            $expenses = $expenses; 
+            $actual_total = $total_orders + $start_amount - $expenses;
+            $data[] = [
+                "expenses" => $expenses,
+                "date" => $last_date,
+                "actual_total" => $actual_total,
+                "total_orders" => $total_orders,
             ];
-        }
-        $shifts_data = collect($shifts_data)->values()
-        ->map(function($element) use($financial_account){
-            $financial_accounts_data = [];
-            $financial_account_total = [];
-            foreach ($financial_account as $item) {
-                $cashier_orders = $this->orders
-                ->where('shift', $element['shift'])
-                ->whereHas('financial_accountigs', function($query) use($item) {
-                    $query->where('finantiol_acountings.id', $item->id);
-                })
-                ->with('financial_accountigs')
-                ->get();
-                $financial_account_total[] = [
-                    'financial_account' => $item->name,
-                    'amount' => $cashier_orders
-                    ?->pluck('financial_accountigs')
-                    ?->sum('amount') ?? 0,
-                    'orders' => $cashier_orders
-                ];
-            }
-            $element['financial_account_total'] = $financial_account_total;
-            return $element;
-        });
+        } 
 
         return response()->json([
-            'shifts_data' => $shifts_data,
+            'data' => $data,
+        ]);
+    }
+
+    public function shifts_data(Request $request){
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $cashier_balance = $this->cashier_balance;
+        $cashier_shift = $this->cashier_shift
+        ->with('cashier_man')
+        ->whereDate("start_time" , $request->date)
+        ->get();  
+        $shifts_data = [];
+        $data = [];
+        $last_date = null;
+        foreach ($cashier_shift as $item) { 
+       
+            $shifts_data = $this->cashier_shift
+            ->whereDate("start_time" , $request->date)
+            ->get();
+            $shift_ids = $shifts_data
+            ->pluck("shift")
+            ->toArray();
+            $total_orders = Order::
+            select("id") 
+            ->whereIn('shift', $shift_ids)
+            ->where("is_void", 0) 
+            ->where("due", 0)
+            ->where("due_module", 0)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            }) 
+            ->where(function($query) {
+                $query->where('due_from_delivery', 0)
+                ->where('order_type', "delivery")
+                ->orwhere('due_from_delivery', 1)
+                ->where('order_type', "!=", "delivery");
+            }) 
+            ->where(function($query){
+                $query->where('pos', 1)
+                ->orWhere('pos', 0)
+                ->where('order_status', '!=', 'pending');
+            }) 
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->sum('amount');
+            $count_orders = Order::
+            select("id") 
+            ->whereIn('shift', $shift_ids)
+            ->where("is_void", 0) 
+            ->where("due", 0)
+            ->where("due_module", 0)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            }) 
+            ->where(function($query) {
+                $query->where('due_from_delivery', 0)
+                ->where('order_type', "delivery")
+                ->orwhere('due_from_delivery', 1)
+                ->where('order_type', "!=", "delivery");
+            }) 
+            ->where(function($query){
+                $query->where('pos', 1)
+                ->orWhere('pos', 0)
+                ->where('order_status', '!=', 'pending');
+            }) 
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->count();
+            
+            $expenses = $this->expenses
+            ->whereDate('created_at', $item->start_time)
+            ->sum('amount');
+            $start_amount = $shifts_data->sum('amount') ?? 0; 
+            $expenses = $expenses; 
+            $actual_total = $total_orders + $start_amount - $expenses;
+            $data[] = [
+                "id" => $item->id,
+                "start_shift" => $item->start_time,
+                "end_shift" => $item->end_time,
+                "expenses" => $expenses, 
+                "actual_total" => $actual_total,
+                "total_orders" => $total_orders,
+                "count_orders" => $count_orders,
+            ];
+        } 
+
+        return response()->json([
+            'data' => $data,
+        ]);
+    }
+
+    public function shift_details(Request $request, $id){
+  
+        $cashier_shift = $this->cashier_shift
+        ->with('cashier_man')
+        ->where("id" , $id)
+        ->get();  
+        $shifts_data = [];
+        $data = [];
+        $last_date = null; 
+
+        $total_orders = Order::
+        select("id") 
+        ->where('shift', $cashier_shift->shift)
+        ->where("is_void", 0) 
+        ->where("due", 0)
+        ->where("due_module", 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where(function($query) {
+            $query->where('due_from_delivery', 0)
+            ->where('order_type', "delivery")
+            ->orwhere('due_from_delivery', 1)
+            ->where('order_type', "!=", "delivery");
+        }) 
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        }) 
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->sum('amount');
+            $count_orders = Order::
+            select("id") 
+            ->whereIn('shift', $cashier_shift->shift)
+            ->where("is_void", 0) 
+            ->where("due", 0)
+            ->where("due_module", 0)
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            }) 
+            ->where(function($query) {
+                $query->where('due_from_delivery', 0)
+                ->where('order_type', "delivery")
+                ->orwhere('due_from_delivery', 1)
+                ->where('order_type', "!=", "delivery");
+            }) 
+            ->where(function($query){
+                $query->where('pos', 1)
+                ->orWhere('pos', 0)
+                ->where('order_status', '!=', 'pending');
+            }) 
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->count();
+            
+            $expenses = $this->expenses
+            ->whereDate('created_at', $cashier_shift->start_time)
+            ->sum('amount');
+            $start_amount = $shifts_data->sum('amount') ?? 0; 
+            $expenses = $expenses; 
+            $actual_total = $total_orders + $start_amount - $expenses;
+            $data[] = [
+                "start_shift" => $cashier_shift->start_time,
+                "end_shift" => $cashier_shift->end_time,
+                "expenses" => $expenses, 
+                "actual_total" => $actual_total,
+                "total_orders" => $total_orders,
+                "count_orders" => $count_orders,
+            ]; 
+
+        return response()->json([
+            'data' => $data,
         ]);
     }
 
