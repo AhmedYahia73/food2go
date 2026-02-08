@@ -821,11 +821,11 @@ trait PlaceOrder
                 if(!empty($user)){
                     $user->save();
                 }
-                $order_details[$key]['extras'] = [];
-                $order_details[$key]['addons'] = [];
-                $order_details[$key]['excludes'] = [];
-                $order_details[$key]['product'] = [];
-                $order_details[$key]['variations'] = [];
+                $order_details[0]['extras'] = [];
+                $order_details[0]['addons'] = [];
+                $order_details[0]['excludes'] = [];
+                $order_details[0]['product'] = [];
+                $order_details[0]['variations'] = [];
 
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
@@ -834,7 +834,7 @@ trait PlaceOrder
                 $product_item = collect([$product_item]);
                 $product_item = ProductResource::collection($product_item);
                 $product_item = count($product_item) > 0 ? $product_item[0] : null; 
-                $order_details[$key]['product'][] = [
+                $order_details[0]['product'][] = [
                     'product' => $product_item,
                     'count' => $product['count'],
                     'prepration' => 'watting',
@@ -850,7 +850,7 @@ trait PlaceOrder
                         $exclude = collect([$exclude]);
                         $exclude = ExcludeResource::collection($exclude);
                         $exclude = count($exclude) > 0 ? $exclude[0] : null;
-                        $order_details[$key]['excludes'][] = $exclude;
+                        $order_details[0]['excludes'][] = $exclude;
                     }
                 } 
                 if (isset($product['addons'])) {
@@ -872,7 +872,7 @@ trait PlaceOrder
                         $addon_item = collect([$addon_item]);
                         $addon_item = AddonResource::collection($addon_item);
                         $addon_item = count($addon_item) > 0 ? $addon_item[0] : null; 
-                        $order_details[$key]['addons'][] = [
+                        $order_details[0]['addons'][] = [
                             'addon' => $addon_item,
                             'count' => $addon['count']
                         ];
@@ -895,7 +895,7 @@ trait PlaceOrder
                         $extra_item = collect([$extra_item]);
                         $extra_item = ExtraResource::collection($extra_item);
                         $extra_item = count($extra_item) > 0 ? $extra_item[0] : null; 
-                        $order_details[$key]['extras'][] = $extra_item; 
+                        $order_details[0]['extras'][] = $extra_item; 
                     }
                 }
                 if (isset($product['product_extra_id'])) {
@@ -916,7 +916,7 @@ trait PlaceOrder
                         $extra_item = collect([$extra_item]);
                         $extra_item = ExtraResource::collection($extra_item);
                         $extra_item = count($extra_item) > 0 ? $extra_item[0] : null; 
-                        $order_details[$key]['extras'][] = $extra_item;  
+                        $order_details[0]['extras'][] = $extra_item;  
                     }
                 }
                 if (isset($product['variation'])) {
@@ -944,12 +944,12 @@ trait PlaceOrder
                         $variations = VariationResource::collection($variations);
                         $variations = count($variations) > 0 ? $variations[0] : null;
                         $options = OptionResource::collection($options);
-                        $order_details[$key]['variations'][] = [
+                        $order_details[0]['variations'][] = [
                             'variation' => $variations,
                             'options' => $options,
                         ];
-                        // $order_details[$key]['excludes'] = [];
-                        // $order_details[$key]['variations'] = [];
+                        // $order_details[0]['excludes'] = [];
+                        // $order_details[0]['variations'] = [];
                         //$amount_product += $this->options
                         // ->whereIn('id', $variation['option_id'])
                         // ->sum('price');
