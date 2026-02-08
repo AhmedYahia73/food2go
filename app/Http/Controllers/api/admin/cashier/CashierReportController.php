@@ -52,12 +52,12 @@ class CashierReportController extends Controller
             $shifts_data = $this->cashier_shift
             ->whereDate("start_time" , $item->start_time)
             ->get();
-            $shift_ids = $shifts_data
+            $shift_num = $shifts_data
             ->pluck("shift")
             ->toArray();
             $total_orders = Order::
             select("id") 
-            ->whereIn('shift', $shift_ids)
+            ->whereIn('shift', $shift_num)
             ->where("is_void", 0) 
             ->where("due", 0)
             ->where("due_module", 0)
@@ -80,7 +80,7 @@ class CashierReportController extends Controller
             ->sum('amount');
             
             $expenses = $this->expenses
-            ->whereDate('created_at', $item->start_time)
+            ->whereDate('created_at', $date_format)
             ->sum('amount');
             $start_amount = $shifts_data->sum('amount') ?? 0; 
             $expenses = $expenses; 
@@ -90,6 +90,7 @@ class CashierReportController extends Controller
                 "date" => $last_date,
                 "actual_total" => $actual_total,
                 "total_orders" => $total_orders,
+                "shift_num" => $shift_num
             ];
         } 
 
