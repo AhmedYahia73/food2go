@@ -168,9 +168,7 @@ class CashierReportController extends Controller
             }) 
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->count();
-            
-            $expenses = $this->expenses
-            ->whereDate('created_at', $item->start_time)
+            $expenses = Expense::whereDate('created_at', $item->start_time)
             ->sum('amount');
             $start_amount = $shifts_data->sum('amount') ?? 0; 
             $expenses = $expenses; 
