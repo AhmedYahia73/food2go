@@ -250,7 +250,7 @@ class CashierReportController extends Controller
             $expenses = $this->expenses
             ->whereDate('created_at', $cashier_shift->start_time)
             ->sum('amount');
-            $start_amount = $shifts_data->sum('amount') ?? 0; 
+            $start_amount = $cashier_shift->amount ?? 0; 
             $expenses = $expenses; 
             $actual_total = $total_orders + $start_amount - $expenses;
             $data[] = [
