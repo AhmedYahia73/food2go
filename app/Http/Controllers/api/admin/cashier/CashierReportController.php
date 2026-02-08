@@ -83,7 +83,7 @@ class CashierReportController extends Controller
                     "date" => $last_date,
                     "actual_total" => $actual_total + $data[$date_format]['actual_total'],
                     "total_orders" => $total_orders + $data[$date_format]['total_orders'],
-                    "shift_num" => $shift_num
+                    "shift_num" => $item->shift
                 ];
             }
             else{ 
@@ -92,7 +92,7 @@ class CashierReportController extends Controller
                     "date" => $last_date,
                     "actual_total" => $actual_total,
                     "total_orders" => $total_orders,
-                    "shift_num" => $shift_num
+                    "shift_num" => $item->shift
                 ];
             }
             $last_date = $date_format;
