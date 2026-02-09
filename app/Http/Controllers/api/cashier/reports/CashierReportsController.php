@@ -824,7 +824,7 @@ class CashierReportsController extends Controller
         })
         ->sum("amount");
         $expenses = $this->expenses
-        ->where("financial_account_id", $financial->id)
+        ->where("financial_account_id", $financial->id ?? 0)
         ->where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
         ->sum('amount');
@@ -2261,7 +2261,7 @@ class CashierReportsController extends Controller
             // For each captain, collect all financials and count orders per financial
             $financialOrders = $orders
                 ->flatMap(fn($order) => $order->financials->map(fn($financial) => [
-                    'id'       => $financial->id,
+                    'id'       => $financial->id ?? 0,
                     'name'     => $financial->name,
                     'order_id' => $order->id,
                 ]))
