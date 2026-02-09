@@ -813,7 +813,7 @@ class CashierReportsController extends Controller
         })
         ->first();    
         $order_financial = OrderFinancial::
-        where("financial_id", $financial->id)
+        where("financial_id", $financial->id ?? 0)
         ->whereHas("order", function($query){
             $query
             ->where('cashier_man_id', auth()->user()->id)
