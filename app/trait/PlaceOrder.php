@@ -1146,7 +1146,21 @@ trait PlaceOrder
                 });
             })
             ->where('branch_id', auth()->user()->branch_id)
+            ->with(["printer" => function($query) use($order){
+                $query->whereHas("group_product", function($q2) use($order){
+                    $q2->where("group_products.id", $order->module_id);
+                })
+                ->orWhereJsonContains("module", $order->order_type);
+            }])
             ->first();
+            $printers = $kitchen->printer;
+            if($printers->count() > 0){ 
+                $kitchen->print_name = $printers[0]->print_name;
+                $kitchen->print_ip = $printers[0]->print_ip;
+                $kitchen->print_status = $printers[0]->print_status;
+                $kitchen->print_type = $printers[0]->print_type;
+                $kitchen->print_port = $printers[0]->print_port;
+            }
             if(!empty($kitchen) && $kitchen->type == "kitchen"){ 
                 $locale = Setting::
                 where("name", "kitchen_lang")

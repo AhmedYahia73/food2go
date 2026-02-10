@@ -600,6 +600,7 @@ class LoginController extends Controller
         ]);
         $request->user()->shift_number = null;
         $request->user()->save();
+        $request->user()->tokens()->delete();
 
         return response()->json([
             'success' => 'You close shift success'

@@ -163,6 +163,8 @@ use App\Http\Controllers\api\admin\product_pos_pricing\ProductPOSPricingControll
 
 use App\Http\Controllers\api\admin\cashier\CashierGapController;
 
+use App\Http\Controllers\api\admin\pos\kitchen\KitchenPrinterController;
+
 use App\Models\TimeSittings;
 use App\Models\Order;
 use Illuminate\Support\Facades\App;
@@ -274,6 +276,17 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     // جديد تحت التجربة 
     // DeliveryBalanceGate,
     // SocialMediaController
+
+
+    Route::controller(KitchenPrinterController::class)
+    ->prefix('kitchen_printer')->group(function(){
+        Route::get('/lists', 'lists');
+        Route::get('/item/{id}', 'index'); 
+        Route::post('/add', 'store');
+        Route::post('/update/{id}', 'update');
+        Route::delete('/delete/{id}', 'destroy');
+        Route::get('/{id}', 'index'); 
+    });
 
     Route::controller(CashierGapController::class)
     ->prefix('cashier_gap')->group(function(){

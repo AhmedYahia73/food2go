@@ -25,6 +25,10 @@ class Kitchen extends Model
         'status',
     ];
 
+    public function printer(){
+        return $this->hasMany(PrinterKitchen::class, "kitchen_id");
+    }
+
     public function products(){
         return $this->belongsToMany(Product::class, 'kitchen_products');
     }
@@ -40,6 +44,7 @@ class Kitchen extends Model
     protected $hidden = [
         'password', 
         'remember_token',
+        'pivot', 
     ];
 
     protected function casts(): array
