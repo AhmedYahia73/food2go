@@ -1164,7 +1164,7 @@ class CashierMakeOrderController extends Controller
                 $query->orWhereJsonContains("module", "dine_in");
             }])
             ->first(); 
-            $printers = $kitchen?->printer ?? [];
+            $printers = $kitchen?->printer ?? collect([]);
             if($printers->count() > 0){ 
                 $kitchen->print_name = $printers[0]->print_name;
                 $kitchen->print_ip = $printers[0]->print_ip;
