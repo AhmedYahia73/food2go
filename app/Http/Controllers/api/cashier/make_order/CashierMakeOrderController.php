@@ -1184,7 +1184,6 @@ class CashierMakeOrderController extends Controller
                     });
                 })
                 ->where('branch_id', $request->user()->branch_id)
-                ->get()
                 ->with(["printer" => function($query){
                     $query->orWhereJsonContains("module", "dine_in");
                 }])
