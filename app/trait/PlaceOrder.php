@@ -1267,7 +1267,24 @@ trait PlaceOrder
                     });
                 })
                 ->where('branch_id', auth()->user()->branch_id)
-                ->get();
+				->with(["printer" => function($query) use($order){
+					$query->whereHas("group_product", function($q2) use($order){
+						$q2->where("group_products.id", $order->module_id);
+					})
+					->orWhereJsonContains("module", $order->order_type);
+				}])
+				->get()
+				->map(function($item){
+					$printers = $item->printer;
+					if($printers->count() > 0){ 
+						$item->print_name = $printers[0]->print_name;
+						$item->print_ip = $printers[0]->print_ip;
+						$item->print_status = $printers[0]->print_status;
+						$item->print_type = $printers[0]->print_type;
+						$item->print_port = $printers[0]->print_port;
+					}
+					return $item;
+				});
                 foreach ($kitchens as $kitchen) {
                     $kitchen_items[$kitchen->id] = $kitchen;
                     $kitchen_order[$kitchen->id][] = $order_data[$key];

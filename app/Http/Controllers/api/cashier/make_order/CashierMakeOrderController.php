@@ -1184,7 +1184,23 @@ class CashierMakeOrderController extends Controller
                     });
                 })
                 ->where('branch_id', $request->user()->branch_id)
-                ->get();
+                ->get()
+                ->with(["printer" => function($query){
+                    $query->orWhereJsonContains("module", "dine_in");
+                }])
+                ->get()
+                ->map(function($item){ 
+                    $printers = $item->printer;
+                    if($printers->count() > 0){ 
+                        $item->print_name = $printers[0]->print_name;
+                        $item->print_ip = $printers[0]->print_ip;
+                        $item->print_status = $printers[0]->print_status;
+                        $item->print_type = $printers[0]->print_type;
+                        $item->print_port = $printers[0]->print_port;
+                    }
+
+                    return $item;
+                }); 
                 $element['cart_id'] = $value['cart_id']; 
                 $element['count'] = $value['count']; 
                 foreach ($kitchens as $kitchen) {
