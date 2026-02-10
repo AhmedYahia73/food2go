@@ -281,7 +281,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(KitchenPrinterController::class)
     ->prefix('kitchen_printer')->group(function(){
         Route::get('/lists', 'lists');
-        Route::get('/item/{id}', 'index'); 
+        Route::get('/item/{id}', 'show'); 
         Route::post('/add', 'store');
         Route::post('/update/{id}', 'update');
         Route::delete('/delete/{id}', 'destroy');
