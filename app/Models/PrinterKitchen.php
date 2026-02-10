@@ -28,7 +28,7 @@ class PrinterKitchen extends Model
     }
 
     public function group_product(){
-        return $this->belongsToMany(GroupProduct::class, "printer_module", "printer_kitchens", "group_product_id");
+        return $this->belongsToMany(GroupProduct::class, "printer_module", "printer_kitchen_id", "group_product_id");
     }
 
     public function kitchen(){
