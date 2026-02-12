@@ -105,7 +105,8 @@ class ProductOfferController extends Controller
     public function show(string $id)
     {
         $offer = ProductOffer::
-        where("id", $id)
+        with("products:id,name")
+        ->where("id", $id)
         ->first();
  
         return response()->json([
