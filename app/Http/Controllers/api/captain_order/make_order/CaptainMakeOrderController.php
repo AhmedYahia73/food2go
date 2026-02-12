@@ -1181,7 +1181,7 @@ class CaptainMakeOrderController extends Controller
                 "products" => ProductResource::collection($item->products),
             ];
         });
-        $offers_dine_id = ProductOffer::
+        $offers_dine_in = ProductOffer::
         where("start_date", "<=", date("Y-m-d"))
         ->where("end_date", ">=", date("Y-m-d"))
         ->where("time_from", "<=", date("H:i:s"))
@@ -1211,7 +1211,7 @@ class CaptainMakeOrderController extends Controller
             ->whereJsonContains("days", date("l"))
             ->orWhere("delay", 1);
         })
-        ->whereJsonContains("module", "dine_id")
+        ->whereJsonContains("module", "dine_in")
         ->get()
         ->map(function($item) use($locale){
             return [
