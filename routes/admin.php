@@ -165,6 +165,8 @@ use App\Http\Controllers\api\admin\cashier\CashierGapController;
 
 use App\Http\Controllers\api\admin\pos\kitchen\KitchenPrinterController;
 
+use App\Http\Controllers\api\admin\product_offers\ProductOfferController;
+
 use App\Models\TimeSittings;
 use App\Models\Order;
 use Illuminate\Support\Facades\App;
@@ -267,6 +269,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
         return $first_order - 1;
     });
+    
+    Route::resource("product_offer", ProductOfferController::class);
+    
     Route::controller(ProfileController::class)
     ->prefix('profile')->group(function(){
         Route::get('/', 'profile')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
