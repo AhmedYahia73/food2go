@@ -1269,7 +1269,7 @@ class CaptainMakeOrderController extends Controller
             'discounts' => $discounts,
             'bundles' => $bundles,
             'offers_take_away' => $offers_take_away,
-            'offers_dine_id' => $offers_dine_id,
+            'offers_dine_id' => $offers_dine_in,
             'offers_delivery' => $offers_delivery,
         ]);
     }
