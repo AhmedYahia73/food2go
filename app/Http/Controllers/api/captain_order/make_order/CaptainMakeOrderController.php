@@ -37,7 +37,7 @@ use App\Models\Discount;
 use App\Models\Bundle;
 use App\Models\Kitchen;
 use App\Models\CaptainOrder;
-use App\Models\ProductPosPricing;
+use App\Models\ProductOffer;
 
 use App\trait\image;
 use App\trait\PlaceOrder;
@@ -1143,7 +1143,195 @@ class CaptainMakeOrderController extends Controller
                 }), 
             ];
         });
-
+        $offers_take_away = ProductOffer::
+        where("start_date", "<=", date("Y-m-d"))
+        ->where("end_date", ">=", date("Y-m-d"))
+        ->where("time_from", "<=", date("H:i:s"))
+        ->where("time_to", ">=", date("H:i:s"))
+        ->with("products")
+        ->where(function($query){
+            $query
+            ->whereJsonContains("days", date("l"))
+            ->orWhere("delay", 1);
+        })
+        ->whereJsonContains("module", "take_away")
+        ->get()
+        ->map(function($item){
+            return [
+                "name" => $item->name,
+                "discount" => $item->discount,
+                "products" => $item->products
+                ->map(function($element) use($locale, $item){
+                    return [
+                        "id" => $element->id,
+                        "name" => $element->translations
+                        ->where('key', $element->name)
+                        ->where("locale", $locale)
+                        ->first()?->value ?? $element->name,
+                        "variations" => $element->variations
+                        ->map(function($value) use($element, $item, $locale){
+                            return [
+                                "id" => $value->id,
+                                "variation_selected" => $item->bundle_variations
+                                ->where("product_id", $element->id)
+                                ->first()
+                                ? 1 : 0,
+                                "variation" => $value->translations
+                                ->where('key', $value->name)
+                                ->where("locale", $locale)
+                                ->first()?->value ?? $value->name, 
+                                "type" => $value?->type,
+                                "min" => $value?->min,
+                                "max" => $value?->max,
+                                "required" => $value?->required,
+                                "options" => $value?->options
+                                ->map(function($new_item) use($item, $locale){
+                                    return [
+                                        "id" => $new_item->id,
+                                        "name" => $new_item->translations
+                                        ->where('key', $new_item->name)
+                                        ->where("locale", $locale)
+                                        ->first()?->value ?? $new_item->name, 
+                                        "price" => $new_item->price,
+                                        "selected" => $new_item->bundle_options
+                                        ->where("bundle_id", $item->id)
+                                        ->first()
+                                        ? 1 : 0,
+                                    ];
+                                }),
+                            ];
+                        })
+                    ]; 
+                //________________________
+                })
+            ];
+        });
+        $offers_dine_id = ProductOffer::
+        where("start_date", "<=", date("Y-m-d"))
+        ->where("end_date", ">=", date("Y-m-d"))
+        ->where("time_from", "<=", date("H:i:s"))
+        ->where("time_to", ">=", date("H:i:s"))
+        ->with("products")
+        ->where(function($query){
+            $query
+            ->whereJsonContains("days", date("l"))
+            ->orWhere("delay", 1);
+        })
+        ->whereJsonContains("module", "dine_id")
+        ->get()
+        ->map(function($item){
+            return [
+                "name" => $item->name,
+                "discount" => $item->discount,
+                "products" => $item->products
+                ->map(function($element) use($locale, $item){
+                    return [
+                        "id" => $element->id,
+                        "name" => $element->translations
+                        ->where('key', $element->name)
+                        ->where("locale", $locale)
+                        ->first()?->value ?? $element->name,
+                        "variations" => $element->variations
+                        ->map(function($value) use($element, $item, $locale){
+                            return [
+                                "id" => $value->id,
+                                "variation_selected" => $item->bundle_variations
+                                ->where("product_id", $element->id)
+                                ->first()
+                                ? 1 : 0,
+                                "variation" => $value->translations
+                                ->where('key', $value->name)
+                                ->where("locale", $locale)
+                                ->first()?->value ?? $value->name, 
+                                "type" => $value?->type,
+                                "min" => $value?->min,
+                                "max" => $value?->max,
+                                "required" => $value?->required,
+                                "options" => $value?->options
+                                ->map(function($new_item) use($item, $locale){
+                                    return [
+                                        "id" => $new_item->id,
+                                        "name" => $new_item->translations
+                                        ->where('key', $new_item->name)
+                                        ->where("locale", $locale)
+                                        ->first()?->value ?? $new_item->name, 
+                                        "price" => $new_item->price,
+                                        "selected" => $new_item->bundle_options
+                                        ->where("bundle_id", $item->id)
+                                        ->first()
+                                        ? 1 : 0,
+                                    ];
+                                }),
+                            ];
+                        })
+                    ]; 
+                //________________________
+                })
+            ];
+        });
+        $offers_delivery = ProductOffer::
+        where("start_date", "<=", date("Y-m-d"))
+        ->where("end_date", ">=", date("Y-m-d"))
+        ->where("time_from", "<=", date("H:i:s"))
+        ->where("time_to", ">=", date("H:i:s"))
+        ->with("products")
+        ->where(function($query){
+            $query
+            ->whereJsonContains("days", date("l"))
+            ->orWhere("delay", 1);
+        })
+        ->whereJsonContains("module", "delivery")
+        ->get()
+        ->map(function($item){
+            return [
+                "name" => $item->name,
+                "discount" => $item->discount,
+                "products" => $item->products
+                ->map(function($element) use($locale, $item){
+                    return [
+                        "id" => $element->id,
+                        "name" => $element->translations
+                        ->where('key', $element->name)
+                        ->where("locale", $locale)
+                        ->first()?->value ?? $element->name,
+                        "variations" => $element->variations
+                        ->map(function($value) use($element, $item, $locale){
+                            return [
+                                "id" => $value->id,
+                                "variation_selected" => $item->bundle_variations
+                                ->where("product_id", $element->id)
+                                ->first()
+                                ? 1 : 0,
+                                "variation" => $value->translations
+                                ->where('key', $value->name)
+                                ->where("locale", $locale)
+                                ->first()?->value ?? $value->name, 
+                                "type" => $value?->type,
+                                "min" => $value?->min,
+                                "max" => $value?->max,
+                                "required" => $value?->required,
+                                "options" => $value?->options
+                                ->map(function($new_item) use($item, $locale){
+                                    return [
+                                        "id" => $new_item->id,
+                                        "name" => $new_item->translations
+                                        ->where('key', $new_item->name)
+                                        ->where("locale", $locale)
+                                        ->first()?->value ?? $new_item->name, 
+                                        "price" => $new_item->price,
+                                        "selected" => $new_item->bundle_options
+                                        ->where("bundle_id", $item->id)
+                                        ->first()
+                                        ? 1 : 0,
+                                    ];
+                                }),
+                            ];
+                        })
+                    ]; 
+                //________________________
+                })
+            ];
+        });
         return response()->json([
             'categories' => $categories,
             'products' => $products, 
@@ -1153,6 +1341,9 @@ class CaptainMakeOrderController extends Controller
             'cafe_location' => $cafe_location,
             'discounts' => $discounts,
             'bundles' => $bundles,
+            'offers_take_away' => $offers_take_away,
+            'offers_dine_id' => $offers_dine_id,
+            'offers_delivery' => $offers_delivery,
         ]);
     }
 
