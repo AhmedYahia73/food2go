@@ -1156,7 +1156,7 @@ class CaptainMakeOrderController extends Controller
         })
         ->whereJsonContains("module", "take_away")
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             return [
                 "name" => $item->name,
                 "discount" => $item->discount,
@@ -1219,7 +1219,7 @@ class CaptainMakeOrderController extends Controller
         })
         ->whereJsonContains("module", "dine_id")
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             return [
                 "name" => $item->name,
                 "discount" => $item->discount,
@@ -1282,7 +1282,7 @@ class CaptainMakeOrderController extends Controller
         })
         ->whereJsonContains("module", "delivery")
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             return [
                 "name" => $item->name,
                 "discount" => $item->discount,
