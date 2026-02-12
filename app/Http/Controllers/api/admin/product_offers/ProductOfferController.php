@@ -28,7 +28,12 @@ class ProductOfferController extends Controller
                 "time_to" => $item->time_to,
                 "delay" => $item->delay,
                 "days" => $item->days,
-                "products" => $item?->products,
+                "products" => $item?->products->map(function($element){
+                    return [
+                        "id" => $element->id,
+                        "name" => $element->name,
+                    ];
+                }),
             ];
         });
 
