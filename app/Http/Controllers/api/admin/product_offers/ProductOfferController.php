@@ -33,8 +33,7 @@ class ProductOfferController extends Controller
         });
 
         return response()->json([
-            "offers" => $offers,
-            "days" => $days,
+            "offers" => $offers, 
         ]);
     }
 
