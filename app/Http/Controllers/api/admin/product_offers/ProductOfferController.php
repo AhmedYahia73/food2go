@@ -145,7 +145,7 @@ class ProductOfferController extends Controller
         $offer = ProductOffer::
         findOrFail($id);
         $offer->update($offerRequest);
-        $offer->products()->attach($request->products);
+        $offer->products()->sync($request->products);
  
         return response()->json([
             "success" => "You update data success",
