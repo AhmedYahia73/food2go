@@ -270,8 +270,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         return $first_order - 1;
     });
     
+    Route::get("product_offer/lists", [ProductOfferController::class, "lists"]);
     Route::resource("product_offer", ProductOfferController::class);
-    
+
     Route::controller(ProfileController::class)
     ->prefix('profile')->group(function(){
         Route::get('/', 'profile')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);

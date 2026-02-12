@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\ProductOffer;
+use App\Models\Product;
 
 class ProductOfferController extends Controller
 { 
@@ -32,7 +33,40 @@ class ProductOfferController extends Controller
         });
 
         return response()->json([
-            "offers" => $offers
+            "offers" => $offers,
+            "days" => $days,
+        ]);
+    }
+
+    public function lists(){ 
+        $days = [
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday'
+        ];
+        $modules = [
+            'take_away',
+            'dine_in',
+            'delivery'
+        ];
+        $products = Product::
+        where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+        return response()->json([
+            "days" => $days,
+            "modules" => $modules,
+            "products" => $products,
         ]);
     }
  
@@ -50,6 +84,8 @@ class ProductOfferController extends Controller
             'days' => ['sometimes', 'array'],
             'days.*' => ['sometimes', 'in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'],
             'delay' => ['required'],
+            'products' => ['required', 'array'],
+            'products.*' => ['required', 'exists:products,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -58,7 +94,8 @@ class ProductOfferController extends Controller
         }
 
         $offerRequest = $validator->validated();
-        ProductOffer::create($offerRequest);
+        $offer = ProductOffer::create($offerRequest);
+        $offer->products()->attach($request->products);
  
         return response()->json([
             "success" => "You add data success",
@@ -90,6 +127,8 @@ class ProductOfferController extends Controller
             'days' => ['sometimes', 'array'],
             'days.*' => ['sometimes', 'in:Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'],
             'delay' => ['required'],
+            'products' => ['required', 'array'],
+            'products.*' => ['required', 'exists:products,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -98,9 +137,10 @@ class ProductOfferController extends Controller
         }
 
         $offerRequest = $validator->validated();
-        ProductOffer::
-        where("id", $id)
-        ->update($offerRequest);
+        $offer = ProductOffer::
+        findOrFail($id);
+        $offer->update($offerRequest);
+        $offer->products()->attach($request->products);
  
         return response()->json([
             "success" => "You update data success",
