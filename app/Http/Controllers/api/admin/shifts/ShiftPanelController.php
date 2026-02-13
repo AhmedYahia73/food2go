@@ -133,8 +133,8 @@ class ShiftPanelController extends Controller
             ->groupBy('cafe_locations.id', 'cafe_locations.name')
             ->get();
         }
-        if (($cashier_shifts?->cashier_man?->report ?? 0 == "unactive" ) ||
-        $cashier_shifts?->cashier_man?->enter_amount ?? 0 ) {
+        if ((($cashier_shifts?->cashier_man?->report ?? 0) == "unactive" ) ||
+        $cashier_shifts?->cashier_man?->enter_amount ) {
             $validator = Validator::make($request->all(), [
                 'amount' => ['required', 'numeric'], 
             ]);
@@ -184,7 +184,7 @@ class ShiftPanelController extends Controller
                 'shift' => $cashier_shifts?->cashier_man?->shift_number ?? 0,
             ]);  
         }   
-        if (($cashier_shifts?->cashier_man?->report ?? 0) == "unactive") {
+        if ($cashier_shifts?->cashier_man?->report == "unactive") {
             $arr = [
                 "start_amount" => $start_amount,
                 "expenses" => $expenses, 
@@ -200,7 +200,7 @@ class ShiftPanelController extends Controller
             $cashier_shifts->save();
             return response()->json($arr);
         }
-        if(($cashier_shifts?->cashier_man?->report ?? 0) != "unactive"){
+        if($cashier_shifts?->cashier_man?->report ?? 0 != "unactive"){
             $order_count = Order::
             select("id")
             ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
@@ -486,7 +486,7 @@ class ShiftPanelController extends Controller
                 'un_paid' => array_values($unpaid_online_order),
             ];
 
-            if($cashier_shifts?->cashier_man?->report ?? 0 == "all"){
+            if($cashier_shifts?->cashier_man?->report == "all"){
                 $group_modules = Order::
                 selectRaw("module_id, SUM(amount) AS amount, SUM(due_module) AS due_module, group_products.name AS module_name")
                 ->join('group_products', 'group_products.id', '=', 'orders.module_id')
@@ -609,7 +609,7 @@ class ShiftPanelController extends Controller
                 $cashier_shifts->save();
                 return response()->json($arr);
             }
-            elseif($cashier_shifts?->cashier_man?->report ?? 0 == "financial"){
+            elseif($cashier_shifts?->cashier_man?->report == "financial"){
                 
                $captain_order = Order::
                 selectRaw("
