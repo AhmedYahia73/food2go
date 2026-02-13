@@ -24,6 +24,10 @@ class CashierShift extends Model
         return $this->belongsTo(CashierMan::class ,'cashier_man_id');
     }
 
+    public function cashier(){
+        return $this->belongsTo(Cashier::class ,'cashier_id');
+    }
+
     public function financial(){
         return $this->belongsTo(FinantiolAcounting::class ,'financial_id');
     }

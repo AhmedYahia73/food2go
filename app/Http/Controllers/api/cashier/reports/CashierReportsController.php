@@ -809,7 +809,7 @@ class CashierReportsController extends Controller
         $financial = FinantiolAcounting::
         where("main", 1)
         ->whereHas('branch', function($query){
-            return $query->where("branches.id", auth()->user()->id);
+            return $query->where("branches.id", auth()->user()->branch_id);
         })
         ->first();    
         $order_financial = OrderFinancial::
@@ -866,7 +866,7 @@ class CashierReportsController extends Controller
             $main_financial_id = FinantiolAcounting::
             where("main", 1)
             ->whereHas('branch', function($query){
-                return $query->where("branches.id", auth()->user()->id);
+                return $query->where("branches.id", auth()->user()->branch_id);
             })
             ->first()?->id ?? 0;
             
@@ -2339,7 +2339,7 @@ class CashierReportsController extends Controller
         });
         $financial_accounts = FinantiolAcounting:: 
         whereHas('branch', function($query){
-            return $query->where("branches.id", auth()->user()->id);
+            return $query->where("branches.id", auth()->user()->branch_id);
         })
         ->get()
         ->map(function($item){
