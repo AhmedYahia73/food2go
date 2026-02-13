@@ -15,6 +15,7 @@ use App\Mail\CancelOrderMail;
 use App\trait\POS;
 use App\trait\PlaceOrder;
 
+use App\Models\CompanyInfo;
 use App\Models\Order;
 use App\Models\OrderFinancial;
 use App\Models\Setting;
@@ -65,11 +66,50 @@ class OrderController extends Controller
         $locale = $request->locale ?? "en";
         $order = $this->orders
         ->where("id", $id)
+        ->with("service_fees_item", "financials", 
+        "order_address", "user", "casheir")
         ->first();
         $order_checkout = $this->checkout_format($order, $id, $locale);
+        $service_fees_title = $order?->service_fees_item
+        ?->title ?? null;
+        $order_note = $order->notes;
+        $order_number = $this->order_num_today($order['order']->id);
+        $order_id = $this->order_num_today($order['order']->id);
+        $financials = $order->financials;
+        $address = $order->order_address;
+        $delivery_fees = $order->delivery_fees;
+        $customer = $order->user;
+        $subtotal = $order->amount;
+        $total_tax = $order->total_tax;
+        $total_discount = $order->total_discount;
+        $service_fees = $order?->service_fees_item;
+        $reaturant_name = CompanyInfo::
+        first()?->name; 
+        $printer = [
+            "print_name" => $order?->casheir?->print_name,
+            "print_type" => $order?->casheir?->print_type,
+            "print_port" => $order?->casheir?->print_port,
+            "print_ip" => $order?->casheir?->print_ip,
+        ];
+        $module_order_number = $order->module_order_number;
 
         return response()->json([
-            "order_checkout" => $order_checkout
+            "order_checkout" => $order_checkout,
+            "service_fees_title" => $service_fees_title,
+            "order_note" => $order_note,
+            "order_number" => $order_number,
+            "order_id" => $order_id,
+            "financials" => $financials,
+            "address" => $address,
+            "delivery_fees" => $delivery_fees,
+            "customer" => $customer,
+            "subtotal" => $subtotal,
+            "total_tax" => $total_tax,
+            "total_discount" => $total_discount,
+            "service_fees" => $service_fees,
+            "reaturant_name" => $reaturant_name,
+            "printer" => $printer,
+            "module_order_number" => $module_order_number,
         ]);
     }
 
@@ -1571,5 +1611,10 @@ class OrderController extends Controller
             'success' => $order_items,
             'kitchen_items' => $order_kitchen,
         ];
+    }
+    
+
+    public function order_num_today($id){ 
+        return $id - app("first_order_today");
     }
 }
