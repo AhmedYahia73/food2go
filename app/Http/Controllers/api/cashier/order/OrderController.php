@@ -73,8 +73,8 @@ class OrderController extends Controller
         $service_fees_title = $order?->service_fees_item
         ?->title ?? null;
         $order_note = $order->notes;
-        $order_number = $this->order_num_today($order['order']->id);
-        $order_id = $this->order_num_today($order['order']->id);
+        $order_number = $this->order_num_today($order->id);
+        $order_id = $this->order_num_today($order->id);
         $financials = $order->financials;
         $address = $order->order_address;
         $delivery_fees = $order->delivery_fees;
