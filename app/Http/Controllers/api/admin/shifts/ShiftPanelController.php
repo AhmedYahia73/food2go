@@ -184,7 +184,7 @@ class ShiftPanelController extends Controller
                 'shift' => $cashier_shifts?->cashier_man?->shift_number ?? 0,
             ]);  
         }   
-        if ($cashier_shifts?->cashier_man?->report ?? 0 == "unactive") {
+        if (($cashier_shifts?->cashier_man?->report ?? 0) == "unactive") {
             $arr = [
                 "start_amount" => $start_amount,
                 "expenses" => $expenses, 
@@ -200,7 +200,7 @@ class ShiftPanelController extends Controller
             $cashier_shifts->save();
             return response()->json($arr);
         }
-        if($cashier_shifts?->cashier_man?->report ?? 0 != "unactive"){
+        if(($cashier_shifts?->cashier_man?->report ?? 0) != "unactive"){
             $order_count = Order::
             select("id")
             ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
