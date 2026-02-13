@@ -76,12 +76,16 @@ class ShiftPanelController extends Controller
         ->sum('amount');
         
         $shift = Expense::
-        where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
-        ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
+        where('created_at', '>=', $shift->start_time ?? now())
+        ->where('created_at', '<=', $shift->end_time ?? now())
+        ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
+        ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
         ->first();
         $expenses = Expense::
         where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
+        ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
+        ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
         ->sum('amount');
         $start_amount = $shift->amount ?? 0; 
         $expenses = $expenses;
@@ -106,6 +110,8 @@ class ShiftPanelController extends Controller
         where("financial_account_id", $financial->id ?? 0)
         ->where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
+        ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
+        ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
         ->sum('amount');
         $net_cash_drawer = $order_financial + $start_amount - $expenses;
         $actual_total = $total_orders + $start_amount - $expenses; 
@@ -162,6 +168,8 @@ class ShiftPanelController extends Controller
             where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
             ->where("financial_account_id", $main_financial_id)
+            ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
+            ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
             ->sum('amount');
             $gap = $total_financial_accounts - $cash_expenses - $request->amount; 
             $shift = CashierShift::
@@ -248,6 +256,8 @@ class ShiftPanelController extends Controller
             $expenses = Expense::
             where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
+            ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
+            ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
             ->with("financial_account")
             ->get();
             
@@ -380,6 +390,8 @@ class ShiftPanelController extends Controller
             selectRaw("financial_account_id, category_id, SUM(amount) AS total")
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
+            ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
+            ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
             ->with("financial_account", "category")
             ->groupBy("financial_account_id")
             ->groupBy("category_id")

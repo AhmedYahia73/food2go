@@ -796,13 +796,17 @@ class CashierReportsController extends Controller
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->sum('amount');
         
-        $shift = $this->cashier_shift
-        ->where('shift', $request->user()->shift_number)
-        ->where('cashier_man_id', $request->user()->id)
+        $shift = $this->cashier_shift 
+        ->where('created_at', '>=', $shift->start_time ?? now())
+        ->where('created_at', '<=', $shift->end_time ?? now())
+        ->where("branch_id", $request->user()->branch_id)
+        ->where("cahier_man_id", $request->user()->id)
         ->first();
         $expenses = $this->expenses
         ->where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
+        ->where("branch_id", $request->user()->branch_id)
+        ->where("cahier_man_id", $request->user()->id)
         ->sum('amount');
         $start_amount = $shift->amount ?? 0; 
         $expenses = $expenses;
@@ -827,6 +831,8 @@ class CashierReportsController extends Controller
         ->where("financial_account_id", $financial->id ?? 0)
         ->where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
+        ->where("branch_id", $request->user()->branch_id)
+        ->where("cahier_man_id", $request->user()->id)
         ->sum('amount');
         $net_cash_drawer = $order_financial + $start_amount - $expenses;
         $actual_total = $total_orders + $start_amount - $expenses;
@@ -888,6 +894,8 @@ class CashierReportsController extends Controller
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
             ->where("financial_account_id", $main_financial_id)
+            ->where("branch_id", $request->user()->branch_id)
+            ->where("cahier_man_id", $request->user()->id)
             ->sum('amount');
             $gap = $total_financial_accounts - $cash_expenses - $request->amount; 
             $shift = CashierShift::
@@ -972,6 +980,8 @@ class CashierReportsController extends Controller
             $expenses = $this->expenses
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
+            ->where("branch_id", $request->user()->branch_id)
+            ->where("cahier_man_id", $request->user()->id)
             ->with("financial_account")
             ->get();
             
@@ -1104,6 +1114,8 @@ class CashierReportsController extends Controller
             ->selectRaw("financial_account_id, category_id, SUM(amount) AS total")
             ->where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
+            ->where("branch_id", $request->user()->branch_id)
+            ->where("cahier_man_id", $request->user()->id)
             ->with("financial_account", "category")
             ->groupBy("financial_account_id")
             ->groupBy("category_id")
