@@ -825,7 +825,7 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $pending = $this->orders
@@ -836,7 +836,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'pending')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $confirmed = $this->orders
@@ -847,7 +847,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'confirmed')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $processing = $this->orders
@@ -858,7 +858,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'processing')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $out_for_delivery = $this->orders
@@ -869,7 +869,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'out_for_delivery')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $delivered = $this->orders
@@ -880,7 +880,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'delivered')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $returned = $this->orders
@@ -891,7 +891,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'returned')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $faild_to_deliver = $this->orders
@@ -902,7 +902,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'faild_to_deliver')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $canceled = $this->orders
@@ -913,7 +913,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'canceled')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $scheduled = $this->orders
@@ -924,7 +924,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'scheduled')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
         $refund = $this->orders
@@ -935,7 +935,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'refund')
-        ->where("branch_id", $request->user()->id)
+        ->where("branch_id", $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->count();
 
