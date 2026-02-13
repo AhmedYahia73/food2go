@@ -272,7 +272,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     });
     
     Route::get("shifts/shifts", [ShiftPanelController::class, "shifts"]);
-    Route::get("shifts/end_shift", [ShiftPanelController::class, "end_shift"]);
+    Route::get("shifts/end_shift/{id}", [ShiftPanelController::class, "end_shift"]);
 
     Route::get("product_offer/lists", [ProductOfferController::class, "lists"]);
     Route::resource("product_offer", ProductOfferController::class);
