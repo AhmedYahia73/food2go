@@ -564,27 +564,33 @@ class BranchController extends Controller
         ]);
     }
 
-    public function stoped_product_in_branch($id){
+    public function stoped_product_in_branch(Request $request, $id){
         // /admin/branch/stoped_product_in_branch
+
         $branch_off = $this->branch_off
         ->where('branch_id', $id)
         ->get();
-
+        $locale = $request->locale ?? "en";
         $product_off = $branch_off->pluck('product_id')->filter()->toArray();
         $category_off = $branch_off->pluck('category_id')->filter()->toArray();
 
         $products = $this->products
             ->where('status', 1)
+            ->with("translations")
             ->get()
-            ->map(function ($item) use ($product_off, $category_off) {
+            ->map(function ($item) use ($product_off, $category_off, $locale) {
                 $is_off = in_array($item->id, $product_off)
                 || in_array($item->category_id, $category_off)
                 || in_array($item->sub_category_id, $category_off);
 
                 if ($is_off) {
+                    $name = $item->translations
+                    ->where("locale", $locale)
+                    ->where("key", $item->name)
+                    ->first()?->value ?? $item->name;
                     return [
                         "id"     => $item->id,
-                        "name"   => $item->name, 
+                        "name"   => $name, 
                     ];
                 }
             })
