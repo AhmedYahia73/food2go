@@ -37,7 +37,7 @@ class ShiftPanelController extends Controller
     }
 
 
-    public function financial_report(Request $request, $id){
+    public function end_shift(Request $request, $id){
         //  
         $cashier_shifts = CashierShift::
         where("id", $id)
@@ -108,12 +108,7 @@ class ShiftPanelController extends Controller
         ->where('created_at', '<=', $shift->end_time ?? now())
         ->sum('amount');
         $net_cash_drawer = $order_financial + $start_amount - $expenses;
-        $actual_total = $total_orders + $start_amount - $expenses;
-        $cashier_shift = CashierShift::
-        where("shift", $cashier_shift?->cashier_man->shift_number)
-        ->where("cashier_man_id", $cashier_shift?->cashier_man->id)
-        ->with("financial")
-        ->first();
+        $actual_total = $total_orders + $start_amount - $expenses; 
         if($cashier_shifts?->cashier_man?->hall_orders ?? 0){
             $hall_orders = CafeLocation::query()
             ->selectRaw("
@@ -132,8 +127,8 @@ class ShiftPanelController extends Controller
             ->groupBy('cafe_locations.id', 'cafe_locations.name')
             ->get();
         }
-        if (($cashier_shifts?->cashier_man?->report ?? 0 == "unactive" && password_verify($request->input('password'), $cashier_shifts?->cashier_man?->password ?? 0)) ||
-        $cashier_shifts?->cashier_man?->enter_amount ?? 0 && password_verify($request->input('password'), $cashier_shifts?->cashier_man?->password ?? 0)) {
+        if (($cashier_shifts?->cashier_man?->report ?? 0 == "unactive" ) ||
+        $cashier_shifts?->cashier_man?->enter_amount ?? 0 ) {
             $validator = Validator::make($request->all(), [
                 'amount' => ['required', 'numeric'], 
             ]);
@@ -144,8 +139,8 @@ class ShiftPanelController extends Controller
             }
             $main_financial_id = FinantiolAcounting::
             where("main", 1)
-            ->whereHas('branch', function($query){
-                return $query->where("branches.id", $cashier_shift?->cashier_man->id);
+            ->whereHas('branch', function($query) use($cashier_shifts){
+                return $query->where("branches.id", $cashier_shifts?->cashier_man->id);
             })
             ->first()?->id ?? 0;
             
@@ -181,7 +176,7 @@ class ShiftPanelController extends Controller
                 'shift' => $cashier_shifts?->cashier_man?->shift_number ?? 0,
             ]);  
         }   
-        if (($cashier_shifts?->cashier_man?->report ?? 0 == "unactive" && password_verify($request->input('password'), $cashier_shifts?->cashier_man?->password ?? 0))) {
+        if ($cashier_shifts?->cashier_man?->report ?? 0 == "unactive") {
             $arr = [
                 "start_amount" => $start_amount,
                 "expenses" => $expenses, 
@@ -193,9 +188,11 @@ class ShiftPanelController extends Controller
             if(isset($hall_orders)){
                 $arr['hall_orders'] = $hall_orders;
             }
+            $cashier_shifts->end_time = now();
+            $cashier_shifts->save();
             return response()->json($arr);
         }
-        if($cashier_shifts?->cashier_man?->report ?? 0 != "unactive" && password_verify($request->input('password'), $cashier_shifts?->cashier_man?->password ?? 0)){
+        if($cashier_shifts?->cashier_man?->report ?? 0 != "unactive"){
             $order_count = Order::
             select("id")
             ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
@@ -515,7 +512,7 @@ class ShiftPanelController extends Controller
                 ->get();
                 $start_balance = [
                     "amount" => $cashier_shift->amount ?? 0,
-                    "financial" => $cashier_shift?->financial?->name,
+                    "financial" => $cashier_shifts?->financial?->name,
                 ];
                 $arr = [
                     "actual_total" => $actual_total,
@@ -596,6 +593,8 @@ class ShiftPanelController extends Controller
                 if($cashier_shifts?->cashier_man?->enter_amount ?? 0){
                     $arr['gap'] = $gap;
                 }
+                $cashier_shifts->end_time = now();
+                $cashier_shifts->save();
                 return response()->json($arr);
             }
             elseif($cashier_shifts?->cashier_man?->report ?? 0 == "financial"){
@@ -621,8 +620,8 @@ class ShiftPanelController extends Controller
                 ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
                 ->get();
                 $start_balance = [
-                    "amount" => $cashier_shift->amount,
-                    "financial" => $cashier_shift?->financial?->name,
+                    "amount" => $cashier_shifts->amount,
+                    "financial" => $cashier_shifts?->financial?->name,
                 ];
                 $arr = [
                     "actual_total" => $actual_total,
@@ -696,12 +695,11 @@ class ShiftPanelController extends Controller
                     ->sum('total_tax');
                     $arr['total_tax'] = $total_tax;
                 } 
+                $cashier_shifts->end_time = now();
+                $cashier_shifts->save();
                 return response()->json($arr);
             }
         } 
-
-        return response()->json([
-            'errors' => "password wrong", 
-        ], 400);
+ 
     }
 }

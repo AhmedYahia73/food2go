@@ -167,6 +167,8 @@ use App\Http\Controllers\api\admin\pos\kitchen\KitchenPrinterController;
 
 use App\Http\Controllers\api\admin\product_offers\ProductOfferController;
 
+use App\Http\Controllers\api\admin\shifts\ShiftPanelController;
+
 use App\Models\TimeSittings;
 use App\Models\Order;
 use Illuminate\Support\Facades\App;
@@ -174,8 +176,7 @@ use Carbon\Carbon;
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     App::singleton('first_order_today', function(){
- 
-   
+  
         $time_sittings = TimeSittings::
         get();
 
@@ -270,6 +271,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         return $first_order - 1;
     });
     
+    Route::get("shifts/shifts", [ShiftPanelController::class, "shifts"]);
+    Route::get("shifts/end_shift", [ShiftPanelController::class, "end_shift"]);
+
     Route::get("product_offer/lists", [ProductOfferController::class, "lists"]);
     Route::resource("product_offer", ProductOfferController::class);
 
