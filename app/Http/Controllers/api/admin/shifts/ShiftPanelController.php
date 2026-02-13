@@ -92,7 +92,7 @@ class ShiftPanelController extends Controller
         $financial = FinantiolAcounting::
         where("main", 1)
         ->whereHas('branch', function($query) use($cashier_shifts){
-            return $query->where("branches.id", $cashier_shifts?->cashier_man->id);
+            return $query->where("branches.id", $cashier_shifts?->cashier_man?->branch_id);
         })
         ->first();    
         $order_financial = OrderFinancial::
@@ -146,7 +146,7 @@ class ShiftPanelController extends Controller
             $main_financial_id = FinantiolAcounting::
             where("main", 1)
             ->whereHas('branch', function($query) use($cashier_shifts){
-                return $query->where("branches.id", $cashier_shifts?->cashier_man->id);
+                return $query->where("branches.id", $cashier_shifts?->cashier_man->branch_id);
             })
             ->first()?->id ?? 0;
             
