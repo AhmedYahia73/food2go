@@ -951,6 +951,8 @@ class OrderController extends Controller
             "canceled" => $canceled,
             "scheduled" => $scheduled,
             "refund" => $refund,
+            "start" => $start->format("Y-m-d H:i"),
+            "end" => $end->format("Y-m-d H:i"),
         ]);
     }
 
