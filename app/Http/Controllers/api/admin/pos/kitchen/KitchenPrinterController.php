@@ -60,9 +60,9 @@ class KitchenPrinterController extends Controller
             'print_type' => 'required|in:usb,network',
             'print_port' => 'required',
             'kitchen_id' => 'required|exists:kitchens,id',
-            "module" => "required|array",
+            "module" => "array",
             "module.*" => "required|in:take_away,dine_in,delivery",
-            "group_modules" => "required|array",
+            "group_modules" => "array",
             "group_modules.*" => "required|exists:group_products,id",
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -107,9 +107,9 @@ class KitchenPrinterController extends Controller
             'print_type' => 'required|in:usb,network',
             'print_port' => 'required',
             'kitchen_id' => 'required|exists:kitchens,id',
-            "module" => "required|array",
+            "module" => "array",
             "module.*" => "required|in:take_away,dine_in,delivery",
-            "group_modules" => "required|array",
+            "group_modules" => "array",
             "group_modules.*" => "required|exists:group_products,id",
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error

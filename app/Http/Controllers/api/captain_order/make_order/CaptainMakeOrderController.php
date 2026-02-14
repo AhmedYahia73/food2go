@@ -889,10 +889,15 @@ class CaptainMakeOrderController extends Controller
                 return $addon;
             });
             $tax_module = $product->tax_module
-            ->map(function ($taxItem) use ($module) {
+            ->map(function ($taxItem) use ($module, $branch_id) {
 
                 $isFound = $taxItem->module
 				->where('module', $module)
+                ->where(function($q2){
+                    $q2->where("app_type", "pos")
+                    ->orWhere("app_type", "all");
+                })
+                ->Where("branch_id", $branch_id)
 				->first();
 				if($isFound){
 					return $taxItem->tax;
@@ -955,10 +960,15 @@ class CaptainMakeOrderController extends Controller
             
           
             $tax_module = $product->tax_module
-            ->map(function ($taxItem) use ($module) {
+            ->map(function ($taxItem) use ($module, $branch_id) {
 
                 $isFound = $taxItem->module
 				->where('module', $module)
+                ->where(function($q2){
+                    $q2->where("app_type", "pos")
+                    ->orWhere("app_type", "all");
+                })
+                ->Where("branch_id", $branch_id)
 				->first();
 				if($isFound){
 					return $taxItem->tax;
@@ -1016,10 +1026,15 @@ class CaptainMakeOrderController extends Controller
             });
          
             $tax_module = $product->tax_module
-            ->map(function ($taxItem) use ($module) {
+            ->map(function ($taxItem) use ($module, $branch_id) {
 
                 $isFound = $taxItem->module
 				->where('module', $module)
+                ->where(function($q2){
+                    $q2->where("app_type", "pos")
+                    ->orWhere("app_type", "all");
+                })
+                ->Where("branch_id", $branch_id)
 				->first();
 				if($isFound){
 					return $taxItem->tax;

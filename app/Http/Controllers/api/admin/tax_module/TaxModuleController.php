@@ -27,6 +27,7 @@ class TaxModuleController extends Controller
                     "type" => $element->type,
                     "module" => $element->module,
                     "branch" => $element?->branch?->name,
+                    "app_type" => $element->app_type,
                 ];
             });
             return [
@@ -49,9 +50,15 @@ class TaxModuleController extends Controller
             'app',
             'web',
         ];
+        $app_type = [
+            "online",
+            "pos",
+            "all",
+        ];
 
         return response()->json([
             "taxs" => $taxs,
+            "app_type" => $app_type,
             "branches" => $branches,
             "modules" => $modules,
             "type" => $type,
@@ -94,6 +101,7 @@ class TaxModuleController extends Controller
                 "module" => $element->module,
                 "branch" => $element?->branch?->name,
                 "type" => $element->type,
+                "app_type" => $element->app_type,
             ];
         });
 
@@ -113,6 +121,7 @@ class TaxModuleController extends Controller
             'branch_modules.*.type' => 'required|in:all,app,web',
             'branch_modules.*.branch_id' => 'required|exists:branches,id',
             'branch_modules.*.module' => 'required|in:take_away,dine_in,delivery',
+            'branch_modules.*.app_type' => 'required|in:pos,online,all',
         ]); 
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -131,6 +140,7 @@ class TaxModuleController extends Controller
                 'branch_id' => $item['branch_id'],
                 'module' => $item['module'],
                 'type' => $item['type'],
+                "app_type" => $item['app_type'],
             ]);
         }
 
@@ -147,6 +157,7 @@ class TaxModuleController extends Controller
             'branch_modules.*.type' => 'required|in:all,app,web',
             'branch_modules.*.branch_id' => 'required|exists:branches,id',
             'branch_modules.*.module' => 'required|in:take_away,dine_in,delivery',
+            'branch_modules.*.app_type' => 'required|in:pos,online,all',
         ]); 
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -169,6 +180,7 @@ class TaxModuleController extends Controller
                 'branch_id' => $item['branch_id'],
                 'module' => $item['module'],
                 'type' => $item['type'],
+                "app_type" => $item['app_type'],
             ]);
         }
 

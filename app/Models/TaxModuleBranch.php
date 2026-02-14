@@ -13,6 +13,7 @@ class TaxModuleBranch extends Model
         'branch_id',
         'module',
         'type',
+        "app_type",
     ];
 
     public function branch(){
