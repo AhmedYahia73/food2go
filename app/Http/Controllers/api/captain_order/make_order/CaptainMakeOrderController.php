@@ -1245,7 +1245,7 @@ class CaptainMakeOrderController extends Controller
             ];
             $products= $item->products
             ->map(function($element) use($discount){
-                $element->discount = collect($discount);
+                $element->discount = (object) $discount;
                 return $element;
             });
             return [
