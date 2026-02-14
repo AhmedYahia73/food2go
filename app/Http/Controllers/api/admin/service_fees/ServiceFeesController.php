@@ -137,6 +137,7 @@ class ServiceFeesController extends Controller
             "amount" => $request->amount,
             "module" => $request->module,
             "online_type" => $request->online_type,
+            "modules" => $request->modules,
         ]);
 
         return response()->json([
