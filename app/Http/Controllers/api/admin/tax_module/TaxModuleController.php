@@ -115,7 +115,7 @@ class TaxModuleController extends Controller
 
     public function create(Request $request){ 
         $validator = Validator::make($request->all(), [
-            'tax' => 'required|numeric',
+            'tax_id' => 'required|exists:taxes,id',
             'status' => 'required|boolean',
             'branch_modules' => 'required|array',
             'branch_modules.*.type' => 'required|in:all,app,web',
@@ -130,7 +130,7 @@ class TaxModuleController extends Controller
         }
         $tax_module = $this->tax_module
         ->create([
-            "tax" => $request->tax,
+            "tax_id" => $request->tax_id,
             "status" => $request->status,
         ]);
         foreach ($request->branch_modules as $item) {
@@ -151,7 +151,7 @@ class TaxModuleController extends Controller
 
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'tax' => 'required|numeric',
+            'tax_id' => 'required|exists:taxes,id',
             'status' => 'required|boolean',
             'branch_modules' => 'required|array',
             'branch_modules.*.type' => 'required|in:all,app,web',
@@ -167,7 +167,7 @@ class TaxModuleController extends Controller
         $tax_module = $this->tax_module
         ->where("id", $id)
         ->update([
-            "tax" => $request->tax,
+            "tax_id" => $request->tax_id,
             "status" => $request->status,
         ]);
         $this->tax_module_branch
