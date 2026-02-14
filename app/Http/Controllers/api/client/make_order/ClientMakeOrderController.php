@@ -51,6 +51,7 @@ use App\Models\CashierBalance;
 use App\Models\FinantiolAcounting;
 use App\Models\Delivery;
 use App\Models\CashierMan;
+use App\Models\Branch;
 use App\Models\CaptainOrder;
 
 use App\trait\image;
@@ -277,6 +278,9 @@ class ClientMakeOrderController extends Controller
         ->with('location')
         ->first()
         ?->location?->branch_id;
+        $branch_name = Branch::
+        where("id", $branch_id)
+        ->first()?->name;
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
@@ -382,7 +386,9 @@ class ClientMakeOrderController extends Controller
             'categories' => $categories,
             'products' => $products,
             'paymentMethod' => $paymentMethod,
-            'financial_account' => $financial_account
+            'financial_account' => $financial_account,
+            "branch_id" => $branch_id,
+            "branch_name" => $branch_name,
         ]);
     }
 
@@ -492,6 +498,14 @@ class ClientMakeOrderController extends Controller
             ],400);
         }
 
+        $branch_id = $this->cafe_tables
+        ->where('id', $request->table_id)
+        ->with('location')
+        ->first()
+        ?->location?->branch_id;
+        $branch_name = Branch::
+        where("id", $branch_id ?? $request->branch_id)
+        ->first()?->name;
         $location = $this->cafe_tables
         ->where('id', $request->table_id)
         ->with('location')
@@ -541,6 +555,8 @@ class ClientMakeOrderController extends Controller
 
         return response()->json([
             'success' => $order_data, 
+            "branch_name" => $branch_name,
+            "branch_id" => $branch_id,
         ]);
     }
 
