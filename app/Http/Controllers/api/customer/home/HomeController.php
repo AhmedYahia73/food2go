@@ -45,7 +45,7 @@ class HomeController extends Controller
     public function service_fees(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'source' => 'required|in:web,app',
-            'module' => 'required|in:take_away,delivery',
+            'module' => 'in:take_away,delivery',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

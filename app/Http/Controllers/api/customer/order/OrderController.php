@@ -28,7 +28,7 @@ class OrderController extends Controller
     public function service_fees(Request $request){
         $validator = Validator::make($request->all(), [
             'online_type' => 'required|in:app,web', 
-            'module' => 'required|in:take_away,delivery',
+            'module' => 'in:take_away,delivery',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
