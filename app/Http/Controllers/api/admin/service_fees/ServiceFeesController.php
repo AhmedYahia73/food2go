@@ -32,12 +32,14 @@ class ServiceFeesController extends Controller
         $types = ['precentage','value'];
         $modules = ["pos", "online"];
         $online_types = ["all", "app", "web"];
+        $web_modules = ["all", "take_away", "dine_in", "delivery"];
 
         return response()->json([
             "branches" => $branches, 
             "types" => $types, 
             "modules" => $modules, 
             "online_types" => $online_types, 
+            "web_modules" => $web_modules, 
         ]);
     }
 
@@ -80,6 +82,8 @@ class ServiceFeesController extends Controller
             'amount' => ['required', 'numeric'],
             'module' => ['required', 'in:pos,online'],
             'online_type' => ['sometimes', 'in:all,app,web'],
+            "modules" => ["required", "array"],
+            "modules.*" => ["required", "in:all,take_away,dine_in,delivery"],
             'branches' => ['required', 'array'],
             'branches.*' => ['required', 'exists:branches,id'],
         ]);
@@ -106,6 +110,8 @@ class ServiceFeesController extends Controller
             'amount' => ['required', 'numeric'],
             'module' => ['required', 'in:pos,online'],
             'online_type' => ['sometimes', 'in:all,app,web'],
+            "modules" => ["required", "array"],
+            "modules.*" => ["required", "in:all,take_away,dine_in,delivery"],
             'branches' => ['required', 'array'],
             'branches.*' => ['required', 'exists:branches,id'],
         ]);

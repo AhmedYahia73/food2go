@@ -15,11 +15,19 @@ class ServiceFees extends Model
         'amount',
         'module',
         'online_type',
+        'modules',
     ];
 
     protected $hidden = array('pivot');
     
     public function branches(){
         return $this->belongsToMany(Branch::class, 'service_fees_branch', 'fees_id', 'branch_id');
+    }
+    
+    protected function casts(): array
+    {
+        return [
+            'modules' => 'array',
+        ];
     }
 }
