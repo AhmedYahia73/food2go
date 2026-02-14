@@ -14,4 +14,9 @@ class Tax extends Model
         'type',
         'amount',
     ];
+
+    public function tax_module(){
+        return $this->hasMany(TaxModule::class, 'tax_id');
+    }
+    
 }

@@ -888,8 +888,9 @@ class CaptainMakeOrderController extends Controller
               
                 return $addon;
             });
-            $tax_module = $product->tax_module
-            ->map(function ($taxItem) use ($module, $branch_id) {
+            $tax_module = $product?->tax
+            ?->tax_module
+            ?->map(function ($taxItem) use ($module, $branch_id) {
 
                 $isFound = $taxItem->module
 				->where('module', $module)
@@ -959,8 +960,9 @@ class CaptainMakeOrderController extends Controller
             //get count of sales of product to detemine stock
             
           
-            $tax_module = $product->tax_module
-            ->map(function ($taxItem) use ($module, $branch_id) {
+            $tax_module = $product?->tax
+            ?->tax_module
+            ?->map(function ($taxItem) use ($module, $branch_id) {
 
                 $isFound = $taxItem->module
 				->where('module', $module)
@@ -1025,8 +1027,9 @@ class CaptainMakeOrderController extends Controller
                 return $addon;
             });
          
-            $tax_module = $product->tax_module
-            ->map(function ($taxItem) use ($module, $branch_id) {
+            $tax_module = $product?->tax
+            ?->tax_module
+            ?->map(function ($taxItem) use ($module, $branch_id) {
 
                 $isFound = $taxItem->module
 				->where('module', $module)
