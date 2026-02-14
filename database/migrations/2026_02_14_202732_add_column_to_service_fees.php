@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('service_fees', function (Blueprint $table) {
-            $table->string("modules")->default("[all]");
+            $table->string("modules")->default(json_encode(["all"]));
         });
     }
 
