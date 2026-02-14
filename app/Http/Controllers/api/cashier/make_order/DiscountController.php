@@ -53,11 +53,20 @@ class DiscountController extends Controller
         ]);
     }
 
-    public function service_fees(Request $request){
+    public function service_fees(Request $request){  
+        $validator = Validator::make($request->all(), [
+            'module' => 'required|in:take_away,delivery,dine_in',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $service_fees_model = $this->service_fees_model
         ->whereHas("branches", function($query) use($request){
             $query->where("branches.id", $request->user()->branch_id);
         })
+        ->whereJsonContains("modules", $request->module ?? "dine_id")
         ->where("module", "pos")
         ->orderByDesc("id")
         ->first();

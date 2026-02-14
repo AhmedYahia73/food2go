@@ -28,12 +28,13 @@ class OrderController extends Controller
     public function service_fees(Request $request){
         $validator = Validator::make($request->all(), [
             'online_type' => 'required|in:app,web', 
+            'module' => 'required|in:take_away,delivery',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
-        }
+        } 
         $service_fees_model = $this->service_fees_model
         ->whereHas("branches", function($query) use($request){
             $query->where("branches.id", $request->user()->branch_id);
@@ -43,6 +44,7 @@ class OrderController extends Controller
             $query->where("online_type", "all")
             ->orWhere("online_type", $request->online_type);
         })
+        ->where("modules", $request->module ?? "delivery")
         ->orderByDesc("id")
         ->first();
 

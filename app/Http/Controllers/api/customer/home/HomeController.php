@@ -45,6 +45,7 @@ class HomeController extends Controller
     public function service_fees(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'source' => 'required|in:web,app',
+            'module' => 'required|in:take_away,delivery',
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -56,6 +57,7 @@ class HomeController extends Controller
             $query->where("branches.id", $id);
         })
         ->where("module", "online")
+        ->whereJsonContains("modules", $request->module ?? "delivery")
         ->where(function($query) use($request){
             $query->where('online_type', 'all')
             ->orWhere("online_type", $request->source);
