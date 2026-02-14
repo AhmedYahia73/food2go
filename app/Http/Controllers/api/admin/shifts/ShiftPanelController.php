@@ -257,7 +257,7 @@ class ShiftPanelController extends Controller
             where('created_at', '>=', $shift->start_time ?? now())
             ->where('created_at', '<=', $shift->end_time ?? now())
             ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
-            ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
+            ->where("cashier_man_id", $cashier_shifts?->cashier_man?->id)
             ->with("financial_account")
             ->get();
             

@@ -798,7 +798,7 @@ class CashierReportsController extends Controller
         
         $shift = $this->cashier_shift 
         ->where('shift', auth()->user()->shift_number)  
-        ->where("cahier_man_id", $request->user()->id)
+        ->where("cashier_man_id", $request->user()->id)
         ->first();
         $expenses = $this->expenses
         ->where('created_at', '>=', $shift->start_time ?? now())
