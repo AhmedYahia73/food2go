@@ -12,5 +12,7 @@ class Policy extends Model
     protected $fillable = [
         'policy',
         'support',
+        'return_policy',
+        'delivery_policy',
     ];
 }

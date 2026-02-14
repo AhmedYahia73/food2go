@@ -160,7 +160,9 @@ class MainDataController extends Controller
         // policy, support
         $validator = Validator::make($request->all(), [
             'policy' => 'required',
-            'support' => 'required',
+            'support' => 'required', 
+            'return_policy' => ['required'],
+            'delivery_policy' => ['required'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
