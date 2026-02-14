@@ -1189,10 +1189,20 @@ class CaptainMakeOrderController extends Controller
         ->whereJsonContains("module", "take_away")
         ->get()
         ->map(function($item) use($locale){
+            $discount = [ 
+                'name' => $item->name,
+                'type' => "precentage",
+                'amount' => $item->discount,
+            ];
+            $products= $item->products
+            ->map(function($element) use($discount){
+                $element->discount = collect($discount);
+                return $element;
+            });
             return [
                 "name" => $item->name,
                 "discount" => $item->discount,
-                "products" => ProductResource::collection($item->products),
+                "products" => ProductResource::collection($products),
             ];
         });
         $offers_dine_in = ProductOffer::
@@ -1228,10 +1238,20 @@ class CaptainMakeOrderController extends Controller
         ->whereJsonContains("module", "dine_in")
         ->get()
         ->map(function($item) use($locale){
+            $discount = [ 
+                'name' => $item->name,
+                'type' => "precentage",
+                'amount' => $item->discount,
+            ];
+            $products= $item->products
+            ->map(function($element) use($discount){
+                $element->discount = collect($discount);
+                return $element;
+            });
             return [
                 "name" => $item->name,
                 "discount" => $item->discount,
-                "products" => ProductResource::collection($item->products),
+                "products" => ProductResource::collection($products),
             ];
         });
         $offers_delivery = ProductOffer::
@@ -1267,10 +1287,20 @@ class CaptainMakeOrderController extends Controller
         ->whereJsonContains("module", "delivery")
         ->get()
         ->map(function($item) use($locale){
+            $discount = [ 
+                'name' => $item->name,
+                'type' => "precentage",
+                'amount' => $item->discount,
+            ];
+            $products= $item->products
+            ->map(function($element) use($discount){
+                $element->discount = collect($discount);
+                return $element;
+            });
             return [
                 "name" => $item->name,
                 "discount" => $item->discount,
-                "products" => ProductResource::collection($item->products),
+                "products" => ProductResource::collection($products),
             ];
         });
         return response()->json([
