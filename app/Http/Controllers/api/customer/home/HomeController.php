@@ -128,8 +128,10 @@ class HomeController extends Controller
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         
         $branch_id = 0;
+        $module = "delivery";
         if ($request->branch_id && !empty($request->branch_id)) {
             $branch_id = $request->branch_id;
+            $module = "take_away";
         }
         if ($request->address_id && !empty($request->address_id)) {
             $address = $this->address
@@ -184,7 +186,7 @@ class HomeController extends Controller
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
             ->get()
-            ->map(function ($product) use ($option_off, $branch_id) {
+            ->map(function ($product) use ($option_off, $branch_id, $module) {
                 $product->favourite = $product->favourite_product->isNotEmpty();
                 $product->favourites = $product->favourite_product->isNotEmpty();
 
@@ -213,6 +215,28 @@ class HomeController extends Controller
                     return $variation;
                 });
 
+                $tax_module = $product?->tax
+                ?->tax_module
+                ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+                    $isFound = $taxItem->module
+                    ->where('module', $module) 
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id)
+                    ->first();
+                    if($isFound){
+                        return $product?->tax;
+                    }
+
+                })
+                ->filter()
+                ->first();
+                if(!empty($tax_module)){  
+                    $product->tax = $tax_module;
+                }
+                else{
+                    $product->tax = null;
+                }
                 return $product;
             });
 
@@ -238,7 +262,7 @@ class HomeController extends Controller
                 ->whereNotIn('products.id', $product_off)
                 ->get();
 
-            $products = $products->map(function($product) use ($branch_id, $option_off) {
+            $products = $products->map(function($product) use ($branch_id, $option_off, $module) {
                 $product->price = $product->product_pricing
                     ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
 
@@ -255,6 +279,29 @@ class HomeController extends Controller
 
                     return $variation;
                 });
+
+                $tax_module = $product?->tax
+                ?->tax_module
+                ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+                    $isFound = $taxItem->module
+                    ->where('module', $module) 
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id)
+                    ->first();
+                    if($isFound){
+                        return $product?->tax;
+                    }
+
+                })
+                ->filter()
+                ->first();
+                if(!empty($tax_module)){  
+                    $product->tax = $tax_module;
+                }
+                else{
+                    $product->tax = null;
+                }
                 return $product;
             });
         }
