@@ -958,7 +958,6 @@ class CaptainMakeOrderController extends Controller
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
             //get count of sales of product to detemine stock
             
-          
             $tax_module = $product?->tax
             ?->tax_module
             ?->map(function ($taxItem) use ($module, $branch_id, $product) {
