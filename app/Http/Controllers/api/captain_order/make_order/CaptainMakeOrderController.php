@@ -907,6 +907,9 @@ class CaptainMakeOrderController extends Controller
             if(!empty($tax_module)){  
                 $product->tax = $tax_module;
             }
+            else{
+                $product->tax = null;
+            }
             return $product;
         })->filter();
         $cafe_location = $this->cafe_location
@@ -975,6 +978,9 @@ class CaptainMakeOrderController extends Controller
             if(!empty($tax_module)){  
                 $product->tax = $tax_module;
             }
+            else{
+                $product->tax = null;
+            }
             $new_price = $product?->product_pricing
             ->where('branch_id', $branch_id)
             ->first()?->price;
@@ -1037,6 +1043,9 @@ class CaptainMakeOrderController extends Controller
             ->first();
             if(!empty($tax_module)){  
                 $product->tax = $tax_module;
+            }
+            else{
+                $product->tax = null;
             }
             return $product;
         })->filter();
