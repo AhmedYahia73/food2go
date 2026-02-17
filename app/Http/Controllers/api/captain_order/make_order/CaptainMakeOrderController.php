@@ -1194,13 +1194,16 @@ class CaptainMakeOrderController extends Controller
                 'type' => "precentage",
                 'amount' => $item->discount,
             ];
+            $total = 0;
             $products= $item->products
-            ->map(function($element) use($discount){
+            ->map(function($element) use($discount, $total){
                 $element->discount = (object) $discount;
+                $total += $element->price - ($discount['amount'] * $element->price / 100);
                 return $element;
             });
             return [
                 "name" => $item->name,
+                "total" => $total,
                 "discount" => $item->discount,
                 "products" => ProductResource::collection($products),
             ];
@@ -1243,13 +1246,16 @@ class CaptainMakeOrderController extends Controller
                 'type' => "precentage",
                 'amount' => $item->discount,
             ];
+            $total = 0;
             $products= $item->products
-            ->map(function($element) use($discount){
+            ->map(function($element) use($discount, $total){
                 $element->discount = (object) $discount;
+                $total += $element->price - ($discount['amount'] * $element->price / 100);
                 return $element;
             });
             return [
                 "name" => $item->name,
+                "total" => $total,
                 "discount" => $item->discount,
                 "products" => ProductResource::collection($products),
             ];
