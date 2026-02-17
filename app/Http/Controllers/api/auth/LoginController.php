@@ -214,6 +214,10 @@ class LoginController extends Controller
         $r_online_noti = $this->settings
         ->where("name", "r_online_noti")
         ->first()?->setting ?? 0;
+        $notification_sound = $this->settings
+        ->where("name", "notification_sound")
+        ->first()?->setting;
+        $notification_sound = url("storage/" . $notification_sound);
         if (empty($user)) {
             $user = $this->branch
             ->where('email', $request->email)
@@ -284,6 +288,7 @@ class LoginController extends Controller
                 "r_online_noti" => $r_online_noti,
                 "order_lang" => $order_lang->setting,
                 "receipt_design" => $receipt_design,
+                "notification_sound" => $notification_sound,
             ], 200);
         }
         else { 
