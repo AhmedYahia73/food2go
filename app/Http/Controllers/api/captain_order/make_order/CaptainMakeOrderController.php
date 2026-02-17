@@ -1196,7 +1196,7 @@ class CaptainMakeOrderController extends Controller
             ];
             $total = 0;
             $products= $item->products
-            ->map(function($element) use($discount, $total){
+            ->map(function($element) use($discount, &$total){
                 $element->discount = (object) $discount;
                 $total += $element->price - ($discount['amount'] * $element->price / 100);
                 return $element;
@@ -1248,7 +1248,7 @@ class CaptainMakeOrderController extends Controller
             ];
             $total = 0;
             $products= $item->products
-            ->map(function($element) use($discount, $total){
+            ->map(function($element) use($discount, &$total){
                 $element->discount = (object) $discount;
                 $total += $element->price - ($discount['amount'] * $element->price / 100);
                 return $element;
@@ -1300,7 +1300,7 @@ class CaptainMakeOrderController extends Controller
             ];
             $total = 0;
             $products= $item->products
-            ->map(function($element) use($discount, $total){
+            ->map(function($element) use($discount, &$total){
                 $element->discount = (object) $discount;
                 $total += $element->price - ($discount['amount'] * $element->price / 100);
                 return $element;
