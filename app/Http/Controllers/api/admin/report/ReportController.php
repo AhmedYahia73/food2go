@@ -2493,6 +2493,7 @@ class ReportController extends Controller
             ],400);
         }
         
+        
         $locale = $request->locale ?? "ar";
         $time_sittings = TimeSittings::
         get();
@@ -2515,10 +2516,10 @@ class ReportController extends Controller
         }
         if ($time_sittings->count() > 0) {
             $from = $from->from;
-            $end = $request->to . ' ' . $to->from;
+            $end = ($request->to ?? date("Y-m-d")) . ' ' . $to->from;
             $hours = $to->hours;
             $minutes = $to->minutes;
-            $from = $request->from . ' ' . $from;
+            $from = ($request->from ?? "1999-05-05") . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
             $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
@@ -2531,7 +2532,7 @@ class ReportController extends Controller
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-        } 
+        }  
         $orders = Order::
         where("is_void", 0)  
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])

@@ -165,6 +165,7 @@ class Order extends Model
         if(isset($this->attributes['order_details'])){
             return json_decode($this->attributes['order_details'], true);
         }
+        return collect([]);
     }
 
     public function getorderDetailsAttribute($data){
