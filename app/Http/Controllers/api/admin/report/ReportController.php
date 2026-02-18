@@ -2492,7 +2492,7 @@ class ReportController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        try{
+        
         $locale = $request->locale ?? "ar";
         $time_sittings = TimeSittings::
         get();
@@ -2561,61 +2561,67 @@ class ReportController extends Controller
             if(!empty($details)){
                 foreach ($details as $element) {
                     $price = 0;
-                    foreach ($element['variations'] as $key => $value) {
-                        foreach ($value['options'] as $key => $option) {
-                            $price += $option['price_after_tax'] 
-                            - $option['price']
-                            + $option['after_disount'];
+                    if (isset($element['variations'])) {
+                        foreach ($element['variations'] as $key => $value) {
+                            foreach ($value['options'] as $key => $option) {
+                                $price += $option['price_after_tax'] 
+                                - $option['price']
+                                + $option['after_disount'];
+                            }
                         }
                     }
-                    foreach ($element['extras'] as $key => $extra) {
-                            $price += $extra['price_after_tax'] 
-                            - $extra['price']
-                            + $extra['price_after_discount'];
-                    }
-                    $price += $element['product'][0]['product']['price_after_tax'] 
-                        - $element['product'][0]['product']['price']
-                        + $element['product'][0]['product']['price_after_discount'];
-                    $count = $element['product'][0]['count'];
-                    $product_id = $element['product'][0]['product']['id'];
-                
-                    if(isset($products[$product_id])){
-                        $products[$product_id]["price"] += $price * $count;
-                        $products[$product_id]["count"] += $count;
-                    }
-                    else{ 
-                        $category_id = $element['product'][0]['product']['category_id'];
-                        $sub_category_id = $element['product'][0]['product']['sub_category_id'];
-                        // $category = Category::
-                        // where("id", $category_id)
-                        // ->first()?->name;
-                        // $sub_category = Category::
-                        // where("id", $sub_category_id)
-                        // ->first()?->name;
-                        
-                        $product_name_item = $element['product'][0]['product']['name'];
-                        if($locale != "en"){ 
-                            $product_name = Product::
-                            where("id", $product_id)
-                            ->with("translations")
-                            ->first();
-                            $product_name = $product_name
-                            ->translations
-                            ->where("locale", $locale)
-                            ->where("key", $product_name_item)
-                            ->first()?->value ?? $product_name_item;
+                    if (isset($element['extras'])) {
+                        foreach ($element['extras'] as $key => $extra) {
+                                $price += $extra['price_after_tax'] 
+                                - $extra['price']
+                                + $extra['price_after_discount'];
                         }
-                        else{
-                            $product_name = $product_name_item;
+                    }
+                    if(isset($element['product'][0]['product'])){
+                        $price += $element['product'][0]['product']['price_after_tax'] 
+                            - $element['product'][0]['product']['price']
+                            + $element['product'][0]['product']['price_after_discount'];
+                        $count = $element['product'][0]['count'];
+                        $product_id = $element['product'][0]['product']['id'];
+                    
+                        if(isset($products[$product_id])){
+                            $products[$product_id]["price"] += $price * $count;
+                            $products[$product_id]["count"] += $count;
                         }
-                        $products[$product_id] = [
-                            "id" => $product_id,
-                            "name" => $product_name,
-                            "category_id" => $category_id,
-                            "sub_category_id" => $sub_category_id, 
-                            "price" => $price * $count,
-                            "count" => $count, 
-                        ];
+                        else{ 
+                            $category_id = $element['product'][0]['product']['category_id'];
+                            $sub_category_id = $element['product'][0]['product']['sub_category_id'];
+                            // $category = Category::
+                            // where("id", $category_id)
+                            // ->first()?->name;
+                            // $sub_category = Category::
+                            // where("id", $sub_category_id)
+                            // ->first()?->name;
+                            
+                            $product_name_item = $element['product'][0]['product']['name'];
+                            if($locale != "en"){ 
+                                $product_name = Product::
+                                where("id", $product_id)
+                                ->with("translations")
+                                ->first();
+                                $product_name = $product_name
+                                ->translations
+                                ->where("locale", $locale)
+                                ->where("key", $product_name_item)
+                                ->first()?->value ?? $product_name_item;
+                            }
+                            else{
+                                $product_name = $product_name_item;
+                            }
+                            $products[$product_id] = [
+                                "id" => $product_id,
+                                "name" => $product_name,
+                                "category_id" => $category_id,
+                                "sub_category_id" => $sub_category_id, 
+                                "price" => $price * $count,
+                                "count" => $count, 
+                            ];
+                        }
                     }
                 }
             }
@@ -2679,14 +2685,6 @@ class ReportController extends Controller
         return response()->json([
             "data" => $data,
         ]);
-} catch (\Exception $e) {
-    return response()->json([
-        'status' => false,
-        'message' => $e->getMessage(),
-        'line' => $e->getLine(),
-        'file' => $e->getFile(),
-    ]);
-}
     }
 
     public function invoices_filter(Request $request){
