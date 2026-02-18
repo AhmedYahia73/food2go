@@ -2492,7 +2492,7 @@ class ReportController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-        
+        try{
         $locale = $request->locale ?? "ar";
         $time_sittings = TimeSittings::
         get();
@@ -2679,6 +2679,13 @@ class ReportController extends Controller
         return response()->json([
             "data" => $data,
         ]);
+} catch (\Exception $e) {
+    return response()->json([
+        'status' => false,
+        'message' => $e->getMessage(),
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+}
     }
 
     public function invoices_filter(Request $request){
