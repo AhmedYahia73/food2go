@@ -95,7 +95,10 @@ class Order extends Model
     }
 
     public function getdateAttribute(){
-        return $this->created_at->format('H:i:s');
+        return $this->created_at 
+        ? $this->created_at->format('H:i:s') 
+        : null;
+
     }
 
     public function service_fees_item(){
@@ -154,7 +157,9 @@ class Order extends Model
     
     public function getOrderDateAttribute(){
         if (isset($this->attributes['created_at'] )&& !empty($this->attributes['created_at'])) {
-            return Carbon::parse($this->attributes['created_at'])->format('Y-m-d');
+            return $this->created_at
+            ? $this->created_at->format('Y-m-d')
+            : null;
         } 
         else {
             return null;
@@ -163,9 +168,9 @@ class Order extends Model
 
     public function getOrderDetailsDataAttribute(){
         if(isset($this->attributes['order_details'])){
-            return json_decode($this->attributes['order_details'], true);
+            return json_decode($this->attributes['order_details'], true) ?? [];
         }
-        return collect([]);
+        return [];
     }
 
     public function getorderDetailsAttribute($data){
