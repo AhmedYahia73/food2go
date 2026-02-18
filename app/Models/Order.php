@@ -150,6 +150,7 @@ class Order extends Model
         elseif (isset($this->attributes['status']) && $this->attributes['status'] == 2) {
             return 'faild';
         } 
+        return null;
     }
     
     public function getOrderDateAttribute(){
@@ -171,7 +172,19 @@ class Order extends Model
     }
 
     public function getorderDetailsAttribute($data){
-        return json_decode($data);
+    if (empty($data)) {
+        return [];
+    }
+
+    if (is_array($data)) {
+        return $data;
+    }
+
+    $decoded = json_decode($data, true);
+
+    return json_last_error() === JSON_ERROR_NONE
+        ? $decoded
+        : []; 
     }
 
     public function void(){
