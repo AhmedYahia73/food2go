@@ -2685,6 +2685,7 @@ class ReportController extends Controller
         'message' => $e->getMessage(),
         'line' => $e->getLine(),
         'file' => $e->getFile(),
+    ]);
 }
     }
 
