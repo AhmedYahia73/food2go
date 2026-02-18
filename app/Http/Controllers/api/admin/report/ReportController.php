@@ -2476,7 +2476,8 @@ class ReportController extends Controller
     }
 
     public function product_report(Request $request){ 
- 
+        ini_set('memory_limit', '512M');
+        set_time_limit(300); // 5 دقائق
         $validator = Validator::make($request->all(), [
             'branch_id' => ['exists:branches,id'],
             'cashier_id' => ['exists:cashiers,id'],
