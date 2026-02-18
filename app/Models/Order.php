@@ -91,168 +91,97 @@ class Order extends Model
     ];
 
     public function financials(){
-        return $this->belongsToMany(FinantiolAcounting::class, 'order_financials', "order_id", "financial_id");
     }
 
     public function getdateAttribute(){
-        return $this->created_at 
-        ? $this->created_at->format('H:i:s') 
-        : null;
-
     }
 
     public function service_fees_item(){
-        return $this->belongsTo(ServiceFees::class, 'service_fees_id');
     }
     
     public function transfer_from(){
-        return $this->belongsTo(Branch::class, 'transfer_from_id');
     }
     
     public function bundles(){
-        return $this->hasMany(OrderBundle::class, 'bundle_id');
     }
 
     public function group_module(){
-        return $this->belongsTo(GroupProduct::class, 'module_id');
     }
 
     public function getorderNumberAttribute()
     {
-        if (!$this->created_at) {
-            return null;
-        }
-
-        $time_settings = TimeSittings::where('branch_id', $this->branch_id)
-            ->orderByDesc('id')
-            ->first();
-
-        $date = $this->created_at;
-
-        if ($time_settings && $time_settings->from > $date->format('H:i:s')) {
-            $date = $date->copy()->subDay();
-        }
-
-        return $date->format('dmy') . $this->id;
     }
 
 
     public function getStatusPaymentAttribute(){
-        if (isset($this->attributes['status']) && $this->attributes['status'] == 1) {
-            return 'approved';
-        } 
-        elseif (!isset($this->attributes['status'])) { // Use isset to check if it's null or not set
-            return 'pending';
-        } 
-        elseif (isset($this->attributes['status']) && $this->attributes['status'] == 0) {
-            return 'rejected';
-        } 
-        elseif (isset($this->attributes['status']) && $this->attributes['status'] == 2) {
-            return 'faild';
-        } 
-        return null;
     }
     
     public function getOrderDateAttribute(){
-        if (isset($this->attributes['created_at'] )&& !empty($this->attributes['created_at'])) {
-            return $this->created_at
-            ? $this->created_at->format('Y-m-d')
-            : null;
-        } 
-        else {
-            return null;
-        }
     }
 
     public function getOrderDetailsDataAttribute(){
-        if(isset($this->attributes['order_details'])){
-            return json_decode($this->attributes['order_details'], true) ?? [];
-        }
-        return [];
     }
 
     public function getorderDetailsAttribute($data){
-        return json_decode($data);
     }
 
     public function void(){
-        return $this->belongsTo(VoidReason::class, 'void_id');
     }
 
     public function financial_accountigs(){
-        return $this->belongsToMany(FinantiolAcounting::class, 'order_financials', 'order_id', 'financial_id');
     }
 
     public function financial_amount(){
-        return $this->hasMany(OrderFinancial::class, 'order_id');
     }
 
     public function captain(){
-        return $this->belongsTo(CaptainOrder::class, 'captain_id');
     }
 
     public function delivery(){
-        return $this->belongsTo(Delivery::class, 'delivery_id');
     }
 
     public function table(){
-        return $this->belongsTo(CafeTable::class, 'table_id');
     }
 
     public function payment_method(){
-        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
 
     public function user(){
-        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function branch(){
-        return $this->belongsTo(Branch::class, 'branch_id');
     }
 
     public function cashier_man(){
-        return $this->belongsTo(CashierMan::class, 'cashier_man_id');
     }
 
     public function casheir(){
-        return $this->belongsTo(Cashier::class, 'cashier_id');
     }
 
     public function products(){
-        return $this->belongsToMany(Product::class, 'order_product', 'order_id', 'product_id')
-        ->withPivot('created_at');
     }
 
     public function addons(){
-        return $this->belongsToMany(Addon::class, 'order_product', 'order_id', 'addon_id');
     }
 
     public function offers(){
-        return $this->belongsToMany(Offer::class, 'order_product', 'order_id', 'offer_id');
     }
 
     public function deal(){
-        return $this->belongsToMany(Deal::class, 'order_product', 'order_id', 'deal_id');
     }
 
     public function address(){
-        return $this->belongsTo(Address::class, 'address_id');
     }
 
     public function order_address(){
-        return $this->belongsTo(Address::class, 'address_id');
     }
 
-    public function admin(){
-        return $this->belongsTo(Admin::class, 'admin_id');
+    public function admin(){ 
     }
 
-    public function schedule(){
-        return $this->belongsTo(ScheduleSlot::class, 'sechedule_slot_id');
+    public function schedule(){ 
     }
 
-    public function details(){
-        return $this->hasMany(OrderDetail::class, 'order_id');
+    public function details(){ 
     }
 }

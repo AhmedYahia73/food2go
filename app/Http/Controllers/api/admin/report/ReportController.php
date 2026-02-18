@@ -2475,7 +2475,7 @@ class ReportController extends Controller
         ]);
     }
 
-    public function product_report(Request $request){ 
+    public function product_report(Request $request){
         ini_set('memory_limit', '512M');
         set_time_limit(300); // 5 دقائق
         $validator = Validator::make($request->all(), [
@@ -2483,173 +2483,213 @@ class ReportController extends Controller
             'cashier_id' => ['exists:cashiers,id'],
             'category_id' => ['exists:categories,id'],
             'cashier_man_id' => ['exists:cashier_men,id'],
-            'from' => ['date'],
+            'from' => ['date'], 
             'to' => ['date'],
             'sort' => ['in:desc,asc'],
             'products' => ['array'],
             'products.*' => ['exists:products,id'],
         ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
         }
-
+        
+        
         $locale = $request->locale ?? "ar";
-        $time_sittings = TimeSittings::all();
-
-        // تحديد نطاق الوقت (Start & End)
-        if ($time_sittings->count() > 0) {
-            $items = $time_sittings->groupBy('branch_id');
-            $to_sit = $time_sittings->first();
-            $from_sit = $time_sittings->first();
-            $max_count = 0;
-
-            foreach ($items as $branch_items) {
-                if ($branch_items->count() > $max_count || ($branch_items->count() == $max_count && $branch_items->last()->from > $to_sit->from)) {
-                    $max_count = $branch_items->count();
-                    $to_sit = $branch_items->last();
-                }
-                if ($from_sit->from > $branch_items->first()->from) {
-                    $from_sit = $branch_items->first();
-                }
+        $time_sittings = TimeSittings::
+        get();
+      
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if($from->from > $item[0]->from){
+                $from = $item[0];
             }
-
-            $start_time = ($request->from ?? "1999-05-05") . ' ' . $from_sit->from;
-            $end_time = ($request->to ?? date("Y-m-d")) . ' ' . $to_sit->from;
-            
-            $start = Carbon::parse($start_time);
-            $end = Carbon::parse($end_time)->addHours($to_sit->hours)->addMinutes($to_sit->minutes);
-
-            if ($start >= $end) $end = $end->addDay();
-            if ($start >= now()) $start = $start->subDay();
+        }
+        if ($time_sittings->count() > 0) {
+            $from = $from->from;
+            $end = ($request->to ?? date("Y-m-d")) . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = ($request->from ?? "1999-05-05") . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+            if($start >= now()){
+                $start = $start->subDay();
+            } 
         } else {
-            $start = now()->startOfDay();
-            $end = now()->endOfDay();
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }  
+        $orders = Order::
+        where("is_void", 0)  
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        // ->whereBetween("created_at", [$start, $end]) 
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where('order_active', 1);
+        if($request->from || $request->to){
+            $orders = $orders 
+            ->whereBetween("created_at", [$start, $end]);
         }
-
-        // جلب الطلبات مع الفلترة
-        $ordersQuery = Order::where("is_void", 0)
-            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
-            ->where(fn($q) => $q->where('status', 1)->orWhereNull('status'))
-            ->where('order_active', 1);
-
-        if ($request->from || $request->to) {
-            $ordersQuery->whereBetween("created_at", [$start, $end]);
+        if($request->branch_id){
+            $orders = $orders->where("branch_id", $request->branch_id);
         }
-
-        if ($request->branch_id) $ordersQuery->where("branch_id", $request->branch_id);
-        if ($request->cashier_id) $ordersQuery->where("cashier_id", $request->cashier_id);
-        if ($request->cashier_man_id) $ordersQuery->where("cashier_man_id", $request->cashier_man_id);
-
-        $orders = $ordersQuery->get(["id", "order_details"]);
-
-        // معالجة المنتجات داخل الطلبات
-        $processedProducts = [];
-        $productIds = [];
-
-        foreach ($orders as $order) {
-            $details = $order->order_details_data;
-            if (empty($details)) continue;
-
-            foreach ($details as $element) {
-                if (!isset($element['product'][0]['product'])) continue;
-
-                $pData = $element['product'][0]['product'];
-                $pId = $pData['id'];
-                $count = $element['product'][0]['count'];
-                $productIds[] = $pId;
-
-                $price = 0;
-                // حساب التباينات
-                if (isset($element['variations'])) {
-                    foreach ($element['variations'] as $variation) {
-                        foreach ($variation['options'] as $option) {
-                            $price += ($option['price_after_tax'] - $option['price'] + $option['after_disount']);
+        if($request->cashier_id){
+            $orders = $orders->where("cashier_id", $request->cashier_id);
+        }
+        if($request->cashier_man_id){
+            $orders = $orders->where("cashier_man_id", $request->cashier_man_id);
+        }
+        $orders = $orders->get([
+            "id", "order_details"
+        ]);
+        $products = [];
+        foreach ($orders as $item) {
+            $details = $item->order_details_data;
+            if(!empty($details)){
+                foreach ($details as $element) {
+                    $price = 0;
+                    if (isset($element['variations'])) {
+                        foreach ($element['variations'] as $key => $value) {
+                            foreach ($value['options'] as $key => $option) {
+                                $price += $option['price_after_tax'] 
+                                - $option['price']
+                                + $option['after_disount'];
+                            }
+                        }
+                    }
+                    if (isset($element['extras'])) {
+                        foreach ($element['extras'] as $key => $extra) {
+                                $price += $extra['price_after_tax'] 
+                                - $extra['price']
+                                + $extra['price_after_discount'];
+                        }
+                    }
+                    if(isset($element['product'][0]['product'])){
+                        $price += $element['product'][0]['product']['price_after_tax'] 
+                            - $element['product'][0]['product']['price']
+                            + $element['product'][0]['product']['price_after_discount'];
+                        $count = $element['product'][0]['count'];
+                        $product_id = $element['product'][0]['product']['id'];
+                    
+                        if(isset($products[$product_id])){
+                            $products[$product_id]["price"] += $price * $count;
+                            $products[$product_id]["count"] += $count;
+                        }
+                        else{ 
+                            $category_id = $element['product'][0]['product']['category_id'];
+                            $sub_category_id = $element['product'][0]['product']['sub_category_id'];
+                            // $category = Category::
+                            // where("id", $category_id)
+                            // ->first()?->name;
+                            // $sub_category = Category::
+                            // where("id", $sub_category_id)
+                            // ->first()?->name;
+                            
+                            $product_name_item = $element['product'][0]['product']['name'];
+                            if($locale != "en"){ 
+                                $product_name = Product::
+                                where("id", $product_id)
+                                ->with("translations")
+                                ->first();
+                                $product_name = $product_name
+                                ->translations
+                                ->where("locale", $locale)
+                                ->where("key", $product_name_item)
+                                ->first()?->value ?? $product_name_item;
+                            }
+                            else{
+                                $product_name = $product_name_item;
+                            }
+                            $products[$product_id] = [
+                                "id" => $product_id,
+                                "name" => $product_name,
+                                "category_id" => $category_id,
+                                "sub_category_id" => $sub_category_id, 
+                                "price" => $price * $count,
+                                "count" => $count, 
+                            ];
                         }
                     }
                 }
-                // حساب الإضافات
-                if (isset($element['extras'])) {
-                    foreach ($element['extras'] as $extra) {
-                        $price += ($extra['price_after_tax'] - $extra['price'] + $extra['price_after_discount']);
-                    }
-                }
-                // سعر المنتج الأساسي
-                $price += ($pData['price_after_tax'] - $pData['price'] + $pData['price_after_discount']);
-
-                if (isset($processedProducts[$pId])) {
-                    $processedProducts[$pId]["price"] += $price * $count;
-                    $processedProducts[$pId]["count"] += $count;
-                } else {
-                    $processedProducts[$pId] = [
-                        "id" => $pId,
-                        "name_key" => $pData['name'],
-                        "category_id" => $pData['category_id'],
-                        "sub_category_id" => $pData['sub_category_id'],
-                        "price" => $price * $count,
-                        "count" => $count,
-                    ];
-                }
             }
         }
-
-        // جلب تراجم المنتجات دفعة واحدة لتحسين الأداء
-        $translations = [];
-        if ($locale != "en" && !empty($productIds)) {
-            $translations = \DB::table('translations') // افترضت أن اسم الجدول translations
-                ->whereIn('translationable_id', array_unique($productIds))
-                ->where('locale', $locale)
-                ->pluck('value', 'key')
-                ->toArray();
+        $categories = Category::
+        with("translations");
+        if($request->category_id){
+            $categories = $categories
+            ->where("id", $request->category_id);
         }
+        $categories = $categories->get()
+        ->map(function($element) use($locale){
+            $name = $element
+            ->translations
+            ->where("locale", $locale)
+            ->where("key", $element->name)
+            ->first()?->value ?? $element->name;
 
-        // تحديث أسماء المنتجات المترجمة
-        foreach ($processedProducts as &$p) {
-            $p['name'] = $translations[$p['name_key']] ?? $p['name_key'];
-            unset($p['name_key']);
-        }
-
-        // جلب الفئات مع تراجمها
-        $categoriesQuery = Category::with(['translations' => fn($q) => $q->where('locale', $locale)]);
-        if ($request->category_id) $categoriesQuery->where("id", $request->category_id);
-
-        $categories = $categoriesQuery->get()->map(function ($cat) use ($locale) {
             return [
-                "id" => $cat->id,
-                "name" => $cat->translations->where('key', $cat->name)->first()?->value ?? $cat->name,
+                "id" => $element->id,
+                "name" => $name,
             ];
         });
-
-        $productsCol = collect($processedProducts);
-        $sortOrder = $request->sort ?? "desc";
+        $products = collect($products);
         $data = [];
-
-        foreach ($categories as $cat) {
-            // تصفية وفرز المنتجات للفئة الحالية
-            $categoryProducts = $productsCol->filter(function ($p) use ($cat, $request) {
-                $isInCategory = ($p['category_id'] == $cat['id'] || $p['sub_category_id'] == $cat['id']);
-                if ($request->products) {
-                    return $isInCategory && in_array($p['id'], $request->products);
+        foreach ($categories as $key => $item) {
+            if(!$request->sort || $request->sort == "desc"){
+                $products_item = $products
+                ->sortByDesc("price");
+            }
+            else{ 
+                $products_item = $products
+                ->sortBy("price");
+            }
+            if($request->products){
+                $products_item = $products_item->filter(function ($product) use ($item, $request) {
+                    return ($product['category_id'] == data_get($item, 'id')
+                    || $product['sub_category_id'] ==  data_get($item, 'id'))
+                    && in_array($product['id'], $request->products);
+                });
+                if(count($products_item) == 0){
+                    continue;
                 }
-                return $isInCategory;
-            });
-
-            if ($request->products && $categoryProducts->isEmpty()) continue;
-
-            $sortedProducts = $sortOrder == "desc" 
-                ? $categoryProducts->sortByDesc("price")->values() 
-                : $categoryProducts->sortBy("price")->values();
-
+            }
+            else{
+                $products_item = $products_item->filter(function ($product) use ($item, $request) {
+                    return $product['category_id'] ==  data_get($item, 'id')
+                        || $product['sub_category_id'] ==  data_get($item, 'id');
+                });
+            }
+             $products_item = $products_item->values();
             $data[] = [
-                "id" => $cat['id'],
-                "category" => $cat['name'],
-                "products" => $sortedProducts,
-                "products_count" => $sortedProducts->sum("count"),
-                "products_price" => $sortedProducts->sum("price"),
+                "id" =>  data_get($item, 'id'),
+                "category" => data_get($item, 'name'),
+                "products" => $products_item,
+                "products_count" => $products_item->sum("count"),
+                "products_price" => $products_item->sum("price"),
             ];
         }
 
-        return response()->json(["data" => $data]);
+        return response()->json([
+            "data" => $data,
+        ]);
     }
 
     public function invoices_filter(Request $request){
