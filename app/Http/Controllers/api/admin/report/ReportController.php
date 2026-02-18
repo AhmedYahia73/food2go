@@ -2555,7 +2555,9 @@ class ReportController extends Controller
         if($request->cashier_man_id){
             $orders = $orders->where("cashier_man_id", $request->cashier_man_id);
         }
-        $orders = $orders->get();
+        $orders = $orders->get([
+            "id", "order_details"
+        ]);
         $products = [];
         foreach ($orders as $item) {
             $details = $item->order_details_data;

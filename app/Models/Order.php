@@ -172,19 +172,7 @@ class Order extends Model
     }
 
     public function getorderDetailsAttribute($data){
-    if (empty($data)) {
-        return [];
-    }
-
-    if (is_array($data)) {
-        return $data;
-    }
-
-    $decoded = json_decode($data, true);
-
-    return json_last_error() === JSON_ERROR_NONE
-        ? $decoded
-        : []; 
+        return json_decode($data);
     }
 
     public function void(){
