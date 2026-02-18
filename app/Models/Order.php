@@ -85,7 +85,10 @@ class Order extends Model
         'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
- 
+
+    protected $hidden = [
+        'pivot', 
+    ];
 
     public function financials(){
         return $this->belongsToMany(FinantiolAcounting::class, 'order_financials', "order_id", "financial_id");
@@ -164,14 +167,22 @@ class Order extends Model
     }
 
     public function getOrderDetailsDataAttribute(){
-        if(isset($this->attributes['order_details'])){
-            return json_decode($this->attributes['order_details'], true) ?? [];
+        try {
+            if(isset($this->attributes['order_details'])){
+                return json_decode($this->attributes['order_details'], true) ?? [];
+            }
+            return [];
+        } catch (\Throwable $th) {
+            return [];
         }
-        return [];
     }
 
     public function getorderDetailsAttribute($data){
-        return json_decode($data);
+        try { 
+            return json_decode($data);
+        } catch (\Throwable $th) {
+            return collect([]);
+        }
     }
 
     public function void(){
