@@ -117,28 +117,25 @@ class Order extends Model
         return $this->belongsTo(GroupProduct::class, 'module_id');
     }
 
-    public function getorderNumberAttribute(){
-        $time_settings = TimeSittings::
-        where('branch_id', $this->branch_id)
-        ->orderByDesc('id')
-        ->first();
-        if (empty($time_settings)) {
-            return $this->created_at->format('d') . $this->created_at->format('m') . 
-            $this->created_at->format('y') . $this->id;
+    public function getorderNumberAttribute()
+    {
+        if (!$this->created_at) {
+            return null;
         }
-        else{
-            $from = $time_settings->from;
-            $to = $this->created_at->format('H:i:s');
-            if ($from > $to) {
-                $date = Carbon::parse($this->created_at)->subDay();
-            }
-            else{
-                $date = $this->created_at;
-            }
-            return $date->format('d') . $date->format('m') . 
-            $date->format('y') . $this->id;
+
+        $time_settings = TimeSittings::where('branch_id', $this->branch_id)
+            ->orderByDesc('id')
+            ->first();
+
+        $date = $this->created_at;
+
+        if ($time_settings && $time_settings->from > $date->format('H:i:s')) {
+            $date = $date->copy()->subDay();
         }
+
+        return $date->format('dmy') . $this->id;
     }
+
 
     public function getStatusPaymentAttribute(){
         if (isset($this->attributes['status']) && $this->attributes['status'] == 1) {
