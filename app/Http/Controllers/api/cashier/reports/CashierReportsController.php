@@ -846,7 +846,7 @@ class CashierReportsController extends Controller
                 cafe_locations.name as hall_name,
                 COUNT(orders.id) as order_count
             ")
-            ->where("branch_id", auth()->user()->branch_id)
+            ->where("cafe_locations.branch_id", auth()->user()->branch_id)
             ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
             ->leftJoin('orders', function ($join) use ($request) {
                 $join->on('orders.table_id', '=', 'cafe_tables.id')
