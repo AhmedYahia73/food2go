@@ -1574,6 +1574,8 @@ class ReportController extends Controller
         ->get();
         $total_tax = $order_count
         ->sum("total_tax");
+        $total_discount = $order_count
+        ->sum("total_discount");
         $service_fees = $order_count
         ->sum("service_fees"); 
         $order_count = $order_count
@@ -1849,6 +1851,7 @@ class ReportController extends Controller
             'online_order' => $online_order,
             'void_order_count' => $void_order_count,
             'void_order_sum' => $void_order_sum, 
+            'total_discount' => $total_discount, 
             'start' => $start->format("Y-m-d H:i"), 
             'end' => $end->format("Y-m-d H:i"), 
         ]);
