@@ -2025,6 +2025,12 @@ class ReportController extends Controller
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("total_tax");
+            $total_discount = Order:: 
+            where("branch_id", $request->branch_id)
+            ->whereBetween("created_at", [$start, $end])  
+            ->where("is_void", 0)  
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->sum("total_discount");
             $service_fees = Order:: 
             where("branch_id", $request->branch_id)
             ->whereBetween("created_at", [$start, $end])  
@@ -2082,6 +2088,7 @@ class ReportController extends Controller
                 "void_order_count" => $void_order_count,
                 "void_order_sum" => $void_order_sum,
                 "total_tax" => $total_tax,
+                "total_discount" => $total_discount,
                 "delivery_fees" => $delivery_fees,
                 "paid_module" => $paid_module,
                 "order_module" => $order_module, 
@@ -2199,7 +2206,13 @@ class ReportController extends Controller
                 ->whereBetween("created_at", [$start, $end]) 
                 ->where("is_void", 0)  
                 ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"]) 
-                ->sum("total_tax"); 
+                ->sum("total_tax");
+                $total_discount = Order:: 
+                where("branch_id", $item->branch_id)
+                ->whereBetween("created_at", [$start, $end])  
+                ->where("is_void", 0)  
+                ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+                ->sum("total_discount"); 
                 $delivery_fees = Order:: 
                 where("branch_id", $item->id)
                 ->whereBetween("created_at", [$start, $end]) 
@@ -2229,6 +2242,7 @@ class ReportController extends Controller
                     "void_order_count" => $void_order_count,
                     "void_order_sum" => $void_order_sum,
                     "total_tax" => $total_tax,
+                    "total_discount" => $total_discount,
                     "delivery_fees" => $delivery_fees,
                 ];
             }
