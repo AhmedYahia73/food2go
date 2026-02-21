@@ -11,6 +11,7 @@ use App\Models\Kitchen;
 use App\Models\Branch;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\PrinterKitchen;
 
 class KitchenController extends Controller
 {
@@ -143,6 +144,7 @@ class KitchenController extends Controller
         $kitchen = $this->kitchen
         ->with('branch', 'products')
         ->where('id', $id)
+        ->with("printer")
         ->first();
 
         return response()->json([
@@ -191,6 +193,18 @@ class KitchenController extends Controller
             'type' => 'required|in:kitchen,brista',
             'preparing_time' => 'required|date_format:H:i:s',
             "print_type" => "required|in:usb,network",
+
+            
+            'kitchen.*.print_name' => 'required',
+            'kitchen.*.print_ip' => 'required',
+            'kitchen.*.print_status' => 'required|boolean',
+            'kitchen.*.print_type' => 'required|in:usb,network',
+            'kitchen.*.print_port' => 'required',
+            'kitchen.*.kitchen_id' => 'required|exists:kitchens,id',
+            "kitchen.*.module" => "array",
+            "kitchen.*.module.*" => "required|in:take_away,dine_in,delivery",
+            "kitchen.*.group_modules" => "array",
+            "kitchen.*.group_modules.*" => "required|exists:group_products,id",
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -198,9 +212,27 @@ class KitchenController extends Controller
             ],400);
         }
         $kitchenRequest = $validator->validated();
-        $this->kitchen
+        $kitchen = $this->kitchen
         ->create($kitchenRequest);
+ 
+        if($request->kitchen){ 
+            foreach ($request->kitchen as $kitchen_item) {
+                $printer = PrinterKitchen::create([ 
+                    'print_name' => $kitchen_item->print_name ?? null,
+                    'print_ip' => $kitchen_item->print_ip ?? null,
+                    'print_status' => $kitchen_item->print_status ?? null,
+                    'print_type' => $kitchen_item->print_type ?? null,
+                    'print_port' => $kitchen_item->print_port ?? null, 
+                    'kitchen_id' => $kitchen->id ?? null,
+                    'module' => $kitchen_item->module ?? null,
+                ]);
+                $printer->group_product()->attach($kitchen_item->group_modules);
+            }
+        }
 
+        // return response()->json([
+        //     "success" => "You add data success"
+        // ]);
         return response()->json([
             'success' => 'You add data success'
         ]);
@@ -220,6 +252,18 @@ class KitchenController extends Controller
             'status' => 'required|boolean',
             'preparing_time' => 'required|date_format:H:i:s',
             "print_type" => "required|in:usb,network",
+
+            
+            'kitchen.*.print_name' => 'required',
+            'kitchen.*.print_ip' => 'required',
+            'kitchen.*.print_status' => 'required|boolean',
+            'kitchen.*.print_type' => 'required|in:usb,network',
+            'kitchen.*.print_port' => 'required',
+            'kitchen.*.kitchen_id' => 'required|exists:kitchens,id',
+            "kitchen.*.module" => "array",
+            "kitchen.*.module.*" => "required|in:take_away,dine_in,delivery",
+            "kitchen.*.group_modules" => "array",
+            "kitchen.*.group_modules.*" => "required|exists:group_products,id",
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -230,9 +274,28 @@ class KitchenController extends Controller
         if($request->password){
             $kitchenRequest['password'] = Hash::make($request->password);
         }
-        $this->kitchen
+        $kitchen = $this->kitchen
         ->where('id', $id)
-        ->update($kitchenRequest);
+        ->findOrFail();
+        $kitchen->update($kitchenRequest);
+ 
+        PrinterKitchen::
+        where("kitchen_id", $id)
+        ->delete();
+        if($request->kitchen){ 
+            foreach ($request->kitchen as $kitchen_item) {
+                $printer = PrinterKitchen::create([ 
+                    'print_name' => $kitchen_item->print_name ?? null,
+                    'print_ip' => $kitchen_item->print_ip ?? null,
+                    'print_status' => $kitchen_item->print_status ?? null,
+                    'print_type' => $kitchen_item->print_type ?? null,
+                    'print_port' => $kitchen_item->print_port ?? null, 
+                    'kitchen_id' => $id ?? null,
+                    'module' => $kitchen_item->module ?? null,
+                ]);
+                $printer->group_product()->attach($kitchen_item->group_modules);
+            }
+        }
 
         return response()->json([
             'success' => 'You update data success'
