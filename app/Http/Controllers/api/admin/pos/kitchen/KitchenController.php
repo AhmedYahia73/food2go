@@ -218,15 +218,15 @@ class KitchenController extends Controller
         if($request->kitchen){ 
             foreach ($request->kitchen as $kitchen_item) {
                 $printer = PrinterKitchen::create([ 
-                    'print_name' => $kitchen_item->print_name ?? null,
-                    'print_ip' => $kitchen_item->print_ip ?? null,
-                    'print_status' => $kitchen_item->print_status ?? null,
-                    'print_type' => $kitchen_item->print_type ?? null,
-                    'print_port' => $kitchen_item->print_port ?? null, 
+                    'print_name' => $kitchen_item['print_name'] ?? null,
+                    'print_ip' => $kitchen_item['print_ip'] ?? null,
+                    'print_status' => $kitchen_item['print_status'] ?? null,
+                    'print_type' => $kitchen_item['print_type'] ?? null,
+                    'print_port' => $kitchen_item['print_port'] ?? null, 
                     'kitchen_id' => $kitchen->id ?? null,
-                    'module' => $kitchen_item->module ?? null,
+                    'module' => $kitchen_item['module'] ?? null,
                 ]);
-                $printer->group_product()->attach($kitchen_item->group_modules);
+                $printer->group_product()->attach($kitchen_item['group_modules']);
             }
         }
 
@@ -285,15 +285,15 @@ class KitchenController extends Controller
         if($request->kitchen){ 
             foreach ($request->kitchen as $kitchen_item) {
                 $printer = PrinterKitchen::create([ 
-                    'print_name' => $kitchen_item->print_name ?? null,
-                    'print_ip' => $kitchen_item->print_ip ?? null,
-                    'print_status' => $kitchen_item->print_status ?? null,
-                    'print_type' => $kitchen_item->print_type ?? null,
-                    'print_port' => $kitchen_item->print_port ?? null, 
+                    'print_name' => $kitchen_item['print_name'] ?? null,
+                    'print_ip' => $kitchen_item['print_ip'] ?? null,
+                    'print_status' => $kitchen_item['print_status'] ?? null,
+                    'print_type' => $kitchen_item['print_type'] ?? null,
+                    'print_port' => $kitchen_item['print_port'] ?? null, 
                     'kitchen_id' => $id ?? null,
-                    'module' => $kitchen_item->module ?? null,
+                    'module' => $kitchen_item['module'] ?? null,
                 ]);
-                $printer->group_product()->attach($kitchen_item->group_modules);
+                $printer->group_product()->attach($kitchen_item['group_modules']);
             }
         }
 
