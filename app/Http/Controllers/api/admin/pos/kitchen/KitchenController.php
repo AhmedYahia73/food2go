@@ -195,12 +195,12 @@ class KitchenController extends Controller
             "print_type" => "required|in:usb,network",
 
             
+            'kitchen' => 'array',
             'kitchen.*.print_name' => 'required',
             'kitchen.*.print_ip' => 'required',
             'kitchen.*.print_status' => 'required|boolean',
             'kitchen.*.print_type' => 'required|in:usb,network',
-            'kitchen.*.print_port' => 'required',
-            'kitchen.*.kitchen_id' => 'required|exists:kitchens,id',
+            'kitchen.*.print_port' => 'required', 
             "kitchen.*.module" => "array",
             "kitchen.*.module.*" => "required|in:take_away,dine_in,delivery",
             "kitchen.*.group_modules" => "array",
@@ -254,12 +254,12 @@ class KitchenController extends Controller
             "print_type" => "required|in:usb,network",
 
             
+            'kitchen' => 'array',
             'kitchen.*.print_name' => 'required',
             'kitchen.*.print_ip' => 'required',
             'kitchen.*.print_status' => 'required|boolean',
             'kitchen.*.print_type' => 'required|in:usb,network',
-            'kitchen.*.print_port' => 'required',
-            'kitchen.*.kitchen_id' => 'required|exists:kitchens,id',
+            'kitchen.*.print_port' => 'required', 
             "kitchen.*.module" => "array",
             "kitchen.*.module.*" => "required|in:take_away,dine_in,delivery",
             "kitchen.*.group_modules" => "array",
