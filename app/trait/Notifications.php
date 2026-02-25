@@ -8,6 +8,7 @@ use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\MulticastSendReport;
+use Kreait\Firebase\Messaging\ApnsConfig;
 
 trait Notifications
 {
@@ -25,7 +26,17 @@ trait Notifications
 
             $message = CloudMessage::new()
                 ->withNotification(Notification::create($title, $body))
-                ->withData($data);
+                ->withData($data)
+                ->withApnsConfig(
+                    ApnsConfig::fromArray([
+                        'payload' => [
+                            'aps' => [
+                                'sound' => 'default',
+                                'badge' => 1,
+                            ],
+                        ],
+                    ])
+                );
             return $this->messaging->sendMulticast($message, $tokens);
         }
 
