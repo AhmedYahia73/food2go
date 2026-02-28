@@ -384,14 +384,22 @@ class ClientMakeOrderController extends Controller
         ]);
     }
 
-    public function category(Request $request, $id){
+    public function category(Request $request){
         // https://bcknd.food2go.online/client/order/products/{id}
         // Keys
         // address_id, branch_id
         
         // // _______________________________________________________________________
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
         $branch_id = $this->cafe_tables
-        ->where('id', $id)
+        ->where('id', $request->table_id)
         ->with('location')
         ->first()
         ?->location?->branch_id ?? 0;
