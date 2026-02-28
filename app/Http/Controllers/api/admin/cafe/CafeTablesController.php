@@ -103,7 +103,7 @@ class CafeTablesController extends Controller
         $cafe_tables = $this->cafe_tables
         ->create($tablesRequest); 
      
-        $qrContent = $cafe_tables->id;
+        $qrContent = "https://orderfood.food2go.online/table?table_id=" . $cafe_tables->id;
     
         $qrImage = QrCode::format('png')->size(300)->generate($qrContent);
         $fileName = 'admin/cafe/tables/qr/'.$cafe_tables->id.'.png';
