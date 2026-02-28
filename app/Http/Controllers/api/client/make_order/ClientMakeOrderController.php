@@ -81,6 +81,354 @@ class ClientMakeOrderController extends Controller
     use POS; 
     use Notifications;
 
+
+    public function discount_product(Request $request){
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        $module = "delivery";
+        $branch_id = $this->cafe_tables
+        ->where("id", $request->table_id)
+        ->first()
+        ?->location?->branch_id ?? 0;
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+        $products = $this->product 
+        ->orderBy('order')
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'online')
+        ->whereHas('discount')
+        ->where('status', 1) 
+        // ->whereNotIn('sub_category_id', $category_off)
+        ->where(function($query) use($category_off){
+            $query->whereNotIn('sub_category_id', $category_off)
+            ->orWhereNotIn('category_id', $category_off);
+        })
+        ->whereNotIn('products.id', $product_off)
+        ->get()
+        ->map(function ($product) use ($option_off, $branch_id, $module) {
+            $product->favourite = $product->favourite_product->isNotEmpty();
+
+            $tax_module = $product?->tax
+            ?->tax_module
+            ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+                $isFound = $taxItem->module
+                ->where('module', $module) 
+                ->whereIn('app_type', ['online', 'all'])
+                ->Where("branch_id", $branch_id)
+                ->first();
+                if($isFound){
+                    return $product?->tax;
+                }
+
+            })
+            ->filter()
+            ->first();
+            if(!empty($tax_module)){  
+                $product->tax = $tax_module;
+            }
+            else{
+                $product->tax = null;
+            }
+            if ($product->taxes->setting == 'included') {
+                $price = empty($product->tax) ? $product->price: 
+                ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
+                : $product->price + $product->tax->amount * $product->price / 100);
+                
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                        $discount_val = $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                        $discount_val = $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                    $discount_val = 0;
+                }
+                $tax = $price;
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax, 
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            } 
+            else {
+                $price = $product->price;
+                
+                if (!empty($product->tax)) {
+                    if ($product->tax->type == 'precentage') {
+                        $tax = $price + $product->tax->amount * $price / 100;
+                    } else {
+                        $tax = $price + $product->tax->amount;
+                    }
+                }
+                else{
+                    $tax = $price;
+                }
+
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                }
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax,
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            }
+        });
+
+        return response()->json([
+            'discount_products' => $products
+        ]);
+    } 
+
+    public function favourit_product(Request $request){
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        $module = "delivery";
+        $branch_id = $this->cafe_tables
+        ->where("id", $request->table_id)
+        ->first()
+        ?->location?->branch_id ?? 0;
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $tax = $this->settings
+        ->where('name', 'tax')
+        ->orderByDesc('id')
+        ->first();
+        if (!empty($tax)) {
+            $tax = $tax->setting;
+        }
+        else {
+            $tax = $this->settings
+            ->create([
+                'name' => 'tax',
+                'setting' => 'included',
+            ]);
+            $tax = $tax->setting;
+        }
+        $products = $this->product 
+        ->orderBy('order')
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'online')
+        ->where('favourite', 1)
+        ->where('status', 1) 
+        // ->whereNotIn('sub_category_id', $category_off)
+        ->where(function($query) use($category_off){
+            $query->whereNotIn('sub_category_id', $category_off)
+            ->orWhereNotIn('category_id', $category_off);
+        })
+        ->whereNotIn('products.id', $product_off)
+        ->get()
+        ->map(function ($product) use ($option_off, $branch_id, $module) {
+            $product->favourite = $product->favourite_product->isNotEmpty();
+
+            $tax_module = $product?->tax
+            ?->tax_module
+            ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+                $isFound = $taxItem->module
+                ->where('module', $module) 
+                ->whereIn('app_type', ['online', 'all'])
+                ->Where("branch_id", $branch_id)
+                ->first();
+                if($isFound){
+                    return $product?->tax;
+                }
+
+            })
+            ->filter()
+            ->first();
+            if(!empty($tax_module)){  
+                $product->tax = $tax_module;
+            }
+            else{
+                $product->tax = null;
+            }
+            if ($product->taxes->setting == 'included') {
+                $price = empty($product->tax) ? $product->price: 
+                ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
+                : $product->price + $product->tax->amount * $product->price / 100);
+                
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                        $discount_val = $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                        $discount_val = $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                    $discount_val = 0;
+                }
+                $tax = $price;
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax, 
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            } 
+            else {
+                $price = $product->price;
+                
+                if (!empty($product->tax)) {
+                    if ($product->tax->type == 'precentage') {
+                        $tax = $price + $product->tax->amount * $price / 100;
+                    } else {
+                        $tax = $price + $product->tax->amount;
+                    }
+                }
+                else{
+                    $tax = $price;
+                }
+
+                if (!empty($product->discount)) {
+                    if ($product->discount->type == 'precentage') {
+                        $discount = $price - $product->discount->amount * $price / 100;
+                    } else {
+                        $discount = $price - $product->discount->amount;
+                    }
+                }
+                else{
+                    $discount = $price;
+                }
+                return [
+                    'id' => $product->id,
+                    'taxes' => $product->taxes->setting,
+                    'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                    'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                    'price' => $price,
+                    'price_after_discount' => $discount,
+                    'price_after_tax' => $tax,
+                    'image_link' => $product->image_link,
+                    'discount' => $price - $discount,
+                    'tax' => $tax - $price,
+                ];
+            }
+        });
+
+        return response()->json([
+            'products' => $products
+        ]);
+    }
+
+    public function category(Request $request, $id){
+        // https://bcknd.food2go.online/client/order/products/{id}
+        // Keys
+        // address_id, branch_id
+        
+        // // _______________________________________________________________________
+        $branch_id = $this->cafe_tables
+        ->where('id', $id)
+        ->with('location')
+        ->first()
+        ?->location?->branch_id ?? 0;
+
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get(); 
+        $category_off = $branch_off->pluck('category_id')->filter(); 
+
+        $categories = $this->categories
+        ->with(['sub_categories' => function($query) use($locale){
+            $query->withLocale($locale);
+        }, 
+        'addons' => function($query) use($locale){
+            $query->withLocale($locale);
+        }])
+        ->orderBy('priority')
+        ->withLocale($locale)
+        ->where('category_id', null)
+        ->where('status', 1)
+        ->get()
+        ->filter(function($item) use($category_off){
+            return !$category_off->contains($item->id);
+        });  
+        $resturant_time = $this->settings
+        ->where('name', 'resturant_time')
+        ->orderByDesc('id')
+        ->first();   
+        $categories = CategoryResource::collection($categories); 
+
+        return response()->json([
+            'categories' => $categories, 
+            'resturant_time' => $resturant_time, 
+        ]);
+    }
+
     public function products(Request $request, $id){
         // https://bcknd.food2go.online/client/order/products/{id}
         // Keys
@@ -115,113 +463,7 @@ class ClientMakeOrderController extends Controller
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
-        });
-        if ($request->user_id) {
-            $user_id = $request->user_id;
-            $products = $this->product
-            ->orderBy('order')
-            ->with([ 
-                'favourite_product' => fn($q) => $q->where('users.id', $user_id),
-                'addons' => fn($q) => $q->withLocale($locale),
-                'category_addons' => fn($q) => $q->withLocale($locale),
-                'sub_category_addons' => fn($q) => $q->withLocale($locale),
-                'excludes' => fn($q) => $q->withLocale($locale),
-                'discount', 'extra', 'sales_count', 'tax',
-                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-                'variations' => fn($q) => $q->withLocale($locale)->with([
-                    'options' => fn($q) => $q
-                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
-                        ->withLocale($locale),
-                ]),
-                  'group_products' => fn($q) => $q
-                    ->with(['products' => fn($q) => $q
-                    ->select("products.id", "products.name")->withLocale($locale)]),
-            ])
-            ->withLocale($locale)
-            ->where('item_type', '!=', 'offline')
-            ->where('status', 1)
-            ->whereNotIn('category_id', $category_off)
-            // ->whereNotIn('sub_category_id', $category_off)
-            ->whereNotIn('products.id', $product_off)
-            ->get()
-            ->map(function ($product) use ($option_off, $branch_id) {
-                $product->favourite = $product->favourite_product->isNotEmpty();
-                $product->favourites = $product->favourite_product->isNotEmpty();
-
-                $product->price = $product->product_pricing->first()?->price ?? $product->price;
-
-                if ($product->stock_type === 'fixed') {
-                    $product->count = $product->sales_count->sum('count');
-                } elseif ($product->stock_type === 'daily') {
-                    $product->count = $product->sales_count
-                        ->where('date', date('Y-m-d'))
-                        ->sum('count');
-                }
-
-                $product->in_stock = $product->number > $product->count;
-
-                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
-                    $variation->options = $variation->options
-                        ->where('status', 1)
-                        ->values()
-                        ->reject(fn($option) => $option_off->contains($option->id))
-                        ->map(function ($option) {
-                            $option->price = $option->option_pricing->first()?->price ?? $option->price;
-                            return $option;
-                        });
-
-                    return $variation;
-                });
-
-                return $product;
-            });
-
-        }
-        else{
-                $products = $this->product
-                ->orderBy('order')
-                ->with([
-                    'addons' => fn($q) => $q->withLocale($locale),
-                    'category_addons' => fn($q) => $q->withLocale($locale),
-                    'sub_category_addons' => fn($q) => $q->withLocale($locale),
-                    'excludes' => fn($q) => $q->withLocale($locale),
-                    'discount', 'extra', 'sales_count', 'tax',
-                    'variations' => fn($q) => $q->with([
-                        'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
-                    ])->withLocale($locale),
-                
-                  'group_products' => fn($q) => $q
-                    ->with(['products' => fn($q) => $q
-                    ->select("products.id", "products.name")->withLocale($locale)]),
-                ])
-                ->withLocale($locale)
-                ->where('item_type', '!=', 'offline')
-                ->where('status', 1)
-                ->whereNotIn('category_id', $category_off)
-                //->whereNotIn('sub_category_id', $category_off)
-                ->whereNotIn('products.id', $product_off)
-                ->get();
-
-            $products = $products->map(function($product) use ($branch_id, $option_off) {
-                $product->price = $product->product_pricing
-                    ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
-
-                $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
-                    $variation->options = $variation->options
-                        ->where('status', 1)
-                        ->values()
-                        ->reject(fn($opt) => $option_off->contains($opt->id))
-                        ->map(function($opt) use ($branch_id) {
-                            $opt->price = $opt->option_pricing
-                                ->firstWhere('branch_id', $branch_id)?->price ?? $opt->price;
-                            return $opt;
-                        });
-
-                    return $variation;
-                });
-                return $product;
-            });
-        }
+        }); 
         $discounts = $this->product
         ->orderBy('order')
         ->with('discount')
@@ -255,11 +497,80 @@ class ClientMakeOrderController extends Controller
 
         return response()->json([
             'categories' => $categories,
-            'products' => $products,
             'discounts' => $discounts,
             'resturant_time' => $resturant_time,
             'tax' => $tax,
             'branch_id' => $branch_id
+        ]);
+    }
+
+    public function products_in_category(Request $request, $id){ 
+        $validator = Validator::make($request->all(), [
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $branch_id = $this->cafe_tables
+        ->where("id", $request->table_id)
+        ->first()
+        ?->location?->branch_id;
+        $locale = $request->locale ?? "en";
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $products = $this->product
+        ->orderBy('order')
+        ->with([
+            'addons' => fn($q) => $q->withLocale($locale),
+            'category_addons' => fn($q) => $q->withLocale($locale),
+            'sub_category_addons' => fn($q) => $q->withLocale($locale),
+            'excludes' => fn($q) => $q->withLocale($locale),
+            'discount', 'extra', 'sales_count', 'tax',
+            'variations' => fn($q) => $q->with([
+                'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
+            ])->withLocale($locale),
+        
+            'group_products' => fn($q) => $q
+            ->with(['products' => fn($q) => $q
+            ->select("products.id", "products.name")->withLocale($locale)]),
+        ])
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->where('status', 1)
+        ->whereNotIn('category_id', $category_off)
+        //->whereNotIn('sub_category_id', $category_off)
+        ->whereNotIn('products.id', $product_off)
+        ->get();
+
+        $products = $products->map(function($product) use ($branch_id, $option_off) {
+            $product->price = $product->product_pricing
+                ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
+
+            $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
+                $variation->options = $variation->options
+                    ->where('status', 1)
+                    ->values()
+                    ->reject(fn($opt) => $option_off->contains($opt->id))
+                    ->map(function($opt) use ($branch_id) {
+                        $opt->price = $opt->option_pricing
+                            ->firstWhere('branch_id', $branch_id)?->price ?? $opt->price;
+                        return $opt;
+                    });
+
+                return $variation;
+            });
+            return $product;
+        });
+
+        return response()->json([
+            "products" => $products
         ]);
     }
 
@@ -592,65 +903,7 @@ class ClientMakeOrderController extends Controller
             'success' => $orders
         ]);
     }
-
-    // public function preparing(Request $request){
-    //     $validator = Validator::make($request->all(), [
-    //         'preparing' => 'required',
-    //         'preparing.*.cart_id' => 'required|exists:order_carts,id',
-    //         'preparing.*.status' => 'required|in:preparing,preparation,done,pick_up',
-    //         'table_id' => 'required|exists:cafe_tables,id',
-    //     ]);
-    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
-    //         return response()->json([
-    //             'errors' => $validator->errors(),
-    //         ],400);
-    //     }
-        
-    //     $kitchen_order = [];
-    //     foreach ($request->preparing as $value) {
-    //         $order_cart = $this->order_cart
-    //         ->where('id', $value['cart_id'])
-    //         ->first();
-    //         $preparing = $order_cart->cart;
-    //         $order_cart->prepration_status = $value['status'];  
-    //         $order_cart->save();
-    //         $order_item = $this->order_format($order_cart);
-    //         $order_item = collect($order_item);
-
-    //         $element = $order_item[0];
-    //         $kitchen = $this->kitchen
-    //         ->where(function($q) use($element){
-    //             $q->whereHas('products', function($query) use ($element){
-    //                 $query->where('products.id', $element->id);
-    //             })
-    //             ->orWhereHas('category', function($query) use ($element){
-    //                 $query->where('categories.id', $element->category_id)
-    //                 ->orWhere('categories.id', $element->sub_category_id);
-    //             });
-    //         })
-    //         ->where('branch_id', $request->user()->branch_id)
-    //         ->first();
-    //         if(!empty($kitchen) && $value['status'] == 'preparing'){
-    //             $kitchen_order[$kitchen->id][] = $element;
-    //         }
-    //     }
-        
-    //     foreach ($kitchen_order as $key => $item) {
-    //         $kitechen_cart = $this->kitchen_order
-    //         ->create([
-    //             'table_id' => $request->table_id,
-    //             'kitchen_id' => $key,
-    //             'order' => json_encode($item),
-    //             'type' => 'dine_in',
-    //         ]);
-            // $this->kitechen_cart($item, $kitchen_order );
-    //     }
-
-    //     return response()->json([
-    //         'success' => 'You perpare success'
-    //     ]);
-    // }
-
+ 
     public function dine_in_payment(DineinClientOrderRequest $request){
         // /cashier/dine_in_payment
         // Keys

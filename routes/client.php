@@ -15,7 +15,15 @@ Route::controller(ClientMakeOrderController::class)
     Route::get('/dine_in_table_carts/{id}', 'dine_in_table_carts');
     Route::get('/dine_in_table_order/{id}', 'dine_in_table_order');
     Route::post('/dine_in_payment', 'dine_in_payment');
-    Route::post('/dine_in_split_payment', 'dine_in_split_payment');
+    Route::post('/dine_in_split_payment', 'dine_in_split_payment'); 
+});
+
+Route::controller(ClientMakeOrderController::class)
+->prefix('home')->group(function(){
+    Route::post('/recommandation_product', 'favourit_product');
+    Route::post('/discount_product', 'discount_product');
+    Route::post('/products_in_category/{id}', 'products_in_category');
+    Route::post('/categories', 'category');
 });
 
 Route::controller(WaiterCallController::class)->group(function(){
