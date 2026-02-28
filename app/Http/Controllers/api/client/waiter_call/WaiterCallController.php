@@ -114,6 +114,45 @@ class WaiterCallController extends Controller
         ]);
     }
 
+    public function captain_call_payment(Request $request){
+        $validator = Validator::make($request->all(), [
+            'table_id' => ['required', 'exists:cafe_tables,id'],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $cafe_table = $this->cafe_table
+        ->where('id', $request->table_id)
+        ->with('location:id,name')
+        ->first();
+        $branch_id = $cafe_table->branch_id;
+        $users_tokens1 = $this->cashier_man
+        ->where("branch_id", $branch_id)
+        ->pluck('fcm_token'); 
+        $device_token = $this->device_token
+        ->whereNotNull("admin_id")
+        ->get()
+        ?->pluck('token');
+        $users_tokens = $users_tokens1
+        ->merge($device_token)
+        ->filter()->toArray();
+        $body = 'Table ' . $cafe_table->table_number . 
+            ' at location ' . $cafe_table?->location?->name . ' Want To Pay';
+  
+        $notifications = $this->sendNotificationToMany($users_tokens, $cafe_table->table_number, $body);
+        $this->checkout_request_query
+        ->create([
+            'table_id' => $request->table_id
+        ]);
+
+        return response()->json([
+            'success' => 'You call Pay success',
+            "notifications" => $notifications->count()
+        ]);
+    }
+
     public function call_captain_order(Request $request){
         $validator = Validator::make($request->all(), [
             'table_id' => ['required', 'exists:cafe_tables,id'],
