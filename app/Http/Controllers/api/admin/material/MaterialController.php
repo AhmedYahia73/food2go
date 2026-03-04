@@ -61,8 +61,9 @@ class MaterialController extends Controller
         ->get();
         $product = $this->product 
         ->get()
-        ->map(function($item) use($stocks, $purchases){
-            $stock = $item?->stock?->quantity ?? 0;
+        ->map(function($item) use($stocks, $purchases, $request){
+            $stock = $item?->stock_items
+            ?->where("store_id", $request->store_id)?->first()?->quantity ?? 0;
             $purchase = $purchases[$item->id] ?? collect();
             $quantity_stock = $stock;
             $cost = 0;
