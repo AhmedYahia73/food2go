@@ -29,4 +29,11 @@ class PaymentMethod extends Model
     public function payment_method_data(){
         return $this->hasOne(PaymentMethodAuto::class);
     }
+    
+    protected static function booted()
+    {
+        static::addGlobalScope('order', function ($query) {
+            $query->orderBy('order', 'asc');
+        });
+    }
 }

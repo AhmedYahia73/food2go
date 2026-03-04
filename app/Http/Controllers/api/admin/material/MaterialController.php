@@ -52,19 +52,18 @@ class MaterialController extends Controller
             ],400);
         }
 
-        $purchase = Purchase::
-        where("store_id", $request->store_id)
-        ->orderByDesc('id');
+        $purchases = Purchase::where("store_id", $request->store_id)
+        ->orderByDesc('id')
+        ->get()
+        ->groupBy('product_id');
         $stocks = $this->stock
         ->where("store_id", $request->store_id)
         ->get();
         $product = $this->product 
         ->get()
-        ->map(function($item) use($stocks, $purchase){
-            $stock = $item?->stock?->quantity;
-            $purchase = $purchase
-            ->where("product_id", $item->id)
-            ->get();
+        ->map(function($item) use($stocks, $purchase, $purchases){
+            $stock = $item?->stock?->quantity ?? 0;
+            $purchase = $purchases[$item->id] ?? collect();
             $quantity_stock = $stock;
             $cost = 0;
             $count = 0;
@@ -72,7 +71,9 @@ class MaterialController extends Controller
             foreach ($purchase as $element) {
                 if($quantity_stock > 0){
                     $count++;
-                    $cost += $element->total_coast / $element->quintity;
+                    if($element->quintity > 0){
+                        $cost += $element->total_coast / $element->quintity;
+                    }
                 }
                 else{
                     break;

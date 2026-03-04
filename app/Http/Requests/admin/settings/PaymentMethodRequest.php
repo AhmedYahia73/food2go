@@ -29,6 +29,7 @@ class PaymentMethodRequest extends FormRequest
             'feez_amount' => ['sometimes', 'numeric'],
             'feez_status' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
+            'order' => ['required', 'numeric'],
         ];
     }
 
