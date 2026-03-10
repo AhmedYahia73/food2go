@@ -18,6 +18,7 @@ class FinantiolAcounting extends Model
         'status',
         'logo',
         "main",
+        "order",
     ];
     protected $appends = ['logo_link'];
     protected $hidden = [

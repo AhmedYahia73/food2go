@@ -54,6 +54,29 @@ class FinancialAccountingController extends Controller
             'success' => $request->status ? 'active' : 'banned',
         ]);
     }
+
+    public function order(Request $request, $id){
+        // admin/financial/status/{id}
+        // Keys
+        // status
+        $validation = Validator::make($request->all(), [
+            'order' => 'required|numeric',
+        ]);
+        if ($validation->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validation->errors(),
+            ],400);
+        }
+        $financial = $this->financial
+        ->where('id', $id)
+        ->update([
+            'order' => $request->order
+        ]); 
+
+        return response()->json([
+            'success' => "you update success",
+        ]);
+    }
     
     public function financial(Request $request, $id){
         // /admin/financial/item/{id}

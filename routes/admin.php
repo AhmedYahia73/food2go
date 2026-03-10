@@ -1131,6 +1131,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/', 'view')->middleware('can:view_financial_accounting');
             Route::get('item/{id}', 'financial')->middleware('can:edit_financial_accounting');
             Route::put('status/{id}', 'status')->middleware('can:edit_financial_accounting');
+            Route::put('order/{id}', 'order')->middleware('can:edit_financial_accounting');
             Route::post('add', 'create')->middleware('can:add_financial_accounting');
             Route::post('update/{id}', 'modify')->middleware('can:edit_financial_accounting');
             Route::delete('delete/{id}', 'delete')->middleware('can:delete_financial_accounting');
