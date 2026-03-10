@@ -84,8 +84,8 @@ class CategoryController extends Controller
      
 
     public function products_in_category(Request $request, $id){
-        $products = $this->products
-        ->select("id", "name") 
+        $products = Product::
+        select("id", "name") 
         ->where("category_id", $id)
         ->orWhere("sub_category_id", $id)
         ->whereDoesntHave(["product_off" => function($query){
