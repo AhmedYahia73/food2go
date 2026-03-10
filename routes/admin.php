@@ -642,6 +642,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/product_report', 'product_report');
         Route::get('/product_report_lists', 'product_report_lists');
         Route::post('/hall_reports', 'hall_reports');
+        Route::post('/products_movement', 'products_movement');
     });
     
     Route::controller(TaxModuleController::class)

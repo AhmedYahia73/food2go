@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Carbon\CarbonPeriod;
 
 use App\Models\CashierMan;
 use App\Models\Cashier; 
@@ -26,7 +27,7 @@ use App\Models\OrderDetail;
 use App\Models\CompanyInfo; 
 use App\Models\CafeTable; 
 use App\Models\CafeLocation;
-use App\Models\Setting; 
+use App\Models\Setting;  
 
 use App\trait\OrderFormat; 
 
@@ -65,6 +66,7 @@ class ReportController extends Controller
             "products" => $products->values()
         ]);
     }
+
     public function filter_raise_product(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -151,6 +153,7 @@ class ReportController extends Controller
             "products" => $products,
         ]);
     }
+
     public function low_product(Request $request)
     {
         $products = OrderDetail::
@@ -269,7 +272,7 @@ class ReportController extends Controller
     }
     public function sales_product(Request $request)
     { 
-//'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
+        //'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
         $online_pickup_order = Order::
         where("pos", 0)
         ->where("order_type", "take_away") 
@@ -359,7 +362,7 @@ class ReportController extends Controller
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
-//'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
+        //'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
         $online_pickup_order = Order::
         where("pos", 0)
         ->where("order_type", "take_away") 
@@ -468,7 +471,7 @@ class ReportController extends Controller
     }
     public function purchase_product(Request $request)
     { 
-//'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
+        //'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
         $purchase = Purchase::
         selectRaw("sum(total_coast) as amount, store_id")
         ->groupBy("store_id")
@@ -515,7 +518,7 @@ class ReportController extends Controller
     
     public function purchase_raise_product(Request $request)
     { 
-//'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
+        //'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
         $products = Purchase::
         selectRaw("sum(quintity) as stock, product_id")
         ->groupBy("product_id")
@@ -570,7 +573,7 @@ class ReportController extends Controller
     
     public function purchase_low_product(Request $request)
     { 
-//'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
+        //'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
         $products = Purchase::
         selectRaw("sum(quintity) as stock, product_id")
         ->groupBy("product_id")
@@ -3286,5 +3289,108 @@ class ReportController extends Controller
         // return response()->json([
         //     "halls" => $location
         // ]);
+    }
+
+    public function products_movement(Request $request){
+        $validator = Validator::make($request->all(), [
+            'from' => ["required", 'date'], 
+            'to' => ["required", 'date'],
+            "product_id" => ["exists:products,id"],
+            "code" => ["exists:products,product_code"],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+         
+        if(!$request->product_id && !$request->code){
+            return response()->json([
+                "errors" => "You must select product"
+            ], 400);
+        }
+        if($request->product_id){
+            $product = Product::
+            where("id", $request->product_id)
+            ->first();
+        }
+        else{ 
+            $product = Product::
+            where("product_code", $request->code)
+            ->first();
+        }
+        $dates = CarbonPeriod::create($request->from, $request->to)
+        ->map(fn($date) => $date->format('Y-m-d'))
+        ->toArray(); 
+        $purchases_items = Purchase::
+        selectRaw("date, sum(quintity) as quintity, sum(total_coast) as total_coast")
+        ->where("product_id", $product->id)
+        ->groupBy("date")
+        ->get();
+        $products = [];
+        $purchases = [];
+        foreach ($dates as $item) {
+            $product_count = OrderDetail::
+            whereNull("deal_id")
+            ->whereNull("option_id")
+            ->whereNull("variation_id")
+            ->whereNull("extra_id")
+            ->whereNull("offer_id")
+            ->whereNull("addon_id")
+            ->whereNull("exclude_id") 
+            ->where("product_id", $product->id)
+            ->whereDate("created_at", $item)
+            ->sum("count");
+            $price = 0;
+            $product_price = OrderDetail::
+            whereNull("deal_id")
+            ->whereNull("option_id")
+            ->whereNull("variation_id")
+            ->whereNull("extra_id")
+            ->whereNull("offer_id")
+            ->whereNull("addon_id")
+            ->whereNull("exclude_id") 
+            ->with("order")
+            ->where("product_id", $product->id)
+            ->whereDate("created_at", $item)
+            ->first();
+            if($product_price && $product_price->order){
+                $product_price = $product_price->order->order_details_data;
+                foreach ($product_price as $element) {
+                    if(isset($item['product'][0]['product']) && $item['product'][0]['product']['id'] == $product->id){
+                        $price = $item['product'][0]['product']['price'];
+                        break;
+                    }
+                }
+            }
+            $products[] = [
+                "sales" => [
+                    "count" => $product_count,
+                    "date" => $item,
+                    "price" => $price,
+                    "total" => $product_count * $price
+                ],
+                "purchases" => Purchase
+            ];
+            $new_item = $purchases_items
+            ->where("date", $item)
+            ->first();
+            $purchases[] = $new_item ? [
+                "date" => $item,
+                "quintity" => $new_item->quintity,
+                "coast" => $new_item->total_coast / $new_item->quintity,
+                "total_coast" => $new_item->total_coast,
+            ]
+             : [
+                "date" => $item,
+                "quintity" => 0,
+                "coast" => 0,
+                "total_coast" => 0,
+            ];
+        }
+
+        return response()->json([
+            "purchases" => $purchases
+        ]);
     }
 }
