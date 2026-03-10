@@ -3319,9 +3319,7 @@ class ReportController extends Controller
             where("product_code", $request->code)
             ->first();
         }
-        $dates = CarbonPeriod::create($request->from, $request->to)
-        ->map(fn($date) => $date->format('Y-m-d'))
-        ->toArray(); 
+        $dates = CarbonPeriod::create($request->from, $request->to); 
         $purchases_items = Purchase::
         selectRaw("date, sum(quintity) as quintity, sum(total_coast) as total_coast")
         ->where("product_id", $product->id)
