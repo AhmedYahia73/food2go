@@ -82,6 +82,29 @@ class CategoryController extends Controller
         ]);
     }
      
+
+    public function products_in_category(Request $request, $id){
+        $products = $this->products
+        ->select("id", "name") 
+        ->where("category_id", $id)
+        ->orWhere("sub_category_id", $id)
+        ->whereDoesntHave(["product_off" => function($query){
+            $query->where("branch_id", auth()->user()->id);
+        }])
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+
+        return response()->json([
+            'products' => $products
+        ]);
+    }
+
     public function branch_products_status(Request $request, $id){
         // /branch/branch_products_status/{id}
         // keys
