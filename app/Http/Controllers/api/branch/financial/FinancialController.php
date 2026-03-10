@@ -56,6 +56,32 @@ class FinancialController extends Controller
             'success' => $request->status ? 'active' : 'banned',
         ]);
     }
+
+    public function order(Request $request, $id){
+        // admin/financial/order/{id}
+        // Keys
+        // order
+        $validation = Validator::make($request->all(), [
+            'order' => 'required|numeric',
+        ]);
+        if ($validation->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validation->errors(),
+            ],400);
+        }
+        $financial = $this->financial
+        ->where('id', $id)
+        ->whereHas('branch', function($query) use($request){
+            $query->where('branches.id', $request->user()->id);
+        })
+        ->update([
+            'order' => $request->order
+        ]); 
+
+        return response()->json([
+            'success' => "you update success",
+        ]);
+    }
     
     public function financial(Request $request, $id){
         // /admin/financial/item/{id}
@@ -84,6 +110,11 @@ class FinancialController extends Controller
             'balance' => ['required', 'numeric'],
             'description_status' => ['required', 'boolean'],
             'status' => ['required', 'boolean'],
+            
+            'order' => ['required', 'numeric'],
+            'main' => ['sometimes', 'boolean'],
+            'branch_id' => ['required', 'array'],
+            'branch_id.*' => ['required', 'exists:branches,id'],
         ]);
         if ($financial->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

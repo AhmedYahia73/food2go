@@ -89,6 +89,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     ->prefix('financial')->group(function(){
         Route::get('/', 'view');
         Route::put('/status/{id}', 'status');
+        Route::put('/order/{id}', 'order');
         Route::get('/item/{id}', 'financial');
         Route::post('/add', 'create');
         Route::delete('/delete/{id}', 'delete');
