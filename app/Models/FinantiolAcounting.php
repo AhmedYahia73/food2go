@@ -37,4 +37,11 @@ class FinantiolAcounting extends Model
     public function branch(){
         return $this->belongsToMany(Branch::class, 'financial_branch', 'financial_id', 'branch_id');
     }
+    
+    protected static function booted()
+    {
+        static::addGlobalScope('order', function ($query) {
+            $query->orderBy('order', 'asc');
+        });
+    }
 }
