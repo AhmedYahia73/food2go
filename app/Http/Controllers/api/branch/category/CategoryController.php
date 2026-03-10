@@ -88,7 +88,7 @@ class CategoryController extends Controller
         select("id", "name") 
         ->where("category_id", $id)
         ->orWhere("sub_category_id", $id)
-        ->whereDoesntHave("product_off" => function($query){
+        ->whereDoesntHave("product_off", function($query){
             $query->where("branch_id", auth()->user()->id);
         })
         ->get()
