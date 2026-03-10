@@ -28,7 +28,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::put('/branch_category_status/{id}', 'branch_category_status'); 
         Route::get('/branch_products', 'products'); 
         Route::put('/branch_products_status/{id}', 'branch_products_status'); 
-        Route::get('/products_in_category', 'products_in_category'); 
+        Route::get('/products_in_category/{id}', 'products_in_category'); 
     });
     
     Route::controller(CashierController::class)->prefix('cashier')->group(function(){
