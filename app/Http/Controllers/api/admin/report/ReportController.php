@@ -3303,91 +3303,93 @@ class ReportController extends Controller
                 'errors' => $validator->errors(),
             ],400);
         }
-         
-        if(!$request->product_id && !$request->code){
-            return response()->json([
-                "errors" => "You must select product"
-            ], 400);
-        }
-        if($request->product_id){
-            $product = Product::
-            where("id", $request->product_id)
-            ->first();
-        }
-        else{ 
-            $product = Product::
-            where("product_code", $request->code)
-            ->first();
-        }
-        $dates = CarbonPeriod::create($request->from, $request->to); 
-        $purchases_items = Purchase::
-        selectRaw("date, sum(quintity) as quintity, sum(total_coast) as total_coast")
-        ->where("product_id", $product->id)
-        ->groupBy("date")
-        ->get();
-        $products = [];
-        $purchases = [];
-        foreach ($dates as $item) {
-            $product_count = OrderDetail::
-            whereNull("deal_id")
-            ->whereNull("option_id")
-            ->whereNull("variation_id")
-            ->whereNull("extra_id")
-            ->whereNull("offer_id")
-            ->whereNull("addon_id")
-            ->whereNull("exclude_id") 
-            ->where("product_id", $product->id)
-            ->whereDate("created_at", $item)
-            ->sum("count");
-            $price = 0;
-            $product_price = OrderDetail::
-            whereNull("deal_id")
-            ->whereNull("option_id")
-            ->whereNull("variation_id")
-            ->whereNull("extra_id")
-            ->whereNull("offer_id")
-            ->whereNull("addon_id")
-            ->whereNull("exclude_id") 
-            ->with("order")
-            ->where("product_id", $product->id)
-            ->whereDate("created_at", $item)
-            ->first();
-            if($product_price && $product_price->order){
-                $product_price = $product_price->order->order_details_data;
-                foreach ($product_price as $element) {
-                    if(isset($item['product'][0]['product']) && $item['product'][0]['product']['id'] == $product->id){
-                        $price = $item['product'][0]['product']['price'];
-                        break;
-                    }
-                }
-            }
-            $new_item = $purchases_items
-            ->where("date", $item)
-            ->first(); 
-            $products[] = [
-                "sales" => [
-                    "count" => $product_count,
-                    "date" => $item,
-                    "price" => $price,
-                    "total" => $product_count * $price
-                ],
-                "purchases" => $new_item ? [
-                    "date" => $item,
-                    "quintity" => $new_item->quintity,
-                    "coast" => $new_item->total_coast / $new_item->quintity,
-                    "total_coast" => $new_item->total_coast,
-                ]
-                : [
-                    "date" => $item,
-                    "quintity" => 0,
-                    "coast" => 0,
-                    "total_coast" => 0,
-                ]
-            ];
-        }
+         // 1. جلب المنتج بكفاءة
+$product = $request->product_id 
+    ? Product::find($request->product_id) 
+    : Product::where("product_code", $request->code)->first();
 
-        return response()->json([
-            "products" => $products
-        ]);
+if (!$product) {
+    return response()->json(["errors" => "Product not found"], 404);
+}
+
+// 2. تجهيز النطاق الزمني
+$startDate = Carbon::parse($request->from)->startOfDay();
+$endDate = Carbon::parse($request->to)->endOfDay();
+$dates = CarbonPeriod::create($startDate, $endDate);
+
+// 3. جلب المشتريات مجمعة ومفهرسة بالتاريخ (استعلام واحد)
+$purchases_items = Purchase::selectRaw("date, sum(quintity) as quintity, sum(total_coast) as total_coast")
+    ->where("product_id", $product->id)
+    ->whereBetween("date", [$startDate, $endDate])
+    ->groupBy("date")
+    ->get()
+    ->keyBy(fn($item) => Carbon::parse($item->date)->format('Y-m-d'));
+
+// 4. جلب تفاصيل الطلبات مجمعة (استعلام واحد)
+// سنقوم بجلب الـ sum والـ first record في استعلامات منفصلة لكن خارج الـ loop
+$sales_summary = OrderDetail::where("product_id", $product->id)
+    ->whereBetween("created_at", [$startDate, $endDate])
+    ->whereNull(["deal_id", "option_id", "variation_id", "extra_id", "offer_id", "addon_id", "exclude_id"])
+    ->selectRaw("DATE(created_at) as date, sum(count) as total_count")
+    ->groupBy("date")
+    ->get()
+    ->keyBy('date');
+
+// جلب أول سجل لكل يوم للحصول على السعر (للحفاظ على اللوجيك الخاص بك)
+$sales_prices = OrderDetail::with("order")
+    ->where("product_id", $product->id)
+    ->whereBetween("created_at", [$startDate, $endDate])
+    ->whereNull(["deal_id", "option_id", "variation_id", "extra_id", "offer_id", "addon_id", "exclude_id"])
+    ->get()
+    ->groupBy(fn($item) => $item->created_at->format('Y-m-d'));
+
+$products = [];
+
+foreach ($dates as $date) {
+    $dateString = $date->format('Y-m-d');
+    
+    // حساب المبيعات من الـ Collection المحملة مسبقاً
+    $product_count = $sales_summary->get($dateString)->total_count ?? 0;
+    
+    // استخراج السعر (نفس اللوجيك الخاص بك لكن من الذاكرة)
+    $price = 0;
+    $first_order_detail = $sales_prices->get($dateString)?->first();
+    
+    if ($first_order_detail && $first_order_detail->order) {
+        $order_details_data = $first_order_detail->order->order_details_data;
+        foreach ($order_details_data as $element) {
+            // ملاحظة: قمت بتصحيح متغير $item ليكون $element بناءً على سياق الكود
+            if (isset($element['product'][0]['product']) && $element['product'][0]['product']['id'] == $product->id) {
+                $price = $element['product'][0]['product']['price'];
+                break;
+            }
+        }
+    }
+
+    // جلب بيانات المشتريات من الـ Collection
+    $purchase_item = $purchases_items->get($dateString);
+
+    $products[] = [
+        "sales" => [
+            "count" => (int)$product_count,
+            "date" => $dateString,
+            "price" => $price,
+            "total" => $product_count * $price
+        ],
+        "purchases" => $purchase_item ? [
+            "date" => $dateString,
+            "quintity" => $purchase_item->quintity,
+            "coast" => $purchase_item->quintity > 0 ? $purchase_item->total_coast / $purchase_item->quintity : 0,
+            "total_coast" => $purchase_item->total_coast,
+        ] : [
+            "date" => $dateString,
+            "quintity" => 0,
+            "coast" => 0,
+            "total_coast" => 0,
+        ]
+    ];
+}
+
+return response()->json(["products" => $products]);
     }
 }
