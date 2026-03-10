@@ -3361,6 +3361,9 @@ class ReportController extends Controller
                     }
                 }
             }
+            $new_item = $purchases_items
+            ->where("date", $item)
+            ->first(); 
             $products[] = [
                 "sales" => [
                     "count" => $product_count,
@@ -3368,27 +3371,23 @@ class ReportController extends Controller
                     "price" => $price,
                     "total" => $product_count * $price
                 ],
-                "purchases" => Purchase
-            ];
-            $new_item = $purchases_items
-            ->where("date", $item)
-            ->first();
-            $purchases[] = $new_item ? [
-                "date" => $item,
-                "quintity" => $new_item->quintity,
-                "coast" => $new_item->total_coast / $new_item->quintity,
-                "total_coast" => $new_item->total_coast,
-            ]
-             : [
-                "date" => $item,
-                "quintity" => 0,
-                "coast" => 0,
-                "total_coast" => 0,
+                "purchases" => $new_item ? [
+                    "date" => $item,
+                    "quintity" => $new_item->quintity,
+                    "coast" => $new_item->total_coast / $new_item->quintity,
+                    "total_coast" => $new_item->total_coast,
+                ]
+                : [
+                    "date" => $item,
+                    "quintity" => 0,
+                    "coast" => 0,
+                    "total_coast" => 0,
+                ]
             ];
         }
 
         return response()->json([
-            "purchases" => $purchases
+            "products" => $products
         ]);
     }
 }
