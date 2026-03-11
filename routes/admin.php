@@ -173,6 +173,19 @@ use App\Models\TimeSittings;
 use App\Models\Order;
 use Illuminate\Support\Facades\App;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+Route::get('/mail', function () {
+    try {
+        Mail::raw('إيميل تجريبي من Food2Go', function ($message) {
+            $message->to('ahmedahmadahmid73@gmail.com') // حط جيميلك هنا
+                    ->subject('اختبار الربط النهائي');
+        });
+        return "✅ Laravel سلم الإيميل للسيرفر بنجاح!";
+    } catch (\Exception $e) {
+        // ده هيطبعلك العيب فين بالظبط
+        return "❌ الخطأ هو: " . $e->getMessage();
+    }
+});
 
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     App::singleton('first_order_today', function(){
