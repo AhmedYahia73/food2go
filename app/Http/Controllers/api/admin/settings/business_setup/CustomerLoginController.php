@@ -56,6 +56,7 @@ class CustomerLoginController extends Controller
         // user, pwd, senderid, mobileno, msgtext, CountryCode, profileid
         $validator = Validator::make($request->all(), [
             'verification' => ['required', 'in:email,phone'],
+            'login' => ['required', 'in:otp,manuel'],
             'email' => ['required_if:verification,email', 'email'],
             'integration_password' => ['required_if:verification,email'],
             'user' => ['required_if:verification,phone'],
@@ -71,7 +72,7 @@ class CustomerLoginController extends Controller
             ],400);
         }
         $setting = [
-            'login' => 'otp',
+            'login' => $request->login,
             'verification' => $request->verification ?? null,
         ];
         $setting = json_encode($setting);
