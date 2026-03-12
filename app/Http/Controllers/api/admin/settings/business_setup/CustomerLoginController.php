@@ -55,7 +55,7 @@ class CustomerLoginController extends Controller
         // email, integration_password
         // user, pwd, senderid, mobileno, msgtext, CountryCode, profileid
         $validator = Validator::make($request->all(), [
-            'verification' => ['required', 'in:email,phone'],
+            'verification' => ['sometimes', 'in:email,phone'],
             'login' => ['required', 'in:otp,manuel'],
             'email' => ['required_if:verification,email', 'email'],
             'integration_password' => ['required_if:verification,email'],
