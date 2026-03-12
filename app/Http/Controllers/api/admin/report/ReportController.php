@@ -2586,12 +2586,14 @@ class ReportController extends Controller
             if(!empty($details)){
                 foreach ($details as $element) {
                     $price = 0;
+                    $principle_price = 0;
                     if (isset($element['variations'])) {
                         foreach ($element['variations'] as $key => $value) {
                             foreach ($value['options'] as $key => $option) {
                                 $price += $option['price_after_tax'] 
                                 - $option['price']
                                 + $option['after_disount'];
+                                $principle_price += $option['price'];
                             }
                         }
                     }
@@ -2600,12 +2602,14 @@ class ReportController extends Controller
                                 $price += $extra['price_after_tax'] 
                                 - $extra['price']
                                 + $extra['price_after_discount'];
+                                $principle_price += $extra['price'];
                         }
                     }
                     if(isset($element['product'][0]['product'])){
                         $price += $element['product'][0]['product']['price_after_tax'] 
                             - $element['product'][0]['product']['price']
                             + $element['product'][0]['product']['price_after_discount'];
+                        $principle_price += $element['product'][0]['product']['price'];
                         $count = $element['product'][0]['count'];
                         $product_id = $element['product'][0]['product']['id'];
                     
@@ -2645,6 +2649,7 @@ class ReportController extends Controller
                                 "sub_category_id" => $sub_category_id, 
                                 "price" => $price * $count,
                                 "count" => $count, 
+                                "principle_price" => $principle_price
                             ];
                         }
                     }
