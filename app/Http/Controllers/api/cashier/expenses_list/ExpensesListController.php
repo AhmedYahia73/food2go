@@ -46,7 +46,7 @@ class ExpensesListController extends Controller
                 "note" => $item->note,
                 "expense" => $item->expense,
                 "admin" => $item->admin, 
-                "date" => Carbon::parse($item->created_at)
+                "date" => Carbon::parse($item->created_at),
                 "cashier" =>  [
                     "id" => $item?->cashier?->id,
                     'name' => $item?->cashier
