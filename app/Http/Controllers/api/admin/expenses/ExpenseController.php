@@ -41,7 +41,8 @@ class ExpenseController extends Controller
                 "cahier_man" => $item->cahier_man,
                 "financial_account" => $item->financial_account,
                 "category" => $item->category,
-                "date" => Carbon::parse($item->created_at)
+                "date" => Carbon::parse($item->created_at)->format("Y-m-d"),
+                "time" => Carbon::parse($item->created_at)->format("H:i A"),
             ];
         });
 
