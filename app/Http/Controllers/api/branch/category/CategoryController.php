@@ -90,8 +90,7 @@ class CategoryController extends Controller
 
     public function products_in_category(Request $request, $id){
         $products = Product::
-        select("id", "name")
-        ->with("discount", "tax")
+        with("discount", "tax")
         ->where("category_id", $id)
         ->orWhere("sub_category_id", $id)
         ->whereDoesntHave("product_off", function($query){
