@@ -101,7 +101,6 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::get('/', 'profile');
         Route::post('/update', 'update');
     });
-        Route::put('/branch_product_status/{id}', 'branch_product_status')->middleware('can:product_branch');
     //_______________________________________________________________________________
     Route::controller(HomeController::class)->group(function(){
         Route::get('/branch_product_status/{id}', 'branch_product_status');
