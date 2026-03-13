@@ -63,14 +63,19 @@ class CategoryController extends Controller
         ]);
     }
     
-    public function products(){
+    public function products(Request $request){
+        $locale = $request->locale ?? "en";
         $products = Product::
         where("status", 1)
+        ->with("translations")
         ->get()
-        ->map(function($item){
+        ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
-                "name" => $item->name,
+                "name" => $item->name->translations
+                ->where("locale", $locale)
+                ->where("key", $item->name)
+                ->first() ?? $item->name,
                 "status" => $item->product_off
                 ->where("branch_id", auth()->user()->id)
                 ->count() > 0 ? 0 : 1,

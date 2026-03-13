@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\expenses;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 use App\Models\Expense;
 
@@ -40,6 +41,7 @@ class ExpenseController extends Controller
                 "cahier_man" => $item->cahier_man,
                 "financial_account" => $item->financial_account,
                 "category" => $item->category,
+                "date" => Carbon::parse($item->created_at)
             ];
         });
 
