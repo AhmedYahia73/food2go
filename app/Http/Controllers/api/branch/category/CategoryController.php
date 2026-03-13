@@ -90,7 +90,8 @@ class CategoryController extends Controller
 
     public function products_in_category(Request $request, $id){
         $products = Product::
-        select("id", "name") 
+        select("id", "name")
+        ->with("discount", "tax")
         ->where("category_id", $id)
         ->orWhere("sub_category_id", $id)
         ->whereDoesntHave("product_off", function($query){
@@ -98,9 +99,28 @@ class CategoryController extends Controller
         })
         ->get()
         ->map(function($item){
+            $final_price = $item->price;
+            if($item->discount){
+                if($item->discount->type == "precentage"){
+                    $final_price -= $final_price * $item->discount->amount / 100;
+                }
+                else{
+                    $final_price -= $item->discount->amount;
+                }
+            }
+            if($item->tax){
+                if($item->tax->type == "precentage"){
+                    $final_price += $final_price * $item->tax->amount / 100;
+                }
+                else{
+                    $final_price += $item->tax->amount;
+                }
+            }
             return [
                 "id" => $item->id,
                 "name" => $item->name,
+                "price" => $item->price,
+                "final_price" => $final_price
             ];
         });
 

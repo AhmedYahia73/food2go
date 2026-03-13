@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\SmsIntegration; 
 use App\Models\SmsBalance; 
@@ -23,6 +24,39 @@ class HomeController extends Controller
     private Deal $deals, private User $users, private Setting $settings
     , private TimeSittings $TimeSittings, private LogOrder $log_order
     , private SmsBalance $sms_balance, private SmsIntegration $sms_integration,){}
+
+
+    public function branch_product_status(Request $request, $id){
+        // /admin/branch/branch_product_status/{id}
+        // keys
+        // status, branch_id
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|boolean', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        if ($request->status) {
+            $branch_off = $this->branch_off
+            ->where('branch_id', $request->user()->id)
+            ->where('product_id', $id)
+            ->delete();
+        } 
+        else {
+            $this->branch_off
+            ->create([
+                'branch_id' => $request->user()->id,
+                'product_id' => $id
+            ]);
+        }
+        
+        return response()->json([
+            'success' => 'You change status success'
+        ]);
+    }
 
     public function home_orders_count(Request $request){ 
         

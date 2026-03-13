@@ -30,7 +30,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
         Route::put('/branch_products_status/{id}', 'branch_products_status'); 
         Route::get('/products_in_category/{id}', 'products_in_category'); 
     });
-    
+    branch_product_status
     Route::controller(CashierController::class)->prefix('cashier')->group(function(){
         Route::get('/', 'view'); 
         Route::put('/status/{id}', 'status'); 
@@ -100,6 +100,11 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     ->prefix('profile')->group(function(){
         Route::get('/', 'profile');
         Route::post('/update', 'update');
+    });
+        Route::put('/branch_product_status/{id}', 'branch_product_status')->middleware('can:product_branch');
+    //_______________________________________________________________________________
+    Route::controller(HomeController::class)->group(function(){
+        Route::get('/branch_product_status/{id}', 'branch_product_status');
     });
     //_______________________________________________________________________________
     Route::controller(HomeController::class)->prefix('home')->group(function(){
