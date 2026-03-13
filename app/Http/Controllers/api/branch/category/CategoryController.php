@@ -72,7 +72,7 @@ class CategoryController extends Controller
         ->map(function($item) use($locale){
             return [
                 "id" => $item->id,
-                "name" => $item->name->translations
+                "name" => $item->translations
                 ->where("locale", $locale)
                 ->where("key", $item->name)
                 ->first() ?? $item->name,
