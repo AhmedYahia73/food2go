@@ -18,7 +18,7 @@ class PurchaseProduct extends Model
     ];
 
     public function start_stock(){
-        return $this->belongsTo(ProductStore::class, 'product_id');
+        return $this->hasMany(ProductStore::class, 'product_id');
     }
 
     public function category(){

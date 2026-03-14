@@ -18,7 +18,7 @@ class Material extends Model
     ];
 
     public function start_stock(){
-        return $this->belongsTo(MaterialStore::class, 'material_id');
+        return $this->hasMany(MaterialStore::class, 'material_id');
     }
 
     public function unit(){
