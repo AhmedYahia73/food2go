@@ -515,6 +515,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(MaterialController::class)
     ->prefix('material_product')->group(function(){
         Route::get('/', 'view')->middleware('can:view_material_product');
+        Route::get('/lists', 'lists');
         Route::get('/stock', 'material_stock')->middleware('can:view_material_product');
         Route::get('/product/{id}', 'product')->middleware('can:view_material_product');
         Route::put('/status/{id}', 'status')->middleware('can:status_material_product');

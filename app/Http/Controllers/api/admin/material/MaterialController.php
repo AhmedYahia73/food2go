@@ -10,6 +10,8 @@ use App\Models\MaterialCategory;
 use App\Models\MaterialStock;
 use App\Models\Material;
 use App\Models\Purchase;
+use App\Models\PurchaseStore;
+use App\Models\Unit;
 
 class MaterialController extends Controller
 {
@@ -49,6 +51,21 @@ class MaterialController extends Controller
         return response()->json([
             'materials' => $product,
             'categories' => $categories,
+        ]);
+    }
+
+    public function lists(Request $request){
+        $stores = PurchaseStore::
+        select("id", "name")
+        ->get();
+        $units = Unit::
+        select("id", "name")
+        ->where("status", 1)
+        ->get();
+
+        return response()->json([
+            "stores" => $stores,
+            "units" => $units,
         ]);
     }
 
