@@ -15,10 +15,11 @@ class PurchaseProduct extends Model
         'status',
         'category_id',
         'min_stock',
-        'start_stock',
-        'cost',
-        'unit_id',
     ];
+
+    public function start_stock(){
+        return $this->belongsTo(ProductStore::class, 'product_id');
+    }
 
     public function category(){
         return $this->belongsTo(PurchaseCategory::class, 'category_id');

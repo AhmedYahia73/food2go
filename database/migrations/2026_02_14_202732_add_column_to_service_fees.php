@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string("modules")->default(json_encode(["all"]));
         });
     }
-
     /**
      * Reverse the migrations.
      */

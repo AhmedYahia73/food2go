@@ -10,11 +10,15 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    { 
-        Schema::table('materials', function (Blueprint $table) {
+    {
+        Schema::create('material_stores', function (Blueprint $table) {
+            $table->id();
             $table->decimal("start_stock", 10, 2)->default(0);
             $table->decimal("cost", 10, 2)->default(0);
             $table->foreignId('unit_id')->nullable()->constrained('units')->onUpdate('cascade')->onDelete('set null');
+            $table->foreignId('store_id')->nullable()->constrained('purchase_stores')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('product_id')->nullable()->constrained('purchase_products')->onUpdate('cascade')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -23,8 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('materials', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('material_stores');
     }
 };

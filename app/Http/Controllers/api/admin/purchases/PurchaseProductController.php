@@ -29,6 +29,7 @@ class PurchaseProductController extends Controller
 
     public function view(Request $request){
         $product = $this->product 
+        ->with("start_stock.store")
         ->get()
         ->map(function($item){
             return [
@@ -39,10 +40,16 @@ class PurchaseProductController extends Controller
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
                 'min_stock' => $item->min_stock, 
-                'start_stock' => $item->start_stock,
-                'cost' => $item->cost,
-                'unit_id' => $item->unit_id,
-                'unit' => $item->unit?->name,
+                'start_stock' => $item->start_stock
+                ->map(function($element){
+                    return [
+                        "id" => $element->id,
+                        "start_stock" => $element->start_stock,
+                        "cost" => $element->cost,
+                        "unit" => $element->unit?->name,
+                        "store" => $element->store?->name,
+                    ];
+                }),
             ];
         }); 
         $categories = $this->categories
@@ -84,9 +91,13 @@ class PurchaseProductController extends Controller
             $purchase = $purchase
             ->where("product_id", $item->id)
             ->values();
-            $cost = $item->cost;
-            $count = $item->start_stock;
-            $last_cost = $item->cost; 
+            $cost = $item->start_stock
+            ->where("store_id", $request->store_id)
+            ->first()?->cost ?? 0;
+            $count = $item->start_stock
+            ->where("store_id", $request->store_id)
+            ->first()?->start_stock ?? 0;
+            $last_cost = $cost; 
             foreach ($purchase as $element) {
                 if($quantity_stock > 0){
                     $count++;
@@ -171,6 +182,11 @@ class PurchaseProductController extends Controller
             'start_stock' => ["required", "numeric"],
             'cost' => ["required", "numeric"],
             'unit_id' => ["required", "exists:units,id"], 
+            'product_store' => ["array"],
+            'product_store.start_stock' => ["required", "numeric"],
+            'product_store.cost' => ["required", "numeric"],
+            'product_store.unit_id' => ["required", "exists:units,id"], 
+            'product_store.store_id' => ["required", "exists:units,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -181,6 +197,16 @@ class PurchaseProductController extends Controller
         $productRequest = $validator->validated();
         $product = $this->product
         ->create($productRequest);
+        $product_store = $request->product_store ?? [];
+        foreach ($product_store as $item) {
+            $product->start_stock()
+            ->create([
+                "start_stock" => $item['start_stock'],
+                "cost" => $item['cost'],
+                "unit_id" => $item['unit_id'],
+                "store_id" => $item['store_id'],
+            ]);
+        }
 
         return response()->json([
             'success' => 'You add data success'
@@ -193,10 +219,12 @@ class PurchaseProductController extends Controller
             'description' => ['sometimes'],
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:purchase_categories,id'],
-            'min_stock' => ['sometimes', 'numeric'],
-            'start_stock' => ["required", "numeric"],
-            'cost' => ["required", "numeric"],
-            'unit_id' => ["required", "exists:units,id"], 
+            'min_stock' => ['sometimes', 'numeric'], 
+            'product_store' => ["array"],
+            'product_store.start_stock' => ["required", "numeric"],
+            'product_store.cost' => ["required", "numeric"],
+            'product_store.unit_id' => ["required", "exists:units,id"], 
+            'product_store.store_id' => ["required", "exists:units,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -209,6 +237,17 @@ class PurchaseProductController extends Controller
         ->where('id', $id)
         ->first();
         $product->update($productRequest);
+        $product_store = $request->product_store ?? [];
+        $product->start_stock()->delete();
+        foreach ($product_store as $item) {
+            $product->start_stock()
+            ->create([
+                "start_stock" => $item['start_stock'],
+                "cost" => $item['cost'],
+                "unit_id" => $item['unit_id'],
+                "store_id" => $item['store_id'],
+            ]);
+        }
 
         return response()->json([
             'success' => 'You update data success'
