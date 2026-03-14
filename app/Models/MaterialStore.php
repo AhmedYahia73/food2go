@@ -16,7 +16,7 @@ class MaterialStore extends Model
         'cost',
         'unit_id',
         'store_id',
-        'material_id',
+        'product_id',
     ]; 
 
     public function unit(){
@@ -28,6 +28,6 @@ class MaterialStore extends Model
     }
 
     public function material(){
-        return $this->belongsTo(Material::class, 'material_id');
+        return $this->belongsTo(Material::class, 'product_id');
     } 
 }
