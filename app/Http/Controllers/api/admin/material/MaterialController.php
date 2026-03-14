@@ -29,6 +29,10 @@ class MaterialController extends Controller
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
                 'min_stock' => $item->min_stock,
+                'start_stock' => $item->start_stock,
+                'cost' => $item->cost,
+                'unit_id' => $item->unit_id,
+                'unit' => $item->unit?->name,
             ];
         }); 
         $categories = $this->categories
@@ -66,9 +70,9 @@ class MaterialController extends Controller
             ?->where("store_id", $request->store_id)?->first()?->quantity ?? 0;
             $purchase = $purchases[$item->id] ?? collect();
             $quantity_stock = $stock;
-            $cost = 0;
-            $count = 0;
-            $last_cost = 0; 
+            $cost = $item->cost;
+            $count = $item->start_stock;
+            $last_cost = $item->cost; 
             foreach ($purchase as $element) {
                 if($quantity_stock > 0){
                     $count++;
@@ -150,6 +154,9 @@ class MaterialController extends Controller
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:material_categories,id'],
             'min_stock' => ['sometimes', 'numeric'],
+            'start_stock' => ["required", "numeric"],
+            'cost' => ["required", "numeric"],
+            'unit_id' => ["required", "exists:units,id"], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -173,6 +180,9 @@ class MaterialController extends Controller
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:material_categories,id'],
             'min_stock' => ['sometimes', 'numeric'],
+            'start_stock' => ["required", "numeric"],
+            'cost' => ["required", "numeric"],
+            'unit_id' => ["required", "exists:units,id"], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

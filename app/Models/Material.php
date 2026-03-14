@@ -15,7 +15,14 @@ class Material extends Model
         'status',
         'category_id',
         'min_stock',
+        'start_stock',
+        'cost',
+        'unit_id',
     ];
+
+    public function unit(){
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
 
     public function category(){
         return $this->belongsTo(MaterialCategory::class, 'category_id');

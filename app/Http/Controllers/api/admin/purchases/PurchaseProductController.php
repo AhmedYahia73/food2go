@@ -39,6 +39,10 @@ class PurchaseProductController extends Controller
                 'category_id' => $item->category_id,
                 'category' => $item?->category?->name,
                 'min_stock' => $item->min_stock, 
+                'start_stock' => $item->start_stock,
+                'cost' => $item->cost,
+                'unit_id' => $item->unit_id,
+                'unit' => $item->unit?->name,
             ];
         }); 
         $categories = $this->categories
@@ -80,9 +84,9 @@ class PurchaseProductController extends Controller
             $purchase = $purchase
             ->where("product_id", $item->id)
             ->values();
-            $cost = 0;
-            $count = 0;
-            $last_cost = 0; 
+            $cost = $item->cost;
+            $count = $item->start_stock;
+            $last_cost = $item->cost; 
             foreach ($purchase as $element) {
                 if($quantity_stock > 0){
                     $count++;
@@ -108,6 +112,7 @@ class PurchaseProductController extends Controller
                 "last_cost" => $last_cost,
                 "total_cost" => $cost * $stock,
                 "total_last_cost" => $last_cost * $stock,
+                
             ];
         }); 
         $categories = $this->categories
@@ -163,6 +168,9 @@ class PurchaseProductController extends Controller
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'min_stock' => ['sometimes', 'numeric'],
+            'start_stock' => ["required", "numeric"],
+            'cost' => ["required", "numeric"],
+            'unit_id' => ["required", "exists:units,id"], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -186,6 +194,9 @@ class PurchaseProductController extends Controller
             'status' => ['required', 'boolean'],
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'min_stock' => ['sometimes', 'numeric'],
+            'start_stock' => ["required", "numeric"],
+            'cost' => ["required", "numeric"],
+            'unit_id' => ["required", "exists:units,id"], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

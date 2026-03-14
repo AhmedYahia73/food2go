@@ -1855,6 +1855,8 @@ class ReportController extends Controller
             'void_order_count' => $void_order_count,
             'void_order_sum' => $void_order_sum, 
             'total_discount' => $total_discount, 
+            "principle_price" => $total_amount + $total_discount - $total_tax,
+            "price_after_discount" => $total_amount - $total_tax,
             'start' => $start->format("Y-m-d H:i"), 
             'end' => $end->format("Y-m-d H:i"), 
         ]);
