@@ -183,10 +183,10 @@ class PurchaseProductController extends Controller
             'cost' => ["required", "numeric"],
             'unit_id' => ["required", "exists:units,id"], 
             'product_store' => ["array"],
-            'product_store.start_stock' => ["required", "numeric"],
-            'product_store.cost' => ["required", "numeric"],
-            'product_store.unit_id' => ["required", "exists:units,id"], 
-            'product_store.store_id' => ["required", "exists:units,id"],
+            'product_store.*.start_stock' => ["required", "numeric"],
+            'product_store.*.cost' => ["required", "numeric"],
+            'product_store.*.unit_id' => ["required", "exists:units,id"], 
+            'product_store.*.store_id' => ["required", "exists:units,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -221,10 +221,10 @@ class PurchaseProductController extends Controller
             'category_id' => ['required', 'exists:purchase_categories,id'],
             'min_stock' => ['sometimes', 'numeric'], 
             'product_store' => ["array"],
-            'product_store.start_stock' => ["required", "numeric"],
-            'product_store.cost' => ["required", "numeric"],
-            'product_store.unit_id' => ["required", "exists:units,id"], 
-            'product_store.store_id' => ["required", "exists:units,id"],
+            'product_store.*.start_stock' => ["required", "numeric"],
+            'product_store.*.cost' => ["required", "numeric"],
+            'product_store.*.unit_id' => ["required", "exists:units,id"], 
+            'product_store.*.store_id' => ["required", "exists:units,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

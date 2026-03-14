@@ -166,10 +166,10 @@ class MaterialController extends Controller
             'category_id' => ['required', 'exists:material_categories,id'],
             'min_stock' => ['sometimes', 'numeric'],
             'matrial_store' => ["array"],
-            'matrial_store.start_stock' => ["required", "numeric"],
-            'matrial_store.cost' => ["required", "numeric"],
-            'matrial_store.unit_id' => ["required", "exists:units,id"], 
-            'matrial_store.store_id' => ["required", "exists:units,id"], 
+            'matrial_store.*.start_stock' => ["required", "numeric"],
+            'matrial_store.*.cost' => ["required", "numeric"],
+            'matrial_store.*.unit_id' => ["required", "exists:units,id"], 
+            'matrial_store.*.store_id' => ["required", "exists:units,id"], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -204,10 +204,10 @@ class MaterialController extends Controller
             'category_id' => ['required', 'exists:material_categories,id'],
             'min_stock' => ['sometimes', 'numeric'],
             'matrial_store' => ["array"],
-            'matrial_store.start_stock' => ["required", "numeric"],
-            'matrial_store.cost' => ["required", "numeric"],
-            'matrial_store.unit_id' => ["required", "exists:units,id"], 
-            'matrial_store.store_id' => ["required", "exists:units,id"],
+            'matrial_store.*.start_stock' => ["required", "numeric"],
+            'matrial_store.*.cost' => ["required", "numeric"],
+            'matrial_store.*.unit_id' => ["required", "exists:units,id"], 
+            'matrial_store.*.store_id' => ["required", "exists:units,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
