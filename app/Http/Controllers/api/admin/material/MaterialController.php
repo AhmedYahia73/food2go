@@ -83,6 +83,7 @@ class MaterialController extends Controller
             $count = $item->start_stock
             ->where("store_id", $request->store_id)
             ->first()?->start_stock ?? 0;
+            $stock += $count;
             $last_cost = $cost; 
             foreach ($purchase as $element) {
                 if($quantity_stock > 0){
