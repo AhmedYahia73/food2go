@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('material_stores', function (Blueprint $table) {
             $table->dropForeign("material_stores_product_id_foreign");
             $table->dropColumn("product_id");
-            $table->foreignId('product_id')->nullable()->constrained('purchase_products')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('product_id')->nullable()->constrained('materials')->onUpdate('cascade')->onDelete('cascade');
         }); 
     }
 
