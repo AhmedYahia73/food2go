@@ -21,7 +21,7 @@ Schedule::call(function () {
     ->get();
     foreach ($orders as $element) {
         foreach ($emails as $item) {
-            Mail::to($item->email)->send(new OrderDelayEmail($element));
+            // Mail::to($item->email)->send(new OrderDelayEmail($element));
         }
     }
 })->everyFiveMinutes();

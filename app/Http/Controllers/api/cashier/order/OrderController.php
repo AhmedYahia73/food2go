@@ -1303,7 +1303,7 @@ class OrderController extends Controller
                 'name' => $order?->user?->name,
                 'reason' => $request->admin_cancel_reason,
             ];
-            Mail::to($order->user->email)->send(new CancelOrderMail($data));
+            // Mail::to($order->user->email)->send(new CancelOrderMail($data));
             $order->update([
                 'order_status' => $request->order_status,
                 'admin_cancel_reason' => $request->admin_cancel_reason,
