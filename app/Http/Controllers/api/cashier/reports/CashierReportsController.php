@@ -795,6 +795,59 @@ class CashierReportsController extends Controller
         }) 
         ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
         ->sum('amount');
+
+        $total_discount = Order::
+        select("id")
+        ->where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("is_void", 0) 
+        ->where("due", 0)
+        ->where("due_module", 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where(function($query) {
+            $query->where('due_from_delivery', 0)
+            ->where('order_type', "delivery")
+            ->orwhere('due_from_delivery', 1)
+            ->where('order_type', "!=", "delivery");
+        }) 
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        }) 
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->sum('total_discount');
+
+        $total_tax = Order::
+        select("id")
+        ->where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("is_void", 0) 
+        ->where("due", 0)
+        ->where("due_module", 0)
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->where(function($query) {
+            $query->where('due_from_delivery', 0)
+            ->where('order_type', "delivery")
+            ->orwhere('due_from_delivery', 1)
+            ->where('order_type', "!=", "delivery");
+        }) 
+        ->where(function($query){
+            $query->where('pos', 1)
+            ->orWhere('pos', 0)
+            ->where('order_status', '!=', 'pending');
+        }) 
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->sum('total_tax');
+
+        $principle_price = $total_orders + $total_discount - $total_tax;
+        $price_after_discount = $total_orders - $total_tax;
         
         $shift = $this->cashier_shift 
         ->where('shift', auth()->user()->shift_number)  
@@ -911,6 +964,8 @@ class CashierReportsController extends Controller
         }   
         if (($request->user()->report == "unactive" && password_verify($request->input('password'), $request->user()->password))) {
             $arr = [
+                "principle_price" => $principle_price,
+                "price_after_discount" => $price_after_discount,
                 "start_amount" => $start_amount,
                 "expenses" => $expenses, 
                 "total_orders" => $total_orders, 
@@ -1250,6 +1305,8 @@ class CashierReportsController extends Controller
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
+                    "principle_price" => $principle_price,
+                    "price_after_discount" => $price_after_discount,
                     "actual_total" => $actual_total,
                     "start_amount" => $start_amount,
                     "expenses" => $expenses, 
@@ -1357,6 +1414,8 @@ class CashierReportsController extends Controller
                     "financial" => $cashier_shift?->financial?->name,
                 ];
                 $arr = [
+                    "principle_price" => $principle_price,
+                    "price_after_discount" => $price_after_discount,
                     "actual_total" => $actual_total,
                     "start_amount" => $start_amount,
                     "expenses" => $expenses, 

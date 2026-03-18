@@ -2080,6 +2080,8 @@ class ReportController extends Controller
                 "due_module" => $due_module,
                 "due_user" => $due_user,
                 "total_orders" => $total_orders,
+                "principle_price" => $total_orders + $total_discount - $total_tax,
+                "price_after_discount" => $total_orders - $total_tax,
                 "service_fees" => $service_fees,
                 "avg_orders" => $avg_orders,
                 "count_orders" => $count_orders,
