@@ -2251,6 +2251,9 @@ class ReportController extends Controller
                     "total_tax" => $total_tax,
                     "total_discount" => $total_discount,
                     "delivery_fees" => $delivery_fees,
+
+                    "principle_price" => $total_orders - $total_tax + $total_discount,
+                    "price_after_discount" => $total_orders - $total_tax,
                 ];
             }
             $count_orders = Order::
@@ -2410,6 +2413,9 @@ class ReportController extends Controller
                 "delivery_fees" => $delivery_fees,
                 "paid_module" => $paid_module,
                 "order_module" => $order_module,
+
+                "principle_price" => $total_orders - $total_tax + $discount,
+                "price_after_discount" => $total_orders - $total_tax,
             ]);
         }
     }
