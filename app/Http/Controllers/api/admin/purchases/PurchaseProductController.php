@@ -184,7 +184,7 @@ class PurchaseProductController extends Controller
             'product_store.*.start_stock' => ["required", "numeric"],
             'product_store.*.cost' => ["required", "numeric"],
             'product_store.*.unit_id' => ["required", "exists:units,id"], 
-            'product_store.*.store_id' => ["required", "exists:units,id"],
+            'product_store.*.store_id' => ["required", "exists:purchase_stores,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -222,7 +222,7 @@ class PurchaseProductController extends Controller
             'product_store.*.start_stock' => ["required", "numeric"],
             'product_store.*.cost' => ["required", "numeric"],
             'product_store.*.unit_id' => ["required", "exists:units,id"], 
-            'product_store.*.store_id' => ["required", "exists:units,id"],
+            'product_store.*.store_id' => ["required", "exists:purchase_stores,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([

@@ -187,7 +187,7 @@ class MaterialController extends Controller
             'matrial_store.*.start_stock' => ["required", "numeric"],
             'matrial_store.*.cost' => ["required", "numeric"],
             'matrial_store.*.unit_id' => ["required", "exists:units,id"], 
-            'matrial_store.*.store_id' => ["required", "exists:units,id"], 
+            'matrial_store.*.store_id' => ["required", "exists:purchase_stores,id"], 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -225,7 +225,7 @@ class MaterialController extends Controller
             'matrial_store.*.start_stock' => ["required", "numeric"],
             'matrial_store.*.cost' => ["required", "numeric"],
             'matrial_store.*.unit_id' => ["required", "exists:units,id"], 
-            'matrial_store.*.store_id' => ["required", "exists:units,id"],
+            'matrial_store.*.store_id' => ["required", "exists:purchase_stores,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
