@@ -2591,6 +2591,7 @@ class ReportController extends Controller
                 foreach ($details as $element) {
                     $price = 0;
                     $principle_price = 0;
+                    $price_after_discount = 0;
                     if (isset($element['variations'])) {
                         foreach ($element['variations'] as $key => $value) {
                             foreach ($value['options'] as $key => $option) {
@@ -2598,6 +2599,7 @@ class ReportController extends Controller
                                 - $option['price']
                                 + $option['after_disount'];
                                 $principle_price += $option['price'];
+                                $price_after_discount += $option['after_disount'];
                             }
                         }
                     }
@@ -2607,6 +2609,7 @@ class ReportController extends Controller
                                 - $extra['price']
                                 + $extra['price_after_discount'];
                                 $principle_price += $extra['price'];
+                                $price_after_discount += $extra['price_after_discount'];
                         }
                     }
                     if(isset($element['product'][0]['product'])){
