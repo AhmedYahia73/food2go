@@ -147,7 +147,7 @@ class MaterialController extends Controller
     public function product(Request $request, $id){ 
         $product = $this->product
         ->where('id', $id)
-        ->with('category:id,name')
+        ->with('category:id,name', "start_stock.store")
         ->first();
 
         return response()->json([

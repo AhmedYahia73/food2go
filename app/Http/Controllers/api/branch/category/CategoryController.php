@@ -133,6 +133,8 @@ class CategoryController extends Controller
             return [
                 "id" => $item->id,
                 "name" => $item->name,
+                "image_link" => $item->image_link,
+                "description" => $item->description,
                 "price" => $item->price,
                 "final_price" => $final_price
             ];
