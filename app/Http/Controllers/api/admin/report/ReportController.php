@@ -2613,8 +2613,7 @@ class ReportController extends Controller
                         $price += $element['product'][0]['product']['price_after_tax'] 
                             - $element['product'][0]['product']['price']
                             + $element['product'][0]['product']['price_after_discount'];
-                        $price_after_discount += $element['product'][0]['product']['price_after_tax']  
-                            + $element['product'][0]['product']['price_after_discount'];
+                        $price_after_discount += $element['product'][0]['product']['price_after_discount'];
                         $principle_price += $element['product'][0]['product']['price'];
                         $count = $element['product'][0]['count'];
                         $product_id = $element['product'][0]['product']['id'];
@@ -2656,7 +2655,7 @@ class ReportController extends Controller
                                 "price" => $price * $count,
                                 "count" => $count, 
                                 "principle_price" => $principle_price,
-                                "price_after_discount" => $price_after_discount
+                                "price_after_discount" => $price_after_discount,
                             ];
                         }
                     }
