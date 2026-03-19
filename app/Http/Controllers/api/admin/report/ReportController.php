@@ -2592,6 +2592,7 @@ class ReportController extends Controller
                     $price = 0;
                     $principle_price = 0;
                     $price_after_discount = 0;
+                    $price_after_tax = 0;
                     if (isset($element['variations'])) {
                         foreach ($element['variations'] as $key => $value) {
                             foreach ($value['options'] as $key => $option) {
