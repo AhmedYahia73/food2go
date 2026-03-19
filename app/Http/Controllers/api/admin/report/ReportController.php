@@ -2600,6 +2600,7 @@ class ReportController extends Controller
                                 + $option['after_disount'];
                                 $principle_price += $option['price'];
                                 $price_after_discount += $option['after_disount'];
+                                $price_after_tax += $option['price_after_tax'];
                             }
                         }
                     }
@@ -2609,6 +2610,7 @@ class ReportController extends Controller
                                 - $extra['price']
                                 + $extra['price_after_discount'];
                                 $principle_price += $extra['price'];
+                                $price_after_tax += $extra['price_after_tax'];
                                 $price_after_discount += $extra['price_after_discount'];
                         }
                     }
@@ -2655,6 +2657,7 @@ class ReportController extends Controller
                                 "name" => $product_name,
                                 "category_id" => $category_id,
                                 "sub_category_id" => $sub_category_id, 
+                                "element_price" => $price,
                                 "price" => $price * $count,
                                 "count" => $count, 
                                 "principle_price" => $principle_price,
