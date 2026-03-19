@@ -65,21 +65,21 @@ class CategoryController extends Controller
     
     public function products(Request $request){
         $locale = $request->locale ?? "en";
+           $locale = $request->locale ?? 'en';
         $products = Product::
-        where("status", 1)
-        ->with("translations")
+        with(['addons', 'excludes', 'extra', 'variations.options.extra',
+        'category', 'subCategory', 'discount', 'tax', 'group_products:id,name'
+        , 'unit:id,name'])
+        ->orderBy('order')
         ->get()
         ->map(function($item) use($locale){
-            return [
-                "id" => $item->id,
-                "name" => $item->translations
-                ->where("locale", $locale)
-                ->where("key", $item->name)
-                ->first() ?? $item->name,
-                "status" => $item->product_off
-                ->where("branch_id", auth()->user()->id)
-                ->count() > 0 ? 0 : 1,
-            ];
+            $item->name = $item->translations->where('key', $item->name)
+            ->where('locale', $locale)->first()?->value ?? $item->name;
+            $item->description = $item->translations->where('key', $item->description)
+            ->where('locale', $locale)->first()?->value ?? $item->description;
+            unset($item->translations);
+            
+            return $item;
         });
         
         return response()->json([
