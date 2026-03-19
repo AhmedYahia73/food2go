@@ -22,6 +22,9 @@ class OrderDetail extends Model
         'deal_id',
         'product_index',
         'addon_count',
+        'principle_price',
+        'price_after_discount',
+        'price',
     ];
 
     public function addon(){
