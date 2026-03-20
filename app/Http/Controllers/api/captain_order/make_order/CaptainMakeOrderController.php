@@ -395,8 +395,12 @@ class CaptainMakeOrderController extends Controller
                         ->where('date', date('Y-m-d'))
                         ->sum('count');
                 }
-                unset($product->tax);
-                $product->tax = $product->tax_module->first()?->tax;
+         
+                $tax_module = $product->tax_module->first()?->tax;
+                if(!empty($tax_module)){
+                    unset($product->tax);
+                    $product->tax = $tax_module;
+                }
                 $product->in_stock = $product->number > $product->count;
 
                 $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
@@ -841,7 +845,11 @@ class CaptainMakeOrderController extends Controller
                 }])
                 ->withLocale($locale);
             }]);
-        }, 'sales_count', 'tax', 'tax_module.module'])
+        }, 'sales_count', 'tax',
+        'tax_module' => fn($q) => $q->whereHas('module', fn($q) => $q->where('branch_id', $branch_id)
+        ->whereIn('app_type', ['pos', 'all']))
+        ->with('tax'),
+        'tax_module.module'])
         ->withLocale($locale)
         ->where('item_type', '!=', 'online') 
         ->where('status', 1)
@@ -891,28 +899,13 @@ class CaptainMakeOrderController extends Controller
               
                 return $addon;
             });
-            $tax_module = $product?->tax
-            ?->tax_module
-            ?->map(function ($taxItem) use ($module, $branch_id, $product) {
-
-                $isFound = $taxItem->module
-				->where('module', $module) 
-                ->whereIn('app_type', ['pos', 'all'])
-                ->Where("branch_id", $branch_id)
-				->first();
-				if($isFound){
-					return $product?->tax;
-				}
-
-            })
-            ->filter()
-            ->first();
-            if(!empty($tax_module)){  
+             
+            $tax_module = $product->tax_module->first()?->tax;
+            if(!empty($tax_module)){
+                unset($product->tax);
                 $product->tax = $tax_module;
             }
-            else{
-                $product->tax = null;
-            }
+              
             return $product;
         })->filter();
         $cafe_location = $this->cafe_location
