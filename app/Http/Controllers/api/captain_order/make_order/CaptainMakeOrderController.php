@@ -395,6 +395,7 @@ class CaptainMakeOrderController extends Controller
                         ->where('date', date('Y-m-d'))
                         ->sum('count');
                 }
+                unset($product->tax);
                 $product->tax = $product->tax_module->first()?->tax;
                 $product->in_stock = $product->number > $product->count;
 
