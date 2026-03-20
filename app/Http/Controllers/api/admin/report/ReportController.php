@@ -2651,10 +2651,10 @@ class ReportController extends Controller
                                 ->with("translations")
                                 ->first();
                                 $product_name = $product_name
-                                ->translations
-                                ->where("locale", $locale)
-                                ->where("key", $product_name_item)
-                                ->first()?->value ?? $product_name_item;
+                                ?->translations
+                                ?->where("locale", $locale)
+                                ?->where("key", $product_name_item)
+                                ?->first()?->value ?? $product_name_item;
                             }
                             else{
                                 $product_name = $product_name_item;

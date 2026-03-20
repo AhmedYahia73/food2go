@@ -103,7 +103,7 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     });
     //_______________________________________________________________________________
     Route::controller(HomeController::class)->group(function(){
-        Route::get('/branch_product_status/{id}', 'branch_product_status');
+        Route::put('/branch_product_status/{id}', 'branch_product_status');
     });
     //_______________________________________________________________________________
     Route::controller(HomeController::class)->prefix('home')->group(function(){
