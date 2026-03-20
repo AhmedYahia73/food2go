@@ -846,8 +846,7 @@ class CaptainMakeOrderController extends Controller
                 ->withLocale($locale);
             }]);
         }, 'sales_count', 'tax',
-        'tax_module' => fn($q) => $q->whereHas('module', fn($q) => $q->where('branch_id', $branch_id)
-        ->whereIn('app_type', ['pos', 'all']))
+        'tax_module' => fn($q) => $q 
         ->with('tax'),
         'tax_module.module'])
         ->withLocale($locale)
