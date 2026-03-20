@@ -900,13 +900,13 @@ class CaptainMakeOrderController extends Controller
                 return $addon;
             });
              
-            $tax_module = $product->tax_module->first()?->tax;
+            $tax_module = $product->tax_module;
             if(!empty($tax_module)){
                 unset($product->tax);
                 $product->tax = $tax_module;
             }
               
-            return $product;
+            return $tax_module;
         })->filter();
         return response()->json([
             "products" => $products
