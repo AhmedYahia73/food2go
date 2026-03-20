@@ -377,6 +377,8 @@ class CaptainMakeOrderController extends Controller
                         ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
                         ->withLocale($locale),
                 ]),
+                'tax_module' => fn($q) => $q->whereHas('module', fn($q) => $q->where('branch_id', $branch_id))
+                ->with('tax'),
                   'group_products' => fn($q) => $q
                     ->with(['products' => fn($q) => $q
                     ->select("products.id", "products.name")->withLocale($locale)]),
@@ -393,7 +395,7 @@ class CaptainMakeOrderController extends Controller
                         ->where('date', date('Y-m-d'))
                         ->sum('count');
                 }
-
+                $product->tax = $product->tax_module->first()?->tax;
                 $product->in_stock = $product->number > $product->count;
 
                 $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {

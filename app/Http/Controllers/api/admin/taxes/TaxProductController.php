@@ -15,11 +15,11 @@ use App\Models\TaxModuleBranch;
 class TaxProductController extends Controller
 {
     public function view(Request $request, $id){
-        $products = TaxModule::
+        $tax_module = TaxModule::
         where("tax_id", $id)
         ->with("products")
-        ->first()
-        ?->products;
+        ->first();
+        $products = $tax_module?->products;
         if($products && $products->count() > 0){
             $products = $products
             ->map(function($item){
@@ -34,9 +34,11 @@ class TaxProductController extends Controller
         else{
             $products = [];
         }
+        unset($tax_module->products);
 
         return response()->json([
-            "products" => $products
+            "products" => $products,
+            "tax_module" => $tax_module,
         ]);
     }
 
