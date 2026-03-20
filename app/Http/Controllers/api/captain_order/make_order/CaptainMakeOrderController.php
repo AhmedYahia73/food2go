@@ -908,9 +908,6 @@ class CaptainMakeOrderController extends Controller
               
             return $product;
         })->filter();
-        return response()->json([
-            "products" => $products
-        ]);
         $cafe_location = $this->cafe_location
         ->with(['tables' => function($query){
             return $query
