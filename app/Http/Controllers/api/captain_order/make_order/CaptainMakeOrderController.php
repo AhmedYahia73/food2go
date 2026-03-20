@@ -846,7 +846,8 @@ class CaptainMakeOrderController extends Controller
                 ->withLocale($locale);
             }]);
         }, 'sales_count', 'tax',
-        'tax_module' => fn($q) => $q 
+        'tax_module' => fn($q) => $q->whereHas('module', fn($q) => $q->where('branch_id', $branch_id)
+        ->whereIn('app_type', ['pos', 'all']))
         ->with('tax'),
         'tax_module.module'])
         ->withLocale($locale)
@@ -899,13 +900,13 @@ class CaptainMakeOrderController extends Controller
                 return $addon;
             });
              
-            $tax_module = $product->tax_module;
+            $tax_module = $product->tax_module->first()?->tax;
             if(!empty($tax_module)){
                 unset($product->tax);
                 $product->tax = $tax_module;
             }
               
-            return $tax_module;
+            return $product;
         })->filter();
         return response()->json([
             "products" => $products

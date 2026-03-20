@@ -86,6 +86,8 @@ class TaxProductController extends Controller
             'tax_id' => ["required", "exists:taxes,id"],
             'tax_modules' => ["required", "array"],
             'tax_modules.*' => ["required", "in:take_away,dine_in,delivery"],
+            "branch_id" => ["required", "array"],
+            "branch_id.*" => ["required", "exists:branches,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -114,6 +116,7 @@ class TaxProductController extends Controller
                 TaxModuleBranch::create([
                     "tax_module_id" => $tax_module->id,
                     "module" => $item,
+                    "branch_id" => $request->branch_id[0],
                     "type" => "all"
                 ]);
             }
@@ -128,6 +131,7 @@ class TaxProductController extends Controller
                 TaxModuleBranch::create([
                     "tax_module_id" => $taxes->id,
                     "module" => $item,
+                    "branch_id" => $request->branch_id[0],
                     "type" => "all"
                 ]);
             }
