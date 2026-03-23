@@ -473,6 +473,18 @@ class LoginController extends Controller
         })
         ->where('status', 1)
         ->get(); 
+        $cashier_log = $this->cashier_shift 
+        ->where("cashier_id", $request->cashier_id)
+        ->whereNull("end_time")
+        ->first();
+         $cashier_machine = $this->cashier_machine
+        ->where("id", $request->cashier_id ?? 0)  
+        ->first();
+        if($cashier_log && !$cashier_machine->multiple){
+            return response()->json([
+                "errors" => "You must end shift from this pos first"
+            ], 400);
+        }
         if (empty($user)) {
             return response()->json([
                 'errors' => 'This user does not have the ability to login'
