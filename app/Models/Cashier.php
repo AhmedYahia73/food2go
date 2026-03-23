@@ -11,6 +11,7 @@ class Cashier extends Model
 
     protected $fillable = [
         'name',
+        'multiple',
         'branch_id',
         'cashier_active',
         'cashier_id',

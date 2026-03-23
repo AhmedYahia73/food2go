@@ -30,6 +30,7 @@ class CashierController extends Controller
                 "cashier_active" => $item->cashier_active,
                 "status" => $item->status,
                 "branch" => $item->branch,
+                "multiple" => $item->multiple,
                 "cashier_man" => [
                     "id" => $cashier_man?->id,
                     "user_name" => $cashier_man?->user_name,
@@ -110,10 +111,11 @@ class CashierController extends Controller
             'cashier_names.*.name' => 'required',
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|boolean',
-           'print_name' => ["required"], 
-           'print_port' => ["sometimes"],
-           'print_ip' => ["required"],
-           "print_type" => 'required|in:usb,network',
+            'print_name' => ["required"], 
+            'print_port' => ["sometimes"],
+            'print_ip' => ["required"],
+            "print_type" => 'required|in:usb,network',
+            "multiple" => ['required', 'boolean'],
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -132,6 +134,7 @@ class CashierController extends Controller
             "name" => $default,
             "branch_id" => $request->branch_id,
             "status" => $request->status,
+            "multiple" => $request->multiple,
         ]);
         foreach ($cashier_names as $item) {
             if (!empty($item['name'])) {
@@ -163,6 +166,7 @@ class CashierController extends Controller
             'print_port' => ["sometimes"],
             'print_ip' => ["required"],
             'status' => 'required|boolean',
+            "multiple" => ['required', 'boolean'],
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -188,6 +192,7 @@ class CashierController extends Controller
             "name" => $default,
             "branch_id" => $request->branch_id,
             "status" => $request->status,
+            "multiple" => $request->multiple,
         ]);
         $cashier->translations()->delete();
         foreach ($cashier_names as $item) {
