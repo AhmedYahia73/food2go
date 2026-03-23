@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\api\cashier\Home;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Models\Cashier;
+use App\Models\CashierShift;
 use App\Models\Order;
 use App\Models\Setting;
-
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -72,6 +71,19 @@ class HomeController extends Controller
 
     public function active_cashier(Request $request, $id){
         // https://bcknd.food2go.online/cashier/home/active_cashier/{id}
+         
+        $cashier_log = CashierShift:: 
+        where("cashier_id", $id)
+        ->whereNull("end_time")
+        ->first();
+        $cashier_machine = Cashier::
+        where("id", $id ?? 0)  
+        ->first();
+        if($cashier_log && !$cashier_machine->multiple){
+            return response()->json([
+                "errors" => "You must end shift from this pos first"
+            ], 400);
+        } 
         $this->cashier
         ->where('id', $id)
         ->update([
