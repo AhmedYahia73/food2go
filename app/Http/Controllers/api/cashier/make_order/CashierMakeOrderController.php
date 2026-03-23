@@ -63,6 +63,7 @@ use App\Models\FinantiolAcounting;
 use App\Models\DiscountEmail;
 use App\Models\GroupProduct;
 use App\Models\TaxModule;
+use App\Models\OrderCart;
 use Illuminate\Support\Facades\Storage;
 
 use App\trait\image;
@@ -992,6 +993,61 @@ class CashierMakeOrderController extends Controller
             'cashier_man_id' =>$request->user()->id,
             'shift' => $request->user()->shift_number,
         ]);
+        $order = $this->make_order_cart($request);
+        if (isset($order['errors']) && !empty($order['errors'])) {
+            return response()->json($order, 400);
+        }
+        $this->cafe_table
+        ->where('id', $request->table_id)
+        ->update([
+            'current_status' => 'not_available_with_order'
+        ]);
+        $order_data = $this->order_format($order['payment'], 0);
+
+  
+        return response()->json([ 
+            "cart_id" => $order['payment']->id
+        ]);
+    }
+
+    public function update_dine_in_order(DineinItemRequest $request){
+        // /cashier/dine_in_order
+        // Keys
+        // amount, total_tax, total_discount, table_id
+        // notes
+        // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
+        // variation[{variation_id, option_id[]}], count}]
+  
+        $validator = Validator::make($request->all(), [
+            'cart_id' => 'required|exists:order_carts,id',
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        if(!$request->user()->dine_in){
+            return response()->json([
+                "errors" => "You do not have this premission"
+            ], 400);
+        }
+        $request->merge([
+            'branch_id' => $request->user()->branch_id,
+            'user_id' => 'empty',
+            'order_type' => 'dine_in',
+            'cashier_man_id' =>$request->user()->id,
+            'shift' => $request->user()->shift_number,
+        ]);
+        $order_cart = OrderCart::where("id", $request->cart_id)
+        ->where("prepration_status", "watting")
+        ->first();
+        if(!$order_cart){
+            return response()->json([
+                "errors" => "status must be waiting"
+            ], 400);
+        }
+        $order_cart->delete();
         $order = $this->make_order_cart($request);
         if (isset($order['errors']) && !empty($order['errors'])) {
             return response()->json($order, 400);
