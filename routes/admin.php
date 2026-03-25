@@ -827,6 +827,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     Route::controller(HomeController::class)
     ->prefix('home')->group(function(){
         Route::get('/', 'home')->middleware('can:view_home');
+        Route::get('/home_data', 'home_data')->middleware('can:view_home');
         Route::get('/orders', 'home_orders_count')->middleware('can:view_home');
     });
 

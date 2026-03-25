@@ -12,6 +12,8 @@ use App\Models\SmsBalance;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\OrderDetail;
+use App\Models\OrderFinancial;
 use App\Models\Deal;
 use App\Models\User;
 use App\Models\Setting;
@@ -24,6 +26,152 @@ class HomeController extends Controller
     private Deal $deals, private User $users, private Setting $settings, 
     private SmsIntegration $sms_integration, private SmsBalance $sms_balance,
     private TimeSittings $TimeSittings, private LogOrder $log_order){}
+
+    public function home_data(Request $request){
+        
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if($from->from > $item[0]->from){
+                $from = $item[0];
+            }
+        }
+        if ($time_sittings->count() > 0) {
+            $from = $from->from;
+            $end = date('Y-m-d') . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+ 
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }  
+
+        $top_product = OrderDetail::
+        selectRaw("product_id, sum(count) as total_sales")
+        ->whereNull("exclude_id")
+        ->whereNull("addon_id")
+        ->whereNull("offer_id")
+        ->whereNull("extra_id")
+        ->whereNull("variation_id")
+        ->whereNull("option_id")
+        ->whereNull("deal_id")
+        ->groupBy("product_id")
+        ->with("product:id,name")
+        ->orderByDesc("total_sales")
+        ->limit(5)
+        ->get();
+        $top_financial = OrderFinancial::
+        selectRaw("financial_id, sum(amount) as total_amount")
+        ->groupBy("financial_id")
+        ->with("financials:id,name")
+        ->where(function($query){
+            $query->where("order_status", "!=", "returned")
+            ->where("order_status", "!=", "refund")
+            ->where("is_void", 0);
+        })
+        ->limit(5)
+        ->get();
+        $top_payment_method = Order::
+        selectRaw("payment_method_id, sum(amount) as total_amount")
+        ->groupBy("payment_method_id")
+        ->with("payment_method:id,name")
+        ->where(function($query){
+            $query->where("order_status", "!=", "returned")
+            ->where("order_status", "!=", "refund")
+            ->where("is_void", 0);
+        })
+        ->limit(5)
+        ->get();
+        $order_types = Order::
+        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %A') as hour, count(id) as order_count, order_type")
+        ->groupBy("hour")
+        ->groupBy("order_type") 
+        ->where("created_at", ">=", $start)
+        ->where("created_at", "<=", $end) 
+        ->where(function($query){
+            $query->where("order_status", "!=", "returned")
+            ->where("order_status", "!=", "refund")
+            ->where("is_void", 0);
+        })
+        ->get();
+        $sales_hourly = Order::
+        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %A') as hour, sum(amount) as total_amount")
+        ->groupBy("hour") 
+        ->where("created_at", ">=", $start)
+        ->where("created_at", "<=", $end) 
+        ->where(function($query){
+            $query->where("order_status", "!=", "returned")
+            ->where("order_status", "!=", "refund")
+            ->where("is_void", 0);
+        })
+        ->get();
+        $return_hourly = Order::
+        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %A') as hour, sum(amount) as total_amount")
+        ->groupBy("hour") 
+        ->where("created_at", ">=", $start)
+        ->where("created_at", "<=", $end)
+        ->where(function($query){
+            $query->where("order_status", "returned")
+            ->orWhere("order_status", "refund")
+            ->orWhere("is_void", 1);
+        })
+        ->get();
+        $discount_hourly = Order::
+        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %A') as hour, sum(total_discount) as total_discount")
+        ->groupBy("hour") 
+        ->where("created_at", ">=", $start)
+        ->where("created_at", "<=", $end)
+        ->where(function($query){
+            $query->where("order_status", "!=", "returned")
+            ->where("order_status", "!=", "refund")
+            ->where("is_void", 0);
+        })
+        ->get();
+        $branch_sales = Order::
+        selectRaw("branch_id, sum(amount) as total_amount")
+        ->groupBy("branch_id")  
+        ->where(function($query){
+            $query->where("order_status", "!=", "returned")
+            ->where("order_status", "!=", "refund")
+            ->where("is_void", 0);
+        })
+        ->orderByDesc("total_amount")
+        ->with("branch:id,name")
+        ->get();
+
+        return response()->json([
+            "top_product" => $top_product,
+            "top_financial" => $top_financial,
+            "top_payment_method" => $top_payment_method,
+            "order_types" => $order_types,
+            "sales_hourly" => $sales_hourly,
+            "return_hourly" => $return_hourly,
+            "discount_hourly" => $discount_hourly,
+            "branch_sales" => $branch_sales,
+        ]);
+    }
 
     public function home_orders_count(){ 
         
