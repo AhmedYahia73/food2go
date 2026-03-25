@@ -100,7 +100,7 @@ class HomeController extends Controller
         ->limit(5)
         ->get();
         $order_types = Order::
-        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %A') as hour, count(id) as order_count, order_type")
+        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, count(id) as order_count, order_type")
         ->groupBy("hour")
         ->groupBy("order_type") 
         ->where("created_at", ">=", $start)
@@ -112,7 +112,7 @@ class HomeController extends Controller
         })
         ->get();
         $sales_hourly = Order::
-        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %A') as hour, sum(amount) as total_amount")
+        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, sum(amount) as total_amount")
         ->groupBy("hour") 
         ->where("created_at", ">=", $start)
         ->where("created_at", "<=", $end) 
@@ -123,7 +123,7 @@ class HomeController extends Controller
         })
         ->get();
         $return_hourly = Order::
-        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %A') as hour, sum(amount) as total_amount")
+        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, sum(amount) as total_amount")
         ->groupBy("hour") 
         ->where("created_at", ">=", $start)
         ->where("created_at", "<=", $end)
@@ -134,7 +134,7 @@ class HomeController extends Controller
         })
         ->get();
         $discount_hourly = Order::
-        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %A') as hour, sum(total_discount) as total_discount")
+        selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, sum(total_discount) as total_discount")
         ->groupBy("hour") 
         ->where("created_at", ">=", $start)
         ->where("created_at", "<=", $end)
