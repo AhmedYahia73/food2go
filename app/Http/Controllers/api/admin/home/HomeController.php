@@ -85,12 +85,7 @@ class HomeController extends Controller
         $top_financial = OrderFinancial::
         selectRaw("financial_id, sum(amount) as total_amount")
         ->groupBy("financial_id")
-        ->with("financials:id,name")
-        ->where(function($query){
-            $query->where("order_status", "!=", "returned")
-            ->where("order_status", "!=", "refund")
-            ->where("is_void", 0);
-        })
+        ->with("financials:id,name") 
         ->limit(5)
         ->get();
         $top_payment_method = Order::
