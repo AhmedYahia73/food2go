@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('captain_printers', function (Blueprint $table) {
+        Schema::create('captain_printers', function (Blueprint $table) {
             $table->string("print_name");
             $table->string("print_port");
             $table->string("print_ip");
