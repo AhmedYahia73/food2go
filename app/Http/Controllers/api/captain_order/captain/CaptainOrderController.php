@@ -20,13 +20,38 @@ class CaptainOrderController extends Controller
         ]);
     }
 
-    public function update(Request $request){
+    public function create(Request $request){
         $validator = Validator::make($request->all(), [
-            'printers' => ['required', "array"],
-            'printers.*.print_type' => ["required", 'in:usb,network'],
-            'printers.*.print_name' => ["required"],
-            'printers.*.print_port' => ["required"],
-            'printers.*.print_ip' => ["required"],
+            'print_type' => ["required", 'in:usb,network'],
+            'print_name' => ["required"],
+            'print_port' => ["required"],
+            'print_ip' => ["required"],
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+  
+        CaptainPrinter::create([
+            "print_name" => $request->print_name,
+            "print_type" => $request->print_type,
+            "print_port" => $request->print_port,
+            "print_ip" => $request->print_ip,
+            "captain_order_id" => auth()->user()->id
+        ]); 
+
+        return response()->json([
+            "success" => "you add data success", 
+        ]);
+    }
+
+    public function update(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'print_type' => ["required", 'in:usb,network'],
+            'print_name' => ["required"],
+            'print_port' => ["required"],
+            'print_ip' => ["required"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -35,20 +60,28 @@ class CaptainOrderController extends Controller
         }
 
         CaptainPrinter::
-        where("captain_order_id", $request->user()->id)
-        ->delete();
-        foreach ($request->printers as $item) {
-            CaptainPrinter::create([
-                "print_name" => $item['print_name'],
-                "print_type" => $item['print_type'],
-                "print_port" => $item['print_port'],
-                "print_ip" => $item['print_ip'],
-                "captain_order_id" => auth()->user()->id
-            ]);
-        }
+        where("id", $id)
+        ->update([
+            "print_name" => $request->print_name,
+            "print_type" => $request->print_type,
+            "print_port" => $request->print_port,
+            "print_ip" => $request->print_ip, 
+        ]);
 
         return response()->json([
             "success" => "you update data success", 
+        ]);
+    }
+
+    public function delete(Request $request, $id){
+ 
+
+        CaptainPrinter::
+        where("id", $id)
+        ->delete();
+
+        return response()->json([
+            "success" => "you delete data success", 
         ]);
     }
 }

@@ -20,7 +20,9 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     Route::controller(CaptainOrderController::class)
     ->prefix('captain')->group(function(){
         Route::get('/', 'view');
-        Route::put('/update', 'update');
+        Route::post('/add', 'create');
+        Route::put('/update/{id}', 'update');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(CaptainMakeOrderController::class)
