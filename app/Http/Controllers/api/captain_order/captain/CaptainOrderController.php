@@ -6,31 +6,45 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\CaptainPrinter;
+
 class CaptainOrderController extends Controller
 {
     public function view(Request $request){
+        $captain_printers = CaptainPrinter::
+        where("captain_order_id", $request->user()->id)
+        ->get();
+
         return response()->json([
-            "print_name" => $request->user()->print_name,
-            "print_port" => $request->user()->print_port,
-            "print_ip" => $request->user()->print_ip,
-            "print_type" => $request->user()->print_type,
+            "captain_printers" => $captain_printers, 
         ]);
     }
 
     public function update(Request $request){
         $validator = Validator::make($request->all(), [
-            'print_type' => ['in:usb,network'],
+            'printers' => ['required', "array"],
+            'printers.*.print_type' => ["required", 'in:usb,network'],
+            'printers.*.print_name' => ["required"],
+            'printers.*.print_port' => ["required"],
+            'printers.*.print_ip' => ["required"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
                 'errors' => $validator->errors(),
             ],400);
         }
-        $request->user()->print_name = $request->print_name ?? $request->user()->print_name;
-        $request->user()->print_port = $request->print_port ?? $request->user()->print_port;
-        $request->user()->print_ip = $request->print_ip ?? $request->user()->print_ip;
-        $request->user()->print_type = $request->print_type ?? $request->user()->print_type;
-        $request->user()->save();
+
+        CaptainPrinter::
+        where("captain_order_id", $request->user()->id)
+        ->delete();
+        foreach ($request->printers as $item) {
+            CaptainPrinter::create([
+                "print_name" => $request->print_name,
+                "print_type" => $request->print_type,
+                "print_port" => $request->print_port,
+                "print_ip" => $request->print_ip,
+            ]);
+        }
 
         return response()->json([
             "success" => "you update data success", 
