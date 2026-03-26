@@ -43,6 +43,7 @@ class CaptainOrderController extends Controller
                 "print_type" => $item['print_type'],
                 "print_port" => $item['print_port'],
                 "print_ip" => $item['print_ip'],
+                "captain_order_id" => auth()->user()->id
             ]);
         }
 
