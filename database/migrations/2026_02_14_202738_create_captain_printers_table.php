@@ -12,11 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('captain_printers', function (Blueprint $table) {
+            $table->id();
             $table->string("print_name");
             $table->string("print_port");
             $table->string("print_ip");
             $table->string("print_type");
             $table->foreignId('captain_order_id')->nullable()->constrained('captain_orders')->onUpdate('cascade')->onDelete('cascade');
+            $table->timestamps();
         }); 
     }
 
