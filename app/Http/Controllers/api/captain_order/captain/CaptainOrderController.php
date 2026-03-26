@@ -39,10 +39,10 @@ class CaptainOrderController extends Controller
         ->delete();
         foreach ($request->printers as $item) {
             CaptainPrinter::create([
-                "print_name" => $request->print_name,
-                "print_type" => $request->print_type,
-                "print_port" => $request->print_port,
-                "print_ip" => $request->print_ip,
+                "print_name" => $item['print_name'],
+                "print_type" => $item['print_type'],
+                "print_port" => $item['print_port'],
+                "print_ip" => $item['print_ip'],
             ]);
         }
 
