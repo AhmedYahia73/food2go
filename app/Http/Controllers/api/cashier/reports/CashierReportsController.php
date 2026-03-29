@@ -771,6 +771,84 @@ class CashierReportsController extends Controller
         
         $gap = 0;
 
+        $dine_in_orders_count = Order::
+        where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("order_type", "dine_in")
+        ->where("is_void", 0)  
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->count();
+        $take_away_orders_count = Order::
+        where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("order_type", "take_away")
+        ->where("is_void", 0)  
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->count();
+        $delivery_orders_count = Order::
+        where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("order_type", "delivery")
+        ->where("is_void", 0)  
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->count();
+        $orders_count = [
+            "dine_in_orders_count" => $dine_in_orders_count,
+            "take_away_orders_count" => $take_away_orders_count,
+            "delivery_orders_count" => $delivery_orders_count,
+        ];
+
+        $dine_in_amount = Order::
+        where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("order_type", "dine_in")
+        ->where("is_void", 0)  
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->sum("amount");
+        $take_away_amount = Order::
+        where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("order_type", "take_away")
+        ->where("is_void", 0)  
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->sum("amount");
+        $delivery_amount = Order::
+        where('cashier_man_id', $request->user()->id)
+        ->where('shift', $request->user()->shift_number)
+        ->where("order_type", "delivery")
+        ->where("is_void", 0)  
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+        ->sum("amount");
+        $orders_amount = [
+            "dine_in_amount" => $dine_in_amount,
+            "take_away_amount" => $take_away_amount,
+            "delivery_amount" => $delivery_amount,
+        ];
+
         $total_orders = Order::
         select("id")
         ->where('cashier_man_id', $request->user()->id)
@@ -972,6 +1050,8 @@ class CashierReportsController extends Controller
                 "actual_total" => $actual_total,
                 "gap" => $gap,
                 "net_cash_drawer" => $net_cash_drawer,
+                "orders_count" => $orders_count,
+                "orders_amount" => $orders_amount,
             ];
             if(isset($hall_orders)){
                 $arr['hall_orders'] = $hall_orders;
@@ -1327,6 +1407,8 @@ class CashierReportsController extends Controller
                     "due_user" => $due_user,
                     "start_balance" => $start_balance,
                     "net_cash_drawer" => $net_cash_drawer,
+                    "orders_count" => $orders_count,
+                    "orders_amount" => $orders_amount,
                 ];
                 if(isset($hall_orders)){
                     $arr['hall_orders'] = $hall_orders;
@@ -1428,6 +1510,8 @@ class CashierReportsController extends Controller
                     "due_user" => $due_user,
                     "start_balance" => $start_balance,
                     "net_cash_drawer" => $net_cash_drawer,
+                    "orders_count" => $orders_count,
+                    "orders_amount" => $orders_amount,
                 ];
                 if(isset($hall_orders)){
                     $arr['hall_orders'] = $hall_orders;
