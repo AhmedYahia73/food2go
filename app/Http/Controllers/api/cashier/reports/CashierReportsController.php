@@ -963,7 +963,8 @@ class CashierReportsController extends Controller
         ->where("branch_id", $request->user()->branch_id)
         ->where("cahier_man_id", $request->user()->id)
         ->sum('amount');
-        $net_cash_drawer = $order_financial + $start_amount - $expenses;
+        $net_cash_drawer2 = $order_financial + $start_amount - $expenses;
+        $net_cash_drawer = $total_orders + $start_amount - $expenses;
         $actual_total = $total_orders + $start_amount - $expenses;
         $cashier_shift = $this->cashier_shift
         ->where("shift", auth()->user()->shift_number)
@@ -1050,6 +1051,7 @@ class CashierReportsController extends Controller
                 "actual_total" => $actual_total,
                 "gap" => $gap,
                 "net_cash_drawer" => $net_cash_drawer,
+                "net_cash_drawer2" => $net_cash_drawer2,
                 "orders_count" => $orders_count,
                 "orders_amount" => $orders_amount,
             ];
@@ -1154,6 +1156,7 @@ class CashierReportsController extends Controller
             ->groupBy("financial_id") 
             ->get();
             $financial_accounts = [];
+            $financial_accounts2 = [];
             $total_amount = 0;
             foreach ($delivery_financial_accounts as $item) {
                 $total_amount += $item->total_amount;
@@ -1165,9 +1168,23 @@ class CashierReportsController extends Controller
                         "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
                         "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
                     ];
+                    $financial_accounts2[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name,
+                        "total_amount_delivery" => $item->total_amount + $financial_accounts2[$item->financial_id]['total_amount_delivery'], 
+                        "total_amount_take_away" => $financial_accounts2[$item->financial_id]['total_amount_take_away'],
+                        "total_amount_dine_in" => $financial_accounts2[$item->financial_id]['total_amount_dine_in'],
+                    ];
                 }
                 else{
                     $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                        "total_amount_delivery" => $item->total_amount ,
+                        "total_amount_take_away" => 0,
+                        "total_amount_dine_in" => 0,
+                    ];
+                    $financial_accounts2[$item->financial_id] = [
                         "financial_id" => $item->financial_id,
                         "financial_name" => $item?->financials?->name, 
                         "total_amount_delivery" => $item->total_amount ,
@@ -1186,9 +1203,23 @@ class CashierReportsController extends Controller
                         "total_amount_take_away" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_take_away'],
                         "total_amount_dine_in" => $financial_accounts[$item->financial_id]['total_amount_dine_in'],
                     ];
+                    $financial_accounts2[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                        "total_amount_delivery" => $financial_accounts2[$item->financial_id]['total_amount_delivery'], 
+                        "total_amount_take_away" => $item->total_amount + $financial_accounts2[$item->financial_id]['total_amount_take_away'],
+                        "total_amount_dine_in" => $financial_accounts2[$item->financial_id]['total_amount_dine_in'],
+                    ];
                 }
                 else{
                     $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name, 
+                        "total_amount_delivery" => 0 ,
+                        "total_amount_take_away" => $item->total_amount,
+                        "total_amount_dine_in" => 0,
+                    ];
+                    $financial_accounts2[$item->financial_id] = [
                         "financial_id" => $item->financial_id,
                         "financial_name" => $item?->financials?->name, 
                         "total_amount_delivery" => 0 ,
@@ -1207,9 +1238,23 @@ class CashierReportsController extends Controller
                         "total_amount_take_away" => $financial_accounts[$item->financial_id]['total_amount_take_away'],
                         "total_amount_dine_in" => $item->total_amount + $financial_accounts[$item->financial_id]['total_amount_dine_in'],
                     ];
+                    $financial_accounts2[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name,
+                        "total_amount_delivery" => $financial_accounts2[$item->financial_id]['total_amount_delivery'], 
+                        "total_amount_take_away" => $financial_accounts2[$item->financial_id]['total_amount_take_away'],
+                        "total_amount_dine_in" => $item->total_amount + $financial_accounts2[$item->financial_id]['total_amount_dine_in'],
+                    ];
                 }
                 else{
                     $financial_accounts[$item->financial_id] = [
+                        "financial_id" => $item->financial_id,
+                        "financial_name" => $item?->financials?->name,
+                        "total_amount_delivery" => 0 ,
+                        "total_amount_take_away" => 0,
+                        "total_amount_dine_in" => $item->total_amount,
+                    ];
+                    $financial_accounts2[$item->financial_id] = [
                         "financial_id" => $item->financial_id,
                         "financial_name" => $item?->financials?->name,
                         "total_amount_delivery" => 0 ,
@@ -1392,12 +1437,14 @@ class CashierReportsController extends Controller
                     "expenses" => $expenses, 
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
+                    'financial_accounts2' => $financial_accounts2,
                     'order_count' => $order_count,
                     'total_amount' => $total_amount, 
                     'expenses_total' => $expenses_total,
                     "total_orders" => $total_orders,  
                     'group_modules' => $group_modules, 
                     'expenses' => $expenses, 
+                    "net_cash_drawer2" => $net_cash_drawer2,
                     'online_order' => $online_order,
                     'report_role' => $request->user()->report,
                     "void_order_count" => $void_order_count,
@@ -1503,13 +1550,15 @@ class CashierReportsController extends Controller
                     "expenses" => $expenses, 
                     "total_orders" => $total_orders, 
                     'perimission' => true,
-                    'financial_accounts' => $financial_accounts,
+                    'financial_accounts' => $financial_accounts2,
+                    'financial_accounts2' => $financial_accounts,
                     'report_role' => $request->user()->report,
                     'captain_order' => $captain_order,
                     "due_module" => $due_module,
                     "due_user" => $due_user,
                     "start_balance" => $start_balance,
                     "net_cash_drawer" => $net_cash_drawer,
+                    "net_cash_drawer2" => $net_cash_drawer2,
                     "orders_count" => $orders_count,
                     "orders_amount" => $orders_amount,
                 ];
