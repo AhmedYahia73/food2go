@@ -281,10 +281,15 @@ class LoginController extends Controller
                 'preparation_num' => $receipt_design->preparation_num ?? 1,
             ];
 
+            $resturant_name = $this->company_info
+            ->with("currency")
+            ->first();
+            $currency = $resturant_name?->currency;
             return response()->json([
                 'admin' => $user,
                 'token' => $user->token,
                 'role' => $role,
+                'resturant_name' => $resturant_name,
                 "r_online_noti" => $r_online_noti,
                 "order_lang" => $order_lang->setting,
                 "receipt_design" => $receipt_design,
@@ -352,14 +357,18 @@ class LoginController extends Controller
             $user->save();
             $user->role = 'captain_order';
             $user->token = $user->createToken('captain_order')->plainTextToken;
-            $preparation_num_status = $this->company_info
-            ->first()?->preparation_num_status;
+            $company_info = $this->company_info
+            ->with("currency")
+            ->first();
+            $currency = $company_info?->currency;
+            $preparation_num_status = $company_info?->preparation_num_status;
 
             return response()->json([
                 'user' => $user,
                 'token' => $user->token,
                 'role' => $user->role,
                 'preparation_num_status' => $preparation_num_status,
+                "currency" => $currency,
             ], 200);
         }
         else { 
@@ -533,9 +542,10 @@ class LoginController extends Controller
             $user->role = 'cashier';
             $user->token = $user->createToken('cashier')->plainTextToken;
             $resturant_name = $this->company_info
+            ->with("currency")
             ->first();
-            $preparation_num_status = $this->company_info
-            ->first()?->preparation_num_status; 
+            $currency = $resturant_name?->currency;
+            $preparation_num_status = $resturant_name?->preparation_num_status; 
             
             $notification_sound = $this->settings
             ->where('name', 'notification_sound')
@@ -556,6 +566,7 @@ class LoginController extends Controller
                 'scale' => $scale,
                 'token' => $user->token,
                 'start_shift' => $start_shift,
+                "currency" => $currency,
                 'financial_account' => $financial_account,
                 "resturant_name" => $resturant_name?->name,
                 "resturant_logo" => url('storage/' . $resturant_name?->logo),
@@ -727,8 +738,11 @@ class LoginController extends Controller
             if($order && empty($order->rate) && !$order->is_cancel_evaluate){
                 $rate = true;
             }
-            $show_map = $this->company_info
-            ->first()
+            $resturant_name = $this->company_info
+            ->with("currency")
+            ->first();
+            $currency = $resturant_name?->currency;
+            $show_map = $resturant_name
             ?->show_map ?? 1;
 
             return response()->json([
@@ -736,6 +750,7 @@ class LoginController extends Controller
                 'token' => $user->token,
                 'addresses' => $addresses,
                 'zones' => $zones,
+                "currency" => $currency,
                 'show_map' => $show_map,
                 'rate' => $rate,
                 'order_id' => $rate ? $order?->id : null,
