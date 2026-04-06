@@ -289,6 +289,7 @@ class LoginController extends Controller
                 'admin' => $user,
                 'token' => $user->token,
                 'role' => $role,
+                "currency" => $currency,
                 'resturant_name' => $resturant_name,
                 "r_online_noti" => $r_online_noti,
                 "order_lang" => $order_lang->setting,
