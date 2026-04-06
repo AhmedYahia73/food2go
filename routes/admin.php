@@ -1070,7 +1070,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('shift_reports', 'shift_reports')->middleware('can:view_pos_reports');
         });
         Route::controller(PosOrder2Controller::class)
-        ->prefix('order')->group(function(){
+        ->prefix('orders')->group(function(){
             Route::get('/branches', 'branches');
             Route::get('/tables/{id}', 'tables'); 
             Route::get('/captain_orders/{id}', 'captain_orders'); 
