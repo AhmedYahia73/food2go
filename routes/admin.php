@@ -1074,7 +1074,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::get('/branches', 'branches');
             Route::get('/tables/{id}', 'tables'); 
             Route::get('/captain_orders/{id}', 'captain_orders'); 
-            Route::put('/table_order_orders/{id}', 'table_order_orders');
+            Route::get('/table_order_orders/{id}', 'table_order_orders');
             Route::post('/preparing', 'preparing');
         });
         Route::controller(PosOrderController::class)
