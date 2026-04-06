@@ -12,7 +12,7 @@ class TableOrderController extends Controller
     public function table_orders(Request $request){
         $tables = CafeTable::
         where("status", 1)
-        ->with(["location", "order_cart"])
+        ->with(["location", "order_cart", "branch"])
         ->get()
         ->map(function($item){
             return [

@@ -1,4 +1,4 @@
-<?php
+2<?php
 
 use Illuminate\Support\Facades\Route;
 
@@ -8,6 +8,8 @@ use App\Http\Controllers\api\admin\category\CategoryController;
 use App\Http\Controllers\api\admin\category\CreateCategoryController;
 
 use App\Http\Controllers\api\admin\addon\AddonController;
+
+use App\Http\Controllers\api\admin\order\PosOrderController as PosOrder2Controller;
 
 use App\Http\Controllers\api\admin\deal\DealController;
 
@@ -42,7 +44,7 @@ use App\Http\Controllers\api\admin\admin_roles\AdminRolesController;
 use App\Http\Controllers\api\admin\product\ProductController;
 use App\Http\Controllers\api\admin\product\CreateProductController;
 
-use App\Http\Controllers\api\admin\pos\PosOrderController;
+use App\Http\Controllers\api\admin\pos\PosOrderController as ;
 use App\Http\Controllers\api\admin\pos\PosCustomerController;
 use App\Http\Controllers\api\admin\pos\PosAddressController;
 use App\Http\Controllers\api\admin\pos\PosReportsController;
@@ -1066,6 +1068,14 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(PosReportsController::class)
         ->prefix('/reports')->group(function(){
             Route::get('shift_reports', 'shift_reports')->middleware('can:view_pos_reports');
+        });
+        Route::controller(PosOrder2Controller::class)
+        ->prefix('order')->group(function(){
+            Route::get('/branches', 'branches');
+            Route::get('/tables/{id}', 'tables'); 
+            Route::get('/captain_orders/{id}', 'captain_orders'); 
+            Route::put('/table_order_orders/{id}', 'table_order_orders');
+            Route::post('/preparing', 'preparing');
         });
         Route::controller(PosOrderController::class)
         ->prefix('order')->group(function(){
