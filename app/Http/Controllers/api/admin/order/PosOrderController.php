@@ -66,12 +66,6 @@ class PosOrderController extends Controller
     }
 
     public function captain_orders(Request $request, $id){
-                // /cashier/dine_in_table_carts/{id}
-        if(!$request->user()->dine_in){
-            return response()->json([
-                "errors" => "You do not have this premission"
-            ], 400);
-        }
         $tables_ids = CafeTable::
         where('id', $id)
         ->orWhere('main_table_id', $id)
@@ -93,12 +87,6 @@ class PosOrderController extends Controller
     }
 
     public function table_order_orders(Request $request, $id){
-                // /cashier/dine_in_table_carts/{id}
-        if(!$request->user()->dine_in){
-            return response()->json([
-                "errors" => "You do not have this premission"
-            ], 400);
-        }
         $tables_ids = CafeTable::
         where('id', $id)
         ->orWhere('main_table_id', $id)
