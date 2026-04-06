@@ -231,7 +231,7 @@ class OrderController extends Controller
             ,'order_status', 'order_type',
             'delivery_id', 'address_id', 'source',
             'payment_method_id', 'rate', 'transfer_from_id',
-            'status', 'points', 'rejected_reason', 'transaction_id', "delivery_fees")
+            'status', 'points', 'coupon_discount', 'rejected_reason', 'transaction_id', "delivery_fees")
             ->where('pos', 0)
             ->whereBetween('created_at', [$start, $end])
             ->whereNull('captain_id')
@@ -258,6 +258,7 @@ class OrderController extends Controller
                     'order_status' => $item->order_status,
                     'delivery_fees' => $item->delivery_fees,
                     'source' => $item->source,
+                    'coupon_discount' => $item->coupon_discount,
                     'status' => $item->status,
                     'points' => $item->points, 
                     'rejected_reason' => $item->rejected_reason,
@@ -280,7 +281,7 @@ class OrderController extends Controller
         else{
         $orders = $this->orders
             ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-            ,'order_status',
+            ,'order_status', 'coupon_discount',
             'delivery_id', 'address_id', 'source', 'transfer_from_id',
             'payment_method_id', 'order_type', 'rate',
             'status', 'points', 'rejected_reason', 'transaction_id', "delivery_fees")
@@ -312,6 +313,7 @@ class OrderController extends Controller
                     'delivery_fees' => $item->delivery_fees,
                     'transfer_from' => $item?->transfer_from?->name,
                     'source' => $item->source,
+                    "coupon_discount" => $item->coupon_discount,
                     'payment' => $item->payment_method_id == 2 && $item->operation_status != "delivered"? "UnPaid" : "Paid",
                     'status' => $item->status,
                     'points' => $item->points, 
@@ -420,7 +422,7 @@ class OrderController extends Controller
         $start = $start->subDay();
         $orders = $this->orders
         ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
-        ,'order_status', 'rate',
+        ,'order_status', 'rate', "coupon_discount",
         'delivery_id', 'address_id', 'source',
         'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id')
@@ -451,6 +453,7 @@ class OrderController extends Controller
 				'status' => $item->status,
 				'rate' => $item->rate,
 				'points' => $item->points, 
+				'coupon_discount' => $item->coupon_discount, 
 				'rejected_reason' => $item->rejected_reason,
 				'transaction_id' => $item->transaction_id,
 				'user' => [

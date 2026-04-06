@@ -498,6 +498,7 @@ trait OrderFormat
             "order_details" => $products,
             "amount" => $order->amount,
             "comment" => $order->comment,
+            "coupon_discount" => $order->coupon_discount ?? null,
             "rate" => $order->rate,
             "order_status" => $order->order_status,
             "payment" => $order->payment_method_id !== 2 ? "Paid" : "UnPaid",
