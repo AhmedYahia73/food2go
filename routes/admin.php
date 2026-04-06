@@ -44,7 +44,7 @@ use App\Http\Controllers\api\admin\admin_roles\AdminRolesController;
 use App\Http\Controllers\api\admin\product\ProductController;
 use App\Http\Controllers\api\admin\product\CreateProductController;
 
-use App\Http\Controllers\api\admin\pos\PosOrderController as PosOrder2Controller;
+use App\Http\Controllers\api\admin\pos\PosOrderController;
 use App\Http\Controllers\api\admin\pos\PosCustomerController;
 use App\Http\Controllers\api\admin\pos\PosAddressController;
 use App\Http\Controllers\api\admin\pos\PosReportsController;
