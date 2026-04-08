@@ -92,11 +92,13 @@ class PaymentMethodGeidiaController extends Controller
                     "errors" => "Logo is required"
                 ], 400);
             }
+            $image_path = $this->upload($request, 'logo', 'admin/settings/payment_methods');
             $payment_method = PaymentMethod::create([
                 "id" => 1000,
                 "name" => $request->name,
                 "status" => $request->status,
                 "type" => "automatic",
+                "logo" => $image_path,
             ]);
             Geidia::create([
                 "geidea_public_key" => $request->geidea_public_key,
