@@ -4,8 +4,78 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ff9369bae471a1959619c54f6f6544ea",
+    "content-hash": "b4eb2156e21ff3e94eccdadace09ecad",
     "packages": [
+        {
+            "name": "almesery/laravel-geidea",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/almesery/laravel-geidea-payment.git",
+                "reference": "469f4c491093c128f99d6f653c6df68996f1e93f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/almesery/laravel-geidea-payment/zipball/469f4c491093c128f99d6f653c6df68996f1e93f",
+                "reference": "469f4c491093c128f99d6f653c6df68996f1e93f",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0",
+                "illuminate/http": "^10.0|^11.0",
+                "illuminate/routing": "^10.0|^11.0",
+                "illuminate/support": "^10.0|^11.0",
+                "php": "^8.1|^8.2|^8.3|^8.4|^8.5"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^8.0|^9.0|^10.0",
+                "phpunit/phpunit": "^10.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Geidea": "Almesery\\LaravelGeidea\\Facades\\Geidea"
+                    },
+                    "providers": [
+                        "Almesery\\LaravelGeidea\\GeideaServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Almesery\\LaravelGeidea\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Abdalrahmnan Almesery",
+                    "email": "almesery599@gmail.com"
+                }
+            ],
+            "description": "Geidea Payment Gateway integration for Laravel",
+            "keywords": [
+                "Egypt",
+                "geidea",
+                "laravel",
+                "payment",
+                "payment-gateway",
+                "saudi-arabia",
+                "uae"
+            ],
+            "support": {
+                "issues": "https://github.com/almesery/laravel-geidea-payment/issues",
+                "source": "https://github.com/almesery/laravel-geidea-payment/tree/1.0.1"
+            },
+            "time": "2026-01-18T14:49:24+00:00"
+        },
         {
             "name": "bacon/bacon-qr-code",
             "version": "2.0.8",
@@ -11720,5 +11790,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

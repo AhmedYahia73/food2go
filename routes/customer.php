@@ -24,6 +24,7 @@ use App\Http\Controllers\api\customer\coupon\CouponController;
 
 use App\Http\Controllers\api\customer\order_type\OrderTypeController;
 
+use App\Http\Controllers\api\customer\make_order\MakeOrderGediaController;
 
 Route::controller(OtpController::class)->prefix('otp')->group(function(){
     Route::post('/create_code', 'create_code');
@@ -62,8 +63,16 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::post('/send', 'store');
     });
 
-    Route::controller(CouponController::class)->prefix('coupon')->group(function(){
-        Route::post('/', 'coupon');
+    Route::controller(ChatController::class)->prefix('chat')->group(function(){
+        Route::get('/{order_id}/{delivery_id}', 'chat');
+        Route::post('/send', 'store');
+    });
+
+    Route::controller(MakeOrderGediaController::class)
+    ->prefix('geidia')->group(function(){
+        Route::get('/callback', 'callback')->name("payment_gedia.callback");
+        Route::get('/return', 'return_page')->name("payment_gedia.return");
+        Route::get('/page', 'paymentPage')->name("payment_gedia.page");
     });
 
     Route::controller(AddressController::class)->prefix('address')->group(function(){

@@ -32,6 +32,7 @@ use App\Models\Branch;
 use App\Models\Address;
 use App\Models\DeviceToken;
 use App\Models\NewNotification;
+use Almesery\LaravelGeidea\Facades\Geidea;
 
 class MakeOrderController extends Controller
 {
@@ -212,7 +213,9 @@ class MakeOrderController extends Controller
             ?->toArray();
             $this->sendNotificationToMany($device_token, $order['payment']->order_number, $body);
             return response()->json([
-                'success' => $order['payment']->id, 
+                'success' => $order['payment']->id,
+                'gedia' => $order['gedia'],
+                "gedia_status" => $order['gedia_status'],
             ]);
         }
         // CreateOrderJob::dispatch($request);

@@ -32,6 +32,10 @@ class PaymentMethod extends Model
     public function payment_method_data(){
         return $this->hasOne(PaymentMethodAuto::class);
     }
+
+    public function geidea(){
+        return $this->hasOne(Geidia::class, "payment_method_id");
+    }
     
     protected static function booted()
     {

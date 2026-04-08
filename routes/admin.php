@@ -9,6 +9,8 @@ use App\Http\Controllers\api\admin\category\CreateCategoryController;
 
 use App\Http\Controllers\api\admin\addon\AddonController;
 
+use App\Http\Controllers\api\admin\settings\PaymentMethodGeidiaController;
+
 use App\Http\Controllers\api\admin\order\PosOrderController as PosOrder2Controller;
 
 use App\Http\Controllers\api\admin\deal\DealController;
@@ -171,11 +173,14 @@ use App\Http\Controllers\api\admin\product_offers\ProductOfferController;
 
 use App\Http\Controllers\api\admin\shifts\ShiftPanelController;
 
+
 use App\Models\TimeSittings;
 use App\Models\Order;
 use Illuminate\Support\Facades\App;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+
+
 Route::get('/mail', function () {
     try {
         Mail::raw('إيميل تجريبي من Food2Go', function ($message) {
@@ -1232,6 +1237,13 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             Route::delete('/delete/{id}', 'delete')->middleware('can:delete_discount');
         });
         
+
+        Route::controller(PaymentMethodGeidiaController::class)
+        ->prefix('payment_methods/geidia')->group(function(){
+            Route::get('/', 'view')->middleware('can:view_group_product');
+            Route::put('/status/{id}', 'status')->middleware('can:status_group_product');
+            Route::post('/update/{id}', 'modify')->middleware('can:update_group_product');
+        });
         Route::controller(PaymentMethodController::class)
         ->prefix('payment_methods')->group(function(){
             Route::get('/', 'view')->middleware('can:view_payment_method');

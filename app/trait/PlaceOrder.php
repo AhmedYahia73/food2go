@@ -2,32 +2,33 @@
 
 namespace App\trait;
 
-use App\Models\Payment;
+use Almesery\LaravelGeidea\Facades\Geidea;
+use App\Http\Resources\AddonResource;
+use App\Http\Resources\ExcludeResource;
+use App\Http\Resources\ExtraResource;
+use App\Http\Resources\OptionResource;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\VariationResource;
 use App\Models\BranchOff;
-use App\Models\TranslationTbl;
+use App\Models\Kitchen; 
 use App\Models\KitchenItem;
-use App\Models\KItemExtra;
-use App\Models\KItemExclude;
 use App\Models\KItemAddon;
-use App\Models\KItemVriation;
-use App\Models\Setting;
+use App\Models\KItemExclude;
+use App\Models\KItemExtra;
 use App\Models\KItemOption;
+use App\Models\KItemVriation;
+use App\Models\Geidia;
+use App\Models\Order;
+use App\Models\OrderCartBOption; 
 use App\Models\OrderCartBundle; 
 use App\Models\OrderCartBVariation; 
-use App\Models\OrderCartBOption; 
-use App\Models\Kitchen; 
-
+use App\Models\Payment;
+use App\Models\Setting;
+use App\Models\TranslationTbl;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
-use App\Http\Resources\ProductResource;
-use App\Http\Resources\AddonResource;
-use App\Http\Resources\ExcludeResource;
-use App\Http\Resources\ExtraResource;
-use App\Http\Resources\VariationResource;
-use App\Http\Resources\OptionResource;
 
 trait PlaceOrder
 { 
@@ -131,9 +132,7 @@ trait PlaceOrder
 
         return $createdOrders;
     }
-
-
-
+  
     public function payment_approve($payment)
     {
         if ($payment) {
@@ -142,6 +141,7 @@ trait PlaceOrder
         }
         return false;
     }
+    
     public function order_success($payment)
     {
     }
@@ -418,8 +418,15 @@ trait PlaceOrder
             }
         } 
         $order->order_details = json_encode($order_details);
+        $order->load("payment_method");
+        $gedia_status = false;
         if ($paymob) {
             $order->status = 2;
+        }
+        if(!empty($order->payment_method?->geidea)){
+            $gedia = $this->geidea($order->id, $order->amount);
+            $gedia = isset($gedia['payment_url']) ? $gedia : null;
+            $gedia_status = isset($gedia['payment_url']) ? true : false;
         }
         $order->save();
 
@@ -427,9 +434,54 @@ trait PlaceOrder
             'payment' => $order,
             'orderItems' => $order_details,
             'items' => $items,
+            'gedia' => $gedia,
+            "gedia_status" => $gedia_status,
         ];
     }
 
+    
+    public function geidea($id, $amount)
+    {
+        $settings = Geidia::first(); // أو أي model عندك
+
+        $result = geidea([
+            'merchant_public_key' => $settings->geidea_public_key,
+            'api_password'        => $settings->geidea_api_password,
+            'environment'         => $settings->geidea_environment, // egypt, ksa, uae
+            'currency'            => 'EGP',
+            'language'            => 'ar',
+        ])->createSession([
+            'amount'                => $amount,
+            'currency'              => 'EGP',
+            'merchant_reference_id' => geidea_merchant_reference('ORDER', $id),
+            'callback_url'          => route('payment_gedia.callback'),
+            'return_url'            => route('payment_gedia.return'),
+            'customer' => [
+                'email'        => auth()->user()->email,
+                'name'         => auth()->user()->f_name . ' ' . auth()->user()->l_name,
+                'phone_number' => auth()->user()->phone,
+            ],
+        ]);
+
+        if (!$result['success']) {
+            return redirect()->back()->with('error', $result['message']);
+        }
+        Order::where('id', $id)->update([
+            'transaction_id' => $result['order_id'],  // ← ده اللي بييجي من createSession
+            'status'  => 2,
+        ]);
+        $paymentUrl = route('payment_gedia.page', [
+            'session_id' => $result['session_id'],
+            'order_id'   => $id,
+        ]);
+        
+        return [
+            'payment_url'     => $paymentUrl,
+            'session_id'      => $result['session_id'],
+            'geidea_order_id' => $result['order_id'],
+        ];
+    }
+    
     public function make_order_cart($request, $paymob = 0){
         $branch_off = BranchOff::
         where('branch_id', $request->branch_id)
