@@ -141,7 +141,7 @@ trait PlaceOrder
         }
         return false;
     }
-    
+
     public function order_success($payment)
     {
     }
@@ -420,6 +420,7 @@ trait PlaceOrder
         $order->order_details = json_encode($order_details);
         $order->load("payment_method");
         $gedia_status = false;
+        $gedia = null;
         if ($paymob) {
             $order->status = 2;
         }
