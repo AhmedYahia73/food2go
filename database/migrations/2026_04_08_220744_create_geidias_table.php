@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string("geidea_public_key");
             $table->string("api_password");
             $table->string("environment");
-            $table->foreignId('payment_method_id')->nullable()->constrained('materials')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('payment_method_id')->nullable()->constrained()->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
     }
