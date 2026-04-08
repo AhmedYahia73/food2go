@@ -1240,9 +1240,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
         Route::controller(PaymentMethodGeidiaController::class)
         ->prefix('payment_methods/geidia')->group(function(){
-            Route::get('/', 'view')->middleware('can:view_group_product');
-            Route::put('/status/{id}', 'status')->middleware('can:status_group_product');
-            Route::post('/update/{id}', 'modify')->middleware('can:update_group_product');
+            Route::get('/', 'view')->middleware('can:view_payment_method_auto');
+            Route::put('/status', 'status')->middleware('can:status_payment_method_auto');
+            Route::post('/update', 'update')->middleware('can:edit_payment_method_auto');
         });
         Route::controller(PaymentMethodController::class)
         ->prefix('payment_methods')->group(function(){
