@@ -326,6 +326,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(ProductPOSPricingController::class)
     ->prefix('product_pos_pricing')->group(function(){
+        Route::get('/lists', 'lists');
         Route::get('/price_item/{id}', 'price_item');
         Route::post('/update', 'update');
         Route::get('/{module}/{branch_id}', 'view');
