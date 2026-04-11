@@ -451,8 +451,8 @@ trait PlaceOrder
         // ✅ غيّر الـ config في runtime
         config([
             'geidea.merchant_public_key' => $settings->geidea_public_key,
-            'geidea.api_password'        => $settings->geidea_api_password,
-            'geidea.environment'         => $settings->geidea_environment,
+            'geidea.api_password'        => $settings->api_password,
+            'geidea.environment'         => $settings->environment,
             'geidea.currency'            => 'EGP',
             'geidea.language'            => 'ar',
         ]);
