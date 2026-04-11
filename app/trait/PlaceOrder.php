@@ -447,7 +447,7 @@ trait PlaceOrder
     {
 
         $settings = Geidia::first();
-
+        dd($settings);
         // ✅ غيّر الـ config في runtime
         config([
             'geidea.merchant_public_key' => $settings->geidea_public_key,
