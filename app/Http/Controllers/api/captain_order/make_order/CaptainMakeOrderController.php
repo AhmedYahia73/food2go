@@ -79,6 +79,66 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
+    public function order_void(Request $request){ 
+        $validator = Validator::make($request->all(), [
+            'cart_ids' => 'required|array',
+            'cart_ids.*' => 'exists:order_carts,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $order_cart = $this->order_cart
+        ->whereIn('id', $request->cart_ids)
+        ->where("prepration_status", "!=", "watting")
+        ->first();
+        $cashier_man = $this->cashier_man
+        ->where('my_id', $request->manager_id)
+        ->first();
+
+        if(!empty($order_cart)){
+            $validator = Validator::make($request->all(), [  
+                'table_id' => 'required|exists:cafe_tables,id',
+                'manager_id' => 'required',
+                'manager_password' => 'required', 
+            ]);
+            if ($validator->fails()) { // if Validate Make Error Return Message Error
+                return response()->json([
+                    'errors' => $validator->errors(),
+                ],400);
+            } 
+            if(empty($cashier_man) || !password_verify($request->input('manager_password'), $cashier_man->password)){
+                return response()->json([
+                    'errors' => 'id or password is wrong'
+                ], 400);
+            }
+            if(!$cashier_man->void_order){
+                return response()->json([
+                    'errors' => "You don't have this premission"
+                ], 400);
+            }
+        }
+ 
+        $order_cart = $this->order_cart
+        ->whereIn('id', $request->cart_ids)
+        ->delete();
+        $order_cart = $this->order_cart
+        ->where('table_id', $request->table_id)
+        ->first();
+        if(empty($order_cart)){ 
+            $cafe_table = $this->cafe_table
+            ->where('id', $request->table_id)
+            ->update([
+                'current_status' => 'not_available_pre_order'
+            ]);
+        }
+
+        return response()->json([
+            'success' => 'you void order success'
+        ]);
+    }
+
     public function notification_order(Request $request){
         $validator = Validator::make($request->all(), [
             'table_id' => ['required', 'exists:cafe_tables,id'],
