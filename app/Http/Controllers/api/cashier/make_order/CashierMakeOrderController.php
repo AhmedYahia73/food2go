@@ -1192,7 +1192,6 @@ class CashierMakeOrderController extends Controller
         foreach ($request->preparing as $value) {
             $order_cart = $this->order_cart
             ->where('id', $value['cart_id'])
-            ->where("prepration_status", "!=", "preparing")
             ->first();
             if(empty($order_cart)){
                 continue;
