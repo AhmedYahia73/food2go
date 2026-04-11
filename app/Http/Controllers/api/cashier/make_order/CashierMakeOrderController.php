@@ -1858,6 +1858,20 @@ class CashierMakeOrderController extends Controller
             'kitchen_items' => $kitchen_items
         ]);
     }
+
+    public function print_kitchen(Request $request, $id){
+        $order = Order::
+        findOrFail($id);
+        $request->merge([
+            "table_id" => $order->table_id
+        ]);
+        $kitchen_items = $this->preparing_takeaway($request, $id);
+        $kitchen_items = $kitchen_items['kitchen_items'];
+
+        return response()->json([
+            "kitchen_items" => $kitchen_items
+        ]);
+    }
     
     // kitchen_lang, brista_lang
     public function preparing_delivery($request, $id){

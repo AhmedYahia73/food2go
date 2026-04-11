@@ -71,6 +71,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/update_dine_in_order', 'update_dine_in_order');
         
         Route::post('/print_takeaway_order', 'print_takeaway_order');
+        
+        Route::get('/print_kitchen/{id}', 'print_kitchen');
 
         Route::get('/table_lists', 'table_lists');
         Route::post('/assign_table_captain', 'assign_table_captain');
