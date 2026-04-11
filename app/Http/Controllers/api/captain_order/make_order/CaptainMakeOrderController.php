@@ -921,6 +921,7 @@ class CaptainMakeOrderController extends Controller
             ->first()?->price;
             if(empty($new_price)){
                 $new_price = $product?->pos_pricing->where('module', $module)
+                ->where('branch_id', $branch_id)
                 ->first()?->price ?? $product->price;
             }
             $product->price = $new_price ?? $product->price;
@@ -941,7 +942,7 @@ class CaptainMakeOrderController extends Controller
             $category_off->contains($product->sub_category_id)
             || $product_off->contains($product->id)) {
                 return null;
-            }
+            }....
             $product->variations = $product->variations->map(function ($variation) 
             use ($option_off, $product, $branch_id) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
@@ -1041,6 +1042,7 @@ class CaptainMakeOrderController extends Controller
             ->first()?->price;
             if(empty($new_price)){
                 $new_price = $product?->pos_pricing->where('module', $module)
+                ->where('branch_id', $branch_id)
                 ->first()?->price ?? $product->price;
             }
             $product->price = $new_price ?? $product->price;

@@ -8,6 +8,7 @@ class ProductPosPricing extends Model
 { 
     protected $fillable = [
         'product_id',
+        'branch_id',
         'module',
         'price',
     ];
