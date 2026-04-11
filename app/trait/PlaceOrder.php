@@ -462,8 +462,8 @@ trait PlaceOrder
             'amount'                => $amount,
             'currency'              => 'EGP',
             'merchant_reference_id' => geidea_merchant_reference('ORDER', $id),
-            'callback_url'          => route('payment_gedia.callback'),
-            'return_url'            => route('payment_gedia.return'),
+            'callback_url'          => route('customer.payment_gedia.callback'),
+            'return_url'            => route('customer.payment_gedia.return'),
             'customer' => [
                 'email'        => auth()->user()->email,
                 'name'         => auth()->user()->f_name . ' ' . auth()->user()->l_name,
@@ -480,7 +480,7 @@ trait PlaceOrder
         ]);
 
         return [
-            'payment_url'     => route('payment_gedia.page', [
+            'payment_url'     => route('customer.payment_gedia.page', [
                 'session_id' => $result['session_id'],
                 'order_id'   => $id,
             ]),
