@@ -23,6 +23,8 @@ use App\Models\OrderCartBOption;
 use App\Models\OrderCartBundle; 
 use App\Models\OrderCartBVariation; 
 use App\Models\Payment;
+
+use Almesery\LaravelGeidea\Facades\Geidea as GeideaFacade;
 use App\Models\Setting;
 use App\Models\TranslationTbl;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -443,15 +445,20 @@ trait PlaceOrder
     
     public function geidea($id, $amount)
     {
-        $settings = Geidia::first(); // أو أي model عندك
 
-        $result = geidea([
-            'merchant_public_key' => $settings->geidea_public_key,
-            'api_password'        => $settings->geidea_api_password,
-            'environment'         => $settings->geidea_environment, // egypt, ksa, uae
-            'currency'            => 'EGP',
-            'language'            => 'ar',
-        ])->createSession([
+        $settings = Geidia::first();
+
+        // ✅ غيّر الـ config في runtime
+        config([
+            'geidea.merchant_public_key' => $settings->geidea_public_key,
+            'geidea.api_password'        => $settings->geidea_api_password,
+            'geidea.environment'         => $settings->geidea_environment,
+            'geidea.currency'            => 'EGP',
+            'geidea.language'            => 'ar',
+        ]);
+
+        // ✅ استخدم الـ Facade عادي
+        $result = GeideaFacade::createSession([
             'amount'                => $amount,
             'currency'              => 'EGP',
             'merchant_reference_id' => geidea_merchant_reference('ORDER', $id),
@@ -465,19 +472,18 @@ trait PlaceOrder
         ]);
 
         if (!$result['success']) {
-            return redirect()->back()->with('error', $result['message']);
+            return ['error' => $result['message']];
         }
+
         Order::where('id', $id)->update([
-            'transaction_id' => $result['order_id'],  // ← ده اللي بييجي من createSession
-            'status'  => 2,
+            'transaction_id' => $result['order_id'],
         ]);
-        $paymentUrl = route('payment_gedia.page', [
-            'session_id' => $result['session_id'],
-            'order_id'   => $id,
-        ]);
-        
+
         return [
-            'payment_url'     => $paymentUrl,
+            'payment_url'     => route('payment_gedia.page', [
+                'session_id' => $result['session_id'],
+                'order_id'   => $id,
+            ]),
             'session_id'      => $result['session_id'],
             'geidea_order_id' => $result['order_id'],
         ];
