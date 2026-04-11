@@ -21,7 +21,6 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     ->prefix('captain')->group(function(){
         Route::get('/', 'view');
         Route::post('/add', 'create');
-        Route::post('/order_void', 'order_void');
         Route::put('/update/{id}', 'update');
         Route::delete('/delete/{id}', 'delete');
     });
@@ -30,6 +29,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
     ->group(function(){
         Route::get('/discount_list', 'discount_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/my_lists', 'my_lists');
+        Route::post('/order_void', 'order_void');
         Route::post('/preparation_num', 'preparation_num');
         Route::post('/notification_order', 'notification_order');
         Route::get('/my_selection_lists', 'my_selection_lists');
