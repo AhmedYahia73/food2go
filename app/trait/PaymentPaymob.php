@@ -28,7 +28,7 @@ trait PaymentPaymob
         if (isset($items['errors']) && !empty($items['errors'])) {
             return $items;
         }
-        $totalAmountCents = $items['payment']->amount;
+        $totalAmountCents = (int) round($items['payment']->amount);
         
         //  $total = 100;
         // $items = [
