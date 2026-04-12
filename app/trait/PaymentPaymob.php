@@ -56,8 +56,7 @@ trait PaymentPaymob
         $response = Http::post('https://accept.paymob.com/api/ecommerce/orders', $data);
         
         // Update Transaction order For Payment 
-        $payment = $items['payment']->id;
-        dd($response->json());
+        $payment = $items['payment']->id; 
         $order_id = $response['id'];
          $payment = $this->generateUniqueTransactionId($payment,$order_id);
         // Update Transaction order For Payment 
