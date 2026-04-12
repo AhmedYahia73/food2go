@@ -942,7 +942,7 @@ class CaptainMakeOrderController extends Controller
             $category_off->contains($product->sub_category_id)
             || $product_off->contains($product->id)) {
                 return null;
-            }....
+            }
             $product->variations = $product->variations->map(function ($variation) 
             use ($option_off, $product, $branch_id) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
