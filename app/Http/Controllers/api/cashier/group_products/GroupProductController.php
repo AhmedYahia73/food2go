@@ -53,7 +53,7 @@ class GroupProductController extends Controller
         // ___________________________
         $branch_id = $request->branch_id; 
 
-// ghgfhgfgfhhhhhhhhhhhhhhhhhhhhhhh 
+        // ghgfhgfgfhhhhhhhhhhhhhhhhhhhhhhh 
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)

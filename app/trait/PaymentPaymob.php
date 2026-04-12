@@ -57,6 +57,7 @@ trait PaymentPaymob
         
         // Update Transaction order For Payment 
         $payment = $items['payment']->id;
+        dd($response);
         $order_id = $response['id'];
          $payment = $this->generateUniqueTransactionId($payment,$order_id);
         // Update Transaction order For Payment 
