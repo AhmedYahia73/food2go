@@ -921,7 +921,6 @@ class CaptainMakeOrderController extends Controller
             ->first()?->price;
             if(empty($new_price)){
                 $new_price = $product?->pos_pricing->where('module', $module)
-                ->where('branch_id', $branch_id)
                 ->first()?->price ?? $product->price;
             }
             $product->price = $new_price ?? $product->price;
@@ -1042,7 +1041,6 @@ class CaptainMakeOrderController extends Controller
             ->first()?->price;
             if(empty($new_price)){
                 $new_price = $product?->pos_pricing->where('module', $module)
-                ->where('branch_id', $branch_id)
                 ->first()?->price ?? $product->price;
             }
             $product->price = $new_price ?? $product->price;
