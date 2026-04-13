@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\customer\make_order;
 
 use Almesery\LaravelGeidea\Facades\Geidea;
 use App\Http\Controllers\Controller;
+use App\Models\Geidia;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -79,10 +80,21 @@ class MakeOrderGediaController extends Controller
     
     public function paymentPage(Request $request)
     {
+        $settings = Geidia::first();
+
+        // ✅ حمّل الـ config الأول
+        config([
+            'geidea.merchant_public_key' => $settings->geidea_public_key,
+            'geidea.api_password'        => $settings->api_password,
+            'geidea.environment'         => $settings->environment,
+            'geidea.currency'            => 'EGP',
+            'geidea.language'            => 'ar',
+        ]);
+
         return view('Geida.Geida', [
-            'sessionId'  => $request->session_id,
-            'merchantKey'=> Geidea::getMerchantPublicKey(),
-            'hppScript'  => Geidea::getHppScriptUrl(),
+            'sessionId'   => $request->session_id,
+            'merchantKey' => \Almesery\LaravelGeidea\Facades\Geidea::getMerchantPublicKey(),
+            'hppScript'   => \Almesery\LaravelGeidea\Facades\Geidea::getHppScriptUrl(),
         ]);
     }
 
