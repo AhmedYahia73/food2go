@@ -93,7 +93,7 @@ class MakeOrderGediaController extends Controller
 
         return view('Geida.Geida', [
             'sessionId'   => $request->session_id,
-            'merchantKey' => \Almesery\LaravelGeidea\Facades\Geidea::getMerchantPublicKey(),
+            'merchantKey' => $settings->geidea_public_key,
             'hppScript'   => \Almesery\LaravelGeidea\Facades\Geidea::getHppScriptUrl(),
         ]);
     }
