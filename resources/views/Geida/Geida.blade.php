@@ -25,25 +25,29 @@
     {{-- ✅ الـ Container اللي الـ HPP هيتعرض فيه --}}
     <div id="geidea-checkout"></div>
 
-    <script src="{{ $hppScript }}"></script>
-    <script>
-        window.onload = function () {
-            GeideaCheckout({
-                sessionId:      "{{ $sessionId }}",
-                merchantKey:    "{{ $merchantKey }}",
-                containerId:    "geidea-checkout",  // ✅ ربطه بالـ div
-                onSuccess: function (data) {
-                    console.log("Payment Success", data);
-                },
-                onError: function (data) {
-                    console.log("Payment Error", data);
-                },
-                onCancel: function () {
-                    window.history.back();
-                }
-            });
-        };
-    </script>
+<script src="{{ $hppScript }}"></script>
+<script>
+    window.onload = function () {
+        // ✅ new GeideaCheckout مش GeideaCheckout()
+        var checkout = new GeideaCheckout({
+            sessionId:   "{{ $sessionId }}",
+            merchantKey: "{{ $merchantKey }}",
+            containerId: "geidea-checkout",
+            onSuccess: function (data) {
+                console.log("Payment Success", data);
+            },
+            onError: function (data) {
+                console.log("Payment Error", data);
+            },
+            onCancel: function () {
+                window.history.back();
+            }
+        });
+
+        // ✅ ابدأ الـ checkout
+        checkout.startPayment();
+    };
+</script>
 
 </body>
 </html>
