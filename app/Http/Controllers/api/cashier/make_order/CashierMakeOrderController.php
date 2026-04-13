@@ -2358,7 +2358,7 @@ class CashierMakeOrderController extends Controller
     }
 
     public function get_financial($request, $locale){
-        $financial_account = $request->financials; 
+        $financial_account = $request->financials ?? []; 
         
         $ids = array_column($financial_account, 'id');
         $amounts = array_column($financial_account, 'amount');
