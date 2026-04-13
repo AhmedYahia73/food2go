@@ -483,6 +483,7 @@ trait PlaceOrder
             'payment_url'     => route('customer.payment_gedia.page', [
                 'session_id' => $result['session_id'],
                 'order_id'   => $id,
+                'merchant_key' => $settings->geidea_public_key
             ]),
             'session_id'      => $result['session_id'],
             'geidea_order_id' => $result['order_id'],
@@ -495,7 +496,11 @@ trait PlaceOrder
             'geidea_order_id' => $result['order_id'],
             
             // ✅ لو Frontend محتاج يفتح صفحة جاهزة على Web domain
-            'payment_url' => url( '/payment/geidea?session_id=' . $result['session_id'] . '&merchant_key=' . $settings->geidea_public_key),
+            'payment_url'     => route('customer.payment_gedia.page', [
+                'session_id' => $result['session_id'],
+                'order_id'   => $id,
+                'merchant_key' => $settings->geidea_public_key
+            ]),
         ];
     }
     

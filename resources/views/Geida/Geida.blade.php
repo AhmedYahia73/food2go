@@ -21,7 +21,7 @@
 
         // ✅ نفس أسماء الـ params في الـ URL
         const sessionId   = params.get('session_id');
-        const merchantKey = {{ $merchantKey }};
+        const merchantKey = params.get('merchant_key');
 
         // ✅ تأكد إنهم موجودين
         console.log('sessionId:', sessionId);
