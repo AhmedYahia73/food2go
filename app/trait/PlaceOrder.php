@@ -487,6 +487,16 @@ trait PlaceOrder
             'session_id'      => $result['session_id'],
             'geidea_order_id' => $result['order_id'],
         ];
+        return [
+            // ✅ بعت الـ data للـ Frontend يبني الصفحة بنفسه
+            'session_id'      => $result['session_id'],
+            'merchant_key'    => $settings->geidea_public_key,
+            'hpp_script'      => GeideaFacade::getHppScriptUrl(),
+            'geidea_order_id' => $result['order_id'],
+            
+            // ✅ لو Frontend محتاج يفتح صفحة جاهزة على Web domain
+            'payment_url' => url( '/payment/geidea?session_id=' . $result['session_id'] . '&merchant_key=' . $settings->geidea_public_key),
+        ];
     }
     
     public function make_order_cart($request, $paymob = 0){
