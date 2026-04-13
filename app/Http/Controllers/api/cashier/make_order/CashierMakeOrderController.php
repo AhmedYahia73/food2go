@@ -2162,7 +2162,7 @@ class CashierMakeOrderController extends Controller
     }
 
     public function finantion_validation($request){
-        $financial_ids = array_column($request->financials, 'id');
+        $financial_ids = array_column($request->financials ?? [], 'id');
         $financial_account = $this->financial_account
         ->whereIn("id", $financial_ids)
         ->get();
