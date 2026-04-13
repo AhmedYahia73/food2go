@@ -70,9 +70,9 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
 
     Route::controller(MakeOrderGediaController::class)
     ->prefix('geidia')->group(function(){
-        Route::get('/callback', 'callback')->name("payment_gedia.callback");
-        Route::get('/return', 'return_page')->name("payment_gedia.return");
-        Route::get('/page', 'paymentPage')->name("payment_gedia.page");
+        Route::get('/callback', 'callback')->name("payment_gedia.callback")->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/return', 'return_page')->name("payment_gedia.return")->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/page', 'paymentPage')->name("payment_gedia.page")->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
     });
 
     Route::controller(AddressController::class)->prefix('address')->group(function(){
