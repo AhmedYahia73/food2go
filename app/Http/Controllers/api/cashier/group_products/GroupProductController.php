@@ -316,142 +316,123 @@ class GroupProductController extends Controller
     }
 
     public function group_lists(Request $request){
-        // /captain/lists
+        // /captain/lists// 1. التحقق من البيانات
         $validator = Validator::make($request->all(), [
             'branch_id' => 'required|exists:branches,id',
-            'group_id' => 'required|exists:group_products,id',
-            "products" => "required|array",
-            "products.*" => "required|exists:products,id",
+            'group_id'  => 'required|exists:group_products,id',
+            'products'  => 'required|array',
+            'products.*' => 'required|exists:products,id',
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        $group_id = $request->group_id;
-        // Group Product
-        $group_product = $this->group_product
-        ->where("id", $request->group_id)
-        ->first();
-        // ___________________________
-        $branch_id = $request->branch_id; 
 
-        // ghgfhgfgfhhhhhhhhhhhhhhhhhhhhhhh 
-        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
-        $branch_off = $this->branch_off
-        ->where('branch_id', $branch_id)
-        ->get();
-        $product_off = $branch_off->pluck('product_id')->filter();
-        $category_off = $branch_off->pluck('category_id')->filter();
-        $option_off = $branch_off->pluck('option_id')->filter();
-  
-            
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        // 2. جلب البيانات الأساسية
+        $group_product = $this->group_product->findOrFail($request->group_id);
+        $branch_id = $request->branch_id;
+        $locale = $request->locale ?? app()->getLocale();
+
+        // جلب الإعدادات الخاصة بالفرع (المنتجات/الأصناف المعطلة)
+        $branch_off = $this->branch_off->where('branch_id', $branch_id)->get();
+        $product_off  = $branch_off->pluck('product_id')->filter()->toArray();
+        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
+        $option_off   = $branch_off->pluck('option_id')->filter()->toArray();
+
+        // 3. استعلام المنتجات مع التحميل المسبق للعلاقات (Eager Loading)
         $products = $this->products
-        ->orderBy('order')
-        ->whereIn("id", $request->products)
-        ->with([
-            'addons' => fn($q) => $q->withLocale($locale),
-            'category_addons' => fn($q) => $q->withLocale($locale),
-            'sub_category_addons' => fn($q) => $q->withLocale($locale),
-            'excludes' => fn($q) => $q->withLocale($locale),
-            'discount', 'extra', 'sales_count', 'tax',
-            'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-            'variations' => fn($q) => $q->withLocale($locale)->with([
-                'options' => fn($q) => $q
-                    ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
-                    ->withLocale($locale),
-            ]),
-                'group_products' => fn($q) => $q
-                ->with(['products' => fn($q) => $q
-                ->select("products.id", "products.name")->withLocale($locale)]),
-        ])
-        ->withLocale($locale)
-        ->where('item_type', '!=', 'online') 
-        ->where('status', 1)
-        ->get()
-        ->map(function($product) use($category_off, $product_off, $option_off, 
-            $branch_id, $request, $group_id, $group_product){
-            //get count of sales of product to detemine stock
-            // Price of group
-            $price = $product->price;
-            $new_price = $product?->group_price
-            ?->where("group_product_id", $request->group_id)
-            ?->first()?->price ?? null;
-            if(empty($new_price)){
-                $new_price = $group_product->increase_precentage - $group_product->decrease_precentage;
-                $new_price = $price + $new_price * $price / 100;
-            }
-            $product->price = $new_price;
-            $status = $product->group_product_status
-            ->where("id", $group_product->id)->count()
-            <= 0;
-            if(!$status){
+            ->withLocale($locale)
+            ->whereIn("id", $request->products)
+            ->where('item_type', '!=', 'online')
+            ->where('status', 1)
+            ->with([
+                'addons' => fn($q) => $q->withLocale($locale),
+                'category_addons' => fn($q) => $q->withLocale($locale),
+                'excludes' => fn($q) => $q->withLocale($locale),
+                'discount', 'extra', 'sales_count', 'tax',
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                // العلاقات الضرورية للحسابات داخل الـ map لتجنب N+1
+                'group_price' => fn($q) => $q->where('group_product_id', $group_product->id),
+                'group_product_status', 
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($q) => $q->withLocale($locale)
+                        ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
+                        // إضافة أسعار المجموعة للخيارات أيضاً
+                        ->with(['group_price' => fn($q) => $q->where('group_product_id', $group_product->id)])
+                ]),
+            ])
+            ->orderBy('order')
+            ->get();
+
+        // 4. معالجة البيانات (Logic)
+        $processedProducts = $products->map(function($product) use ($category_off, $product_off, $option_off, $group_product, $branch_id) {
+            
+            // أولاً: التحقق من استبعاد المنتج بناءً على الفرع أو القسم
+            if (in_array($product->category_id, $category_off) || 
+                in_array($product->sub_category_id, $category_off) || 
+                in_array($product->id, $product_off)) {
                 return null;
             }
-            // ____________________________________
+
+            // ثانياً: التحقق من حالة المنتج داخل المجموعة (Status)
+            $is_active_in_group = $product->group_product_status->where('id', $group_product->id)->count() <= 0;
+            if (!$is_active_in_group) return null;
+
+            // ثالثاً: حساب السعر بناءً على المجموعة
+            $groupPriceEntry = $product->group_price->first();
+            if ($groupPriceEntry && $groupPriceEntry->price > 0) {
+                $product->price = $groupPriceEntry->price;
+            } else {
+                // حساب السعر بناءً على النسبة المئوية للمجموعة
+                $percentage = $group_product->increase_precentage - $group_product->decrease_precentage;
+                $product->price = $product->price + ($percentage * $product->price / 100);
+            }
+
+            // رابعاً: إدارة المخزون
             $product->favourite = false;
+            $sales_total = 0;
             if ($product->stock_type == 'fixed') {
-                $product->count = $product->sales_count->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
+                $sales_total = $product->sales_count->sum('count');
+            } elseif ($product->stock_type == 'daily') {
+                $sales_total = $product->sales_count->where('date', date('Y-m-d'))->sum('count');
             }
-            elseif ($product->stock_type == 'daily') {
-                $product->count = $product->sales_count
-                ->where('date', date('Y-m-d'))
-                ->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            // return !$category_off->contains($item->id);
-            // $category_off, $product_off, $option_off
-            if ($category_off->contains($product->category_id) || 
-            $category_off->contains($product->sub_category_id)
-            || $product_off->contains($product->id)) {
-                return null;
-            }
-            $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product, $branch_id, $group_id, $group_product) {
-                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id, $group_id, $group_product){
-                     $price = $element?->group_price
-                    ?->where("group_product_id", $group_id)
-                    ?->where("option_id", $element->id)
-                    ?->first()?->price ?? null;
-                    if(empty($price)){
-                        $price = $group_product->increase_precentage - $group_product->decrease_precentage;
-                        $price = $element->price + $price * $element->price / 100;
-                    }
-                    $status = $element->group_product_status
-                    ->where("id", $group_product->id)->count()
-                    <= 0; 
-                    $element->price = $price;
-                    return $element;
-                });
-              
+            $product->in_stock = $product->number > $sales_total;
+
+            // خامساً: معالجة الخيارات (Variations & Options)
+            $product->variations = $product->variations->map(function ($variation) use ($option_off, $group_product) {
+                $variation->setRelation('options', $variation->options->reject(fn($opt) => in_array($opt->id, $option_off))
+                    ->map(function($option) use ($group_product) {
+                        // تسعير الخيارات بناءً على المجموعة
+                        $optGroupPrice = $option->group_price->first();
+                        if ($optGroupPrice && $optGroupPrice->price > 0) {
+                            $option->price = $optGroupPrice->price;
+                        } else {
+                            $percentage = $group_product->increase_precentage - $group_product->decrease_precentage;
+                            $option->price = $option->price + ($percentage * $option->price / 100);
+                        }
+                        return $option;
+                    })
+                );
                 return $variation;
             });
-            $product->addons = $product->addons->map(function ($addon) 
-            use ($product) {
-                $addon->discount = $product->discount;
-              
-                return $addon;
-            });
+
             return $product;
-        })->filter()
-        ->values(); 
-        $products = ProductResource::collection($products);
-        $products_items = [];
-        
-        foreach ($products as $item) {
-            $products_items[] = [
-                "id" => $item->id,
-                "price" => $item->price,
-                "price_after_discount" => $item->price_after_discount,
-                "price_after_tax" => $item->price_after_tax,
-                "final_price" => $item->final_price,
-            ];
-        } 
+        })->filter()->values();
+
+        // 5. تحويل البيانات للـ Response
+        // ملاحظة: تأكد أن ProductResource يحسب 'final_price' و 'price_after_tax' بناءً على $product->price الجديد
+        $final_data = ProductResource::collection($processedProducts)->resolve();
+
+        $products_items = collect($final_data)->map(fn($item) => [
+            "id"                   => $item['id'],
+            "price"                => $item['price'],
+            "price_after_discount" => $item['price_after_discount'] ?? $item['price'],
+            "price_after_tax"      => $item['price_after_tax'] ?? $item['price'],
+            "final_price"          => $item['final_price'] ?? $item['price'],
+        ]);
 
         return response()->json([
-            'products_items' => $products_items, 
+            'products_items' => $products_items,
         ]);
     }
 
