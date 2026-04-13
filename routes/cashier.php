@@ -142,6 +142,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->prefix("group_product")->group(function(){
         Route::get('/', 'groups_product');
         Route::post('/favourite', 'lists');
+        Route::post('/group_lists', 'group_lists')->withOutMiddleware(['auth:sanctum', 'IsCashier']);
         Route::post('/product_in_category/{id}', 'product_category_lists');
     });
 
