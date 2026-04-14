@@ -1651,6 +1651,10 @@ class OrderController extends Controller
             $user_item = User::
             where("id", $order->user_id )
             ->first();
+            return response()->json([
+                'order_status' => $request->order_status, 
+                "order->points" => $order->points
+            ]);
             if($user_item){
                 $user_item->update([
                     "points" => $user_item->points + $order->points
