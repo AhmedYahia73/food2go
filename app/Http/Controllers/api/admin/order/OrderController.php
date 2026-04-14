@@ -1647,6 +1647,19 @@ class OrderController extends Controller
             'to_status' => $request->order_status,
         ]); 
 
+        if($old_status == 'delivery'){ 
+            $user_item = User::
+            where("id", $order->user_id )
+            ->first();
+            if($user_item){
+                $user_item->update([
+                    "points" => $user_item->points - $order->points
+                ]);
+            }
+        }
+        elseif($order->order_status == 'delivery'){
+
+        }
         return response()->json([
             'order_status' => $request->order_status,
             'kitchen' => $kitchen,
