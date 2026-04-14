@@ -1380,8 +1380,8 @@ trait PlaceOrder
             if(isset($item->product)){
                 $product = $item->product[0]->product;
                 // Kitchen
-                $kitchen = $this->kitchen
-                ->where(function($q) use($product){
+                $kitchen = Kitchen::
+                where(function($q) use($product){
                     $q->whereHas('products', function($query) use ($product){
                         $query->where('products.id', $product->id);
                     })
