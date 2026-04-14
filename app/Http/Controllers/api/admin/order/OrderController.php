@@ -1646,8 +1646,8 @@ class OrderController extends Controller
             'from_status' => $old_status,
             'to_status' => $request->order_status,
         ]); 
-
-        if($order->order_status == 'delivery'){ 
+        
+        if($request->order_status == 'delivery'){ 
             $user_item = User::
             where("id", $order->user_id )
             ->first();
