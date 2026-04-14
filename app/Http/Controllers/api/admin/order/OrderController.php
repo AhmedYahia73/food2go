@@ -1653,7 +1653,8 @@ class OrderController extends Controller
             ->first();
             return response()->json([
                 'order_status' => $request->order_status, 
-                "order->points" => $order->points
+                "points" => $order->points,
+                "user_points" => $$user_item->points
             ]);
             if($user_item){
                 $user_item->update([
