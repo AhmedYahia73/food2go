@@ -1647,7 +1647,7 @@ class OrderController extends Controller
             'to_status' => $request->order_status,
         ]); 
          
-        if($request->order_status == 'delivered'){ 
+        if($request->order_status == 'processing'){ 
             $user_item = User::
             where("id", $order->user_id )
             ->first();
@@ -1657,7 +1657,8 @@ class OrderController extends Controller
                 ]);
             }
         }
-        elseif($old_status == 'delivered'){ 
+        elseif($request->order_status == 'returned' || $request->order_status == 'faild_to_deliver'
+        || $request->order_status == 'canceled' || $request->order_status == 'refund'){ 
             $user_item = User::
             where("id", $order->user_id )
             ->first();

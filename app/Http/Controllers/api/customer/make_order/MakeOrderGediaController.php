@@ -62,6 +62,14 @@ class MakeOrderGediaController extends Controller
                 'order_status' => 'processing',
             ]);
 
+            $user_item = User::
+            where("id", $order->user_id )
+            ->first();
+            if($user_item){
+                $user_item->update([
+                    "points" => $user_item->points + $order->points
+                ]);
+            }
             $user = User::find($order->user_id);
             if ($user) {
                 $user->increment('points', $order->points);
