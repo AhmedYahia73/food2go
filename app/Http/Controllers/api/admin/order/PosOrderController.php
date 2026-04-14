@@ -128,8 +128,7 @@ class PosOrderController extends Controller
         ->first()?->table_number ?? null;
         foreach ($request->preparing as $value) {
             $order_cart = OrderCart::
-            where('id', $value['cart_id'])
-            ->where("prepration_status", "!=", "preparing")
+            where('id', $value['cart_id']) 
             ->first();
             if(empty($order_cart)){
                 continue;
