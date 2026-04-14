@@ -1646,16 +1646,8 @@ class OrderController extends Controller
             'from_status' => $old_status,
             'to_status' => $request->order_status,
         ]); 
-        
-            $user_item = User::
-            where("id", $order->user_id )
-            ->first();
-            return response()->json([
-                'order_status' => $request->order_status, 
-                "points" => $order->points,
-                "user_points" => $user_item->points
-            ]);
-        if($request->order_status == 'delivery'){ 
+         
+        if($request->order_status == 'delivered'){ 
             $user_item = User::
             where("id", $order->user_id )
             ->first();
@@ -1665,7 +1657,7 @@ class OrderController extends Controller
                 ]);
             }
         }
-        elseif($old_status == 'delivery'){ 
+        elseif($old_status == 'delivered'){ 
             $user_item = User::
             where("id", $order->user_id )
             ->first();
