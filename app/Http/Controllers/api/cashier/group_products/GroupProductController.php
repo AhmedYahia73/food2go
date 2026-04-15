@@ -321,7 +321,15 @@ class GroupProductController extends Controller
             'branch_id' => 'required|exists:branches,id',
             'group_id'  => 'required|exists:group_products,id',
             'products'  => 'required|array',
-            'products.*' => 'required|exists:products,id',
+            'products.*.id' => 'required|exists:products,id',
+            'products.*.extras' => 'array',
+            'products.*.extras.*' => 'required|exists:extra_products,id',
+            'products.*.addons' => 'array',
+            'products.*.addons.*' => 'required|exists:addons,id',
+            'products.*.variations' => 'array',
+            'products.*.variations.*.id' => 'required|exists:variation_products,id',
+            'products.*.variations.*.options' => 'required|array',
+            'products.*.variations.*.options.*' => 'required|exists:option_products,id',
         ]);
 
         if ($validator->fails()) {
@@ -340,9 +348,10 @@ class GroupProductController extends Controller
         $option_off   = $branch_off->pluck('option_id')->filter()->toArray();
 
         // 3. استعلام المنتجات مع التحميل المسبق للعلاقات (Eager Loading)
+        $product_ids = $request->input('products.*.id');
         $products = $this->products
             ->withLocale($locale)
-            ->whereIn("id", $request->products)
+            ->whereIn("id", $product_ids)
             ->where('item_type', '!=', 'online')
             ->where('status', 1)
             ->with([
@@ -420,16 +429,91 @@ class GroupProductController extends Controller
         })->filter()->values();
 
         // 5. تحويل البيانات للـ Response
-        // ملاحظة: تأكد أن ProductResource يحسب 'final_price' و 'price_after_tax' بناءً على $product->price الجديد
         $final_data = ProductResource::collection($processedProducts)->resolve();
+        $catalogProducts = collect($final_data); // تحويلها لـ Collection عشان يسهل البحث فيها
 
-        $products_items = collect($final_data)->map(fn($item) => [
-            "id"                   => $item['id'],
-            "price"                => $item['price'],
-            "price_after_discount" => $item['price_after_discount'] ?? $item['price'],
-            "price_after_tax"      => $item['price_after_tax'] ?? $item['price'],
-            "final_price"          => $item['final_price'] ?? $item['price'],
-        ]);
+        // 6. حساب المجاميع بناءً على اختيارات العميل في الـ Request
+        $requestedProducts = $request->input('products', []);
+        $products_items = [];
+
+        foreach ($requestedProducts as $reqProduct) {
+            $reqProductId = $reqProduct['id'];
+            
+            // نجيب المنتج بكامل بياناته وتفاصيله بعد الخصومات من الـ Resource
+            $catalogProduct = $catalogProducts->firstWhere('id', $reqProductId);
+
+            // لو المنتج مش موجود (مثلاً مقفول في الفرع وتم استبعاده في الخطوات السابقة) نتجاهله
+            if (!$catalogProduct) {
+                continue; 
+            }
+
+            // تهيئة الأسعار المبدئية بسعر المنتج الأساسي
+            $totalPrice               = $catalogProduct['price'];
+            $totalPriceAfterDiscount  = $catalogProduct['price_after_discount'] ?? $catalogProduct['price'];
+            $totalPriceAfterTax       = $catalogProduct['price_after_tax'] ?? $catalogProduct['price'];
+            $totalFinalPrice          = $catalogProduct['final_price'] ?? $catalogProduct['price'];
+
+            // أ. تجميع أسعار الـ Addons
+            if (isset($reqProduct['addons']) && is_array($reqProduct['addons'])) {
+                $catalogAddons = collect($catalogProduct['addons'] ?? []);
+                foreach ($reqProduct['addons'] as $addonId) {
+                    $addon = $catalogAddons->firstWhere('id', $addonId);
+                    if ($addon) {
+                        $totalPrice               += $addon['price'] ?? 0;
+                        $totalPriceAfterDiscount  += $addon['price_after_discount'] ?? ($addon['price'] ?? 0);
+                        $totalPriceAfterTax       += $addon['price_after_tax'] ?? ($addon['price'] ?? 0);
+                        $totalFinalPrice          += $addon['final_price'] ?? ($addon['price'] ?? 0);
+                    }
+                }
+            }
+
+            // ب. تجميع أسعار الـ Extras
+            if (isset($reqProduct['extras']) && is_array($reqProduct['extras'])) {
+                $catalogExtras = collect($catalogProduct['allExtras'] ?? []);
+                foreach ($reqProduct['extras'] as $extraId) {
+                    $extra = $catalogExtras->firstWhere('id', $extraId);
+                    if ($extra) {
+                        $totalPrice               += $extra['price'] ?? 0;
+                        $totalPriceAfterDiscount  += $extra['price_after_discount'] ?? ($extra['price'] ?? 0);
+                        $totalPriceAfterTax       += $extra['price_after_tax'] ?? ($extra['price'] ?? 0);
+                        $totalFinalPrice          += $extra['final_price'] ?? ($extra['price'] ?? 0);
+                    }
+                }
+            }
+
+            // ج. تجميع أسعار الـ Variations & Options
+            if (isset($reqProduct['variations']) && is_array($reqProduct['variations'])) {
+                $catalogVariations = collect($catalogProduct['variations'] ?? []);
+                
+                foreach ($reqProduct['variations'] as $reqVariation) {
+                    $catalogVariation = $catalogVariations->firstWhere('id', $reqVariation['id']);
+                    
+                    if ($catalogVariation && isset($reqVariation['options']) && is_array($reqVariation['options'])) {
+                        $catalogOptions = collect($catalogVariation['options'] ?? []);
+                        
+                        foreach ($reqVariation['options'] as $optionId) {
+                            $option = $catalogOptions->firstWhere('id', $optionId);
+                            if ($option) {
+                                $totalPrice               += $option['price'] ?? 0;
+                                // ملاحظة: بناءً على الـ JSON الخاص بك، حقل الخصم في الخيارات اسمه after_disount (يوجد به خطأ إملائي)
+                                $totalPriceAfterDiscount  += $option['after_disount'] ?? $option['price_after_discount'] ?? ($option['price'] ?? 0);
+                                $totalPriceAfterTax       += $option['price_after_tax'] ?? ($option['price'] ?? 0);
+                                $totalFinalPrice          += $option['final_price'] ?? ($option['price'] ?? 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // إضافة النتيجة النهائية للمنتج داخل الـ Array
+            $products_items[] = [
+                "product_id"           => $reqProductId,
+                "price"                => $totalPrice,
+                "price_after_discount" => $totalPriceAfterDiscount,
+                "price_after_tax"      => $totalPriceAfterTax,
+                "final_price"          => $totalFinalPrice,
+            ];
+        }
 
         return response()->json([
             'products_items' => $products_items,
