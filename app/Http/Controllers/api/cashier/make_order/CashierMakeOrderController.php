@@ -602,6 +602,7 @@ class CashierMakeOrderController extends Controller
             "total_discount" => $request->total_discount ?? 0,
             "service_fees" => $request->service_fees ?? null,
             "print_type" => $request->user()?->cashier?->print_type ?? null,
+            "due_module" => $request->due_module ?? 0,
         ]);
     }
 
@@ -937,6 +938,7 @@ class CashierMakeOrderController extends Controller
                 "total_discount" => $request->total_discount ?? 0,
                 "print_type" => $request->user()?->cashier?->print_type ?? null,
                 'order_id' => $order['order']['id'],
+                "due_module" => $request->due_module ?? 0,
             ]);
         }
         $financials = $this->get_financial($request, $locale);  
@@ -961,6 +963,7 @@ class CashierMakeOrderController extends Controller
             "total_tax" => $request->total_tax ?? 0,
             "total_discount" => $request->total_discount ?? 0,
             "print_type" => $request->user()?->cashier?->print_type ?? null,
+            "due_module" => $request->due_module ?? 0,
         ]);
     }
 
@@ -1528,6 +1531,7 @@ class CashierMakeOrderController extends Controller
             "total_tax" => $request->total_tax ?? 0,
             "total_discount" => $request->total_discount ?? 0,
             "print_type" => $request->user()?->cashier?->print_type ?? null,
+            "due_module" => $request->due_module ?? 0,
         ]);
     }
 
@@ -1717,6 +1721,7 @@ class CashierMakeOrderController extends Controller
             "table_number" => $table_item?->table_number,
             "reaturant_name" => $reaturant_name,
             "print_type" => $request->user()?->cashier?->print_type ?? null,
+            "due_module" => $request->due_module ?? 0,
         ]);
     } 
 
