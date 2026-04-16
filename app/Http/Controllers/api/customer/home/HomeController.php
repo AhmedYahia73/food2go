@@ -838,7 +838,7 @@ class HomeController extends Controller
                 $tax_module = $product?->tax_module
                 ?->map(function ($taxItem) use ($module, $branch_id, $product) {
 
-                    return $taxItem;
+                    return $taxItem->module;
 
                 })
                 ->filter()
