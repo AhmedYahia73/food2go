@@ -728,7 +728,7 @@ class HomeController extends Controller
                 })
                 ->filter()
                 ->first();
-                if(!empty($tax_module)){  
+                if(!empty($tax_module)){
                     $product->tax = $tax_module;
                 }
                 else{
@@ -830,9 +830,32 @@ class HomeController extends Controller
             // ->whereNotIn('sub_category_id', $category_off)
             ->whereNotIn('products.id', $product_off)
             ->get()
-            ->map(function ($product) use ($option_off, $branch_id) {
+            ->map(function ($product) use ($option_off, $branch_id, $module) {
                 $product->favourite = $product->favourite_product->isNotEmpty();
-                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;   
+
+                $tax_module = $product?->tax
+                ?->tax_module
+                ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+                    $isFound = $taxItem->module
+                    ->where('module', $module) 
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id)
+                    ->first();
+                    if($isFound){
+                        return $product?->tax;
+                    }
+
+                })
+                ->filter()
+                ->first();
+                if(!empty($tax_module)){
+                    $product->tax = $tax_module;
+                }
+                else{
+                    $product->tax = null;
+                }
                 if ($product->taxes->setting == 'included') {
                     $price = empty($product->tax) ? $product->price: 
                     ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
