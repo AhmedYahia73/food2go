@@ -696,6 +696,7 @@ class HomeController extends Controller
             ->orderBy('order')
             ->with([ 
                 'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
@@ -709,6 +710,7 @@ class HomeController extends Controller
             ->get()
             ->map(function ($product) use ($option_off, $branch_id, $module) {
                 $product->favourites = $product->favourite_product->isNotEmpty();
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;
 
                 $tax_module = $product?->tax
                 ?->tax_module
@@ -816,6 +818,9 @@ class HomeController extends Controller
             $products = $this->product 
             ->orderBy('order')
             ->withLocale($locale)
+            ->with([ 
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+            ])
             ->where('item_type', '!=', 'offline')
             ->where('status', 1) 
             ->where(function($query) use($id){
@@ -827,6 +832,7 @@ class HomeController extends Controller
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {
                 $product->favourite = $product->favourite_product->isNotEmpty();
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;
                 if ($product->taxes->setting == 'included') {
                     $price = empty($product->tax) ? $product->price: 
                     ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
