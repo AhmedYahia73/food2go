@@ -850,6 +850,7 @@ class HomeController extends Controller
                 })
                 ->filter()
                 ->first();
+                return $tax_module;
                 if(!empty($tax_module)){
                     $product->tax = $tax_module;
                 }
