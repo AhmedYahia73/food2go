@@ -836,15 +836,7 @@ class HomeController extends Controller
                 $product->price = $product->product_pricing->first()?->price ?? $product->price;   
 
                 $tax_module = $product?->tax_module
-                ?->map(function ($taxItem) use ($module, $branch_id, $product) {
-
-                    $isFound = $taxItem->module 
-                    ->first();
-                    if($isFound){
-                        return $product?->tax;
-                    }
-
-                });
+                ;
                 return $tax_module;
                 if(!empty($tax_module)){
                     $product->tax = $tax_module;
