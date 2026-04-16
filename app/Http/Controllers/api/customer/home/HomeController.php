@@ -820,7 +820,12 @@ class HomeController extends Controller
             ->withLocale($locale)
             ->with([ 
                 'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-                "tax_module.module"
+                "tax_module.module" => function($query) use($module, $branch_id){
+                    $query->where("module", $module)
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id)
+                    ->first();
+                }
             ])
             ->where('item_type', '!=', 'offline')
             ->where('status', 1) 
@@ -839,6 +844,9 @@ class HomeController extends Controller
                 ?->map(function ($taxItem) use ($module, $branch_id, $product) {
 
                     return $taxItem->module;
+                    if($isFound){
+                        return $product?->tax;
+                    }
 
                 })
                 ->filter()
