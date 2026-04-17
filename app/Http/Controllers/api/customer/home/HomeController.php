@@ -843,7 +843,7 @@ class HomeController extends Controller
                 $tax_module = $product?->tax_module
                 ?->map(function ($taxItem) use ($module, $branch_id, $product) {
 
-                    return $taxItem->module;
+                    return $taxItem->module->count();
                     if($isFound->count() > 0){
                         return $product?->tax;
                     }
