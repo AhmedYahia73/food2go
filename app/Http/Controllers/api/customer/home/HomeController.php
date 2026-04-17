@@ -843,13 +843,12 @@ class HomeController extends Controller
                 $tax_module = $product?->tax_module
                 ?->map(function ($taxItem) use ($module, $branch_id, $product) {
                     if($taxItem->module->count() > 0){
-                        return $product?->tax;
+                        return $taxItem?->tax;
                     }
 
                 })
                 ->filter()
-                ->first();
-                return $tax_module;
+                ->first(); 
                 if(!empty($tax_module)){
                     $product->tax = $tax_module;
                 }
