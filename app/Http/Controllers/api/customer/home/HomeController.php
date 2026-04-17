@@ -696,7 +696,13 @@ class HomeController extends Controller
             ->orderBy('order')
             ->with([ 
                 'favourite_product' => fn($q) => $q->where('users.id', $user_id),
-                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),       
+                "tax_module.module" => function($query) use($module, $branch_id){
+                    $query->where("module", $module)
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id)
+                    ->first();
+                }
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
@@ -712,22 +718,15 @@ class HomeController extends Controller
                 $product->favourites = $product->favourite_product->isNotEmpty();
                 $product->price = $product->product_pricing->first()?->price ?? $product->price;
 
-                $tax_module = $product?->tax
-                ?->tax_module
+                $tax_module = $product?->tax_module
                 ?->map(function ($taxItem) use ($module, $branch_id, $product) {
-
-                    $isFound = $taxItem->module
-                    ->where('module', $module) 
-                    ->whereIn('app_type', ['online', 'all'])
-                    ->Where("branch_id", $branch_id)
-                    ->first();
-                    if($isFound){
-                        return $product?->tax;
+                    if($taxItem->module->count() > 0){
+                        return $taxItem?->tax;
                     }
 
                 })
                 ->filter()
-                ->first();
+                ->first(); 
                 if(!empty($tax_module)){
                     $product->tax = $tax_module;
                 }
