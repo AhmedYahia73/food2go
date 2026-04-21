@@ -3,37 +3,37 @@
 namespace App\Http\Controllers\api\cashier\order;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\trait\OrderFormat;
-use App\trait\Recipe;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator; 
-use Illuminate\Support\Collection;
 use App\Http\Requests\cashier\UpdateOrderRequest;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\CancelOrderMail;
-use App\trait\POS;
-use App\trait\PlaceOrder;
-
-use App\Models\CompanyInfo;
-use App\Models\Order;
-use App\Models\OrderFinancial;
-use App\Models\Setting;
-use App\Models\TimeSittings;
-use App\Models\Delivery;
-use App\Models\FinantiolAcounting;
-use App\Models\OrderDetail;
-use App\Models\Branch;
-use App\Models\Product;
-use App\Models\ExcludeProduct;
 use App\Models\Addon;
-use App\Models\ExtraProduct;
-use App\Models\VariationProduct;
-use App\Models\OptionProduct;
+use App\Models\Branch;
 use App\Models\CashierMan;
-use App\Models\VoidReason;
+use App\Models\CompanyInfo;
+use App\Models\Delivery;
+use App\Models\ExcludeProduct;
+use App\Models\ExtraProduct;
+use App\Models\FinantiolAcounting;
 use App\Models\KitchenOrder;
 use App\Models\LogOrder;
+use App\Models\OptionProduct;
+use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\OrderFinancial;
+use App\Models\Product;
+use App\Models\Setting;
+use App\Models\TimeSittings;
+use App\Models\User;
+use App\Models\VariationProduct;
+use App\Models\VoidReason;
+use App\trait\OrderFormat;
+use App\trait\PlaceOrder;
+use App\trait\POS;
+use App\trait\Recipe;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator; 
 
 class OrderController extends Controller
 {
@@ -1323,6 +1323,29 @@ class OrderController extends Controller
             $order->save();
         }
 
+         
+        if($request->order_status == 'processing'){ 
+            $user_item = User::
+            where("id", $order->user_id )
+            ->first();
+            if($user_item){
+                $user_item->update([
+                    "points" => $user_item->points + $order->points
+                ]);
+            }
+        }
+        elseif($request->order_status == 'returned' || $request->order_status == 'faild_to_deliver'
+        || $request->order_status == 'canceled' || $request->order_status == 'refund'){ 
+            $user_item = User::
+            where("id", $order->user_id )
+            ->first();
+            if($user_item){
+                $user_item->update([
+                    "points" => $user_item->points - $order->points
+                ]);
+            }
+        }
+        
         return response()->json([
             'order_status' => $request->order_status,
             "kitchen" => $kitchen,
