@@ -58,6 +58,10 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/fav_products', 'fav_products');
     });
 
+    Route::controller(CouponController::class)->prefix('coupon')->group(function(){
+        Route::get('/', 'coupon');
+    });
+
     Route::controller(ChatController::class)->prefix('chat')->group(function(){
         Route::get('/{order_id}/{delivery_id}', 'chat');
         Route::post('/send', 'store');
