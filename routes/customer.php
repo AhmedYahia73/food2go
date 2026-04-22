@@ -59,7 +59,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(CouponController::class)->prefix('coupon')->group(function(){
-        Route::get('/', 'coupon');
+        Route::post('/', 'coupon');
     });
 
     Route::controller(ChatController::class)->prefix('chat')->group(function(){
