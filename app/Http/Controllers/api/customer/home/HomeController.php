@@ -1374,8 +1374,7 @@ class HomeController extends Controller
                     return $variation;
                 });
 
-                $tax_module = $item?->tax
-                ?->tax_module
+                $tax_module = $item?->tax_module
                 ?->map(function ($taxItem) use ($module, $branch_id, $item) {
 
                     $isFound = $taxItem->module
@@ -1444,8 +1443,21 @@ class HomeController extends Controller
                     return $variation;
                 });
 
-                $tax_module = $product?->tax;
-                dd($tax_module); 
+                $tax_module = $product?->tax_module
+                ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+                    $isFound = $taxItem->module
+                    ->where('module', $module) 
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id)
+                    ->first();
+                    if($isFound){
+                        return $product?->tax;
+                    }
+
+                })
+                ->filter()
+                ->first();
                 if(!empty($tax_module)){  
                     $product->tax = $tax_module;
                 }
