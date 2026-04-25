@@ -1447,9 +1447,6 @@ class HomeController extends Controller
                 ?->map(function ($taxItem) use ($module, $branch_id, $product) {
 
                     $isFound = $taxItem->module
-                    ->where('module', $module) 
-                    ->whereIn('app_type', ['online', 'all'])
-                    ->Where("branch_id", $branch_id)
                     ->first();
                     if($isFound){
                         return $product?->tax;
