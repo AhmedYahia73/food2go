@@ -470,11 +470,11 @@ class HomeController extends Controller
                 ->where('id', $id)
                 ->get();
 
-            $products = $products->map(function($product) use ($branch_id, $option_off) {
+            $products = $products->map(function($product) use ($branch_id, $option_off, $module) {
                 $product->price = $product->product_pricing
                     ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
 
-                $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
+                $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id, $module) {
                     $variation->options = $variation->options
                         ->where('status', 1)
                         ->values()
@@ -487,6 +487,26 @@ class HomeController extends Controller
 
                     return $variation;
                 });
+                $tax_module = $product?->tax_module
+                ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+                    $isFound = $taxItem->module
+                    ->where('module', $module) 
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id);
+                    if($isFound->count() > 0){
+                        return $taxItem->tax;
+                    }
+
+                })
+                ->filter()
+                ->first();
+                if(!empty($tax_module)){  
+                    $product->tax = $tax_module;
+                }
+                else{
+                    $product->tax = null;
+                } 
                 return $product;
             });
         }
