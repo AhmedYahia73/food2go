@@ -1450,8 +1450,8 @@ class HomeController extends Controller
                     ->where('module', $module) 
                     ->whereIn('app_type', ['online', 'all'])
                     ->Where("branch_id", $branch_id);
-                    if($isFound){
-                        return $product?->tax;
+                    if($isFound->count() > 0){
+                        return $product[0]?->tax;
                     }
 
                 })
