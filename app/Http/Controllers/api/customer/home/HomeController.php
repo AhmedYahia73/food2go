@@ -1444,10 +1444,9 @@ class HomeController extends Controller
                     return $variation;
                 });
 
-                $tax_module = $product?->tax
-                ?->tax_module;
+                $tax_module = $product?->tax;
+                dd($tax_module); 
                 if(!empty($tax_module)){  
-                    dd($tax_module); 
                     $product->tax = $tax_module;
                 }
                 else{
