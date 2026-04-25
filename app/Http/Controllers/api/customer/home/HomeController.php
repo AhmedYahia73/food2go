@@ -1446,8 +1446,8 @@ class HomeController extends Controller
 
                 $tax_module = $product?->tax
                 ?->tax_module;
-                dd($tax_module); 
                 if(!empty($tax_module)){  
+                    dd($tax_module); 
                     $product->tax = $tax_module;
                 }
                 else{
