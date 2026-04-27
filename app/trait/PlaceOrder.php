@@ -477,15 +477,17 @@ trait PlaceOrder
             return ['error' => $result['message']];
         }
 
+        $geideaOrderId = $result['order_id'] ?? $result['orderId'] ?? null;
+
         Order::where('id', $id)->update([
-            'transaction_id' => $result['order_id'],
+            'transaction_id' => $geideaOrderId,
         ]);
 
         // ✅ إرجاع البيانات للـ Frontend ليعرض صفحة الدفع
         return [
             'session_id'      => $result['session_id'],
             'merchant_key'    => $settings->geidea_public_key,
-            'geidea_order_id' => $result['order_id'],
+            'geidea_order_id' => $geideaOrderId,
             'hpp_url'         => 'https://www.merchant.geidea.net/hpp/geideaCheckout.min.js',
         ];
     }
