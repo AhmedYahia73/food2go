@@ -477,7 +477,10 @@ trait PlaceOrder
             return ['error' => $result['message']];
         }
 
-        $geideaOrderId = $result['order_id'] ?? $result['orderId'] ?? null;
+        // Log the result to see what Geidea returns
+        \Log::info('Geidea createSession result:', $result);
+
+        $geideaOrderId = $result['order_id'] ?? $result['orderId'] ?? $result['order']['orderId'] ?? null;
 
         Order::where('id', $id)->update([
             'transaction_id' => $geideaOrderId,
@@ -489,6 +492,7 @@ trait PlaceOrder
             'merchant_key'    => $settings->geidea_public_key,
             'geidea_order_id' => $geideaOrderId,
             'hpp_url'         => 'https://www.merchant.geidea.net/hpp/geideaCheckout.min.js',
+            'debug_result'    => $result, // للتجربة فقط
         ];
     }
     
