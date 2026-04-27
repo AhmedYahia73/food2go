@@ -427,10 +427,19 @@ trait PlaceOrder
             $order->status = 2;
         }
         if(!empty($order->payment_method?->geidea)){
-            $gedia = $this->geidea($order->id, $order->amount);
-            $gedia_status = isset($gedia['session_id']) && !isset($gedia['error']);
-            if(isset($gedia['error'])){
+            try {
+                $gedia = $this->geidea($order->id, $order->amount);
+                if (isset($gedia['error'])) {
+                    \Log::error('Geidea error: ' . $gedia['error']);
+                    $gedia = null;
+                    $gedia_status = false;
+                } else {
+                    $gedia_status = isset($gedia['session_id']);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Geidea exception: ' . $e->getMessage());
                 $gedia = null;
+                $gedia_status = false;
             }
         }
         $order->save();
@@ -450,6 +459,10 @@ trait PlaceOrder
 
         $settings = Geidia::first();
         
+        if (!$settings) {
+            return ['error' => 'Geidea settings not found'];
+        }
+        
         // ✅ غيّر الـ config في runtime
         config([
             'geidea.merchant_public_key' => $settings->geidea_public_key,
@@ -459,22 +472,27 @@ trait PlaceOrder
             'geidea.language'            => 'ar',
         ]);
 
-        // ✅ استخدم الـ Facade عادي
-        $result = GeideaFacade::createSession([
-            'amount'                => $amount,
-            'currency'              => 'EGP',
-            'merchant_reference_id' => geidea_merchant_reference('ORDER', $id),
-            'callback_url'          => url('/customer/geidia/callback'),
-            'return_url'            => url('/customer/geidia/return'),
-            'customer' => [
-                'email'        => auth()->user()->email,
-                'name'         => auth()->user()->f_name . ' ' . auth()->user()->l_name,
-                'phone_number' => auth()->user()->phone,
-            ],
-        ]);
+        try {
+            // ✅ استخدم الـ Facade عادي
+            $result = GeideaFacade::createSession([
+                'amount'                => $amount,
+                'currency'              => 'EGP',
+                'merchant_reference_id' => geidea_merchant_reference('ORDER', $id),
+                'callback_url'          => url('/customer/geidia/callback'),
+                'return_url'            => url('/customer/geidia/return'),
+                'customer' => [
+                    'email'        => auth()->user()->email,
+                    'name'         => auth()->user()->f_name . ' ' . auth()->user()->l_name,
+                    'phone_number' => auth()->user()->phone,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Geidea createSession failed: ' . $e->getMessage());
+            return ['error' => 'Failed to create payment session: ' . $e->getMessage()];
+        }
 
         if (!$result['success']) {
-            return ['error' => $result['message']];
+            return ['error' => $result['message'] ?? 'Unknown error'];
         }
 
         // Geidea doesn't return order_id in session creation, only in callback
