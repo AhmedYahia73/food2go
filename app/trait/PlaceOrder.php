@@ -479,16 +479,12 @@ trait PlaceOrder
             'transaction_id' => $result['order_id'],
         ]);
 
-        // ✅ بناء رابط صفحة الدفع مع الـ parameters الصحيحة
-        $paymentUrl = url('/api/customer/geidia/page') . 
-                      '?session_id=' . $result['session_id'] . 
-                      '&merchant_key=' . $settings->geidea_public_key . 
-                      '&order_id=' . $id;
-
+        // ✅ إرجاع البيانات للـ Frontend ليعرض صفحة الدفع
         return [
-            'payment_url'     => $paymentUrl,
             'session_id'      => $result['session_id'],
+            'merchant_key'    => $settings->geidea_public_key,
             'geidea_order_id' => $result['order_id'],
+            'hpp_url'         => 'https://www.merchant.geidea.net/hpp/geideaCheckout.min.js',
         ];
     }
     
