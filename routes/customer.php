@@ -33,6 +33,14 @@ Route::controller(OtpController::class)->prefix('otp')->group(function(){
     Route::post('/complete_signup', 'complete_signup');
 });
 
+// Geidea payment routes - without authentication
+Route::controller(MakeOrderGediaController::class)
+->prefix('geidia')->group(function(){
+    Route::get('/callback', 'callback')->name("payment_gedia.callback");
+    Route::get('/return', 'return_page')->name("payment_gedia.return");
+    Route::get('/page', 'paymentPage')->name("payment_gedia.page");
+});
+
 Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(HomeController::class)->prefix('home')->group(function(){
         Route::post('/service_fees/{id}', 'service_fees')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
@@ -70,13 +78,6 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     Route::controller(ChatController::class)->prefix('chat')->group(function(){
         Route::get('/{order_id}/{delivery_id}', 'chat');
         Route::post('/send', 'store');
-    });
-
-    Route::controller(MakeOrderGediaController::class)
-    ->prefix('geidia')->group(function(){
-        Route::get('/callback', 'callback')->name("payment_gedia.callback")->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
-        Route::get('/return', 'return_page')->name("payment_gedia.return")->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
-        Route::get('/page', 'paymentPage')->name("payment_gedia.page")->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
     });
 
     Route::controller(AddressController::class)->prefix('address')->group(function(){
