@@ -447,7 +447,7 @@ trait PlaceOrder
     {
 
         $settings = Geidia::first();
-        //dd($settings);
+        
         // ✅ غيّر الـ config في runtime
         config([
             'geidea.merchant_public_key' => $settings->geidea_public_key,
@@ -479,28 +479,14 @@ trait PlaceOrder
             'transaction_id' => $result['order_id'],
         ]);
 
+        // ✅ بناء رابط الدفع المباشر من Geidea HPP
+        $hppUrl = GeideaFacade::getHppUrl();
+        $paymentUrl = $hppUrl . '?sessionId=' . $result['session_id'] . '&merchantKey=' . $settings->geidea_public_key;
+
         return [
-            'payment_url'     => route('customer.payment_gedia.page', [
-                'session_id' => $result['session_id'],
-                'order_id'   => $id,
-                'merchant_key' => $settings->geidea_public_key
-            ]),
+            'payment_url'     => $paymentUrl,
             'session_id'      => $result['session_id'],
             'geidea_order_id' => $result['order_id'],
-        ];
-        return [
-            // ✅ بعت الـ data للـ Frontend يبني الصفحة بنفسه
-            'session_id'      => $result['session_id'],
-            'merchant_key'    => $settings->geidea_public_key,
-            'hpp_script'      => GeideaFacade::getHppScriptUrl(),
-            'geidea_order_id' => $result['order_id'],
-            
-            // ✅ لو Frontend محتاج يفتح صفحة جاهزة على Web domain
-            'payment_url'     => route('customer.payment_gedia.page', [
-                'session_id' => $result['session_id'],
-                'order_id'   => $id,
-                'merchant_key' => $settings->geidea_public_key
-            ]),
         ];
     }
     
