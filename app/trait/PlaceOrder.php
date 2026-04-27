@@ -482,19 +482,9 @@ trait PlaceOrder
         $merchantReferenceId = $result['data']['session']['merchantReferenceId'] ?? null;
 
         // Don't update transaction_id yet, it will be updated in callback
-        // Order::where('id', $id)->update([
-        //     'transaction_id' => $geideaOrderId,
-        // ]);
 
-        // ✅ بناء رابط صفحة الدفع
-        $paymentUrl = url('/customer/geidia/page') . 
-                      '?session_id=' . $result['session_id'] . 
-                      '&merchant_key=' . $settings->geidea_public_key . 
-                      '&order_id=' . $id;
-
-        // ✅ إرجاع رابط الدفع المباشر
+        // ✅ إرجاع البيانات للـ Frontend ليعرض صفحة الدفع مباشرة
         return [
-            'payment_url'     => $paymentUrl,
             'session_id'      => $result['session_id'],
             'merchant_key'    => $settings->geidea_public_key,
             'merchant_reference_id' => $merchantReferenceId,
