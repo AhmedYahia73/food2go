@@ -486,8 +486,15 @@ trait PlaceOrder
         //     'transaction_id' => $geideaOrderId,
         // ]);
 
-        // ✅ إرجاع البيانات للـ Frontend ليعرض صفحة الدفع
+        // ✅ بناء رابط صفحة الدفع
+        $paymentUrl = url('/api/customer/geidia/page') . 
+                      '?session_id=' . $result['session_id'] . 
+                      '&merchant_key=' . $settings->geidea_public_key . 
+                      '&order_id=' . $id;
+
+        // ✅ إرجاع رابط الدفع المباشر
         return [
+            'payment_url'     => $paymentUrl,
             'session_id'      => $result['session_id'],
             'merchant_key'    => $settings->geidea_public_key,
             'merchant_reference_id' => $merchantReferenceId,
