@@ -479,9 +479,11 @@ trait PlaceOrder
             'transaction_id' => $result['order_id'],
         ]);
 
-        // ✅ بناء رابط الدفع المباشر من Geidea HPP
-        $hppUrl = GeideaFacade::getHppUrl();
-        $paymentUrl = $hppUrl . '?sessionId=' . $result['session_id'] . '&merchantKey=' . $settings->geidea_public_key;
+        // ✅ بناء رابط صفحة الدفع مع الـ parameters الصحيحة
+        $paymentUrl = route('customer.payment_gedia.page') . 
+                      '?session_id=' . $result['session_id'] . 
+                      '&merchant_key=' . $settings->geidea_public_key . 
+                      '&order_id=' . $id;
 
         return [
             'payment_url'     => $paymentUrl,
