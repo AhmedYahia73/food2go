@@ -420,7 +420,7 @@ trait PlaceOrder
             }
         } 
         $order->order_details = json_encode($order_details);
-        $order->load("payment_method");
+        $order->load("payment_method.geidea");
         $gedia_status = false;
         $gedia = null;
         if ($paymob) {
@@ -428,8 +428,10 @@ trait PlaceOrder
         }
         if(!empty($order->payment_method?->geidea)){
             $gedia = $this->geidea($order->id, $order->amount);
-            $gedia = isset($gedia['payment_url']) ? $gedia : null;
-            $gedia_status = isset($gedia['payment_url']) ? true : false;
+            $gedia_status = isset($gedia['session_id']) && !isset($gedia['error']);
+            if(isset($gedia['error'])){
+                $gedia = null;
+            }
         }
         $order->save();
 
