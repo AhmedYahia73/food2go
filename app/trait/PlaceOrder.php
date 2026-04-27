@@ -477,22 +477,21 @@ trait PlaceOrder
             return ['error' => $result['message']];
         }
 
-        // Log the result to see what Geidea returns
-        \Log::info('Geidea createSession result:', $result);
+        // Geidea doesn't return order_id in session creation, only in callback
+        // We'll use the merchant_reference_id for now
+        $merchantReferenceId = $result['data']['session']['merchantReferenceId'] ?? null;
 
-        $geideaOrderId = $result['order_id'] ?? $result['orderId'] ?? $result['order']['orderId'] ?? null;
-
-        Order::where('id', $id)->update([
-            'transaction_id' => $geideaOrderId,
-        ]);
+        // Don't update transaction_id yet, it will be updated in callback
+        // Order::where('id', $id)->update([
+        //     'transaction_id' => $geideaOrderId,
+        // ]);
 
         // ✅ إرجاع البيانات للـ Frontend ليعرض صفحة الدفع
         return [
             'session_id'      => $result['session_id'],
             'merchant_key'    => $settings->geidea_public_key,
-            'geidea_order_id' => $geideaOrderId,
+            'merchant_reference_id' => $merchantReferenceId,
             'hpp_url'         => 'https://www.merchant.geidea.net/hpp/geideaCheckout.min.js',
-            'debug_result'    => $result, // للتجربة فقط
         ];
     }
     

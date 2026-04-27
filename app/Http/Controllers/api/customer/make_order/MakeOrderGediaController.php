@@ -28,8 +28,32 @@ class MakeOrderGediaController extends Controller
             return view('Paymob.FaildPayment');
         }
 
-        // ✅ تحقق من المبلغ
-        $order = Order::where('transaction_id', $orderId)->firstOrFail();
+        // Get merchant reference ID from Geidea response
+        $merchantReferenceId = $orderResult['order']['merchantReferenceId'] ?? null;
+        
+        // Extract order ID from merchant reference (e.g., "ORDER4957" -> 4957)
+        $localOrderId = null;
+        if ($merchantReferenceId && preg_match('/ORDER(\d+)/', $merchantReferenceId, $matches)) {
+            $localOrderId = $matches[1];
+        }
+
+        // Find order by ID or transaction_id
+        $order = Order::where('id', $localOrderId)
+                     ->orWhere('transaction_id', $orderId)
+                     ->first();
+
+        if (!$order) {
+            \Log::error('Order not found', [
+                'geidea_order_id' => $orderId,
+                'merchant_reference' => $merchantReferenceId,
+            ]);
+            return view('Paymob.FaildPayment');
+        }
+
+        // Update transaction_id if not set
+        if (empty($order->transaction_id)) {
+            $order->update(['transaction_id' => $orderId]);
+        }
 
         $transactions = $orderResult['order']['transactions'] ?? [];
         $successTxn   = collect($transactions)->firstWhere('status', 'Success');
