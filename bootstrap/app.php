@@ -86,8 +86,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'IsPreparation' => PreparationMiddleware::class,
         ]);
          $middleware->redirectGuestsTo(function (Request $request) {
+            // Allow Geidea payment pages without authentication
+            if ($request->is('customer/geidia/*')) {
+                return null;
+            }
             if (!$request->is('api/*')) {
-                return response()->json(['errors' => 'you must login', 400]);
+                return response()->json(['errors' => 'you must login'], 400);
             } 
         });
     })
