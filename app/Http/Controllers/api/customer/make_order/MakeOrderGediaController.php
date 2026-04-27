@@ -112,8 +112,22 @@ class MakeOrderGediaController extends Controller
     
     public function paymentPage(Request $request)
     {
+        $settings = Geidia::first();
 
-        return 21;
+        // ✅ حمّل الـ config الأول
+        config([
+            'geidea.merchant_public_key' => $settings->geidea_public_key,
+            'geidea.api_password'        => $settings->api_password,
+            'geidea.environment'         => $settings->environment,
+            'geidea.currency'            => 'EGP',
+            'geidea.language'            => 'ar',
+        ]);
+
+        return view('Geida.Geida', [
+            'sessionId'   => $request->session_id,
+            'merchantKey' => \Almesery\LaravelGeidea\Facades\Geidea::getMerchantPublicKey(),
+            'hppScript'   => \Almesery\LaravelGeidea\Facades\Geidea::getHppScriptUrl(),
+        ]);
     }
 
     public function return_page(Request $request)

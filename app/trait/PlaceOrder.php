@@ -464,8 +464,8 @@ trait PlaceOrder
             'amount'                => $amount,
             'currency'              => 'EGP',
             'merchant_reference_id' => geidea_merchant_reference('ORDER', $id),
-            'callback_url'          => url('/api/customer/geidia/callback'),
-            'return_url'            => url('/api/customer/geidia/return'),
+            'callback_url'          => url('/customer/geidia/callback'),
+            'return_url'            => url('/customer/geidia/return'),
             'customer' => [
                 'email'        => auth()->user()->email,
                 'name'         => auth()->user()->f_name . ' ' . auth()->user()->l_name,
@@ -487,7 +487,7 @@ trait PlaceOrder
         // ]);
 
         // ✅ بناء رابط صفحة الدفع
-        $paymentUrl = url('/api/customer/geidia/page') . 
+        $paymentUrl = url('/customer/geidia/page') . 
                       '?session_id=' . $result['session_id'] . 
                       '&merchant_key=' . $settings->geidea_public_key . 
                       '&order_id=' . $id;
