@@ -26,6 +26,14 @@ use App\Http\Controllers\api\customer\order_type\OrderTypeController;
 
 use App\Http\Controllers\api\customer\make_order\MakeOrderGediaController;
 
+// Geidea payment routes - accessible without authentication
+Route::controller(MakeOrderGediaController::class)
+->prefix('geidia')->name('customer.')->group(function(){
+    Route::get('/callback', 'callback')->name("payment_gedia.callback")->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+    Route::get('/return', 'return_page')->name("payment_gedia.return")->withOutMiddleware(['auth:sanctum', 'IsCustomer']); 
+    Route::get('/page', 'paymentPage')->name("payment_gedia.page")->withOutMiddleware(['auth:sanctum', 'IsCustomer']); 
+});
+
 Route::controller(OtpController::class)->prefix('otp')->group(function(){
     Route::post('/create_code', 'create_code');
     Route::post('/check_code', 'check_code');
