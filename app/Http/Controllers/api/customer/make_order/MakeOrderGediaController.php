@@ -122,7 +122,27 @@ class MakeOrderGediaController extends Controller
     public function return_page(Request $request)
     {
         $geideaOrderId = $request->query('orderId');
-        $order = Order::where('transaction_id', $geideaOrderId)->firstOrFail();
-        return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
+        $sessionId     = $request->query('sessionId');
+        $responseCode  = $request->query('responseCode');
+
+        // User cancelled or payment failed
+        if (!$geideaOrderId || $geideaOrderId === 'null') {
+            // Try to find order by session if possible, otherwise redirect to home
+            return redirect(env('WEB_LINK') . '/orders');
+        }
+
+        // Find order by transaction_id or by merchant reference
+        $order = Order::where('transaction_id', $geideaOrderId)->first();
+
+        if (!$order) {
+            return redirect(env('WEB_LINK') . '/orders');
+        }
+
+        // responseCode 000 = success, anything else = failed/cancelled
+        if ($responseCode === '000') {
+            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
+        }
+
+        return redirect(env('WEB_LINK') . '/orders');
     }
 }

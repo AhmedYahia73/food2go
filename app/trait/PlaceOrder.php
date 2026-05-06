@@ -478,8 +478,8 @@ trait PlaceOrder
                 'amount'                => $amount,
                 'currency'              => 'EGP',
                 'merchant_reference_id' => geidea_merchant_reference('ORDER', $id),
-                'callback_url'          => url('/customer/geidia/callback'),
-                'return_url'            => url('/customer/geidia/return'),
+                'callback_url'          => env('BACKEND_URL') . '/customer/geidia/callback',
+                'return_url'            => env('BACKEND_URL') . '/customer/geidia/return',
                 'customer' => [
                     'email'        => auth()->user()->email,
                     'name'         => auth()->user()->f_name . ' ' . auth()->user()->l_name,
