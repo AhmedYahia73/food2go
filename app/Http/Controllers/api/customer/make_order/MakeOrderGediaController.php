@@ -19,13 +19,13 @@ class MakeOrderGediaController extends Controller
         $orderId = $request->query('orderId');
 
         if (!$orderId) {
-            return view('Paymob.FaildPayment');
+            return redirect(env('WEB_LINK'));
         }
 
         $orderResult = Geidea::getOrder($orderId);
 
         if (!$orderResult['success']) {
-            return view('Paymob.FaildPayment');
+            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $orderId);
         }
 
         // Get merchant reference ID from Geidea response
