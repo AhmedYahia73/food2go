@@ -25,7 +25,7 @@ class MakeOrderGediaController extends Controller
         $orderResult = Geidea::getOrder($orderId);
 
         if (!$orderResult['success']) {
-            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $orderId);
+            return redirect(env('WEB_LINK'));
         }
 
         // Get merchant reference ID from Geidea response
@@ -47,7 +47,7 @@ class MakeOrderGediaController extends Controller
                 'geidea_order_id' => $orderId,
                 'merchant_reference' => $merchantReferenceId,
             ]);
-            return view('Paymob.FaildPayment');
+            return redirect(env('WEB_LINK'));
         }
 
         // Update transaction_id if not set
@@ -66,19 +66,14 @@ class MakeOrderGediaController extends Controller
                 'paid'     => $paidAmount,
                 'order_id' => $order->id,
             ]);
-            return view('Paymob.FaildPayment');
+            return redirect(env('WEB_LINK'));
         }
 
         if ($orderResult['order']['status'] === 'Success') {
 
             // ✅ Idempotency - متشغلش مرتين
             if ($order->status === 1) {
-                return view('Paymob.checkout', [
-                    'totalAmount' => $order->amount,
-                    'message'     => 'تم الدفع مسبقاً',
-                    'redirectUrl' => env('WEB_LINK') . '/orders/order_traking/' . $order->id,
-                    'timer'       => 3,
-                ]);
+                return redirect(env('WEB_LINK') . '/orders/order_traking/' . $orderId);
             }
 
             $order->update([
@@ -99,15 +94,9 @@ class MakeOrderGediaController extends Controller
                 $user->increment('points', $order->points);
             }
 
-            return view('Paymob.checkout', [
-                'totalAmount' => $order->amount,
-                'message'     => 'Your payment is being processed. Please wait...',
-                'redirectUrl' => env('WEB_LINK') . '/orders/order_traking/' . $order->id,
-                'timer'       => 3,
-            ]);
+            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $orderId);
         }
-
-        return view('Paymob.FaildPayment');
+        return redirect(env('WEB_LINK'));
     }
     
     public function paymentPage(Request $request)
