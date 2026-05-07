@@ -73,7 +73,7 @@ class MakeOrderGediaController extends Controller
 
             // ✅ Idempotency - متشغلش مرتين
             if ($order->status === 1) {
-                return redirect(env('WEB_LINK') . '/orders/order_traking/' . $orderId);
+                return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
             }
 
             $order->update([
@@ -94,7 +94,7 @@ class MakeOrderGediaController extends Controller
                 $user->increment('points', $order->points);
             }
 
-            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $orderId);
+            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
         }
         return redirect(env('WEB_LINK'));
     }
@@ -125,16 +125,46 @@ class MakeOrderGediaController extends Controller
         $responseCode  = $request->query('responseCode');
         $sessionId     = $request->query('sessionId');
 
+        \Log::info('Geidea return_page', [
+            'orderId'       => $geideaOrderId,
+            'responseCode'  => $responseCode,
+            'sessionId'     => $sessionId,
+        ]);
+
         // Cancelled or failed
         if (!$geideaOrderId || $geideaOrderId === 'null' || $responseCode !== '000') {
-            // Try to find order by session if possible
             return redirect(env('WEB_LINK'));
         }
 
-        // Success - find order by transaction_id or merchant reference
+        // Try to find order by transaction_id (Geidea order ID)
         $order = Order::where('transaction_id', $geideaOrderId)->first();
 
+        // If not found, try to get order info from Geidea and match by merchant reference
         if (!$order) {
+            try {
+                $settings = Geidia::first();
+                config([
+                    'geidea.merchant_public_key' => $settings->geidea_public_key,
+                    'geidea.api_password'        => $settings->api_password,
+                    'geidea.environment'         => $settings->environment,
+                ]);
+                $orderResult = Geidea::getOrder($geideaOrderId);
+                if ($orderResult['success']) {
+                    $merchantReferenceId = $orderResult['order']['merchantReferenceId'] ?? null;
+                    if ($merchantReferenceId && preg_match('/ORDER(\d+)/', $merchantReferenceId, $matches)) {
+                        $order = Order::find($matches[1]);
+                        if ($order) {
+                            $order->update(['transaction_id' => $geideaOrderId]);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('Geidea return_page getOrder failed: ' . $e->getMessage());
+            }
+        }
+
+        if (!$order) {
+            \Log::error('Order not found in return_page', ['orderId' => $geideaOrderId]);
             return redirect(env('WEB_LINK'));
         }
 
