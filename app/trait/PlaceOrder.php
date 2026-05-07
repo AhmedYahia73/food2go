@@ -429,8 +429,6 @@ trait PlaceOrder
         }
         if(!empty($order->payment_method?->geidea)){
             try {
-                $order->status = 2;
-                $order->save();
                 $gedia = $this->geidea($order->id, $order->amount);
                 if (isset($gedia['error'])) {
                     \Log::error('Geidea error: ' . $gedia['error']);
