@@ -133,9 +133,10 @@ class MakeOrderGediaController extends Controller
             return redirect(env('WEB_LINK'));
         }
 
-        // Find order by session_id saved as transaction_id
+        // Find order by session_id saved as transaction_id - must be status=2 (pending payment)
         $order = Order::where('transaction_id', $sessionId)
                       ->orWhere('transaction_id', $geideaOrderId)
+                      ->where('status', 2)
                       ->first();
 
         if (!$order) {
