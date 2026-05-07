@@ -502,7 +502,10 @@ trait PlaceOrder
         // We'll use the merchant_reference_id for now
         $merchantReferenceId = $result['data']['session']['merchantReferenceId'] ?? null;
 
-        // Don't update transaction_id yet, it will be updated in callback
+        // Save session_id as transaction_id to find the order in return_page
+        Order::where('id', $id)->update([
+            'transaction_id' => $result['session_id'],
+        ]);
 
         // ✅ إرجاع البيانات للـ Frontend ليعرض صفحة الدفع مباشرة
         return [

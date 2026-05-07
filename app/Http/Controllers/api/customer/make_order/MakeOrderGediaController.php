@@ -133,9 +133,9 @@ class MakeOrderGediaController extends Controller
             return redirect(env('WEB_LINK'));
         }
 
-        // Find by transaction_id (could be session_id saved earlier or geidea order_id)
-        $order = Order::where('transaction_id', $geideaOrderId)
-                      ->orWhere('transaction_id', $sessionId)
+        // Find order by session_id saved as transaction_id
+        $order = Order::where('transaction_id', $sessionId)
+                      ->orWhere('transaction_id', $geideaOrderId)
                       ->first();
 
         if (!$order) {
@@ -146,8 +146,57 @@ class MakeOrderGediaController extends Controller
             return redirect(env('WEB_LINK'));
         }
 
-        if ($geideaOrderId && $geideaOrderId !== 'null') {
-            $order->update(['transaction_id' => $geideaOrderId]);
+        // Already paid
+        if ($order->status === 1) {
+            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
+        }
+
+        // Verify payment with Geidea
+        $settings = Geidia::first();
+        config([
+            'geidea.merchant_public_key' => $settings->geidea_public_key,
+            'geidea.api_password'        => $settings->api_password,
+            'geidea.environment'         => $settings->environment,
+        ]);
+
+        try {
+            $orderResult = Geidea::getOrder($geideaOrderId);
+            Log::info('Geidea return_page getOrder', $orderResult);
+        } catch (\Exception $e) {
+            Log::error('Geidea return_page getOrder failed: ' . $e->getMessage());
+            return redirect(env('WEB_LINK'));
+        }
+
+        if (!$orderResult['success'] || ($orderResult['order']['status'] ?? '') !== 'Success') {
+            Log::warning('Geidea payment not successful', [
+                'status' => $orderResult['order']['status'] ?? 'unknown'
+            ]);
+            return redirect(env('WEB_LINK'));
+        }
+
+        // Verify amount
+        $transactions = $orderResult['order']['transactions'] ?? [];
+        $successTxn   = collect($transactions)->firstWhere('status', 'Success');
+        $paidAmount   = $successTxn['amount'] ?? 0;
+
+        if ((float)$paidAmount !== (float)$order->amount) {
+            Log::critical('Geidea Amount mismatch', [
+                'expected' => $order->amount,
+                'paid'     => $paidAmount,
+            ]);
+            return redirect(env('WEB_LINK'));
+        }
+
+        // Update order
+        $order->update([
+            'status'         => 1,
+            'order_status'   => 'processing',
+            'transaction_id' => $geideaOrderId,
+        ]);
+
+        $user = User::find($order->user_id);
+        if ($user) {
+            $user->increment('points', $order->points);
         }
 
         return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
