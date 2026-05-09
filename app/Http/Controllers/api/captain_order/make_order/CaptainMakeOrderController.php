@@ -942,30 +942,29 @@ class CaptainMakeOrderController extends Controller
             || $product_off->contains($product->id)) {
                 return null;
             }
+            // Resolve tax before variations map
+            $resolved_tax = $product->tax_module
+                ->filter(fn($tm) => $tm->module->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all'])->count() > 0)
+                ->first()?->tax ?? $product->tax ?? null;
+
             $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product, $branch_id) {
+            use ($option_off, $product, $branch_id, $resolved_tax) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id){
+                $variation->options = $variation->options->map(function($element) use($branch_id, $resolved_tax){
                     $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                     ->first()?->price ?? $element->price;
+                    $element->new_tax = $resolved_tax;
                     return $element;
                 });
-              
                 return $variation;
             });
-            $product->addons = $product->addons->map(function ($addon) 
-            use ($product) {
+            $product->addons = $product->addons->map(function ($addon) use ($product) {
                 $addon->discount = $product->discount;
-              
                 return $addon;
             });
-             
-            $tax_module = $product->tax_module->first()?->tax;
-            if(!empty($tax_module)){
-                unset($product->tax);
-                $product->tax = $tax_module;
+            if (!empty($resolved_tax)) {
+                $product->tax = $resolved_tax;
             }
-              
             return $product;
         })->filter();
         $cafe_location = $this->cafe_location
@@ -1371,7 +1370,7 @@ class CaptainMakeOrderController extends Controller
         });
         return response()->json([
             'categories' => $categories,
-            'products' => $products, 
+            'products' => ProductResource::collection($products), 
             'products_weight' => $products_weight, 
             'favourite_products' => $favourite_products, 
             'favourite_products_weight' => $favourite_products_weight, 

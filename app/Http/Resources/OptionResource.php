@@ -17,9 +17,6 @@ class OptionResource extends JsonResource
         
         $locale = app()->getLocale(); // Use the application's current locale
         $tax_module = $this->new_tax ?? $this?->product?->tax;
-        if($this->id == 394){
-            dd($this);
-        }
         if ($this->taxes->setting == 'included') {
             $price = $this->price;
             $total_option_price = $price + $this?->product?->price;
