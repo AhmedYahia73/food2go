@@ -1002,7 +1002,7 @@ class CaptainMakeOrderController extends Controller
                 $query_option->with(['extra' => function($query_extra) use($locale){
                     $query_extra->with('parent_extra')
                     ->withLocale($locale);
-                }])
+                }, "product.discount", "product.tax"])
                 ->withLocale($locale);
             }]);
         }, 'sales_count', 'tax', 'tax_module.module'])
