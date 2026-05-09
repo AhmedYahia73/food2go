@@ -955,6 +955,12 @@ class CaptainMakeOrderController extends Controller
                 $resolved_tax = $product->tax ?? null;
             }
 
+            \Log::info('resolved_tax for product ' . $product->id, [
+                'tax_module_count' => $product->tax_module->count(),
+                'direct_tax' => $product->tax,
+                'resolved_tax' => $resolved_tax,
+            ]);
+
             $product->variations = $product->variations->map(function ($variation) 
             use ($option_off, $product, $branch_id, $resolved_tax) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
