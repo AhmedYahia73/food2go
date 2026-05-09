@@ -906,9 +906,7 @@ class CaptainMakeOrderController extends Controller
                 ->withLocale($locale);
             }]);
         }, 'sales_count', 'tax',
-        'tax_module' => fn($q) => $q->whereHas('module', fn($q) => $q->where('branch_id', $branch_id)
-        ->whereIn('app_type', ['pos', 'all']))
-        ->with('tax'),
+        'tax_module' => fn($q) => $q->with(['tax', 'module']),
         'tax_module.module'])
         ->withLocale($locale)
         ->where('item_type', '!=', 'online') 
@@ -944,12 +942,17 @@ class CaptainMakeOrderController extends Controller
             }
 
             // Resolve tax first before variations map
-            $resolved_tax = $product->tax_module->first()?->tax;
-            if (empty($resolved_tax) && !empty($product->tax_obj)) {
-                $resolved_tax = $product->tax_obj;
-            }
-            if (!empty($resolved_tax)) {
-                $product->tax = $resolved_tax;
+            $resolved_tax = $product->tax_module
+                ->filter(function($tm) use($branch_id, $module) {
+                    return $tm->module->where('branch_id', $branch_id)
+                        ->whereIn('app_type', ['pos', 'all'])
+                        ->count() > 0;
+                })
+                ->first()?->tax;
+
+            // Fallback to direct tax relation
+            if (empty($resolved_tax)) {
+                $resolved_tax = $product->tax ?? null;
             }
 
             $product->variations = $product->variations->map(function ($variation) 
