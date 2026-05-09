@@ -972,6 +972,34 @@ class CaptainMakeOrderController extends Controller
             $product->variations = $product->variations->map(function ($variation) use ($product) {
                 $variation->options = $variation->options->map(function($element) use($product){
                     $element->setRelation('product', $product);
+                    $price = $element->price;
+                    $discount = $price;
+                    $tax = $price;
+
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $price - $product->discount->amount * $price / 100;
+                        } else {
+                            $discount = $price - $product->discount->amount;
+                        }
+                    }
+
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $tax = $discount + $product->tax->amount * $discount / 100;
+                        } else {
+                            $tax = $discount + $product->tax->amount;
+                        }
+                    } else {
+                        $tax = $discount;
+                    }
+
+                    $element->after_discount   = $discount;
+                    $element->price_after_tax  = $tax;
+                    $element->final_price      = $tax;
+                    $element->discount_val     = $price - $discount;
+                    $element->tax_val          = round($tax - $discount, 2);
+                    $element->total_option_price = $tax + $product->price;
                     return $element;
                 });
                 return $variation;
