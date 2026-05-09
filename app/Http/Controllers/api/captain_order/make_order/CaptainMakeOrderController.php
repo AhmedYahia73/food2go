@@ -942,43 +942,26 @@ class CaptainMakeOrderController extends Controller
             || $product_off->contains($product->id)) {
                 return null;
             }
-            $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product, $branch_id) {
-                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id, $product){
-                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
-                    ->first()?->price ?? $element->price;
-                    // Pass product's tax and discount to option so OptionResource calculates correctly
-                    $element->setRelation('product', $product);
-                    return $element;
-                });
-              
-                return $variation;
-            });
-            $product->addons = $product->addons->map(function ($addon) 
-            use ($product) {
-                $addon->discount = $product->discount;
-              
-                return $addon;
-            });
-             
-            $tax_module = $product->tax_module->first()?->tax;
-            if(!empty($tax_module)){
-                unset($product->tax);
-                $product->tax = $tax_module;
+
+            // Resolve tax first before variations map
+            $resolved_tax = $product->tax_module->first()?->tax;
+            if (empty($resolved_tax) && !empty($product->tax_obj)) {
+                $resolved_tax = $product->tax_obj;
             }
-            // Fallback: use tax_obj (appended attribute) if tax is still null
-            if(empty($product->tax) && !empty($product->tax_obj)){
-                $product->tax = $product->tax_obj;
+            if (!empty($resolved_tax)) {
+                $product->tax = $resolved_tax;
             }
 
-            // Re-apply tax and discount to variations options after tax_module override
-            $product->variations = $product->variations->map(function ($variation) use ($product) {
-                $variation->options = $variation->options->map(function($element) use($product){
-                    $element->setRelation('product', $product);
-                    $price = $element->price;
+            $product->variations = $product->variations->map(function ($variation) 
+            use ($option_off, $product, $branch_id, $resolved_tax) {
+                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+                $variation->options = $variation->options->map(function($element) use($branch_id, $product, $resolved_tax){
+                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+                    ->first()?->price ?? $element->price;
+
+                    $price    = $element->price;
                     $discount = $price;
-                    $tax = $price;
+                    $tax      = $price;
 
                     if (!empty($product->discount)) {
                         if ($product->discount->type == 'precentage') {
@@ -988,23 +971,16 @@ class CaptainMakeOrderController extends Controller
                         }
                     }
 
-                    if (!empty($product->tax)) {
-                        if ($product->tax->type == 'precentage') {
-                            $tax = $discount + $product->tax->amount * $discount / 100;
+                    if (!empty($resolved_tax)) {
+                        if ($resolved_tax->type == 'precentage') {
+                            $tax = $discount + $resolved_tax->amount * $discount / 100;
                         } else {
-                            $tax = $discount + $product->tax->amount;
+                            $tax = $discount + $resolved_tax->amount;
                         }
                     } else {
                         $tax = $discount;
                     }
 
-                    $element->after_discount   = $discount;
-                    $element->price_after_tax  = $tax;
-                    $element->final_price      = $tax;
-                    $element->discount_val     = $price - $discount;
-                    $element->tax_val          = round($tax - $discount, 2);
-                    $element->total_option_price = $tax + $product->price;
-                    // Override the serialized fields directly on the model attributes
                     $element->setAttribute('after_disount', $discount);
                     $element->setAttribute('price_after_tax', $tax);
                     $element->setAttribute('final_price', $tax);
@@ -1015,7 +991,11 @@ class CaptainMakeOrderController extends Controller
                 });
                 return $variation;
             });
-              
+            $product->addons = $product->addons->map(function ($addon) 
+            use ($product) {
+                $addon->discount = $product->discount;
+                return $addon;
+            });
             return $product;
         })->filter();
         $cafe_location = $this->cafe_location
@@ -1115,10 +1095,39 @@ class CaptainMakeOrderController extends Controller
             $product->variations = $product->variations->map(function ($variation) 
             use ($option_off, $product, $branch_id, $tax_module) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id, $tax_module){
+                $variation->options = $variation->options->map(function($element) use($branch_id, $tax_module, $product){
                     $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                     ->first()?->price ?? $element->price;
-                    $element->new_tax = $tax_module;
+
+                    $price    = $element->price;
+                    $discount = $price;
+                    $tax      = $price;
+
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $price - $product->discount->amount * $price / 100;
+                        } else {
+                            $discount = $price - $product->discount->amount;
+                        }
+                    }
+
+                    $activeTax = $tax_module ?? $product->tax ?? null;
+                    if (!empty($activeTax)) {
+                        if ($activeTax->type == 'precentage') {
+                            $tax = $discount + $activeTax->amount * $discount / 100;
+                        } else {
+                            $tax = $discount + $activeTax->amount;
+                        }
+                    } else {
+                        $tax = $discount;
+                    }
+
+                    $element->setAttribute('after_disount', $discount);
+                    $element->setAttribute('price_after_tax', $tax);
+                    $element->setAttribute('final_price', $tax);
+                    $element->setAttribute('discount_val', $price - $discount);
+                    $element->setAttribute('tax_val', round($tax - $discount, 2));
+                    $element->setAttribute('total_option_price', $tax + $product->price);
                     return $element;
                 });
               
