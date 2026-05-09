@@ -1000,6 +1000,13 @@ class CaptainMakeOrderController extends Controller
                     $element->discount_val     = $price - $discount;
                     $element->tax_val          = round($tax - $discount, 2);
                     $element->total_option_price = $tax + $product->price;
+                    // Override the serialized fields directly on the model attributes
+                    $element->setAttribute('after_disount', $discount);
+                    $element->setAttribute('price_after_tax', $tax);
+                    $element->setAttribute('final_price', $tax);
+                    $element->setAttribute('discount_val', $price - $discount);
+                    $element->setAttribute('tax_val', round($tax - $discount, 2));
+                    $element->setAttribute('total_option_price', $tax + $product->price);
                     return $element;
                 });
                 return $variation;
