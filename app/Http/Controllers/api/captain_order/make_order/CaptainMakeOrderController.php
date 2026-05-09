@@ -963,6 +963,13 @@ class CaptainMakeOrderController extends Controller
             });
              
             $tax_module = $product->tax_module->first()?->tax;
+            \Log::info('product tax debug', [
+                'product_id' => $product->id,
+                'tax' => $product->tax,
+                'tax_module_count' => $product->tax_module->count(),
+                'tax_module_first' => $product->tax_module->first(),
+                'tax_module_tax' => $tax_module,
+            ]);
             if(!empty($tax_module)){
                 unset($product->tax);
                 $product->tax = $tax_module;
