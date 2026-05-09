@@ -1113,11 +1113,12 @@ class CaptainMakeOrderController extends Controller
                 return null;
             }
             $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product, $branch_id) {
+            use ($option_off, $product, $branch_id, $tax_module) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id){
+                $variation->options = $variation->options->map(function($element) use($branch_id, $tax_module){
                     $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                     ->first()?->price ?? $element->price;
+                    $element->new_tax = $tax_module;
                     return $element;
                 });
               

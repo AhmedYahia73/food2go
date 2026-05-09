@@ -16,6 +16,7 @@ class OptionResource extends JsonResource
     {   
         
         $locale = app()->getLocale(); // Use the application's current locale
+        $tax_module = $this->new_tax ?? $this?->product?->tax;
         if ($this->taxes->setting == 'included') {
             $price = $this->price;
             $total_option_price = $price + $this?->product?->price;
@@ -29,9 +30,9 @@ class OptionResource extends JsonResource
             else{
                 $discount = $price;
             }
-            $price = empty($this?->product?->tax) ? $discount: 
-            ($this?->product?->tax->type == 'value' ? $discount 
-            : $discount + $this?->product?->tax->amount * $discount / 100);
+            $price = empty($tax_module) ? $discount: 
+            ($tax_module->type == 'value' ? $discount 
+            : $discount + $tax_module->amount * $discount / 100);
             $total_option_price = $price + $this?->product?->price;
             $tax = $price;
             return [
@@ -68,9 +69,9 @@ class OptionResource extends JsonResource
             else{
                 $discount = $price;
             }
-            if (!empty($this?->product?->tax)) {
-                if ($this?->product?->tax->type == 'precentage') {
-                    $tax = $discount + $this?->product?->tax->amount * $discount / 100;
+            if (!empty($tax_module)) {
+                if ($tax_module->type == 'precentage') {
+                    $tax = $discount + $tax_module->amount * $discount / 100;
                 } else {
                     $tax = $discount;
                 }
