@@ -945,9 +945,11 @@ class CaptainMakeOrderController extends Controller
             $product->variations = $product->variations->map(function ($variation) 
             use ($option_off, $product, $branch_id) {
                 $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id){
+                $variation->options = $variation->options->map(function($element) use($branch_id, $product){
                     $element->price = $element?->option_pricing->where('branch_id', $branch_id)
                     ->first()?->price ?? $element->price;
+                    // Pass product's tax and discount to option so OptionResource calculates correctly
+                    $element->setRelation('product', $product);
                     return $element;
                 });
               
@@ -965,6 +967,15 @@ class CaptainMakeOrderController extends Controller
                 unset($product->tax);
                 $product->tax = $tax_module;
             }
+
+            // Re-apply tax and discount to variations options after tax_module override
+            $product->variations = $product->variations->map(function ($variation) use ($product) {
+                $variation->options = $variation->options->map(function($element) use($product){
+                    $element->setRelation('product', $product);
+                    return $element;
+                });
+                return $variation;
+            });
               
             return $product;
         })->filter();
