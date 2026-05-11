@@ -1171,7 +1171,7 @@ class ClientMakeOrderController extends Controller
                 $user->save();
                 $totalAmount = $data['amount_cents'];
                 $message = 'Your payment is being processed. Please wait...';
-                $redirectUrl = env('WEB_LINK') . '/orders/order_traking/' . $order->id;
+                $redirectUrl = env('WEB_LINK') . '/order_traking/' . $order->id;
                 $timer = 3; // 3  seconds
 
                 if($order->source == 'web'){

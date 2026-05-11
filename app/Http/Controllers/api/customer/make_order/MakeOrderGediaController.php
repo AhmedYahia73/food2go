@@ -78,7 +78,7 @@ class MakeOrderGediaController extends Controller
 
         if ($orderResult['order']['status'] === 'Success') {
             if ($order->status === 1) {
-                return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
+                return redirect(env('WEB_LINK') . '/order_traking/' . $order->id);
             }
 
             $order->update([
@@ -91,7 +91,7 @@ class MakeOrderGediaController extends Controller
                 $user->increment('points', $order->points);
             }
 
-            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
+            return redirect(env('WEB_LINK') . '/order_traking/' . $order->id);
         }
 
         Log::warning('Geidea order status not Success: ' . ($orderResult['order']['status'] ?? 'unknown'));
@@ -149,7 +149,7 @@ class MakeOrderGediaController extends Controller
 
         // Already paid
         if ($order->status === 1) {
-            return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
+            return redirect(env('WEB_LINK') . '/order_traking/' . $order->id);
         }
 
         // Verify payment with Geidea
@@ -200,6 +200,6 @@ class MakeOrderGediaController extends Controller
             $user->increment('points', $order->points);
         }
 
-        return redirect(env('WEB_LINK') . '/orders/order_traking/' . $order->id);
+        return redirect(env('WEB_LINK') . '/order_traking/' . $order->id);
     }
 }
