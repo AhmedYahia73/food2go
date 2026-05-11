@@ -64,7 +64,7 @@
                         containerId: "geidea-checkout",
                         onSuccess: function(data) {
                             console.log('Payment Success:', data);
-                            window.location.href = "{{ env('WEB_LINK') }}/orders/order_tracking";
+                            window.location.href = "{{ env('WEB_LINK') }}/order_tracking";
                         },
                         onError: function(data) {
                             console.log('Payment Error:', data);
