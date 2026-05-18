@@ -375,7 +375,6 @@ trait OrderFormat
     // ___________________________________________________________
 
     public function order_item_format($order, $id, $locale){
-        dd($order->order_details_data);
         if(empty($order->order_details_data)){
             return null;
         } 
