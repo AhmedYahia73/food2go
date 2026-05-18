@@ -387,6 +387,196 @@ class OrderController extends Controller
             'role' => $request->user()->role
         ]);  
     }
+
+    public function my_orders(Request $request){
+         // https://bcknd.food2go.online/admin/order
+    
+         $validator = Validator::make($request->all(), [
+            'order_status' => 'required|in:all,pending,delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
+            'per_page' => 'nullable|integer|min:1' // يمكنك إرسال عدد العناصر في الصفحة هنا
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if($from->from > $item[0]->from){
+                $from = $item[0];
+            }
+        }
+        if ($time_sittings->count() > 0) {
+            $from = $from->from;
+            $end = date('Y-m-d') . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+            if($start >= now()){
+                $start = $start->subDay();
+            }
+
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // } format('Y-m-d H:i:s')
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
+        $start = $start->subDay();
+        
+        // تحديد عدد العناصر في الصفحة (افتراضي 15 إذا لم يرسل في الطلب)
+        $perPage = $request->input('per_page', 15);
+
+        if ($request->user()->role == "admin") {
+            $orders = $this->orders
+            ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
+            ,'order_status', 'order_type',
+            'delivery_id', 'address_id', 'source',
+            'payment_method_id', 'rate', 'transfer_from_id',
+            'status', 'points', 'coupon_discount', 'rejected_reason', 'transaction_id', "delivery_fees")
+            ->where('pos', 0)
+            ->whereBetween('created_at', [$start, $end])
+            ->whereNull('captain_id')
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            });
+            if($request->order_status != "all"){
+                $orders = $orders->where("order_status", $request->order_status);
+            }
+           $orders = $orders->orderByDesc('id')
+            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+                $query->select('id', 'zone_id')
+                ->with('zone:id,zone');
+            }, 'transfer_from:id,name', 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+            'schedule:id,name', 'delivery'])
+            ->paginate($perPage) // تم استبدال get بـ paginate
+            ->through(function($item){ // تم استبدال map بـ through للحفاظ على الـ pagination meta
+                return [ 
+                    'id' => $item->id,
+                    'order_number' => $item->id - app('first_order_yesterday'),
+                    'created_at' => $item->created_at,
+                    'transfer_from' => $item?->transfer_from?->name,
+                    'amount' => $item->amount,
+                    'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
+                    'order_status' => $item->order_status,
+                    'delivery_fees' => $item->delivery_fees,
+                    'source' => $item->source,
+                    'coupon_discount' => $item->coupon_discount,
+                    'status' => $item->status,
+                    'points' => $item->points, 
+                    'rejected_reason' => $item->rejected_reason,
+                    'transaction_id' => $item->transaction_id,
+                    'payment' => $item->payment_method_id == 2 && $item->operation_status != "delivered"? "UnPaid" : "Paid",
+                    'rate' => $item->rate,
+                    'user' => [
+                        'f_name' => $item?->user?->f_name,
+                        'l_name' => $item?->user?->l_name,
+                        'phone' => $item?->user?->phone],
+                    'branch' => ['name' => $item?->branch?->name, ],
+                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                    'admin' => ['name' => $item?->admin?->name,],
+                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'schedule' => ['name' => $item?->schedule?->name],
+                    'delivery' => ['name' => $item?->delivery?->name], 
+                ];
+            });
+        }
+        else{
+        $orders = $this->orders
+            ->select('id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status'
+            ,'order_status', 'coupon_discount',
+            'delivery_id', 'address_id', 'source', 'transfer_from_id',
+            'payment_method_id', 'order_type', 'rate',
+            'status', 'points', 'rejected_reason', 'transaction_id', "delivery_fees")
+            ->where('pos', 0)
+            ->where("branch_id", $request->user()->id)
+            ->whereBetween('created_at', [$start, $end])
+            ->whereNull('captain_id')
+            ->where(function($query) {
+                $query->where('status', 1)
+                ->orWhereNull('status');
+            });
+            if($request->order_status != "all"){
+                $orders = $orders->where("order_status", $request->order_status);
+            }
+           $orders = $orders->orderByDesc('id')
+            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
+                $query->select('id', 'zone_id')
+                ->with('zone:id,zone');
+            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+            'schedule:id,name', 'delivery', 'transfer_from:id,name'])
+            ->paginate($perPage) // تم استبدال get بـ paginate
+            ->through(function($item){ // تم استبدال map بـ through للحفاظ على الـ pagination meta
+                return [ 
+                    'id' => $item->id,
+                    'order_number' => $item->id - app('first_order_today'),
+                    'created_at' => $item->created_at,
+                    'amount' => $item->amount,
+                    'rate' => $item->rate,
+                    'operation_status' => $item->operation_status,
+                    'order_type' => $item->order_type,
+                    'order_status' => $item->order_status,
+                    'delivery_fees' => $item->delivery_fees,
+                    'transfer_from' => $item?->transfer_from?->name,
+                    'source' => $item->source,
+                    "coupon_discount" => $item->coupon_discount,
+                    'payment' => $item->payment_method_id == 2 && $item->operation_status != "delivered"? "UnPaid" : "Paid",
+                    'status' => $item->status,
+                    'points' => $item->points, 
+                    'rejected_reason' => $item->rejected_reason,
+                    'transaction_id' => $item->transaction_id,
+                    'user' => [
+                        'f_name' => $item?->user?->f_name,
+                        'l_name' => $item?->user?->l_name,
+                        'phone' => $item?->user?->phone],
+                    'branch' => ['name' => $item?->branch?->name, ],
+                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                    'admin' => ['name' => $item?->admin?->name,],
+                    'payment_method' => ['name' => $item?->payment_method?->name],
+                    'schedule' => ['name' => $item?->schedule?->name],
+                    'delivery' => ['name' => $item?->delivery?->name], 
+                ];
+            });
+        }
+        $deliveries = $this->deliveries
+        ->get();
+        $branches = $this->branches
+        ->where('status', 1)
+        ->get();
+
+        return response()->json([
+            'orders' => $orders, 
+            'deliveries' => $deliveries,
+            'branches' => $branches,
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
+            'role' => $request->user()->role
+        ]);
+    }
  
     public function order_details(Request $request){
         // https://bcknd.food2go.online/admin/order 
