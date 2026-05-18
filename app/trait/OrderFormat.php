@@ -378,7 +378,7 @@ trait OrderFormat
         dd($order);
         if(empty($order->order_details_data)){
             return null;
-        }
+        } 
 
         // Batch load all translations in ONE query
         $allKeys = $this->extractTranslationKeys($order->order_details_data);
