@@ -521,238 +521,45 @@ class OrderController extends Controller
         } 
         $start = $start->subDay();
         if ($request->user()->role == "admin") {
-            $orders = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $pending = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'pending')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $confirmed = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'confirmed')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $processing = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'processing')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $out_for_delivery = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'out_for_delivery')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })  
-            ->count();
-            $delivered = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'delivered')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $returned = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'returned')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $faild_to_deliver = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'faild_to_deliver')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $canceled = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'canceled')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $scheduled = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'scheduled')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count();
-            $refund = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'refund')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->count(); 
+            $counts = $this->orders
+                ->select('order_status', \DB::raw('count(*) as total'))
+                ->where('pos', 0)
+                ->whereBetween('created_at', [$start, $end])
+                ->whereNull('captain_id')
+                ->where(function($query) {
+                    $query->where('status', 1)
+                    ->orWhereNull('status');
+                })
+                ->groupBy('order_status')
+                ->pluck('total', 'order_status')
+                ->toArray();
+        } else {
+            $counts = $this->orders
+                ->select('order_status', \DB::raw('count(*) as total'))
+                ->where('pos', 0)
+                ->whereBetween('created_at', [$start, $end])
+                ->whereNull('captain_id')
+                ->where(function($query) {
+                    $query->where('status', 1)
+                    ->orWhereNull('status');
+                })
+                ->where("branch_id", $request->user()->id)
+                ->groupBy('order_status')
+                ->pluck('total', 'order_status')
+                ->toArray();
         }
-        else{
-            $orders = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $pending = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'pending')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $confirmed = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'confirmed')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $processing = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'processing')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $out_for_delivery = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'out_for_delivery')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)  
-            ->count();
-            $delivered = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'delivered')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $returned = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'returned')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $faild_to_deliver = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'faild_to_deliver')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $canceled = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'canceled')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $scheduled = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'scheduled')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count();
-            $refund = $this->orders
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where('order_status', 'refund')
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where("branch_id", $request->user()->id)
-            ->count(); 
-        }
+
+        $orders = array_sum($counts);
+        $pending = $counts['pending'] ?? 0;
+        $confirmed = $counts['confirmed'] ?? 0;
+        $processing = $counts['processing'] ?? 0;
+        $out_for_delivery = $counts['out_for_delivery'] ?? 0;
+        $delivered = $counts['delivered'] ?? 0;
+        $returned = $counts['returned'] ?? 0;
+        $faild_to_deliver = $counts['faild_to_deliver'] ?? 0;
+        $canceled = $counts['canceled'] ?? 0;
+        $scheduled = $counts['scheduled'] ?? 0;
+        $refund = $counts['refund'] ?? 0;
 
         return response()->json([
             'orders' => $orders,

@@ -173,7 +173,7 @@ class HomeController extends Controller
                 'category_addons' => fn($q) => $q->withLocale($locale),
                 'sub_category_addons' => fn($q) => $q->withLocale($locale),
                 'excludes' => fn($q) => $q->withLocale($locale),
-                'discount', 'extra', 'sales_count', 'tax',
+                'discount', 'extra', 'tax',
                 'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
                 'variations' => fn($q) => $q->withLocale($locale)->with([
                     'options' => fn($q) => $q
@@ -181,6 +181,10 @@ class HomeController extends Controller
                         ->withLocale($locale),
                 ]),
             ])
+            ->withSum('sales_count as sales_count_fixed', 'count')
+            ->withSum(['sales_count as sales_count_daily' => function ($query) {
+                $query->where('date', date('Y-m-d'));
+            }], 'count')
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')
             ->where('status', 1)
@@ -195,11 +199,9 @@ class HomeController extends Controller
                 $product->price = $product->product_pricing->first()?->price ?? $product->price;
 
                 if ($product->stock_type === 'fixed') {
-                    $product->count = $product->sales_count->sum('count');
+                    $product->count = $product->sales_count_fixed ?? 0;
                 } elseif ($product->stock_type === 'daily') {
-                    $product->count = $product->sales_count
-                        ->where('date', date('Y-m-d'))
-                        ->sum('count');
+                    $product->count = $product->sales_count_daily ?? 0;
                 }
 
                 $product->in_stock = $product->number > $product->count;
@@ -251,7 +253,7 @@ class HomeController extends Controller
                     'category_addons' => fn($q) => $q->withLocale($locale),
                     'sub_category_addons' => fn($q) => $q->withLocale($locale),
                     'excludes' => fn($q) => $q->withLocale($locale),
-                    'discount', 'extra', 'sales_count', 'tax',
+                    'discount', 'extra', 'tax',
                     'variations' => fn($q) => $q->with([
                         'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
                     ])->withLocale($locale),
@@ -370,7 +372,7 @@ class HomeController extends Controller
                 'category_addons' => fn($q) => $q->withLocale($locale),
                 'sub_category_addons' => fn($q) => $q->withLocale($locale),
                 'excludes' => fn($q) => $q->withLocale($locale),
-                'discount', 'extra', 'sales_count', 'tax',
+                'discount', 'extra', 'tax',
                 'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
                 'variations' => fn($q) => $q->withLocale($locale)->with([
                     'options' => fn($q) => $q
@@ -378,6 +380,10 @@ class HomeController extends Controller
                         ->withLocale($locale),
                 ]),
             ])
+            ->withSum('sales_count as sales_count_fixed', 'count')
+            ->withSum(['sales_count as sales_count_daily' => function ($query) {
+                $query->where('date', date('Y-m-d'));
+            }], 'count')
             ->withLocale($locale)
             ->where('id', $id)
             ->where('item_type', '!=', 'offline')
@@ -390,11 +396,9 @@ class HomeController extends Controller
                 $product->price = $product->product_pricing->first()?->price ?? $product->price;
 
                 if ($product->stock_type === 'fixed') {
-                    $product->count = $product->sales_count->sum('count');
+                    $product->count = $product->sales_count_fixed ?? 0;
                 } elseif ($product->stock_type === 'daily') {
-                    $product->count = $product->sales_count
-                        ->where('date', date('Y-m-d'))
-                        ->sum('count');
+                    $product->count = $product->sales_count_daily ?? 0;
                 }
 
                 $product->in_stock = $product->number > $product->count;
@@ -445,7 +449,7 @@ class HomeController extends Controller
                     'category_addons' => fn($q) => $q->withLocale($locale),
                     'sub_category_addons' => fn($q) => $q->withLocale($locale),
                     'excludes' => fn($q) => $q->withLocale($locale),
-                    'discount', 'extra', 'sales_count', 'tax',
+                    'discount', 'extra', 'tax',
                     'variations' => fn($q) => $q->with([
                         'options' => fn($oq) => $oq->with(['option_pricing'])
                         ->withLocale($locale) // تأكد دي مطلوبة

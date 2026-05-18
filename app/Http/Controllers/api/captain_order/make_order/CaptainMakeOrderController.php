@@ -251,7 +251,7 @@ class CaptainMakeOrderController extends Controller
             'category_addons' => fn($q) => $q->withLocale($locale),
             'sub_category_addons' => fn($q) => $q->withLocale($locale),
             'excludes' => fn($q) => $q->withLocale($locale),
-            'discount', 'extra', 'sales_count', 'tax',
+            'discount', 'extra', 'tax',
             'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             'variations' => fn($q) => $q->withLocale($locale)->with([
                 'options' => fn($q) => $q
@@ -262,6 +262,10 @@ class CaptainMakeOrderController extends Controller
                 ->with(['products' => fn($q) => $q
                 ->select("products.id", "products.name")->withLocale($locale)]),
         ])
+        ->withSum('sales_count as sales_count_fixed', 'count')
+        ->withSum(['sales_count as sales_count_daily' => function ($query) {
+            $query->where('date', date('Y-m-d'));
+        }], 'count')
         ->withLocale($locale)
         ->where('item_type', '!=', 'online') 
         ->where('status', 1)
@@ -269,11 +273,9 @@ class CaptainMakeOrderController extends Controller
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
         
             if ($product->stock_type === 'fixed') {
-                $product->count = $product->sales_count->sum('count');
+                $product->count = $product->sales_count_fixed ?? 0;
             } elseif ($product->stock_type === 'daily') {
-                $product->count = $product->sales_count
-                    ->where('date', date('Y-m-d'))
-                    ->sum('count');
+                $product->count = $product->sales_count_daily ?? 0;
             }
 
             $product->in_stock = $product->number > $product->count;
@@ -317,7 +319,7 @@ class CaptainMakeOrderController extends Controller
             'category_addons' => fn($q) => $q->withLocale($locale),
             'sub_category_addons' => fn($q) => $q->withLocale($locale),
             'excludes' => fn($q) => $q->withLocale($locale),
-            'discount', 'extra', 'sales_count', 'tax',
+            'discount', 'extra', 'tax',
             'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             'variations' => fn($q) => $q->withLocale($locale)->with([
                 'options' => fn($q) => $q
@@ -328,6 +330,10 @@ class CaptainMakeOrderController extends Controller
                 ->with(['products' => fn($q) => $q
                 ->select("products.id", "products.name")->withLocale($locale)]),
         ])
+        ->withSum('sales_count as sales_count_fixed', 'count')
+        ->withSum(['sales_count as sales_count_daily' => function ($query) {
+            $query->where('date', date('Y-m-d'));
+        }], 'count')
         ->withLocale($locale)
         ->where('item_type', '!=', 'online') 
         ->where("favourite", 1)
@@ -336,11 +342,9 @@ class CaptainMakeOrderController extends Controller
         ->map(function($product) use($category_off, $product_off, $option_off, $branch_id){
           
             if ($product->stock_type === 'fixed') {
-                $product->count = $product->sales_count->sum('count');
+                $product->count = $product->sales_count_fixed ?? 0;
             } elseif ($product->stock_type === 'daily') {
-                $product->count = $product->sales_count
-                    ->where('date', date('Y-m-d'))
-                    ->sum('count');
+                $product->count = $product->sales_count_daily ?? 0;
             }
 
             $product->in_stock = $product->number > $product->count;
@@ -430,7 +434,7 @@ class CaptainMakeOrderController extends Controller
                 'category_addons' => fn($q) => $q->withLocale($locale),
                 'sub_category_addons' => fn($q) => $q->withLocale($locale),
                 'excludes' => fn($q) => $q->withLocale($locale),
-                'discount', 'extra', 'sales_count', 'tax',
+                'discount', 'extra', 'tax',
                 'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
                 'variations' => fn($q) => $q->withLocale($locale)->with([
                     'options' => fn($q) => $q
@@ -443,17 +447,19 @@ class CaptainMakeOrderController extends Controller
                     ->with(['products' => fn($q) => $q
                     ->select("products.id", "products.name")->withLocale($locale)]),
             ])
+            ->withSum('sales_count as sales_count_fixed', 'count')
+            ->withSum(['sales_count as sales_count_daily' => function ($query) {
+                $query->where('date', date('Y-m-d'));
+            }], 'count')
             ->withLocale($locale)
             ->where('id', $id)
             ->get()
             ->map(function ($product) use ($option_off, $branch_id) {  
 
                 if ($product->stock_type === 'fixed') {
-                    $product->count = $product->sales_count->sum('count');
+                    $product->count = $product->sales_count_fixed ?? 0;
                 } elseif ($product->stock_type === 'daily') {
-                    $product->count = $product->sales_count
-                        ->where('date', date('Y-m-d'))
-                        ->sum('count');
+                    $product->count = $product->sales_count_daily ?? 0;
                 }
          
                 $tax_module = $product->tax_module->first()?->tax;
@@ -535,7 +541,7 @@ class CaptainMakeOrderController extends Controller
                 'category_addons' => fn($q) => $q->withLocale($locale),
                 'sub_category_addons' => fn($q) => $q->withLocale($locale),
                 'excludes' => fn($q) => $q->withLocale($locale),
-                'discount', 'extra', 'sales_count', 'tax',
+                'discount', 'extra', 'tax',
                 'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
                 'variations' => fn($q) => $q->withLocale($locale)->with([
                     'options' => fn($q) => $q
@@ -546,6 +552,10 @@ class CaptainMakeOrderController extends Controller
                     ->with(['products' => fn($q) => $q
                     ->select("products.id", "products.name")->withLocale($locale)]),
             ])
+            ->withSum('sales_count as sales_count_fixed', 'count')
+            ->withSum(['sales_count as sales_count_daily' => function ($query) {
+                $query->where('date', date('Y-m-d'));
+            }], 'count')
             ->withLocale($locale)
             ->where('item_type', '!=', 'online')
             ->where('status', 1)
@@ -560,11 +570,9 @@ class CaptainMakeOrderController extends Controller
             ->map(function ($product) use ($option_off, $branch_id) {  
 
                 if ($product->stock_type === 'fixed') {
-                    $product->count = $product->sales_count->sum('count');
+                    $product->count = $product->sales_count_fixed ?? 0;
                 } elseif ($product->stock_type === 'daily') {
-                    $product->count = $product->sales_count
-                        ->where('date', date('Y-m-d'))
-                        ->sum('count');
+                    $product->count = $product->sales_count_daily ?? 0;
                 }
 
                 $product->in_stock = $product->number > $product->count;

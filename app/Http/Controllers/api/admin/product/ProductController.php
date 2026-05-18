@@ -91,37 +91,49 @@ class ProductController extends Controller
         $variation_options_extra = [];
         $options = [];
         $extra_option = [];
+        $keys = array_filter([$product->name, $product->description]);
+        foreach ($product->excludes as $exclude) { $keys[] = $exclude->name; }
+        foreach ($product->extra->whereNull('variation_id') as $extra) { $keys[] = $extra->name; }
+        foreach ($product->variations as $variation_item) {
+            $keys[] = $variation_item->name;
+            foreach ($variation_item->options as $option) {
+                $keys[] = $option->name;
+                foreach ($option->extra as $extra_item) {
+                    $keys[] = $extra_item->name;
+                }
+            }
+        }
+        $keys = array_unique(array_filter($keys));
+
         foreach ($translations as $key => $item) {
-            $translation_file = $this->translation_tbl
+            $translation_dict = $this->translation_tbl
             ->where('locale', $item->name)
-            ->get();
+            ->whereIn('key', $keys)
+            ->pluck('value', 'key')
+            ->toArray();
 
             $product_names[] = [
                 'tranlation_id' => $item->id,
                 'tranlation_name' => $item->name,
-                'product_name' => $translation_file->where('key', $product->name)
-                ->first()->value ?? null
+                'product_name' => $translation_dict[$product->name] ?? null
             ];
             $product_descriptions[] = [
                 'tranlation_id' => $item->id,
                 'tranlation_name' => $item->name,
-                'product_description' => $translation_file->where('key', $product->description)
-                ->first()->value ?? null
+                'product_description' => $translation_dict[$product->description] ?? null
             ];
             foreach ($product->excludes as $exclude) {
                 $excludes[$exclude->id]['names'][] = [
                     'tranlation_id' => $item->id,
                     'tranlation_name' => $item->name,
-                    'exclude_name' => $translation_file->where('key', $exclude->name)
-                    ->first()->value ?? null
+                    'exclude_name' => $translation_dict[$exclude->name] ?? null
                 ];
             }
             foreach ($product->extra->whereNull('variation_id') as $key => $extra) {
                 $extras[$extra->id]['names'][] = [
                     'tranlation_id' => $item->id,
                     'tranlation_name' => $item->name,
-                    'extra_name' =>$translation_file->where('key', $extra->name)
-                    ->first()->value ?? null
+                    'extra_name' => $translation_dict[$extra->name] ?? null
                 ];
                 $extras[$extra->id]['extra_price'] = $extra->price;
             }
@@ -129,8 +141,7 @@ class ProductController extends Controller
                 $variation[$variation_item->id]['names'][] = [
                     'tranlation_id' => $item->id,
                     'tranlation_name' => $item->name,
-                    'name' => $translation_file->where('key', $variation_item->name)
-                    ->first()->value ?? null
+                    'name' => $translation_dict[$variation_item->name] ?? null
                 ];
                 $variation[$variation_item->id]['type'] = $variation_item->type;
                 $variation[$variation_item->id]['min'] = $variation_item->min ?? 0;
@@ -140,8 +151,7 @@ class ProductController extends Controller
                     $options[$variation_item->id][$option->id]['names'][] = [
                         'tranlation_id' => $item->id,
                         'tranlation_name' => $item->name,
-                        'name' => $translation_file->where('key', $option->name)
-                        ->first()->value ?? null
+                        'name' => $translation_dict[$option->name] ?? null
                     ];
                     $options[$variation_item->id][$option->id]['price'] = $option->price;
                     $options[$variation_item->id][$option->id]['status'] = $option->status;
@@ -150,8 +160,7 @@ class ProductController extends Controller
                         $extra_options[$option->id][$extra_item->id]['extra_names'][] = [
                             'tranlation_id' => $item->id,
                             'tranlation_name' => $item->name,
-                            'extra_name' => $translation_file->where('key', $extra_item->name)
-                            ->first()->value ?? null
+                            'extra_name' => $translation_dict[$extra_item->name] ?? null
                         ];
                         $extra_options[$option->id][$extra_item->id]['extra_price'] = $extra_item->price;
                     }

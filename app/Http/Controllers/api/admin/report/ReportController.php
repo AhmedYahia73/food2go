@@ -273,21 +273,19 @@ class ReportController extends Controller
     public function sales_product(Request $request)
     { 
         //'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
-        $online_pickup_order = Order::
-        where("pos", 0)
-        ->where("order_type", "take_away") 
-        ->where("order_status", "delivered")
-        ->sum("amount");
-        $online_delivery_order = Order::
-        where("pos", 0)
-        ->where("order_type", "delivery")
-        ->where("order_status", "delivered")
-        ->sum("amount");
-        $online_dine_in_order = Order::
-        where("pos", 0)
-        ->where("order_type", "dine_in")
-        ->where("order_status", "delivered")
-        ->sum("amount");
+        $sales = Order::where('order_status', 'delivered')
+            ->select('pos', 'order_type', DB::raw('SUM(amount) as total_amount'))
+            ->groupBy('pos', 'order_type')
+            ->get();
+
+        $online_pickup_order = $sales->where('pos', 0)->where('order_type', 'take_away')->first()?->total_amount ?? 0;
+        $online_delivery_order = $sales->where('pos', 0)->where('order_type', 'delivery')->first()?->total_amount ?? 0;
+        $online_dine_in_order = $sales->where('pos', 0)->where('order_type', 'dine_in')->first()?->total_amount ?? 0;
+
+        $offline_pickup_order = $sales->where('pos', 1)->where('order_type', 'take_away')->first()?->total_amount ?? 0;
+        $offline_delivery_order = $sales->where('pos', 1)->where('order_type', 'delivery')->first()?->total_amount ?? 0;
+        $offline_dine_in_order = $sales->where('pos', 1)->where('order_type', 'dine_in')->first()?->total_amount ?? 0;
+
         $online_order = [
             "online_pickup_order" => $online_pickup_order,
             "online_delivery_order" => $online_delivery_order,
@@ -295,22 +293,6 @@ class ReportController extends Controller
             "total_online_order" => $online_pickup_order + $online_delivery_order + $online_dine_in_order,
         ];
 
-
-      $offline_pickup_order = Order::
-        where("pos", 1)
-        ->where("order_type", "take_away") 
-        ->where("order_status", "delivered")
-        ->sum("amount");
-        $offline_delivery_order = Order::
-        where("pos", 1)
-        ->where("order_type", "delivery")
-        ->where("order_status", "delivered")
-        ->sum("amount");
-        $offline_dine_in_order = Order::
-        where("pos", 1)
-        ->where("order_type", "dine_in")
-        ->where("order_status", "delivered")
-        ->sum("amount");
         $pos_order = [
             "offline_pickup_order" => $offline_pickup_order,
             "offline_delivery_order" => $offline_delivery_order,
@@ -362,106 +344,43 @@ class ReportController extends Controller
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         }
-        //'pending','confirmed','processing','out_for_delivery','delivered','returned','faild_to_deliver','canceled','scheduled','refund'
-        $online_pickup_order = Order::
-        where("pos", 0)
-        ->where("order_type", "take_away") 
-        ->where("order_status", "delivered");
-        $online_delivery_order = Order::
-        where("pos", 0)
-        ->where("order_type", "delivery")
-        ->where("order_status", "delivered");
-        $online_dine_in_order = Order::
-        where("pos", 0)
-        ->where("order_type", "dine_in")
-        ->where("order_status", "delivered");
+        $query = Order::where("order_status", "delivered")
+            ->select('pos', 'order_type', DB::raw('SUM(amount) as total_amount'));
 
-      $offline_pickup_order = Order::
-        where("pos", 1)
-        ->where("order_type", "take_away") 
-        ->where("order_status", "delivered");
-        $offline_delivery_order = Order::
-        where("pos", 1)
-        ->where("order_type", "delivery")
-        ->where("order_status", "delivered");
-        $offline_dine_in_order = Order::
-        where("pos", 1)
-        ->where("order_type", "dine_in")
-        ->where("order_status", "delivered");
         if($request->from){
-            $online_pickup_order = $online_pickup_order
-            ->where("created_at", ">=", $start);
-            $online_delivery_order = $online_delivery_order
-            ->where("created_at", ">=", $start);
-            $online_dine_in_order = $online_dine_in_order
-            ->where("created_at", ">=", $start);
-
-            $offline_pickup_order = $offline_pickup_order
-            ->where("created_at", ">=", $start);
-            $offline_delivery_order = $offline_delivery_order
-            ->where("created_at", ">=", $start);
-            $offline_dine_in_order = $offline_dine_in_order
-            ->where("created_at", ">=", $start);
+            $query->where("created_at", ">=", $start);
         }
         if($request->to){
-            $online_pickup_order = $online_pickup_order
-            ->where("created_at", "<=", $end);
-            $online_delivery_order = $online_delivery_order
-            ->where("created_at", "<=", $end);
-            $online_dine_in_order = $online_dine_in_order
-            ->where("created_at", "<=", $end);
-
-            $offline_pickup_order = $offline_pickup_order
-            ->where("created_at", "<=", $end);
-            $offline_delivery_order = $offline_delivery_order
-            ->where("created_at", "<=", $end);
-            $offline_dine_in_order = $offline_dine_in_order
-            ->where("created_at", "<=", $end);
+            $query->where("created_at", "<=", $end);
         }
-
         if($request->branch_id){
-            $online_pickup_order = $online_pickup_order
-            ->where("branch_id", "<=", $request->branch_id);
-            $online_delivery_order = $online_delivery_order
-            ->where("branch_id", "<=", $request->branch_id);
-            $online_dine_in_order = $online_dine_in_order
-            ->where("branch_id", "<=", $request->branch_id);
-
-            $offline_pickup_order = $offline_pickup_order
-            ->where("branch_id", "<=", $request->branch_id);
-            $offline_delivery_order = $offline_delivery_order
-            ->where("branch_id", "<=", $request->branch_id);
-            $offline_dine_in_order = $offline_dine_in_order
-            ->where("branch_id", "<=", $request->branch_id);
+            $query->where("branch_id", $request->branch_id);
         }
-
         if($request->order_type){
-            $online_pickup_order = $online_pickup_order
-            ->where("order_type", "<=", $request->order_type);
-            $online_delivery_order = $online_delivery_order
-            ->where("order_type", "<=", $request->order_type);
-            $online_dine_in_order = $online_dine_in_order
-            ->where("order_type", "<=", $request->order_type);
-
-            $offline_pickup_order = $offline_pickup_order
-            ->where("order_type", "<=", $request->order_type);
-            $offline_delivery_order = $offline_delivery_order
-            ->where("order_type", "<=", $request->order_type);
-            $offline_dine_in_order = $offline_dine_in_order
-            ->where("order_type", "<=", $request->order_type);
+            $query->where("order_type", $request->order_type);
         }
+
+        $sales = $query->groupBy('pos', 'order_type')->get();
+
+        $online_pickup_order = $sales->where('pos', 0)->where('order_type', 'take_away')->first()?->total_amount ?? 0;
+        $online_delivery_order = $sales->where('pos', 0)->where('order_type', 'delivery')->first()?->total_amount ?? 0;
+        $online_dine_in_order = $sales->where('pos', 0)->where('order_type', 'dine_in')->first()?->total_amount ?? 0;
+
+        $offline_pickup_order = $sales->where('pos', 1)->where('order_type', 'take_away')->first()?->total_amount ?? 0;
+        $offline_delivery_order = $sales->where('pos', 1)->where('order_type', 'delivery')->first()?->total_amount ?? 0;
+        $offline_dine_in_order = $sales->where('pos', 1)->where('order_type', 'dine_in')->first()?->total_amount ?? 0;
 
         $pos_order = [
-            "offline_pickup_order" => $offline_pickup_order->sum("amount"),
-            "offline_delivery_order" => $offline_delivery_order->sum("amount"),
-            "offline_dine_in_order" => $offline_dine_in_order->sum("amount"),
-            "total_offline_order" => $offline_pickup_order->sum("amount") + $offline_delivery_order->sum("amount") + $offline_dine_in_order->sum("amount"),
+            "offline_pickup_order" => $offline_pickup_order,
+            "offline_delivery_order" => $offline_delivery_order,
+            "offline_dine_in_order" => $offline_dine_in_order,
+            "total_offline_order" => $offline_pickup_order + $offline_delivery_order + $offline_dine_in_order,
         ];
         $online_order = [
-            "online_pickup_order" => $online_pickup_order->sum("amount"),
-            "online_delivery_order" => $online_delivery_order->sum("amount"),
-            "online_dine_in_order" => $online_dine_in_order->sum("amount"),
-            "total_online_order" => $online_pickup_order->sum("amount") + $online_delivery_order->sum("amount") + $online_dine_in_order->sum("amount"),
+            "online_pickup_order" => $online_pickup_order,
+            "online_delivery_order" => $online_delivery_order,
+            "online_dine_in_order" => $online_dine_in_order,
+            "total_online_order" => $online_pickup_order + $online_delivery_order + $online_dine_in_order,
         ];
 
         return response()->json([
