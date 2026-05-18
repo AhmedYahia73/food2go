@@ -232,123 +232,191 @@ trait PlaceOrder
             $orderRequest['receipt'] = $request->receipt;
         }
         $orderRequest['points'] = $points;
-        $order = $this->order->create($orderRequest);
+        $order = $this->order
+        ->create($orderRequest);
         if(!empty($user)){
             $user->save();
         }
         if (isset($request->products)) {
-            $request->products = is_string($request->products) ? json_decode($request->products, true) : (array) $request->products;
-
-            // Batch load all needed models at once
-            $productIds   = collect($request->products)->pluck('product_id')->unique()->all();
-            $excludeIds   = collect($request->products)->flatMap(fn($p) => $p['exclude_id'] ?? [])->unique()->all();
-            $addonIds     = collect($request->products)->flatMap(fn($p) => collect($p['addons'] ?? [])->pluck('addon_id'))->unique()->all();
-            $extraIds     = collect($request->products)->flatMap(fn($p) => array_merge($p['extra_id'] ?? [], $p['product_extra_id'] ?? []))->unique()->all();
-            $variationIds = collect($request->products)->flatMap(fn($p) => collect($p['variation'] ?? [])->pluck('variation_id'))->unique()->all();
-            $optionIds    = collect($request->products)->flatMap(fn($p) => collect($p['variation'] ?? [])->flatMap(fn($v) => $v['option_id'] ?? []))->unique()->all();
-
-            $productsMap   = $this->products->whereIn('id', $productIds)->get()->keyBy('id');
-            $excludesMap   = !empty($excludeIds) ? $this->excludes->whereIn('id', $excludeIds)->get()->keyBy('id') : collect();
-            $addonsMap     = !empty($addonIds) ? $this->addons->whereIn('id', $addonIds)->get()->keyBy('id') : collect();
-            $extrasMap     = !empty($extraIds) ? $this->extras->whereIn('id', $extraIds)->get()->keyBy('id') : collect();
-            $variationsMap = !empty($variationIds) ? $this->variation->whereIn('id', $variationIds)->get()->keyBy('id') : collect();
-            $optionsMap    = !empty($optionIds) ? $this->options->whereIn('id', $optionIds)->get()->keyBy('id') : collect();
-
-            $orderDetailsInsert = [];
-            $now = now();
-
+            $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
-                $order_details[$key] = ['extras' => [], 'addons' => [], 'excludes' => [], 'product' => [], 'variations' => []];
+                // $amount_product = 0;
+                $order_details[$key]['extras'] = [];
+                $order_details[$key]['addons'] = [];
+                $order_details[$key]['excludes'] = [];
+                $order_details[$key]['product'] = [];
+                $order_details[$key]['variations'] = [];
 
-                $product_item = $productsMap[$product['product_id']] ?? null;
-                if (!$product_item) continue;
-
-                $product_item_resource = ProductResource::collection(collect([$product_item]));
-                $product_item_resource = count($product_item_resource) > 0 ? $product_item_resource[0] : null;
+                $product_item = $this->products
+                ->where('id', $product['product_id'])
+                ->first();
+                $product_item = collect([$product_item]);
+                $product_item = ProductResource::collection($product_item);
+                $product_item = count($product_item) > 0 ? $product_item[0] : null;
                 $order_details[$key]['product'][] = [
-                    'product' => $product_item_resource,
-                    'count'   => $product['count'],
-                    'notes'   => $product['note'] ?? null,
+                    'product' => $product_item,
+                    'count' => $product['count'],
+                    'notes' => isset($product['note']) ? $product['note'] : null,
                 ];
+                // Add product price
+                //$amount_product += $product_item->price;
 
-                $orderDetailsInsert[] = [
-                    'order_id' => $order->id, 'product_id' => $product['product_id'],
-                    'count' => $product['count'], 'product_index' => $key,
-                    'created_at' => $now, 'updated_at' => $now,
-                ];
-
-                foreach ($product['exclude_id'] ?? [] as $exclude_id) {
-                    $orderDetailsInsert[] = [
-                        'order_id' => $order->id, 'product_id' => $product['product_id'],
-                        'exclude_id' => $exclude_id, 'count' => $product['count'], 'product_index' => $key,
-                        'created_at' => $now, 'updated_at' => $now,
-                    ];
-                    $exc = $excludesMap[$exclude_id] ?? null;
-                    if ($exc) {
-                        $order_details[$key]['excludes'][] = ExcludeResource::collection(collect([$exc]))[0] ?? null;
+                $this->order_details
+                ->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product['product_id'],
+                    'count' => $product['count'],
+                    'product_index' => $key,
+                ]); // Add product with count
+                if (isset($product['exclude_id'])) {
+                    foreach ($product['exclude_id'] as $exclude) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'exclude_id' => $exclude,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $exclude = $this->excludes
+                        ->where('id', $exclude)
+                        ->first();
+                        $exclude = collect([$exclude]);
+                        $exclude = ExcludeResource::collection($exclude);
+                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
+                        $order_details[$key]['excludes'][] = $exclude;
                     }
-                }
-
-                foreach ($product['addons'] ?? [] as $addon) {
-                    $orderDetailsInsert[] = [
-                        'order_id' => $order->id, 'product_id' => $product['product_id'],
-                        'addon_id' => $addon['addon_id'], 'count' => $product['count'],
-                        'addon_count' => $addon['count'], 'product_index' => $key,
-                        'created_at' => $now, 'updated_at' => $now,
-                    ];
-                    $addon_item = $addonsMap[$addon['addon_id']] ?? null;
-                    if ($addon_item) {
+                } 
+                if (isset($product['addons'])) {
+                    foreach ($product['addons'] as $addon) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'addon_id' => $addon['addon_id'],
+                            'count' => $product['count'],
+                            'addon_count' => $addon['count'],
+                            'product_index' => $key,
+                        ]); // Add excludes
+                        
+                        $addon_item = $this->addons
+                        ->where('id', $addon['addon_id'])
+                        ->first();
+                        $addon_item = collect([$addon_item]);
+                        $addon_item = AddonResource::collection($addon_item);
+                        $addon_item = count($addon_item) > 0 ? $addon_item[0] : null;
                         $order_details[$key]['addons'][] = [
-                            'addon' => AddonResource::collection(collect([$addon_item]))[0] ?? null,
-                            'count' => $addon['count'],
-                        ];
+                            'addon' => $addon_item,
+                            'count' => $addon['count']
+                        ]; 
+                    }
+                } 
+                if (isset($product['extra_id'])) {
+                    foreach ($product['extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        $extra_item = $this->extras
+                        ->where('id', $extra)
+                        ->first();
+                        $extra_item = collect([$extra_item]);
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
+                        $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
-
-                foreach (array_merge($product['extra_id'] ?? [], $product['product_extra_id'] ?? []) as $extra_id) {
-                    $orderDetailsInsert[] = [
-                        'order_id' => $order->id, 'product_id' => $product['product_id'],
-                        'extra_id' => $extra_id, 'count' => $product['count'], 'product_index' => $key,
-                        'created_at' => $now, 'updated_at' => $now,
-                    ];
-                    $extra_item = $extrasMap[$extra_id] ?? null;
-                    if ($extra_item) {
-                        $order_details[$key]['extras'][] = ExtraResource::collection(collect([$extra_item]))[0] ?? null;
+                if (isset($product['product_extra_id'])) {
+                    foreach ($product['product_extra_id'] as $extra) {
+                        $this->order_details
+                        ->create([
+                            'order_id' => $order->id,
+                            'product_id' => $product['product_id'],
+                            'extra_id' => $extra,
+                            'count' => $product['count'],
+                            'product_index' => $key,
+                        ]); // Add extra
+                        
+                        $extra_item = $this->extras
+                        ->where('id', $extra)
+                        ->first();
+                        $extra_item = collect([$extra_item]);
+                        $extra_item = ExtraResource::collection($extra_item);
+                        $extra_item = count($extra_item) > 0 ? $extra_item[0] : null;
+                        $order_details[$key]['extras'][] = $extra_item; 
                     }
                 }
-
                 if (isset($product['variation'])) {
-                    $product['variation'] = collect($product['variation'])->unique('variation_id');
+					$product['variation'] = collect($product['variation'])->unique('variation_id');
                     foreach ($product['variation'] as $variation) {
                         foreach ($variation['option_id'] as $option_id) {
-                            $orderDetailsInsert[] = [
-                                'order_id' => $order->id, 'product_id' => $product['product_id'],
-                                'variation_id' => $variation['variation_id'], 'option_id' => $option_id,
-                                'count' => $product['count'], 'product_index' => $key,
-                                'created_at' => $now, 'updated_at' => $now,
-                            ];
+                            $this->order_details
+                            ->create([
+                                'order_id' => $order->id,
+                                'product_id' => $product['product_id'],
+                                'variation_id' => $variation['variation_id'],
+                                'option_id' => $option_id,
+                                'count' => $product['count'],
+                                'product_index' => $key,
+                            ]); // Add variations & options
                         }
-                        $var = $variationsMap[$variation['variation_id']] ?? null;
-                        $opts = $optionsMap->whereIn('id', $variation['option_id']);
-                        if ($var) {
-                            $order_details[$key]['variations'][] = [
-                                'variation' => VariationResource::collection(collect([$var]))[0] ?? null,
-                                'options'   => OptionResource::collection($opts->values()),
-                            ];
-                        }
+                        $variations = $this->variation
+                        ->where('id', $variation['variation_id'])
+                        ->first();
+                        $variations = collect([$variations]);
+                        $options = $this->options
+                        ->whereIn('id', $variation['option_id'])
+                        ->get();
+                        $variations = VariationResource::collection($variations);
+                        $variations = count($variations) > 0 ? $variations[0] : null;
+                        $options = OptionResource::collection($options);
+                        $order_details[$key]['variations'][] = [
+                            'variation' => $variations,
+                            'options' => $options,
+                        ];
+                        // $amount_product += $this->options
+                        // ->whereIn('id', $variation['option_id'])
+                        // ->sum('price');
                     }
                 }
-
-                // Use cached tax setting
-                $tax_item = $product_item_resource->tax ?? null;
+                $discount_item = $product_item->discount;
+                $tax_item = $product_item->tax;
+                $tax = $this->settings
+                ->where('name', 'tax')
+                ->orderByDesc('id')
+                ->first();
                 if (!empty($tax_item)) {
-                    \Cache::remember('setting_tax', 3600, fn() => $this->settings->where('name', 'tax')->orderByDesc('id')->first());
+                    if (!empty($tax)) {
+                        $tax = $tax->setting;
+                    }
+                    else {
+                        $tax = $this->settings
+                        ->create([
+                            'name' => 'tax',
+                            'setting' => 'included',
+                        ]);
+                        $tax = $tax->setting;
+                    }
+                    // if ($tax_item->type == 'precentage') { 
+                    //     $amount_product = $amount_product + $amount_product * $tax_item->amount / 100;
+                    // }
+                    // else{ 
+                    //     $amount_product = $amount_product + $tax_item->amount;
+                    // }
                 }
-            }
-
-            // Batch insert all order details in ONE query
-            if (!empty($orderDetailsInsert)) {
-                \DB::table('order_details')->insert($orderDetailsInsert);
+                // if (!empty($discount_item)) {
+                //     if ($discount_item->type == 'precentage') { 
+                //         $amount_product = $amount_product - $amount_product * $discount_item->amount / 100;
+                //     }
+                //     else{ 
+                //         $amount_product = $amount_product - $discount_item->amount;
+                //     }
+                // } 
             }
         } 
         $order->order_details = json_encode($order_details);

@@ -1029,8 +1029,7 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->find($id);
-        dd($order->order_details);
+        ->find($id); 
         if(empty($order)){
             return response()->json([
                 "errors" => "id is wrong"
