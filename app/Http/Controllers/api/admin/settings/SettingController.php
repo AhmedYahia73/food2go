@@ -172,7 +172,7 @@ class SettingController extends Controller
                 'setting' => $request->tax,
             ]);
         }
-
+        clear_tax_cache();
         return response()->json([
             'success' => 'You change data success'
         ]);

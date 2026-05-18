@@ -50,9 +50,11 @@ class OptionProduct extends Model
     }
     
     public function getTaxesAttribute(){
-        return Setting::where('name', 'tax')
-        ->orderByDesc('id')
-        ->first();
+        return \Cache::remember('setting_tax', 3600, function() {
+            return Setting::where('name', 'tax')
+            ->orderByDesc('id')
+            ->first();
+        });
     }
     
     public function translations()

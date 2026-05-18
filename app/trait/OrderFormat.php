@@ -14,6 +14,44 @@ use Illuminate\Http\Request;
 
 trait OrderFormat
 {
+    /**
+     * Batch load all translations for order details in a single query
+     * instead of querying one by one in loops
+     */
+    private function batchTranslations(array $keys, string $locale): array
+    {
+        if (empty($keys)) return [];
+        
+        return TranslationTbl::whereIn('key', array_unique($keys))
+            ->where('locale', $locale)
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy('key')
+            ->map(fn($items) => $items->first()->value)
+            ->toArray();
+    }
+
+    /**
+     * Extract all translation keys from order_details_data
+     */
+    private function extractTranslationKeys(array $order_details_data): array
+    {
+        $keys = [];
+        foreach ($order_details_data as $item) {
+            foreach ($item['extras'] ?? [] as $el) { $keys[] = $el['name']; }
+            foreach ($item['addons'] ?? [] as $el) { $keys[] = $el['addon']['name'] ?? ''; }
+            foreach ($item['excludes'] ?? [] as $el) { $keys[] = $el['name']; }
+            foreach ($item['variations'] ?? [] as $el) {
+                $keys[] = $el['variation']['name'] ?? '';
+                foreach ($el['options'] ?? [] as $opt) { $keys[] = $opt['name']; }
+            }
+            if (isset($item['product'][0]['product']['name'])) {
+                $keys[] = $item['product'][0]['product']['name'];
+            }
+        }
+        return array_filter($keys);
+    }
+
     public function order_details_format($id, $locale){
         $order = Order::
         with(['user', 'address.zone.city', 'admin:id,name,email,phone,image', 
@@ -23,86 +61,59 @@ trait OrderFormat
         if(empty($order->order_details_data)){
             return null;
         }
+
+        // Batch load all translations in ONE query
+        $allKeys = $this->extractTranslationKeys($order->order_details_data);
+        $translations = $this->batchTranslations($allKeys, $locale);
+
         $products = [];
         foreach ($order->order_details_data as $item) {
-            # TranslationTbl
             $extras = [];
             $addons = [];
             $excludes = [];
             $variations = [];
             $product = [];
             foreach ($item['extras'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $extras[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                     "price" => $element['price'],
                 ];
             }
             foreach ($item['addons'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['addon']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['addon']['name'];
                 $addons[] = [
                     "id" => $element['addon']['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
                     "price" => $element['addon']['price'],
                     "count" => $element['count'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $excludes[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
             foreach ($item['variations'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['variation']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['variation']['name'];
                 $options = [];
                 foreach ($element['options'] as $value) {
-                    $option_name = TranslationTbl::
-                    where("key", $value['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $value['name'];
                     $options[] = [
                         "id" => $value['id'],
-                        "name" => $option_name,
+                        "name" => $translations[$value['name']] ?? $value['name'],
                         "price" => $value['price'],
                         "total_option_price" => $value['total_option_price'],
                     ];
                 }
                 $variations[] = [
                     "id" => $element['variation']['id'],
-                    "name" => $name,
-                    //"price" => $element['variation']['price'],
+                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
                     "options" => $options,
                 ];
             }
             if(isset($item['product'][0]['product'])){
-                $name = TranslationTbl::
-                where("key", $item['product'][0]['product']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $item['product'][0]['product']['name'];
                 $product = [
                     'id' => $item['product'][0]['product']['id'],
-                    'name' => $name,
+                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
                     'image_link' => $item['product'][0]['product']['image_link'],
                     'price' => $item['product'][0]['product']['price'],
                     'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
@@ -111,14 +122,12 @@ trait OrderFormat
                     'notes' => $item['product'][0]['notes'],
                 ];
             }  
-            $product_item = [
+            $products[] = [
                 "extras" => $extras,
-                "addons" => $addons,
                 "addons" => $addons,
                 "variations" => $variations,
                 "product" => $product,
             ];
-            $products[] = $product_item;
         }
         $order_arr = [
             "id" => $order->id,
@@ -206,86 +215,59 @@ trait OrderFormat
             if(empty($order->order_details_data)){
                 continue;
             }
+
+            // Batch load all translations in ONE query per order
+            $allKeys = $this->extractTranslationKeys($order->order_details_data);
+            $translations = $this->batchTranslations($allKeys, $locale);
+
             $products = [];
             foreach ($order->order_details_data as $item) {
-                # TranslationTbl
                 $extras = [];
                 $addons = [];
                 $excludes = [];
                 $variations = [];
                 $product = [];
                 foreach ($item['extras'] as $element) {
-                    $name = TranslationTbl::
-                    where("key", $element['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $element['name'];
                     $extras[] = [
                         "id" => $element['id'],
-                        "name" => $name,
+                        "name" => $translations[$element['name']] ?? $element['name'],
                         "price" => $element['price'],
                     ];
                 }
                 foreach ($item['addons'] as $element) {
-                    $name = TranslationTbl::
-                    where("key", $element['addon']['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $element['addon']['name'];
                     $addons[] = [
                         "id" => $element['addon']['id'],
-                        "name" => $name,
+                        "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
                         "price" => $element['addon']['price'],
                         "count" => $element['count'],
                     ];
                 }
                 foreach ($item['excludes'] as $element) {
-                    $name = TranslationTbl::
-                    where("key", $element['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $element['name'];
                     $excludes[] = [
                         "id" => $element['id'],
-                        "name" => $name,
+                        "name" => $translations[$element['name']] ?? $element['name'],
                     ];
                 }
                 foreach ($item['variations'] as $element) {
-                    $name = TranslationTbl::
-                    where("key", $element['variation']['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $element['variation']['name'];
                     $options = [];
                     foreach ($element['options'] as $value) {
-                        $option_name = TranslationTbl::
-                        where("key", $value['name'])
-                        ->where("locale", $locale)
-                        ->orderByDesc("id")
-                        ->first()?->value ?? $value['name'];
                         $options[] = [
                             "id" => $value['id'],
-                            "name" => $option_name,
+                            "name" => $translations[$value['name']] ?? $value['name'],
                             "price" => $value['price'],
                             "total_option_price" => $value['total_option_price'],
                         ];
                     }
                     $variations[] = [
                         "id" => $element['variation']['id'],
-                        "name" => $name,
-                        //"price" => $element['variation']['price'],
+                        "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
                         "options" => $options,
                     ];
                 }
                 if(isset($item['product'][0]['product'])){
-                    $name = TranslationTbl::
-                    where("key", $item['product'][0]['product']['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $item['product'][0]['product']['name'];
                     $product = [
                         'id' => $item['product'][0]['product']['id'],
-                        'name' => $name,
+                        'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
                         'image_link' => $item['product'][0]['product']['image_link'],
                         'price' => $item['product'][0]['product']['price'],
                         'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
@@ -396,86 +378,59 @@ trait OrderFormat
         if(empty($order->order_details_data)){
             return null;
         }
+
+        // Batch load all translations in ONE query
+        $allKeys = $this->extractTranslationKeys($order->order_details_data);
+        $translations = $this->batchTranslations($allKeys, $locale);
+
         $products = [];
         foreach ($order->order_details_data as $item) {
-            # TranslationTbl
             $extras = [];
             $addons = [];
             $excludes = [];
             $variations = [];
             $product = [];
             foreach ($item['extras'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $extras[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                     "price" => $element['price'],
                 ];
             }
             foreach ($item['addons'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['addon']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['addon']['name'];
                 $addons[] = [
                     "id" => $element['addon']['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
                     "price" => $element['addon']['price'],
                     "count" => $element['count'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $excludes[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
             foreach ($item['variations'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['variation']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['variation']['name'];
                 $options = [];
                 foreach ($element['options'] as $value) {
-                    $option_name = TranslationTbl::
-                    where("key", $value['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $value['name'];
                     $options[] = [
                         "id" => $value['id'],
-                        "name" => $option_name,
+                        "name" => $translations[$value['name']] ?? $value['name'],
                         "price" => $value['price'],
                         "total_option_price" => $value['total_option_price'],
                     ];
                 }
                 $variations[] = [
                     "id" => $element['variation']['id'],
-                    "name" => $name,
-                    //"price" => $element['variation']['price'],
+                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
                     "options" => $options,
                 ];
             }
             if(isset($item['product'][0]['product'])){
-                $name = TranslationTbl::
-                where("key", $item['product'][0]['product']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $item['product'][0]['product']['name'];
                 $product = [
                     'id' => $item['product'][0]['product']['id'],
-                    'name' => $name,
+                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
                     'image_link' => $item['product'][0]['product']['image_link'],
                     'price' => $item['product'][0]['product']['price'],
                     'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
@@ -484,14 +439,12 @@ trait OrderFormat
                     'notes' => $item['product'][0]['notes'],
                 ];
             }  
-            $product_item = [
+            $products[] = [
                 "extras" => $extras,
-                "addons" => $addons,
                 "addons" => $addons,
                 "variations" => $variations,
                 "product" => $product,
             ];
-            $products[] = $product_item;
         }
         $order_arr = [
             "id" => $order->id,
@@ -589,97 +542,66 @@ trait OrderFormat
         if(empty($order->order_details_data)){
             return null;
         }
+
+        // Batch load all translations in ONE query
+        $allKeys = $this->extractTranslationKeys($order->order_details_data);
+        $translations = $this->batchTranslations($allKeys, $locale);
+
         foreach ($order->order_details_data as $item) {
-            # TranslationTbl
             $extras = [];
             $addons = [];
             $excludes = [];
             $variations = [];
             $product = [];
             foreach ($item['extras'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $extras[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                     "price" => $element['price'],
                 ];
             }
             foreach ($item['addons'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['addon']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['addon']['name'];
                 $addons[] = [
                     "id" => $element['addon']['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
                     "price" => $element['addon']['price'],
                     "count" => $element['count'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $excludes[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
             foreach ($item['variations'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['variation']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['variation']['name'];
                 $options = [];
                 foreach ($element['options'] as $value) {
-                    $option_name = TranslationTbl::
-                    where("key", $value['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $value['name'];
                     $options[] = [
                         "id" => $value['id'],
-                        "name" => $option_name,
-                        //"price" => $value['price'],
-                        //"total_option_price" => $value['total_option_price'],
+                        "name" => $translations[$value['name']] ?? $value['name'],
                     ];
                 }
                 $variations[] = [
                     "id" => $element['variation']['id'],
-                    "name" => $name,
-                    //"price" => $element['variation']['price'],
+                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
                     "options" => $options,
                 ];
             }
             if(isset($item['product'][0]['product'])){
-                $name = TranslationTbl::
-                where("key", $item['product'][0]['product']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $item['product'][0]['product']['name'];
                 $product = [
                     'id' => $item['product'][0]['product']['id'],
-                    'note' => $item['product'][0]['product']['note'],
-                    'name' => $name,
+                    'note' => $item['product'][0]['product']['note'] ?? null,
+                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
                     'count' => $item['product'][0]['count'],
                 ];
             }  
-            $product_item = [
+            $products[] = [
                 "extras" => $extras,
-                "addons" => $addons,
                 "addons" => $addons,
                 "variations" => $variations,
                 "product" => $product,
             ];
-            $products[] = $product_item;
         }
         $order_arr = [
             "id" => $order->id,
@@ -707,10 +629,13 @@ trait OrderFormat
             $precentage = $group_product->increase_precentage - $group_product->decrease_precentage;
         }
 
+        // Batch load all translations in ONE query
+        $allKeys = $this->extractTranslationKeys($order->order_details_data);
+        $translations = $this->batchTranslations($allKeys, $locale);
+
         $products = [];
         $total_price_calculated = 0;
         foreach ($order->order_details_data as $item) {
-            # TranslationTbl
             $extras = [];
             $addons = [];
             $excludes = [];
@@ -718,7 +643,6 @@ trait OrderFormat
             $product = [];
             $product_price = 0;
             foreach ($item['extras'] as $element) {
-                // هيتعمله سعر خاص 
                 $extra_price_item = GroupExtraPrice::
                 where("extra_id", $element['id'])
                 ->where("group_product_id", $order->module_id)
@@ -730,15 +654,9 @@ trait OrderFormat
                     $extra_price = $element['price'] + $element['price'] * $precentage / 100;
                 }
                 $product_price += $extra_price;
-
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $extras[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
@@ -753,8 +671,6 @@ trait OrderFormat
                 ];
             }
             foreach ($item['addons'] as $element) {
-                // هيتعمله سعر خاص
-                
                 $addon_price_item = GroupAddonPrice::
                 where("addon_id", $element['addon']['id'])
                 ->where("group_product_id", $order->module_id)
@@ -765,40 +681,21 @@ trait OrderFormat
                 else{
                     $addon_price = $element['addon']['price'] + $element['addon']['price'] * $precentage / 100;
                 }
-
-                $name = TranslationTbl::
-                where("key", $element['addon']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['addon']['name'];
                 $addons[] = [
                     "id" => $element['addon']['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
                     "price" => $addon_price,
                     "count" => $element['count'],
                     "total" => $addon_price * $element['count'],
                 ];
                 $total_price_calculated += $addon_price * $element['count'];
-                // Addon , Extra
-                
             } 
             foreach ($item['variations'] as $element) { 
-                
-                $name = TranslationTbl::
-                where("key", $element['variation']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['variation']['name'];
                 $options = [];
                 foreach ($element['options'] as $value) {
-                    $option_name = TranslationTbl::
-                    where("key", $value['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $value['name'];
                     $options[] = [
                         "id" => $value['id'],
-                        "name" => $option_name,
+                        "name" => $translations[$value['name']] ?? $value['name'],
                         "price" => $value['price'],
                         "total_option_price" => $value['total_option_price'],
                     ];
@@ -816,8 +713,7 @@ trait OrderFormat
                 }
                 $variations[] = [
                     "id" => $element['variation']['id'],
-                    "name" => $name,
-                    //"price" => $element['variation']['price'],
+                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
                     "options" => $options,
                 ]; 
             }
@@ -835,19 +731,13 @@ trait OrderFormat
                     $price = $price + $price * $precentage / 100;
                 }
                 $product_price += $price;
-                $name = TranslationTbl::
-                where("key", $item['product'][0]['product']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $item['product'][0]['product']['name'];
                 $product = [
                     'id' => $item['product'][0]['product']['id'],
-                    'name' => $name,
+                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
                     'price' => $product_price,
                     'total_price' => $product_price * $count,
                     'count' => $count,
                 ];
-                
                 $total_price_calculated += $product_price * $count;
             }  
             $product_item = [
@@ -940,86 +830,59 @@ trait OrderFormat
         if(empty($order->order_details_data)){
             return null;
         }
+
+        // Batch load all translations in ONE query
+        $allKeys = $this->extractTranslationKeys($order->order_details_data);
+        $translations = $this->batchTranslations($allKeys, $locale);
+
         $products = [];
         foreach ($order->order_details_data as $item) {
-            # TranslationTbl
             $extras = [];
             $addons = [];
             $excludes = [];
             $variations = [];
             $product = [];
             foreach ($item['extras'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $extras[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                     "price" => $element['price'],
                 ];
             }
             foreach ($item['addons'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['addon']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['addon']['name'];
                 $addons[] = [
                     "id" => $element['addon']['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
                     "price" => $element['addon']['price'],
                     "count" => $element['count'],
                 ];
             }
             foreach ($item['excludes'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['name'];
                 $excludes[] = [
                     "id" => $element['id'],
-                    "name" => $name,
+                    "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
             foreach ($item['variations'] as $element) {
-                $name = TranslationTbl::
-                where("key", $element['variation']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $element['variation']['name'];
                 $options = [];
                 foreach ($element['options'] as $value) {
-                    $option_name = TranslationTbl::
-                    where("key", $value['name'])
-                    ->where("locale", $locale)
-                    ->orderByDesc("id")
-                    ->first()?->value ?? $value['name'];
                     $options[] = [
                         "id" => $value['id'],
-                        "name" => $option_name,
+                        "name" => $translations[$value['name']] ?? $value['name'],
                         "price" => $value['price'],
                         "total_option_price" => $value['total_option_price'],
                     ];
                 }
                 $variations[] = [
                     "id" => $element['variation']['id'],
-                    "name" => $name,
-                    //"price" => $element['variation']['price'],
+                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
                     "options" => $options,
                 ];
             }
             if(isset($item['product'][0]['product'])){
-                $name = TranslationTbl::
-                where("key", $item['product'][0]['product']['name'])
-                ->where("locale", $locale)
-                ->orderByDesc("id")
-                ->first()?->value ?? $item['product'][0]['product']['name'];
                 $product = [
                     'id' => $item['product'][0]['product']['id'],
-                    'name' => $name,
+                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
                     'image_link' => $item['product'][0]['product']['image_link'],
                     'price' => $item['product'][0]['product']['price'],
                     'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
@@ -1028,14 +891,12 @@ trait OrderFormat
                     'notes' => $item['product'][0]['notes'],
                 ];
             }  
-            $product_item = [
+            $products[] = [
                 "extras" => $extras,
-                "addons" => $addons,
                 "addons" => $addons,
                 "variations" => $variations,
                 "product" => $product,
             ];
-            $products[] = $product_item;
         }
         $order_arr = [
             "id" => $order->id,

@@ -320,21 +320,8 @@ class HomeController extends Controller
             $resturant_time = $resturant_time->setting;
             $resturant_time = json_decode($resturant_time) ?? $resturant_time;
         }
-        $tax = $this->settings
-        ->where('name', 'tax')
-        ->orderByDesc('id')
-        ->first();
-        if (!empty($tax)) {
-            $tax = $tax->setting;
-        }
-        else {
-            $tax = $this->settings
-            ->create([
-                'name' => 'tax',
-                'setting' => 'included',
-            ]);
-            $tax = $tax->setting;
-        }
+        $tax = get_tax_setting();
+
         $categories = CategoryResource::collection($categories);
         $products = ProductResource::collection($products);
 
@@ -692,21 +679,8 @@ class HomeController extends Controller
         ->get();
         $product_off = $branch_off->pluck('product_id')->filter(); 
         $option_off = $branch_off->pluck('option_id')->filter();
-        $tax = $this->settings
-        ->where('name', 'tax')
-        ->orderByDesc('id')
-        ->first();
-        if (!empty($tax)) {
-            $tax = $tax->setting;
-        }
-        else {
-            $tax = $this->settings
-            ->create([
-                'name' => 'tax',
-                'setting' => 'included',
-            ]);
-            $tax = $tax->setting;
-        }
+        $tax = get_tax_setting();
+
     
         if ($request->user_id) {
             $user_id = $request->user_id;
@@ -976,21 +950,8 @@ class HomeController extends Controller
         $product_off = $branch_off->pluck('product_id')->filter(); 
         $option_off = $branch_off->pluck('option_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
-        $tax = $this->settings
-        ->where('name', 'tax')
-        ->orderByDesc('id')
-        ->first();
-        if (!empty($tax)) {
-            $tax = $tax->setting;
-        }
-        else {
-            $tax = $this->settings
-            ->create([
-                'name' => 'tax',
-                'setting' => 'included',
-            ]);
-            $tax = $tax->setting;
-        }
+        $tax = get_tax_setting();
+
         $products = $this->product 
         ->orderBy('order')
         ->withLocale($locale)
@@ -1125,21 +1086,8 @@ class HomeController extends Controller
         $product_off = $branch_off->pluck('product_id')->filter(); 
         $option_off = $branch_off->pluck('option_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
-        $tax = $this->settings
-        ->where('name', 'tax')
-        ->orderByDesc('id')
-        ->first();
-        if (!empty($tax)) {
-            $tax = $tax->setting;
-        }
-        else {
-            $tax = $this->settings
-            ->create([
-                'name' => 'tax',
-                'setting' => 'included',
-            ]);
-            $tax = $tax->setting;
-        }
+        $tax = get_tax_setting();
+
         $products = $this->product 
         ->orderBy('order')
         ->withLocale($locale)
@@ -1314,21 +1262,8 @@ class HomeController extends Controller
         $product_off = $branch_off->pluck('product_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
         $option_off = $branch_off->pluck('option_id')->filter();
-        $tax = $this->settings
-        ->where('name', 'tax')
-        ->orderByDesc('id')
-        ->first();
-        if (!empty($tax)) {
-            $tax = $tax->setting;
-        }
-        else {
-            $tax = $this->settings
-            ->create([
-                'name' => 'tax',
-                'setting' => 'included',
-            ]);
-            $tax = $tax->setting;
-        }
+        $tax = get_tax_setting();
+
         $categories = $this->categories
         ->orderBy('priority')
         ->with(['sub_categories' => function($query) use($locale){

@@ -65,7 +65,7 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         }) 
-        ->with('delivery', 'payment_method')
+        ->with('delivery', 'payment_method', 'address.zone', 'branch:id,name')
         ->get()
         ->map(function($item){ 
             $total_variation = collect($item->order_details);  
@@ -111,16 +111,14 @@ class OrderController extends Controller
                 'rejected_reason' => $item->rejected_reason,
                 'customer_cancel_reason' => $item->customer_cancel_reason,
                 'admin_cancel_reason' => $item->admin_cancel_reason,
-                'delivery_price' => $item->delivery_price,
                 'products' => $products,
                 'payment_method' => $item?->payment_method?->name,
-                'delivery_price' => $item?->order_address?->zone?->price ?? null,
+                'delivery_price' => $item?->address?->zone?->price ?? null,
                 'branch_name' => $item?->branch?->name ?? null,
-                'address_name' => $item?->order_address?->address ?? null,
+                'address_name' => $item?->address?->address ?? null,
                 'addons' => $addons,
                 'order_date' => $item->order_date,
                 'can_cancel' => $item->order_status == 'pending' ? true : false,
-
             ];
         });
         $cancel_time = $this->settings
@@ -141,7 +139,7 @@ class OrderController extends Controller
         ->orderByDesc('id')
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['delivered', 'faild_to_deliver', 'canceled'])
-        ->with('payment_method')
+        ->with('payment_method', 'address.zone', 'branch:id,name')
         ->where('deleted_at', 0)
         ->get()
         ->map(function($item){
@@ -191,9 +189,9 @@ class OrderController extends Controller
                 'delivery_price' => $item->delivery_price,
                 'products' => $products,
                 'payment_method' => $item?->payment_method?->name,
-                'delivery_price' => $item?->order_address?->zone?->price ?? null,
+                'delivery_price' => $item?->address?->zone?->price ?? null,
                 'branch_name' => $item?->branch?->name ?? null,
-                'address_name' => $item?->order_address?->address ?? null,
+                'address_name' => $item?->address?->address ?? null,
                 'addons' => $addons,
                 'order_date' => $item->order_date,
                 'rate' => $item->rate,
