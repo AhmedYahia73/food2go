@@ -13,12 +13,6 @@ return new class extends Migration
             if (!$this->indexExists('order_carts', 'order_carts_table_id_index')) {
                 $table->index('table_id', 'order_carts_table_id_index');
             }
-            if (!$this->indexExists('order_carts', 'order_carts_captain_id_index')) {
-                $table->index('captain_id', 'order_carts_captain_id_index');
-            }
-            if (!$this->indexExists('order_carts', 'order_carts_user_id_index')) {
-                $table->index('user_id', 'order_carts_user_id_index');
-            }
         });
 
         // Order Details Table Indexes
