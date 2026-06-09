@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB; // تم إضافة هذا السطر لاستخدام DB::raw
 
 return new class extends Migration
 {
@@ -30,7 +31,11 @@ return new class extends Migration
         // translation_tbls table indexes
         Schema::table('translation_tbls', function (Blueprint $table) {
             if (!$this->indexExists('translation_tbls', 'translations_key_locale_index')) {
-                $table->index(['key', 'locale'], 'translations_key_locale_index');
+                // تم تعديل هذا السطر لتحديد طول الفهرس وتفادي مشكلة الـ 3072 بايت
+                $table->index([
+                    DB::raw('`key`(250)'), 
+                    DB::raw('`locale`(10)')
+                ], 'translations_key_locale_index');
             }
         });
 
