@@ -10,8 +10,9 @@ Broadcast::channel('chatChannel', function ($chat) {
     return $chat;
 }, ['guards' => ['sanctum']]);
 
-Broadcast::channel('new_order', function ($user) {
-    return true;
+
+Broadcast::channel('App.Models.Admin.{id}', function ($user, $id) {
+    return  $user->role === "admin";
 });
 
 Broadcast::channel('print_order', function ($user) {

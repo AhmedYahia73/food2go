@@ -178,13 +178,12 @@ class MakeOrderController extends Controller
             }
             $order_id = $this->order
             ->where('transaction_id', $order->id)
-            ->first();
-            broadcast(new OrderEvent($order_id))->toOthers();
+            ->first(); 
             // $order = $this->make_order($request);
             // $order = $order['payment']; 
             $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens, $payment_method_auto);
              $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
-
+            OrderEvent::dispatch($order_id);
             $body = 'New Order #' . $order_id->order_number;
             $device_token = $this->device_tokens
             ->whereNotNull('admin_id')
@@ -203,7 +202,7 @@ class MakeOrderController extends Controller
             if (isset($order['errors']) && !empty($order['errors'])) {
                 return response()->json($order, 400);
             } // new_order
-            broadcast(new OrderEvent($order['payment']))->toOthers();
+            OrderEvent::dispatch($order['payment']);
 
             $body = 'New Order #' . $order['payment']->order_number;
             $device_token = $this->device_tokens

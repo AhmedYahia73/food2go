@@ -179,7 +179,11 @@ use App\Models\Order;
 use Illuminate\Support\Facades\App;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Broadcast;
 
+
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 Route::get('/mail', function () {
     try {

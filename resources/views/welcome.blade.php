@@ -1,53 +1,49 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reverb Test</title> -->
-    <!-- أولاً: مكتبة Pusher -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/pusher-js@7.2.0/dist/web/pusher.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.0/dist/echo.iife.js"></script>
-  -->
-<!-- </head>
+    <title>فحص Reverb Real-Time</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/8.3.0/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
+</head>
 <body>
-    <h1>Reverb Test Page</h1>  -->
-<!-- 
-<script>
-const echo = new Echo({
-    broadcaster: 'pusher',
-    key: 'foo2go123', 
-    wsHost: 'bcknd.food2go.online',
-    wsPort: 443, // إذا كان اتصال WSS/HTTPS عبر Proxy
-    forceTLS: true,
-    // wssPort: 443, // يمكنك أيضاً تجربتها
-    disableStats: true,
-    enabledTransports: ['ws', 'wss'],
-});
 
-echo.channel('print_order')
-    .listen('.PrintOrder', (data) => {
-        console.log("📡 Received:", data);
-    });
-</script> -->
-<!-- 
-</body>
-</html> -->
-<!-- أولاً: socket.io-client -->
-<script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js"></script>
+    <div style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+        <h1 style="color: #2d3748;">📡 صفحة فحص البث اللحظي (Reverb)</h1>
+        <p style="color: #4a5568; font-size: 18px;">افتح الـ **Console (F12)** وراقب المخرجات عند إرسال طلب جديد!</p>
+        
+        <div id="status" style="display: inline-block; padding: 10px 20px; background: #feebc8; color: #c05621; border-radius: 5px; font-weight: bold;">
+            جاري الاتصال بسيرفر Reverb...
+        </div>
+    </div>
 
-<!-- ثانياً: laravel-echo -->
-<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.11.0/dist/echo.iife.js"></script>
-
-<script>
-    // استخدم window.Echo
-    const echo = new window.Echo({
-        broadcaster: 'socket.io',
-        host: 'http://127.0.0.1:6001'
-    });
-
-    echo.channel('print_order')
-        .listen('.printed', (e) => {
-            console.log('New Order:', e.order);
+    <script>
+        // 1. إعداد واجهة Laravel Echo للربط مع سيرفر Reverb
+        window.Echo = new window.Echo({
+            broadcaster: 'reverb', // الأفضل استخدام 'reverb' مباشرة
+            key: "6756764554", // المفتاح من ملف الـ .env الخاص بك
+            wsHost: "anlatech.mazoom.online", // أو '127.0.0.1' إذا كنت تجرب محلياً
+            wsPort: 8080,
+            forceTLS: false, // لأنك تستخدم http وليس https
+            enabledTransports: ['ws'],
+            cluster: 'mt1' 
         });
-</script>
 
+        // تحديث واجهة الصفحة عند نجاح الاتصال
+        window.Echo.connector.pusher.connection.bind('connected', function() {
+            console.log('✅ Connected to Reverb Successfully on port 8080!');
+        });
+
+        // 2. الاستماع للقناة والحدث
+        // تأكد من أن اسم الـ Channel هو 'newOrder' واسم الـ Event هو 'NewOrderEvent'
+        window.Echo.channel('newOrder')
+            .listen('.NewOrderEvent', (data) => {
+                console.log('🎯 وصّلت نوتيفيكيشن جديدة لايف!!');
+                console.log('📦 Data Received:', data);
+                
+                alert('تم استلام طلب جديد برقم: ' + data.order_id);
+            });
+    </script>
+</body>
+</html>
