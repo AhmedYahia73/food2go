@@ -725,10 +725,52 @@ class OrderController extends Controller
     public function count_orders(Request $request){
         // https://bcknd.food2go.online/admin/order/count
         
+
+        $time_sittings = $this->TimeSittings->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+
+        foreach ($items as $item) {
+            if (count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from)) {
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if ($from->from > $item[0]->from) {
+                $from = $item[0];
+            }
+        }
+
+        if ($time_sittings->count() > 0) {
+            $from = $from->from;
+            $end = date('Y-m-d') . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+            if ($start >= now()) {
+                $start = $start->subDay();
+            }
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
+        $start = $start->subDay();
         if ($request->user()->role == "admin") {
             $orders = $this->orders 
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -737,6 +779,7 @@ class OrderController extends Controller
             $pending = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -746,6 +789,7 @@ class OrderController extends Controller
             $confirmed = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -755,6 +799,7 @@ class OrderController extends Controller
             $processing = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -764,6 +809,7 @@ class OrderController extends Controller
             $out_for_delivery = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -773,6 +819,7 @@ class OrderController extends Controller
             $delivered = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -782,6 +829,7 @@ class OrderController extends Controller
             $returned = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -791,6 +839,7 @@ class OrderController extends Controller
             $faild_to_deliver = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -800,6 +849,7 @@ class OrderController extends Controller
             $canceled = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -809,6 +859,7 @@ class OrderController extends Controller
             $scheduled = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -818,6 +869,7 @@ class OrderController extends Controller
             $refund = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -829,6 +881,7 @@ class OrderController extends Controller
             $orders = $this->orders 
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -838,6 +891,7 @@ class OrderController extends Controller
             $pending = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -848,6 +902,7 @@ class OrderController extends Controller
             $confirmed = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -858,6 +913,7 @@ class OrderController extends Controller
             $processing = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -868,6 +924,7 @@ class OrderController extends Controller
             $out_for_delivery = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -878,6 +935,7 @@ class OrderController extends Controller
             $delivered = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -888,6 +946,7 @@ class OrderController extends Controller
             $returned = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -898,6 +957,7 @@ class OrderController extends Controller
             $faild_to_deliver = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -908,6 +968,7 @@ class OrderController extends Controller
             $canceled = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -918,6 +979,7 @@ class OrderController extends Controller
             $scheduled = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
@@ -928,6 +990,7 @@ class OrderController extends Controller
             $refund = $this->orders
             ->where('pos', 0)
             ->whereNull('captain_id')
+            ->whereBetween('created_at', [$start, $end])
             ->where(function($query) {
                 $query->where('status', 1)
                 ->orWhereNull('status');
