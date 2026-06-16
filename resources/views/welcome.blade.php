@@ -20,15 +20,14 @@
 
     <script>
         // 1. إعداد واجهة Laravel Echo للربط مع سيرفر Reverb
-        window.Echo = new window.Echo({
-            broadcaster: 'reverb',
-            key: "6756764554",
-            wsHost: "lamadafoodbcknd.food2go.online", // عنوان النطاق
-            wsPort: 443, // المتصفح يتصل بـ 443 (Nginx)
-            wssPort: 443,
-            forceTLS: true, // لأن الموقع HTTPS
-            enabledTransports: ['ws', 'wss'],
-        });
+ window.Echo = new window.Echo({
+    broadcaster: 'reverb',
+    key: "6756764554",
+    wsHost: "lamadafoodbcknd.food2go.online",
+    wsPort: 8080,        // استخدام المنفذ 8080 مباشرة
+    forceTLS: false,     // تعطيل الـ TLS مؤقتاً
+    enabledTransports: ['ws'],
+});
 
         // تحديث واجهة الصفحة عند نجاح الاتصال
         window.Echo.connector.pusher.connection.bind('connected', function() {
