@@ -23,7 +23,7 @@
         window.Echo = new window.Echo({
             broadcaster: 'reverb', // الأفضل استخدام 'reverb' مباشرة
             key: "6756764554", // المفتاح من ملف الـ .env الخاص بك
-            wsHost: "anlatech.mazoom.online", // أو '127.0.0.1' إذا كنت تجرب محلياً
+            wsHost: "lamadafoodbcknd.food2go.online", // أو '127.0.0.1' إذا كنت تجرب محلياً
             wsPort: 8080,
             forceTLS: false, // لأنك تستخدم http وليس https
             enabledTransports: ['ws'],
