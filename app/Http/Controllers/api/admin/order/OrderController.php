@@ -402,7 +402,7 @@ class OrderController extends Controller
                 'errors' => $validator->errors(),
             ], 400);
         }
-
+return response()->json(["rrrr"]);
         $from_date = $request->date ?? date("Y-m-d");
         $to_date = $request->date_to ?? date("Y-m-d");
         $time_sittings = $this->TimeSittings->get();
