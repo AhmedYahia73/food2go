@@ -1877,13 +1877,13 @@ class OrderController extends Controller
             // else{
             //     $end = Carbon::parse($date_to)->addHours(intval($hours));
             // } 
-        return response()->json(["hghjg"]);
         $orders = $this->orders
         ->whereBetween('created_at', [$start, $end])
         ->where('pos', 0)
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->get();
+        return response()->json(["hghjg"]);
         if ($request->type != 'all') {
             $orders = $orders->where('order_status', $request->type)->values();
         }
