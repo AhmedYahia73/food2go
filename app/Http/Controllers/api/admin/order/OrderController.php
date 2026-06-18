@@ -448,11 +448,6 @@ class OrderController extends Controller
             $start = $start->subDay();
         }
 
-        return response()->json([
-            'start' => $start->format('Y-m-d H:i:s'),
-            'end' => $end->format('Y-m-d H:i:s'),
-            'role' => $request->user()->role
-        ]);
         $perPage = $request->input('per_page', 15);
 
         // 1. بناء الاستعلام الأساسي المشترك بين الآدمين والفرع لمنع التكرار
