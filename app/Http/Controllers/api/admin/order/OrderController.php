@@ -1889,8 +1889,7 @@ class OrderController extends Controller
         if ($request->branch_id) {
             $orders = $orders->where('branch_id', $request->branch_id)->values();
         }
- 
-        return response()->json([$orders]);
+  
         return response()->json([
             'orders' => $orders
         ]);
