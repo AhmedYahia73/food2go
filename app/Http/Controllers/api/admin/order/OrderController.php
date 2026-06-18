@@ -3,27 +3,26 @@
 namespace App\Http\Controllers\api\admin\order;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\CancelOrderMail;
-use Carbon\Carbon;
-
-use App\Models\Order;
-use App\Models\Delivery;
 use App\Models\Branch;
-use App\Models\Setting;
-use App\Models\LogOrder;
-use App\Models\User;
-use App\Models\TimeSittings; 
-use App\Models\KitchenOrder;
 use App\Models\CompanyInfo;
+use App\Models\Delivery;
 use App\Models\Kitchen;
+use App\Models\KitchenOrder;
+use App\Models\LogOrder;
+use App\Models\Order;
+use App\Models\Setting;
+use App\Models\TimeSittings; 
 use App\Models\TranslationTbl;
-
-use App\trait\Recipe;
+use App\Models\User;
 use App\trait\OrderFormat; 
+use App\trait\Recipe;
+use Carbon\Carbon;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
@@ -640,38 +639,64 @@ class OrderController extends Controller
 
     public function orders_count(Request $request){
     //     // https://bcknd.food2go.online/admin/order
-        $time_sittings = $this->TimeSittings 
-        ->get();
+         // https://bcknd.food2go.online/admin/order
+        $validator = Validator::make($request->all(), [ 
+            "date" => "date",
+            "date_to" => "date",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+        $from_date = $request->date ?? date("Y-m-d");
+        $to_date = $request->date_to ?? date("Y-m-d");
+        $time_sittings = $this->TimeSittings->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+
+        foreach ($items as $item) {
+            if (count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from)) {
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if ($from->from > $item[0]->from) {
+                $from = $item[0];
+            }
+        }
+
         if ($time_sittings->count() > 0) {
-            $from = $time_sittings[0]->from;
-            $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-            $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-            $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
+            $from = $from->from;
+            $end = $to_date . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = $from_date . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
-			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-			if($start >= now()){
+            if ($start >= now()) {
                 $start = $start->subDay();
-			}
-
-            // if ($start > $end) {
-            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($from)->addHours(intval($hours));
-            // } format('Y-m-d H:i:s')
+            }
         } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            $start = Carbon::parse($from_date . ' 00:00:00');
+            $end = Carbon::parse($to_date . ' 23:59:59');
         } 
-        $start = $start->subDay();
+        if(!$from_date){
+            $start = $start->subDay();
+        }
         if ($request->user()->role == "admin") {
             $counts = $this->orders
-                ->select('order_status', \DB::raw('count(*) as total'))
+                ->select('order_status', DB::raw('count(*) as total'))
                 ->where('pos', 0)
                 ->whereBetween('created_at', [$start, $end])
                 ->whereNull('captain_id')
@@ -684,7 +709,7 @@ class OrderController extends Controller
                 ->toArray();
         } else {
             $counts = $this->orders
-                ->select('order_status', \DB::raw('count(*) as total'))
+                ->select('order_status', DB::raw('count(*) as total'))
                 ->where('pos', 0)
                 ->whereBetween('created_at', [$start, $end])
                 ->whereNull('captain_id')
