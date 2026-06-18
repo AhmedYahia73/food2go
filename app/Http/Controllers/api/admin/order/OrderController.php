@@ -392,7 +392,9 @@ class OrderController extends Controller
          // https://bcknd.food2go.online/admin/order
         $validator = Validator::make($request->all(), [
             'order_status' => 'required|in:all,pending,delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
-            'per_page' => 'nullable|integer|min:1'
+            'per_page' => 'nullable|integer|min:1',
+            "date" => "date",
+            "date_to" => "date",
         ]);
 
         if ($validator->fails()) {
@@ -401,6 +403,8 @@ class OrderController extends Controller
             ], 400);
         }
 
+        $from_date = $request->date ?? date("Y-m-d");
+        $to_date = $request->date_to ?? date("Y-m-d");
         $time_sittings = $this->TimeSittings->get();
         $items = [];
         $count = 0;
@@ -423,10 +427,10 @@ class OrderController extends Controller
 
         if ($time_sittings->count() > 0) {
             $from = $from->from;
-            $end = date('Y-m-d') . ' ' . $to->from;
+            $end = $to_date . ' ' . $to->from;
             $hours = $to->hours;
             $minutes = $to->minutes;
-            $from = date('Y-m-d') . ' ' . $from;
+            $from = $from_date . ' ' . $from;
             $start = Carbon::parse($from);
             $end = Carbon::parse($end);
             $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
@@ -437,10 +441,12 @@ class OrderController extends Controller
                 $start = $start->subDay();
             }
         } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            $start = Carbon::parse($from_date . ' 00:00:00');
+            $end = Carbon::parse($to_date . ' 23:59:59');
         } 
-        $start = $start->subDay();
+        if(!$from_date){
+            $start = $start->subDay();
+        }
 
         $perPage = $request->input('per_page', 15);
 
