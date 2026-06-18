@@ -1882,8 +1882,7 @@ class OrderController extends Controller
         ->where('pos', 0)
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
-        ->get();
-        return response()->json(["hghjg"]);
+        ->get(); 
         if ($request->type != 'all') {
             $orders = $orders->where('order_status', $request->type)->values();
         }
@@ -1891,6 +1890,7 @@ class OrderController extends Controller
             $orders = $orders->where('branch_id', $request->branch_id)->values();
         }
 
+        return response()->json(["hghjg"]);
         return response()->json([
             'orders' => $orders
         ]);
