@@ -120,6 +120,10 @@ class User extends Authenticatable
         ->count();
     }
 
+    public function order(){
+        return $this->hasMany(Order::class, 'user_id');
+    }
+
     public function getOrdersCountBranchAttribute(){
         return $this->hasMany(Order::class, 'user_id')
         ->where('orders.branch_id', auth()?->user()?->id)

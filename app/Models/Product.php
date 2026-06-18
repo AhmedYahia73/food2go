@@ -163,6 +163,10 @@ class Product extends Model
         ->count();
     }
 
+    public function order(){
+        return $this->belongsToMany(Order::class, 'order_product', 'product_id', 'order_id');
+    }
+
     public function getOrdersCountBranchAttribute(){
         return $this->belongsToMany(Order::class, 'order_product', 'product_id', 'order_id')
         ->where('orders.branch_id', auth()?->user()?->id)
