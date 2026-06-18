@@ -1877,7 +1877,7 @@ class OrderController extends Controller
             // else{
             //     $end = Carbon::parse($date_to)->addHours(intval($hours));
             // } 
-        
+        return response()->json(["hghjg"]);
         $orders = $this->orders
         ->whereBetween('created_at', [$start, $end])
         ->where('pos', 0)
