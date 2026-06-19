@@ -28,9 +28,9 @@ return new class extends Migration
             }
         });
 
-        // translation_tbls table indexes
+        // translation_tbls table indexes - key is VARCHAR(191), locale is VARCHAR(255)
         if (!$this->indexExists('translation_tbls', 'translations_key_locale_index')) {
-            DB::statement('ALTER TABLE `translation_tbls` ADD INDEX `translations_key_locale_index` (`key`(250), `locale`(10))');
+            DB::statement('ALTER TABLE `translation_tbls` ADD INDEX `translations_key_locale_index` (`key`(191), `locale`(50))');
         }
 
         // branch_offs table indexes
