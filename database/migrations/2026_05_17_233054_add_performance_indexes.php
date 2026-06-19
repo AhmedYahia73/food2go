@@ -29,15 +29,9 @@ return new class extends Migration
         });
 
         // translation_tbls table indexes
-        Schema::table('translation_tbls', function (Blueprint $table) {
-            if (!$this->indexExists('translation_tbls', 'translations_key_locale_index')) {
-                // تم تعديل هذا السطر لتحديد طول الفهرس وتفادي مشكلة الـ 3072 بايت
-                $table->index([
-                    DB::raw('`key`(250)'), 
-                    DB::raw('`locale`(10)')
-                ], 'translations_key_locale_index');
-            }
-        });
+        if (!$this->indexExists('translation_tbls', 'translations_key_locale_index')) {
+            DB::statement('ALTER TABLE `translation_tbls` ADD INDEX `translations_key_locale_index` (`key`(250), `locale`(10))');
+        }
 
         // branch_offs table indexes
         Schema::table('branch_offs', function (Blueprint $table) {
@@ -73,9 +67,9 @@ return new class extends Migration
             $table->dropIndexIfExists('orders_transaction_id_index');
             $table->dropIndexIfExists('orders_created_at_index');
         });
-        Schema::table('translation_tbls', function (Blueprint $table) {
-            $table->dropIndexIfExists('translations_key_locale_index');
-        });
+        if ($this->indexExists('translation_tbls', 'translations_key_locale_index')) {
+            DB::statement('ALTER TABLE `translation_tbls` DROP INDEX `translations_key_locale_index`');
+        }
         Schema::table('branch_offs', function (Blueprint $table) {
             $table->dropIndexIfExists('branch_offs_branch_id_index');
         });
