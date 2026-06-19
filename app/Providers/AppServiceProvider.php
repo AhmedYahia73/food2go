@@ -6,7 +6,6 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cache;
-
 use App\Models\EmailIntegration;
 use App\Models\CompanyInfo;
 use App\Providers\gates\AdminGate;
@@ -84,7 +83,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-    Schema::defaultStringLength(191);
+        // Load global helpers
+        require_once app_path('helpers.php');
+
+        Schema::defaultStringLength(191);
         try {
             $company = Cache::remember('company_info', 3600, fn() => CompanyInfo::orderByDesc('id')->first());
             $timezone = $company->time_zone ?? config('app.timezone');
