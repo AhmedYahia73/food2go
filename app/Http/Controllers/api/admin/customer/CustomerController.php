@@ -56,7 +56,7 @@ class CustomerController extends Controller
         ->where('deleted_at', 0)
         ->withSum('orders', 'amount')
         ->withCount('orders')
-        ->get();
+        ->paginate(10);
 
         return response()->json([
             'customers' => $customers,
