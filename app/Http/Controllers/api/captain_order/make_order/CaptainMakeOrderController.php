@@ -907,7 +907,9 @@ class CaptainMakeOrderController extends Controller
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options' => function($query_option) use($locale){
-                $query_option->with(['extra' => function($query_extra) use($locale){
+                $query_option
+                ->where("status", 1)
+                ->with(['extra' => function($query_extra) use($locale){
                     $query_extra->with('parent_extra')
                     ->withLocale($locale);
                 }])
