@@ -54,31 +54,23 @@ class CustomerController extends Controller
         // https://bcknd.food2go.online/admin/customer
         $searchTerm = request('search'); 
 
-        // $customers = $this->customers
-        // ->where('deleted_at', 0)
-        // ->when($searchTerm, function ($query, $searchTerm) {
-        //     $query->where(function ($q) use ($searchTerm) {
-        //         $q->where('f_name', 'LIKE', "%{$searchTerm}%")
-        //         ->orWhere('l_name', 'LIKE', "%{$searchTerm}%")
-        //         ->orWhere('email', 'LIKE', "%{$searchTerm}%")
-        //         ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
-        //         ->orWhere('phone_2', 'LIKE', "%{$searchTerm}%")
-        //         ->orWhereRaw("CONCAT(f_name, ' ', l_name) LIKE ?", ["%{$searchTerm}%"]);
-        //     });
-        // })
-        // ->withSum('orders', 'amount')
-        // ->withCount('orders')
-        // ->paginate(10);
-
         $customers = $this->customers
         ->where('deleted_at', 0)
+        ->when($searchTerm, function ($query, $searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('f_name', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('l_name', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('email', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('phone_2', 'LIKE', "%{$searchTerm}%")
+                // السطر الجاي ب يدمج الاسم الأول والأخير علشان لو حد بحث بالاسم بالكامل
+                ->orWhereRaw("CONCAT(f_name, ' ', l_name) LIKE ?", ["%{$searchTerm}%"]);
+            });
+        })
         ->withSum('orders', 'amount')
         ->withCount('orders')
-        ->get();
+        ->paginate(10);
 
-        return response()->json([
-            'customers' => $customers,
-        ]);
         return response()->json([
             'customers' => $customers,
         ]);
