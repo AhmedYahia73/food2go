@@ -44,6 +44,7 @@ class Product extends Model
         'recipe',
         'order',
         'product_code',
+        'app_type', // "all", "web", "app"
     ];
     protected $appends = ['image_link', 'orders_count', 'taxes', 'orders_count_branch'];
 

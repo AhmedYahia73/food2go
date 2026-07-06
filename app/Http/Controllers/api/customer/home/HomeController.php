@@ -558,7 +558,9 @@ class HomeController extends Controller
             'schedules' => $schedules,
         ]);
     }
+
     public function categories(Request $request){
+        $app_type = $request->app_type ?? "app";
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;
         $close_message = '';
@@ -634,6 +636,7 @@ class HomeController extends Controller
         }])
         ->withLocale($locale) 
         ->where('category_id', null)
+        ->whereIn("app_type", ["all", $app_type])
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);
@@ -665,6 +668,7 @@ class HomeController extends Controller
 
     public function products_in_category(Request $request, $id){
         
+        $app_type = $request->app_type ?? "app";
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;
         $module = "delivery";
@@ -690,6 +694,7 @@ class HomeController extends Controller
             $user_id = $request->user_id;
             $products = $this->product
             ->orderBy('order')
+            ->whereIn("app_type", ["all", $app_type])
             ->with([ 
                 'favourite_product' => fn($q) => $q->where('users.id', $user_id),
                 'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),       
@@ -1248,6 +1253,7 @@ class HomeController extends Controller
         // }
         // _________________________________________________________________________
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $app_type = $request->app_type ?? "app";
         $branch_id = 0;
         $module = "delivery";
         if ($request->branch_id && !empty($request->branch_id)) {
@@ -1279,6 +1285,7 @@ class HomeController extends Controller
         ->withLocale($locale)
         ->where('status', 1)
         ->where('category_id', null)
+        ->whereIn('app_type', ['all', $app_type])
         ->get()
         ->filter(function($item) use($category_off){
             return !$category_off->contains($item->id);

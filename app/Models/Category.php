@@ -20,6 +20,7 @@ class Category extends Model
         'status',
         'priority',
         'active',
+        'app_type', // "all", "web", "app"
     ];
     protected $appends = ['image_link', 'banner_link'];
 

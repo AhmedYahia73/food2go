@@ -49,6 +49,7 @@ class CreateProductController extends Controller
         'recipe',
         'order',
         'product_code',
+        'app_type',
     ];
     use image;
     use translaion;
