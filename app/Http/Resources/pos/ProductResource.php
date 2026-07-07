@@ -33,8 +33,8 @@ class ProductResource extends JsonResource
         else{  
             $addons = AddonResource::collection($this->whenLoaded('addons'));
         }
-        $my_discount = $this?->discount->start_date <= date("Y-m-d")
-        && $this?->discount->end_date >= date("Y-m-d") ? $this?->discount
+        $my_discount = $this?->discount?->start_date <= date("Y-m-d")
+        && $this?->discount?->end_date >= date("Y-m-d") ? $this?->discount
         : null;
     
         $locale = app()->getLocale(); // Use the application's current locale

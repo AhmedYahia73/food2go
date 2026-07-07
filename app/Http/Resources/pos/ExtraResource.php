@@ -16,8 +16,8 @@ class ExtraResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $my_discount = $this?->product?->discount->start_date <= date("Y-m-d")
-        && $this?->product?->discount->end_date >= date("Y-m-d") ? $this?->discount
+        $my_discount = $this?->product?->discount?->start_date <= date("Y-m-d")
+        && $this?->product?->discount?->end_date >= date("Y-m-d") ? $this?->discount
         : null;
         $total_discount = 0;
         $total_tax = 0;
