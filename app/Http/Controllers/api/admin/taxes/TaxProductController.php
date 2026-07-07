@@ -36,9 +36,46 @@ class TaxProductController extends Controller
         }
         unset($tax_module->products);
 
+        $branches = TaxModuleBranch::
+        whereIn("tax_module_id", $tax_module->id)
+        ->with("branch")
+        ->whereHas("branch")
+        ->unique("branch_id")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->branch_id,
+                "branch" => $item->branch->name,
+            ];
+        });
+
+        $modules = TaxModuleBranch::
+        whereIn("tax_module_id", $tax_module->id)
+        ->unique("module")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "module" => $item->module,
+            ];
+        });
+
+        $types = TaxModuleBranch::
+        whereIn("tax_module_id", $tax_module->id)
+        ->unique("type")
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "type" => $item->type,
+            ];
+        });
         return response()->json([
             "products" => $products,
             "tax_module" => $tax_module,
+            "branches" => $branches,
+            "modules" => $modules,
+            "types" => $types,
         ]);
     }
 
