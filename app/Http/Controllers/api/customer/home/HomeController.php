@@ -1666,8 +1666,8 @@ class HomeController extends Controller
         });
 
         return response()->json([
-            'deals' => $deals
-            'products' => $products
+            'deals' => $deals,
+            'products' => $products,
         ]);
     }
 
