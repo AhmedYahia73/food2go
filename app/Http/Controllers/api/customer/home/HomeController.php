@@ -18,6 +18,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Banner;
 use App\Models\Setting;
+use App\Models\Deal;
 use App\Models\Translation;
 use App\Models\BranchOff;
 use App\Models\ScheduleSlot;
@@ -1523,7 +1524,7 @@ class HomeController extends Controller
 
     public function slider(Request $request){
         // https://bcknd.food2go.online/customer/home/slider
-        $locale = $request->locale ?? "ar";
+        $locale = $request->locale ?? "en";
         $banners = $this->banner
         ->where('status', 1)
         ->with('category_banner', 'translations')
@@ -1538,6 +1539,14 @@ class HomeController extends Controller
                 ->first()?->value ?? $item->image_link;
             return [
                 "id" => $item->id,
+                "image" => $item->image,
+                "order" => $item->order,
+                "category_id" => $item->category_id,
+                "product_id" => $item->product_id,
+                "deal_id" => $item->deal_id,
+                "translation_id" => $item->translation_id,
+                "status" => $item->status,
+                "category_banner" => $item->category_banner,
                 "image_link" => url("storage/" . $image),
             ];
         });
@@ -1545,6 +1554,116 @@ class HomeController extends Controller
         return response()->json([
             'banners' => $banners
         ]);
+    }
+
+    public function banner_products(Request $request, $id){
+        $banner = $this->banner
+        ->with("categories", "products")
+        ->findOrFail($id);
+        $categories = $banner->categories->pluck("id")->toArray();
+        $products = $banner->products->pluck("id")->toArray();
+        $locale = $request->locale ?? "en";
+        $deals = Deal::
+        where("start_date", "<=", date("Y-m-d"))
+        ->where("end_date", ">=", date("Y-m-d"))
+        ->where("status", true)
+        ->with("translations")
+        ->where("id", $banner->deal_id ?? 0)
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "image_link" => $item->image_link,
+                "description" => $locale == "en" ?
+                $item->translations : $item->translations
+                ->where("key", $item->description)
+                ->where("locale", $locale)
+                ->first()?->value ?? $item->description,
+                "id" => $item->id,
+            ];
+        });
+        $products = Product::
+        where("status", 1)
+        ->where(function($query) use($categories, $products){
+            $query->whereIn("id", $products)
+            ->orWhere("category_id", $categories)
+            ->orWhere("sub_category_id", $categories);
+        })
+        ->with([ 
+            'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+            'addons' => fn($q) => $q->withLocale($locale),
+            'category_addons' => fn($q) => $q->withLocale($locale),
+            'sub_category_addons' => fn($q) => $q->withLocale($locale),
+            'excludes' => fn($q) => $q->withLocale($locale),
+            'discount', 'extra', 'tax',
+            'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+            'variations' => fn($q) => $q->withLocale($locale)->with([
+                'options' => fn($q) => $q
+                    ->with(['option_pricing' => fn($q) => $q->where('branch_id', $branch_id)])
+                    ->withLocale($locale),
+            ]),
+        ])
+        ->orderBy('order')
+        ->withSum('sales_count as sales_count_fixed', 'count')
+        ->withSum(['sales_count as sales_count_daily' => function ($query) {
+            $query->where('date', date('Y-m-d'));
+        }], 'count')
+        ->withLocale($locale)
+        ->where('item_type', '!=', 'offline')
+        ->where('status', 1)
+        ->whereNotIn('category_id', $category_off)
+        // ->whereNotIn('sub_category_id', $category_off)
+        ->whereNotIn('products.id', $product_off)
+        ->get()
+        ->map(function ($product) use ($option_off, $branch_id, $module) { 
+
+            $product->price = $product->product_pricing->first()?->price ?? $product->price;
+
+            if ($product->stock_type === 'fixed') {
+                $product->count = $product->sales_count_fixed ?? 0;
+            } elseif ($product->stock_type === 'daily') {
+                $product->count = $product->sales_count_daily ?? 0;
+            }
+
+            $product->in_stock = $product->number > $product->count;
+
+            $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id) {
+                $variation->options = $variation->options
+                    ->where('status', 1)
+                    ->values()
+                    ->reject(fn($option) => $option_off->contains($option->id))
+                    ->map(function ($option) {
+                        $option->price = $option->option_pricing->first()?->price ?? $option->price;
+                        return $option;
+                    });
+
+                return $variation;
+            });
+
+            $tax_module = $product?->tax
+            ?->tax_module
+            ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+                $isFound = $taxItem->module
+                ->where('module', $module) 
+                ->whereIn('app_type', ['online', 'all'])
+                ->Where("branch_id", $branch_id)
+                ->first();
+                if($isFound){
+                    return $product?->tax;
+                }
+
+            })
+            ->filter()
+            ->first();
+            if(!empty($tax_module)){  
+                $product->tax = $tax_module;
+            }
+            else{
+                $product->tax = null;
+            }
+            return $product;
+        });
     }
 
     public function favourite(Request $request, $id){
