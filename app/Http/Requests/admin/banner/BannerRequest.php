@@ -29,8 +29,8 @@ class BannerRequest extends FormRequest
             'images.*.image' => ['required'], 
             'categories' => ['array'],
             'products' => ['array'],
-            'categories' => ['exists:categories,id'],
-            'products' => ['exists:products,id'],
+            'categories.*' => ['exists:categories,id'],
+            'products.*' => ['exists:products,id'],
             'deal_id' => ['exists:deals,id', 'nullable'],
             'status' => ['required', 'boolean'],
         ];
