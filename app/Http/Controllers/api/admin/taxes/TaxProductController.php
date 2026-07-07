@@ -113,12 +113,14 @@ class TaxProductController extends Controller
             ]);
             $modules = $request->tax_modules;
             foreach ($modules as $item) {
-                TaxModuleBranch::create([
-                    "tax_module_id" => $tax_module->id,
-                    "module" => $item,
-                    "branch_id" => $request->branch_id[0],
-                    "type" => "all"
-                ]);
+                foreach ($request->branch_id as $value) {
+                    TaxModuleBranch::create([
+                        "tax_module_id" => $tax_module->id,
+                        "module" => $item,
+                        "branch_id" => $value,
+                        "type" => "all"
+                    ]);
+                }
             }
             $tax_module->products()->attach($request->products ?? []);
         }
