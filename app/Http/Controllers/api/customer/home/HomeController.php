@@ -1556,7 +1556,16 @@ class HomeController extends Controller
         ]);
     }
 
-    public function banner_products(Request $request, $id){
+    public function banner_products(Request $request, $id){    
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $branch_id = $request->branch_id;
         $banner = $this->banner
         ->with("categories", "products")
         ->findOrFail($id);
