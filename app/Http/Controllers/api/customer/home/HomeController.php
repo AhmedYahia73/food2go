@@ -1664,6 +1664,11 @@ class HomeController extends Controller
             }
             return $product;
         });
+
+        return response()->json([
+            'deals' => $deals
+            'products' => $products
+        ]);
     }
 
     public function favourite(Request $request, $id){
