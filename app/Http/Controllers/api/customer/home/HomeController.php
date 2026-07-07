@@ -1521,13 +1521,29 @@ class HomeController extends Controller
         ]);
     }
 
-    public function slider(){
+    public function slider(Request $request){
         // https://bcknd.food2go.online/customer/home/slider
+        $locale = $request->locale ?? "ar";
         $banners = $this->banner
         ->where('status', 1)
-        ->with('category_banner')
+        ->with('category_banner', 'translations')
         ->orderBy('order')
-        ->get();
+        ->get()
+        ->map(function($item) use($locale){
+            return [
+                "id" => $item->id,
+                "image_link" => $locale == "en" ? 
+                $item->image_link : 
+                $item->translations
+                ->where("key", $item->image)
+                ->where("locale", $locale)
+                ->first()?->value ?? $item->image_link,
+                "id" => $item->id,
+                "id" => $item->id,
+                "id" => $item->id,
+                "id" => $item->id,
+            ];
+        });
 
         return response()->json([
             'banners' => $banners
