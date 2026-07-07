@@ -4,9 +4,12 @@ namespace App\Http\Controllers\api\admin\settings;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\admin\settings\DiscountRequest;
 
 use App\Models\Discount;
+use App\Models\Product;
+use App\Models\Category;
 
 class DiscountController extends Controller
 {
@@ -15,6 +18,8 @@ class DiscountController extends Controller
         'name',
         'type',
         'amount',
+        "start_date",
+        "end_date",
     ];
 
     public function view(){
@@ -23,6 +28,105 @@ class DiscountController extends Controller
 
         return response()->json([
             'discounts' => $discount
+        ]);
+    }
+
+    public function lists(){
+        $products = Product::
+        whereDoesntHave("discounts", function($query) use($id){
+            $query->where("discounts.id", $id);
+        })
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+        $categories = Category::
+        whereDoesntHave("discounts", function($query) use($id){
+            $query->where("discounts.id", $id);
+        })
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+        return response()->json([
+            "products" => $products,
+            "categories" => $categories,
+        ]);
+    }
+
+    public function show_products(Request $request, $id){
+        // discounts 
+        $products = Product::
+        whereHas("discounts", function($query) use($id){
+            $query->where("discounts.id", $id);
+        })
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+        $categories = Category::
+        whereHas("discounts", function($query) use($id){
+            $query->where("discounts.id", $id);
+        })
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+        return response()->json([
+            "products" => $products,
+            "categories" => $categories,
+        ]);
+    }
+
+    public function discount_product(Request $request){
+        // discounts 
+        $validation = Validator::make($request->all(), [
+            'categories' => 'array',
+            'products' => 'array',
+            'categories.*' => 'exists:categories,id',
+            'products.*' => 'exists:products,id',
+            'discount_id' => 'exists:discounts,id',
+        ]);
+        if ($validation->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validation->errors(),
+            ],400);
+        }
+
+        $products = Product::
+        where("discount_id", $request->discount_id)
+        ->update([
+            "discount_id" => null
+        ]);
+        $products = Product::
+        whereIn("category_id", $request->categories)
+        ->orWhereIn("sub_category_id", $request->categories)
+        ->orWhereIn("id", $request->products)
+        ->update([
+            "discount_id" => $request->discount_id
+        ]);
+         $discount = Discount::
+         where("id", $request->discount_id)
+         ->first();
+         $discount->products()->sync($request->products);
+         $discount->categories()->sync($request->categories);
+        
+        return response()->json([
+            "products" => $products, 
         ]);
     }
 

@@ -24,6 +24,10 @@ class Category extends Model
     ];
     protected $appends = ['image_link', 'banner_link'];
 
+    public function discounts(){
+        return $this->belongsToMany(Discount::class, "discount_category", "category_id", "discount_id");
+    }
+
     public function category_off(){
         return $this->hasMany(BranchOff::class, "category_id");
     }

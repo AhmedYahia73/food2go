@@ -51,6 +51,10 @@ class Product extends Model
     public function product_off(){
         return $this->hasMany(BranchOff::class, "product_id");
     }
+    
+    public function C(){
+        return $this->belongsToMany(Discount::class, "discount_product", "product_id", "discount_id");
+    }
 
     public function tax_module(){
         return $this->belongsToMany(TaxModule::class, 'tax_module_product', 'product_id', 'tax_module_id');

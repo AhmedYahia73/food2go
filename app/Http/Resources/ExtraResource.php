@@ -16,12 +16,16 @@ class ExtraResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $my_discount = $this?->product?->discount->start_date <= date("Y-m-d")
+        && $this?->product?->discount->end_date >= date("Y-m-d") ? $this?->product?->discount
+        : null;
+
         $locale = app()->getLocale(); // Use the application's current locale
        if ($this->product?->taxes?->setting == 'included') {
             
             $price = $this->price;
-            if (!empty($this->product->discount) && $this->product->discount->type == 'precentage') {
-                $discount = $price - $this->product->discount->amount * $price / 100;
+            if (!empty($my_discount) && $my_discount->type == 'precentage') {
+                $discount = $price - $my_discount->amount * $price / 100;
             }
             else{
                 $discount = $price;
@@ -48,8 +52,8 @@ class ExtraResource extends JsonResource
         else{
             $price = $this->price;
             
-            if (!empty($this->product->discount) && $this->product->discount->type == 'precentage') {
-                $discount = $price - $this->product->discount->amount * $price / 100;
+            if (!empty($my_discount) && $my_discount->type == 'precentage') {
+                $discount = $price - $my_discount->amount * $price / 100;
             }
             else{
                 $discount = $price;

@@ -1237,6 +1237,10 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::controller(DiscountController::class)
         ->prefix('discount')->group(function(){
             Route::get('/', 'view')->middleware('can:view_discount');
+            Route::get('/lists', 'lists')->middleware('can:view_discount');
+            Route::get('/show_products/{id}', 'show_products')->middleware('can:view_discount');
+            Route::post('/discount_product', 'discount_product')->middleware('can:view_discount');
+            Route::get('/', 'view')->middleware('can:view_discount');
             Route::get('/item/{id}', 'discount')->middleware('can:edit_discount');
             Route::post('/add', 'create')->middleware('can:add_discount');
             Route::post('/update/{id}', 'modify')->middleware('can:edit_discount');

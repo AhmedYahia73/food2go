@@ -33,17 +33,20 @@ class ProductResource extends JsonResource
         else{  
             $addons = AddonResource::collection($this->whenLoaded('addons'));
         }
+        $my_discount = $this?->discount->start_date <= date("Y-m-d")
+        && $this?->discount->end_date >= date("Y-m-d") ? $this?->discount
+        : null;
     
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
             $price = $this->price;
-            if (!empty($this->discount)) {
-                if ($this->discount->type == 'precentage') {
-                    $discount = $price - $this->discount->amount * $price / 100;
-                    $total_discount = $this->discount->amount * $price / 100;
+            if (!empty($my_discount)) {
+                if ($my_discount->type == 'precentage') {
+                    $discount = $price - $my_discount->amount * $price / 100;
+                    $total_discount = $my_discount->amount * $price / 100;
                 } else {
-                    $discount = $price - $this->discount->amount;
-                    $total_discount = $this->discount->amount;
+                    $discount = $price - $my_discount->amount;
+                    $total_discount = $my_discount->amount;
                 }
                 $price = empty($this->tax) ? $discount: 
                 ($this->tax->type == 'value' ? $discount + $this->tax->amount 
@@ -84,13 +87,13 @@ class ProductResource extends JsonResource
         else {
             $price = $this->price;
 
-            if (!empty($this->discount)) {
-                if ($this->discount->type == 'precentage') {
-                    $discount = $price - $this->discount->amount * $price / 100;
-                    $total_discount = $this->discount->amount * $price / 100;
+            if (!empty($my_discount)) {
+                if ($my_discount->type == 'precentage') {
+                    $discount = $price - $my_discount->amount * $price / 100;
+                    $total_discount = $my_discount->amount * $price / 100;
                 } else {
-                    $discount = $price - $this->discount->amount;
-                    $total_discount = $this->discount->amount;
+                    $discount = $price - $my_discount->amount;
+                    $total_discount = $my_discount->amount;
                 }
             }
             else{

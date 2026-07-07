@@ -32,14 +32,17 @@ class ProductResource extends JsonResource
             $addons = AddonResource::collection($this->whenLoaded('addons'));
         }
     
+        $my_discount = $this->discount->start_date <= date("Y-m-d")
+        && $this->discount->end_date >= date("Y-m-d") ? $this->discount
+        : null;
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
             $price = $this->price;
-            if (!empty($this->discount)) {
-                if ($this->discount->type == 'precentage') {
-                    $discount = $price - $this->discount->amount * $price / 100;
+            if (!empty($my_discount)) {
+                if ($my_discount->type == 'precentage') {
+                    $discount = $price - $my_discount->amount * $price / 100;
                 } else {
-                    $discount = $price - $this->discount->amount;
+                    $discount = $price - $my_discount->amount;
                 }
                 $price = empty($this->tax) ? $discount: 
                 ($this->tax->type == 'value' ? $discount + $this->tax->amount 
@@ -73,7 +76,7 @@ class ProductResource extends JsonResource
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
-                'discount_id' => $this->discount_id,
+                'discount_id' => $my_discount_id,
                 'tax_id' => $this->tax_id,
                 'status' => $this->status,
                 'recommended' => $this->recommended,
@@ -101,11 +104,11 @@ class ProductResource extends JsonResource
         else {
             $price = $this->price;
 
-            if (!empty($this->discount)) {
-                if ($this->discount->type == 'precentage') {
-                    $discount = $price - $this->discount->amount * $price / 100;
+            if (!empty($my_discount)) {
+                if ($my_discount->type == 'precentage') {
+                    $discount = $price - $my_discount->amount * $price / 100;
                 } else {
-                    $discount = $price - $this->discount->amount;
+                    $discount = $price - $my_discount->amount;
                 }
             }
             else{
@@ -144,7 +147,7 @@ class ProductResource extends JsonResource
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
-                'discount_id' => $this->discount_id,
+                'discount_id' => $my_discount_id,
                 'tax_id' => $this->tax_id,
                 'status' => $this->status,
                 'recommended' => $this->recommended,
