@@ -1530,18 +1530,15 @@ class HomeController extends Controller
         ->orderBy('order')
         ->get()
         ->map(function($item) use($locale){
-            return [
-                "id" => $item->id,
-                "image_link" => $locale == "en" ? 
+            $image = $locale == "en" ? 
                 $item->image_link : 
                 $item->translations
                 ->where("key", $item->image)
                 ->where("locale", $locale)
-                ->first()?->value ?? $item->image_link,
+                ->first()?->value ?? $item->image_link;
+            return [
                 "id" => $item->id,
-                "id" => $item->id,
-                "id" => $item->id,
-                "id" => $item->id,
+                "image_link" => url("storage/" . $image),
             ];
         });
 
