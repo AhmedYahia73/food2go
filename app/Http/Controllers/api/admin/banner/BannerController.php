@@ -131,6 +131,8 @@ class BannerController extends Controller
                         'key' => $image_path,
                         'value' => $image_path
                     ]);
+                    $banner->categories()->attach($request->categories ?? []);
+                    $banner->products()->attach($request->products ?? []);
                 }
             }
             else{
@@ -202,6 +204,8 @@ class BannerController extends Controller
                 }
                 $bannerRequest['translation_id'] = $item['translation_id'];
                 $banner->update($bannerRequest);
+                $banner->categories()->sync($request->categories ?? []);
+                $banner->products()->sync($request->products ?? []);
             }
             else{
                 if (!is_string($item['image'])) {

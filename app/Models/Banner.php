@@ -36,6 +36,14 @@ class Banner extends Model
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    public function categories(){
+        return $this->belongsToMany(Category::class, 'category_banners', 'banner_id', 'category_id');
+    }
+
+    public function products(){
+        return $this->belongsToMany(Product::class, 'products_banners', 'banner_id', 'product_id');
+    }
+
     public function deal(){
         return $this->belongsTo(Deal::class, 'deal_id');
     }
