@@ -147,7 +147,7 @@ class ProductResource extends JsonResource
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
-                'discount_id' => $discount_id,
+                'discount_id' => $this->discount_id,
                 'tax_id' => $this->tax_id,
                 'status' => $this->status,
                 'recommended' => $this->recommended,
