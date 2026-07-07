@@ -1533,10 +1533,10 @@ class HomeController extends Controller
         ->map(function($item) use($locale){
             $image = $locale == "en" ? 
                 $item->image_link : 
-                $item->translations
+                url("storage/" . $item->translations
                 ->where("key", $item->image)
                 ->where("locale", $locale)
-                ->first()?->value ?? $item->image_link;
+                ->first()?->value) ?? $item->image_link;
             return [
                 "id" => $item->id,
                 "image" => $item->image,
@@ -1547,7 +1547,7 @@ class HomeController extends Controller
                 "translation_id" => $item->translation_id,
                 "status" => $item->status,
                 "category_banner" => $item->category_banner,
-                "image_link" => url("storage/" . $image),
+                "image_link" => $image,
             ];
         });
 
