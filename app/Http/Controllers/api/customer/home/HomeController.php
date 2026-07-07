@@ -1610,10 +1610,7 @@ class HomeController extends Controller
         }], 'count')
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
-        ->where('status', 1)
-        ->whereNotIn('category_id', $category_off)
-        // ->whereNotIn('sub_category_id', $category_off)
-        ->whereNotIn('products.id', $product_off)
+        ->where('status', 1) 
         ->get()
         ->map(function ($product) use ($option_off, $branch_id, $module) { 
 
