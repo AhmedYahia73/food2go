@@ -130,12 +130,14 @@ class TaxProductController extends Controller
             where("tax_module_id", $taxes->id)
             ->delete();
             foreach ($modules as $item) {
-                TaxModuleBranch::create([
-                    "tax_module_id" => $taxes->id,
-                    "module" => $item,
-                    "branch_id" => $request->branch_id[0],
-                    "type" => "all"
-                ]);
+                foreach ($request->branch_id as $value) {
+                    TaxModuleBranch::create([
+                        "tax_module_id" => $taxes->id,
+                        "module" => $item,
+                        "branch_id" => $value,
+                        "type" => "all"
+                    ]);
+                }
             }
             $taxes->products()->sync($request->products ?? []);
         } 
