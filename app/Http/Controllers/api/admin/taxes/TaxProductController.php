@@ -15,14 +15,25 @@ use App\Models\TaxModuleBranch;
 class TaxProductController extends Controller
 {
     public function view(Request $request, $id){
-        $tax_module = TaxModule::
-        where("tax_id", $id)
-        ->with("products")
-        ->first();
-        $products = $tax_module?->products;
-        if($products && $products->count() > 0){
-            $products = $products
-            ->map(function($item){
+        // 1. جلب الـ tax_module والعلاقة
+        $tax_module = TaxModule::where("tax_id", $id)->with("products")->first();
+
+        // تأمين: لو الـ id مش موجود في الداتابيز، نوقف هنا بدل ما الكود يضرب تحت
+        if (!$tax_module) {
+            return response()->json([
+                "products" => [],
+                "tax_module" => null,
+                "branches" => [],
+                "modules" => [],
+                "types" => [],
+            ], 404);
+        }
+
+        // 2. التعامل مع المنتجات باستخدام الـ Collection المضمونة
+        $products = $tax_module->products;
+
+        if ($products && $products->isNotEmpty()) {
+            $products = $products->map(function($item) {
                 return [
                     "id" => $item->id,
                     "name" => $item->name,
@@ -30,46 +41,58 @@ class TaxProductController extends Controller
                     "sub_category_id" => $item->sub_category_id,
                 ];
             });
-        }
-        else{
+        } else {
             $products = [];
         }
+
+        // فصل الـ relation عشان ما ترجعش مع الـ object في الـ JSON لو مش عايزها
         unset($tax_module->products);
 
-        $branches = TaxModuleBranch::
-        whereIn("tax_module_id", $tax_module->id)
-        ->with("branch")
-        ->whereHas("branch")
-        ->unique("branch_id")
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->branch_id,
-                "branch" => $item->branch->name,
-            ];
-        });
+        /* 3. جلب البيانات من جدول الـ TaxModuleBranch 
+        تم استبدال whereIn بـ where لأن الـ ID قيمة مفردة.
+        تم استبدال unique بـ groupBy أو distinct (على حسب رغبتك في الفلترة) 
+        لأن unique مش ميثود مدعومة في الـ Query Builder قبل الـ get().
+        */
 
-        $modules = TaxModuleBranch::
-        whereIn("tax_module_id", $tax_module->id)
-        ->unique("module")
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "module" => $item->module,
-            ];
-        });
+        // الفروع (Branches)
+        $branches = TaxModuleBranch::where("tax_module_id", $tax_module->id)
+            ->with("branch")
+            ->whereHas("branch")
+            ->get()
+            ->unique("branch_id") // عملنا الفلترة هنا بعد الـ get عشان تشتغل صح كـ Collection
+            ->map(function($item) {
+                return [
+                    "id" => $item->branch_id,
+                    "branch" => $item->branch?->name, // استخدام nullsafe تأكيداً
+                ];
+            })
+            ->values(); // لإعادة ترتيب الـ indexes بعد الـ unique
 
-        $types = TaxModuleBranch::
-        whereIn("tax_module_id", $tax_module->id)
-        ->unique("type")
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "type" => $item->type,
-            ];
-        });
+        // الموديولات (Modules)
+        $modules = TaxModuleBranch::where("tax_module_id", $tax_module->id)
+            ->get()
+            ->unique("module")
+            ->map(function($item) {
+                return [
+                    "id" => $item->id,
+                    "module" => $item->module,
+                ];
+            })
+            ->values();
+
+        // الأنواع (Types)
+        $types = TaxModuleBranch::where("tax_module_id", $tax_module->id)
+            ->get()
+            ->unique("type")
+            ->map(function($item) {
+                return [
+                    "id" => $item->id,
+                    "type" => $item->type,
+                ];
+            })
+            ->values();
+
+        // 4. إرجاع الـ JSON النهائي سليم 100%
         return response()->json([
             "products" => $products,
             "tax_module" => $tax_module,
