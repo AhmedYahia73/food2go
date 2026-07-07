@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('discounts', function (Blueprint $table) {
-            $table->date("start_date")->useCurrent();
+            $table->date("start_date")->default(DB::raw('(CURRENT_DATE)'));
             $table->date("end_date")->default(DB::raw('(CURRENT_DATE + INTERVAL 1 YEAR)'));
         });
     }
