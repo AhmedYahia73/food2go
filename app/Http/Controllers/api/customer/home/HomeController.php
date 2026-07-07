@@ -1582,6 +1582,13 @@ class HomeController extends Controller
                 "id" => $item->id,
             ];
         });
+        
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter();
+        $category_off = $branch_off->pluck('category_id')->filter();
+        $option_off = $branch_off->pluck('option_id')->filter();
         $products = Product::
         where("status", 1)
         ->where(function($query) use($categories, $products){
@@ -1610,7 +1617,10 @@ class HomeController extends Controller
         }], 'count')
         ->withLocale($locale)
         ->where('item_type', '!=', 'offline')
-        ->where('status', 1) 
+        ->where('status', 1)
+        ->whereNotIn('category_id', $category_off)
+        // ->whereNotIn('sub_category_id', $category_off)
+        ->whereNotIn('products.id', $product_off)
         ->get()
         ->map(function ($product) use ($option_off, $branch_id, $module) { 
 
