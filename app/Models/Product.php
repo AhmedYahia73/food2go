@@ -52,7 +52,7 @@ class Product extends Model
         return $this->hasMany(BranchOff::class, "product_id");
     }
     
-    public function C(){
+    public function discounts(){
         return $this->belongsToMany(Discount::class, "discount_product", "product_id", "discount_id");
     }
 
