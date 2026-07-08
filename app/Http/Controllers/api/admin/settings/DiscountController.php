@@ -122,11 +122,11 @@ class DiscountController extends Controller
          $discount = Discount::
          where("id", $request->discount_id)
          ->first();
-         $discount->products()->sync($request->products);
-         $discount->categories()->sync($request->categories);
+         $discount->products()->sync($request->products ?? []);
+         $discount->categories()->sync($request->categories ?? []);
         
         return response()->json([
-            "products" => $products, 
+            "success" => "You update data success", 
         ]);
     }
 
