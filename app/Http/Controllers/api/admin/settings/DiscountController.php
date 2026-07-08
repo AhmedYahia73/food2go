@@ -99,7 +99,7 @@ class DiscountController extends Controller
             'products' => 'array',
             'categories.*' => 'exists:categories,id',
             'products.*' => 'exists:products,id',
-            'discount_id' => 'exists:discounts,id',
+            'discount_id' => 'required|exists:discounts,id',
         ]);
         if ($validation->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
