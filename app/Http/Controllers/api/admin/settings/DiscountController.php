@@ -31,7 +31,7 @@ class DiscountController extends Controller
         ]);
     }
 
-    public function lists(){
+    public function lists($id){
         $products = Product::
         whereDoesntHave("discounts", function($query) use($id){
             $query->where("discounts.id", $id);
