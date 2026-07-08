@@ -849,541 +849,791 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
-    public function cashier_lists(Request $request){
-        // /captain/lists
+    // public function cashier_lists(Request $request){
+    //     // /captain/lists
+    //     $validator = Validator::make($request->all(), [
+    //         'branch_id' => 'required|exists:branches,id',
+    //         'module' => 'in:take_away,dine_in,delivery'
+    //     ]);//tax_modules all,take_away,dine_in,delivery
+    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
+    //         return response()->json([
+    //             'errors' => $validator->errors(),
+    //         ],400);
+    //     } 
+    //     $module = $request->module ?? null;
+    //     $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+    //     $branch_id = $request->branch_id;
+    //     $branch_off = $this->branch_off
+    //     ->where('branch_id', $branch_id)
+    //     ->get();
+    //     $product_off = $branch_off->pluck('product_id')->filter();
+    //     $category_off = $branch_off->pluck('category_id')->filter();
+    //     $option_off = $branch_off->pluck('option_id')->filter();
+
+    //     $categories = $this->category
+    //     ->with(['sub_categories' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 
+    //     'addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }])
+    //     ->withLocale($locale)
+    //     ->where('status', 1)
+    //     ->whereNull('category_id')
+    //     ->orderBy("priority") 
+    //     ->get()
+    //     ->map(function($item) use($category_off, $locale){
+    //         $sub_category = clone $item->sub_categories 
+    //         ->filter(function($item) use($category_off){
+    //             return !$category_off->contains($item->id);
+    //         }); 
+    //         $item->sub_categories = $sub_category;
+    //         return $item;
+    //     })
+    //     ->filter(function($item) use($category_off){
+    //         return !$category_off->contains($item->id);
+    //     });
+    //     $products = $this->products
+    //     ->orderBy('order')
+    //     ->with(['addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     },'sub_category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'excludes' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'extra', 'discount', 
+    //     'variations' => function($query) use($locale){
+    //         $query->withLocale($locale)
+    //         ->with(['options' => function($query_option) use($locale){
+    //             $query_option
+    //             ->where("status", 1)
+    //             ->with(['extra' => function($query_extra) use($locale){
+    //                 $query_extra->with('parent_extra')
+    //                 ->withLocale($locale);
+    //             }])
+    //             ->withLocale($locale);
+    //         }]);
+    //     }, 'sales_count', 'tax',
+    //     'tax_module' => fn($q) => $q->whereHas('module', fn($q) => $q->where('branch_id', $branch_id)
+    //     ->whereIn('app_type', ['pos', 'all']))
+    //     ->with('tax'),
+    //     'tax_module.module'])
+    //     ->withLocale($locale)
+    //     ->where('item_type', '!=', 'online') 
+    //     ->where('status', 1)
+    //     ->get()
+    //     ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
+    //         //get count of sales of product to detemine stock
+    //         $new_price = $product?->product_pricing
+    //         ->where('branch_id', $branch_id)
+    //         ->first()?->price;
+    //         if(empty($new_price)){
+    //             $new_price = $product?->pos_pricing->where('module', $module)
+    //             ->first()?->price ?? $product->price;
+    //         }
+    //         $product->price = $new_price ?? $product->price;
+    //         $product->favourite = false;
+    //         if ($product->stock_type == 'fixed') {
+    //             $product->count = $product->sales_count->sum('count');
+    //             $product->in_stock = $product->number > $product->count ? true : false;
+    //         }
+    //         elseif ($product->stock_type == 'daily') {
+    //             $product->count = $product->sales_count
+    //             ->where('date', date('Y-m-d'))
+    //             ->sum('count');
+    //             $product->in_stock = $product->number > $product->count ? true : false;
+    //         }
+    //         // return !$category_off->contains($item->id);
+    //         // $category_off, $product_off, $option_off
+    //         if ($category_off->contains($product->category_id) || 
+    //         $category_off->contains($product->sub_category_id)
+    //         || $product_off->contains($product->id)) {
+    //             return null;
+    //         }
+    //         // Resolve tax before variations map
+    //         $resolved_tax = $product->tax_module
+    //             ->filter(fn($tm) => $tm->module->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all'])->count() > 0)
+    //             ->first()?->tax ?? $product->tax ?? null;
+
+    //         $product->variations = $product->variations->map(function ($variation) 
+    //         use ($option_off, $product, $branch_id, $resolved_tax) {
+    //             $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+    //             $variation->options = $variation->options->map(function($element) use($branch_id, $resolved_tax){
+    //                 $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+    //                 ->first()?->price ?? $element->price;
+    //                 $element->new_tax = $resolved_tax;
+    //                 return $element;
+    //             });
+    //             return $variation;
+    //         });
+    //         $product->addons = $product->addons->map(function ($addon) use ($product) {
+    //             $addon->discount = $product->discount;
+    //             return $addon;
+    //         });
+    //         if (!empty($resolved_tax)) {
+    //             $product->tax = $resolved_tax;
+    //         }
+    //         return $product;
+    //     })->filter();
+    //     $cafe_location = $this->cafe_location
+    //     ->with(['tables' => function($query){
+    //         return $query
+    //         ->where('status', 1)
+    //         ->where('is_merge', 0)
+    //         ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
+    //     }])
+    //     ->where('branch_id', $request->branch_id)
+    //     ->get()
+    //     ->map(function($item){
+    //         $item->tables =  $item?->tables?->map(function($element){
+    //             $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
+    //             $element->makeHidden(['call_payment']);
+    //             return $element; 
+    //         });
+    //         return $item;
+    //     });
+    //     $favourite_products = $this->products
+    //     ->orderBy('order')
+    //     ->with(['addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     },'sub_category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'excludes' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'extra', 'discount', 
+    //     'variations' => function($query) use($locale){
+    //         $query->withLocale($locale)
+    //         ->with(['options' => function($query_option) use($locale){
+    //             $query_option->with(['extra' => function($query_extra) use($locale){
+    //                 $query_extra->with('parent_extra')
+    //                 ->withLocale($locale);
+    //             }])
+    //             ->withLocale($locale);
+    //         }]);
+    //     }, 'sales_count', 'tax', 'tax_module.module'])
+    //     ->withLocale($locale)
+    //     ->where('item_type', '!=', 'online') 
+    //     ->where("favourite", 1)
+    //     ->where('status', 1)
+    //     ->get()
+    //     ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
+    //         //get count of sales of product to detemine stock
+            
+    //         $tax_module = $product?->tax
+    //         ?->tax_module
+    //         ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+    //             $isFound = $taxItem->module
+	// 			->where('module', $module) 
+    //             ->whereIn('app_type', ['pos', 'all'])
+    //             ->Where("branch_id", $branch_id)
+	// 			->first();
+	// 			if($isFound){
+	// 				return $product?->tax;
+	// 			}
+
+    //         })
+    //         ->filter()
+    //         ->first();
+    //         if(!empty($tax_module)){  
+    //             $product->tax = $tax_module;
+    //         }
+    //         else{
+    //             $product->tax = null;
+    //         }
+    //         $new_price = $product?->product_pricing
+    //         ->where('branch_id', $branch_id)
+    //         ->first()?->price;
+    //         if(empty($new_price)){
+    //             $new_price = $product?->pos_pricing->where('module', $module)
+    //             ->first()?->price ?? $product->price;
+    //         }
+    //         $product->price = $new_price ?? $product->price;
+    //         $product->favourite = false;
+    //         if ($product->stock_type == 'fixed') {
+    //             $product->count = $product->sales_count->sum('count');
+    //             $product->in_stock = $product->number > $product->count ? true : false;
+    //         }
+    //         elseif ($product->stock_type == 'daily') {
+    //             $product->count = $product->sales_count
+    //             ->where('date', date('Y-m-d'))
+    //             ->sum('count');
+    //             $product->in_stock = $product->number > $product->count ? true : false;
+    //         }
+    //         // return !$category_off->contains($item->id);
+    //         // $category_off, $product_off, $option_off
+    //         if ($category_off->contains($product->category_id) || 
+    //         $category_off->contains($product->sub_category_id)
+    //         || $product_off->contains($product->id)) {
+    //             return null;
+    //         }
+    //         $product->variations = $product->variations->map(function ($variation) 
+    //         use ($option_off, $product, $branch_id, $tax_module) {
+    //             $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
+    //             $variation->options = $variation->options->map(function($element) use($branch_id, $product, $tax_module){
+    //                 $element->price = $element?->option_pricing->where('branch_id', $branch_id)
+    //                 ->first()?->price ?? $element->price;
+    //                 $element->new_tax = $tax_module ?? $product->tax;
+    //                 return $element;
+    //             });
+              
+    //             return $variation;
+    //         });
+    //         $product->addons = $product->addons->map(function ($addon) 
+    //         use ($product) {
+    //             $addon->discount = $product->discount;
+              
+    //             return $addon;
+    //         });
+         
+    //         $tax_module = $product?->tax
+    //         ?->tax_module
+    //         ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+
+    //             $isFound = $taxItem->module
+	// 			->where('module', $module) 
+    //             ->whereIn('app_type', ['pos', 'all'])
+    //             ->Where("branch_id", $branch_id)
+	// 			->first();
+	// 			if($isFound){
+	// 				return $product?->tax;
+	// 			}
+
+    //         })
+    //         ->filter()
+    //         ->first();
+    //         if(!empty($tax_module)){  
+    //             $product->tax = $tax_module;
+    //         }
+    //         else{
+    //             $product->tax = null;
+    //         }
+    //         return $product;
+    //     })->filter();
+    //     $cafe_location = $this->cafe_location
+    //     ->with(['tables' => function($query){
+    //         return $query
+    //         ->where('status', 1)
+    //         ->where('is_merge', 0)
+    //         ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
+    //     }])
+    //     ->where('branch_id', $request->branch_id)
+    //     ->get()
+    //     ->map(function($item){
+    //         $item->tables =  $item?->tables?->map(function($element){
+    //             $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
+    //             $element->makeHidden(['call_payment']);
+    //             return $element; 
+    //         });
+    //         return $item;
+    //     });
+    //     $products_count = $products->where("weight_status", 0)
+    //     ->values();
+    //     $products_weight = $products->where("weight_status", 1)
+    //     ->values();
+    //     $favourite_products_count = $favourite_products->where("weight_status", 0)
+    //     ->values();
+    //     $favourite_products_weight = $favourite_products->where("weight_status", 1)
+    //     ->values();
+    //     $categories = CategoryResource::collection($categories);
+    //     $products = ProductResource::collection($products_count); 
+    //     $favourite_products = ProductResource::collection($favourite_products_count); 
+    //     $favourite_products_weight = ProductResource::collection($favourite_products_weight); 
+    //     $products_weight = ProductResource::collection($products_weight); 
+    //     $discounts = $this->discount
+    //     ->get()
+    //     ->map(function($item){
+    //         return [
+    //             "id" => $item->id,
+    //             "name" => $item->name,
+    //             "type" => $item->type,
+    //             "amount" => $item->amount,
+    //         ];
+    //     });
+    //     $bundles = $this->bundle
+    //     ->where("status", 1)
+    //     ->with("products", "discount", "tax", "translations")
+    //     ->get()
+    //     ->map(function($item) use($locale){
+    //         return [
+    //             "id" => $item->id,
+    //             "name" => $item->translations
+    //             ->where('key', $item->name)
+    //             ->where("locale", $locale)
+    //             ->first()?->value ?? $item->name,
+    //             "image" => $item->image_link,
+    //             "price" => $item->price,
+    //             "discount" => [
+    //                 "name" => $item?->discount?->name ?? null,
+    //                 "type" => $item?->discount?->type ?? null,
+    //                 "amount" => $item?->discount?->amount ?? null,
+    //             ],
+    //             "tax" => [
+    //                 "name" => $item?->tax?->name ?? null,
+    //                 "type" => $item?->tax?->type ?? null,
+    //                 "amount" => $item?->tax?->amount ?? null,
+    //             ],
+    //             "products" => $item->products
+    //             ->map(function($element) use($locale, $item){
+    //                 return [
+    //                     "id" => $element->id,
+    //                     "name" => $element->translations
+    //                     ->where('key', $element->name)
+    //                     ->where("locale", $locale)
+    //                     ->first()?->value ?? $element->name,
+    //                     "variations" => $element->variations
+    //                     ->map(function($value) use($element, $item, $locale){
+    //                         return [
+    //                             "id" => $value->id,
+    //                             "variation_selected" => $item->bundle_variations
+    //                             ->where("product_id", $element->id)
+	// 							->first()
+    //                             ? 1 : 0,
+    //                             "variation" => $value->translations
+    //                             ->where('key', $value->name)
+    //                             ->where("locale", $locale)
+    //                             ->first()?->value ?? $value->name, 
+    //                             "type" => $value?->type,
+    //                             "min" => $value?->min,
+    //                             "max" => $value?->max,
+    //                             "required" => $value?->required,
+    //                             "options" => $value?->options
+    //                             ->map(function($new_item) use($item, $locale){
+    //                                 return [
+    //                                     "id" => $new_item->id,
+    //                                     "name" => $new_item->translations
+    //                                     ->where('key', $new_item->name)
+    //                                     ->where("locale", $locale)
+    //                                     ->first()?->value ?? $new_item->name, 
+    //                                     "price" => $new_item->price,
+    //                                     "selected" => $new_item->bundle_options
+    //                                     ->where("bundle_id", $item->id)
+	// 									->first()
+    //                                     ? 1 : 0,
+    //                                 ];
+    //                             }),
+    //                         ];
+    //                     })
+    //                 ]; 
+    //             //________________________
+    //             }), 
+    //         ];
+    //     });
+    //     $offers_take_away = ProductOffer::
+    //     where("start_date", "<=", date("Y-m-d"))
+    //     ->where("end_date", ">=", date("Y-m-d"))
+    //     ->where("time_from", "<=", date("H:i:s"))
+    //     ->where("time_to", ">=", date("H:i:s"))
+    //     ->with(["products.addons" => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     },'products.sub_category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.excludes' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.extra', 'products.discount', 
+    //     'products.variations' => function($query) use($locale){
+    //         $query->withLocale($locale)
+    //         ->with(['options' => function($query_option) use($locale){
+    //             $query_option->with(['extra' => function($query_extra) use($locale){
+    //                 $query_extra->with('parent_extra')
+    //                 ->withLocale($locale);
+    //             }])
+    //             ->withLocale($locale);
+    //         }]);
+    //     }, 'products.sales_count', 'products.tax', 'products.tax_module.module'])
+    //     ->where(function($query){
+    //         $query
+    //         ->whereJsonContains("days", date("l"))
+    //         ->orWhere("delay", 1);
+    //     })
+    //     ->whereJsonContains("module", "take_away")
+    //     ->get()
+    //     ->map(function($item) use($locale){
+    //         $discount = [ 
+    //             'name' => $item->name,
+    //             'type' => "precentage",
+    //             'amount' => $item->discount,
+    //         ];
+    //         $total = 0;
+    //         $products= $item->products
+    //         ->map(function($element) use($discount, &$total){
+    //             $element->discount = (object) $discount;
+    //             $total += $element->price - ($discount['amount'] * $element->price / 100);
+    //             return $element;
+    //         });
+    //         return [
+    //             "name" => $item->name,
+    //             "total" => $total,
+    //             "discount" => $item->discount,
+    //             "products" => ProductResource::collection($products),
+    //         ];
+    //     });
+    //     $offers_dine_in = ProductOffer::
+    //     where("start_date", "<=", date("Y-m-d"))
+    //     ->where("end_date", ">=", date("Y-m-d"))
+    //     ->where("time_from", "<=", date("H:i:s"))
+    //     ->where("time_to", ">=", date("H:i:s"))
+        
+    //     ->with(["products.addons" => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     },'products.sub_category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.excludes' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.extra', 'products.discount', 
+    //     'products.variations' => function($query) use($locale){
+    //         $query->withLocale($locale)
+    //         ->with(['options' => function($query_option) use($locale){
+    //             $query_option->with(['extra' => function($query_extra) use($locale){
+    //                 $query_extra->with('parent_extra')
+    //                 ->withLocale($locale);
+    //             }])
+    //             ->withLocale($locale);
+    //         }]);
+    //     }, 'products.sales_count', 'products.tax', 'products.tax_module.module'])
+    //     ->where(function($query){
+    //         $query
+    //         ->whereJsonContains("days", date("l"))
+    //         ->orWhere("delay", 1);
+    //     })
+    //     ->whereJsonContains("module", "dine_in")
+    //     ->get()
+    //     ->map(function($item) use($locale){
+    //         $discount = [ 
+    //             'name' => $item->name,
+    //             'type' => "precentage",
+    //             'amount' => $item->discount,
+    //         ];
+    //         $total = 0;
+    //         $products= $item->products
+    //         ->map(function($element) use($discount, &$total){
+    //             $element->discount = (object) $discount;
+    //             $total += $element->price - ($discount['amount'] * $element->price / 100);
+    //             return $element;
+    //         });
+    //         return [
+    //             "name" => $item->name,
+    //             "total" => $total,
+    //             "discount" => $item->discount,
+    //             "products" => ProductResource::collection($products),
+    //         ];
+    //     });
+    //     $offers_delivery = ProductOffer::
+    //     where("start_date", "<=", date("Y-m-d"))
+    //     ->where("end_date", ">=", date("Y-m-d"))
+    //     ->where("time_from", "<=", date("H:i:s"))
+    //     ->where("time_to", ">=", date("H:i:s"))
+        
+    //     ->with(["products.addons" => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     },'products.sub_category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.category_addons' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.excludes' => function($query) use($locale){
+    //         $query->withLocale($locale);
+    //     }, 'products.extra', 'products.discount', 
+    //     'products.variations' => function($query) use($locale){
+    //         $query->withLocale($locale)
+    //         ->with(['options' => function($query_option) use($locale){
+    //             $query_option->with(['extra' => function($query_extra) use($locale){
+    //                 $query_extra->with('parent_extra')
+    //                 ->withLocale($locale);
+    //             }])
+    //             ->withLocale($locale);
+    //         }]);
+    //     }, 'products.sales_count', 'products.tax', 'products.tax_module.module'])
+    //     ->where(function($query){
+    //         $query
+    //         ->whereJsonContains("days", date("l"))
+    //         ->orWhere("delay", 1);
+    //     })
+    //     ->whereJsonContains("module", "delivery")
+    //     ->get()
+    //     ->map(function($item) use($locale){
+    //         $discount = [ 
+    //             'name' => $item->name,
+    //             'type' => "precentage",
+    //             'amount' => $item->discount,
+    //         ];
+    //         $total = 0;
+    //         $products= $item->products
+    //         ->map(function($element) use($discount, &$total){
+    //             $element->discount = (object) $discount;
+    //             $total += $element->price - ($discount['amount'] * $element->price / 100);
+    //             return $element;
+    //         });
+    //         return [
+    //             "name" => $item->name,
+    //             "total" => $total,
+    //             "discount" => $item->discount,
+    //             "products" => ProductResource::collection($products),
+    //         ];
+    //     });
+    //     return response()->json([
+    //         'categories' => $categories,
+    //         'products' => ProductResource::collection($products), 
+    //         'products_weight' => $products_weight, 
+    //         'favourite_products' => $favourite_products, 
+    //         'favourite_products_weight' => $favourite_products_weight, 
+    //         'cafe_location' => $cafe_location,
+    //         'discounts' => $discounts,
+    //         'bundles' => $bundles,
+    //         'offers_take_away' => $offers_take_away,
+    //         'offers_dine_id' => $offers_dine_in,
+    //         'offers_delivery' => $offers_delivery,
+    //     ]);
+    // }
+    
+    public function cashier_lists(Request $request) {
+        // 1. Validation
         $validator = Validator::make($request->all(), [
             'branch_id' => 'required|exists:branches,id',
             'module' => 'in:take_away,dine_in,delivery'
-        ]);//tax_modules all,take_away,dine_in,delivery
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
         } 
+
+        // 2. Initial Setup & Optimization Variables
         $module = $request->module ?? null;
-        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale());
         $branch_id = $request->branch_id;
-        $branch_off = $this->branch_off
-        ->where('branch_id', $branch_id)
-        ->get();
-        $product_off = $branch_off->pluck('product_id')->filter();
-        $category_off = $branch_off->pluck('category_id')->filter();
-        $option_off = $branch_off->pluck('option_id')->filter();
+        $today = date('Y-m-d');
+        $current_time = date('H:i:s');
+        $current_day = date('l');
 
+        // Get exclusions in one query
+        $branch_off = $this->branch_off->where('branch_id', $branch_id)->get();
+        $product_off = $branch_off->pluck('product_id')->filter()->toArray();
+        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
+        $option_off = $branch_off->pluck('option_id')->filter()->toArray();
+
+        // 3. Fetch Categories
         $categories = $this->category
-        ->with(['sub_categories' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 
-        'addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }])
-        ->withLocale($locale)
-        ->where('status', 1)
-        ->whereNull('category_id')
-        ->orderBy("priority") 
-        ->get()
-        ->map(function($item) use($category_off, $locale){
-            $sub_category = clone $item->sub_categories 
-            ->filter(function($item) use($category_off){
-                return !$category_off->contains($item->id);
-            }); 
-            $item->sub_categories = $sub_category;
-            return $item;
-        })
-        ->filter(function($item) use($category_off){
-            return !$category_off->contains($item->id);
-        });
-        $products = $this->products
-        ->orderBy('order')
-        ->with(['addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        },'sub_category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'excludes' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'extra', 'discount', 
-        'variations' => function($query) use($locale){
-            $query->withLocale($locale)
-            ->with(['options' => function($query_option) use($locale){
-                $query_option
-                ->where("status", 1)
-                ->with(['extra' => function($query_extra) use($locale){
-                    $query_extra->with('parent_extra')
-                    ->withLocale($locale);
-                }])
-                ->withLocale($locale);
-            }]);
-        }, 'sales_count', 'tax',
-        'tax_module' => fn($q) => $q->whereHas('module', fn($q) => $q->where('branch_id', $branch_id)
-        ->whereIn('app_type', ['pos', 'all']))
-        ->with('tax'),
-        'tax_module.module'])
-        ->withLocale($locale)
-        ->where('item_type', '!=', 'online') 
-        ->where('status', 1)
-        ->get()
-        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
-            //get count of sales of product to detemine stock
-            $new_price = $product?->product_pricing
-            ->where('branch_id', $branch_id)
-            ->first()?->price;
-            if(empty($new_price)){
-                $new_price = $product?->pos_pricing->where('module', $module)
-                ->first()?->price ?? $product->price;
-            }
-            $product->price = $new_price ?? $product->price;
-            $product->favourite = false;
-            if ($product->stock_type == 'fixed') {
-                $product->count = $product->sales_count->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            elseif ($product->stock_type == 'daily') {
-                $product->count = $product->sales_count
-                ->where('date', date('Y-m-d'))
-                ->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            // return !$category_off->contains($item->id);
-            // $category_off, $product_off, $option_off
-            if ($category_off->contains($product->category_id) || 
-            $category_off->contains($product->sub_category_id)
-            || $product_off->contains($product->id)) {
-                return null;
-            }
-            // Resolve tax before variations map
-            $resolved_tax = $product->tax_module
-                ->filter(fn($tm) => $tm->module->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all'])->count() > 0)
-                ->first()?->tax ?? $product->tax ?? null;
-
-            $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product, $branch_id, $resolved_tax) {
-                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id, $resolved_tax){
-                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
-                    ->first()?->price ?? $element->price;
-                    $element->new_tax = $resolved_tax;
-                    return $element;
-                });
-                return $variation;
-            });
-            $product->addons = $product->addons->map(function ($addon) use ($product) {
-                $addon->discount = $product->discount;
-                return $addon;
-            });
-            if (!empty($resolved_tax)) {
-                $product->tax = $resolved_tax;
-            }
-            return $product;
-        })->filter();
-        $cafe_location = $this->cafe_location
-        ->with(['tables' => function($query){
-            return $query
+            ->with([
+                'sub_categories' => fn($q) => $q->withLocale($locale), 
+                'addons' => fn($q) => $q->withLocale($locale)
+            ])
+            ->withLocale($locale)
             ->where('status', 1)
-            ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
-        }])
-        ->where('branch_id', $request->branch_id)
-        ->get()
-        ->map(function($item){
-            $item->tables =  $item?->tables?->map(function($element){
-                $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
-                $element->makeHidden(['call_payment']);
-                return $element; 
-            });
-            return $item;
-        });
-        $favourite_products = $this->products
-        ->orderBy('order')
-        ->with(['addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        },'sub_category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'excludes' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'extra', 'discount', 
-        'variations' => function($query) use($locale){
-            $query->withLocale($locale)
-            ->with(['options' => function($query_option) use($locale){
-                $query_option->with(['extra' => function($query_extra) use($locale){
-                    $query_extra->with('parent_extra')
-                    ->withLocale($locale);
-                }])
-                ->withLocale($locale);
-            }]);
-        }, 'sales_count', 'tax', 'tax_module.module'])
-        ->withLocale($locale)
-        ->where('item_type', '!=', 'online') 
-        ->where("favourite", 1)
-        ->where('status', 1)
-        ->get()
-        ->map(function($product) use($category_off, $product_off, $option_off, $branch_id, $module){
-            //get count of sales of product to detemine stock
-            
-            $tax_module = $product?->tax
-            ?->tax_module
-            ?->map(function ($taxItem) use ($module, $branch_id, $product) {
-
-                $isFound = $taxItem->module
-				->where('module', $module) 
-                ->whereIn('app_type', ['pos', 'all'])
-                ->Where("branch_id", $branch_id)
-				->first();
-				if($isFound){
-					return $product?->tax;
-				}
-
+            ->whereNull('category_id')
+            ->orderBy("priority") 
+            ->get()
+            ->each(function($item) use ($category_off) {
+                $item->setRelation('sub_categories', $item->sub_categories->reject(fn($sub) => in_array($sub->id, $category_off)));
             })
-            ->filter()
-            ->first();
-            if(!empty($tax_module)){  
-                $product->tax = $tax_module;
-            }
-            else{
-                $product->tax = null;
-            }
-            $new_price = $product?->product_pricing
-            ->where('branch_id', $branch_id)
-            ->first()?->price;
-            if(empty($new_price)){
-                $new_price = $product?->pos_pricing->where('module', $module)
-                ->first()?->price ?? $product->price;
-            }
-            $product->price = $new_price ?? $product->price;
-            $product->favourite = false;
-            if ($product->stock_type == 'fixed') {
-                $product->count = $product->sales_count->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            elseif ($product->stock_type == 'daily') {
-                $product->count = $product->sales_count
-                ->where('date', date('Y-m-d'))
-                ->sum('count');
-                $product->in_stock = $product->number > $product->count ? true : false;
-            }
-            // return !$category_off->contains($item->id);
-            // $category_off, $product_off, $option_off
-            if ($category_off->contains($product->category_id) || 
-            $category_off->contains($product->sub_category_id)
-            || $product_off->contains($product->id)) {
-                return null;
-            }
-            $product->variations = $product->variations->map(function ($variation) 
-            use ($option_off, $product, $branch_id, $tax_module) {
-                $variation->options = $variation->options->reject(fn($option) => $option_off->contains($option->id));
-                $variation->options = $variation->options->map(function($element) use($branch_id, $product, $tax_module){
-                    $element->price = $element?->option_pricing->where('branch_id', $branch_id)
-                    ->first()?->price ?? $element->price;
-                    $element->new_tax = $tax_module ?? $product->tax;
-                    return $element;
+            ->reject(fn($item) => in_array($item->id, $category_off));
+
+        // 4. Shared Product Processor Method (Optimized to run everything in-memory)
+        $processProducts = function($productsQuery) use ($category_off, $product_off, $option_off, $branch_id, $module, $today) {
+            return $productsQuery->get()->map(function($product) use ($category_off, $product_off, $option_off, $branch_id, $module, $today) {
+                // Exclude early before heavy calculations
+                if (in_array($product->category_id, $category_off) || 
+                    in_array($product->sub_category_id, $category_off) || 
+                    in_array($product->id, $product_off)) {
+                    return null;
+                }
+
+                // Resolve Pricing
+                $new_price = $product->product_pricing->firstWhere('branch_id', $branch_id)?->price;
+                if (empty($new_price)) {
+                    $new_price = $product->pos_pricing->firstWhere('module', $module)?->price ?? $product->price;
+                }
+                $product->price = $new_price;
+                $product->favourite = false;
+
+                // Stock Calculation (Using in-memory collections instead of queries)
+                if ($product->stock_type == 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                } elseif ($product->stock_type == 'daily') {
+                    $product->count = $product->sales_count->where('date', $today)->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                }
+
+                // Resolve Tax Module efficiently
+                $resolved_tax = $product->tax_module->first()?->tax ?? $product->tax ?? null;
+
+                // Map Variations & Options
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id, $resolved_tax) {
+                    $variation->options = $variation->options
+                        ->reject(fn($option) => in_array($option->id, $option_off))
+                        ->map(function($element) use ($branch_id, $resolved_tax) {
+                            $element->price = $element->option_pricing->firstWhere('branch_id', $branch_id)?->price ?? $element->price;
+                            $element->new_tax = $resolved_tax;
+                            return $element;
+                        });
+                    return $variation;
                 });
-              
-                return $variation;
-            });
-            $product->addons = $product->addons->map(function ($addon) 
-            use ($product) {
-                $addon->discount = $product->discount;
-              
-                return $addon;
-            });
-         
-            $tax_module = $product?->tax
-            ?->tax_module
-            ?->map(function ($taxItem) use ($module, $branch_id, $product) {
 
-                $isFound = $taxItem->module
-				->where('module', $module) 
-                ->whereIn('app_type', ['pos', 'all'])
-                ->Where("branch_id", $branch_id)
-				->first();
-				if($isFound){
-					return $product?->tax;
-				}
+                // Map Addons
+                $product->addons = $product->addons->map(function ($addon) use ($product) {
+                    $addon->discount = $product->discount;
+                    return $addon;
+                });
 
-            })
-            ->filter()
-            ->first();
-            if(!empty($tax_module)){  
-                $product->tax = $tax_module;
-            }
-            else{
-                $product->tax = null;
-            }
-            return $product;
-        })->filter();
+                if (!empty($resolved_tax)) {
+                    $product->tax = $resolved_tax;
+                }
+
+                return $product;
+            })->filter();
+        };
+
+        // 5. Build Base Product Query with all Eager Loads to avoid N+1
+        $baseProductQuery = $this->products
+            ->orderBy('order')
+            ->with([
+                'addons' => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale), 
+                'category_addons' => fn($q) => $q->withLocale($locale), 
+                'excludes' => fn($q) => $q->withLocale($locale), 
+                'extra', 'discount', 'sales_count', 'tax', 'product_pricing', 'pos_pricing',
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($qo) => $qo->where("status", 1)->withLocale($locale)->with([
+                        'extra' => fn($qe) => $qe->with('parent_extra')->withLocale($locale),
+                        'option_pricing'
+                    ])
+                ]),
+                'tax_module' => fn($q) => $q->whereHas('module', fn($qm) => $qm->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all']))
+                                            ->with(['tax', 'module'])
+            ])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'online') 
+            ->where('status', 1);
+
+        // Execute product pipelines
+        $allProcessedProducts = $processProducts(clone $baseProductQuery);
+        $allProcessedFavourites = $processProducts(clone $baseProductQuery->where("favourite", 1));
+
+        // 6. Partition Products by Weight Status (In-memory, avoids extra queries)
+        $products_count = $allProcessedProducts->where("weight_status", 0)->values();
+        $products_weight = $allProcessedProducts->where("weight_status", 1)->values();
+        
+        $favourite_products_count = $allProcessedFavourites->where("weight_status", 0)->values();
+        $favourite_products_weight = $allProcessedFavourites->where("weight_status", 1)->values();
+
+        // 7. Fetch Cafe Locations & Tables
         $cafe_location = $this->cafe_location
-        ->with(['tables' => function($query){
-            return $query
-            ->where('status', 1)
-            ->where('is_merge', 0)
-            ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment');
-        }])
-        ->where('branch_id', $request->branch_id)
-        ->get()
-        ->map(function($item){
-            $item->tables =  $item?->tables?->map(function($element){
-                $element->call_payment_status = $element->call_payment->count() > 0 ? true: false;
-                $element->makeHidden(['call_payment']);
-                return $element; 
+            ->with(['tables' => fn($q) => $q->where('status', 1)->where('is_merge', 0)->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment')])
+            ->where('branch_id', $branch_id)
+            ->get()
+            ->map(function($item) {
+                $item->tables = $item->tables->map(function($element) {
+                    $element->call_payment_status = $element->call_payment->isNotEmpty();
+                    $element->makeHidden(['call_payment']);
+                    return $element; 
+                });
+                return $item;
             });
-            return $item;
-        });
-        $products_count = $products->where("weight_status", 0)
-        ->values();
-        $products_weight = $products->where("weight_status", 1)
-        ->values();
-        $favourite_products_count = $favourite_products->where("weight_status", 0)
-        ->values();
-        $favourite_products_weight = $favourite_products->where("weight_status", 1)
-        ->values();
-        $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products_count); 
-        $favourite_products = ProductResource::collection($favourite_products_count); 
-        $favourite_products_weight = ProductResource::collection($favourite_products_weight); 
-        $products_weight = ProductResource::collection($products_weight); 
-        $discounts = $this->discount
-        ->get()
-        ->map(function($item){
-            return [
-                "id" => $item->id,
-                "name" => $item->name,
-                "type" => $item->type,
-                "amount" => $item->amount,
-            ];
-        });
+
+        // 8. Fetch Discounts & Bundles
+        $discounts = $this->discount->get(['id', 'name', 'type', 'amount']);
+        
         $bundles = $this->bundle
-        ->where("status", 1)
-        ->with("products", "discount", "tax", "translations")
-        ->get()
-        ->map(function($item) use($locale){
-            return [
-                "id" => $item->id,
-                "name" => $item->translations
-                ->where('key', $item->name)
-                ->where("locale", $locale)
-                ->first()?->value ?? $item->name,
-                "image" => $item->image_link,
-                "price" => $item->price,
-                "discount" => [
-                    "name" => $item?->discount?->name ?? null,
-                    "type" => $item?->discount?->type ?? null,
-                    "amount" => $item?->discount?->amount ?? null,
-                ],
-                "tax" => [
-                    "name" => $item?->tax?->name ?? null,
-                    "type" => $item?->tax?->type ?? null,
-                    "amount" => $item?->tax?->amount ?? null,
-                ],
-                "products" => $item->products
-                ->map(function($element) use($locale, $item){
+            ->where("status", 1)
+            ->with(["products.translations", "products.variations.translations", "products.variations.options.translations", "discount", "tax", "translations", "bundle_variations", "bundle_options"])
+            ->get()
+            ->map(function($item) use ($locale) {
+                return [
+                    "id" => $item->id,
+                    "name" => $item->translations->where('key', $item->name)->where("locale", $locale)->first()?->value ?? $item->name,
+                    "image" => $item->image_link,
+                    "price" => $item->price,
+                    "discount" => [
+                        "name" => $item->discount?->name ?? null,
+                        "type" => $item->discount?->type ?? null,
+                        "amount" => $item->discount?->amount ?? null,
+                    ],
+                    "tax" => [
+                        "name" => $item->tax?->name ?? null,
+                        "type" => $item->tax?->type ?? null,
+                        "amount" => $item->tax?->amount ?? null,
+                    ],
+                    "products" => $item->products->map(function($element) use ($locale, $item) {
+                        return [
+                            "id" => $element->id,
+                            "name" => $element->translations->where('key', $element->name)->where("locale", $locale)->first()?->value ?? $element->name,
+                            "variations" => $element->variations->map(function($value) use ($element, $item, $locale) {
+                                return [
+                                    "id" => $value->id,
+                                    "variation_selected" => $item->bundle_variations->where("product_id", $element->id)->isNotEmpty() ? 1 : 0,
+                                    "variation" => $value->translations->where('key', $value->name)->where("locale", $locale)->first()?->value ?? $value->name, 
+                                    "type" => $value->type,
+                                    "min" => $value->min,
+                                    "max" => $value->max,
+                                    "required" => $value->required,
+                                    "options" => $value->options->map(function($new_item) use ($item, $locale) {
+                                        return [
+                                            "id" => $new_item->id,
+                                            "name" => $new_item->translations->where('key', $new_item->name)->where("locale", $locale)->first()?->value ?? $new_item->name, 
+                                            "price" => $new_item->price,
+                                            "selected" => $item->bundle_options->where("bundle_id", $item->id)->where('id', $new_item->id)->isNotEmpty() ? 1 : 0,
+                                        ];
+                                    }),
+                                ];
+                            })
+                        ]; 
+                    }), 
+                ];
+            });
+
+        // 9. Shared Offers Processor
+        $getOffersByModule = function($moduleName) use ($locale, $today, $current_time, $current_day) {
+            return ProductOffer::where("start_date", "<=", $today)
+                ->where("end_date", ">=", $today)
+                ->where("time_from", "<=", $current_time)
+                ->where("time_to", ">=", $current_time)
+                ->whereJsonContains("module", $moduleName)
+                ->where(fn($q) => $q->whereJsonContains("days", $current_day)->orWhere("delay", 1))
+                ->with([
+                    "products.addons" => fn($q) => $q->withLocale($locale),
+                    "products.sub_category_addons" => fn($q) => $q->withLocale($locale), 
+                    "products.category_addons" => fn($q) => $q->withLocale($locale), 
+                    "products.excludes" => fn($q) => $q->withLocale($locale), 
+                    "products.extra", "products.discount", "products.sales_count", "products.tax", "products.tax_module.module",
+                    "products.variations" => fn($q) => $q->withLocale($locale)->with(['options' => fn($qo) => $qo->with(['extra' => fn($qe) => $qe->with('parent_extra')->withLocale($locale)])->withLocale($locale)])
+                ])
+                ->get()
+                ->map(function($item) {
+                    $discount = ['name' => $item->name, 'type' => "precentage", 'amount' => $item->discount];
+                    $total = 0;
+                    $products = $item->products->map(function($element) use ($discount, &$total) {
+                        $element->discount = (object) $discount;
+                        $total += $element->price - ($discount['amount'] * $element->price / 100);
+                        return $element;
+                    });
                     return [
-                        "id" => $element->id,
-                        "name" => $element->translations
-                        ->where('key', $element->name)
-                        ->where("locale", $locale)
-                        ->first()?->value ?? $element->name,
-                        "variations" => $element->variations
-                        ->map(function($value) use($element, $item, $locale){
-                            return [
-                                "id" => $value->id,
-                                "variation_selected" => $item->bundle_variations
-                                ->where("product_id", $element->id)
-								->first()
-                                ? 1 : 0,
-                                "variation" => $value->translations
-                                ->where('key', $value->name)
-                                ->where("locale", $locale)
-                                ->first()?->value ?? $value->name, 
-                                "type" => $value?->type,
-                                "min" => $value?->min,
-                                "max" => $value?->max,
-                                "required" => $value?->required,
-                                "options" => $value?->options
-                                ->map(function($new_item) use($item, $locale){
-                                    return [
-                                        "id" => $new_item->id,
-                                        "name" => $new_item->translations
-                                        ->where('key', $new_item->name)
-                                        ->where("locale", $locale)
-                                        ->first()?->value ?? $new_item->name, 
-                                        "price" => $new_item->price,
-                                        "selected" => $new_item->bundle_options
-                                        ->where("bundle_id", $item->id)
-										->first()
-                                        ? 1 : 0,
-                                    ];
-                                }),
-                            ];
-                        })
-                    ]; 
-                //________________________
-                }), 
-            ];
-        });
-        $offers_take_away = ProductOffer::
-        where("start_date", "<=", date("Y-m-d"))
-        ->where("end_date", ">=", date("Y-m-d"))
-        ->where("time_from", "<=", date("H:i:s"))
-        ->where("time_to", ">=", date("H:i:s"))
-        ->with(["products.addons" => function($query) use($locale){
-            $query->withLocale($locale);
-        },'products.sub_category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.excludes' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.extra', 'products.discount', 
-        'products.variations' => function($query) use($locale){
-            $query->withLocale($locale)
-            ->with(['options' => function($query_option) use($locale){
-                $query_option->with(['extra' => function($query_extra) use($locale){
-                    $query_extra->with('parent_extra')
-                    ->withLocale($locale);
-                }])
-                ->withLocale($locale);
-            }]);
-        }, 'products.sales_count', 'products.tax', 'products.tax_module.module'])
-        ->where(function($query){
-            $query
-            ->whereJsonContains("days", date("l"))
-            ->orWhere("delay", 1);
-        })
-        ->whereJsonContains("module", "take_away")
-        ->get()
-        ->map(function($item) use($locale){
-            $discount = [ 
-                'name' => $item->name,
-                'type' => "precentage",
-                'amount' => $item->discount,
-            ];
-            $total = 0;
-            $products= $item->products
-            ->map(function($element) use($discount, &$total){
-                $element->discount = (object) $discount;
-                $total += $element->price - ($discount['amount'] * $element->price / 100);
-                return $element;
-            });
-            return [
-                "name" => $item->name,
-                "total" => $total,
-                "discount" => $item->discount,
-                "products" => ProductResource::collection($products),
-            ];
-        });
-        $offers_dine_in = ProductOffer::
-        where("start_date", "<=", date("Y-m-d"))
-        ->where("end_date", ">=", date("Y-m-d"))
-        ->where("time_from", "<=", date("H:i:s"))
-        ->where("time_to", ">=", date("H:i:s"))
-        
-        ->with(["products.addons" => function($query) use($locale){
-            $query->withLocale($locale);
-        },'products.sub_category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.excludes' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.extra', 'products.discount', 
-        'products.variations' => function($query) use($locale){
-            $query->withLocale($locale)
-            ->with(['options' => function($query_option) use($locale){
-                $query_option->with(['extra' => function($query_extra) use($locale){
-                    $query_extra->with('parent_extra')
-                    ->withLocale($locale);
-                }])
-                ->withLocale($locale);
-            }]);
-        }, 'products.sales_count', 'products.tax', 'products.tax_module.module'])
-        ->where(function($query){
-            $query
-            ->whereJsonContains("days", date("l"))
-            ->orWhere("delay", 1);
-        })
-        ->whereJsonContains("module", "dine_in")
-        ->get()
-        ->map(function($item) use($locale){
-            $discount = [ 
-                'name' => $item->name,
-                'type' => "precentage",
-                'amount' => $item->discount,
-            ];
-            $total = 0;
-            $products= $item->products
-            ->map(function($element) use($discount, &$total){
-                $element->discount = (object) $discount;
-                $total += $element->price - ($discount['amount'] * $element->price / 100);
-                return $element;
-            });
-            return [
-                "name" => $item->name,
-                "total" => $total,
-                "discount" => $item->discount,
-                "products" => ProductResource::collection($products),
-            ];
-        });
-        $offers_delivery = ProductOffer::
-        where("start_date", "<=", date("Y-m-d"))
-        ->where("end_date", ">=", date("Y-m-d"))
-        ->where("time_from", "<=", date("H:i:s"))
-        ->where("time_to", ">=", date("H:i:s"))
-        
-        ->with(["products.addons" => function($query) use($locale){
-            $query->withLocale($locale);
-        },'products.sub_category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.category_addons' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.excludes' => function($query) use($locale){
-            $query->withLocale($locale);
-        }, 'products.extra', 'products.discount', 
-        'products.variations' => function($query) use($locale){
-            $query->withLocale($locale)
-            ->with(['options' => function($query_option) use($locale){
-                $query_option->with(['extra' => function($query_extra) use($locale){
-                    $query_extra->with('parent_extra')
-                    ->withLocale($locale);
-                }])
-                ->withLocale($locale);
-            }]);
-        }, 'products.sales_count', 'products.tax', 'products.tax_module.module'])
-        ->where(function($query){
-            $query
-            ->whereJsonContains("days", date("l"))
-            ->orWhere("delay", 1);
-        })
-        ->whereJsonContains("module", "delivery")
-        ->get()
-        ->map(function($item) use($locale){
-            $discount = [ 
-                'name' => $item->name,
-                'type' => "precentage",
-                'amount' => $item->discount,
-            ];
-            $total = 0;
-            $products= $item->products
-            ->map(function($element) use($discount, &$total){
-                $element->discount = (object) $discount;
-                $total += $element->price - ($discount['amount'] * $element->price / 100);
-                return $element;
-            });
-            return [
-                "name" => $item->name,
-                "total" => $total,
-                "discount" => $item->discount,
-                "products" => ProductResource::collection($products),
-            ];
-        });
+                        "name" => $item->name,
+                        "total" => $total,
+                        "discount" => $item->discount,
+                        "products" => ProductResource::collection($products),
+                    ];
+                });
+        };
+
+        // Execute offers pipelines
+        $offers_take_away = $getOffersByModule("take_away");
+        $offers_dine_in = $getOffersByModule("dine_in");
+        $offers_delivery = $getOffersByModule("delivery");
+
+        // 10. Response
         return response()->json([
-            'categories' => $categories,
-            'products' => ProductResource::collection($products), 
-            'products_weight' => $products_weight, 
-            'favourite_products' => $favourite_products, 
-            'favourite_products_weight' => $favourite_products_weight, 
+            'categories' => CategoryResource::collection($categories),
+            'products' => ProductResource::collection($products_count), 
+            'products_weight' => ProductResource::collection($products_weight), 
+            'favourite_products' => ProductResource::collection($favourite_products_count), 
+            'favourite_products_weight' => ProductResource::collection($favourite_products_weight), 
             'cafe_location' => $cafe_location,
             'discounts' => $discounts,
             'bundles' => $bundles,
