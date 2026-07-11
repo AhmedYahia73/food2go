@@ -144,7 +144,8 @@ class DiscountController extends Controller
     public function create(DiscountRequest $request){
         // https://bcknd.food2go.online/admin/settings/discount/add
         // Keys
-        // name, type, amount
+        // name, type, amount, start_date, end_date, module => [all,pos,web,app]
+
         $discountRequest = $request->only($this->discountRequest);
         $this->discount->create($discountRequest);
 

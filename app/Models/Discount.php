@@ -13,6 +13,9 @@ class Discount extends Model
         'name',
         'type',
         'amount', 
+        "module",
+        "start_date",
+        "end_date",
     ];
     
     public function products(){
@@ -21,5 +24,12 @@ class Discount extends Model
     
     public function categories(){
         return $this->belongsToMany(Category::class, "discount_category", "discount_id", "category_id");
+    }
+    
+    protected function casts(): array
+    {
+        return [
+            'module' => 'array',
+        ];
     }
 }
