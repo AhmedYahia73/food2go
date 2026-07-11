@@ -16,12 +16,17 @@ class ServiceFees extends Model
         'module',
         'online_type',
         'modules',
+        "all_products"
     ];
 
     protected $hidden = array('pivot');
     
     public function branches(){
         return $this->belongsToMany(Branch::class, 'service_fees_branch', 'fees_id', 'branch_id');
+    }
+    
+    public function products(){
+        return $this->belongsToMany(Product::class, 'service_fees_product', 'service_fees_id', 'product_id');
     }
     
     protected function casts(): array

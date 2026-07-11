@@ -86,6 +86,8 @@ class ServiceFeesController extends Controller
             "modules.*" => ["required", "in:all,take_away,dine_in,delivery"],
             'branches' => ['required', 'array'],
             'branches.*' => ['required', 'exists:branches,id'],
+            "products" => ["sometimes", "array"],
+            "products.*" => ["sometimes", "exists:products,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -97,7 +99,8 @@ class ServiceFeesController extends Controller
         $service_fees = $this->service_fees
         ->create($serviceFeesRequest);
         $service_fees->branches()->attach($request->branches);
-
+        $service_fees->products()->attach($request->products ?? []);
+        
         return response()->json([
             "success" => "You add service fees success"
         ]);
@@ -114,6 +117,8 @@ class ServiceFeesController extends Controller
             "modules.*" => ["required", "in:all,take_away,dine_in,delivery"],
             'branches' => ['required', 'array'],
             'branches.*' => ['required', 'exists:branches,id'],
+            "products" => ["sometimes", "array"],
+            "products.*" => ["sometimes", "exists:products,id"],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -131,6 +136,7 @@ class ServiceFeesController extends Controller
             ], 400);
         }
         $service_fees->branches()->sync($request->branches);
+        $service_fees->products()->sync($request->products ?? []);
         $service_fees->update([
             "title" => $request->title,
             "type" => $request->type,
