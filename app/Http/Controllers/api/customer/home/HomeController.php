@@ -174,7 +174,8 @@ class HomeController extends Controller
                 'category_addons' => fn($q) => $q->withLocale($locale),
                 'sub_category_addons' => fn($q) => $q->withLocale($locale),
                 'excludes' => fn($q) => $q->withLocale($locale),
-                'discount', 'extra', 'tax',
+                'extra', 'tax',
+                "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "app")->orWhereJsonContains("module", "all")),
                 'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
                 'variations' => fn($q) => $q->withLocale($locale)->with([
                     'options' => fn($q) => $q
@@ -704,7 +705,8 @@ class HomeController extends Controller
                     ->whereIn('app_type', ['online', 'all'])
                     ->Where("branch_id", $branch_id)
                     ->first();
-                }
+                },
+                "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", $app_type)->orWhereJsonContains("module", "all"))
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'offline')

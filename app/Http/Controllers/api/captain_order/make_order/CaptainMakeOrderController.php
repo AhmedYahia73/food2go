@@ -250,8 +250,9 @@ class CaptainMakeOrderController extends Controller
             'addons' => fn($q) => $q->withLocale($locale),
             'category_addons' => fn($q) => $q->withLocale($locale),
             'sub_category_addons' => fn($q) => $q->withLocale($locale),
-            'excludes' => fn($q) => $q->withLocale($locale),
-            'discount', 'extra', 'tax',
+            'excludes' => fn($q) => $q->withLocale($locale),  
+            "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "pos")->orWhereJsonContains("module", "all"))
+            , 'extra', 'tax',
             'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             'variations' => fn($q) => $q->withLocale($locale)->with([
                 'options' => fn($q) => $q
@@ -665,7 +666,8 @@ class CaptainMakeOrderController extends Controller
             $query->withLocale($locale);
         }, 'excludes' => function($query) use($locale){
             $query->withLocale($locale);
-        }, 'extra', 'discount', 
+        }, 'extra', 
+        "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "pos")->orWhereJsonContains("module", "all")), 
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options' => function($query_option) use($locale){
@@ -782,7 +784,8 @@ class CaptainMakeOrderController extends Controller
             $query->withLocale($locale);
         }, 'excludes' => function($query) use($locale){
             $query->withLocale($locale);
-        }, 'extra', 'discount', 
+        }, 'extra', 
+        "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "pos")->orWhereJsonContains("module", "all")), 
         'variations' => function($query) use($locale){
             $query->withLocale($locale)
             ->with(['options' => function($query_option) use($locale){
@@ -1498,7 +1501,7 @@ class CaptainMakeOrderController extends Controller
                 'sub_category_addons' => fn($q) => $q->withLocale($locale), 
                 'category_addons' => fn($q) => $q->withLocale($locale), 
                 'excludes' => fn($q) => $q->withLocale($locale), 
-                'extra', 'discount', 'sales_count', 'tax', 'product_pricing', 'pos_pricing',
+                'extra', 'sales_count', 'tax', 'product_pricing', 'pos_pricing',
                 'variations' => fn($q) => $q->withLocale($locale)->with([
                     'options' => fn($qo) => $qo->where("status", 1)->withLocale($locale)->with([
                         'extra' => fn($qe) => $qe->with('parent_extra')->withLocale($locale),
@@ -1506,7 +1509,8 @@ class CaptainMakeOrderController extends Controller
                     ])
                 ]),
                 'tax_module' => fn($q) => $q->whereHas('module', fn($qm) => $qm->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all']))
-                                            ->with(['tax', 'module'])
+                                            ->with(['tax', 'module']),
+                "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "pos")->orWhereJsonContains("module", "all"))
             ])
             ->withLocale($locale)
             ->where('item_type', '!=', 'online') 
