@@ -132,7 +132,7 @@ class ServiceFeesController extends Controller
         }
 
         $serviceFeesRequest = $validator->validated();
-        if(count($request->products) > 0){
+        if($request->products && count($request->products) > 0){
             $serviceFeesRequest['all_products'] = false;
         }
         $service_fees = $this->service_fees
@@ -166,7 +166,7 @@ class ServiceFeesController extends Controller
         }
 
         $serviceFeesRequest = $validator->validated();
-        if(count($request->products) > 0){
+        if($request->products && count($request->products) > 0){
             $serviceFeesRequest['all_products'] = false;
         }
         else{

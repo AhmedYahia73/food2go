@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
 
     Route::controller(CaptainMakeOrderController::class)
     ->group(function(){
+        Route::get('/service_fees', 'service_fees')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/discount_list', 'discount_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/my_lists', 'my_lists');
         Route::post('/order_void', 'order_void');

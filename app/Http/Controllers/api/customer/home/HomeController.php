@@ -27,9 +27,9 @@ use App\Models\MainData;
 use App\Models\MenueImage;
 use App\Models\Policy;
 use App\Models\SmsBalance;
-use App\Models\PaymentMethod;
-use App\Models\ServiceFees;
+use App\Models\PaymentMethod; 
 use App\Models\Addon;
+use App\Models\ServiceFees;
 use App\Models\Popup;
 
 class HomeController extends Controller
@@ -524,6 +524,21 @@ class HomeController extends Controller
         $addons = collect($product->toArray(request())['addons'])
         ->merge(collect($cate_addons->toArray(request())))
         ->values();
+        $service_fees = ServiceFees::
+        whereHas("branches", function($query) use($id){
+            $query->where("branches.id", $id);
+        })
+        ->where("module", "online")
+        ->whereJsonContains("modules", $request->module ?? "delivery")
+        ->where(function($query) use($request){
+            $query->where('online_type', 'all')
+            ->orWhere("online_type", $request->source ?? "app");
+        })
+        ->where("all_products", false)
+        ->whereHas("products", function($query) use($product){
+            $query->where("products.id", $product->id);
+        })
+        ->get();
 
         return response()->json([
             'id' => $product->id,
@@ -544,6 +559,7 @@ class HomeController extends Controller
             'excludes' => collect($product->toArray(request())['excludes'])->select('id', 'name'),
             'tax_obj' => $product->toArray(request())['tax_obj'],
             'favourite' => $product->favourite,
+            "service_fees" => $service_fees,
         ]);
     }
 

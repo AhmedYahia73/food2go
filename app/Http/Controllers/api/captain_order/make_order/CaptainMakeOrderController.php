@@ -1705,6 +1705,36 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
+    public function service_fees(Request $request, $order_item){
+        $validator = Validator::make($request->all(), [
+            'module' => 'required|in:delivery,take_away,dine_in',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $service_fees = ServiceFees::
+        whereHas("branches", function($query) use($id){
+            $query->where("branches.id", $id);
+        })
+        ->where("module", "online")
+        ->whereJsonContains("modules", $request->module ?? "delivery")
+        ->where(function($query) use($request){
+            $query->where('online_type', 'all')
+            ->orWhere("online_type", "pos");
+        })
+        ->where("all_products", false)
+        ->whereHas("products", function($query) use($product){
+            $query->where("products.id", $product->id);
+        })
+        ->get();
+
+        return response()->json([
+            "service_fees" => $service_fees
+        ]);
+    }
+
     public function zones_list(){
         // /captain/zones_list
         $zones = $this->zone
