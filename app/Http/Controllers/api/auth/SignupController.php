@@ -136,7 +136,10 @@ class SignupController extends Controller
             ]);
         
             // Send OTP to the new user
-            $this->sendOtp($phone, $code);
+             
+        return response()->json([
+            'sendOtp' => $this->sendOtp($phone, $code)
+        ]);
         }
         else{
             return response()->json([
