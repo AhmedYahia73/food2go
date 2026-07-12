@@ -152,49 +152,68 @@ class SignupController extends Controller
     {
         // Send OTP using Mobishastra API
         try {
-           $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+            $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
             $response = json_decode($response);
-    
+
             $sms_subscription = collect($response?->user_sms) ?? collect([]); 
             $sms_subscription = $sms_subscription->where('back_link', url(''))
-            ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
-            ->first();
+                ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+                ->first();
+
+            // تأكيد أن السجل موجود قبل استخدامه لتجنب Attempt to read property on null
+            if (!$sms_subscription) {
+                throw new Exception('SMS Subscription not found or expired for this domain.');
+            }
+
             $msg_number = $this->sms_balance
-            ->where('package_id', $sms_subscription?->id)
-            ->first();
+                ->where('package_id', $sms_subscription?->id)
+                ->first();
+
             if (!empty($sms_subscription) && empty($msg_number)) {
                 $msg_number = $this->sms_balance
-                ->create([
-                    'package_id' => $sms_subscription->id,
-                    'balance' => $sms_subscription->msg_number,
-                ]);
+                    ->create([
+                        'package_id' => $sms_subscription->id,
+                        'balance' => $sms_subscription->msg_number,
+                    ]);
             }
+
             if (empty($sms_subscription) || $msg_number->balance <= 0) {
                 $customer_login = $this->settings
-                ->where('name', 'customer_login')
-                ->first();
+                    ->where('name', 'customer_login')
+                    ->first();
                 if(empty($customer_login)){
                     $this->settings
-                    ->create([
-                        'name' => 'customer_login',
-                        'setting' => '{"login":"otp","verification":"email"}',
-                    ]);
+                        ->create([
+                            'name' => 'customer_login',
+                            'setting' => '{"login":"otp","verification":"email"}',
+                        ]);
                 }
                 else{
                     $customer_login->update([
                         'setting' => '{"login":"otp","verification":"email"}',
                     ]);
                 }
+                
+                // لو الرصيد خلصان يفضل تقف هنا وميضربش الـ API
+                throw new Exception('SMS Balance is insufficient.');
             }
+
             $this->sms_balance
-            ->where('package_id', $sms_subscription->id)
-            ->update([
-                'balance' => $msg_number->balance - 1
-            ]);
+                ->where('package_id', $sms_subscription->id)
+                ->update([
+                    'balance' => $msg_number->balance - 1
+                ]);
+
             $sms_integration = $this->sms_integration
-            ->orderByDesc('id')
-            ->first();
-            $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
+                ->orderByDesc('id')
+                ->first();
+
+            if (!$sms_integration) {
+                throw new Exception('Mobishastra configuration settings not found in database.');
+            }
+
+            // إرسال الطلب مع تفعيل throw() لرمي استثناء تلقائي لو الـ Status Code مش 2xx
+            $apiResponse = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
                 'user' => $sms_integration->user,
                 'pwd' => $sms_integration->pwd,
                 'senderid' => $sms_integration->senderid,
@@ -203,16 +222,32 @@ class SignupController extends Controller
                 'CountryCode' => $sms_integration->CountryCode,
                 'profileid' => $sms_integration->profileid,
             ]);
-    
-            if ($response->successful()) {
+
+            // تأكد إذا كان الـ API رجع نجاح (200) وهل الـ body فيه إيرور من Mobishastra نفسه
+            // لأن ساعات الـ API ده بيرجع 200 وبيرد بجملة زي "Invalid Credentials" أو "Low Balance" جوة التكست
+            if ($apiResponse->successful()) {
+                $responseBody = $apiResponse->body();
+                
+                // لو الرد فيه كلمة تدل على فشل الإرسال (حسب توثيق Mobishastra، غالباً بيرجعوا رقم الرسالة لو نجحت)
+                if (str_contains(strtolower($responseBody), 'error') || str_contains(strtolower($responseBody), 'fail')) {
+                    throw new Exception('Mobishastra API Error Response: ' . $responseBody);
+                }
+
                 // Store the OTP in the database 
-    
+
                 return response()->json(['message' => 'OTP sent successfully.'], 200);
             } else {
-                throw new Exception('Failed to send OTP.');
+                throw new Exception('API Request failed with status: ' . $apiResponse->status() . ' - Body: ' . $apiResponse->body());
             }
+
         } catch (\Throwable $e) {
-            return response()->json(['errors' => 'Unable to send OTP at this time. Please try again later.'], 500);
+            // هنا بنطبع الإيرور الحقيقي والـ Message والـ File والـ Line علشان تلمح المشكلة فوراً في الـ Postman
+            return response()->json([
+                'errors' => 'Unable to send OTP at this time.',
+                'debug_error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
         }
     }
 }

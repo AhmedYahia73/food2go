@@ -63,6 +63,7 @@ class HomeController extends Controller
             $query->where('online_type', 'all')
             ->orWhere("online_type", $request->source);
         })
+        ->where("all_products", true)
         ->first();
 
         return response()->json([
@@ -1112,6 +1113,7 @@ class HomeController extends Controller
             ->orWhereNotIn('category_id', $category_off);
         })
         ->whereNotIn('products.id', $product_off)
+        ->with("service_fees")
         ->get()
         ->map(function ($product) use ($option_off, $branch_id, $module) {
             $product->favourite = $product->favourite_product->isNotEmpty();

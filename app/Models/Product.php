@@ -172,6 +172,10 @@ class Product extends Model
         return $this->belongsToMany(Order::class, 'order_product', 'product_id', 'order_id');
     }
 
+    public function service_fees(){
+        return $this->belongsToMany(ServiceFees::class, 'service_fees_product', 'product_id', 'service_fees_id');
+    }
+
     public function getOrdersCountBranchAttribute(){
         return $this->belongsToMany(Order::class, 'order_product', 'product_id', 'order_id')
         ->where('orders.branch_id', auth()?->user()?->id)
