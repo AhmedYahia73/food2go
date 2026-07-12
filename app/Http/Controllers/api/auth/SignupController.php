@@ -105,64 +105,48 @@ class SignupController extends Controller
         return response()->json([
             'code' => $code
         ]);
-    }
-
-    public function otp_phone(Request $request)
+    }public function otp_phone(Request $request)
     {
         // https://bcknd.food2go.online/api/user/auth/signup/phone_code
-        // keys
-        // phone, email
+        // keys: phone, email
         $validator = Validator::make($request->all(), [
             'email' => 'email', 
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
+        
+        if ($validator->fails()) { 
             return response()->json([
                 'errors' => $validator->errors(),
-            ],400);
+            ], 400);
         }
 
         if ($request->email) {
             $code = rand(10000, 99999);
             $data['code'] = $code;
             Mail::to($request->email)->send(new OTPMail($data));
+            
+            return response()->json([
+                'code' => $code
+            ]);
         } 
-        elseif($request->phone) {
+        elseif ($request->phone) {
             $temporaryToken = Str::random(40);
             $code = rand(10000, 99999);  // Generate OTP
             $phone = $request->phone;
-            $user = $this->user
-            ->where('phone', $request->phone)
-            ->update([
-                'code' => $code
-            ]);
+            
+            $this->user
+                ->where('phone', $request->phone)
+                ->update([
+                    'code' => $code
+                ]);
         
-            // Send OTP to the new user
-             $clean_phone = $phone;
-
-// لو بيبدأ بـ +20 شيلها
-if (str_starts_with($clean_phone, '+20')) {
-    $clean_phone = substr($clean_phone, 3);
-} 
-// لو بيبدأ بـ 20 شيلها
-elseif (str_starts_with($clean_phone, '20') && strlen($clean_phone) > 10) {
-    $clean_phone = substr($clean_phone, 2);
-}
-// لو بيبدأ بـ 0 شيله (عشان يبدأ بـ 11 أو 10 أو 12 أو 15 على طول)
-elseif (str_starts_with($clean_phone, '0')) {
-    $clean_phone = substr($clean_phone, 1);
-}
-        return response()->json([
-            'sendOtp' => $this->sendOtp($clean_phone, $code)
-        ]);
+            // هنا بنمرر الـ phone والـ code للفانكشن وبنرجع الرد بتاعها مباشرة
+            return $this->sendOtp($phone, $code);
         }
-        else{
+        else {
             return response()->json([
-                'errors' => 'Phone or email is requred'
+                'errors' => 'Phone or email is required'
             ], 400);
         }
-        return response()->json([
-            'code' => $code
-        ]);
     }
     
     private function sendOtp($phone, $otp)
@@ -177,9 +161,9 @@ elseif (str_starts_with($clean_phone, '0')) {
                 ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
                 ->first();
 
-            // تأكيد أن السجل موجود قبل استخدامه لتجنب Attempt to read property on null
+            // تأكيد أن السجل موجود قبل استخدامه
             if (!$sms_subscription) {
-                throw new Exception('SMS Subscription not found or expired for this domain.');
+                throw new \Exception('SMS Subscription not found or expired for this domain.');
             }
 
             $msg_number = $this->sms_balance
@@ -198,21 +182,20 @@ elseif (str_starts_with($clean_phone, '0')) {
                 $customer_login = $this->settings
                     ->where('name', 'customer_login')
                     ->first();
-                if(empty($customer_login)){
+                if (empty($customer_login)) {
                     $this->settings
                         ->create([
                             'name' => 'customer_login',
                             'setting' => '{"login":"otp","verification":"email"}',
                         ]);
                 }
-                else{
+                else {
                     $customer_login->update([
                         'setting' => '{"login":"otp","verification":"email"}',
                     ]);
                 }
                 
-                // لو الرصيد خلصان يفضل تقف هنا وميضربش الـ API
-                throw new Exception('SMS Balance is insufficient.');
+                throw new \Exception('SMS Balance is insufficient.');
             }
 
             $this->sms_balance
@@ -226,10 +209,10 @@ elseif (str_starts_with($clean_phone, '0')) {
                 ->first();
 
             if (!$sms_integration) {
-                throw new Exception('Mobishastra configuration settings not found in database.');
+                throw new \Exception('Mobishastra configuration settings not found in database.');
             }
 
-            // إرسال الطلب مع تفعيل throw() لرمي استثناء تلقائي لو الـ Status Code مش 2xx
+            // إرسال الطلب الفعلي لـ Mobishastra
             $apiResponse = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
                 'user' => $sms_integration->user,
                 'pwd' => $sms_integration->pwd,
@@ -240,27 +223,40 @@ elseif (str_starts_with($clean_phone, '0')) {
                 'profileid' => $sms_integration->profileid,
             ]);
 
-            // تأكد إذا كان الـ API رجع نجاح (200) وهل الـ body فيه إيرور من Mobishastra نفسه
-            // لأن ساعات الـ API ده بيرجع 200 وبيرد بجملة زي "Invalid Credentials" أو "Low Balance" جوة التكست
+            $responseBody = $apiResponse->body();
+
+            // فحص رد الشركة لتحديد هل نجح فعلاً أم لا
             if ($apiResponse->successful()) {
-                $responseBody = $apiResponse->body();
-                
-                // لو الرد فيه كلمة تدل على فشل الإرسال (حسب توثيق Mobishastra، غالباً بيرجعوا رقم الرسالة لو نجحت)
+                // لو الرد فيه أي كلمة تدل على خطأ من سيرفر Mobishastra
                 if (str_contains(strtolower($responseBody), 'error') || str_contains(strtolower($responseBody), 'fail')) {
-                    throw new Exception('Mobishastra API Error Response: ' . $responseBody);
+                    return response()->json([
+                        'status' => 'failed_from_provider',
+                        'message' => 'Mobishastra API rejected the message.',
+                        'api_response' => $responseBody
+                    ], 400);
                 }
 
-                // Store the OTP in the database 
-
-                return response()->json(['message' => 'OTP sent successfully.'], 200);
+                // هنا لو نجح والرد سليم (بيطبع لك الـ Message ID أو كلمة النجاح اللي مبعوتة منهم)
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'OTP sent successfully.',
+                    'api_response' => $responseBody
+                ], 200);
             } else {
-                throw new Exception('API Request failed with status: ' . $apiResponse->status() . ' - Body: ' . $apiResponse->body());
+                // لو الـ status code مش 200
+                return response()->json([
+                    'status' => 'http_error',
+                    'message' => 'Failed to connect with Mobishastra.',
+                    'http_code' => $apiResponse->status(),
+                    'api_response' => $responseBody
+                ], 500);
             }
 
         } catch (\Throwable $e) {
-            // هنا بنطبع الإيرور الحقيقي والـ Message والـ File والـ Line علشان تلمح المشكلة فوراً في الـ Postman
+            // في حالة حدوث أي إيرور داخلي في السيرفر أو الباقة
             return response()->json([
-                'errors' => 'Unable to send OTP at this time.',
+                'status' => 'internal_error',
+                'message' => 'An error occurred during processing.',
                 'debug_error' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
