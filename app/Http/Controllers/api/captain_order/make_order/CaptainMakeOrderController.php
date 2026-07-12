@@ -1709,6 +1709,7 @@ class CaptainMakeOrderController extends Controller
     public function service_fees(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'module' => 'required|in:delivery,take_away,dine_in',
+            "branch_id" => "required|exists:branches,id"
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -1716,8 +1717,8 @@ class CaptainMakeOrderController extends Controller
             ],400);
         }
         $service_fees = ServiceFees::
-        whereHas("branches", function($query) use($id){
-            $query->where("branches.id", $id);
+        whereHas("branches", function($query) use($request){
+            $query->where("branches.id", $request->branch_id);
         })
         ->where("module", "online")
         ->whereJsonContains("modules", $request->module ?? "delivery")
@@ -1726,8 +1727,8 @@ class CaptainMakeOrderController extends Controller
             ->orWhere("online_type", "pos");
         })
         ->where("all_products", false)
-        ->whereHas("products", function($query) use($product){
-            $query->where("products.id", $product->id);
+        ->whereHas("products", function($query) use($id){
+            $query->where("products.id", $id);
         })
         ->get();
 
