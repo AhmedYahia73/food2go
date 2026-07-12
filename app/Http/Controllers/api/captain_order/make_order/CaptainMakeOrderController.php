@@ -1706,7 +1706,7 @@ class CaptainMakeOrderController extends Controller
         ]);
     }
 
-    public function service_fees(Request $request, $order_item){
+    public function service_fees(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'module' => 'required|in:delivery,take_away,dine_in',
         ]);
