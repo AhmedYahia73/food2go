@@ -18,7 +18,9 @@ class VariationProduct extends Model
         'min',
         'max',
         'required',
-        'product_id', 
+        'product_id',
+        'weight',
+        'weight_unit',
     ];
 
     public function extra(){

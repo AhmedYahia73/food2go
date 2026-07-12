@@ -25,8 +25,8 @@ class VariationResource extends JsonResource
             'product_id' => $this->product_id,
             'extra' => ExtraResource::collection($this->whenLoaded('extra')),
             'options' => OptionResource::collection($this->whenLoaded('options')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'weight' => $this->weight,
+            'weight_unit' => $this->weight_unit,
         ];
     }
 }

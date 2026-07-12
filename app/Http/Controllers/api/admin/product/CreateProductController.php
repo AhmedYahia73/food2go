@@ -192,6 +192,8 @@ class CreateProductController extends Controller
                         'max' => $item['max'] ?? null,
                         'required' => $item['required'],
                         'product_id' => $product->id,
+                        'weight' => $item['weight'],
+                        'weight_unit' => isset($item['weight_unit']) ? $item['weight_unit'] : null,
                     ]); // add variation
                     foreach ($item['names'] as $key => $element) {
                         if (!empty($element['name'])) {
@@ -441,6 +443,8 @@ class CreateProductController extends Controller
                     'max' => $item['max'] ?? null,
                     'required' => $item['required'],
                     'product_id' => $product->id,
+                    'weight' => $item['weight'],
+                    'weight_unit' => isset($item['weight_unit']) ? $item['weight_unit'] : null,
                 ]); // add variation
                 foreach ($item['names'] as $key => $element) {
                     if (!empty($element['name'])) {

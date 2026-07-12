@@ -53,6 +53,8 @@ class ProductRequest extends FormRequest
             'variations.*.names.*.tranlation_id' => ['required', 'exists:translations,id'],
             'variations.*.names.*.tranlation_name' => ['required'],
             'variations.*.type' => ['required', 'in:multiple,single'],
+            'variations.*.weight' => ['boolean', 'required'],
+            'variations.*.weight_unit' => ['sometimes'],
             'variations.*.min' => ['numeric', 'nullable'],
             'variations.*.max' => ['numeric', 'nullable'],
             'variations.*.required' => ['required', 'boolean'],
