@@ -11,6 +11,7 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource; 
 
 use App\Models\Order;
+use App\Models\ServiceFees;
 use App\Models\OrderDetail;
 use App\Models\ProductSale;
 use App\Models\Product;
