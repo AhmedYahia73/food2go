@@ -1546,7 +1546,7 @@ class CaptainMakeOrderController extends Controller
         
         $bundles = $this->bundle
             ->where("status", 1)
-            ->with(["products.translations", "products.variations.translations", "products.variations.options.translations", "discount", "tax", "translations", "bundle_variations", "bundle_options"])
+            ->with(["products.translations", "products.variations.translations", "products.variations.options.translations", "discount", "tax", "translations", "bundle_variations"])
             ->get()
             ->map(function($item) use ($locale) {
                 return [

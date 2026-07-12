@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\ServiceFees; 
-use App\Models\Branch; 
+use App\Models\Branch;
+use App\Models\Product;
 
 class ServiceFeesController extends Controller
 {
@@ -17,7 +18,26 @@ class ServiceFeesController extends Controller
     public function view(Request $request){
         $service_fees = $this->service_fees
         ->with("branches:id,name")
-        ->get();
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "title" => $item->title,
+                "type" => $item->type,
+                "amount" => $item->amount,
+                "module" => $item->module,
+                "online_type" => $item->online_type,
+                "modules" => $item->modules,
+                "all_products" => $item->all_products,
+                "branches" => $item->branches
+                ->map(function($element){
+                    return [
+                        "id" => $element->id,
+                        "name" => $element->name,
+                    ];
+                })
+            ];
+        });
 
         return response()->json([
             "service_fees" => $service_fees, 
@@ -43,9 +63,25 @@ class ServiceFeesController extends Controller
         ]);
     }
 
+    public function products_list(Request $request){ 
+        $products = Product::
+        where("status", 1)
+        ->get()
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+        return response()->json([
+            "products" => $products,  
+        ]);
+    }
+
     public function service_fees_item(Request $request, $id){
         $service_fees = $this->service_fees
-        ->with("branches:id,name")
+        ->with("branches:id,name", "products:id,name")
         ->where("id", $id)
         ->first();
 
@@ -96,6 +132,9 @@ class ServiceFeesController extends Controller
         }
 
         $serviceFeesRequest = $validator->validated();
+        if(count($request->products) > 0){
+            $serviceFeesRequest['all_products'] = false;
+        }
         $service_fees = $this->service_fees
         ->create($serviceFeesRequest);
         $service_fees->branches()->attach($request->branches);
@@ -127,6 +166,12 @@ class ServiceFeesController extends Controller
         }
 
         $serviceFeesRequest = $validator->validated();
+        if(count($request->products) > 0){
+            $serviceFeesRequest['all_products'] = false;
+        }
+        else{
+            $serviceFeesRequest['all_products'] = true;
+        }
         $service_fees = $this->service_fees
         ->where("id", $id)
         ->first();
