@@ -137,9 +137,22 @@ class SignupController extends Controller
             ]);
         
             // Send OTP to the new user
-             
+             $clean_phone = $phone;
+
+// لو بيبدأ بـ +20 شيلها
+if (str_starts_with($clean_phone, '+20')) {
+    $clean_phone = substr($clean_phone, 3);
+} 
+// لو بيبدأ بـ 20 شيلها
+elseif (str_starts_with($clean_phone, '20') && strlen($clean_phone) > 10) {
+    $clean_phone = substr($clean_phone, 2);
+}
+// لو بيبدأ بـ 0 شيله (عشان يبدأ بـ 11 أو 10 أو 12 أو 15 على طول)
+elseif (str_starts_with($clean_phone, '0')) {
+    $clean_phone = substr($clean_phone, 1);
+}
         return response()->json([
-            'sendOtp' => $this->sendOtp($phone, $code)
+            'sendOtp' => $this->sendOtp($clean_phone, $code)
         ]);
         }
         else{
