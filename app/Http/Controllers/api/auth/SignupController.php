@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use App\trait\image;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Exception;
 
 use App\Models\SmsIntegration;
 use App\Models\User;
