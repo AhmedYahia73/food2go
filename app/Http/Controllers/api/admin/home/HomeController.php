@@ -119,15 +119,17 @@ class HomeController extends Controller
             $active_amount->where("branch_id", $branch_id);
         }
         $active_amount = $active_amount->sum("amount");
+
         $online_cashiers = CashierMan::whereHas("cashier", function($query) use($branch_id){
-            if($branch_id){
-                $query->where("branch_id", $branch_id);
-            }
-        })
-        ->whereHas("tokenable", function($query) use ($minutes) {
-            $query->where('last_used_at', '>=', now()->subMinutes($minutes));
-        })
-        ->count();
+                if($branch_id){
+                    $query->where("branch_id", $branch_id);
+                }
+            })
+            ->whereHas("tokens", function($query) {
+                // بنشيك هنا على حقل last_used_at في جدول الـ tokens
+                $query->where('last_used_at', '>=', now()->subMinutes(5));
+            })
+            ->count();
         $top_product = OrderDetail::
         selectRaw("product_id, sum(count) as total_sales")
         ->whereNull("exclude_id")
