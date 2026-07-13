@@ -10,5 +10,6 @@ class TablePeople extends Model
         'table_id',
         'count',
         'is_active',
+        'shift_number',
     ];
 }

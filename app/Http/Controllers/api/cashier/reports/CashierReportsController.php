@@ -818,8 +818,7 @@ class CashierReportsController extends Controller
 
         $people = TablePeople::
         where("is_active", 1)
-        ->whereDate("created_at", ">=", $start)
-        ->whereDate("created_at", "<=", $end)
+        ->where("shift_number", $request->user()->shift_number)
         ->sum("count") ?? 0;
         $dine_in_orders_count = Order::
         where('cashier_man_id', $request->user()->id)

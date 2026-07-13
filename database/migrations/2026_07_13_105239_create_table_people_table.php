@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('table_id')->nullable()->constrained('cafe_tables')->onUpdate('cascade')->onDelete('cascade');
             $table->integer("count");
             $table->boolean("is_active")->default(false);
+            $table->integer("shift_number")->nullable();
             $table->timestamps();
         });
     }

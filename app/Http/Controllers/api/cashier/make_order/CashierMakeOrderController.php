@@ -1520,8 +1520,10 @@ class CashierMakeOrderController extends Controller
         where("table_id", $request->table_id)
         ->where("is_active", 1) 
         ->update([
-            "is_active" => false
+            "is_active" => false,
+            "shift_number" => $request->user()->shift_number
         ]);
+        
         return response()->json([
             'success' => $this->checkout_data($request), 
             "service_fees_title" => $service_fees?->title ?? null,  
