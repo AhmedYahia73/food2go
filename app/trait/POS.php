@@ -233,6 +233,7 @@ trait POS
                 ->withLocale($locale)
                 ->first();
                 $product_item = collect([$product_item]);
+                dd($product_item);
                 $product_item = ProductResource::collection($product_item);
                 $product_item = count($product_item) > 0 ? $product_item[0] : null;
                 $order_details[$key]['product'][] = [
