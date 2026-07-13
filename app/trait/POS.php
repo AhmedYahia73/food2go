@@ -277,7 +277,7 @@ trait POS
                 });
 
                 // Map Addons
-                $product_item->addons = $product_item->addons->map(function ($addon) use ($product) {
+                $product_item->addons = $product_item->addons->map(function ($addon) use ($product_item) {
                     $addon->discount = $product_item->discount;
                     return $addon;
                 });
