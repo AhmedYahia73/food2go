@@ -909,6 +909,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('banner')->group(function(){
         Route::get('/', 'view')->middleware('can:view_banner');
         Route::get('/item/{id}', 'banner')->middleware('can:edit_banner');
+        Route::get('/lists', 'lists')->middleware('can:view_banner');
         Route::put('/status/{id}', 'status')->middleware('can:edit_banner');
         Route::post('/add', 'create')->middleware('can:add_banner');
         Route::post('/update/{id}', 'modify')->middleware('can:edit_banner');

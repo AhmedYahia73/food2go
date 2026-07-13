@@ -183,6 +183,33 @@ class BannerController extends Controller
             'banner' => $banner
         ]);
     }
+
+    public function lists($id){
+        // https://bcknd.food2go.online/admin/banner/item/{id}
+        $banner = $this->banner
+        ->where('id', $id)
+        ->with("products", "categories")
+        ->first();
+        $products = $banner->products
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+        $categories = $banner->categories
+        ->map(function($item){
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+
+        return response()->json([
+            'products' => $products,
+            'categories' => $categories,
+        ]);
+    }
     
     public function modify(BannerRequest $request, $id){
         // https://bcknd.food2go.online/admin/banner/update/{id}
