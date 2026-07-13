@@ -125,10 +125,7 @@ class HomeController extends Controller
                     $query->where("branch_id", $branch_id);
                 }
             })
-            ->whereHas("tokens", function($query) {
-                // بنشيك هنا على حقل last_used_at في جدول الـ tokens
-                $query->where('last_used_at', '>=', now()->subMinutes(5));
-            })
+            ->whereHas("tokens")
             ->count();
         $top_product = OrderDetail::
         selectRaw("product_id, sum(count) as total_sales")
