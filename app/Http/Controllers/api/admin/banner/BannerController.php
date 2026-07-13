@@ -157,7 +157,7 @@ class BannerController extends Controller
         // https://bcknd.food2go.online/admin/banner/item/{id}
         $banner = $this->banner
         ->where('id', $id)
-        ->with('category_banner', 'product', 'deal')
+        ->with('category_banner', 'product', 'deal', "products", "categories")
         ->first();
         $banner_image = $banner->image;
         $translation_tbl = $this->translation_tbl
