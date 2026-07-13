@@ -25,6 +25,7 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector; // Windows only
 use App\Events\PrintOrder;
  
 use App\Models\ServiceFees;
+use App\Models\TablePeople;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\CompanyInfo;
@@ -1515,6 +1516,12 @@ class CashierMakeOrderController extends Controller
         $reaturant_name = $this->company_info
         ->first()?->name; 
 
+        TablePeople::
+        where("table_id", $request->table_id)
+        ->where("is_active", 1) 
+        ->update([
+            "is_active" => false
+        ]);
         return response()->json([
             'success' => $this->checkout_data($request), 
             "service_fees_title" => $service_fees?->title ?? null,  

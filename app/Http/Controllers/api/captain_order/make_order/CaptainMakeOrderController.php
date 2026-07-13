@@ -16,6 +16,7 @@ use App\Models\OrderDetail;
 use App\Models\ProductSale;
 use App\Models\Product;
 use App\Models\ExcludeProduct;
+use App\Models\TablePeople;
 use App\Models\ExtraProduct;
 use App\Models\KitchenOrder;
 use App\Models\Addon;
@@ -62,6 +63,51 @@ class CaptainMakeOrderController extends Controller
     use PlaceOrder;
     use PaymentPaymob;
     use Notifications;
+
+    public function table_people($id){
+        $people = TablePeople::
+        where("table_id", $id)
+        ->where("is_active", 1)
+        ->orderByDesc("id")
+        ->first()?->count ?? 0;
+
+        return response()->json([
+            "people" => $people
+        ]);
+    }
+
+    public function update_table_people(Request $request){
+        $validator = Validator::make($request->all(), [
+            'count' => 'required|numeric',
+            'table_id' => 'required|exists:cafe_tables,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+        $people = TablePeople::
+        where("table_id", $request->table_id)
+        ->where("is_active", 1)
+        ->orderByDesc("id")
+        ->first();
+        if($people){
+            $people->update([
+                "count" => $request->count
+            ]);
+        }
+        else{
+            TablePeople::create([
+                "table_id" => $request->table_id,
+                "count" => $request->count,
+                "is_active" => true,
+            ]);
+        }
+
+        return response()->json([
+            "success" => "You update success"
+        ]);
+    }
 
     public function captain_orders(Request $request){
         $captain_orders = CaptainOrder::

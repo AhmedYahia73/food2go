@@ -35,6 +35,9 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
         Route::post('/notification_order', 'notification_order');
         Route::get('/my_selection_lists', 'my_selection_lists');
         Route::get('/product_in_category/{id}', 'product_in_category')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        
+        Route::get('/table_people/{id}', 'table_people');
+        Route::post('/update_table_people', 'update_table_people');
 
         Route::get('/lists', 'cashier_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/product_category_lists/{id}', 'product_category_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);

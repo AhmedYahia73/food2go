@@ -38,6 +38,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     ->group(function(){
         Route::get('/captain_orders', 'captain_orders');
         Route::post('/preparation_num', 'preparation_num');
+        Route::get('/table_people/{id}', 'table_people');
+        Route::post('/update_table_people', 'update_table_people');
     });
  
 
