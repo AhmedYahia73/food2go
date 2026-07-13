@@ -99,13 +99,13 @@ class HomeController extends Controller
         if($branch_id){
             $active_orders->where("branch_id", $branch_id);
         }
-        $active_orders->count();
+        $active_orders = $active_orders->count();
         $occupied_tables = CafeTable::
         whereIn("current_status", ["not_available_pre_order", "not_available_with_order", "not_available_but_checkout"]);
         if($branch_id){
             $occupied_tables->where("branch_id", $branch_id);
         }
-        $occupied_tables->count();
+        $occupied_tables = $occupied_tables->count();
         $tables_ids = CafeTable::
         whereIn("current_status", ["not_available_pre_order", "not_available_with_order"]);
         if($branch_id){
@@ -118,12 +118,14 @@ class HomeController extends Controller
         if($branch_id){
             $active_amount->where("branch_id", $branch_id);
         }
-        $active_amount->sum("amount");
-        $online_cashiers = CashierMan::
-        whereHas("cashier", function($query) use($branch_id){
+        $active_amount = $active_amount->sum("amount");
+        $online_cashiers = CashierMan::whereHas("cashier", function($query) use($branch_id){
             if($branch_id){
                 $query->where("branch_id", $branch_id);
             }
+        })
+        ->whereHas("tokenable", function($query) use ($minutes) {
+            $query->where('last_used_at', '>=', now()->subMinutes($minutes));
         })
         ->count();
         $top_product = OrderDetail::
