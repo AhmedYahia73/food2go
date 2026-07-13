@@ -267,8 +267,7 @@ trait POS
 
                 // Map Variations & Options
                 $product_item->variations = $product_item->variations->map(function ($variation) use ($option_off, $branch_id, $resolved_tax) {
-                    $variation->options = $variation->options
-                        ->reject(fn($option) => in_array($option->id, $option_off))
+                    $variation->options = $variation->options 
                         ->map(function($element) use ($branch_id, $resolved_tax) {
                             $element->price = $element->option_pricing->firstWhere('branch_id', $branch_id)?->price ?? $element->price;
                             $element->new_tax = $resolved_tax;
