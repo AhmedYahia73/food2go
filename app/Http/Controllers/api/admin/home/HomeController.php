@@ -23,6 +23,7 @@ use App\Models\TimeSittings;
 use App\Models\LogOrder;
 use App\Models\Expense;
 use App\Models\CashierMan;
+use App\Models\OrderCart;
 
 class HomeController extends Controller
 {
