@@ -20,6 +20,7 @@ class DiscountController extends Controller
         'amount',
         "start_date",
         "end_date",
+        "module"
     ];
 
     public function view(){
