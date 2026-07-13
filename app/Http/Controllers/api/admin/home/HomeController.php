@@ -15,12 +15,14 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderDetail;
 use App\Models\OrderFinancial;
+use App\Models\CafeTable;
 use App\Models\Deal;
 use App\Models\User;
 use App\Models\Setting;
 use App\Models\TimeSittings;
 use App\Models\LogOrder;
 use App\Models\Expense;
+use App\Models\CashierMan;
 
 class HomeController extends Controller
 {
@@ -91,6 +93,38 @@ class HomeController extends Controller
         $from = $request->from ? $from : null;
         $to = $request->to ? $to : null;
 
+        $active_orders = CafeTable::
+        whereIn("current_status", ["not_available_with_order"]);
+        if($branch_id){
+            $active_orders->where("branch_id", $branch_id);
+        }
+        $active_orders->count();
+        $occupied_tables = CafeTable::
+        whereIn("current_status", ["not_available_pre_order", "not_available_with_order", "not_available_but_checkout"]);
+        if($branch_id){
+            $occupied_tables->where("branch_id", $branch_id);
+        }
+        $occupied_tables->count();
+        $tables_ids = CafeTable::
+        whereIn("current_status", ["not_available_pre_order", "not_available_with_order"]);
+        if($branch_id){
+            $tables_ids->where("branch_id", $branch_id);
+        }
+        $tables_ids = $tables_ids->pluck("id")
+        ->toArray();
+        $active_amount = OrderCart::
+        whereIn("table_id", $tables_ids);
+        if($branch_id){
+            $active_amount->where("branch_id", $branch_id);
+        }
+        $active_amount->sum("amount");
+        $online_cashiers = CashierMan::
+        whereHas("cashier", function($query) use($branch_id){
+            if($branch_id){
+                $query->where("branch_id", $branch_id);
+            }
+        })
+        ->count();
         $top_product = OrderDetail::
         selectRaw("product_id, sum(count) as total_sales")
         ->whereNull("exclude_id")
@@ -251,8 +285,12 @@ class HomeController extends Controller
         $discount_hourly = $discount_hourly->get();
         $branch_sales = $branch_sales->get();
         $expenses_hourly = $expenses_hourly->get();
-
+ 
         return response()->json([
+            "online_cashiers" => $online_cashiers,
+            "active_amount" => $active_amount,
+            "occupied_tables" => $occupied_tables,
+            "active_orders" => $active_orders,
             "top_product" => $top_product,
             "top_financial" => $top_financial,
             "top_payment_method" => $top_payment_method,
