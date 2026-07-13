@@ -286,8 +286,8 @@ trait POS
                     $product_item->tax = $resolved_tax;
                 }
                 $product_item = collect([$product_item]);
-                dd($product_item);
                 $product_item = ProductResource::collection($product_item);
+                dd($product_item);
                 $product_item = count($product_item) > 0 ? $product_item[0] : null;
                 $order_details[$key]['product'][] = [
                     'product' => $product_item,
