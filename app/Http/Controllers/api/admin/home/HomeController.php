@@ -120,13 +120,12 @@ class HomeController extends Controller
         }
         $active_amount = $active_amount->sum("amount");
 
-        $online_cashiers = CashierMan::whereHas("cashier", function($query) use($branch_id){
-                if($branch_id){
-                    $query->where("branch_id", $branch_id);
-                }
-            })
-            ->whereHas("tokens")
-            ->count();
+        $online_cashiers = CashierMan::
+        whereHas("tokens");
+        if($branch_id){
+            $online_cashiers->where("branch_id", $branch_id);
+        }
+        $online_cashiers = $online_cashiers->count();
         $top_product = OrderDetail::
         selectRaw("product_id, sum(count) as total_sales")
         ->whereNull("exclude_id")
