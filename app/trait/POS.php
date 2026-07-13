@@ -232,6 +232,47 @@ trait POS
                 ])
                 ->withLocale($locale)
                 ->first();
+                // Resolve Pricing
+                $new_price = $product->product_pricing->firstWhere('branch_id', $branch_id)?->price;
+                if (empty($new_price)) {
+                    $new_price = $product->pos_pricing->firstWhere('module', $module)?->price ?? $product->price;
+                }
+                $product->price = $new_price;
+                $product->favourite = false;
+
+                // Stock Calculation (Using in-memory collections instead of queries)
+                if ($product->stock_type == 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                } elseif ($product->stock_type == 'daily') {
+                    $product->count = $product->sales_count->where('date', $today)->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                }
+
+                // Resolve Tax Module efficiently
+                $resolved_tax = $product->tax_module->first()?->tax ?? $product->tax ?? null;
+
+                // Map Variations & Options
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id, $resolved_tax) {
+                    $variation->options = $variation->options
+                        ->reject(fn($option) => in_array($option->id, $option_off))
+                        ->map(function($element) use ($branch_id, $resolved_tax) {
+                            $element->price = $element->option_pricing->firstWhere('branch_id', $branch_id)?->price ?? $element->price;
+                            $element->new_tax = $resolved_tax;
+                            return $element;
+                        });
+                    return $variation;
+                });
+
+                // Map Addons
+                $product->addons = $product->addons->map(function ($addon) use ($product) {
+                    $addon->discount = $product->discount;
+                    return $addon;
+                });
+
+                if (!empty($resolved_tax)) {
+                    $product->tax = $resolved_tax;
+                }
                 $product_item = collect([$product_item]);
                 dd($product_item);
                 $product_item = ProductResource::collection($product_item);
