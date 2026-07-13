@@ -769,8 +769,57 @@ class CashierReportsController extends Controller
             ],400);
         }
         
+        $time_sittings = $this->TimeSittings 
+        ->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if($from->from > $item[0]->from){
+                $from = $item[0];
+            }
+        }
+        if ($time_sittings->count() > 0) {
+            $from = $from->from;
+            $end = date('Y-m-d') . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date('Y-m-d') . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+			$end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+			if($start >= now()){
+                $start = $start->subDay();
+			}
+
+            // if ($start > $end) {
+            //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+            // }
+            // else{
+            //     $end = Carbon::parse($from)->addHours(intval($hours));
+            // } format('Y-m-d H:i:s')
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        } 
         $gap = 0;
 
+        $people = TablePeople::
+        where("is_active", 1)
+        ->whereDate("created_at", ">=", $start)
+        ->whereDate("created_at", "<=", $end)
+        ->sum("count") ?? 0;
         $dine_in_orders_count = Order::
         where('cashier_man_id', $request->user()->id)
         ->where('shift', $request->user()->shift_number)
@@ -1054,6 +1103,7 @@ class CashierReportsController extends Controller
                 "net_cash_drawer2" => $net_cash_drawer2,
                 "orders_count" => $orders_count,
                 "orders_amount" => $orders_amount,
+                "table_people" => $people,
             ];
             if(isset($hall_orders)){
                 $arr['hall_orders'] = $hall_orders;
@@ -1456,6 +1506,7 @@ class CashierReportsController extends Controller
                     "net_cash_drawer" => $net_cash_drawer,
                     "orders_count" => $orders_count,
                     "orders_amount" => $orders_amount,
+                    "table_people" => $people,
                 ];
                 if(isset($hall_orders)){
                     $arr['hall_orders'] = $hall_orders;
@@ -1561,6 +1612,7 @@ class CashierReportsController extends Controller
                     "net_cash_drawer2" => $net_cash_drawer2,
                     "orders_count" => $orders_count,
                     "orders_amount" => $orders_amount,
+                    "table_people" => $people,
                 ];
                 if(isset($hall_orders)){
                     $arr['hall_orders'] = $hall_orders;
