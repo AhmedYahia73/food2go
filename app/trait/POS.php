@@ -198,6 +198,7 @@ trait POS
     }
 
     public function order_details($request, $order, $locale){
+        $module = $order->order_type;
         $order_details = [];
         $branch_id = 0;
         if($request->cashier_id){
