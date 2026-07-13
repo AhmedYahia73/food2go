@@ -9,6 +9,7 @@ use Carbon\Carbon;
 
 use App\Models\Order;
 use App\Models\CafeLocation;
+use App\Models\TablePeople;
 use App\Models\FinantiolAcounting;
 use App\Models\CaptainOrder;
 use App\Models\CashierShift;
@@ -769,8 +770,8 @@ class CashierReportsController extends Controller
             ],400);
         }
         
-        $time_sittings = $this->TimeSittings 
-        ->get();
+        $time_sittings = TimeSittings::
+        get();
         $items = [];
         $count = 0;
         $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
