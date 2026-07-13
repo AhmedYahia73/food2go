@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\FinantiolAcounting;
 use App\Models\BranchOff;
 use App\Models\Bundle;
+use App\Models\Cashier;
 
 use App\Models\OrderBundle;
 use App\Models\OrderBundleProduct;
@@ -198,6 +199,13 @@ trait POS
 
     public function order_details($request, $order, $locale){
         $order_details = [];
+        $branch_id = 0;
+        if($request->cashier_id){
+            $branch_id = Cashier::
+            where("id", $request->cashier_id)
+            ->first()
+            ?->branch_id ?? 0;
+        }
         if (isset($request->products)) {
             $request->products = is_string($request->products) ? json_decode($request->products) : $request->products;
             foreach ($request->products as $key => $product) {
@@ -217,6 +225,11 @@ trait POS
                 ]);
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
+                ->with([ 
+                    'tax_module' => fn($q) => $q->whereHas('module', fn($qm) => $qm->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all']))
+                                                ->with(['tax', 'module']),
+                    "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "pos")->orWhereJsonContains("module", "all"))
+                ])
                 ->withLocale($locale)
                 ->first();
                 $product_item = collect([$product_item]);
