@@ -225,7 +225,19 @@ trait POS
                 ]);
                 $product_item = $this->products
                 ->where('id', $product['product_id'])
-                ->with([ 
+            
+                ->with([
+                    'addons' => fn($q) => $q->withLocale($locale),
+                    'sub_category_addons' => fn($q) => $q->withLocale($locale), 
+                    'category_addons' => fn($q) => $q->withLocale($locale), 
+                    'excludes' => fn($q) => $q->withLocale($locale), 
+                    'extra', 'sales_count', 'tax', 'product_pricing', 'pos_pricing',
+                    'variations' => fn($q) => $q->withLocale($locale)->with([
+                        'options' => fn($qo) => $qo->where("status", 1)->withLocale($locale)->with([
+                            'extra' => fn($qe) => $qe->with('parent_extra')->withLocale($locale),
+                            'option_pricing'
+                        ])
+                    ]),
                     'tax_module' => fn($q) => $q->whereHas('module', fn($qm) => $qm->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all']))
                                                 ->with(['tax', 'module']),
                     "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "pos")->orWhereJsonContains("module", "all"))
