@@ -135,10 +135,8 @@ class SignupController extends Controller
                 'code' => $code
             ]);
         
-            // Send OTP to the new user 
-        return response()->json([
-            'code' => $this->sendOtp($phone, $code)
-        ]);
+            // Send OTP to the new user
+            $this->sendOtp($phone, $code);
         }
         else{
             return response()->json([
@@ -149,67 +147,54 @@ class SignupController extends Controller
             'code' => $code
         ]);
     }
-
+    
     private function sendOtp($phone, $otp)
     {
         // Send OTP using Mobishastra API
         try {
-            $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+           $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
             $response = json_decode($response);
-
+    
             $sms_subscription = collect($response?->user_sms) ?? collect([]); 
             $sms_subscription = $sms_subscription->where('back_link', url(''))
-                ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
-                ->first();
-            
+            ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+            ->first();
             $msg_number = $this->sms_balance
-                ->where('package_id', $sms_subscription?->id)
-                ->first();
-                
+            ->where('package_id', $sms_subscription?->id)
+            ->first();
             if (!empty($sms_subscription) && empty($msg_number)) {
                 $msg_number = $this->sms_balance
-                    ->create([
-                        'package_id' => $sms_subscription->id,
-                        'balance' => $sms_subscription->msg_number,
-                    ]);
+                ->create([
+                    'package_id' => $sms_subscription->id,
+                    'balance' => $sms_subscription->msg_number,
+                ]);
             }
-            
             if (empty($sms_subscription) || $msg_number->balance <= 0) {
                 $customer_login = $this->settings
-                    ->where('name', 'customer_login')
-                    ->first();
+                ->where('name', 'customer_login')
+                ->first();
                 if(empty($customer_login)){
                     $this->settings
-                        ->create([
-                            'name' => 'customer_login',
-                            'setting' => '{"login":"otp","verification":"email"}',
-                        ]);
-                } else {
+                    ->create([
+                        'name' => 'customer_login',
+                        'setting' => '{"login":"otp","verification":"email"}',
+                    ]);
+                }
+                else{
                     $customer_login->update([
                         'setting' => '{"login":"otp","verification":"email"}',
                     ]);
                 }
-                
-                // لو مفيش باقة أو الرصيد خلص، يفضل ترمي Exception واضح هنا عشان يوقف العملية
-                throw new \Exception('لا توجد باقة SMS نشطة أو رصيدك الحالي غير كافٍ لإرسال الرسالة.');
             }
-            
             $this->sms_balance
-                ->where('package_id', $sms_subscription->id)
-                ->update([
-                    'balance' => $msg_number->balance - 1
-                ]);
-                
+            ->where('package_id', $sms_subscription->id)
+            ->update([
+                'balance' => $msg_number->balance - 1
+            ]);
             $sms_integration = $this->sms_integration
-                ->orderByDesc('id')
-                ->first();
-                
-            if (!$sms_integration) {
-                throw new \Exception('بيانات ربط SMS (sms_integration) غير موجودة بقاعدة البيانات.');
-            }
-
-            // إرسال الطلب لشركة Mobishastra
-            $apiResponse = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
+            ->orderByDesc('id')
+            ->first();
+            $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
                 'user' => $sms_integration->user,
                 'pwd' => $sms_integration->pwd,
                 'senderid' => $sms_integration->senderid,
@@ -218,31 +203,112 @@ class SignupController extends Controller
                 'CountryCode' => $sms_integration->CountryCode,
                 'profileid' => $sms_integration->profileid,
             ]);
-
-            $apiResponseBody = $apiResponse->body(); // الرد الفعلي من الشركة (غالباً بيكون نص أو XML)
-
-            // التحقق من نجاح الاتصال بالـ API
-            if ($apiResponse->successful()) {
-                // ملحوظة: Mobishastra أحياناً بترجع HTTP status 200 بس الرد نفسه جواه نص خطأ مثل "Invalid User" أو "Insufficient Balance"
-                // لذلك هنرجع الرد الفعلي اللي جاي منهم عشان تشوفه بنفسك
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'OTP sent successfully.',
-                    'api_response' => $apiResponseBody // هتشوف الرد هنا لو العملية مشيت تمام على السيرفر
-                ], 200);
+    
+            if ($response->successful()) {
+                // Store the OTP in the database 
+    
+                return response()->json(['message' => 'OTP sent successfully.'], 200);
             } else {
-                throw new \Exception('فشل الاتصال بسيرفر Mobishastra. الرد: ' . $apiResponseBody);
+                throw new Exception('Failed to send OTP.');
             }
-            
         } catch (\Throwable $e) {
-            // هنا بنرجع الرسالة الحقيقية للـ Exception عشان تظهر لك في الـ Postman أو الـ Response مباشرة
-            return response()->json([
-                'status' => 'error',
-                'errors' => 'حدث خطأ أثناء الإرسال.',
-                'technical_details' => $e->getMessage(), // هيعرض لك نص المشكلة بالظبط
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ], 500);
+            return response()->json(['errors' => 'Unable to send OTP at this time. Please try again later.'], 500);
         }
     }
+ 
+    // private function sendOtp($phone, $otp)
+    // {
+    //     // Send OTP using Mobishastra API
+    //     try {
+    //         $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+    //         $response = json_decode($response);
+
+    //         $sms_subscription = collect($response?->user_sms) ?? collect([]); 
+    //         $sms_subscription = $sms_subscription->where('back_link', url(''))
+    //             ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+    //             ->first();
+            
+    //         $msg_number = $this->sms_balance
+    //             ->where('package_id', $sms_subscription?->id)
+    //             ->first();
+                
+    //         if (!empty($sms_subscription) && empty($msg_number)) {
+    //             $msg_number = $this->sms_balance
+    //                 ->create([
+    //                     'package_id' => $sms_subscription->id,
+    //                     'balance' => $sms_subscription->msg_number,
+    //                 ]);
+    //         }
+            
+    //         if (empty($sms_subscription) || $msg_number->balance <= 0) {
+    //             $customer_login = $this->settings
+    //                 ->where('name', 'customer_login')
+    //                 ->first();
+    //             if(empty($customer_login)){
+    //                 $this->settings
+    //                     ->create([
+    //                         'name' => 'customer_login',
+    //                         'setting' => '{"login":"otp","verification":"email"}',
+    //                     ]);
+    //             } else {
+    //                 $customer_login->update([
+    //                     'setting' => '{"login":"otp","verification":"email"}',
+    //                 ]);
+    //             }
+                
+    //             // لو مفيش باقة أو الرصيد خلص، يفضل ترمي Exception واضح هنا عشان يوقف العملية
+    //             throw new \Exception('لا توجد باقة SMS نشطة أو رصيدك الحالي غير كافٍ لإرسال الرسالة.');
+    //         }
+            
+    //         $this->sms_balance
+    //             ->where('package_id', $sms_subscription->id)
+    //             ->update([
+    //                 'balance' => $msg_number->balance - 1
+    //             ]);
+                
+    //         $sms_integration = $this->sms_integration
+    //             ->orderByDesc('id')
+    //             ->first();
+                
+    //         if (!$sms_integration) {
+    //             throw new \Exception('بيانات ربط SMS (sms_integration) غير موجودة بقاعدة البيانات.');
+    //         }
+
+    //         // إرسال الطلب لشركة Mobishastra
+    //         $apiResponse = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
+    //             'user' => $sms_integration->user,
+    //             'pwd' => $sms_integration->pwd,
+    //             'senderid' => $sms_integration->senderid,
+    //             'mobileno' => $phone,
+    //             'msgtext' => "Your activation number: " . $otp,
+    //             'CountryCode' => $sms_integration->CountryCode,
+    //             'profileid' => $sms_integration->profileid,
+    //         ]);
+
+    //         $apiResponseBody = $apiResponse->body(); // الرد الفعلي من الشركة (غالباً بيكون نص أو XML)
+
+    //         // التحقق من نجاح الاتصال بالـ API
+    //         if ($apiResponse->successful()) {
+    //             // ملحوظة: Mobishastra أحياناً بترجع HTTP status 200 بس الرد نفسه جواه نص خطأ مثل "Invalid User" أو "Insufficient Balance"
+    //             // لذلك هنرجع الرد الفعلي اللي جاي منهم عشان تشوفه بنفسك
+    //             return response()->json([
+    //                 'status' => 'success',
+    //                 'message' => 'OTP sent successfully.',
+    //                 'api_response' => $apiResponseBody // هتشوف الرد هنا لو العملية مشيت تمام على السيرفر
+    //             ], 200);
+    //         } else {
+    //             throw new \Exception('فشل الاتصال بسيرفر Mobishastra. الرد: ' . $apiResponseBody);
+    //         }
+            
+    //     } catch (\Throwable $e) {
+    //         // هنا بنرجع الرسالة الحقيقية للـ Exception عشان تظهر لك في الـ Postman أو الـ Response مباشرة
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'errors' => 'حدث خطأ أثناء الإرسال.',
+    //             'technical_details' => $e->getMessage(), // هيعرض لك نص المشكلة بالظبط
+    //             'file' => $e->getFile(),
+    //             'line' => $e->getLine()
+    //         ], 500);
+    //     }
+    // }
 }
