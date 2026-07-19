@@ -23,6 +23,7 @@ class Admin extends Authenticatable
         'status',
         'email_verified_at',
         "admin_position",
+        'show_deleted_data',
     ];
     protected $appends = ['role', 'image_link'];
 

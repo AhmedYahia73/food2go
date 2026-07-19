@@ -387,6 +387,82 @@ class OrderController extends Controller
         ]);  
     }
 
+    public function delete_orders(Request $request){
+         // https://bcknd.food2go.online/admin/order
+      
+        $validator = Validator::make($request->all(), [
+            "date" => "required|date",
+            "date_to" => "required|date",
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+        $from_date = $request->date ?? date("Y-m-d");
+        $to_date = $request->date_to ?? date("Y-m-d");
+        $time_sittings = $this->TimeSittings->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+
+        foreach ($items as $item) {
+            if (count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from)) {
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if ($from->from > $item[0]->from) {
+                $from = $item[0];
+            }
+        }
+
+        if ($time_sittings->count() > 0) {
+            $from = $from->from;
+            $end = $to_date . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = $from_date . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+            if ($start >= now()) {
+                $start = $start->subDay();
+            }
+        } else {
+            $start = Carbon::parse($from_date . ' 00:00:00');
+            $end = Carbon::parse($to_date . ' 23:59:59');
+        } 
+        if(empty($request->date)){
+            $start = $start->subDay();
+        }
+
+        $orders = $this->orders
+        ->where('pos', 0)
+        ->whereBetween('created_at', [$start, $end])
+        ->whereNull('captain_id')
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })  
+        ->update([
+            "deleted_at" => 0
+        ]);
+        
+
+        return response()->json([
+            'success' => "You delete orders success",
+        ]);  
+    }
+
     public function my_orders(Request $request){
          // https://bcknd.food2go.online/admin/order
         $validator = Validator::make($request->all(), [
@@ -1805,7 +1881,7 @@ class OrderController extends Controller
         // https://sultanayubbcknd.food2go.online/admin/order_filter_date
         // date, date_to, branch_id, 
         // type => all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund,
-   $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'date_to' => 'required|date',
             'branch_id' => 'nullable|exists:branches,id', // جعلناه nullable لأنه قد لا يرسل

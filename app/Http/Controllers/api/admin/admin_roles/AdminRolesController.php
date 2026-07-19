@@ -79,7 +79,7 @@ class AdminRolesController extends Controller
             'Menue' => [ 'view', 'add', 'status', 'delete'],
             'DealOrder' => [ 'view', 'add'], 
             'OfferOrder' => [ 'approve_offer'], 
-            'Order' => [ 'log', 'view', 'status', 'transfer_to_branch', 'back_status', 'change_status'], 
+            'Order' => [ 'log', 'view', 'status', 'transfer_to_branch', 'back_status', 'change_status', 'delete'], 
             'OrderDelay' => [ 'view', 'add', 'edit', 'delete'], 
             'Payments' => [ 'view', 'status'],
             'PosReports' => [ 'view'], 

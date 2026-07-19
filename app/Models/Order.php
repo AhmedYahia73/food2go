@@ -86,6 +86,19 @@ class Order extends Model
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
 
+    protected static function booted()
+    {
+        static::addGlobalScope('hide_deleted_orders', function ($query) {
+            $user = auth()->user();
+            
+            if ($user && isset($user->show_deleted_data) && $user->show_deleted_data == true) {
+                return;
+            }
+
+            $query->where('deleted_at', 0);
+        });
+    }
+
     protected $hidden = [
         'pivot', 
     ];

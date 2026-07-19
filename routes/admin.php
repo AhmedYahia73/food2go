@@ -835,6 +835,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/delivery', 'delivery')->middleware('can:edit_order');
         Route::get('/user_details/{id}', 'user_details')->middleware('can:view_order');
         Route::post('/order_filter_date', 'order_filter_date')->middleware('can:view_order');
+        Route::post('/delete_orders', 'delete_orders')->middleware('can:delete_order');
     });
 
     Route::controller(HomeController::class)

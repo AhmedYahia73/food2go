@@ -20,6 +20,17 @@ class OrderGate
             }
             return false;
         });
+        Gate::define('delete_order', function (Admin $admin) {
+            if (
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('Order') &&
+                $admin->user_positions->roles->where('role', 'Order')->pluck('action')->intersect(['all', 'delete'])->isNotEmpty())
+            ) {
+                return true;
+            }
+            return false;
+        });
         Gate::define('transfer_branch', function (Admin $admin) {
             if (
                 $admin->admin_position == "super_admin" ||
