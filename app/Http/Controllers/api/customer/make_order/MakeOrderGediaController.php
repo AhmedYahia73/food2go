@@ -6,9 +6,11 @@ use Almesery\LaravelGeidea\Facades\Geidea;
 use App\Http\Controllers\Controller;
 use App\Models\Geidia;
 use App\Models\Order;
+use App\Models\DeviceToken;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Events\OrderEvent;
 
 class MakeOrderGediaController extends Controller
 {
@@ -91,6 +93,14 @@ class MakeOrderGediaController extends Controller
                 $user->increment('points', $order->points);
             }
 
+            OrderEvent::dispatch($order);
+            $body = 'New Order #' . $order->order_number;
+            $device_token = DeviceToken::
+            whereNotNull('admin_id')
+            ->get()
+            ?->pluck("fcm_token")
+            ?->toArray();
+            $this->sendNotificationToMany($device_token, $order->order_number, $body);
             return redirect(env('WEB_LINK') . '/order_traking/' . $order->id);
         }
 
