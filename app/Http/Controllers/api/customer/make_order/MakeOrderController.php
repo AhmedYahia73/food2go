@@ -182,15 +182,7 @@ class MakeOrderController extends Controller
             // $order = $this->make_order($request);
             // $order = $order['payment']; 
             $paymentToken = $this->getPaymentToken($user, $amount_cents, $order, $tokens, $payment_method_auto);
-             $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
-            OrderEvent::dispatch($order_id);
-            $body = 'New Order #' . $order_id->order_number;
-            $device_token = $this->device_tokens
-            ->whereNotNull('admin_id')
-            ->get()
-            ?->pluck("fcm_token")
-            ?->toArray();
-            $this->sendNotificationToMany($device_token, $order_id->order_number, $body);
+            $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
             
             return response()->json([
                 'success' => $order_id->id,
@@ -287,7 +279,14 @@ class MakeOrderController extends Controller
                 $message = 'Your payment is being processed. Please wait...';
                 $redirectUrl = env('WEB_LINK') . '/order_traking/' . $order->id;
                 $timer = 3; // 3  seconds
-
+                OrderEvent::dispatch($order_id);
+                $body = 'New Order #' . $order_id->order_number;
+                $device_token = $this->device_tokens
+                ->whereNotNull('admin_id')
+                ->get()
+                ?->pluck("fcm_token")
+                ?->toArray();
+                $this->sendNotificationToMany($device_token, $order_id->order_number, $body);
                 if($order->source == 'web'){
                     return  view('Paymob.checkout', compact('totalAmount','message','redirectUrl','timer'));
                 }
