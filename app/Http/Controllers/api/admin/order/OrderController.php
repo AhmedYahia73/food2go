@@ -478,7 +478,8 @@ class OrderController extends Controller
                 'user:id,f_name,l_name,phone,image', 
                 'branch:id,name', 
                 'address' => function($query) {
-                    $query->select('id', 'zone_id')->with('zone:id,zone');
+                    $query->select('id', 'zone_id')
+                    ->withTrashed()->with('zone:id,zone');
                 }, 
                 'transfer_from:id,name', 
                 'admin:id,name,email,phone,image', 

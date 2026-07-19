@@ -10,6 +10,7 @@ use App\Models\Zone;
 class Address extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     
     protected $fillable = [
         'zone_id',
