@@ -454,7 +454,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })  
         ->update([
-            "deleted_at" => 0
+            "deleted_at" => 1
         ]);
         
 
