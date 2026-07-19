@@ -1805,58 +1805,49 @@ class OrderController extends Controller
         // https://sultanayubbcknd.food2go.online/admin/order_filter_date
         // date, date_to, branch_id, 
         // type => all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund,
-        $validator = Validator::make($request->all(), [
+   $validator = Validator::make($request->all(), [
             'date' => 'required|date',
             'date_to' => 'required|date',
-            'branch_id' => 'exists:branches,id',
+            'branch_id' => 'nullable|exists:branches,id', // جعلناه nullable لأنه قد لا يرسل
             'type' => 'required|in:all,pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund'
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        $validator = Validator::make($request->all(), [ 
-            "date" => "date",
-            "date_to" => "date",
-        ]);
 
-        if ($validator->fails()) {
+        if ($validator->fails()) { 
             return response()->json([
                 'errors' => $validator->errors(),
             ], 400);
-        }
-        $from_date = $request->date ?? date("Y-m-d");
-        $to_date = $request->date_to ?? date("Y-m-d");
+        } 
+
+        $from_date = $request->date;
+        $to_date = $request->date_to;
+        
         $time_sittings = $this->TimeSittings->get();
-        $items = [];
-        $count = 0;
-        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
-        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
 
-        foreach ($time_sittings as $item) {
-            $items[$item->branch_id][] = $item;
-        }
-
-        foreach ($items as $item) {
-            if (count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from)) {
-                $count = count($item);
-                $to = $item[$count - 1];
-            } 
-            if ($from->from > $item[0]->from) {
-                $from = $item[0];
+        // حساب الوقت بشكل آمن لتجنب خطأ الـ Crash
+        if ($time_sittings->isNotEmpty()) {
+            $items = [];
+            foreach ($time_sittings as $item) {
+                $items[$item->branch_id][] = $item;
             }
-        }
 
-        if ($time_sittings->count() > 0) {
-            $from = $from->from;
-            $end = $to_date . ' ' . $to->from;
-            $hours = $to->hours;
-            $minutes = $to->minutes;
-            $from = $from_date . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            $first_setting = $time_sittings->first();
+            $to = $first_setting; 
+            $from = $first_setting;
+            $count = 0;
+
+            foreach ($items as $item) {
+                if (count($item) > $count || (count($item) == $count && end($item)->from > $to->from)) {
+                    $count = count($item);
+                    $to = end($item);
+                } 
+                if ($from->from > $item[0]->from) {
+                    $from = $item[0];
+                }
+            }
+
+            $start = Carbon::parse($from_date . ' ' . $from->from);
+            $end = Carbon::parse($to_date . ' ' . $to->from)->addHours($to->hours)->addMinutes($to->minutes);
+
             if ($start >= $end) {
                 $end = $end->addDay();
             }
@@ -1867,29 +1858,40 @@ class OrderController extends Controller
             $start = Carbon::parse($from_date . ' 00:00:00');
             $end = Carbon::parse($to_date . ' 23:59:59');
         } 
-        if(!$from_date){
+
+        if (!$from_date) {
             $start = $start->subDay();
         }
-        // ___________________________________________________
-        // settings     
-            // if ($start > date('H:i:s')) {
-            //     $end = Carbon::parse($date_to)->addHours($hours)->subDay();
-            // }
-            // else{
-            //     $end = Carbon::parse($date_to)->addHours(intval($hours));
-            // } 
-        $orders = $this->orders
-        ->whereBetween('created_at', [$start, $end])
-        ->where('pos', 0)
-        ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
-        'schedule', 'delivery'])
-        ->get(); 
-        if ($request->type != 'all') {
-            $orders = $orders->where('order_status', $request->type)->values();
+
+        // بناء الاستعلام وتطبيق الفلاتر داخل قاعدة البيانات (Database Level)
+        $ordersQuery = $this->orders
+            ->whereBetween('created_at', [$start, $end])
+            ->where('pos', 0);
+
+        // فلترة حالة الطلب داخل القاعدة
+        if ($request->type !== 'all') {
+            $ordersQuery->where('order_status', $request->type);
         }
+
+        // فلترة الفرع داخل القاعدة
         if ($request->branch_id) {
-            $orders = $orders->where('branch_id', $request->branch_id)->values();
+            $ordersQuery->where('branch_id', $request->branch_id);
         }
+
+        // جلب البيانات النهائية فقط بعد الفلترة مع تحديد حقول العلاقات لتحسين سرعة التصفح
+        $orders = $ordersQuery->with([
+            'user:id,f_name,l_name,phone', 
+            'branch:id,name', 
+            'address' => function($query) {
+                $query->select('id', 'zone_id')->with('zone:id,zone');
+            }, 
+            'admin:id,name,email,phone,image', 
+            'payment_method:id,name',
+            'schedule:id,name', 
+            'delivery:id,name'
+        ])
+        ->orderByDesc('id') // يفضل دائماً ترتيب الطلبات من الأحدث للأقدم
+        ->get(); 
   
         return response()->json([
             'orders' => $orders
