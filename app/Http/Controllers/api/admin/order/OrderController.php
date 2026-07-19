@@ -442,9 +442,7 @@ class OrderController extends Controller
             $start = Carbon::parse($from_date . ' 00:00:00');
             $end = Carbon::parse($to_date . ' 23:59:59');
         } 
-        if(!$from_date){
             $start = $start->subDay();
-        }
 
         $perPage = $request->input('per_page', 15);
 
@@ -1267,10 +1265,6 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->find($id); 
-        
-            return response()->json([
-                "errors" => $order
-            ], 400);
         if(empty($order)){
             return response()->json([
                 "errors" => "id is wrong"
