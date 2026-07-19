@@ -1267,6 +1267,10 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->find($id); 
+        
+            return response()->json([
+                "errors" => $order
+            ], 400);
         if(empty($order)){
             return response()->json([
                 "errors" => "id is wrong"

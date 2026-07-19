@@ -521,7 +521,7 @@ trait OrderFormat
                 "map" => $order?->address?->map ?? null,
                 "zone" => [
                     "zone" => $order?->address?->zone?->zone ?? null,
-                    "price" => $order?->address?->zone?->price ?? null,
+                    "price" => $order->delivery_fees ?? $order?->address?->zone?->price ?? null,
                 ],
                 "city" => $order?->address?->zone?->city?->name ?? null,
             ], 
