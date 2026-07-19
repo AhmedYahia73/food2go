@@ -279,14 +279,14 @@ class MakeOrderController extends Controller
                 $message = 'Your payment is being processed. Please wait...';
                 $redirectUrl = env('WEB_LINK') . '/order_traking/' . $order->id;
                 $timer = 3; // 3  seconds
-                OrderEvent::dispatch($order_id);
-                $body = 'New Order #' . $order_id->order_number;
+                OrderEvent::dispatch($order);
+                $body = 'New Order #' . $order->order_number;
                 $device_token = $this->device_tokens
                 ->whereNotNull('admin_id')
                 ->get()
                 ?->pluck("fcm_token")
                 ?->toArray();
-                $this->sendNotificationToMany($device_token, $order_id->order_number, $body);
+                $this->sendNotificationToMany($device_token, $order->order_number, $body);
                 if($order->source == 'web'){
                     return  view('Paymob.checkout', compact('totalAmount','message','redirectUrl','timer'));
                 }
