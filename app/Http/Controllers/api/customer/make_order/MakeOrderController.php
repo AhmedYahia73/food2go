@@ -40,7 +40,7 @@ class MakeOrderController extends Controller
     private ProductSale $product_sales, private Product $products, private ExcludeProduct $excludes,
     private ExtraProduct $extras, private Addon $addons, private VariationProduct $variation,
     private OptionProduct $options, private PaymentMethod $paymentMethod, private User $user,
-    private PaymentMethodAuto $payment_method_auto,private Setting $settings, 
+    private PaymentMethodAuto $payment_method_auto,private Setting $settings,
     private Address $address, private TimeSittings $TimeSittings,
     private CompanyInfo $company_info, private Branch $branches,
     private DeviceToken $device_tokens){}

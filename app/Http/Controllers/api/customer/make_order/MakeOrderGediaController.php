@@ -11,9 +11,12 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Events\OrderEvent;
+use App\trait\Notifications; 
 
 class MakeOrderGediaController extends Controller
 {
+    use Notifications;
+    
     public function callback(Request $request)
     {
         $orderId = $request->query('orderId');
