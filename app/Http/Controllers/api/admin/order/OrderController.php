@@ -442,7 +442,9 @@ class OrderController extends Controller
             $start = Carbon::parse($from_date . ' 00:00:00');
             $end = Carbon::parse($to_date . ' 23:59:59');
         } 
+        if(empty($request->date)){
             $start = $start->subDay();
+        }
 
         $perPage = $request->input('per_page', 15);
 
