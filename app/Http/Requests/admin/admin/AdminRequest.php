@@ -30,6 +30,7 @@ class AdminRequest extends FormRequest
             'user_position_id' => ['required', 'exists:user_positions,id'],   
             'password' => ['required'],   
             'status' => ['required', 'boolean'],
+            'show_deleted_data' => ['required', 'boolean'],
         ];
     }
 

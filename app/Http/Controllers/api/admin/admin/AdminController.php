@@ -23,6 +23,7 @@ class AdminController extends Controller
         'phone',
         'user_position_id',
         'status',
+        'show_deleted_data',
     ];
     use image;
 
