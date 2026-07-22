@@ -527,7 +527,9 @@ class OrderController extends Controller
         // 1. بناء الاستعلام الأساسي المشترك بين الآدمين والفرع لمنع التكرار
         $ordersQuery = $this->orders
             ->select(
-                'id', 
+                'id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status',
+                'order_status', 'order_type', 'delivery_id', 'address_id', 'source', 'payment_method_id', 'rate', 'transfer_from_id',
+                'status', 'points', 'coupon_discount', 'rejected_reason', 'transaction_id', "delivery_fees"
             )
             ->where('pos', 0)
             ->whereBetween('created_at', [$start, $end])
