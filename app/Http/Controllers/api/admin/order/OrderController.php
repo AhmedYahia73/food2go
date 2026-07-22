@@ -530,23 +530,9 @@ class OrderController extends Controller
                 'id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status',
                 'order_status', 'order_type', 'delivery_id', 'address_id', 'source', 'payment_method_id', 'rate', 'transfer_from_id',
                 'status', 'points', 'coupon_discount', 'rejected_reason', 'transaction_id', "delivery_fees"
-            )
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)->orWhereNull('status');
-            });
-
-        // 2. تطبيق شرط الصلاحية (إذا لم يكن آدمن، يتم الفلترة حسب فرع المستخدم)
-        if ($request->user()->role !== "admin") {
-            $ordersQuery->where("branch_id", $request->user()->id);
-        }
-
-        // 3. تطبيق فلتر حالة الطلب
-        if ($request->order_status != "all") {
-            $ordersQuery->where("order_status", $request->order_status);
-        }
+            ) 
+            ->whereBetween('created_at', [$start, $end]) ;
+ 
 
         // 4. جلب العلاقات وعمل الـ Pagination والتحويل عبر through
         $orders = $ordersQuery->get();
