@@ -462,14 +462,14 @@ class OrderController extends Controller
             'success' => "You delete orders success",
         ]);  
     }
-public function my_orders(Request $request)
-    {
-        // https://bcknd.food2go.online/admin/order
+
+    public function my_orders(Request $request){
+         // https://bcknd.food2go.online/admin/order
         $validator = Validator::make($request->all(), [
             'order_status' => 'required|in:all,pending,delivery,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
-            'per_page'     => 'nullable|integer|min:1',
-            'date'         => 'nullable|date',
-            'date_to'      => 'nullable|date',
+            'per_page' => 'nullable|integer|min:1',
+            "date" => "date",
+            "date_to" => "date",
         ]);
 
         if ($validator->fails()) {
@@ -477,62 +477,49 @@ public function my_orders(Request $request)
                 'errors' => $validator->errors(),
             ], 400);
         }
-
         $from_date = $request->date ?? date("Y-m-d");
         $to_date = $request->date_to ?? date("Y-m-d");
-        
         $time_sittings = $this->TimeSittings->get();
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
 
-        // تجنب الأخطاء في حال لم تكن هناك أي مواعيد محفوظة في قاعدة البيانات
-        if ($time_sittings->isNotEmpty()) {
-            $items = [];
-            foreach ($time_sittings as $item) {
-                $items[$item->branch_id][] = $item;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+
+        foreach ($items as $item) {
+            if (count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from)) {
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if ($from->from > $item[0]->from) {
+                $from = $item[0];
             }
+        }
 
-            $count = 0;
-            $to = $time_sittings->first(); 
-            $from = $time_sittings->first();
-
-            foreach ($items as $item) {
-                $currentCount = count($item);
-                $firstSitting = $item[0];
-                $lastSitting = $item[$currentCount - 1];
-
-                if ($currentCount > $count || ($currentCount == $count && $lastSitting->from > $to->from)) {
-                    $count = $currentCount;
-                    $to = $lastSitting;
-                } 
-                
-                if ($from->from > $firstSitting->from) {
-                    $from = $firstSitting;
-                }
-            }
-
-            $start = Carbon::parse($from_date . ' ' . $from->from);
-            // حساب النهاية بجمع الساعات والدقائق على وقت بداية آخر فترة
-            $end = Carbon::parse($to_date . ' ' . $to->from)
-                         ->addHours($to->hours)
-                         ->addMinutes($to->minutes);
-
-            // لضمان عدم تجاوز تغيير اليوم (إذا كان وقت الإغلاق يبدو قبل الفتح)
+        if ($time_sittings->count() > 0) {
+            $from = $from->from;
+            $end = $to_date . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = $from_date . ' ' . $from;
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
-                $end->addDay();
+                $end = $end->addDay();
             }
-            
-            // في حالة الورديات الليلية التي يسبق وقت بدايتها الوقت الحالي
-            if ($start > now()) {
-                $start->subDay();
-                $end->subDay(); // نطرح يوم من النهاية أيضاً لكي لا تتمدد المدة الكلية للشفت
+            if ($start >= now()) {
+                $start = $start->subDay();
             }
         } else {
             $start = Carbon::parse($from_date . ' 00:00:00');
             $end = Carbon::parse($to_date . ' 23:59:59');
         } 
-
-        // تطبيق فكرتك بجلب أوردرات أمس واليوم كافتراضي
-        if (empty($request->date)) {
-            $start->subDay();
+        if(empty($request->date)){
+            $start = $start->subDay();
         }
 
         $perPage = $request->input('per_page', 15);
@@ -543,23 +530,9 @@ public function my_orders(Request $request)
                 'id', 'order_number', 'created_at', 'sechedule_slot_id', 'admin_id', 'user_id', 'branch_id', 'amount', 'operation_status',
                 'order_status', 'order_type', 'delivery_id', 'address_id', 'source', 'payment_method_id', 'rate', 'transfer_from_id',
                 'status', 'points', 'coupon_discount', 'rejected_reason', 'transaction_id', "delivery_fees"
-            )
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
-            ->whereNull('captain_id')
-            ->where(function($query) {
-                $query->where('status', 1)->orWhereNull('status');
-            });
-
-        // 2. تطبيق شرط الصلاحية (إذا لم يكن آدمن، يتم الفلترة حسب فرع المستخدم)
-        if ($request->user()->role !== "admin") {
-            $ordersQuery->where("branch_id", $request->user()->id);
-        }
-
-        // 3. تطبيق فلتر حالة الطلب
-        if ($request->order_status != "all") {
-            $ordersQuery->where("order_status", $request->order_status);
-        }
+            ) 
+            ->whereBetween('created_at', [$start, $end])  ;
+ 
 
         // 4. جلب العلاقات وعمل الـ Pagination والتحويل عبر through
         $orders = $ordersQuery->orderByDesc('id')
@@ -567,7 +540,8 @@ public function my_orders(Request $request)
                 'user:id,f_name,l_name,phone,image', 
                 'branch:id,name', 
                 'address' => function($query) {
-                    $query->select('id', 'zone_id')->withTrashed()->with('zone:id,zone');
+                    $query->select('id', 'zone_id')
+                    ->withTrashed()->with('zone:id,zone');
                 }, 
                 'transfer_from:id,name', 
                 'admin:id,name,email,phone,image', 
@@ -581,34 +555,34 @@ public function my_orders(Request $request)
                 $appKey = ($request->user()->role == "admin") ? 'first_order_yesterday' : 'first_order_today';
 
                 return [ 
-                    'id'               => $item->id,
-                    'order_number'     => $item->id - app($appKey),
-                    'created_at'       => $item->created_at,
-                    'transfer_from'    => $item?->transfer_from?->name,
-                    'amount'           => $item->amount,
+                    'id' => $item->id,
+                    'order_number' => $item->id - app($appKey),
+                    'created_at' => $item->created_at,
+                    'transfer_from' => $item?->transfer_from?->name,
+                    'amount' => $item->amount,
                     'operation_status' => $item->operation_status,
-                    'order_type'       => $item->order_type,
-                    'order_status'     => $item->order_status,
-                    'delivery_fees'    => $item->delivery_fees,
-                    'source'           => $item->source,
-                    'coupon_discount'  => $item->coupon_discount,
-                    'status'           => $item->status,
-                    'points'           => $item->points, 
-                    'rejected_reason'  => $item->rejected_reason,
-                    'transaction_id'   => $item->transaction_id,
-                    'payment'          => ($item->payment_method_id == 2 && $item->operation_status != "delivered") ? "UnPaid" : "Paid",
-                    'rate'             => $item->rate,
+                    'order_type' => $item->order_type,
+                    'order_status' => $item->order_status,
+                    'delivery_fees' => $item->delivery_fees,
+                    'source' => $item->source,
+                    'coupon_discount' => $item->coupon_discount,
+                    'status' => $item->status,
+                    'points' => $item->points, 
+                    'rejected_reason' => $item->rejected_reason,
+                    'transaction_id' => $item->transaction_id,
+                    'payment' => $item->payment_method_id == 2 && $item->operation_status != "delivered" ? "UnPaid" : "Paid",
+                    'rate' => $item->rate,
                     'user' => [
                         'f_name' => $item?->user?->f_name,
                         'l_name' => $item?->user?->l_name,
-                        'phone'  => $item?->user?->phone
+                        'phone' => $item?->user?->phone
                     ],
-                    'branch'         => ['name' => $item?->branch?->name],
-                    'address'        => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin'          => ['name' => $item?->admin?->name],
+                    'branch' => ['name' => $item?->branch?->name],
+                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+                    'admin' => ['name' => $item?->admin?->name],
                     'payment_method' => ['name' => $item?->payment_method?->name],
-                    'schedule'       => ['name' => $item?->schedule?->name],
-                    'delivery'       => ['name' => $item?->delivery?->name], 
+                    'schedule' => ['name' => $item?->schedule?->name],
+                    'delivery' => ['name' => $item?->delivery?->name], 
                 ];
             });
 
@@ -616,12 +590,12 @@ public function my_orders(Request $request)
         $branches = $this->branches->where('status', 1)->get();
 
         return response()->json([
-            'orders'     => $orders, 
+            'orders' => $orders, 
             'deliveries' => $deliveries,
-            'branches'   => $branches,
-            'start'      => $start->format('Y-m-d H:i:s'),
-            'end'        => $end->format('Y-m-d H:i:s'),
-            'role'       => $request->user()->role
+            'branches' => $branches,
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
+            'role' => $request->user()->role
         ]);
     }
  
