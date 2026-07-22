@@ -549,56 +549,7 @@ class OrderController extends Controller
         }
 
         // 4. جلب العلاقات وعمل الـ Pagination والتحويل عبر through
-        $orders = $ordersQuery->orderByDesc('id')
-            ->with([
-                'user:id,f_name,l_name,phone,image', 
-                'branch:id,name', 
-                'address' => function($query) {
-                    $query->select('id', 'zone_id')
-                    ->withTrashed()->with('zone:id,zone');
-                }, 
-                'transfer_from:id,name', 
-                'admin:id,name,email,phone,image', 
-                'payment_method:id,name,logo',
-                'schedule:id,name', 
-                'delivery'
-            ])
-            ->paginate($perPage)
-            ->through(function($item) use ($request) {
-                // تحديد الـ app key بناءً على الصلاحية كما كانت في كودك الأصلي تماماً
-                $appKey = ($request->user()->role == "admin") ? 'first_order_yesterday' : 'first_order_today';
-
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->id - app($appKey),
-                    'created_at' => $item->created_at,
-                    'transfer_from' => $item?->transfer_from?->name,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'order_type' => $item->order_type,
-                    'order_status' => $item->order_status,
-                    'delivery_fees' => $item->delivery_fees,
-                    'source' => $item->source,
-                    'coupon_discount' => $item->coupon_discount,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                    'payment' => $item->payment_method_id == 2 && $item->operation_status != "delivered" ? "UnPaid" : "Paid",
-                    'rate' => $item->rate,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone
-                    ],
-                    'branch' => ['name' => $item?->branch?->name],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name],
-                    'payment_method' => ['name' => $item?->payment_method?->name],
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
-                ];
-            });
+        $orders = $ordersQuery->get();
 
         $deliveries = $this->deliveries->get();
         $branches = $this->branches->where('status', 1)->get();
