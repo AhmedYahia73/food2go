@@ -531,8 +531,7 @@ class OrderController extends Controller
                 'order_status', 'order_type', 'delivery_id', 'address_id', 'source', 'payment_method_id', 'rate', 'transfer_from_id',
                 'status', 'points', 'coupon_discount', 'rejected_reason', 'transaction_id', "delivery_fees"
             )
-            ->where('pos', 0)
-            ->whereBetween('created_at', [$start, $end])
+            ->where('pos', 0) 
             ->whereNull('captain_id')
             ->where(function($query) {
                 $query->where('status', 1)->orWhereNull('status');
