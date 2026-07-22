@@ -522,7 +522,7 @@ class OrderController extends Controller
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
-        if($request->date || $request->date_to){
+        if(!$request->date && !$request->date_to){
             $start = $start->subDay();
         }
 
