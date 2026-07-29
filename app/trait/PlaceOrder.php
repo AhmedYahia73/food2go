@@ -1505,7 +1505,7 @@ trait PlaceOrder
         $locale = $request->locale ?? $request->query('locale', app()->getLocale());
 
         $carts = \App\Models\ProductCart::with([
-            'product.translations', 'product.tax.tax_module.module',
+            'product.translations', 'product.tax_module.module', 'product.tax_module.tax',
             'product.discount' => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "app")->orWhereJsonContains("module", "all")),
             'product.product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             'variations_cart.variation.translations', 'variations_cart.options_cart.option.translations', 
@@ -1523,9 +1523,9 @@ trait PlaceOrder
             if(!$product) continue;
 
             $product_price = $product->product_pricing->first()?->price ?? $product->price;
-            $tax_module = $product->tax?->tax_module?->map(function ($taxItem) use ($module, $branch_id, $product) {
+            $tax_module = $product?->tax_module?->map(function ($taxItem) use ($module, $branch_id, $product) {
                 $isFound = $taxItem->module->where('module', $module)->whereIn('app_type', ['online', 'all'])->where("branch_id", $branch_id)->first();
-                if($isFound) return $product->tax;
+                if($isFound) return $taxItem->tax;
             })->filter()->first();
             $product->tax = !empty($tax_module) ? $tax_module : null;
             $my_discount = $product->discount?->start_date <= date("Y-m-d") && $product->discount?->end_date >= date("Y-m-d") ? $product->discount : null;
