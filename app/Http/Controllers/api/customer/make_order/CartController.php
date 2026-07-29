@@ -45,7 +45,7 @@ class CartController extends Controller
             'variations_cart.variation.translations', 
             'variations_cart.options_cart.option.translations', 
             'variations_cart.options_cart.option.option_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-            'addons_cart.addon.translations', 'addons_cart.addon.tax', 'addons_cart.addon.discount'
+            'addons_cart.addon.translations', 'addons_cart.addon.tax'
         ])
         ->where('user_id', $userId)
         ->get();
@@ -155,12 +155,6 @@ class CartController extends Controller
                     ($addon->tax->type == 'value' ? $addon_price + $addon->tax->amount : $addon_price + $addon->tax->amount * $addon_price / 100);
 
                     $addon_tax_val = $addon_price_with_tax - $addon_price;
-                    $addon_discount_val = 0;
-                    
-                    if ($addon->discount && $addon->discount->type == 'precentage') {
-                        $discounted = $addon_price_with_tax - $addon->discount->amount * $addon_price_with_tax / 100;
-                        $addon_discount_val = $addon_price_with_tax - $discounted;
-                    }
                 }
                 else {
                     if (!empty($addon->tax)) {
@@ -175,12 +169,7 @@ class CartController extends Controller
                     }
                     
                     $addon_tax_val = $tax_amt - $addon_price;
-                    $addon_discount_val = 0;
                     
-                    if ($addon->discount && $addon->discount->type == 'precentage') {
-                        $discounted = $addon_price - $addon->discount->amount * $addon_price / 100;
-                        $addon_discount_val = $addon_price - $discounted;
-                    }
                 }
 
                 $addon_total_tax += ($addon_tax_val * $addon_cart->quantity);
