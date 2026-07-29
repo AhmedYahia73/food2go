@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class AddonCart extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'addon_id',
         'product_id',

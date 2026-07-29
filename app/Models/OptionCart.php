@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class OptionCart extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'option_id',
         'variation_id',
