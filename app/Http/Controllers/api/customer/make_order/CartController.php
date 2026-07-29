@@ -226,7 +226,7 @@ class CartController extends Controller
                 'image_link' => $cart->product->image_link,
                 'price' => $product_price,
                 'discount_val' => $product_discount_val,
-                'total_price' => $product_price,
+                'total_price' => $product_total,
                 'total_tax' => $total_tax,
                 'total_discount' => $total_discount,
                 'note' => $cart->note,
