@@ -1505,12 +1505,12 @@ trait PlaceOrder
         $locale = $request->locale ?? $request->query('locale', app()->getLocale());
 
         $carts = \App\Models\ProductCart::with([
-            'product.translations', 'product.taxes', 'product.tax.tax_module.module',
+            'product.translations', 'product.tax.tax_module.module',
             'product.discount' => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "app")->orWhereJsonContains("module", "all")),
             'product.product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             'variations_cart.variation.translations', 'variations_cart.options_cart.option.translations', 
             'variations_cart.options_cart.option.option_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-            'addons_cart.addon.translations', 'addons_cart.addon.taxes', 'addons_cart.addon.tax', 'addons_cart.addon.discount'
+            'addons_cart.addon.translations', 'addons_cart.addon.tax', 'addons_cart.addon.discount'
         ])->where('user_id', $user->id)->get();
 
         if ($carts->isEmpty()) {
