@@ -107,7 +107,7 @@ class CartController extends Controller
                     : $discounted_price + $product->tax->amount * $discounted_price / 100);
                 }
                 $product_tax_val = $price_with_tax - $discounted_price; 
-                $product_discount_val = $price_with_tax - $discounted_price; // Note: mirrored exactly as Resource where discount_val = price - discount.
+                $product_discount_val = $product_price - $discounted_price; 
                 $base_product_price = $price_with_tax;
             } else {
                 if (!empty($my_discount)) {
