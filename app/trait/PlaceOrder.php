@@ -1494,4 +1494,248 @@ trait PlaceOrder
         //     }
         // }
     }
+
+    public function calculate_cart_totals($request, $user) {
+        $branch_id = $request->branch_id ?? null;
+        if (empty($branch_id) && !empty($request->address_id)) {
+            $address = \App\Models\Address::find($request->address_id);
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $module = $request->branch_id ? "take_away" : "delivery";
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale());
+
+        $carts = \App\Models\ProductCart::with([
+            'product.translations', 'product.taxes', 'product.tax.tax_module.module',
+            'product.discount' => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "app")->orWhereJsonContains("module", "all")),
+            'product.product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+            'variations_cart.variation.translations', 'variations_cart.options_cart.option.translations', 
+            'variations_cart.options_cart.option.option_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+            'addons_cart.addon.translations', 'addons_cart.addon.taxes', 'addons_cart.addon.tax', 'addons_cart.addon.discount'
+        ])->where('user_id', $user->id)->get();
+
+        if ($carts->isEmpty()) {
+            return null;
+        }
+
+        $cart_total_price = 0; $cart_total_tax = 0; $cart_total_discount = 0;
+        foreach ($carts as $key => $cart) {
+            $product = $cart->product;
+            if(!$product) continue;
+
+            $product_price = $product->product_pricing->first()?->price ?? $product->price;
+            $tax_module = $product->tax?->tax_module?->map(function ($taxItem) use ($module, $branch_id, $product) {
+                $isFound = $taxItem->module->where('module', $module)->whereIn('app_type', ['online', 'all'])->where("branch_id", $branch_id)->first();
+                if($isFound) return $product->tax;
+            })->filter()->first();
+            $product->tax = !empty($tax_module) ? $tax_module : null;
+            $my_discount = $product->discount?->start_date <= date("Y-m-d") && $product->discount?->end_date >= date("Y-m-d") ? $product->discount : null;
+
+            $product_tax_val = 0; $product_discount_val = 0;
+            if ($product->taxes?->setting == 'included') {
+                if (!empty($my_discount)) {
+                    $discounted_price = ($my_discount->type == 'precentage') ? $product_price - $my_discount->amount * $product_price / 100 : $product_price - $my_discount->amount;
+                    $price_with_tax = empty($product->tax) ? $discounted_price : ($product->tax->type == 'value' ? $discounted_price + $product->tax->amount : $discounted_price + $product->tax->amount * $discounted_price / 100);
+                } else {
+                    $discounted_price = $product_price;
+                    $price_with_tax = empty($product->tax) ? $discounted_price : ($product->tax->type == 'value' ? $discounted_price + $product->tax->amount : $discounted_price + $product->tax->amount * $discounted_price / 100);
+                }
+                $product_tax_val = $price_with_tax - $discounted_price; 
+                $product_discount_val = $price_with_tax - $discounted_price; 
+                $base_product_price = $price_with_tax;
+            } else {
+                if (!empty($my_discount)) {
+                    $discounted_price = ($my_discount->type == 'precentage') ? $product_price - $my_discount->amount * $product_price / 100 : $product_price - $my_discount->amount;
+                } else {
+                    $discounted_price = $product_price;
+                }
+                if (!empty($product->tax)) {
+                    $tax_amt = ($product->tax->type == 'precentage') ? $discounted_price + $product->tax->amount * $discounted_price / 100 : $discounted_price + $product->tax->amount;
+                } else {
+                    $tax_amt = $discounted_price;
+                }
+                $product_tax_val = $tax_amt - $discounted_price;
+                $product_discount_val = $product_price - $discounted_price;
+                $base_product_price = $product_price;
+            }
+
+            $options_total_price = 0; $addon_total_tax = 0; $addon_total_discount = 0; $addon_total_price = 0;
+            foreach($cart->addons_cart as $addon_cart) {
+                $addon = $addon_cart->addon;
+                if(!$addon) continue;
+                $addon_price = $addon->price; $addon_tax_val = 0; $addon_discount_val = 0;
+                if ($addon->taxes?->setting == 'included') {
+                    $addon_price_with_tax = empty($addon->tax) ? $addon_price : ($addon->tax->type == 'value' ? $addon_price + $addon->tax->amount : $addon_price + $addon->tax->amount * $addon_price / 100);
+                    $addon_tax_val = $addon_price_with_tax - $addon_price;
+                    if ($addon->discount && $addon->discount->type == 'precentage') {
+                        $discounted = $addon_price_with_tax - $addon->discount->amount * $addon_price_with_tax / 100;
+                        $addon_discount_val = $addon_price_with_tax - $discounted;
+                    }
+                } else {
+                    $tax_amt = empty($addon->tax) ? $addon_price : (($addon->tax->type == 'precentage') ? $addon_price + $addon->tax->amount * $addon_price / 100 : $addon_price + $addon->tax->amount);
+                    $addon_tax_val = $tax_amt - $addon_price;
+                    if ($addon->discount && $addon->discount->type == 'precentage') {
+                        $discounted = $addon_price - $addon->discount->amount * $addon_price / 100;
+                        $addon_discount_val = $addon_price - $discounted;
+                    }
+                }
+                $addon_total_tax += ($addon_tax_val * $addon_cart->quantity);
+                $addon_total_discount += ($addon_discount_val * $addon_cart->quantity);
+                $addon_total_price += ($addon_price * $addon_cart->quantity);
+            }
+
+            foreach($cart->variations_cart as $var_cart) {
+                foreach($var_cart->options_cart as $opt_cart) {
+                    $opt = $opt_cart->option;
+                    if($opt) {
+                        $opt_price = $opt->option_pricing->first()?->price ?? $opt->price;
+                        $options_total_price += ($opt_price * $opt_cart->quantity);
+                    }
+                }
+            }
+            $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price;
+            $cart_total_price += $product_total;
+            $cart_total_tax += ($product_tax_val * $cart->quantity) + $addon_total_tax;
+            $cart_total_discount += ($product_discount_val * $cart->quantity) + $addon_total_discount;
+        }
+
+        $coupon_discount = $request->coupon_discount ?? 0;
+        $delivery_fees = $request->delivery_fees ?? 0;
+        $service_fees = $request->service_fees ?? 0;
+        
+        return [
+            'total_price' => $cart_total_price,
+            'total_tax' => $cart_total_tax,
+            'total_discount' => $cart_total_discount,
+            'amount' => $cart_total_price + $delivery_fees + $service_fees - $coupon_discount,
+            'carts' => $carts
+        ];
+    }
+
+    public function make_order_from_cart($request, $paymob = 0) {
+        $user = auth()->user();
+        $cart_data = $this->calculate_cart_totals($request, $user);
+        
+        if (!$cart_data) {
+            return ['errors' => 'Cart is empty'];
+        }
+
+        $branch_id = $request->branch_id ?? null;
+        if (empty($branch_id) && !empty($request->address_id)) {
+            $address = \App\Models\Address::find($request->address_id);
+            $branch_id = $address?->zone?->branch_id;
+        }
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale());
+        
+        $branch_off = \App\Models\BranchOff::where('branch_id', $branch_id)->get();
+        $products_off = $branch_off->pluck('product_id')->filter()->values()->all();
+        $options_off = $branch_off->pluck('option_id')->filter()->values()->all();
+        $categories_off = $branch_off->pluck('category_id')->filter()->values()->all();
+
+        $orderRequest = $request->only($this->paymentRequest); 
+        if(!$request->user_id || $request->user_id != 'empty') $orderRequest['user_id'] = $user->id;
+        if (!empty($request->customer_id) && is_numeric($request->customer_id)) $orderRequest['customer_id'] = $request->customer_id;
+        
+        $orderRequest['order_status'] = 'pending';
+        if ($request->table_id) $orderRequest['table_id'] = $request->table_id;
+        if ($request->captain_id) $orderRequest['captain_id'] = $request->captain_id;
+        if ($request->cashier_id) $orderRequest['cashier_id'] = $request->cashier_id;
+        if ($request->cashier_man_id) $orderRequest['cashier_man_id'] = $request->cashier_man_id;
+        if ($request->shift) $orderRequest['shift'] = $request->shift;
+
+        $points = 0;
+        $items = [];
+        $order_details = [];
+
+        foreach ($cart_data['carts'] as $key => $cart) {
+            $product = $cart->product;
+            if (in_array($product->id, $products_off) || in_array($product->category_id, $categories_off) || in_array($product->sub_category_id, $categories_off)) {
+                return ['errors' => 'Product ' . $product->name . ' is not found at this branch'];
+            }
+            $points += $product->points * $cart->quantity;
+            $items[] = ["name" => $product->name, "amount_cents" => $product->price, "description" => $product->description, "quantity" => $cart->quantity];
+            
+            $order_details[$key]['extras'] = [];
+            $order_details[$key]['addons'] = [];
+            $order_details[$key]['excludes'] = [];
+            $order_details[$key]['product'] = [];
+            $order_details[$key]['variations'] = [];
+            
+            $product_resource = \App\Http\Resources\ProductResource::collection(collect([$product]))[0] ?? null;
+            $order_details[$key]['product'][] = ['product' => $product_resource, 'count' => $cart->quantity, 'notes' => $cart->note];
+
+            foreach($cart->addons_cart as $addon_cart) {
+                $addon = $addon_cart->addon;
+                $addon_resource = \App\Http\Resources\AddonResource::collection(collect([$addon]))[0] ?? null;
+                $order_details[$key]['addons'][] = ['addon' => $addon_resource, 'count' => $addon_cart->quantity];
+            }
+            foreach($cart->variations_cart as $var_cart) {
+                foreach($var_cart->options_cart as $opt_cart) {
+                    $opt = $opt_cart->option;
+                    if($opt) {
+                        if (in_array($opt->id, $options_off)) return ['errors' => 'Option ' . $opt->name . ' at product ' . $product->name . ' is not found at this branch'];
+                        $points += $opt->points * $cart->quantity;
+                    }
+                }
+                $var_resource = \App\Http\Resources\VariationResource::collection(collect([$var_cart->variation]))[0] ?? null;
+                $opts_resource = \App\Http\Resources\OptionResource::collection($var_cart->options_cart->pluck('option'))->toArray(request());
+                $order_details[$key]['variations'][] = ['variation' => $var_resource, 'options' => $opts_resource];
+            }
+        }
+
+        $orderRequest['amount'] = $cart_data['amount'];
+        $orderRequest['total_tax'] = $cart_data['total_tax'];
+        $orderRequest['total_discount'] = $cart_data['total_discount'];
+        $orderRequest['points'] = $points;
+        $orderRequest['coupon_discount'] = $request->coupon_discount ?? 0;
+        
+        $order = $this->order->create($orderRequest);
+        if(!empty($user)) $user->save();
+
+        foreach ($cart_data['carts'] as $key => $cart) {
+            $this->order_details->create(['order_id' => $order->id, 'product_id' => $cart->product_id, 'count' => $cart->quantity, 'product_index' => $key]);
+            foreach($cart->addons_cart as $addon_cart) {
+                $this->order_details->create(['order_id' => $order->id, 'product_id' => $cart->product_id, 'addon_id' => $addon_cart->addon_id, 'count' => $cart->quantity, 'addon_count' => $addon_cart->quantity, 'product_index' => $key]);
+            }
+            foreach($cart->variations_cart as $var_cart) {
+                foreach($var_cart->options_cart as $opt_cart) {
+                    $this->order_details->create(['order_id' => $order->id, 'product_id' => $cart->product_id, 'variation_id' => $var_cart->variation_id, 'option_id' => $opt_cart->option_id, 'count' => $cart->quantity, 'product_index' => $key]);
+                }
+            }
+        }
+
+        $order->order_details = json_encode($order_details);
+        $order->load("payment_method.geidea");
+        $gedia_status = false;
+        $gedia = null;
+        if ($paymob) {
+            $order->status = 2;
+            $order->save();
+        }
+        if(!empty($order->payment_method?->geidea)){
+            try {
+                $order->status = 2;
+                $order->save();
+                $gedia = $this->geidea($order->id, $order->amount);
+                if (isset($gedia['error'])) {
+                    \Log::error('Geidea error: ' . $gedia['error']);
+                    $gedia = null; $gedia_status = false;
+                } else {
+                    $gedia_status = isset($gedia['session_id']);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Geidea exception: ' . $e->getMessage());
+                $gedia = null; $gedia_status = false;
+            }
+        }
+        $order->save();
+        \App\Models\ProductCart::where('user_id', $user->id)->delete();
+
+        return [
+            'payment' => $order,
+            'orderItems' => $order_details,
+            'items' => $items,
+            'gedia' => $gedia,
+            "gedia_status" => $gedia_status,
+        ];
+    }
 }
