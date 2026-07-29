@@ -250,18 +250,30 @@ class MakeOrderController extends Controller
             return response()->json(['errors' => 'this branch is locked'], 422);
         }
         
-        $time_sitting = $this->TimeSittings->where('branch_id', $request->branch_id ?? null)->get();
+        $time_sitting = $this->TimeSittings
+        ->where('branch_id', $request->branch_id ?? null)
+        ->get();
+        $today = Carbon::now()->format('l');
+        $close_message = '';
         $open_flag = false;
+
         if($time_sitting->count() == 0){
             $open_flag = true;
-        } else {
+        }
+        else{
             $now = Carbon::now();
             foreach ($time_sitting as $item) { 
-                $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $item->from);
-                $open_to = $open_from->copy()->addHours(intval($item->hours));
+                $resturant_time = $item;
+                $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
+
+                $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
+                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
                 if($now >= $open_from && $now <= $open_to){
                     $open_flag = true;
                     break;
+                }
+                else{
+                    $open_flag = false;
                 }
             }
         }
