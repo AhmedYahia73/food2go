@@ -1599,7 +1599,7 @@ trait PlaceOrder
             'total_price' => $cart_total_price,
             'total_tax' => $cart_total_tax,
             'total_discount' => $cart_total_discount,
-            'amount' => $cart_total_price + $delivery_fees + $service_fees - $coupon_discount,
+            'amount' => $cart_total_price + $cart_total_tax - $cart_total_discount + $delivery_fees + $service_fees - $coupon_discount,
             'carts' => $carts
         ];
     }
