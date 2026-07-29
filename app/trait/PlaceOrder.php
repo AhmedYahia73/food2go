@@ -1504,10 +1504,9 @@ trait PlaceOrder
         $module = $request->branch_id ? "take_away" : "delivery";
         $locale = $request->locale ?? $request->query('locale', app()->getLocale());
 
-        $app_type = $request->source ?? "app";
         $carts = \App\Models\ProductCart::with([
-            'product.translations', 'product.tax_module.module', 'product.tax_module.tax',
-            'product.discount' => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", $app_type)->orWhereJsonContains("module", "all")),
+            'product.translations', 'product.tax.tax_module.module',
+            'product.discount' => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "app")->orWhereJsonContains("module", "all")),
             'product.product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             'variations_cart.variation.translations', 'variations_cart.options_cart.option.translations', 
             'variations_cart.options_cart.option.option_pricing' => fn($q) => $q->where('branch_id', $branch_id),
@@ -1524,12 +1523,12 @@ trait PlaceOrder
             if(!$product) continue;
 
             $product_price = $product->product_pricing->first()?->price ?? $product->price;
-            $tax_module = $product?->tax_module?->map(function ($taxItem) use ($module, $branch_id, $product) {
+            $tax_module = $product->tax?->tax_module?->map(function ($taxItem) use ($module, $branch_id, $product) {
                 $isFound = $taxItem->module->where('module', $module)->whereIn('app_type', ['online', 'all'])->where("branch_id", $branch_id)->first();
-                if($isFound) return $taxItem->tax;
+                if($isFound) return $product->tax;
             })->filter()->first();
             $product->tax = !empty($tax_module) ? $tax_module : null;
-            $my_discount = !empty($product->discount) ? $product->discount : null;
+            $my_discount = $product->discount?->start_date <= date("Y-m-d") && $product->discount?->end_date >= date("Y-m-d") ? $product->discount : null;
 
             $product_tax_val = 0; $product_discount_val = 0;
             if ($product->taxes?->setting == 'included') {
