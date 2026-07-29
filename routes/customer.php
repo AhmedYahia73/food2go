@@ -14,6 +14,8 @@ use App\Http\Controllers\api\customer\otp\OtpController;
 
 use App\Http\Controllers\api\customer\make_order\MakeOrderController;
 
+use App\Http\Controllers\api\customer\make_order\CartController;
+
 use App\Http\Controllers\api\customer\chat\ChatController;
 
 use App\Http\Controllers\api\customer\address\AddressController;
@@ -97,6 +99,13 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/callback_status/{id}', 'callback_status');
         Route::any('/callback_success', 'callback_success')->name('callback_success')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::any('/callback_faild', 'callback_faild')->name('callback_faild')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+    });
+
+    Route::controller(CartController::class)->prefix('cart')->group(function(){
+        Route::get('/', 'getCart');
+        Route::post('/add', 'store');
+        Route::put('/update/{id}', 'update');
+        Route::delete('/delete/{id}', 'destroy');
     });
 
     Route::controller(ProfileController::class)->prefix('profile')->group(function(){
