@@ -213,7 +213,7 @@ class MakeOrderController extends Controller
         
     }
 
-    public function order_from_cart(OrderRequest $request){
+    public function order_from_cart(\App\Http\Requests\customer\order\OrderFromCartRequest $request){
         if ($request->user()->status == 0) {
             return response()->json(['errors' => "You are blocked you can't make order"], 400);
         }
