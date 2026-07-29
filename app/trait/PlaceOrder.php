@@ -1555,7 +1555,7 @@ trait PlaceOrder
                 }
                 $product_tax_val = $tax_amt - $discounted_price;
                 $product_discount_val = $product_price - $discounted_price;
-                $base_product_price = $product_price;
+                $base_product_price = $tax_amt;
             }
 
             $options_total_price = 0; $addon_total_tax = 0; $addon_total_discount = 0; $addon_total_price = 0;
