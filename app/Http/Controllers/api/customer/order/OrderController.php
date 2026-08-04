@@ -152,7 +152,7 @@ class OrderController extends Controller
             });
             $total_variation = collect($total_variation->pluck('variations'));
             if ($total_variation->count() > 0) {
-                $total_variation = collect($total_variation)->pluck('options')->flatten(1);
+                $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
             } 
             $total_product = collect($item->order_details);
             $total_product = collect($total_product?->pluck('product')); 
