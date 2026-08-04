@@ -196,6 +196,7 @@ class OrderController extends Controller
                 'order_date' => $item->order_date,
                 'rate' => $item->rate,
                 'comment' => $item->comment,
+                "total_variation" => $total_variation,
             ];
         });
 
