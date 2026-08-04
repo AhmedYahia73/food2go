@@ -158,9 +158,9 @@ class OrderController extends Controller
                 $total_product = collect($total_product);
                 foreach ($total_product as $value) {
                     foreach ($value as $element) {  
-                        $total_variation = collect(collect($element)->pluck('variations'));
+                        $total_variation = collect(collect($element)->variations);
                         if ($total_variation->count() > 0) {
-                            $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
+                            $total_variation = collect($total_variation)->pluck('options')->flatten(1);
                         } 
 
                         $product = $element->product; 
