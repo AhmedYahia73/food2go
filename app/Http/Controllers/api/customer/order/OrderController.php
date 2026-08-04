@@ -150,10 +150,6 @@ class OrderController extends Controller
                 $addon->count = (int)$item->count;
                 return $addon;
             });
-            $total_variation = collect($total_variation->pluck('variations'));
-            if ($total_variation->count() > 0) {
-                $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
-            } 
             $total_product = collect($item->order_details);
             $total_product = collect($total_product?->pluck('product')); 
             $total = 0;
@@ -162,6 +158,11 @@ class OrderController extends Controller
                 $total_product = collect($total_product);
                 foreach ($total_product as $value) {
                     foreach ($value as $element) {  
+                        $total_variation = collect($element->pluck('variations'));
+                        if ($total_variation->count() > 0) {
+                            $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
+                        } 
+
                         $product = $element->product; 
                         unset($product->addons);
                         $total = ($product->final_price + $total_variation
