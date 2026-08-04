@@ -202,7 +202,7 @@ trait PlaceOrder
                 }
                 if (!empty($item)) {
                     $items[] = [ "name"=> $item->name,
-                            "amount_cents"=> $item->price,
+                            "amount_cents"=> (int) round($item->price * 100),
                             "description"=> $item->description,
                             "quantity"=> $product['count']
                         ];
@@ -1644,7 +1644,7 @@ trait PlaceOrder
                 return ['errors' => 'Product ' . $product->name . ' is not found at this branch'];
             }
             $points += $product->points * $cart->quantity;
-            $items[] = ["name" => $product->name, "amount_cents" => $product->price, "description" => $product->description, "quantity" => $cart->quantity];
+            $items[] = ["name" => $product->name, "amount_cents" => (int) round($product->price * 100), "description" => $product->description, "quantity" => $cart->quantity];
             
             $order_details[$key]['extras'] = [];
             $order_details[$key]['addons'] = [];
@@ -1720,7 +1720,6 @@ trait PlaceOrder
             }
         }
         $order->save();
-        \App\Models\ProductCart::where('user_id', $user->id)->delete();
 
         return [
             'payment' => $order,
