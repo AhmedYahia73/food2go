@@ -250,34 +250,38 @@ class MakeOrderController extends Controller
             return response()->json(['errors' => 'this branch is locked'], 422);
         }
         
-            $time_sitting = $this->TimeSittings
-            ->where('branch_id', $request->branch_id ?? null)
-            ->get();
-            $today = Carbon::now()->format('l');
-            $close_message = '';
-            $open_flag = false;
+        $time_sitting = $this->TimeSittings
+        ->where('branch_id', $request->branch_id ?? null)
+        ->get();
+        $today = Carbon::now()->format('l');
+        $close_message = '';
+        $open_flag = false;
 
-            if($time_sitting->count() == 0){
-                $open_flag = true;
-            }
-            else{
-                $now = Carbon::now();
-                foreach ($time_sitting as $item) { 
-                    $resturant_time = $item;
-                    $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
+        if($time_sitting->count() == 0){
+            $open_flag = true;
+        }
+        else{
+            $now = Carbon::now();
+            foreach ($time_sitting as $item) { 
+                $resturant_time = $item;
+                $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
 
-                    $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
-                    $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
-                    if($now >= $open_from && $now <= $open_to){
-                        $open_flag = true;
-                        break;
-                    }
-                    else{
-                        $open_flag = false;
-                    }
+                $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
+                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
+                if($now >= $open_from && $now <= $open_to){
+                    $open_flag = true;
+                    break;
+                }
+                else{
+                    $open_flag = false;
                 }
             }
-        
+        }
+        if (!$open_flag) {
+            return response()->json([
+                'errors' => 'Resurant is closed'
+            ], 403);
+        }
         $order = $this->order->whereIn('order_status', ['pending', 'processing', 'confirmed', 'out_for_delivery', 'scheduled'])
         ->where(function($query){ $query->where("status", 1)->orWhereNull("status"); })
         ->where('user_id', $request->user()->id)->first();
