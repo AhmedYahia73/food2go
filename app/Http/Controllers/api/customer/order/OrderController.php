@@ -92,6 +92,10 @@ class OrderController extends Controller
                     $product->total_product = $total;
                     $product->count = $element->count;
                     $product->note = isset($element->notes) ? $element->notes : null;
+                    $options = $detail_variations
+                    ->where('product_id', $product->id)
+                    ->select('name');
+                    $product->options = $options;
                     $products[] = $product;
                 }
             }
@@ -167,6 +171,10 @@ class OrderController extends Controller
                     $product->total_product = $total;
                     $product->count = $element->count;
                     $product->note = isset($element->notes) ? $element->notes : null;
+                    $options = $detail_variations
+                    ->where('product_id', $product->id)
+                    ->select('name');
+                    $product->options = $options;
                     $products[] = $product;
                 }
             }
