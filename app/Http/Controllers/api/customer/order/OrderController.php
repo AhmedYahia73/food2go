@@ -66,8 +66,8 @@ class OrderController extends Controller
             ->orWhereNull('status');
         }) 
         ->with('delivery', 'payment_method', 'address.zone', 'branch:id,name')
-        ->get()
-        ->map(function($item){ 
+        ->paginate(15)
+        ->through(function($item){ 
             $total_variation = collect($item->order_details);  
             $addons = collect($total_variation->pluck('addons'))->flatten(1); 
             $addons = collect($addons)->map(function ($item) {
@@ -99,7 +99,7 @@ class OrderController extends Controller
                     $products[] = $product;
                 }
             }
-            $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
+            $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note', 'options');
             return [
                 'id' => $item->id,
                 'date' => $item->date,
@@ -141,8 +141,8 @@ class OrderController extends Controller
         ->whereIn('order_status', ['delivered', 'faild_to_deliver', 'canceled'])
         ->with('payment_method', 'address.zone', 'branch:id,name')
         ->where('deleted_at', 0)
-        ->get()
-        ->map(function($item){
+        ->paginate(15)
+        ->through(function($item){
             $total_variation = collect($item->order_details);  
             $addons = collect($total_variation->pluck('addons'))->flatten(1); 
             $addons = collect($addons)->map(function ($item) {
@@ -165,9 +165,9 @@ class OrderController extends Controller
                 foreach ($detail_products as $element) {  
                     $product = $element->product; 
                     unset($product->addons);
-                    $total = ($product->price + $detail_variations
+                    $total = ($product->final_price + $detail_variations
                     ->where('product_id', $product->id)
-                    ->sum('price')) * $element->count;
+                    ->sum('final_price')) * $element->count;
                     $product->total_product = $total;
                     $product->count = $element->count;
                     $product->note = isset($element->notes) ? $element->notes : null;
@@ -178,7 +178,7 @@ class OrderController extends Controller
                     $products[] = $product;
                 }
             }
-            $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
+            $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note', 'options');
             return [
                 'id' => $item->id,
                 'date' => $item->date,
