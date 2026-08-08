@@ -261,21 +261,47 @@ class MakeOrderController extends Controller
             $open_flag = true;
         }
         else{
-            $now = Carbon::now();
-            foreach ($time_sitting as $item) { 
-                $resturant_time = $item;
-                $open_from = date('Y-m-d') . ' ' . $resturant_time->from;
-
-                $open_from = Carbon::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d') . ' ' . $resturant_time->from);
-                $open_to = $open_from->copy()->addHours(intval($resturant_time->hours));
-                if($now >= $open_from && $now <= $open_to){
-                    $open_flag = true;
-                    break;
-                }
-                else{
-                    $open_flag = false;
+            $time_sittings = $this->TimeSittings 
+            ->get();
+            $items = [];
+            $count = 0;
+            $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+            $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+            foreach ($time_sittings as $item) {
+                $items[$item->branch_id][] = $item;
+            }
+            foreach ($items as $item) {
+                if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                    $count = count($item);
+                    $to = $item[$count - 1];
+                } 
+                if($from->from > $item[0]->from){
+                    $from = $item[0];
                 }
             }
+            if ($time_sittings->count() > 0) {
+                $from = $from->from;
+                $end = date('Y-m-d') . ' ' . $to->from;
+                $hours = $to->hours;
+                $minutes = $to->minutes;
+                $from = date('Y-m-d') . ' ' . $from;
+                $start = Carbon::parse($from);
+                $end = Carbon::parse($end);
+                $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+                if ($start >= $end) {
+                    $end = $end->addDay();
+                }
+                if($start >= now()){
+                    $start = $start->subDay();
+                } 
+            } else {
+                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            } 
+        }
+        if($start <= now() && now() <= $end){
+            $open_flag = true;
+
         }
         if (!$open_flag) {
             return response()->json([
