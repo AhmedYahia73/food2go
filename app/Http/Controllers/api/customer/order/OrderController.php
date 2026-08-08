@@ -165,9 +165,11 @@ class OrderController extends Controller
                 foreach ($detail_products as $element) {  
                     $product = $element->product; 
                     unset($product->addons);
-                    $total = ($product->final_price + $detail_variations
+                    $total = (($product?->final_price ?? $product?->price) + ($detail_variations
                     ->where('product_id', $product->id)
-                    ->sum('final_price')) * $element->count;
+                    ->sum('final_price') ?? $detail_variations
+                    ->where('product_id', $product->id)
+                    ->sum('price'))) * $element->count;
                     $product->total_product = $total;
                     $product->count = $element->count;
                     $product->note = isset($element->notes) ? $element->notes : null;
