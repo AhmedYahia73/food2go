@@ -163,13 +163,13 @@ class OrderController extends Controller
                 
                 $detail_products = collect(isset($detail->product) ? $detail->product : []);
                 foreach ($detail_products as $element) {  
-                    $product =collect( $element->product); 
+                    $product = $element->product; 
                     unset($product->addons);
-                    $total = (($product?->final_price ?? $product?->price) + ($detail_variations
-                    ->where('product_id', $product->id)
-                    ?->sum('final_price') ?? $detail_variations
-                    ->where('product_id', $product->id)
-                    ->sum('price'))) * $element->count;
+                    $productPrice = $product->final_price ?? $product->price ?? 0;
+                    $variationPrice = $detail_variations->where('product_id', $product->id)->sum(function($item) {
+                        return data_get($item, 'final_price', data_get($item, 'price', 0));
+                    });
+                    $total = ($productPrice + $variationPrice) * $element->count;
                     $product->total_product = $total;
                     $product->count = $element->count;
                     $product->note = isset($element->notes) ? $element->notes : null;
