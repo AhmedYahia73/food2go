@@ -306,6 +306,10 @@ class MakeOrderController extends Controller
             ];
             $response = \Illuminate\Support\Facades\Http::post('https://accept.paymob.com/api/ecommerce/orders', $data);
             
+            if (!$response->successful() || !isset($response['id'])) {
+                return response()->json(['errors' => 'Paymob payment gateway error: ' . ($response->json('message') ?? $response->json('detail') ?? 'Failed to place order.')], 422);
+            }
+            
             $order_id_paymob = $response['id'];
             $payment_model = $order_data['payment'];
             $payment_model->update(['transaction_id' => $order_id_paymob]);
@@ -313,6 +317,8 @@ class MakeOrderController extends Controller
             
             $paymentToken = $this->getPaymentToken($user, $totalAmountCents, $order_resp, $tokens, $payment_method_auto);
             $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
+            
+            \App\Models\ProductCart::where('user_id', $user->id)->delete();
             
             return response()->json([
                 'success' => $payment_model->id,
@@ -323,6 +329,9 @@ class MakeOrderController extends Controller
             if (isset($order_data['errors']) && !empty($order_data['errors'])) {
                 return response()->json($order_data, 400);
             }
+            
+            \App\Models\ProductCart::where('user_id', $user->id)->delete();
+            
             OrderEvent::dispatch($order_data['payment']);
 
             $body = 'New Order #' . $order_data['payment']->order_number;

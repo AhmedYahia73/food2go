@@ -75,28 +75,24 @@ class OrderController extends Controller
                 $addon->count = (int)$item->count;
                 return $addon;
             });
-            $total_variation = collect($total_variation->pluck('variations'));
-            if ($total_variation->count() > 0) {
-                $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
-            } 
-            $total_product = collect($item->order_details);
-            $total_product = collect($total_product?->pluck('product')); 
-            $total = 0;
             $products = [];
-            if ($total_product->count() > 0) {
-                $total_product = collect($total_product);
-                foreach ($total_product as $value) {
-                    foreach ($value as $element) {  
-                        $product = $element->product; 
-                        unset($product->addons);
-                        $total = ($product->price + $total_variation
-                        ->where('product_id', $product->id)
-                        ->sum('price')) * $element->count;
-                        $product->total_product = $total;
-                        $product->count = $value[0]->count;
-                        $product->note = isset($element?->notes) ? $element?->notes :  null;
-                        $products[] = $product;
-                    }
+            foreach ($item->order_details as $detail) {
+                $detail_variations = collect(isset($detail->variations) ? $detail->variations : []);
+                if ($detail_variations->count() > 0) {
+                    $detail_variations = $detail_variations->pluck('options')->flatten(1);
+                }
+                
+                $detail_products = collect(isset($detail->product) ? $detail->product : []);
+                foreach ($detail_products as $element) {  
+                    $product = $element->product; 
+                    unset($product->addons);
+                    $total = ($product->price + $detail_variations
+                    ->where('product_id', $product->id)
+                    ->sum('price')) * $element->count;
+                    $product->total_product = $total;
+                    $product->count = $element->count;
+                    $product->note = isset($element->notes) ? $element->notes : null;
+                    $products[] = $product;
                 }
             }
             $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
@@ -150,28 +146,28 @@ class OrderController extends Controller
                 $addon->count = (int)$item->count;
                 return $addon;
             });
-            $total_variation = collect($total_variation->pluck('variations'));
-            if ($total_variation->count() > 0) {
-                $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
-            } 
-            $total_product = collect($item->order_details);
-            $total_product = collect($total_product?->pluck('product')); 
-            $total = 0;
+            $total_variation = collect([]);
             $products = [];
-            if ($total_product->count() > 0) {
-                $total_product = collect($total_product);
-                foreach ($total_product as $value) {
-                    foreach ($value as $element) {  
-                        $product = $element->product; 
-                        unset($product->addons);
-                        $total = ($product->price + $total_variation
-                        ->where('product_id', $product->id)
-                        ->sum('price')) * $element->count;
-                        $product->total_product = $total;
-                        $product->count = $value[0]->count;
-                        $product->note = isset($element?->notes) ? $element?->notes :  null;
-                        $products[] = $product;
-                    }
+            foreach ($item->order_details as $detail) {
+                $detail_variations_raw = collect(isset($detail->variations) ? $detail->variations : []);
+                if ($detail_variations_raw->count() > 0) {
+                    $total_variation = $total_variation->merge($detail_variations_raw);
+                    $detail_variations = $detail_variations_raw->pluck('options')->flatten(1);
+                } else {
+                    $detail_variations = collect([]);
+                }
+                
+                $detail_products = collect(isset($detail->product) ? $detail->product : []);
+                foreach ($detail_products as $element) {  
+                    $product = $element->product; 
+                    unset($product->addons);
+                    $total = ($product->final_price + $detail_variations
+                    ->where('product_id', $product->id)
+                    ->sum('final_price')) * $element->count;
+                    $product->total_product = $total;
+                    $product->count = $element->count;
+                    $product->note = isset($element->notes) ? $element->notes : null;
+                    $products[] = $product;
                 }
             }
             $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
@@ -196,6 +192,7 @@ class OrderController extends Controller
                 'order_date' => $item->order_date,
                 'rate' => $item->rate,
                 'comment' => $item->comment,
+                "total_variation" => $total_variation,
             ];
         });
 
