@@ -604,12 +604,23 @@ class OrderController extends Controller
         $branches = $this->branches->where('status', 1)->get();
 
         return response()->json([
-            'orders' => $orders, 
+            'orders' => $orders,
             'deliveries' => $deliveries,
             'branches' => $branches,
             'start' => $start->format('Y-m-d H:i:s'),
             'end' => $end->format('Y-m-d H:i:s'),
             'role' => $request->user()->role
+        ]);
+    }
+
+    public function my_orders_lists(Request $request){
+         // https://bcknd.food2go.online/admin/order  
+        $deliveries = $this->deliveries->get();
+        $branches = $this->branches->where('status', 1)->get();
+
+        return response()->json([ 
+            'deliveries' => $deliveries,
+            'branches' => $branches, 
         ]);
     }
  
