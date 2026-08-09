@@ -213,145 +213,12 @@ class MakeOrderController extends Controller
         
     }
 
-    // public function order_from_cart(\App\Http\Requests\customer\order\OrderFromCartRequest $request){
-    //     if ($request->user()->status == 0) {
-    //         return response()->json(['errors' => "You are blocked you can't make order"], 400);
-    //     }
-    //     $company_info = $this->company_info->first();
-    //     if (!$company_info->order_online) {
-    //         return response()->json(['errors' => 'online order is closed'], 400);
-    //     }
-
-    //     $branch_id = $request->branch_id ?? null;
-    //     if (!empty($request->address_id) && empty($request->branch_id)) {
-    //         $address = $this->address->where('id', $request->address_id)->first();
-    //         $branch_id = $address?->zone?->branch_id ?? null;
-    //         $delivery_fees = $address?->zone?->price ?? 0;
-    //         $request->merge([
-    //             'branch_id' => $branch_id,
-    //             'delivery_fees' => $delivery_fees,
-    //         ]);
-    //     }
-        
-    //     $user = $request->user();
-    //     $cart_data = $this->calculate_cart_totals($request, $user);
-    //     if (!$cart_data) {
-    //         return response()->json(['errors' => 'Cart is empty'], 400);
-    //     }
-        
-    //     $request->merge([
-    //         'amount' => $cart_data['amount'],
-    //         'total_tax' => $cart_data['total_tax'],
-    //         'total_discount' => $cart_data['total_discount']
-    //     ]);
-
-    //     $branche = $this->branches->where('id', $branch_id)->orderBy('order')->where('status', 1)->first();
-
-    //     if(empty($branche)){
-    //         return response()->json(['errors' => 'this branch is locked'], 422);
-    //     }
-        
-    //     $time_sitting = $this->TimeSittings
-    //     ->where('branch_id', $branch_id)
-    //     ->get();
-    //     $today = Carbon::now()->format('l');
-    //     $close_message = '';
-    //     $open_flag = false;
-    //     $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-    //     $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-
-    //     if($time_sitting->count() == 0){
-    //         $open_flag = true;
-    //     }
-    //     else{  
-    //         foreach ($time_sitting as $item) { 
-                  
-    //                 $start = date("Y-m-d") . ' ' . $item->from;  
-    //                 $hours = $item->hours;
-    //                 $minutes = $item->minutes; 
-    //                 $start = Carbon::parse($start); 
-    //                 $end = Carbon::parse($start)->addHours($hours)->addMinutes($minutes);
-  
-    //                 if($start <= now() && now() <= $end){
-    //                     $open_flag = true; 
-    //                 }
-    //         } 
-    //     }
-    //     if (!$open_flag) {
-    //         return response()->json([
-    //             'errors' => 'Resurant is closed'
-    //         ], 403);
-    //     }
-    //     $order = $this->order->whereIn('order_status', ['pending', 'processing', 'confirmed', 'out_for_delivery', 'scheduled'])
-    //     ->where(function($query){ $query->where("status", 1)->orWhereNull("status"); })
-    //     ->where('user_id', $request->user()->id)->first();
-    //     if (!empty($order) && !$request->confirm_order) {
-    //         return response()->json(['errors' => 'You has order at proccessing', 'data' => $order->order_details], 510);
-    //     }
-
-    //     if ($request->payment_method_id == 1) {
-    //         $payment_method_auto = $this->payment_method_auto->where('payment_method_id', 1)->first();
-    //         $tokens = $this->getToken($payment_method_auto);
-            
-    //         $order_data = $this->make_order_from_cart($request, 1);
-    //         if (isset($order_data['errors']) && !empty($order_data['errors'])) return response()->json($order_data, 400);
-
-    //         $totalAmountCents = (int) round($order_data['payment']->amount * 100);
-    //         $data = [
-    //             "auth_token" => $tokens,
-    //             "delivery_needed" =>"false",
-    //             "amount_cents"=> $totalAmountCents,
-    //             "currency"=> "EGP",
-    //             "items"=> $order_data['items'],
-    //         ];
-    //         $response = \Illuminate\Support\Facades\Http::post('https://accept.paymob.com/api/ecommerce/orders', $data);
-            
-    //         if (!$response->successful() || !isset($response['id'])) {
-    //             return response()->json(['errors' => 'Paymob payment gateway error: ' . ($response->json('message') ?? $response->json('detail') ?? 'Failed to place order.')], 422);
-    //         }
-            
-    //         $order_id_paymob = $response['id'];
-    //         $payment_model = $order_data['payment'];
-    //         $payment_model->update(['transaction_id' => $order_id_paymob]);
-    //         $order_resp = $response->object();
-            
-    //         $paymentToken = $this->getPaymentToken($user, $totalAmountCents, $order_resp, $tokens, $payment_method_auto);
-    //         $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
-            
-    //         \App\Models\ProductCart::where('user_id', $user->id)->delete();
-            
-    //         return response()->json([
-    //             'success' => $payment_model->id,
-    //             'paymentLink' => $paymentLink,
-    //         ]);
-    //     } else {
-    //         $order_data = $this->make_order_from_cart($request);
-    //         if (isset($order_data['errors']) && !empty($order_data['errors'])) {
-    //             return response()->json($order_data, 400);
-    //         }
-            
-    //         \App\Models\ProductCart::where('user_id', $user->id)->delete();
-            
-    //         OrderEvent::dispatch($order_data['payment']);
-
-    //         $body = 'New Order #' . $order_data['payment']->order_number;
-    //         $device_token = $this->device_tokens->whereNotNull('admin_id')->get()?->pluck("fcm_token")?->toArray();
-    //         $this->sendNotificationToMany($device_token, $order_data['payment']->order_number, $body);
-    //         return response()->json([
-    //             'success' => $order_data['payment']->id,
-    //             'gedia' => $order_data['gedia'],
-    //             "gedia_status" => $order_data['gedia_status'],
-    //         ]);
-    //     }
-    // }
-    public function order_from_cart(\App\Http\Requests\customer\order\OrderFromCartRequest $request)
-    {
+    public function order_from_cart(\App\Http\Requests\customer\order\OrderFromCartRequest $request){
         if ($request->user()->status == 0) {
             return response()->json(['errors' => "You are blocked you can't make order"], 400);
         }
-
         $company_info = $this->company_info->first();
-        if (!$company_info || !$company_info->order_online) {
+        if (!$company_info->order_online) {
             return response()->json(['errors' => 'online order is closed'], 400);
         }
 
@@ -365,17 +232,13 @@ class MakeOrderController extends Controller
                 'delivery_fees' => $delivery_fees,
             ]);
         }
-
-        if (!$branch_id) {
-            return response()->json(['errors' => 'Branch is required'], 422);
-        }
-
+        
         $user = $request->user();
         $cart_data = $this->calculate_cart_totals($request, $user);
         if (!$cart_data) {
             return response()->json(['errors' => 'Cart is empty'], 400);
         }
-
+        
         $request->merge([
             'amount' => $cart_data['amount'],
             'total_tax' => $cart_data['total_tax'],
@@ -384,56 +247,45 @@ class MakeOrderController extends Controller
 
         $branche = $this->branches->where('id', $branch_id)->orderBy('order')->where('status', 1)->first();
 
-        if (empty($branche)) {
+        if(empty($branche)){
             return response()->json(['errors' => 'this branch is locked'], 422);
         }
-
-        // ==================== [ تحسين فحص مواعيد العمل ] ====================
-        $today = Carbon::now()->format('l'); // اسم اليوم بالكامل e.g., "Sunday"
-
-        // الفلترة بالفرع واليوم الحالي مباشرة
+        
         $time_sitting = $this->TimeSittings
-            ->where('branch_id', $branch_id)
-            ->where('day', $today) // تأكد من مطابقة اسم العمود في قاعدة البيانات عندك (day أو day_name)
-            ->get();
-
+        ->where('branch_id', $branch_id)
+        ->get();
+        $today = Carbon::now()->format('l');
+        $close_message = '';
         $open_flag = false;
+        $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+        $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
 
-        if ($time_sitting->count() == 0) {
+        if($time_sitting->count() == 0){
             $open_flag = true;
-        } else {
-            $now = Carbon::now();
-
-            foreach ($time_sitting as $item) {
-                $hours = $item->hours ?? 0;
-                $minutes = $item->minutes ?? 0;
-
-                // إنشاء كائن بداية الفترة
-                $start = Carbon::parse(date('Y-m-d') . ' ' . $item->from);
+        }
+        else{  
+            foreach ($time_sitting as $item) { 
                 
-                // إنشاء كائن نهاية الفترة باستنسال (clone) لعدم التعديل على $start
+                $from = date("Y-m-d") . ' ' . $item->from;  
+                $hours = $item->hours;
+                $minutes = $item->minutes; 
+                $start = Carbon::parse($from);
                 $end = (clone $start)->addHours($hours)->addMinutes($minutes);
 
-                if ($now->between($start, $end)) {
-                    $open_flag = true;
-                    break; // إيقاف التكرار فور التحقق لتوفير الأداء
+                if($start <= now() && now() <= $end){
+                    $open_flag = true; 
+                    break;
                 }
-            }
+            } 
         }
-
         if (!$open_flag) {
             return response()->json([
-                'errors' => 'Restaurant is closed'
+                'errors' => 'Resurant is closed'
             ], 403);
         }
-        // ===================================================================
-
         $order = $this->order->whereIn('order_status', ['pending', 'processing', 'confirmed', 'out_for_delivery', 'scheduled'])
-            ->where(function ($query) {
-                $query->where("status", 1)->orWhereNull("status");
-            })
-            ->where('user_id', $request->user()->id)->first();
-
+        ->where(function($query){ $query->where("status", 1)->orWhereNull("status"); })
+        ->where('user_id', $request->user()->id)->first();
         if (!empty($order) && !$request->confirm_order) {
             return response()->json(['errors' => 'You has order at proccessing', 'data' => $order->order_details], 510);
         }
@@ -441,34 +293,34 @@ class MakeOrderController extends Controller
         if ($request->payment_method_id == 1) {
             $payment_method_auto = $this->payment_method_auto->where('payment_method_id', 1)->first();
             $tokens = $this->getToken($payment_method_auto);
-
+            
             $order_data = $this->make_order_from_cart($request, 1);
             if (isset($order_data['errors']) && !empty($order_data['errors'])) return response()->json($order_data, 400);
 
             $totalAmountCents = (int) round($order_data['payment']->amount * 100);
             $data = [
                 "auth_token" => $tokens,
-                "delivery_needed" => "false",
-                "amount_cents" => $totalAmountCents,
-                "currency" => "EGP",
-                "items" => $order_data['items'],
+                "delivery_needed" =>"false",
+                "amount_cents"=> $totalAmountCents,
+                "currency"=> "EGP",
+                "items"=> $order_data['items'],
             ];
             $response = \Illuminate\Support\Facades\Http::post('https://accept.paymob.com/api/ecommerce/orders', $data);
-
+            
             if (!$response->successful() || !isset($response['id'])) {
                 return response()->json(['errors' => 'Paymob payment gateway error: ' . ($response->json('message') ?? $response->json('detail') ?? 'Failed to place order.')], 422);
             }
-
+            
             $order_id_paymob = $response['id'];
             $payment_model = $order_data['payment'];
             $payment_model->update(['transaction_id' => $order_id_paymob]);
             $order_resp = $response->object();
-
+            
             $paymentToken = $this->getPaymentToken($user, $totalAmountCents, $order_resp, $tokens, $payment_method_auto);
             $paymentLink = "https://accept.paymob.com/api/acceptance/iframes/" . $payment_method_auto->iframe_id . '?payment_token=' . $paymentToken;
-
+            
             \App\Models\ProductCart::where('user_id', $user->id)->delete();
-
+            
             return response()->json([
                 'success' => $payment_model->id,
                 'paymentLink' => $paymentLink,
@@ -478,18 +330,14 @@ class MakeOrderController extends Controller
             if (isset($order_data['errors']) && !empty($order_data['errors'])) {
                 return response()->json($order_data, 400);
             }
-
+            
             \App\Models\ProductCart::where('user_id', $user->id)->delete();
-
+            
             OrderEvent::dispatch($order_data['payment']);
 
             $body = 'New Order #' . $order_data['payment']->order_number;
-            $device_token = $this->device_tokens->whereNotNull('admin_id')->pluck("fcm_token")->filter()->toArray();
-            
-            if (!empty($device_token)) {
-                $this->sendNotificationToMany($device_token, $order_data['payment']->order_number, $body);
-            }
-
+            $device_token = $this->device_tokens->whereNotNull('admin_id')->get()?->pluck("fcm_token")?->toArray();
+            $this->sendNotificationToMany($device_token, $order_data['payment']->order_number, $body);
             return response()->json([
                 'success' => $order_data['payment']->id,
                 'gedia' => $order_data['gedia'],
@@ -497,6 +345,7 @@ class MakeOrderController extends Controller
             ]);
         }
     }
+
     public function callback(Request $request){
         // https://bcknd.food2go.online/customer/callback
         $payment_method_auto = $this->payment_method_auto
