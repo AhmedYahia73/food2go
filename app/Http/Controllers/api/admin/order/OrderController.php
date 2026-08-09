@@ -600,13 +600,11 @@ class OrderController extends Controller
                 ];
             });
 
-        $deliveries = $this->deliveries->get();
-        $branches = $this->branches->where('status', 1)->get();
+        // $deliveries = $this->deliveries->get();
+        // $branches = $this->branches->where('status', 1)->get();
 
         return response()->json([
-            'orders' => $orders,
-            'deliveries' => $deliveries,
-            'branches' => $branches,
+            'orders' => $orders, 
             'start' => $start->format('Y-m-d H:i:s'),
             'end' => $end->format('Y-m-d H:i:s'),
             'role' => $request->user()->role
