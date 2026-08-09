@@ -265,6 +265,8 @@ class MakeOrderController extends Controller
             ->get();
             $items = [];
             $count = 0;
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
             $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
             $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
             foreach ($time_sittings as $item) {
