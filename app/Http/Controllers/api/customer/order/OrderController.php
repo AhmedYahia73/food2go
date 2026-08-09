@@ -66,6 +66,155 @@ class OrderController extends Controller
             ->orWhereNull('status');
         }) 
         ->with('delivery', 'payment_method', 'address.zone', 'branch:id,name')
+        ->get()
+        ->map(function($item){ 
+            $total_variation = collect($item->order_details);  
+            $addons = collect($total_variation->pluck('addons'))->flatten(1); 
+            $addons = collect($addons)->map(function ($item) {
+                $addon = $item->addon;
+                $addon->count = (int)$item->count;
+                return $addon;
+            });
+            $total_variation = collect($total_variation->pluck('variations'));
+            if ($total_variation->count() > 0) {
+                $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
+            } 
+            $total_product = collect($item->order_details);
+            $total_product = collect($total_product?->pluck('product')); 
+            $total = 0;
+            $products = [];
+            if ($total_product->count() > 0) {
+                $total_product = collect($total_product);
+                foreach ($total_product as $value) {
+                    foreach ($value as $element) {  
+                        $product = $element->product; 
+                        unset($product->addons);
+                        $total = ($product->price + $total_variation
+                        ->where('product_id', $product->id)
+                        ->sum('price')) * $element->count;
+                        $product->total_product = $total;
+                        $product->count = $value[0]->count;
+                        $product->note = isset($element?->notes) ? $element?->notes :  null;
+                        $products[] = $product;
+                    }
+                }
+            }
+            $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
+            return [
+                'id' => $item->id,
+                'date' => $item->date,
+                'amount' => $item->amount,
+                'order_status' => $item->order_status,
+                'order_type' => $item->order_type,
+                'total_discount' => $item->total_discount,
+                'notes' => $item->notes,
+                'rejected_reason' => $item->rejected_reason,
+                'customer_cancel_reason' => $item->customer_cancel_reason,
+                'admin_cancel_reason' => $item->admin_cancel_reason,
+                'products' => $products,
+                'payment_method' => $item?->payment_method?->name,
+                'delivery_price' => $item?->address?->zone?->price ?? null,
+                'branch_name' => $item?->branch?->name ?? null,
+                'address_name' => $item?->address?->address ?? null,
+                'addons' => $addons,
+                'order_date' => $item->order_date,
+                'can_cancel' => $item->order_status == 'pending' ? true : false,
+            ];
+        });
+        $cancel_time = $this->settings
+        ->where('name', 'time_cancel')
+        ->orderByDesc('id')
+        ->first();
+        $cancel_time = $cancel_time->setting ?? '00:00:00';
+
+        return response()->json([
+            'orders' => $orders,
+            'cancel_time' => $cancel_time,
+        ]);
+    }
+
+    public function order_history(Request $request){
+        // https://bcknd.food2go.online/customer/orders/history
+        $orders = $this->orders
+        ->orderByDesc('id')
+        ->where('user_id', $request->user()->id)
+        ->whereIn('order_status', ['delivered', 'faild_to_deliver', 'canceled'])
+        ->with('payment_method', 'address.zone', 'branch:id,name')
+        ->where('deleted_at', 0)
+        ->get()
+        ->map(function($item){
+            $total_variation = collect($item->order_details);  
+            $addons = collect($total_variation->pluck('addons'))->flatten(1); 
+            $addons = collect($addons)->map(function ($item) {
+                $addon = $item->addon;
+                $addon->count = (int)$item->count;
+                return $addon;
+            });
+            $total_variation = collect($total_variation->pluck('variations'));
+            if ($total_variation->count() > 0) {
+                $total_variation = collect($total_variation)->pluck('options')->flatten(1);
+            } 
+            $total_product = collect($item->order_details);
+            $total_product = collect($total_product?->pluck('product')); 
+            $total = 0;
+            $products = [];
+            if ($total_product->count() > 0) {
+                $total_product = collect($total_product);
+                foreach ($total_product as $value) {
+                    foreach ($value as $element) {  
+                        $product = $element->product; 
+                        unset($product->addons);
+                        $total = ($product->price + $total_variation
+                        ->where('product_id', $product->id)
+                        ->sum('price')) * $element->count;
+                        $product->total_product = $total;
+                        $product->count = $value[0]->count;
+                        $product->note = isset($element?->notes) ? $element?->notes :  null;
+                        $products[] = $product;
+                    }
+                }
+            }
+            $products = collect($products)?->select('id', 'total_product', 'name', 'image_link', 'count', 'note');
+            return [
+                'id' => $item->id,
+                'date' => $item->date,
+                'amount' => $item->amount,
+                'order_status' => $item->order_status,
+                'order_type' => $item->order_type,
+                'total_discount' => $item->total_discount,
+                'notes' => $item->notes,
+                'rejected_reason' => $item->rejected_reason,
+                'customer_cancel_reason' => $item->customer_cancel_reason,
+                'admin_cancel_reason' => $item->admin_cancel_reason,
+                'delivery_price' => $item->delivery_price,
+                'products' => $products,
+                'payment_method' => $item?->payment_method?->name,
+                'delivery_price' => $item?->address?->zone?->price ?? null,
+                'branch_name' => $item?->branch?->name ?? null,
+                'address_name' => $item?->address?->address ?? null,
+                'addons' => $addons,
+                'order_date' => $item->order_date,
+                'rate' => $item->rate,
+                'comment' => $item->comment,
+            ];
+        });
+
+        return response()->json([
+            'orders' => $orders
+        ]);
+    }
+
+    public function new_upcomming(Request $request){
+        // https://bcknd.food2go.online/customer/orders
+        $orders = $this->orders
+        ->orderByDesc('id')
+        ->where('user_id', $request->user()->id)
+        ->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'scheduled'])
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        }) 
+        ->with('delivery', 'payment_method', 'address.zone', 'branch:id,name')
         ->paginate(15)
         ->through(function($item){ 
             $total_variation = collect($item->order_details);  
@@ -133,7 +282,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function order_history(Request $request){
+    public function new_order_history(Request $request){
         // https://bcknd.food2go.online/customer/orders/history
         $orders = $this->orders
         ->orderByDesc('id')

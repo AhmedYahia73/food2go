@@ -121,6 +121,8 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
     });
 
     Route::controller(OrderController::class)->prefix('orders')->group(function(){
+        Route::get('/new_upcomming', 'new_upcomming');
+        Route::get('/new_order_history', 'new_order_history');
         Route::get('/', 'upcomming');
         Route::get('/notification_sound', 'notification_sound');
         Route::get('/history', 'order_history');
