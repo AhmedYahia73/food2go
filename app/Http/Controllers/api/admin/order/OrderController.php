@@ -1973,7 +1973,7 @@ class OrderController extends Controller
             'admin:id,name,email,phone,image', 
             'payment_method:id,name',
             'schedule:id,name', 
-            'delivery:id,name'
+            'delivery:id,f_name,l_name'
         ])
         ->orderByDesc('id') // يفضل دائماً ترتيب الطلبات من الأحدث للأقدم
         ->get(); 
