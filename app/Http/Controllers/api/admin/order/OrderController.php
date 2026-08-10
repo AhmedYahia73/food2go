@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use App\Events\ChangeStatusEvent;
 
 class OrderController extends Controller
 {
@@ -1798,6 +1799,8 @@ class OrderController extends Controller
                 ]);
             }
         }
+
+        ChangeStatusEvent::dispatch($request->order_status);
         return response()->json([
             'order_status' => $request->order_status,
             'kitchen' => $kitchen,
