@@ -80,3 +80,8 @@ Route::prefix('user/auth')->group(function(){
     });
 });
 
+
+
+use App\Http\Controllers\Api\SyncController;
+Route::post('/sync/push', [SyncController::class, 'push']);
+Route::get('/sync/pull', [SyncController::class, 'pull']);
