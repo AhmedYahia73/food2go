@@ -85,4 +85,5 @@ Route::prefix('user/auth')->group(function(){
 use App\Http\Controllers\api\SyncController;
 Route::post('/sync/push', [SyncController::class, 'push']);
 Route::get('/sync/pull', [SyncController::class, 'pull']);
+Route::get('/sync/bootstrap/{table}', [SyncController::class, 'bootstrap']);
 

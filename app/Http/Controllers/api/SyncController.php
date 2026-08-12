@@ -155,4 +155,25 @@ class SyncController extends Controller
             ]
         ]);
     }
+
+    public function bootstrap(Request $request, $table)
+    {
+        if (!$this->verifySecretKey($request)) {
+            return response()->json(['error' => 'Unauthorized. Invalid secret_key.'], 401);
+        }
+
+        if (!Schema::hasTable($table)) {
+            return response()->json(['error' => "Table {$table} does not exist."], 404);
+        }
+
+        $rows = DB::table($table)->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'serverSnapshotAt' => now()->toISOString(),
+                'rows' => $rows
+            ]
+        ]);
+    }
 }
