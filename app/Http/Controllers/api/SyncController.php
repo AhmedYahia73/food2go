@@ -14,16 +14,14 @@ class SyncController extends Controller
 {
     private function verifySecretKey(Request $request)
     {
-        $headerKey1 = $request->header('secret_key');
-        $headerKey2 = $request->header('Secret-Key');
-        $headerKey = $headerKey1 ?? $headerKey2;
+        $headerKey = $request->header('secret_key') 
+                  ?? $request->header('Secret-Key') 
+                  ?? $request->input('secret_key'); // Fallback to query/body
         
         $validKey = Setting::where('name', 'desktop_secret_key')->value('setting');
 
         \Illuminate\Support\Facades\Log::info('Sync Auth Debug', [
-            'secret_key_header' => $headerKey1,
-            'Secret-Key_header' => $headerKey2,
-            'resolved_header' => $headerKey,
+            'received_key' => $headerKey,
             'valid_key' => $validKey
         ]);
 
