@@ -14,7 +14,6 @@ use App\Models\Delivery;
 use App\Models\Offer;
 use App\Models\Deal;
 use Carbon\Carbon;
-use App\Traits\LogChanges;
 
 class Order extends Model
 {
