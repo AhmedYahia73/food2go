@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogChanges;
 
 use App\Models\ExtraProduct;
 use App\Models\OptionProduct;
 
 class VariationProduct extends Model
 {
-    use HasFactory;
+    use HasFactory, LogChanges;
 
     protected $fillable = [
         'name',

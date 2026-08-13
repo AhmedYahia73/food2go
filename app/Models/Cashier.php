@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogChanges;
 
 class Cashier extends Model
 {
-    use HasFactory;
+    use HasFactory, LogChanges;
 
     protected $fillable = [
         'name',

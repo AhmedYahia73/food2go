@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogChanges;
 
 class DiscountModuleBranch extends Model
 { 
-    use HasFactory;
+    use HasFactory, LogChanges;
     // module => take_away, dine_in, delivery
     protected $fillable = [
         'discount_module_id',

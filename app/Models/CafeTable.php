@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogChanges;
 
 class CafeTable extends Model
 {
-    use HasFactory;
+    use HasFactory, LogChanges;
     protected $fillable = [
         'table_number',
         'location_id',

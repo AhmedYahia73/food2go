@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogChanges;
 
 use App\Models\Branch;
 use App\Models\User;
@@ -13,10 +14,11 @@ use App\Models\Delivery;
 use App\Models\Offer;
 use App\Models\Deal;
 use Carbon\Carbon;
+use App\Traits\LogChanges;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, LogChanges;
 
     protected $fillable = [
         'date',

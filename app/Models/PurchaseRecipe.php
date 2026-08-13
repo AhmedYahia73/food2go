@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogChanges;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PurchaseRecipe extends Model
 {
-    use HasFactory;
+    use HasFactory, LogChanges;
 
     protected $fillable = [
         'weight', 

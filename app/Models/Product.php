@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogChanges;
 
 use App\Models\Addon;
 use App\Models\ExcludeProduct;
@@ -15,7 +16,7 @@ use App\Models\Tax;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, LogChanges;
 
     protected $fillable = [
         'name',

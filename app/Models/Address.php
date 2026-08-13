@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogChanges;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 use App\Models\Zone;
 
 class Address extends Model
 {
-    use HasFactory;
+    use HasFactory, LogChanges;
     use SoftDeletes;
     
     protected $fillable = [
