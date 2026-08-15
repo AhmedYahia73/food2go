@@ -79,6 +79,12 @@ class SyncController extends Controller
                         // Desktop sends flat row for insert
                         $data = $payload;
                         $data['id'] = $recordId; // ensure ID matches
+                        
+                        // Remove null values so MySQL uses column defaults
+                        $data = array_filter($data, function($val) {
+                            return !is_null($val);
+                        });
+
                         DB::table($tableName)->insert($data);
                         ChangeLog::create([
                             'table_name' => $tableName,
