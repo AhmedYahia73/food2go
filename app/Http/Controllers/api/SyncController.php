@@ -60,6 +60,12 @@ class SyncController extends Controller
 
                     if ($op === 'delete') {
                         DB::table($tableName)->where('id', $recordId)->delete();
+                        ChangeLog::create([
+                            'table_name' => $tableName,
+                            'record_id' => $recordId,
+                            'op' => 'delete',
+                            'client_id' => $clientId,
+                        ]);
                         $applied[] = $change['id'];
                         continue;
                     }
@@ -74,6 +80,13 @@ class SyncController extends Controller
                         $data = $payload;
                         $data['id'] = $recordId; // ensure ID matches
                         DB::table($tableName)->insert($data);
+                        ChangeLog::create([
+                            'table_name' => $tableName,
+                            'record_id' => $recordId,
+                            'op' => 'insert',
+                            'client_id' => $clientId,
+                            'new_payload' => $data,
+                        ]);
                     } elseif ($op === 'update') {
                         $fields = $payload['fields'] ?? [];
                         $updates = [];
@@ -86,6 +99,13 @@ class SyncController extends Controller
                         }
                         if (count($updates) > 0) {
                             DB::table($tableName)->where('id', $recordId)->update($updates);
+                            ChangeLog::create([
+                                'table_name' => $tableName,
+                                'record_id' => $recordId,
+                                'op' => 'update',
+                                'client_id' => $clientId,
+                                'new_payload' => $updates,
+                            ]);
                         }
                     }
 
@@ -143,6 +163,7 @@ class SyncController extends Controller
                 'table_name' => $log->table_name,
                 'op' => $log->op,
                 'record_id' => $log->record_id,
+                'client_id' => $log->client_id,
                 'data' => $data
             ];
         }

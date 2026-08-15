@@ -13,6 +13,7 @@ class CreateChangeLogsTable extends Migration
             $table->string('table_name');
             $table->string('record_id');
             $table->string('op');
+            $table->string('client_id')->nullable();
             $table->json('old_payload')->nullable();
             $table->json('new_payload')->nullable();
             $table->timestamps();
