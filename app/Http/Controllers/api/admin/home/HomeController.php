@@ -547,7 +547,7 @@ class HomeController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->orderByDesc('id');
+        ->orderByDesc("created_at");
         if($branch_id){
             $all_orders
             ->where("branch_id", $branch_id);
@@ -680,7 +680,7 @@ class HomeController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->limit(10)
         ->get();
 

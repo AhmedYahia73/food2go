@@ -550,7 +550,7 @@ class LoginController extends Controller
             
             $notification_sound = $this->settings
             ->where('name', 'notification_sound')
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->first();
             if (empty($notification_sound)) {
                 $notification_sound = null;
@@ -733,7 +733,7 @@ class LoginController extends Controller
             ->where('user_id', $user->id)
             ->where('order_status', 'delivered') 
             ->whereNull('rate') 
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->first();
             $rate = false;
             if($order && empty($order->rate) && !$order->is_cancel_evaluate){

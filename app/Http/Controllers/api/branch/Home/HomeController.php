@@ -220,7 +220,7 @@ class HomeController extends Controller
             ->orWhereNull('status');
         })
         ->where('branch_id', $request->user()->id)
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->get();
         $orders_jan = $all_orders
         ->where('order_date', '>=', $currentYear . '-01-01')

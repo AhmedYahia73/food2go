@@ -21,7 +21,7 @@ class SettingController extends Controller
         // https://bcknd.food2go.online/admin/settings/view_time_cancel
         $time = $this->settings
         ->where('name', 'time_cancel')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
 
         return response()->json([
@@ -44,7 +44,7 @@ class SettingController extends Controller
 
         $setting = $this->settings
         ->where('name', 'time_cancel')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($setting)) {
             $this->settings
@@ -68,7 +68,7 @@ class SettingController extends Controller
         // https://bcknd.food2go.online/admin/settings/resturant_time
         $time = $this->settings
         ->where('name', 'resturant_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($time)) {
             $time = $time->setting;
@@ -96,7 +96,7 @@ class SettingController extends Controller
 
         $time = $this->settings
         ->where('name', 'resturant_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($time)) {
             $time->update([
@@ -125,7 +125,7 @@ class SettingController extends Controller
         // https://bcknd.food2go.online/admin/settings/tax_type
         $tax = $this->settings
         ->where('name', 'tax')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($tax)) {
             $tax = $tax->setting;
@@ -158,7 +158,7 @@ class SettingController extends Controller
         }
         $tax = $this->settings
         ->where('name', 'tax')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($tax)) {
             $tax->update([
@@ -182,7 +182,7 @@ class SettingController extends Controller
         // https://bcknd.food2go.online/admin/settings/delivery_time
         $delivery_time = $this->settings
         ->where('name', 'delivery_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($delivery_time)) {
             $delivery_time = $this->settings
@@ -211,7 +211,7 @@ class SettingController extends Controller
         }
         $delivery_time = $this->settings
         ->where('name', 'delivery_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($delivery_time)) {
             $delivery_time = $this->settings
@@ -235,7 +235,7 @@ class SettingController extends Controller
         // https://bcknd.food2go.online/admin/settings/preparing_time
         $preparing_time = $this->settings
         ->where('name', 'preparing_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($preparing_time)) {
             $preparing_arr = [
@@ -273,7 +273,7 @@ class SettingController extends Controller
         }
         $preparing_time = $this->settings
         ->where('name', 'preparing_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($preparing_time)) {
             $preparing_arr = [
@@ -309,7 +309,7 @@ class SettingController extends Controller
         // https://bcknd.food2go.online/admin/settings/notification_sound
         $notification_sound = $this->settings
         ->where('name', 'notification_sound')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($notification_sound)) {
             $notification_sound = null;
@@ -337,7 +337,7 @@ class SettingController extends Controller
         }
         $notification_sound = $this->settings
         ->where('name', 'notification_sound')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($notification_sound)) {
             $sound = $this->upload($request, 'notification_sound', 'admin/settings/notificatins/sound');
@@ -366,7 +366,7 @@ class SettingController extends Controller
         // https://bcknd.food2go.online/admin/settings/cancelation_notification
         $re_notification = $this->settings
         ->where('name', 'repeated')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first(); 
         if (empty($re_notification)) { 
             $re_notification = $this->settings
@@ -377,7 +377,7 @@ class SettingController extends Controller
         }
         $r_online_noti = $this->settings
         ->where('name', 'r_online_noti')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first(); 
         if (empty($r_online_noti)) { 
             $r_online_noti = $this->settings
@@ -408,7 +408,7 @@ class SettingController extends Controller
         }
         $notification_sound = $this->settings
         ->where('name', 'repeated')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($notification_sound)) { 
             $notification_sound = $this->settings
@@ -425,7 +425,7 @@ class SettingController extends Controller
         } 
         $notification_sound = $this->settings
         ->where('name', 'r_online_noti')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($notification_sound)) { 
             $notification_sound = $this->settings
@@ -454,7 +454,7 @@ class SettingController extends Controller
         ->get();
         $settings = $this->settings
         ->where('name', 'repeated')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($settings)) {
             $settings = $this->settings

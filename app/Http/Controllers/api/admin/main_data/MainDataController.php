@@ -18,7 +18,7 @@ class MainDataController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/settings/main_data
         $main_data = $this->main_data
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($main_data)) {
             $main_data->ar_name = $main_data->translations()
@@ -48,7 +48,7 @@ class MainDataController extends Controller
         }
 
         $main_data = $this->main_data
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $dataRequest = [
             'name' => $request->name,
@@ -146,7 +146,7 @@ class MainDataController extends Controller
     public function view_policy(){
         // https://bcknd.food2go.online/admin/policy
         $data = $this->policy
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
 
         return response()->json([
@@ -171,7 +171,7 @@ class MainDataController extends Controller
         }
 
         $data = $this->policy
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $dataRequest = $validator->validated();
         if (empty($data)) { 

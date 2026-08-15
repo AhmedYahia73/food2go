@@ -157,7 +157,7 @@ class OrderController extends Controller
                 ->orWhereNull('status');
             }) 
             ->where('order_active', 1)
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
@@ -237,7 +237,7 @@ class OrderController extends Controller
             //     $query->where('status', 1)
             //     ->orWhereNull('status');
             // }) 
-            // ->orderByDesc('id')
+            // ->orderByDesc("created_at")
             // ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
             //     $query->select('id', 'zone_id')
             //     ->with('zone:id,zone');
@@ -337,7 +337,7 @@ class OrderController extends Controller
             }) 
             ->where('order_active', 1)
             ->where("branch_id", $request->user()->branch_id) 
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
@@ -472,7 +472,7 @@ class OrderController extends Controller
                 ->orWhereNull('status');
             })
             ->where('order_active', 1) 
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
@@ -629,7 +629,7 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
             $query->select('id', 'zone_id')
             ->with('zone:id,zone');
@@ -746,7 +746,7 @@ class OrderController extends Controller
             ->orWhereNull('status');
         })
         ->where("is_read", 0)
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->pluck("id");
         // ->filter(function ($order, $index) use($order_recentage) {
         //     $positionInBlock = $index % 10;
@@ -1021,7 +1021,7 @@ class OrderController extends Controller
         
         $delivery_time = $this->settings
         ->where('name', 'delivery_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($delivery_time)) {
             $delivery_time = $this->settings

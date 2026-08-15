@@ -45,7 +45,7 @@ class OrderController extends Controller
             ->orWhere("online_type", $request->online_type);
         })
         ->where("modules", $request->module ?? "delivery")
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->first();
 
         return response()->json([
@@ -58,7 +58,7 @@ class OrderController extends Controller
     public function upcomming(Request $request){
         // https://bcknd.food2go.online/customer/orders
         $orders = $this->orders
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'scheduled'])
         ->where(function($query) {
@@ -123,7 +123,7 @@ class OrderController extends Controller
         });
         $cancel_time = $this->settings
         ->where('name', 'time_cancel')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $cancel_time = $cancel_time->setting ?? '00:00:00';
 
@@ -136,7 +136,7 @@ class OrderController extends Controller
     public function order_history(Request $request){
         // https://bcknd.food2go.online/customer/orders/history
         $orders = $this->orders
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['delivered', 'faild_to_deliver', 'canceled'])
         ->with('payment_method', 'address.zone', 'branch:id,name')
@@ -207,7 +207,7 @@ class OrderController extends Controller
     public function new_upcomming(Request $request){
         // https://bcknd.food2go.online/customer/orders
         $orders = $this->orders
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'scheduled'])
         ->where(function($query) {
@@ -272,7 +272,7 @@ class OrderController extends Controller
         });
         $cancel_time = $this->settings
         ->where('name', 'time_cancel')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $cancel_time = $cancel_time->setting ?? '00:00:00';
 
@@ -285,7 +285,7 @@ class OrderController extends Controller
     public function new_order_history(Request $request){
         // https://bcknd.food2go.online/customer/orders/history
         $orders = $this->orders
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('user_id', $request->user()->id)
         ->whereIn('order_status', ['delivered', 'faild_to_deliver', 'canceled'])
         ->with('payment_method', 'address.zone', 'branch:id,name')
@@ -398,7 +398,7 @@ class OrderController extends Controller
         ->first();
         $delivery_time = $this->settings
         ->where('name', 'delivery_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($delivery_time)) {
             $delivery_time = $this->settings
@@ -460,7 +460,7 @@ class OrderController extends Controller
     //     // https://bcknd.food2go.online/customer/orders/notification_sound
     //     $notification_sound = $this->settings
     //     ->where('name', 'notification_sound')
-    //     ->orderByDesc('id')
+    //     ->orderByDesc("created_at")
     //     ->first();
     //     if (empty($notification_sound)) {
     //         $notification_sound = null;
@@ -519,7 +519,7 @@ class OrderController extends Controller
         // https://bcknd.food2go.online/customer/orders/cancel_time
         $cancel_time = $this->settings
         ->where('name', 'time_cancel')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $cancel_time = $cancel_time->setting ?? '00:00:00';
 
@@ -533,7 +533,7 @@ class OrderController extends Controller
         ->where('user_id', $request->user()->id)
         ->where('order_status', 'delivered')
         ->whereNull('rate') 
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->first();
         if ($order) {
             $order->update([

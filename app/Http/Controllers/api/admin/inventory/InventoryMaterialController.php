@@ -43,7 +43,7 @@ class InventoryMaterialController extends Controller
 
     public function inventory_history(Request $request){
         $inventory_list = $this->inventory_list
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->with("store")
         ->where("status", "final")
         ->where("type", "material")
@@ -67,7 +67,7 @@ class InventoryMaterialController extends Controller
 
     public function current_inventory_history(Request $request){
         $inventory_list = $this->inventory_list
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->with("store", "materials")
         ->where("type", "material")
         ->where("status", "current")
@@ -211,7 +211,7 @@ class InventoryMaterialController extends Controller
             $purchase = $this->purchase
             ->where('store_id', $InventoryList?->store_id)
             ->where('material_id', $item['id'])
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->get(); 
             $total_quantity = $stock_quintity - $item['quantity'];
             $item_quantity = $stock_quintity - $item['quantity'];
@@ -387,7 +387,7 @@ class InventoryMaterialController extends Controller
     //         $purchase = $this->purchase
     //         ->where('store_id', $stock->store_id)
     //         ->where('material_id', $stock->material_id)
-    //         ->orderByDesc("id")
+    //         ->orderByDesc("created_at")
     //         ->get();
     //         $purchase_arr = [];
     //         $total_quantity = $item['quantity'] - $stock_quintity;

@@ -30,7 +30,7 @@ class Addon extends Model
 
     public function getTaxesAttribute(){
         return Setting::where('name', 'tax')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
     }
 

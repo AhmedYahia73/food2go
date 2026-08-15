@@ -112,7 +112,7 @@ class OtpController extends Controller
                 'balance' => $msg_number->balance - 1
             ]);
             $sms_integration = $this->sms_integration
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->first();
             $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
                 'user' => $sms_integration->user,

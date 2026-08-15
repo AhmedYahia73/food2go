@@ -105,7 +105,7 @@ class HomeController extends Controller
         ->where('order_active', 1)
         ->with("branch:id,name,food_preparion_time")
         ->where('cashier_man_id', $request->user()->id)
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->get()
         ->map(function($item) use($delivery_time){
             $order_status = null;

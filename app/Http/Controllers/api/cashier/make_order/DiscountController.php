@@ -68,7 +68,7 @@ class DiscountController extends Controller
         })
         ->whereJsonContains("modules", $request->module ?? "dine_id")
         ->where("module", "pos")
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->first();
 
         return response()->json([

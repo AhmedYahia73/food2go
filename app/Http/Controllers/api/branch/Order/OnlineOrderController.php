@@ -100,7 +100,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         }) 
         ->where('branch_id', $request->user()->id)
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
 			$query->select('id', 'zone_id')
 			->with('zone:id,zone');
@@ -191,7 +191,7 @@ class OnlineOrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -204,7 +204,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'pending')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -217,7 +217,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'confirmed')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -230,7 +230,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'processing')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -243,7 +243,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'out_for_delivery')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -256,7 +256,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'delivered')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -269,7 +269,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'returned')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -282,7 +282,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'faild_to_deliver')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -295,7 +295,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'canceled')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -308,7 +308,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'scheduled')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -321,7 +321,7 @@ class OnlineOrderController extends Controller
             ->orWhereNull('status');
         })
         ->where('order_status', 'refund')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
         'schedule', 'delivery'])
         ->count();
@@ -364,7 +364,7 @@ class OnlineOrderController extends Controller
     //             $query->where('status', 1)
     //             ->orWhereNull('status');
     //         })
-    //         ->orderByDesc('id')
+    //         ->orderByDesc("created_at")
     //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
     //         'schedule', 'delivery'])
     //         ->get();
@@ -383,7 +383,7 @@ class OnlineOrderController extends Controller
     //             ->orWhereNull('status');
     //         })
     //         ->where('order_status', $request->order_status)
-    //         ->orderByDesc('id')
+    //         ->orderByDesc("created_at")
     //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
     //         'schedule', 'delivery'])
     //         ->get();
@@ -400,7 +400,7 @@ class OnlineOrderController extends Controller
         // orders 
         $new_orders = $this->orders
         ->where('pos', 0)
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->where('is_read_admin', 0)
         ->where("created_at", ">=", now()->subMinutes(30))
         ->whereNull('captain_id')

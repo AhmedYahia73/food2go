@@ -28,13 +28,13 @@ class CompanyController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/settings/business_setup/company
         $company_info = $this->company_info
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $currency = $this->currency
         ->select('id', 'currancy_name as name')
         ->get();
         $maintenance = $this->maintenance
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first(); 
         $website = $this->settings
         ->where("name", "web_site")
@@ -70,7 +70,7 @@ class CompanyController extends Controller
         $companyRequest['time_zone'] = $companyRequest['time_zone'];
         $companyRequest['time_zone'] = str_replace('"', '', $companyRequest['time_zone']);
         $company_info = $this->company_info
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $maintenance = [];
         if (empty($company_info)) {
@@ -138,7 +138,7 @@ class CompanyController extends Controller
             $maintenanceRequest = $request->maintenance;
             $currentDate = Carbon::now();
             $maintenance = $this->maintenance
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->first();
             if ($request->day) {
                 $maintenanceRequest['start_date'] = date('Y-m-d');

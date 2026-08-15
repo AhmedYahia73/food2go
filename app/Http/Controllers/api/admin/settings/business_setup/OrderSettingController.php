@@ -17,7 +17,7 @@ class OrderSettingController extends Controller
         // https://bcknd.food2go.online/admin/settings/business_setup/order_setting
         $order_setting = $this->settings
         ->where('name', 'order_setting')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first(); 
         if (empty($order_setting)) {  
             $setting = [
@@ -52,7 +52,7 @@ class OrderSettingController extends Controller
         $custom = $request->custom;
         $order_setting = $this->settings
         ->where('name', 'order_setting')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $setting = [
             'min_order' => $request->min_price,

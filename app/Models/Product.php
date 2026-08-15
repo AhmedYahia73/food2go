@@ -64,7 +64,7 @@ class Product extends Model
     public function getTaxesAttribute(){
         return \Cache::remember('setting_tax', 3600, function() {
             return Setting::where('name', 'tax')
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->first();
         });
     }

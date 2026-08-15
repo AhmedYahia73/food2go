@@ -82,7 +82,7 @@ class OrderController extends Controller
             'payment_method_id', 'rate', 'void_reason', 'void_id',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('is_void', 1)  
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['user', 'branch', 'address' => function($query){
                 $query->with('zone:id,zone');
             }, 'admin', 'payment_method',
@@ -130,7 +130,7 @@ class OrderController extends Controller
             'payment_method_id', 'order_type', 'rate',
             'status', 'points', 'rejected_reason', 'transaction_id')
             ->where('is_void', 1)  
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
@@ -239,7 +239,7 @@ class OrderController extends Controller
                 $query->where('status', 1)
                 ->orWhereNull('status');
             }) 
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
@@ -293,7 +293,7 @@ class OrderController extends Controller
                 $query->where('status', 1)
                 ->orWhereNull('status');
             }) 
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
                 $query->select('id', 'zone_id')
                 ->with('zone:id,zone');
@@ -550,7 +550,7 @@ class OrderController extends Controller
         }
 
         // 4. جلب العلاقات وعمل الـ Pagination والتحويل عبر through
-        $orders = $ordersQuery->orderByDesc('id')
+        $orders = $ordersQuery->orderByDesc("created_at")
             ->with([
                 'user:id,f_name,l_name,phone,image', 
                 'branch:id,name', 
@@ -668,7 +668,7 @@ class OrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         }) 
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name', 'address' => function($query){
 			$query->select('id', 'zone_id')
 			->with('zone:id,zone');
@@ -1155,7 +1155,7 @@ class OrderController extends Controller
     //             $query->where('status', 1)
     //             ->orWhereNull('status');
     //         })
-    //         ->orderByDesc('id')
+    //         ->orderByDesc("created_at")
     //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
     //         'schedule', 'delivery'])
     //         ->get();
@@ -1174,7 +1174,7 @@ class OrderController extends Controller
     //             ->orWhereNull('status');
     //         })
     //         ->where('order_status', $request->order_status)
-    //         ->orderByDesc('id')
+    //         ->orderByDesc("created_at")
     //         ->with(['user', 'branch', 'address.zone', 'admin:id,name,email,phone,image', 'payment_method',
     //         'schedule', 'delivery'])
     //         ->get();
@@ -1192,7 +1192,7 @@ class OrderController extends Controller
         if ($request->user()->role == "admin") { 
             $new_orders = $this->orders
             ->where('pos', 0)
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->where('is_read_admin', 0)
             ->whereNull('captain_id')
             ->where("created_at", ">=", now()->subMinutes(30))
@@ -1206,7 +1206,7 @@ class OrderController extends Controller
         else{ 
             $new_orders = $this->orders
             ->where('pos', 0)
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->where('is_read_admin', 0)
             ->where("created_at", ">=", now()->subMinutes(30))
             ->whereNull('captain_id')
@@ -1395,7 +1395,7 @@ class OrderController extends Controller
         
         $delivery_time = $this->settings
         ->where('name', 'delivery_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($delivery_time)) {
             $delivery_time = $this->settings
@@ -1526,7 +1526,7 @@ class OrderController extends Controller
         
         // $delivery_time = $this->settings
         // ->where('name', 'delivery_time')
-        // ->orderByDesc('id')
+        // ->orderByDesc("created_at")
         // ->first();
         // if (empty($delivery_time)) {
         //     $delivery_time = $this->settings
@@ -1981,7 +1981,7 @@ class OrderController extends Controller
             'schedule:id,name', 
             'delivery:id,f_name,l_name'
         ])
-        ->orderByDesc('id') // يفضل دائماً ترتيب الطلبات من الأحدث للأقدم
+        ->orderByDesc("created_at") // يفضل دائماً ترتيب الطلبات من الأحدث للأقدم
         ->get(); 
   
         return response()->json([
@@ -2151,7 +2151,7 @@ class OrderController extends Controller
             $product['name'] = TranslationTbl::
             where("locale", $locale)
             ->where('key', $product['name'])
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->first()
             ?->value ?? $product['name'];
 
@@ -2168,7 +2168,7 @@ class OrderController extends Controller
                     $option_element = TranslationTbl::
                     where("locale", $locale)
                     ->where('key', $value->name)
-                    ->orderByDesc("id")
+                    ->orderByDesc("created_at")
                     ->first()
                     ?->value ?? $value->name;
                     $options[] = ["id" => $value->id, "name" => $option_element];
@@ -2176,7 +2176,7 @@ class OrderController extends Controller
                 $variation_element = TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $element?->variation?->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $element?->variation?->name;
                 $variation[] = [
@@ -2191,7 +2191,7 @@ class OrderController extends Controller
                 $addon_element = TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $element->addon->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $element->addon->name;
                 $addons[] = [
@@ -2204,7 +2204,7 @@ class OrderController extends Controller
                 $exclude_element = TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $element->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $element->name;
                 $excludes[] = [
@@ -2216,7 +2216,7 @@ class OrderController extends Controller
                 $extra_element = TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $element->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $element->name;
                 $extras[] = [

@@ -37,7 +37,7 @@ class ExpensesListController extends Controller
         ->where("cahier_man_id", $request->user()->id)
         ->where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->get()
         ->map(function($item) use($locale){
             return [

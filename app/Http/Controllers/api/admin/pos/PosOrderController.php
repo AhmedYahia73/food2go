@@ -194,7 +194,7 @@ class PosOrderController extends Controller
             })
             ->where("branch_id", $request->branch_id)
             ->whereBetween('created_at', [$start, $end])
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['table', 'captain'])
             ->get()
             ->map(function($item){
@@ -238,7 +238,7 @@ class PosOrderController extends Controller
             })
             ->where("branch_id", $request->user()->id)
             ->whereBetween('created_at', [$start, $end])
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->with(['table', 'captain'])
             ->get()
             ->map(function($item){
@@ -324,7 +324,7 @@ class PosOrderController extends Controller
             $query->where('status', 1)
             ->orWhereNull('status');
         })
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user', 'branch', 'delivery'])
         ->get();
         $tables = $this->tables
