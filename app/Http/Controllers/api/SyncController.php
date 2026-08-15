@@ -81,9 +81,14 @@ class SyncController extends Controller
                         $data['id'] = $recordId; // ensure ID matches
                         
                         // Remove null values so MySQL uses column defaults
-                        $data = array_filter($data, function($val) {
-                            return !is_null($val);
-                        });
+                        // And remove columns that don't exist on the server to prevent schema mismatch crashes
+                        $filteredData = [];
+                        foreach ($data as $k => $v) {
+                            if (!is_null($v) && Schema::hasColumn($tableName, $k)) {
+                                $filteredData[$k] = $v;
+                            }
+                        }
+                        $data = $filteredData;
 
                         DB::table($tableName)->insert($data);
                         ChangeLog::create([
@@ -97,6 +102,11 @@ class SyncController extends Controller
                         $fields = $payload['fields'] ?? [];
                         $updates = [];
                         foreach ($fields as $key => $fieldOp) {
+                            // Only update columns that actually exist on the server
+                            if (!Schema::hasColumn($tableName, $key)) {
+                                continue;
+                            }
+                            
                             if ($fieldOp['op'] === 'set') {
                                 $updates[$key] = $fieldOp['value'];
                             } elseif ($fieldOp['op'] === 'inc') {
