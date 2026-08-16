@@ -163,6 +163,7 @@ class SyncController extends Controller
 
     public function pull(Request $request)
     {
+        ini_set('memory_limit', '-1');
         if (!$this->verifySecretKey($request)) {
             return response()->json(['error' => 'Unauthorized. Invalid secret_key.'], 401);
         }
@@ -227,6 +228,7 @@ class SyncController extends Controller
 
     public function bootstrap(Request $request, $table)
     {
+        ini_set('memory_limit', '-1');
         if (!$this->verifySecretKey($request)) {
             return response()->json(['error' => 'Unauthorized. Invalid secret_key.'], 401);
         }
