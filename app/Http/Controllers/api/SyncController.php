@@ -52,12 +52,13 @@ class SyncController extends Controller
                     $recordId = $change['record_id'];
                     $op = $change['op'];
                     $payloadStr = $change['payload'];
-                    $createdAt = $change['created_at'];
 
                     if (!Schema::hasTable($tableName)) {
                         throw new \Exception("Table {$tableName} does not exist.");
                     }
 
+                    // Tag this change with the client_id so pull can filter it out (prevents sync loop)
+                    // We temporarily suppress LogChanges for DB operations triggered by push
                     if ($op === 'delete') {
                         DB::table($tableName)->where('id', $recordId)->delete();
                         $applied[] = $change['id'];
@@ -87,6 +88,18 @@ class SyncController extends Controller
                         if (count($updates) > 0) {
                             DB::table($tableName)->where('id', $recordId)->update($updates);
                         }
+                    }
+
+                    // Update the change_log entry for this record to tag it with client_id
+                    // so it is excluded from the next pull for this same client
+                    if ($clientId) {
+                        DB::table('change_logs')
+                            ->where('table_name', $tableName)
+                            ->where('record_id', $recordId)
+                            ->whereNull('client_id')
+                            ->orderBy('id', 'desc')
+                            ->limit(1)
+                            ->update(['client_id' => $clientId]);
                     }
 
                     $applied[] = $change['id'];
@@ -119,8 +132,27 @@ class SyncController extends Controller
         }
 
         $since = $request->query('since', '1970-01-01 00:00:00');
+        $clientId = $request->query('clientId');
+
+        // Convert ISO 8601 (e.g. 2026-08-15T12:00:00.000Z) to MySQL datetime string
+        try {
+            $sinceCarbon = \Carbon\Carbon::parse($since)->utc();
+            $sinceFormatted = $sinceCarbon->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            $sinceFormatted = '1970-01-01 00:00:00';
+        }
         
-        $logs = ChangeLog::where('created_at', '>', $since)->orderBy('id', 'asc')->get();
+        $query = ChangeLog::where('created_at', '>', $sinceFormatted)
+            ->orderBy('id', 'asc');
+
+        // Exclude changes that originated from this same desktop client to prevent sync loops
+        if ($clientId) {
+            $query->where(function($q) use ($clientId) {
+                $q->whereNull('client_id')->orWhere('client_id', '!=', $clientId);
+            });
+        }
+
+        $logs = $query->get();
         
         $changes = [];
         foreach ($logs as $log) {
