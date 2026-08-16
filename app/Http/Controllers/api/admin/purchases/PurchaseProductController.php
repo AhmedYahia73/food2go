@@ -75,7 +75,7 @@ class PurchaseProductController extends Controller
 
         $purchase = Purchase::
         where("store_id", $request->store_id)
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->get();
         $stocks = $this->stock
         ->where("store_id", $request->store_id)

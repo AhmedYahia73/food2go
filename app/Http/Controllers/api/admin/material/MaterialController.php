@@ -80,7 +80,7 @@ class MaterialController extends Controller
         }
 
         $purchases = Purchase::where("store_id", $request->store_id)
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->get()
         ->groupBy('product_id');
         $stocks = $this->stock

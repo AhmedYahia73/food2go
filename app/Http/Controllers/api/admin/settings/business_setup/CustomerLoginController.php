@@ -21,7 +21,7 @@ class CustomerLoginController extends Controller
         // https://bcknd.food2go.online/admin/settings/business_setup/customer_login
         $customer_login = $this->settings
         ->where('name', 'customer_login')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($customer_login)) {
             $setting = ['login' => 'manuel', 'verification' => null];
@@ -33,10 +33,10 @@ class CustomerLoginController extends Controller
             ]);
         }
         $email_integration = $this->email_integration
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $sms_integration = $this->sms_integration
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $customer_login = json_decode($customer_login->setting);
 
@@ -78,7 +78,7 @@ class CustomerLoginController extends Controller
         $setting = json_encode($setting);
         $customer_login = $this->settings
         ->where('name', 'customer_login')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($customer_login)) {
             $customer_login = $this->settings
@@ -94,7 +94,7 @@ class CustomerLoginController extends Controller
         }
         if ($request->verification == 'email') {
             $email_integration = $this->email_integration
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->first();
             if (empty($email_integration)) {
                 $this->email_integration
@@ -113,7 +113,7 @@ class CustomerLoginController extends Controller
         }
         elseif ($request->verification == 'phone') {
             $sms_integration = $this->sms_integration
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->first();
             if (empty($sms_integration)) {
                 $this->sms_integration

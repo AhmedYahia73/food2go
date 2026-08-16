@@ -209,7 +209,7 @@ class CashierMakeOrderController extends Controller
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 'service_fees',
         'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number', "delivery_fees")
         ->where('cashier_man_id', $request->user()->id)
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->whereBetween('created_at', [$start, $end])
         ->where('order_active', 1)
         ->get()
@@ -223,7 +223,7 @@ class CashierMakeOrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number', "delivery_fees")
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'delivery')
         ->whereBetween('created_at', [$start, $end])
@@ -239,7 +239,7 @@ class CashierMakeOrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number', "delivery_fees")
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'take_away')
         ->whereBetween('created_at', [$start, $end])
@@ -255,7 +255,7 @@ class CashierMakeOrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number', "delivery_fees")
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'dine_in')
         ->whereBetween('created_at', [$start, $end])
@@ -271,7 +271,7 @@ class CashierMakeOrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number', "delivery_fees")
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'car_slow')
         ->whereBetween('created_at', [$start, $end])
@@ -293,7 +293,7 @@ class CashierMakeOrderController extends Controller
         'created_at', 'updated_at', 'pos', 'delivery_id', 'address_id',
         'notes', 'coupon_discount', 'order_number', 'payment_method_id', 
         'status', 'points', 'rejected_reason', 'transaction_id', 'module_order_number', 'delivery_fees')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->where('cashier_man_id', $request->user()->id)
         ->where('order_type', 'delivery')
         ->whereNull('delivery_id')
@@ -2154,7 +2154,7 @@ class CashierMakeOrderController extends Controller
         ->where("user_id", $request->user_id)
         ->where("pos", 1)
         ->where("order_type", "delivery")
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->limit(3)
         ->get()
         ->map(function($item, $key){
@@ -2461,7 +2461,7 @@ class CashierMakeOrderController extends Controller
 
     public function last_order($amount, $total_tax, $total_discount){
         $order = Order::
-        orderByDesc("id")
+        orderByDesc("created_at")
         ->first();
         if(auth()->user()->id == $order?->cashier_man_id &&
         $amount == $order?->amount && $total_tax == $order->total_tax

@@ -70,7 +70,7 @@ class DueGroupController extends Controller
         ->where("group_product_id", $id)
         ->where("created_at", ">=", $start)
         ->where("created_at", "<=", $end)
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->get()
         ->map(function($item){
             $module_financials = $item->module_financials

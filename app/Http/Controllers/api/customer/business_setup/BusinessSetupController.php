@@ -38,7 +38,7 @@ class BusinessSetupController extends Controller
             ]);
         }
         $maintenance = $this->maintenance
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $login_branch = true;
         $login_customer = true;
@@ -67,12 +67,12 @@ class BusinessSetupController extends Controller
         }
         // Company Info
         $company_info = $this->company_info
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         // Order Settings      
         $order_setting = $this->settings
         ->where('name', 'order_setting')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first(); 
         if (empty($order_setting)) {  
             $setting = [
@@ -91,7 +91,7 @@ class BusinessSetupController extends Controller
         
         $time_slot = $this->settings
         ->where('name', 'time_setting')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($time_slot)) {
             $setting = [
@@ -211,7 +211,7 @@ class BusinessSetupController extends Controller
         // https://bcknd.food2go.online/api/customer_login
         $customer_login = $this->settings
         ->where('name', 'customer_login')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($customer_login)) {
             $setting = ['login' => 'manuel', 'verification' => null,];

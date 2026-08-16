@@ -98,7 +98,7 @@ class HomeController extends Controller
     public function mainData(){
         // https://bcknd.food2go.online/customer/home/main_data
         $main_data = $this->main_data
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($main_data)) {
             $main_data->base = url('/');
@@ -115,7 +115,7 @@ class HomeController extends Controller
     public function policies(){
         // https://bcknd.food2go.online/customer/home/policies
         $policies = $this->policies
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first(); 
 
         return response()->json([
@@ -319,7 +319,7 @@ class HomeController extends Controller
         ->get();
         $resturant_time = $this->settings
         ->where('name', 'resturant_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($resturant_time)) {
             $resturant_time = $resturant_time->setting;
@@ -1459,7 +1459,7 @@ class HomeController extends Controller
         ->get();
         $resturant_time = $this->settings
         ->where('name', 'resturant_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($resturant_time)) {
             $resturant_time = $resturant_time->setting;

@@ -134,7 +134,7 @@ class Order extends Model
     public function getorderNumberAttribute(){
         $time_settings = TimeSittings::
         where('branch_id', $this->branch_id)
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($time_settings)) {
             return $this->created_at->format('d') . $this->created_at->format('m') . 

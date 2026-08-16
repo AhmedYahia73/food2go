@@ -77,7 +77,7 @@ class AddressController extends Controller
             ];
         });
         $call_center_phone = $this->company_info
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first()?->phone; 
 
         $order_types = $this->settings
@@ -139,7 +139,7 @@ class AddressController extends Controller
             return $item;
         });
         $call_center_phone = $this->company_info
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first()?->phone; 
 
         return response()->json([
@@ -208,7 +208,7 @@ class AddressController extends Controller
         ->where('status', 1)
         ->values();
         $call_center_phone = $this->company_info
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first()?->phone;
 
         return response()->json([

@@ -18,7 +18,7 @@ class MaintenanceController extends Controller
     public function view(){
         // https://bcknd.food2go.online/admin/settings/business_setup/maintenance
         $maintenance = $this->maintenance
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
 
         return response()->json([
@@ -56,7 +56,7 @@ class MaintenanceController extends Controller
         $maintenanceRequest = $request->validated();
         $currentDate = Carbon::now();
         $maintenance = $this->maintenance
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if ($request->day) {
             $maintenanceRequest['start_date'] = date('Y-m-d');

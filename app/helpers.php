@@ -9,7 +9,7 @@ if (!function_exists('get_tax_setting')) {
     function get_tax_setting(): string
     {
         return \Cache::remember('setting_tax_value', 3600, function () {
-            $tax = Setting::where('name', 'tax')->orderByDesc('id')->first();
+            $tax = Setting::where('name', 'tax')->orderByDesc("created_at")->first();
             if (!$tax) {
                 $tax = Setting::create(['name' => 'tax', 'setting' => 'included']);
             }

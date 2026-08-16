@@ -20,7 +20,7 @@ class TimeSlotController extends Controller
         // https://bcknd.food2go.online/admin/settings/business_setup/time_slot
         $time_slot = $this->settings
         ->where('name', 'time_setting')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
         if (empty($time_slot)) {
@@ -72,7 +72,7 @@ class TimeSlotController extends Controller
         $setting = json_encode($setting);
         $time_slot = $this->settings
         ->where('name', 'time_setting')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($time_slot)) {
             $time_slot = $this->settings

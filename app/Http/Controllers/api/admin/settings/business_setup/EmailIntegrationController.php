@@ -14,7 +14,7 @@ class EmailIntegrationController extends Controller
 
     public function view(){
         $email_integration = $this->email_integration
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
 
         return response()->json([
@@ -33,7 +33,7 @@ class EmailIntegrationController extends Controller
             ],400);
         }
         $email_integration = $this->email_integration
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($email_integration)) {
             $this->email_integration

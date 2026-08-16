@@ -13,7 +13,7 @@ class SMSIntegrationController extends Controller
 
     public function view(){
         $sms_integration = $this->sms_integration
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
 
         return response()->json([
@@ -36,7 +36,7 @@ class SMSIntegrationController extends Controller
             ],400);
         }
         $sms_integration = $this->sms_integration
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (empty($sms_integration)) {
             $this->sms_integration

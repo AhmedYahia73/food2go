@@ -106,7 +106,7 @@ class ClientMakeOrderController extends Controller
         $category_off = $branch_off->pluck('category_id')->filter();
         $tax = $this->settings
         ->where('name', 'tax')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($tax)) {
             $tax = $tax->setting;
@@ -257,7 +257,7 @@ class ClientMakeOrderController extends Controller
         $category_off = $branch_off->pluck('category_id')->filter();
         $tax = $this->settings
         ->where('name', 'tax')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($tax)) {
             $tax = $tax->setting;
@@ -427,7 +427,7 @@ class ClientMakeOrderController extends Controller
         });  
         $resturant_time = $this->settings
         ->where('name', 'resturant_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();   
         $categories = CategoryResource::collection($categories); 
 
@@ -479,7 +479,7 @@ class ClientMakeOrderController extends Controller
         ->get();
         $resturant_time = $this->settings
         ->where('name', 'resturant_time')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($resturant_time)) {
             $resturant_time = $resturant_time->setting;
@@ -487,7 +487,7 @@ class ClientMakeOrderController extends Controller
         }
         $tax = $this->settings
         ->where('name', 'tax')
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first();
         if (!empty($tax)) {
             $tax = $tax->setting;

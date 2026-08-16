@@ -24,7 +24,7 @@ trait OrderFormat
         
         return TranslationTbl::whereIn('key', array_unique($keys))
             ->where('locale', $locale)
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->get()
             ->groupBy('key')
             ->map(fn($items) => $items->first()->value)
@@ -663,7 +663,7 @@ trait OrderFormat
                 $name = TranslationTbl::
                 where("key", $element['name'])
                 ->where("locale", $locale)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()?->value ?? $element['name'];
                 $excludes[] = [
                     "id" => $element['id'],

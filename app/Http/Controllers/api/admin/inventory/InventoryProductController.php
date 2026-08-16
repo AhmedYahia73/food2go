@@ -55,7 +55,7 @@ class InventoryProductController extends Controller
  
     public function current_inventory_history(Request $request){
         $inventory_list = $this->inventory_list
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->where("type", "product")
         ->where("status", "current")
         ->with("store")
@@ -83,7 +83,7 @@ class InventoryProductController extends Controller
 
     public function inventory_history(Request $request){
         $inventory_list = $this->inventory_list
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->where("type", "product")
         ->where("status", "final")
         ->with("store")
@@ -223,7 +223,7 @@ class InventoryProductController extends Controller
             $purchase = $this->purchase
             ->where('store_id', $InventoryList?->store_id)
             ->where('product_id', $item['id'])
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->get();
             $purchase_arr = [];
             $total_quantity = $stock_quintity - $item['quantity'];
@@ -254,7 +254,7 @@ class InventoryProductController extends Controller
             $one_item = InventoryProductHistory::
             where("inventory_id", $id)
             ->where("product_id", $item['id'])
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->first();
             $arr_items[] = [
                 "id" => $one_item?->id ?? null,
@@ -374,7 +374,7 @@ class InventoryProductController extends Controller
     }
     // public function inventory_history(Request $request){
     //     $inventory_list = $this->inventory_list
-    //     ->orderByDesc("id")
+    //     ->orderByDesc("created_at")
     //     ->with("store")
     //     ->get()
     //     ->map(function($item){
@@ -462,7 +462,7 @@ class InventoryProductController extends Controller
     //         $purchase = $this->purchase
     //         ->where('store_id', $stock->store_id)
     //         ->where('product_id', $stock->product_id)
-    //         ->orderByDesc("id")
+    //         ->orderByDesc("created_at")
     //         ->get();
     //         $purchase_arr = [];
     //         $stock_quintity = $stock->quintity;

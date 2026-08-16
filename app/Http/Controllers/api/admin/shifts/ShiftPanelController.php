@@ -175,7 +175,7 @@ class ShiftPanelController extends Controller
             $shift = CashierShift::
             where("cashier_man_id", $cashier_shifts?->cashier_man?->id ?? 0)
             ->where("cashier_id", $cashier_shifts?->cashier_man?->cashier_id ?? 0)
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->first()?->shift ?? null;
             CashierGap::create([
                 'cashier_id' => $cashier_shifts?->cashier_man?->cashier_id ?? 0,

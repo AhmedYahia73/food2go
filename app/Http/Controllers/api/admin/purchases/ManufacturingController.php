@@ -128,7 +128,7 @@ class ManufacturingController extends Controller
             $purchase = $this->purchase
             ->where('store_id', $request->store_id)
             ->where('material_id', $item['id'])
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->get();
             $purchase_arr = [];
 			$weight = $item['weight'];

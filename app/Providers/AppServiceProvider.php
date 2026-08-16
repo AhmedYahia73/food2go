@@ -88,7 +88,7 @@ class AppServiceProvider extends ServiceProvider
 
         Schema::defaultStringLength(191);
         try {
-            $company = Cache::remember('company_info', 3600, fn() => CompanyInfo::orderByDesc('id')->first());
+            $company = Cache::remember('company_info', 3600, fn() => CompanyInfo::orderByDesc("created_at")->first());
             $timezone = $company->time_zone ?? config('app.timezone');
             if ($timezone != '') { 
                 Config::set('app.timezone', $timezone);
@@ -97,8 +97,8 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Throwable $th) {
         }
         try {
-            $email = Cache::remember('email_integration', 3600, fn() => EmailIntegration::orderByDesc('id')->first());
-            $company = Cache::remember('company_info', 3600, fn() => CompanyInfo::orderByDesc('id')->first());
+            $email = Cache::remember('email_integration', 3600, fn() => EmailIntegration::orderByDesc("created_at")->first());
+            $company = Cache::remember('company_info', 3600, fn() => CompanyInfo::orderByDesc("created_at")->first());
 
             if ($email) {
                 Config::set('mail.mailers.smtp.username', $email->email);

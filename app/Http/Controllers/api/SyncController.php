@@ -61,6 +61,12 @@ class SyncController extends Controller
                     // We temporarily suppress LogChanges for DB operations triggered by push
                     if ($op === 'delete') {
                         DB::table($tableName)->where('id', $recordId)->delete();
+                        ChangeLog::create([
+                            'table_name' => $tableName,
+                            'record_id' => $recordId,
+                            'op' => 'delete',
+                            'client_id' => $clientId,
+                        ]);
                         $applied[] = $change['id'];
                         continue;
                     }
@@ -74,11 +80,34 @@ class SyncController extends Controller
                         // Desktop sends flat row for insert
                         $data = $payload;
                         $data['id'] = $recordId; // ensure ID matches
+                        
+                        // Remove null values so MySQL uses column defaults
+                        // And remove columns that don't exist on the server to prevent schema mismatch crashes
+                        $filteredData = [];
+                        foreach ($data as $k => $v) {
+                            if (!is_null($v) && Schema::hasColumn($tableName, $k)) {
+                                $filteredData[$k] = $v;
+                            }
+                        }
+                        $data = $filteredData;
+
                         DB::table($tableName)->insert($data);
+                        ChangeLog::create([
+                            'table_name' => $tableName,
+                            'record_id' => $recordId,
+                            'op' => 'insert',
+                            'client_id' => $clientId,
+                            'new_payload' => $data,
+                        ]);
                     } elseif ($op === 'update') {
                         $fields = $payload['fields'] ?? [];
                         $updates = [];
                         foreach ($fields as $key => $fieldOp) {
+                            // Only update columns that actually exist on the server
+                            if (!Schema::hasColumn($tableName, $key)) {
+                                continue;
+                            }
+                            
                             if ($fieldOp['op'] === 'set') {
                                 $updates[$key] = $fieldOp['value'];
                             } elseif ($fieldOp['op'] === 'inc') {
@@ -87,6 +116,13 @@ class SyncController extends Controller
                         }
                         if (count($updates) > 0) {
                             DB::table($tableName)->where('id', $recordId)->update($updates);
+                            ChangeLog::create([
+                                'table_name' => $tableName,
+                                'record_id' => $recordId,
+                                'op' => 'update',
+                                'client_id' => $clientId,
+                                'new_payload' => $updates,
+                            ]);
                         }
                     }
 
@@ -175,6 +211,7 @@ class SyncController extends Controller
                 'table_name' => $log->table_name,
                 'op' => $log->op,
                 'record_id' => $log->record_id,
+                'client_id' => $log->client_id,
                 'data' => $data
             ];
         }

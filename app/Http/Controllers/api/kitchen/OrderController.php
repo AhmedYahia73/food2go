@@ -35,7 +35,7 @@ class OrderController extends Controller
         |--------------------------------------------------------------------------
         */
         $translations = TranslationTbl::where('locale', $locale)
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->get()
             ->groupBy('key')
             ->map(fn ($rows) => $rows->first()->value);
@@ -196,7 +196,7 @@ class OrderController extends Controller
         |--------------------------------------------------------------------------
         */
         $translations = TranslationTbl::where('locale', $locale)
-            ->orderByDesc('id')
+            ->orderByDesc("created_at")
             ->get()
             ->groupBy('key')
             ->map(fn ($rows) => $rows->first()->value);

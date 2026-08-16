@@ -388,7 +388,7 @@ trait PlaceOrder
                 $tax_item = $product_item->tax;
                 $tax = $this->settings
                 ->where('name', 'tax')
-                ->orderByDesc('id')
+                ->orderByDesc("created_at")
                 ->first();
                 if (!empty($tax_item)) {
                     if (!empty($tax)) {
@@ -1060,12 +1060,12 @@ trait PlaceOrder
                 $product->name = TranslationTbl::
                 where("locale", $locale)
                 ->where("key", $product->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()->value ?? $product->name;
                 $product->description = TranslationTbl::
                 where("locale", $locale)
                 ->where("key", $product->description)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()->value ?? $product->description;
                 unset($product->addons);
                 unset($product->variations);
@@ -1079,7 +1079,7 @@ trait PlaceOrder
                         $value->name = TranslationTbl::
                         where("locale", $locale)
                         ->where("key", $value->name)
-                        ->orderByDesc("id")
+                        ->orderByDesc("created_at")
                         ->first()->value ?? $value->name;
                         $options[] = $value;
                     }
@@ -1088,7 +1088,7 @@ trait PlaceOrder
                     $element->variation->name = TranslationTbl::
                     where("locale", $locale)
                     ->where("key", $element->variation->name)
-                    ->orderByDesc("id")
+                    ->orderByDesc("created_at")
                     ->first()->value ?? $element->variation->name;
                     $variation[] = $element->variation; 
                 }
@@ -1098,7 +1098,7 @@ trait PlaceOrder
                     $element->addon->name = TranslationTbl::
                     where("locale", $locale)
                     ->where("key", $element->addon->name)
-                    ->orderByDesc("id")
+                    ->orderByDesc("created_at")
                     ->first()->value ?? $element->addon->name;
                     $addons[] = $element->addon;
                 }
@@ -1207,7 +1207,7 @@ trait PlaceOrder
             $product['name'] = TranslationTbl::
             where("locale", $locale)
             ->where('key', $product['name'])
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->first()
             ?->value ?? $product['name'];
 
@@ -1224,7 +1224,7 @@ trait PlaceOrder
                     $option_element = TranslationTbl::
                     where("locale", $locale)
                     ->where('key', $value->name)
-                    ->orderByDesc("id")
+                    ->orderByDesc("created_at")
                     ->first()
                     ?->value ?? $value->name;
                     $options[] = ["id" => $value->id, "name" => $option_element];
@@ -1232,7 +1232,7 @@ trait PlaceOrder
                 $variation_element = TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $element?->variation?->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $element?->variation?->name;
                 $variation[] = [
@@ -1247,7 +1247,7 @@ trait PlaceOrder
                 $addon_element = TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $element->addon->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $element->addon->name;
                 $addons[] = [
@@ -1260,7 +1260,7 @@ trait PlaceOrder
                 $exclude_element = TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $element->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $element->name;
                 $excludes[] = [
@@ -1272,7 +1272,7 @@ trait PlaceOrder
                 $extra_element = TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $element->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $element->name;
                 $extras[] = [
@@ -1364,7 +1364,7 @@ trait PlaceOrder
                 $product_name =  TranslationTbl::
                 where("locale", $locale)
                 ->where('key', $product->name)
-                ->orderByDesc("id")
+                ->orderByDesc("created_at")
                 ->first()
                 ?->value ?? $product->name;
                 unset($product->addons);
@@ -1380,7 +1380,7 @@ trait PlaceOrder
                         $option_element = TranslationTbl::
                         where("locale", $locale)
                         ->where('key', $value->name)
-                        ->orderByDesc("id")
+                        ->orderByDesc("created_at")
                         ->first()
                         ?->value ?? $value->name;
                         $options[] = ["id" => $value->id, "name" => $option_element];
@@ -1388,7 +1388,7 @@ trait PlaceOrder
                     $variation_element = TranslationTbl::
                     where("locale", $locale)
                     ->where('key', $element?->variation?->name)
-                    ->orderByDesc("id")
+                    ->orderByDesc("created_at")
                     ->first()
                     ?->value ?? $element?->variation?->name;
                     $variation[] = [
@@ -1403,7 +1403,7 @@ trait PlaceOrder
                     $addon_element = TranslationTbl::
                     where("locale", $locale)
                     ->where('key', $element->addon->name)
-                    ->orderByDesc("id")
+                    ->orderByDesc("created_at")
                     ->first()
                     ?->value ?? $element->addon->name;
                     $addons[] = [
@@ -1416,7 +1416,7 @@ trait PlaceOrder
                     $exclude_element = TranslationTbl::
                     where("locale", $locale)
                     ->where('key', $element->name)
-                    ->orderByDesc("id")
+                    ->orderByDesc("created_at")
                     ->first()
                     ?->value ?? $element->name;
                     $excludes[] = [
@@ -1428,7 +1428,7 @@ trait PlaceOrder
                     $extra_element = TranslationTbl::
                     where("locale", $locale)
                     ->where('key', $element->name)
-                    ->orderByDesc("id")
+                    ->orderByDesc("created_at")
                     ->first()
                     ?->value ?? $element->name;
                     $extras[] = [

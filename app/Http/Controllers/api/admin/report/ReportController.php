@@ -602,7 +602,7 @@ class ReportController extends Controller
 
         // Order
         $orders = Order::
-        orderByDesc("id");
+        orderByDesc("created_at");
 
         if($request->from || $request->to){ 
             

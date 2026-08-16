@@ -68,7 +68,7 @@ class CaptainMakeOrderController extends Controller
         $people = TablePeople::
         where("table_id", $id)
         ->where("is_active", 1)
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->first()?->count ?? 0;
 
         return response()->json([
@@ -89,7 +89,7 @@ class CaptainMakeOrderController extends Controller
         $people = TablePeople::
         where("table_id", $request->table_id)
         ->where("is_active", 1)
-        ->orderByDesc("id")
+        ->orderByDesc("created_at")
         ->first();
         if($people){
             $people->update([

@@ -1037,7 +1037,7 @@ class CashierReportsController extends Controller
             $shift = CashierShift::
             where("cashier_man_id", $request->user()->id)
             ->where("cashier_id", $request->user()->cashier_id)
-            ->orderByDesc("id")
+            ->orderByDesc("created_at")
             ->first()?->shift ?? null;
             CashierGap::create([
                 'cashier_id' => $request->user()->cashier_id,
@@ -1798,7 +1798,7 @@ class CashierReportsController extends Controller
         })
         ->where('order_active', 1)
         ->where('amount', "<=", $fake_order_limit)
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
             $query->select('id', 'zone_id')
             ->with('zone:id,zone');
@@ -2251,7 +2251,7 @@ class CashierReportsController extends Controller
             ->orWhereNull('status');
         }) 
         ->where('order_active', 1) 
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
             $query->select('id', 'zone_id')
             ->with('zone:id,zone');
@@ -2386,7 +2386,7 @@ class CashierReportsController extends Controller
         }) 
         ->where('order_active', 1)
         ->where('amount', "<=", $fake_order_limit)
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
             $query->select('id', 'zone_id')
             ->with('zone:id,zone');

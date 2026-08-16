@@ -21,7 +21,7 @@ class OrderTypeController extends Controller
         ->where('name', 'order_type')
         ->first();
         $call_center_phone = $this->company_info
-        ->orderByDesc('id')
+        ->orderByDesc("created_at")
         ->first()?->phone;
         $branches = $this->branches
         ->get()
