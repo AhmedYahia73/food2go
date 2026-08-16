@@ -1143,23 +1143,24 @@ class CashierMakeOrderController extends Controller
         $orders = collect([]);
         $arr = [];
         foreach ($order_cart as $key => $item) {
-            $order_item = $this->order_format($item, $key); 
-            $newItem = collect($order_item[0]);
-           $index = $orders->search(function ($item) use ($newItem) {
-				return data_get($item, 'variation_selected') == data_get($newItem, 'variation_selected')
-					&& data_get($item, 'id') == data_get($newItem, 'id')
-					&& data_get($item, 'extras') == data_get($newItem, 'extras')
-					&& data_get($item, 'excludes') == data_get($newItem, 'excludes')
-					&& data_get($item, 'prepration') == data_get($newItem, 'prepration');
-			});
-			
-            if ($index != false) { 
-				$added   = data_get($newItem, 'count');
-
-				$orders[$index]['count'] += $added;
-            } else {
-                $orders = $orders->push($newItem);
-            } 
+            $order_items = $this->order_format($item, $key); 
+            foreach ($order_items as $order_item) {
+                $newItem = collect($order_item);
+                $index = $orders->search(function ($item) use ($newItem) {
+                    return data_get($item, 'variation_selected') == data_get($newItem, 'variation_selected')
+                        && data_get($item, 'id') == data_get($newItem, 'id')
+                        && data_get($item, 'extras') == data_get($newItem, 'extras')
+                        && data_get($item, 'excludes') == data_get($newItem, 'excludes')
+                        && data_get($item, 'prepration') == data_get($newItem, 'prepration');
+                });
+                
+                if ($index !== false) { 
+                    $added   = data_get($newItem, 'count');
+                    $orders[$index]['count'] += $added;
+                } else {
+                    $orders = $orders->push($newItem);
+                }
+            }
         }
         $bundles = $orders
         ->pluck('bundles')

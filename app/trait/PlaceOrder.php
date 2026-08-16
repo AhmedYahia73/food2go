@@ -1113,9 +1113,9 @@ trait PlaceOrder
                 $order_data[$key]->addons_selected = $addons; 
                 $order_data[$key]->bundles = $order->bundles_items; 
             } 
-            return array_values($order_data);
         }
-    } 
+        return array_values($order_data);
+    }
 
     public function takeaway_order_format($order){
         $order_data = [];

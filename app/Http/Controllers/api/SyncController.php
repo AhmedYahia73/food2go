@@ -210,7 +210,7 @@ class SyncController extends Controller
             $changes[] = [
                 'table_name' => $log->table_name,
                 'op' => $log->op,
-                'record_id' => $log->record_id,
+                'record_id' => (string) $log->record_id,
                 'client_id' => $log->client_id,
                 'data' => $data
             ];
