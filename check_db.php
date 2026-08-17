@@ -1,0 +1,1 @@
+﻿<?php $pdo = new PDO('mysql:host=127.0.0.1;dbname=food2go;charset=utf8', 'root', ''); $stmt = $pdo->query('SELECT id, order_number FROM orders ORDER BY created_at DESC LIMIT 5'); print_r($stmt->fetchAll(PDO::FETCH_ASSOC));

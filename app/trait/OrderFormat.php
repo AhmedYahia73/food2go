@@ -609,7 +609,7 @@ trait OrderFormat
             "order_type" => $order->order_type,
             "take_away_status" => $order->take_away_status,
             "delivery_status" => $order->delivery_status,  
-            "order_number" => $order->order_number ?? ($order->order_number ?? ($order->id - app("first_order_today"))),
+            "order_number" => $order->order_number ?? ($order->id > 1000000000 ? (int)substr((string)$order->id, -4) : ($order->id - app("first_order_today"))),
         ];
         
         return $order_arr;
@@ -758,7 +758,7 @@ trait OrderFormat
             "total_tax" => $order->total_tax,
             "total_discount" => $order->total_discount,
             "coupon_discount" => $order->coupon_discount, 
-            "order_number" => $order->order_number ?? ($order->order_number ?? ($order->id - app("first_order_today"))),
+            "order_number" => $order->order_number ?? ($order->id > 1000000000 ? (int)substr((string)$order->id, -4) : ($order->id - app("first_order_today"))),
             "order_date" => $order->created_at->format('Y-m-d'),
             "order_time" => $order->created_at->format('h:i A'),
             "date" => $order->created_at,
