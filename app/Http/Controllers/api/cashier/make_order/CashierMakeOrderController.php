@@ -214,7 +214,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $order->id - app("first_order_today");
+            $item->order_number = $item->order_number ?? ($item->id - app("first_order_today"));
             return $item;
         });
         $delivery_order = $this->order
@@ -230,7 +230,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $order->id - app("first_order_today");
+            $item->order_number = $item->order_number ?? ($item->id - app("first_order_today"));
             return $item;
         });
         $take_away_order = $this->order
@@ -246,7 +246,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $order->id - app("first_order_today");
+            $item->order_number = $item->order_number ?? ($item->id - app("first_order_today"));
             return $item;
         });
         $dine_in_order = $this->order
@@ -262,7 +262,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $order->id - app("first_order_today");
+            $item->order_number = $item->order_number ?? ($item->id - app("first_order_today"));
             return $item;
         });
         $car_slow_order = $this->order
@@ -278,7 +278,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $order->id - app("first_order_today");
+            $item->order_number = $item->order_number ?? ($item->id - app("first_order_today"));
             return $item;
         });
         $orders = [
@@ -301,7 +301,7 @@ class CashierMakeOrderController extends Controller
         ->where('order_active', 1)
         ->get()
         ->map(function($item){
-            $item->order_number = $order->id - app("first_order_today");
+            $item->order_number = $item->order_number ?? ($item->id - app("first_order_today"));
             return $item;
         });
 
@@ -569,7 +569,7 @@ class CashierMakeOrderController extends Controller
         if($request->order_pending){
             return response()->json([
                 'success' => "You draft order success", 
-                'order_number' => $this->order_num_today($order['payment']['id']),
+                'order_number' => $order['payment']->order_number ?? ($order['payment']->id - app("first_order_today")),
                 'order_id' => $order['payment']['id'],
             ]); 
         }
@@ -590,8 +590,9 @@ class CashierMakeOrderController extends Controller
             'order_note' => $request->notes ?? null,
             'kitchen_items' => $kitchen_items,
             'kitchen_items_count' => count($kitchen_items), 
-            'order_number' => $this->order_num_today($order['order']->id),
-            'order_id' => $this->order_num_today($order['order']->id),
+            'order_number' => $order['order']->getRawOriginal('order_number') ?? 'NULL_RAW',
+            'order_id' => $order['order']->id,
+            'debug_generated' => $order['order']->order_number,
             "financials" => $financials,
             "address" => $address,
             "delivery_fees" => $delivery_fees,
@@ -2160,7 +2161,7 @@ class CashierMakeOrderController extends Controller
         ->get()
         ->map(function($item, $key){
             return [
-                "id" => $item->id - app("first_order_today"),
+                "id" => $item->order_number ?? ($item->id - app("first_order_today")),
                 "amount" => $item->amount,
                 "total_discount" => $item->total_discount,
                 "coupon_discount" => $item->coupon_discount, 
@@ -2626,3 +2627,9 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 }
+
+
+
+
+
+

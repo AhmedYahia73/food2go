@@ -133,8 +133,11 @@ trait POS
             }
         }
         // $orderRequest['points'] = $points;
+        $orderRequest['order_number'] = $this->generate_order_number();
         $order = $this->order
         ->create($orderRequest);
+        $order->order_number = $orderRequest["order_number"];
+        $order->save();
         // payment using financial
         if(isset($request->financials)){
             foreach ($request->financials as $element ) {
@@ -460,8 +463,11 @@ trait POS
             }
         } 
         // $orderRequest['points'] = $points;
+        $orderRequest['order_number'] = $this->generate_order_number();
         $order = $this->order
         ->create($orderRequest);
+        $order->order_number = $orderRequest["order_number"];
+        $order->save();
         // payment using financial
         if($request->financials && is_array($request->financials)){
             foreach ($request->financials as $element ) {
@@ -691,8 +697,11 @@ trait POS
             }
         } 
         // $orderRequest['points'] = $points;
+        $orderRequest['order_number'] = $this->generate_order_number();
         $order = $this->order
         ->create($orderRequest);
+        $order->order_number = $orderRequest["order_number"];
+        $order->save();
         // payment using financial
         if($request->financials && is_array($request->financials)){
             foreach ($request->financials as $element ) {
@@ -935,8 +944,11 @@ trait POS
             }
         } 
         // $orderRequest['points'] = $points;
+        $orderRequest['order_number'] = $this->generate_order_number();
         $order = $this->order
         ->create($orderRequest);
+        $order->order_number = $orderRequest["order_number"];
+        $order->save();
         // payment using financial
         foreach ($request->financials as $element ) {
             $this->financial
@@ -1109,4 +1121,59 @@ trait POS
             'payment' => $order, 
         ];
     }
+    public function generate_order_number() {
+        $now = \Carbon\Carbon::now();
+        $time_sittings = \App\Models\TimeSittings::get();
+
+        if ($time_sittings->count() == 0) {
+            $start = $now->copy()->startOfDay();
+            $end = $now->copy()->endOfDay();
+            if ($now->hour < 4) {
+                $start->subDay();
+                $end->subDay();
+            }
+        } else {
+            $min_from = null;
+            $max_end = null;
+
+            foreach ($time_sittings as $sitting) {
+                $sitting_from = \Carbon\Carbon::parse($sitting->from);
+                $sitting_end = $sitting_from->copy()->addHours($sitting->hours)->addMinutes($sitting->minutes);
+
+                if (is_null($min_from) || $sitting_from->format("H:i:s") < $min_from->format("H:i:s")) {
+                    $min_from = $sitting_from;
+                }
+                if (is_null($max_end) || $sitting_end->format("H:i:s") > $max_end->format("H:i:s")) {
+                    $max_end = $sitting_end;
+                }
+            }
+
+            $business_date = $now->copy();
+            if ($business_date->hour < 4) {
+                $business_date->subDay();
+            }
+
+            $start = \Carbon\Carbon::parse($business_date->format("Y-m-d") . " " . $min_from->format("H:i:s"));
+            $end = \Carbon\Carbon::parse($business_date->format("Y-m-d") . " " . $max_end->format("H:i:s"));
+
+            if ($end <= $start || $max_end->format("H:i:s") < $min_from->format("H:i:s")) {
+                $end->addDay();
+            }
+        }
+
+        $max_order_number = \App\Models\Order::whereBetween("created_at", [$start, $end])
+                                             ->where("order_number", "<", 1000000000)
+                                             ->max("order_number");
+
+        if ($max_order_number) {
+            return $max_order_number + 1;
+        } else {
+            $cashier_id = auth()->check() ? auth()->user()->id : 0;
+            return (int)($cashier_id . "1");
+        }
+    }
 }
+
+
+
+

@@ -132,8 +132,11 @@ class Order extends Model
     }
 
     public function getorderNumberAttribute(){
+        if (isset($this->attributes["order_number"]) && $this->attributes["order_number"] !== null) {
+            return $this->attributes["order_number"];
+        }
         $time_settings = TimeSittings::
-        where('branch_id', $this->branch_id)
+        where("branch_id", $this->branch_id)
         ->orderByDesc("created_at")
         ->first();
         if (empty($time_settings)) {
@@ -280,3 +283,4 @@ class Order extends Model
         return $this->hasMany(OrderDetail::class, 'order_id');
     }
 }
+
