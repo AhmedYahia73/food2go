@@ -201,47 +201,56 @@ Route::get('/mail', function () {
 Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     App::singleton('first_order_today', function(){
   
-        $time_sittings = TimeSittings::
-        get();
+        $time_sittings = \App\Models\TimeSittings::get();
 
-        $items = [];
-        $count = 0;
-        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
-        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
-        foreach ($time_sittings as $item) {
-            $items[$item->branch_id][] = $item;
-        }
-        foreach ($items as $item) {
-            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
-                $count = count($item);
-                $to = $item[$count - 1];
-            } 
-            if($from->from > $item[0]->from){
-                $from = $item[0];
-            }
-        }
         if ($time_sittings->count() > 0) {
-            $from = $from->from;
-            $end = date("Y-m-d") . ' ' . $to->from;
-            $hours = $to->hours;
-            $minutes = $to->minutes;
-            $from = date("Y-m-d") . ' ' . $from;
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end);
-            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-            if ($start >= $end) {
+            // بتشوف اقل from بحيث لا تكن فى الفترة 00:00:00 الى 04:00:00
+            $start_sitting = $time_sittings->filter(function($item) {
+                return $item->from > '04:00:00';
+            })->sortBy('from')->first();
+
+            if (!$start_sitting) {
+                $start_sitting = $time_sittings->sortBy('from')->first();
+            }
+
+            // الى اكبر from من 00:00:00 الى 04:00:00
+            $end_sitting = $time_sittings->filter(function($item) {
+                return $item->from >= '00:00:00' && $item->from <= '04:00:00';
+            })->sortByDesc('from')->first();
+
+            $add_day = false;
+            if ($end_sitting) {
+                $add_day = true; // بضيف يوم
+            } else {
+                // لو مفيش باخد اكبر from عمتا
+                $end_sitting = $time_sittings->sortByDesc('from')->first();
+            }
+
+            $start = Carbon\Carbon::parse(date('Y-m-d') . ' ' . $start_sitting->from);
+            
+            $end = Carbon\Carbon::parse(date('Y-m-d') . ' ' . $end_sitting->from)
+                    ->addHours($end_sitting->hours ?? 0)
+                    ->addMinutes($end_sitting->minutes ?? 0);
+            
+            if ($add_day) {
                 $end = $end->addDay();
             }
-            if($start >= now()){
+
+            if ($start >= $end && !$add_day) {
+                $end = $end->addDay();
+            }
+            if ($start >= now()) {
                 $start = $start->subDay();
-            } 
+            }
+            
         } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            $start = Carbon\Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon\Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
  
-        $first_order = Order:: 
+        $first_order = \App\Models\Order:: 
         where('created_at', '>=', $start)
+        ->where('id', '<', 900000)
         ->first()?->id ?? 1; 
 
         return $first_order - 1;

@@ -1659,7 +1659,15 @@ class OrderController extends Controller
         if ($id > 1000000000) {
             return (int)substr((string)$id, -4);
         }
-        return $id - app("first_order_today");
+        
+        $increment = $id - app("first_order_today");
+        $cashier_man_id = auth()->user() ? auth()->user()->id : null;
+        
+        if ($cashier_man_id) {
+            return intval($cashier_man_id . $increment);
+        }
+        
+        return $increment;
     }
 }
 

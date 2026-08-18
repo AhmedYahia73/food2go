@@ -2458,7 +2458,14 @@ class CashierMakeOrderController extends Controller
     }
 
     public function order_num_today($id){ 
-        return $id - app("first_order_today");
+        $increment = $id - app("first_order_today");
+        $cashier_man_id = auth()->user() ? auth()->user()->id : null;
+        
+        if ($cashier_man_id) {
+            return intval($cashier_man_id . $increment);
+        }
+        
+        return $increment;
     }
 
     public function last_order($amount, $total_tax, $total_discount){
