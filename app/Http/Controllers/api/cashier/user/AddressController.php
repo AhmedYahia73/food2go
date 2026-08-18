@@ -89,11 +89,13 @@ class AddressController extends Controller
         }
 
         $addressRequest = $validator->validated();
-        $addressRequest['customer_id'] = $id;
         $user = $this->user
         ->where('id', $id)
         ->first();
-        $user->address()->create($addressRequest);
+        
+        $address = new \App\Models\Address($addressRequest);
+        $address->temp_customer_id = $user->id;
+        $user->address()->save($address);
 
         return response()->json([
             'success' => 'You add data sucess'

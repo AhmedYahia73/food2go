@@ -43,8 +43,14 @@ trait LogChanges
 
             if ($op === 'insert') {
                 $newPayload = $model->getAttributes();
+                if (method_exists($model, 'getSyncAppends')) {
+                    $newPayload = array_merge($newPayload, $model->getSyncAppends());
+                }
             } elseif ($op === 'update') {
                 $newPayload = $model->getAttributes();
+                if (method_exists($model, 'getSyncAppends')) {
+                    $newPayload = array_merge($newPayload, $model->getSyncAppends());
+                }
                 $oldPayload = array_merge($newPayload, $model->getOriginal());
             }
 

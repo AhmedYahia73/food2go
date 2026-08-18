@@ -92,12 +92,12 @@ class UserController extends Controller
         ->create($userRequest); 
         $addresses = $request->addresses;
         if (is_array($addresses)) {
-            foreach ($addresses as &$addr) {
-                $addr['customer_id'] = $user->id;
+            foreach ($addresses as $addrData) {
+                $addr = new \App\Models\Address($addrData);
+                $addr->temp_customer_id = $user->id;
+                $user->address()->save($addr);
             }
-        }
-        $user->address()
-        ->createMany($addresses); 
+        } 
 
         return response()->json([
             'success' => 'You add data success'
