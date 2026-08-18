@@ -226,9 +226,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
                 $end_sitting = $time_sittings->sortByDesc('from')->first();
             }
 
-            $start = Carbon\Carbon::parse(date('Y-m-d') . ' ' . $start_sitting->from);
+            $start = \Carbon\Carbon::parse(date('Y-m-d') . ' ' . $start_sitting->from);
             
-            $end = Carbon\Carbon::parse(date('Y-m-d') . ' ' . $end_sitting->from)
+            $end = \Carbon\Carbon::parse(date('Y-m-d') . ' ' . $end_sitting->from)
                     ->addHours($end_sitting->hours ?? 0)
                     ->addMinutes($end_sitting->minutes ?? 0);
             
@@ -244,8 +244,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
             }
             
         } else {
-            $start = Carbon\Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon\Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            $start = \Carbon\Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = \Carbon\Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
  
         $first_order = \App\Models\Order:: 
