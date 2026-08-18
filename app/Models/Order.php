@@ -160,8 +160,26 @@ class Order extends Model
         if (isset($this->attributes["order_number"]) && $this->attributes["order_number"] !== null) {
             return $this->attributes["order_number"];
         }
-        
-        return $this->id;
+        $time_settings = TimeSittings::
+        where("branch_id", $this->branch_id)
+        ->orderByDesc("created_at")
+        ->first();
+        if (empty($time_settings)) {
+            return $this->created_at->format('d') . $this->created_at->format('m') . 
+            $this->created_at->format('y') . $this->id;
+        }
+        else{
+            $from = $time_settings->from;
+            $to = $this->created_at->format('H:i:s');
+            if ($from > $to) {
+                $date = Carbon::parse($this->created_at)->subDay();
+            }
+            else{
+                $date = $this->created_at;
+            }
+            return $date->format('d') . $date->format('m') . 
+            $date->format('y') . $this->id;
+        }
     }
 
     public function getStatusPaymentAttribute(){
