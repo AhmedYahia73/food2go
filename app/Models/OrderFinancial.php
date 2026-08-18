@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -10,6 +10,11 @@ class OrderFinancial extends Model
 { 
     use HasFactory, LogChanges;
     
+    protected $casts = [
+        'id' => 'string',
+        'order_id' => 'string',
+    ];
+
     protected $fillable = [
         'order_id',
         'financial_id',

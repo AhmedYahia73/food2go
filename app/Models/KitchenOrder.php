@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -7,29 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 use App\Traits\LogChanges;
 
 class KitchenOrder extends Model
-{
+{ 
     use HasFactory, LogChanges;
-
-    protected $fillable = [
-        'order',  
-        'table_id',
-        'kitchen_id',
-        'type',
-        'order_id',
-        'read_status',
-        'status',
-        'cart_id',
+    
+    protected $casts = [
+        'id' => 'string',
+        'table_id' => 'string',
+        'cart_id' => 'string',
     ];
 
-    public function getorderAttribute(){
-        return json_decode($this->attributes['order']);
-    }
-
+    protected $fillable = [
+        'table_id',
+        'order',
+        'kitchen_id',
+        'type',
+        'cart_id',
+        'date'
+    ];
     public function table(){
         return $this->belongsTo(CafeTable::class, 'table_id');
-    }
-
-    public function order_data(){
-        return $this->belongsTo(Order::class, 'order_id');
     }
 }

@@ -10,6 +10,10 @@ class OrderCart extends Model
 { 
     use HasFactory, LogChanges;
 
+    protected $casts = [
+        'id' => 'string',
+    ];
+
     protected $fillable = [
         'table_id', 
         'cart',

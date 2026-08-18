@@ -10,6 +10,11 @@ class OrderDetail extends Model
 {
     use HasFactory, LogChanges;
     
+    protected $casts = [
+        'id' => 'string',
+        'order_id' => 'string',
+    ];
+
     protected $fillable = [
         'product_id',
         'exclude_id',
