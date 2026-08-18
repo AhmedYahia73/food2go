@@ -265,6 +265,7 @@ class AddressController extends Controller
                 "errors" => "map is required"
             ], 400);
         }
+        $address_request['customer_id'] = $request->user()->id;
         $address = $this->address
         ->create($address_request);
         $request->user()->address()->attach($address->id);

@@ -15,7 +15,7 @@ use App\Models\Address;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, \App\Traits\LogChanges;
 
     /**
      * The attributes that are mass assignable.

@@ -89,6 +89,7 @@ class AddressController extends Controller
         }
 
         $addressRequest = $validator->validated();
+        $addressRequest['customer_id'] = $id;
         $user = $this->user
         ->where('id', $id)
         ->first();

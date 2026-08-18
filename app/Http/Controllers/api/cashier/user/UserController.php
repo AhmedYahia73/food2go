@@ -91,6 +91,11 @@ class UserController extends Controller
         $user = $this->user
         ->create($userRequest); 
         $addresses = $request->addresses;
+        if (is_array($addresses)) {
+            foreach ($addresses as &$addr) {
+                $addr['customer_id'] = $user->id;
+            }
+        }
         $user->address()
         ->createMany($addresses); 
 
