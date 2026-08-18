@@ -98,11 +98,16 @@ class Order extends Model
     {
         static::creating(function ($order) {
             if (empty($order->id)) {
-                // Get the max normal ID (ignoring the corrupted huge ones) and increment it
-                $maxId = \Illuminate\Support\Facades\DB::table('orders')
-                            ->where('id', '<', 1000000000)
-                            ->max('id');
-                $order->id = ($maxId ?? 0) + 1;
+                // User explicitly requested count() + 1
+                $newId = \Illuminate\Support\Facades\DB::table('orders')->count() + 1;
+                
+                // Safety check to ensure we don't hit a duplicate key exception
+                // just in case the count() + 1 ID already exists
+                while (\Illuminate\Support\Facades\DB::table('orders')->where('id', $newId)->exists()) {
+                    $newId++;
+                }
+                
+                $order->id = $newId;
             }
         });
 
