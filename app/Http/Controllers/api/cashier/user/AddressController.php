@@ -95,7 +95,12 @@ class AddressController extends Controller
         
         $address = new \App\Models\Address($addressRequest);
         $address->temp_customer_id = $user->id;
-        $user->address()->save($address);
+        $address->save();
+        
+        \App\Models\UserAddress::create([
+            'user_id' => $user->id,
+            'address_id' => $address->id
+        ]);
 
         return response()->json([
             'success' => 'You add data sucess'

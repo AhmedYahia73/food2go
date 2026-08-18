@@ -48,10 +48,10 @@ class Address extends Model
     }
 
     public function address(){
-        return $this->belongsToMany(User::class ,'user_address');
+        return $this->belongsToMany(User::class ,'user_address')->using(UserAddress::class);
     }
 
     public function users(){
-        return $this->belongsToMany(User::class ,'user_address');
+        return $this->belongsToMany(User::class ,'user_address')->using(UserAddress::class);
     }
 }

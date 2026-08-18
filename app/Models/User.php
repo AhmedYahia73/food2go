@@ -75,7 +75,7 @@ class User extends Authenticatable
     }
 
     public function address(){
-        return $this->belongsToMany(Address::class ,'user_address');
+        return $this->belongsToMany(Address::class ,'user_address')->using(UserAddress::class);
     }
 
     public function getRoleAttribute(){

@@ -95,7 +95,12 @@ class UserController extends Controller
             foreach ($addresses as $addrData) {
                 $addr = new \App\Models\Address($addrData);
                 $addr->temp_customer_id = $user->id;
-                $user->address()->save($addr);
+                $addr->save();
+
+                \App\Models\UserAddress::create([
+                    'user_id' => $user->id,
+                    'address_id' => $addr->id
+                ]);
             }
         } 
 
