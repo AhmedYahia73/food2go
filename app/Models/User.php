@@ -75,7 +75,10 @@ class User extends Authenticatable
     }
 
     public function address(){
-        return $this->belongsToMany(Address::class ,'user_address')->using(UserAddress::class);
+        return $this->belongsToMany(Address::class ,'user_address')
+            ->using(UserAddress::class)
+            ->withPivot('id', 'user_id', 'address_id')
+            ->select('addresses.*');
     }
 
     public function getRoleAttribute(){

@@ -19,13 +19,13 @@ class UserController extends Controller
 		->select("id", "f_name", "l_name", "image", "phone", "phone_2")
         ->where('status', 1)
         ->with(['address' => function($query){
-            return $query->with(['zone:id,zone,price', 'city:id,name']);
+            return $query->select('addresses.*')->with(['zone:id,zone,price', 'city:id,name']);
         }])
         ->get()
         ->map(function($item){
-            $item->address = $item->address
-            ->map(function($element){
+            $item->address = $item->address->map(function($element){
                 $element->delivery_fees = $element?->zone?->price ?? null;
+                return $element;
             });
             return $item;
         });
@@ -41,7 +41,7 @@ class UserController extends Controller
         ->where('status', 1)
         ->where('id', $id)
         ->with(['address' => function($query){
-            return $query->with(['zone:id,zone,price', 'city:id,name']);
+            return $query->select('addresses.*')->with(['zone:id,zone,price', 'city:id,name']);
         }])
         ->get()
         ->map(function($item){
