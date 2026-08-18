@@ -203,55 +203,52 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
   
         $time_sittings = \App\Models\TimeSittings::get();
 
+        $items = [];
+        $count = 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+        foreach ($time_sittings as $item) {
+            $items[$item->branch_id][] = $item;
+        }
+        foreach ($items as $item) {
+            if(count($item) > $count || (count($item) == $count && $item[count($item) - 1]->from > $to->from) ){
+                $count = count($item);
+                $to = $item[$count - 1];
+            } 
+            if($from->from > $item[0]->from){
+                $from = $item[0];
+            }
+        }
         if ($time_sittings->count() > 0) {
-            // بتشوف اقل from بحيث لا تكن فى الفترة 00:00:00 الى 04:00:00
-            $start_sitting = $time_sittings->filter(function($item) {
-                return $item->from > '04:00:00';
-            })->sortBy('from')->first();
-
-            if (!$start_sitting) {
-                $start_sitting = $time_sittings->sortBy('from')->first();
-            }
-
-            // الى اكبر from من 00:00:00 الى 04:00:00
-            $end_sitting = $time_sittings->filter(function($item) {
-                return $item->from >= '00:00:00' && $item->from <= '04:00:00';
-            })->sortByDesc('from')->first();
-
-            $add_day = false;
-            if ($end_sitting) {
-                $add_day = true; // بضيف يوم
-            } else {
-                // لو مفيش باخد اكبر from عمتا
-                $end_sitting = $time_sittings->sortByDesc('from')->first();
-            }
-
-            $start = \Carbon\Carbon::parse(date('Y-m-d') . ' ' . $start_sitting->from);
-            
-            $end = \Carbon\Carbon::parse(date('Y-m-d') . ' ' . $end_sitting->from)
-                    ->addHours($end_sitting->hours ?? 0)
-                    ->addMinutes($end_sitting->minutes ?? 0);
-            
-            if ($add_day) {
+            $from = $from->from;
+            $end = date("Y-m-d") . ' ' . $to->from;
+            $hours = $to->hours;
+            $minutes = $to->minutes;
+            $from = date("Y-m-d") . ' ' . $from;
+            $start = \Carbon\Carbon::parse($from);
+            $end = \Carbon\Carbon::parse($end);
+            $end = \Carbon\Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            if ($start >= $end) {
                 $end = $end->addDay();
             }
-
-            if ($start >= $end && !$add_day) {
-                $end = $end->addDay();
-            }
-            if ($start >= now()) {
+            if($start >= now()){
                 $start = $start->subDay();
-            }
-            
+            } 
         } else {
             $start = \Carbon\Carbon::parse(date('Y-m-d') . ' 00:00:00');
             $end = \Carbon\Carbon::parse(date('Y-m-d') . ' 23:59:59');
         } 
  
-        $first_order = \App\Models\Order:: 
-        where('created_at', '>=', $start)
-        ->where('id', '<', 900000)
-        ->first()?->id ?? 1; 
+        $first_order = \App\Models\Order::where('created_at', '>=', $start)->first()?->id ?? 1; 
+
+        // Patch: If the first order today is a huge anomaly, subtraction breaks the increment.
+        // We fix it by mathematically deriving what first_order_today should be so that
+        // (current_id - first_order_today) equals the total count of orders today.
+        if ($first_order > 900000) {
+            $count_today = \App\Models\Order::where('created_at', '>=', $start)->count();
+            $next_normal_id = (\App\Models\Order::where('id', '<', 900000)->max('id') ?? 0) + 1;
+            return $next_normal_id - $count_today - 1;
+        }
 
         return $first_order - 1;
     });
