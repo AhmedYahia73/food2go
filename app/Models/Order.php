@@ -87,6 +87,13 @@ class Order extends Model
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
 
+    protected $casts = [
+        'id' => 'string',
+        'order_number' => 'string',
+        'module_order_number' => 'string',
+    ];
+
+
     protected static function booted()
     {
         static::addGlobalScope('hide_deleted_orders', function ($query) {

@@ -1,11 +1,12 @@
 <?php
 require __DIR__.'/vendor/autoload.php';
-\ = require_once __DIR__.'/bootstrap/app.php';
-\->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+$app = require_once __DIR__.'/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
 
-\ = \App\Models\Order::orderBy('created_at', 'desc')->take(2)->get();
-foreach (\ as \) {
-    echo 'ID: ' . \->id . PHP_EOL;
-    echo 'Raw Order Number: ' . \->getRawOriginal('order_number') . PHP_EOL;
-    echo 'Accessor Order Number: ' . \->order_number . PHP_EOL;
+$order = \App\Models\Order::latest('id')->first();
+if ($order) {
+    echo json_encode(['id' => $order->id, 'order_number' => $order->order_number, 'order_number_type' => gettype($order->order_number)]);
+} else {
+    echo "No orders";
 }
