@@ -96,6 +96,16 @@ class Order extends Model
 
     protected static function booted()
     {
+        static::creating(function ($order) {
+            if (empty($order->id)) {
+                // Get the max normal ID (ignoring the corrupted huge ones) and increment it
+                $maxId = \Illuminate\Support\Facades\DB::table('orders')
+                            ->where('id', '<', 1000000000)
+                            ->max('id');
+                $order->id = ($maxId ?? 0) + 1;
+            }
+        });
+
         static::addGlobalScope('hide_deleted_orders', function ($query) {
             $user = auth()->user();
             
