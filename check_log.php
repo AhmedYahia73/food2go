@@ -1,0 +1,1 @@
+﻿<?php $pdo = new PDO('mysql:host=127.0.0.1;dbname=food2go;charset=utf8', 'root', ''); $stmt = $pdo->query('SELECT table_name, count(*) as count FROM change_logs WHERE created_at > \'2026-08-16\' GROUP BY table_name'); print_r($stmt->fetchAll(PDO::FETCH_ASSOC));

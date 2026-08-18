@@ -204,6 +204,7 @@ trait POS
         $module = $order->order_type;
         $order_details = [];
         $branch_id = 0;
+        $today = now()->format('Y-m-d');
         if($request->cashier_id){
             $branch_id = Cashier::
             where("id", $request->cashier_id)
