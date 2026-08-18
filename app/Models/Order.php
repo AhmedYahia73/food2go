@@ -98,11 +98,14 @@ class Order extends Model
     {
         static::creating(function ($order) {
             if (empty($order->id)) {
-                // User explicitly requested count() + 1
-                $newId = \Illuminate\Support\Facades\DB::table('orders')->count() + 1;
+                // نجيب أكبر رقم طبيعي في الطلبات العادية (ونتجاهل أي قفزات زي 999995 أو الأرقام الضخمة)
+                $maxId = \Illuminate\Support\Facades\DB::table('orders')
+                            ->where('id', '<', 9000000)
+                            ->max('id');
+                            
+                $newId = ($maxId ?? 0) + 1;
                 
                 // Safety check to ensure we don't hit a duplicate key exception
-                // just in case the count() + 1 ID already exists
                 while (\Illuminate\Support\Facades\DB::table('orders')->where('id', $newId)->exists()) {
                     $newId++;
                 }
