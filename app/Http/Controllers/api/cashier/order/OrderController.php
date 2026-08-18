@@ -294,19 +294,17 @@ class OrderController extends Controller
             //         'delivery' => ['name' => $item?->delivery?->name], 
             //     ];
             // });
-            $orders = collect($orders);
-
-            $orders = $orders
-            ->sortByDesc('id')
-            ->values();
+            $orders = collect($orders)->sortByDesc('id')->values();
             $order_type = [
                 "dine_in",
                 "take_away",
                 "delivery",
             ];
+            $pagedData = $this->paginateOrders($orders, $request);
             return response()->json([
                 "state" => 1,
-                "orders" => $orders,
+                "orders" => $pagedData['orders'],
+                "pagination" => $pagedData['pagination'],
                 "order_type" => $order_type, 
             ]);
         }
@@ -396,13 +394,16 @@ class OrderController extends Controller
                     'delivery' => ['name' => $item?->delivery?->name], 
                 ];
             });
+            $orders = collect($orders)->sortByDesc('id')->values();
             $order_type = [
                 "dine_in",
                 "take_away",
                 "delivery",
             ];
+            $pagedData = $this->paginateOrders($orders, $request);
             return response()->json([
-                "orders" => $orders,
+                "orders" => $pagedData['orders'],
+                "pagination" => $pagedData['pagination'],
                 "order_type" => $order_type, 
                 "state" => 2,
             ]);
@@ -531,14 +532,16 @@ class OrderController extends Controller
                     || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
                 ];
             });
+            $orders = collect($orders)->sortByDesc('id')->values();
             $order_type = [
                 "dine_in",
                 "take_away",
                 "delivery",
             ];
-
+            $pagedData = $this->paginateOrders($orders, $request);
             return response()->json([
-                "orders" => $orders, 
+                "orders" => $pagedData['orders'],
+                "pagination" => $pagedData['pagination'],
                 "order_type" => $order_type,
                 "state" => 3,
             ]);
@@ -547,6 +550,45 @@ class OrderController extends Controller
         return response()->json([
             "errors" => "password is wrong"
         ], 400);
+    }
+
+    private function paginateOrders($orders, Request $request) {
+        if ($request->date_from || $request->date_to) {
+            $orders = collect($orders)->filter(function($order) use ($request) {
+                $dateStr = explode(' ', (string)$order['created_at'])[0];
+                $dateStr = explode('T', $dateStr)[0];
+                $pass = true;
+                if ($request->date_from && $dateStr < $request->date_from) $pass = false;
+                if ($request->date_to && $dateStr > $request->date_to) $pass = false;
+                return $pass;
+            })->values();
+        }
+
+        if ($request->search) {
+            $search = strtolower($request->search);
+            $orders = collect($orders)->filter(function($order) use ($search) {
+                $numMatch = str_contains(strtolower((string)($order['order_number'] ?? '')), $search) || str_contains(strtolower((string)($order['id'] ?? '')), $search);
+                $nameMatch = str_contains(strtolower((string)($order['user']['f_name'] ?? '')), $search) || str_contains(strtolower((string)($order['user']['l_name'] ?? '')), $search);
+                $phoneMatch = str_contains(strtolower((string)($order['user']['phone'] ?? '')), $search);
+                return $numMatch || $nameMatch || $phoneMatch;
+            })->values();
+        }
+
+        $page = (int) $request->input('page', 1);
+        $limit = (int) $request->input('limit', 10);
+        $total = count($orders);
+        $last_page = ceil($total / $limit) ?: 1;
+        $paged = collect($orders)->slice(($page - 1) * $limit, $limit)->values();
+
+        return [
+            "orders" => $paged,
+            "pagination" => [
+                "total" => $total,
+                "per_page" => $limit,
+                "current_page" => $page,
+                "last_page" => $last_page
+            ]
+        ];
     }
 
     public function online_orders(Request $request){
