@@ -120,7 +120,7 @@ class SyncController extends Controller
                         // And remove columns that don't exist on the server to prevent schema mismatch crashes
                         $filteredData = [];
                         foreach ($data as $k => $v) {
-                            if ($k === 'deleted_at' && ($v === 0 || $v === '0' || $v === '0000-00-00 00:00:00' || empty($v))) {
+                            if ($k === 'deleted_at' && ($v === 0 || $v === '0' || $v === '0000-00-00 00:00:00' || $v === '1970-01-01 00:00:00' || empty($v))) {
                                 $v = null;
                             }
                             if (!is_null($v) && Schema::hasColumn($tableName, $k)) {
@@ -129,8 +129,8 @@ class SyncController extends Controller
                         }
                         $data = $filteredData;
 
-                        // Use insertOrIgnore to handle potential duplicate IDs gracefully
-                        DB::table($tableName)->insertOrIgnore($data);
+                        // Use updateOrInsert to ensure data is always written even if ID exists (prevents silent ignore of building_num)
+                        DB::table($tableName)->updateOrInsert(['id' => $recordId], $data);
                         
                         // Handle user_address pivot sync for electronPOS backwards compatibility
                         // (addresses table stores customer_id but server uses pivot table)
@@ -151,7 +151,7 @@ class SyncController extends Controller
                         $fields = $payload['fields'] ?? [];
                         $updates = [];
                         foreach ($fields as $key => $fieldOp) {
-                            if ($key === 'deleted_at' && ($fieldOp['value'] === 0 || $fieldOp['value'] === '0' || $fieldOp['value'] === '0000-00-00 00:00:00' || empty($fieldOp['value']))) {
+                            if ($key === 'deleted_at' && ($fieldOp['value'] === 0 || $fieldOp['value'] === '0' || $fieldOp['value'] === '0000-00-00 00:00:00' || $fieldOp['value'] === '1970-01-01 00:00:00' || empty($fieldOp['value']))) {
                                 $fieldOp['value'] = null;
                             }
                             
