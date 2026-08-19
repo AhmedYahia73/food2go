@@ -1,0 +1,1 @@
+﻿<?php require 'vendor/autoload.php'; require 'bootstrap/app.php'; $app = app(); $kernel = $app->make('Illuminate\Contracts\Console\Kernel'); $kernel->bootstrap(); $addr = new App\Models\Address(['zone_id' => 15]); $addr->id = 178705959941481730; echo json_encode($addr);

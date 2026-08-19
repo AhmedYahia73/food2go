@@ -12,6 +12,21 @@ use Illuminate\Support\Facades\Schema;
 
 class SyncController extends Controller
 {
+    private function castBigIntsToStrings($data)
+    {
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                $data[$key] = $this->castBigIntsToStrings($value);
+            }
+        } elseif (is_object($data)) {
+            foreach (get_object_vars($data) as $key => $value) {
+                $data->$key = $this->castBigIntsToStrings($value);
+            }
+        } elseif ((is_int($data) || is_float($data)) && $data > 9007199254740991) {
+            return (string) $data;
+        }
+        return $data;
+    }
     private function verifySecretKey(Request $request)
     {
         $headerKey = $request->header('secret_key') 
@@ -152,13 +167,13 @@ class SyncController extends Controller
             return response()->json(['error' => 'Sync failed', 'message' => $e->getMessage()], 500);
         }
 
-        return response()->json([
+        return response()->json($this->castBigIntsToStrings([
             'success' => true,
             'data' => [
                 'applied' => $applied,
                 'failed' => $failed,
             ]
-        ]);
+        ]));
     }
 
     public function pull(Request $request)
@@ -217,13 +232,13 @@ class SyncController extends Controller
             ];
         }
 
-        return response()->json([
+        return response()->json($this->castBigIntsToStrings([
             'success' => true,
             'data' => [
                 'changes' => $changes,
                 'serverTime' => now()->toIso8601String(),
             ]
-        ]);
+        ]));
     }
 
     public function bootstrap(Request $request, $table)
@@ -239,12 +254,12 @@ class SyncController extends Controller
 
         $rows = DB::table($table)->get();
 
-        return response()->json([
+        return response()->json($this->castBigIntsToStrings([
             'success' => true,
             'data' => [
                 'serverSnapshotAt' => now()->toISOString(),
                 'rows' => $rows
             ]
-        ]);
+        ]));
     }
 }
