@@ -120,7 +120,7 @@ class SyncController extends Controller
                         // And remove columns that don't exist on the server to prevent schema mismatch crashes
                         $filteredData = [];
                         foreach ($data as $k => $v) {
-                            if ($k === 'deleted_at' && ($v === 0 || $v === '0' || $v === '0000-00-00 00:00:00' || $v === '1970-01-01 00:00:00' || empty($v))) {
+                            if ($k === 'deleted_at' && ($v === 0 || $v === '0' || $v === '0000-00-00 00:00:00' || $v === '1970-01-01 00:00:00' || $v == "null" || empty($v))) {
                                 $v = null;
                             }
                             if (!is_null($v) && Schema::hasColumn($tableName, $k)) {
