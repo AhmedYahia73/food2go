@@ -120,6 +120,9 @@ class SyncController extends Controller
                         // And remove columns that don't exist on the server to prevent schema mismatch crashes
                         $filteredData = [];
                         foreach ($data as $k => $v) {
+                            if ($k === 'deleted_at' && ($v === 0 || $v === '0' || $v === '0000-00-00 00:00:00' || empty($v))) {
+                                $v = null;
+                            }
                             if (!is_null($v) && Schema::hasColumn($tableName, $k)) {
                                 $filteredData[$k] = $v;
                             }
@@ -148,6 +151,10 @@ class SyncController extends Controller
                         $fields = $payload['fields'] ?? [];
                         $updates = [];
                         foreach ($fields as $key => $fieldOp) {
+                            if ($key === 'deleted_at' && ($fieldOp['value'] === 0 || $fieldOp['value'] === '0' || $fieldOp['value'] === '0000-00-00 00:00:00' || empty($fieldOp['value']))) {
+                                $fieldOp['value'] = null;
+                            }
+                            
                             // Only update columns that actually exist on the server
                             if (!Schema::hasColumn($tableName, $key)) {
                                 continue;
