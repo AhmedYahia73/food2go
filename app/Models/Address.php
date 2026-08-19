@@ -14,6 +14,7 @@ class Address extends Model
     use HasFactory, LogChanges;
     use SoftDeletes;
     
+    public $incrementing = true;
     public $keyType = 'string';
     
     protected $appends = ['customer_id'];

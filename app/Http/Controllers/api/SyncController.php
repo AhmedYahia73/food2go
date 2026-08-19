@@ -112,16 +112,10 @@ class SyncController extends Controller
                         
                         // Handle user_address pivot sync for electronPOS backwards compatibility
                         if ($tableName === 'addresses' && isset($payload['customer_id'])) {
-                            DB::table('user_address')->updateOrInsert(
+                            \App\Models\UserAddress::updateOrCreate(
                                 ['user_id' => $payload['customer_id'], 'address_id' => $recordId]
                             );
-                            ChangeLog::create([
-                                'table_name' => 'user_address',
-                                'record_id' => $recordId,
-                                'op' => 'insert',
-                                'client_id' => $clientId,
-                                'new_payload' => ['user_id' => $payload['customer_id'], 'address_id' => $recordId],
-                            ]);
+                            // We don't need to manually create ChangeLog because UserAddress model uses LogChanges!
                         }
 
                         ChangeLog::create([
@@ -150,16 +144,9 @@ class SyncController extends Controller
                             DB::table($tableName)->where('id', $recordId)->update($updates);
                             
                             if ($tableName === 'addresses' && isset($updates['customer_id'])) {
-                                DB::table('user_address')->updateOrInsert(
+                                \App\Models\UserAddress::updateOrCreate(
                                     ['user_id' => $updates['customer_id'], 'address_id' => $recordId]
                                 );
-                                ChangeLog::create([
-                                    'table_name' => 'user_address',
-                                    'record_id' => $recordId,
-                                    'op' => 'update',
-                                    'client_id' => $clientId,
-                                    'new_payload' => ['user_id' => $updates['customer_id'], 'address_id' => $recordId],
-                                ]);
                             }
 
                             ChangeLog::create([

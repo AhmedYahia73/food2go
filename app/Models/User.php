@@ -16,6 +16,8 @@ use App\Models\Address;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens, \App\Traits\LogChanges;
+    
+    public $incrementing = true;
     public $keyType = 'string';
 
     /**
