@@ -130,8 +130,14 @@ class SyncController extends Controller
                         $data = $filteredData;
 
                         if (!empty($data)) {
-                            // Use updateOrInsert to ensure data is always written even if ID exists
-                            DB::table($tableName)->updateOrInsert(['id' => $recordId], $data);
+                            // updateOrInsert: use $data without 'id' for the VALUES part
+                            // (id is already in the WHERE, updating PK causes MySQL strict mode errors)
+                            $dataWithoutId = array_diff_key($data, ['id' => null]);
+                            if (!empty($dataWithoutId)) {
+                                DB::table($tableName)->updateOrInsert(['id' => $recordId], $dataWithoutId);
+                            } else {
+                                DB::table($tableName)->insertOrIgnore($data);
+                            }
                         }
                         
                         // Handle user_address pivot sync for electronPOS backwards compatibility
