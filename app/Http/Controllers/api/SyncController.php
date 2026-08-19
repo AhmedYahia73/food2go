@@ -120,34 +120,21 @@ class SyncController extends Controller
                         // And remove columns that don't exist on the server to prevent schema mismatch crashes
                         $filteredData = [];
                         foreach ($data as $k => $v) {
-                            if ($k === 'deleted_at' && ($v === 0 || $v === '0' || $v === '0000-00-00 00:00:00' || $v === '1970-01-01 00:00:00' || empty($v))) {
-                                $v = null;
-                            }
                             if (!is_null($v) && Schema::hasColumn($tableName, $k)) {
                                 $filteredData[$k] = $v;
                             }
                         }
                         $data = $filteredData;
 
-                        if (!empty($data)) {
-                            // Use updateOrInsert to ensure data is always written even if ID exists
-                            DB::table($tableName)->updateOrInsert(['id' => $recordId], $data);
-                        }
+                        // Use insertOrIgnore to handle potential duplicate IDs gracefully
+                        DB::table($tableName)->insertOrIgnore($data);
                         
                         // Handle user_address pivot sync for electronPOS backwards compatibility
                         // (addresses table stores customer_id but server uses pivot table)
                         if ($tableName === 'addresses' && isset($payload['customer_id'])) {
-                            try {
-                                \App\Models\UserAddress::updateOrCreate(
-                                    ['user_id' => $payload['customer_id'], 'address_id' => $recordId]
-                                );
-                            } catch (\Exception $pivotEx) {
-                                Log::warning('Could not create user_address pivot', [
-                                    'user_id' => $payload['customer_id'],
-                                    'address_id' => $recordId,
-                                    'error' => $pivotEx->getMessage()
-                                ]);
-                            }
+                            \App\Models\UserAddress::updateOrCreate(
+                                ['user_id' => $payload['customer_id'], 'address_id' => $recordId]
+                            );
                         }
 
                         ChangeLog::create([
@@ -161,10 +148,6 @@ class SyncController extends Controller
                         $fields = $payload['fields'] ?? [];
                         $updates = [];
                         foreach ($fields as $key => $fieldOp) {
-                            if ($key === 'deleted_at' && ($fieldOp['value'] === 0 || $fieldOp['value'] === '0' || $fieldOp['value'] === '0000-00-00 00:00:00' || $fieldOp['value'] === '1970-01-01 00:00:00' || empty($fieldOp['value']))) {
-                                $fieldOp['value'] = null;
-                            }
-                            
                             // Only update columns that actually exist on the server
                             if (!Schema::hasColumn($tableName, $key)) {
                                 continue;
@@ -193,6 +176,18 @@ class SyncController extends Controller
                                 'new_payload' => $updates,
                             ]);
                         }
+                    }
+
+                    // Update the change_log entry for this record to tag it with client_id
+                    // so it is excluded from the next pull for this same client
+                    if ($clientId) {
+                        DB::table('change_logs')
+                            ->where('table_name', $tableName)
+                            ->where('record_id', $recordId)
+                            ->whereNull('client_id')
+                            ->orderBy('id', 'desc')
+                            ->limit(1)
+                            ->update(['client_id' => $clientId]);
                     }
 
                     $applied[] = $change['id'];
