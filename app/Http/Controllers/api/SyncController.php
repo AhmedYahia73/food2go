@@ -61,7 +61,9 @@ class SyncController extends Controller
 
         DB::beginTransaction();
         try {
+            Log::info('Push received changes', ['count' => count($changes)]);
             foreach ($changes as $change) {
+                Log::info('Processing change', ['table' => $change['table_name'], 'op' => $change['op']]);
                 try {
                     $tableName = $change['table_name'];
                     $recordId = $change['record_id'];
@@ -184,6 +186,7 @@ class SyncController extends Controller
 
                     $applied[] = $change['id'];
                 } catch (\Exception $e) {
+                    Log::error('Change processing failed', ['table' => $change['table_name'], 'error' => $e->getMessage()]);
                     $failed[] = [
                         'id' => $change['id'] ?? null,
                         'error' => $e->getMessage()
@@ -193,6 +196,7 @@ class SyncController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Sync push failed completely', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Sync failed', 'message' => $e->getMessage()], 500);
         }
 
