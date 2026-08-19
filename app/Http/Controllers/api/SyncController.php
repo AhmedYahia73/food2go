@@ -96,6 +96,24 @@ class SyncController extends Controller
                     if ($op === 'insert') {
                         // Desktop sends flat row for insert
                         $data = $payload;
+
+                        // user_address pivot: desktop sends it explicitly AND we auto-create it when
+                        // processing the addresses record → use upsert to avoid duplicate key errors
+                        if ($tableName === 'user_address') {
+                            $upsertData = [];
+                            foreach ($data as $k => $v) {
+                                if (!is_null($v) && Schema::hasColumn($tableName, $k)) {
+                                    $upsertData[$k] = $v;
+                                }
+                            }
+                            DB::table($tableName)->updateOrInsert(
+                                ['user_id' => $upsertData['user_id'] ?? null, 'address_id' => $upsertData['address_id'] ?? null],
+                                $upsertData
+                            );
+                            $applied[] = $change['id'];
+                            continue; // skip the rest, no ChangeLog needed (already logged by Eloquent model)
+                        }
+
                         $data['id'] = $recordId; // ensure ID matches
                         
                         // Remove null values so MySQL uses column defaults
@@ -108,14 +126,15 @@ class SyncController extends Controller
                         }
                         $data = $filteredData;
 
-                        DB::table($tableName)->insert($data);
+                        // Use insertOrIgnore to handle potential duplicate IDs gracefully
+                        DB::table($tableName)->insertOrIgnore($data);
                         
                         // Handle user_address pivot sync for electronPOS backwards compatibility
+                        // (addresses table stores customer_id but server uses pivot table)
                         if ($tableName === 'addresses' && isset($payload['customer_id'])) {
                             \App\Models\UserAddress::updateOrCreate(
                                 ['user_id' => $payload['customer_id'], 'address_id' => $recordId]
                             );
-                            // We don't need to manually create ChangeLog because UserAddress model uses LogChanges!
                         }
 
                         ChangeLog::create([
