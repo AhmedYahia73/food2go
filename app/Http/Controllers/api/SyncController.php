@@ -111,7 +111,7 @@ class SyncController extends Controller
                                 $upsertData
                             );
                             $applied[] = $change['id'];
-                            continue; // skip the rest, no ChangeLog needed (already logged by Eloquent model)
+                            continue;
                         }
 
                         $data['id'] = $recordId; // ensure ID matches
@@ -120,8 +120,9 @@ class SyncController extends Controller
                         // And remove columns that don't exist on the server to prevent schema mismatch crashes
                         $filteredData = [];
                         foreach ($data as $k => $v) {
-                            if ($k === 'deleted_at' && ($v === 0 || $v === '0' || $v === '0000-00-00 00:00:00' || $v === '1970-01-01 00:00:00' || $v == "null" || empty($v))) {
-                                $v = null;
+                            // Skip deleted_at entirely — let MySQL default to NULL
+                            if ($k === 'deleted_at') {
+                                continue;
                             }
                             if (!is_null($v) && Schema::hasColumn($tableName, $k)) {
                                 $filteredData[$k] = $v;
@@ -129,19 +130,9 @@ class SyncController extends Controller
                         }
                         $data = $filteredData;
 
-                        if (!empty($data)) {
-                            // updateOrInsert: use $data without 'id' for the VALUES part
-                            // (id is already in the WHERE, updating PK causes MySQL strict mode errors)
-                            $dataWithoutId = array_diff_key($data, ['id' => null]);
-                            if (!empty($dataWithoutId)) {
-                                DB::table($tableName)->updateOrInsert(['id' => $recordId], $dataWithoutId);
-                            } else {
-                                DB::table($tableName)->insertOrIgnore($data);
-                            }
-                        }
+                        DB::table($tableName)->insert($data);
                         
                         // Handle user_address pivot sync for electronPOS backwards compatibility
-                        // (addresses table stores customer_id but server uses pivot table)
                         if ($tableName === 'addresses' && isset($payload['customer_id'])) {
                             try {
                                 \App\Models\UserAddress::updateOrCreate(
