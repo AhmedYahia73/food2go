@@ -16,6 +16,7 @@ use App\Models\Address;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens, \App\Traits\LogChanges;
+    public $keyType = 'string';
 
     /**
      * The attributes that are mass assignable.

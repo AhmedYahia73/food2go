@@ -14,6 +14,8 @@ class Address extends Model
     use HasFactory, LogChanges;
     use SoftDeletes;
     
+    public $keyType = 'string';
+    
     protected $appends = ['customer_id'];
     public $temp_customer_id = null;
 
@@ -22,7 +24,7 @@ class Address extends Model
     }
 
     public function getCustomerIdAttribute(){
-        return $this->temp_customer_id ?? $this->users()->first()?->id;
+        return (string) ($this->temp_customer_id ?? $this->users()->first()?->id);
     }
 
     protected $fillable = [

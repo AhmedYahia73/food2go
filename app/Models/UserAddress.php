@@ -13,5 +13,6 @@ class UserAddress extends Pivot
 
     // Enable auto-incrementing ID on the pivot model so LogChanges can get it
     public $incrementing = true;
+    public $keyType = 'string';
     protected $guarded = [];
 }
