@@ -10,6 +10,9 @@ class OrderFinancial extends Model
 { 
     use HasFactory, LogChanges;
     
+    public $incrementing = true;
+    public $keyType = 'string';
+
     protected $casts = [
         'id' => 'string',
         'order_id' => 'string',
