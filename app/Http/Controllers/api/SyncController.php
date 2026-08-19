@@ -137,9 +137,17 @@ class SyncController extends Controller
                         // Handle user_address pivot sync for electronPOS backwards compatibility
                         // (addresses table stores customer_id but server uses pivot table)
                         if ($tableName === 'addresses' && isset($payload['customer_id'])) {
-                            \App\Models\UserAddress::updateOrCreate(
-                                ['user_id' => $payload['customer_id'], 'address_id' => $recordId]
-                            );
+                            try {
+                                \App\Models\UserAddress::updateOrCreate(
+                                    ['user_id' => $payload['customer_id'], 'address_id' => $recordId]
+                                );
+                            } catch (\Exception $pivotEx) {
+                                Log::warning('Could not create user_address pivot', [
+                                    'user_id' => $payload['customer_id'],
+                                    'address_id' => $recordId,
+                                    'error' => $pivotEx->getMessage()
+                                ]);
+                            }
                         }
 
                         ChangeLog::create([
