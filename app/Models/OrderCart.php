@@ -10,6 +10,9 @@ class OrderCart extends Model
 { 
     use HasFactory, LogChanges;
 
+    public $incrementing = true;
+    public $keyType = 'string';
+
     protected $casts = [
         'id' => 'string',
     ];

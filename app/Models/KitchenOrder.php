@@ -9,6 +9,9 @@ use App\Traits\LogChanges;
 class KitchenOrder extends Model
 { 
     use HasFactory, LogChanges;
+
+    public $incrementing = true;
+    public $keyType = 'string';
     
     protected $casts = [
         'id' => 'string',
