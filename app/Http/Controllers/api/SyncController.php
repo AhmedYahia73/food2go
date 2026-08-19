@@ -129,8 +129,10 @@ class SyncController extends Controller
                         }
                         $data = $filteredData;
 
-                        // Use updateOrInsert to ensure data is always written even if ID exists (prevents silent ignore of building_num)
-                        DB::table($tableName)->updateOrInsert(['id' => $recordId], $data);
+                        if (!empty($data)) {
+                            // Use updateOrInsert to ensure data is always written even if ID exists
+                            DB::table($tableName)->updateOrInsert(['id' => $recordId], $data);
+                        }
                         
                         // Handle user_address pivot sync for electronPOS backwards compatibility
                         // (addresses table stores customer_id but server uses pivot table)
@@ -183,18 +185,6 @@ class SyncController extends Controller
                                 'new_payload' => $updates,
                             ]);
                         }
-                    }
-
-                    // Update the change_log entry for this record to tag it with client_id
-                    // so it is excluded from the next pull for this same client
-                    if ($clientId) {
-                        DB::table('change_logs')
-                            ->where('table_name', $tableName)
-                            ->where('record_id', $recordId)
-                            ->whereNull('client_id')
-                            ->orderBy('id', 'desc')
-                            ->limit(1)
-                            ->update(['client_id' => $clientId]);
                     }
 
                     $applied[] = $change['id'];
