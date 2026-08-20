@@ -835,7 +835,6 @@ class CashierMakeOrderController extends Controller
                     "errors" => "user is exceed the alloed limit"
                 ], 400); 
             }
-            $user->increment('due', $request->amount);
         } 
         $kitchen_items = [];
         if($request->order_pending){
