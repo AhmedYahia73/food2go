@@ -171,6 +171,8 @@ class SyncController extends Controller
                                 $updates[$key] = $fieldOp['value'];
                             } elseif ($fieldOp['op'] === 'inc') {
                                 DB::table($tableName)->where('id', $recordId)->increment($key, $fieldOp['value']);
+                                $newVal = DB::table($tableName)->where('id', $recordId)->value($key);
+                                $updates[$key] = $newVal;
                             }
                         }
                         if (count($updates) > 0) {
@@ -182,11 +184,20 @@ class SyncController extends Controller
                                 );
                             }
 
+                            $logClientId = $clientId;
+                            // Force sender to pull the absolute definitive value for incremental fields (like due)
+                            foreach ($fields as $key => $fieldOp) {
+                                if ($fieldOp['op'] === 'inc') {
+                                    $logClientId = null;
+                                    break;
+                                }
+                            }
+
                             ChangeLog::create([
                                 'table_name' => $tableName,
                                 'record_id' => $recordId,
                                 'op' => 'update',
-                                'client_id' => $clientId,
+                                'client_id' => $logClientId,
                                 'new_payload' => $updates,
                             ]);
                         }
