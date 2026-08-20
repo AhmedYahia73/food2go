@@ -7,6 +7,11 @@ use App\Traits\LogChanges;
 
 class CashierGap extends Model
 { 
+    use LogChanges;
+    
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
         'amount',
         'cashier_id',
