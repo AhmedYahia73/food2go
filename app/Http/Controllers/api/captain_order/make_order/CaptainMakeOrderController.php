@@ -2137,7 +2137,7 @@ class CaptainMakeOrderController extends Controller
                 'sub_category_addons' => fn($q) => $q->withLocale($locale),
                 'category_addons'     => fn($q) => $q->withLocale($locale),
                 'excludes'            => fn($q) => $q->withLocale($locale),
-                'extra', 'sales_count', 'tax', 'taxes', 'product_pricing', 'pos_pricing', 'translations',
+                'extra', 'sales_count', 'tax', 'product_pricing', 'pos_pricing', 'translations',
                 'variations' => fn($q) => $q->withLocale($locale)->with([
                     'options' => fn($qo) => $qo->where('status', 1)->withLocale($locale)->with([
                         'extra'          => fn($qe) => $qe->with('parent_extra')->withLocale($locale),
