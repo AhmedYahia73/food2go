@@ -115,25 +115,25 @@ class ProductController extends Controller
             $product_names[] = [
                 'tranlation_id' => $item->id,
                 'tranlation_name' => $item->name,
-                'product_name' => $translation_dict[$product->name] ?? null
+                'product_name' => $translation_dict[$product->name] ?? $product->name
             ];
             $product_descriptions[] = [
                 'tranlation_id' => $item->id,
                 'tranlation_name' => $item->name,
-                'product_description' => $translation_dict[$product->description] ?? null
+                'product_description' => $translation_dict[$product->description] ?? $product->description
             ];
             foreach ($product->excludes as $exclude) {
                 $excludes[$exclude->id]['names'][] = [
                     'tranlation_id' => $item->id,
                     'tranlation_name' => $item->name,
-                    'exclude_name' => $translation_dict[$exclude->name] ?? null
+                    'exclude_name' => $translation_dict[$exclude->name] ?? $exclude->name
                 ];
             }
             foreach ($product->extra->whereNull('variation_id') as $key => $extra) {
                 $extras[$extra->id]['names'][] = [
                     'tranlation_id' => $item->id,
                     'tranlation_name' => $item->name,
-                    'extra_name' => $translation_dict[$extra->name] ?? null
+                    'extra_name' => $translation_dict[$extra->name] ?? $extra->name
                 ];
                 $extras[$extra->id]['extra_price'] = $extra->price;
             }
@@ -141,7 +141,7 @@ class ProductController extends Controller
                 $variation[$variation_item->id]['names'][] = [
                     'tranlation_id' => $item->id,
                     'tranlation_name' => $item->name,
-                    'name' => $translation_dict[$variation_item->name] ?? null
+                    'name' => $translation_dict[$variation_item->name] ?? $variation_item->name
                 ];
                 $variation[$variation_item->id]['type'] = $variation_item->type;
                 $variation[$variation_item->id]['min'] = $variation_item->min ?? 0;
@@ -153,7 +153,7 @@ class ProductController extends Controller
                     $options[$variation_item->id][$option->id]['names'][] = [
                         'tranlation_id' => $item->id,
                         'tranlation_name' => $item->name,
-                        'name' => $translation_dict[$option->name] ?? null
+                        'name' => $translation_dict[$option->name] ?? $option->name
                     ];
                     $options[$variation_item->id][$option->id]['price'] = $option->price;
                     $options[$variation_item->id][$option->id]['status'] = $option->status;
