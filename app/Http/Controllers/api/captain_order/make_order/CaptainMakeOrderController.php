@@ -1943,4 +1943,338 @@ class CaptainMakeOrderController extends Controller
             'success' => $request->current_status
         ]);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  NEW SPLIT APIs  (تفصيل captain/lists إلى endpoints منفصلة)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * GET /captain/categories
+     * Returns: categories (with sub_categories + addons) + offers + discounts
+     */
+    public function categories_list(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $branch_id  = $request->branch_id;
+        $locale     = $request->locale ?? $request->query('locale', app()->getLocale());
+        $today          = date('Y-m-d');
+        $current_time   = date('H:i:s');
+        $current_day    = date('l');
+
+        $branch_off   = $this->branch_off->where('branch_id', $branch_id)->get();
+        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
+
+        $categories = $this->category
+            ->with([
+                'sub_categories' => fn($q) => $q->withLocale($locale),
+                'addons'         => fn($q) => $q->withLocale($locale),
+            ])
+            ->withLocale($locale)
+            ->where('status', 1)
+            ->whereNull('category_id')
+            ->orderBy('priority')
+            ->get()
+            ->each(function ($item) use ($category_off) {
+                $item->setRelation(
+                    'sub_categories',
+                    $item->sub_categories->reject(fn($sub) => in_array($sub->id, $category_off))
+                );
+            })
+            ->reject(fn($item) => in_array($item->id, $category_off));
+
+        $getOffersByModule = function ($moduleName) use ($locale, $today, $current_time, $current_day) {
+            return ProductOffer::where("start_date", "<=", $today)
+                ->where("end_date", ">=", $today)
+                ->where("time_from", "<=", $current_time)
+                ->where("time_to", ">=", $current_time)
+                ->whereJsonContains("module", $moduleName)
+                ->where(fn($q) => $q->whereJsonContains("days", $current_day)->orWhere("delay", 1))
+                ->with([
+                    "products.addons"              => fn($q) => $q->withLocale($locale),
+                    "products.sub_category_addons" => fn($q) => $q->withLocale($locale),
+                    "products.category_addons"     => fn($q) => $q->withLocale($locale),
+                    "products.excludes"            => fn($q) => $q->withLocale($locale),
+                    "products.extra", "products.discount", "products.sales_count",
+                    "products.tax", "products.tax_module.module",
+                    "products.variations"          => fn($q) => $q->withLocale($locale)->with([
+                        'options' => fn($qo) => $qo->with([
+                            'extra' => fn($qe) => $qe->with('parent_extra')->withLocale($locale),
+                        ])->withLocale($locale),
+                    ]),
+                ])
+                ->get()
+                ->map(function ($item) {
+                    $discount = ['name' => $item->name, 'type' => "precentage", 'amount' => $item->discount];
+                    $total    = 0;
+                    $products = $item->products->map(function ($element) use ($discount, &$total) {
+                        $element->discount = (object) $discount;
+                        $total += $element->price - ($discount['amount'] * $element->price / 100);
+                        return $element;
+                    });
+                    return [
+                        "name"     => $item->name,
+                        "total"    => $total,
+                        "discount" => $item->discount,
+                        "products" => ProductResource::collection($products),
+                    ];
+                });
+        };
+
+        $discounts = $this->discount->get(['id', 'name', 'type', 'amount']);
+
+        return response()->json([
+            'categories'      => CategoryResource::collection($categories),
+            'offers_take_away' => $getOffersByModule("take_away"),
+            'offers_dine_id'   => $getOffersByModule("dine_in"),
+            'offers_delivery'  => $getOffersByModule("delivery"),
+            'discounts'        => $discounts,
+        ]);
+    }
+
+    /**
+     * GET /captain/cafe_locations
+     * Returns: cafe_location with tables
+     */
+    public function cafe_locations_list(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $branch_id = $request->branch_id;
+
+        $cafe_location = $this->cafe_location
+            ->with(['tables' => fn($q) => $q
+                ->where('status', 1)
+                ->where('is_merge', 0)
+                ->with('sub_table:id,table_number,capacity,main_table_id', 'call_payment')
+            ])
+            ->where('branch_id', $branch_id)
+            ->get()
+            ->map(function ($item) {
+                $item->tables = $item->tables->map(function ($element) {
+                    $element->call_payment_status = $element->call_payment->isNotEmpty();
+                    $element->makeHidden(['call_payment']);
+                    return $element;
+                });
+                return $item;
+            });
+
+        return response()->json(['cafe_location' => $cafe_location]);
+    }
+
+    /**
+     * Shared product processor closure (DRY helper)
+     */
+    private function buildProductProcessor(array $category_off, array $product_off, array $option_off, $branch_id, $module, $today): \Closure
+    {
+        return function ($query) use ($category_off, $product_off, $option_off, $branch_id, $module, $today) {
+            return $query->get()->map(function ($product) use ($category_off, $product_off, $option_off, $branch_id, $module, $today) {
+                if (in_array($product->category_id, $category_off) ||
+                    in_array($product->sub_category_id, $category_off) ||
+                    in_array($product->id, $product_off)) {
+                    return null;
+                }
+
+                $new_price = $product->product_pricing->firstWhere('branch_id', $branch_id)?->price;
+                if (empty($new_price)) {
+                    $new_price = $product->pos_pricing->firstWhere('module', $module)?->price ?? $product->price;
+                }
+                $product->price    = $new_price;
+                $product->favourite = false;
+
+                if ($product->stock_type == 'fixed') {
+                    $product->count    = $product->sales_count->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                } elseif ($product->stock_type == 'daily') {
+                    $product->count    = $product->sales_count->where('date', $today)->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                }
+
+                $resolved_tax = $product->tax_module->first()?->tax ?? $product->tax ?? null;
+
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id, $resolved_tax) {
+                    $variation->options = $variation->options
+                        ->reject(fn($option) => in_array($option->id, $option_off))
+                        ->map(function ($element) use ($branch_id, $resolved_tax) {
+                            $element->price   = $element->option_pricing->firstWhere('branch_id', $branch_id)?->price ?? $element->price;
+                            $element->new_tax = $resolved_tax;
+                            return $element;
+                        });
+                    return $variation;
+                });
+
+                $product->addons = $product->addons->map(function ($addon) use ($product) {
+                    $addon->discount = $product->discount;
+                    return $addon;
+                });
+
+                if (!empty($resolved_tax)) {
+                    $product->tax = $resolved_tax;
+                }
+
+                return $product;
+            })->filter();
+        };
+    }
+
+    /**
+     * Build eager-loaded base product query
+     */
+    private function buildBaseProductQuery($locale, $branch_id)
+    {
+        return $this->products
+            ->orderBy('order')
+            ->with([
+                'addons'              => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                'category_addons'     => fn($q) => $q->withLocale($locale),
+                'excludes'            => fn($q) => $q->withLocale($locale),
+                'extra', 'sales_count', 'tax', 'product_pricing', 'pos_pricing',
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($qo) => $qo->where('status', 1)->withLocale($locale)->with([
+                        'extra'          => fn($qe) => $qe->with('parent_extra')->withLocale($locale),
+                        'option_pricing',
+                    ]),
+                ]),
+                'tax_module' => fn($q) => $q
+                    ->whereHas('module', fn($qm) => $qm->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all']))
+                    ->with(['tax', 'module']),
+                'discount' => fn($q) => $q->where(fn($d) => $d->whereJsonContains('module', 'pos')->orWhereJsonContains('module', 'all')),
+                'group_products' => fn($q) => $q->with([
+                    'products' => fn($q) => $q->select('products.id', 'products.name')->withLocale($locale),
+                ]),
+            ])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'online')
+            ->where('status', 1);
+    }
+
+    /**
+     * GET /captain/products
+     * Params: branch_id (required), locale, module, category_id (optional)
+     * Returns: products + products_weight (filtered by category if provided)
+     */
+    public function products_list(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'branch_id'   => 'required|exists:branches,id',
+            'module'      => 'nullable|in:take_away,dine_in,delivery',
+            'category_id' => 'nullable|integer|exists:categories,id',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $branch_id   = $request->branch_id;
+        $locale      = $request->locale ?? $request->query('locale', app()->getLocale());
+        $module      = $request->module ?? null;
+        $category_id = $request->category_id ?? null;
+        $today       = date('Y-m-d');
+
+        $branch_off  = $this->branch_off->where('branch_id', $branch_id)->get();
+        $product_off  = $branch_off->pluck('product_id')->filter()->toArray();
+        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
+        $option_off   = $branch_off->pluck('option_id')->filter()->toArray();
+
+        $baseQuery = $this->buildBaseProductQuery($locale, $branch_id);
+
+        if ($category_id) {
+            $baseQuery = $baseQuery->where(fn($q) =>
+                $q->where('category_id', $category_id)->orWhere('sub_category_id', $category_id)
+            );
+        }
+
+        $processProducts = $this->buildProductProcessor($category_off, $product_off, $option_off, $branch_id, $module, $today);
+        $processed = $processProducts($baseQuery);
+
+        return response()->json([
+            'products'        => ProductResource::collection($processed->where('weight_status', 0)->values()),
+            'products_weight' => ProductResource::collection($processed->where('weight_status', 1)->values()),
+        ]);
+    }
+
+    /**
+     * GET /captain/favourite_products
+     * Params: branch_id (required), locale, module
+     * Returns: favourite_products + favourite_products_weight
+     */
+    public function favourite_products_list(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+            'module'    => 'nullable|in:take_away,dine_in,delivery',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $branch_id = $request->branch_id;
+        $locale    = $request->locale ?? $request->query('locale', app()->getLocale());
+        $module    = $request->module ?? null;
+        $today     = date('Y-m-d');
+
+        $branch_off  = $this->branch_off->where('branch_id', $branch_id)->get();
+        $product_off  = $branch_off->pluck('product_id')->filter()->toArray();
+        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
+        $option_off   = $branch_off->pluck('option_id')->filter()->toArray();
+
+        $baseQuery = $this->buildBaseProductQuery($locale, $branch_id)->where('favourite', 1);
+
+        $processProducts = $this->buildProductProcessor($category_off, $product_off, $option_off, $branch_id, $module, $today);
+        $processed = $processProducts($baseQuery);
+
+        return response()->json([
+            'favourite_products'        => ProductResource::collection($processed->where('weight_status', 0)->values()),
+            'favourite_products_weight' => ProductResource::collection($processed->where('weight_status', 1)->values()),
+        ]);
+    }
+
+    /**
+     * GET /captain/search_products
+     * Params: branch_id (required), locale, module, search (required)
+     * Returns: products + products_weight matching search term (name, product_code, barcode)
+     */
+    public function search_products(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'branch_id' => 'required|exists:branches,id',
+            'module'    => 'nullable|in:take_away,dine_in,delivery',
+            'search'    => 'required|string|min:1',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $branch_id = $request->branch_id;
+        $locale    = $request->locale ?? $request->query('locale', app()->getLocale());
+        $module    = $request->module ?? null;
+        $search    = $request->search;
+        $today     = date('Y-m-d');
+
+        $branch_off  = $this->branch_off->where('branch_id', $branch_id)->get();
+        $product_off  = $branch_off->pluck('product_id')->filter()->toArray();
+        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
+        $option_off   = $branch_off->pluck('option_id')->filter()->toArray();
+
+        $baseQuery = $this->buildBaseProductQuery($locale, $branch_id)
+            ->where(fn($q) => $q
+                ->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('product_code', 'LIKE', "%{$search}%")
+                ->orWhere('barcode', 'LIKE', "%{$search}%")
+                ->orWhereHas('translations', fn($t) => $t->where('value', 'LIKE', "%{$search}%"))
+            );
+
+        $processProducts = $this->buildProductProcessor($category_off, $product_off, $option_off, $branch_id, $module, $today);
+        $processed = $processProducts($baseQuery);
+
+        return response()->json([
+            'products'        => ProductResource::collection($processed->where('weight_status', 0)->values()),
+            'products_weight' => ProductResource::collection($processed->where('weight_status', 1)->values()),
+        ]);
+    }
 }

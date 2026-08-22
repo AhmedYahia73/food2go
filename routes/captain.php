@@ -43,6 +43,15 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
         Route::get('/product_category_lists/{id}', 'product_category_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/product_item/{id}', 'product_item')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
 
+        // ── New Split APIs ──────────────────────────────────────────────────
+        Route::get('/categories', 'categories_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/cafe_locations', 'cafe_locations_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/products', 'products_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/favourite_products', 'favourite_products_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/search_products', 'search_products')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        // ───────────────────────────────────────────────────────────────────
+
+
         Route::get('/selection_lists', 'my_selection_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/get_table_status', 'get_table_status');
         Route::get('/zones_list', 'zones_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
