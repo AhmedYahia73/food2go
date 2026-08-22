@@ -2276,4 +2276,114 @@ class CaptainMakeOrderController extends Controller
             'products_weight' => ProductResource::collection($processed->where('weight_status', 1)->values()),
         ]);
     }
+
+    public function payment_methods_list(Request $request) {
+        $payment_methods = PaymentMethod::where('status', 1)->get();
+        return response()->json(['payment_methods' => $payment_methods]);
+    }
+
+    public function discounts_list(Request $request) {
+        $discounts = $this->discount->get(['id', 'name', 'type', 'amount']);
+        return response()->json(['discounts' => $discounts]);
+    }
+
+    public function bundles_list(Request $request) {
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale());
+        $bundles = $this->bundle
+            ->where("status", 1)
+            ->with(["products.translations", "products.variations.translations", "products.variations.options.translations", "discount", "tax", "translations", "bundle_variations"])
+            ->get()
+            ->map(function($item) use ($locale) {
+                return [
+                    "id" => $item->id,
+                    "name" => $item->translations->where('key', $item->name)->where("locale", $locale)->first()?->value ?? $item->name,
+                    "image" => $item->image_link,
+                    "price" => $item->price,
+                    "discount" => [
+                        "name" => $item->discount?->name ?? null,
+                        "type" => $item->discount?->type ?? null,
+                        "amount" => $item->discount?->amount ?? null,
+                    ],
+                    "tax" => [
+                        "name" => $item->tax?->name ?? null,
+                        "type" => $item->tax?->type ?? null,
+                        "amount" => $item->tax?->amount ?? null,
+                    ],
+                    "products" => $item->products->map(function($element) use ($locale, $item) {
+                        return [
+                            "id" => $element->id,
+                            "name" => $element->translations->where('key', $element->name)->where("locale", $locale)->first()?->value ?? $element->name,
+                            "variations" => $element->variations->map(function($value) use ($element, $item, $locale) {
+                                return [
+                                    "id" => $value->id,
+                                    "variation_selected" => $item->bundle_variations->where("product_id", $element->id)->isNotEmpty() ? 1 : 0,
+                                    "variation" => $value->translations->where('key', $value->name)->where("locale", $locale)->first()?->value ?? $value->name, 
+                                    "type" => $value->type,
+                                    "min" => $value->min,
+                                    "max" => $value->max,
+                                    "required" => $value->required,
+                                    "options" => $value->options->map(function($new_item) use ($item, $locale) {
+                                        return [
+                                            "id" => $new_item->id,
+                                            "name" => $new_item->translations->where('key', $new_item->name)->where("locale", $locale)->first()?->value ?? $new_item->name, 
+                                            "price" => $new_item->price,
+                                            "selected" => $item->bundle_options->where("bundle_id", $item->id)->where('id', $new_item->id)->isNotEmpty() ? 1 : 0,
+                                        ];
+                                    }),
+                                ];
+                            })
+                        ]; 
+                    }), 
+                ];
+            });
+        return response()->json(['bundles' => $bundles]);
+    }
+
+    public function offers_list(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'module' => 'required|in:take_away,dine_in,delivery'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+        
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale());
+        $module = $request->module;
+        $today = date('Y-m-d');
+        $current_time = date('H:i:s');
+        $current_day = strtolower(date('l'));
+        
+        $offers = ProductOffer::where("start_date", "<=", $today)
+            ->where("end_date", ">=", $today)
+            ->where("time_from", "<=", $current_time)
+            ->where("time_to", ">=", $current_time)
+            ->whereJsonContains("module", $module)
+            ->where(fn($q) => $q->whereJsonContains("days", $current_day)->orWhere("delay", 1))
+            ->with([
+                "products.addons" => fn($q) => $q->withLocale($locale),
+                "products.sub_category_addons" => fn($q) => $q->withLocale($locale), 
+                "products.category_addons" => fn($q) => $q->withLocale($locale), 
+                "products.excludes" => fn($q) => $q->withLocale($locale), 
+                "products.extra", "products.discount", "products.sales_count", "products.tax", "products.tax_module.module",
+                "products.variations" => fn($q) => $q->withLocale($locale)->with(['options' => fn($qo) => $qo->with(['extra' => fn($qe) => $qe->with('parent_extra')->withLocale($locale)])->withLocale($locale)])
+            ])
+            ->get()
+            ->map(function($item) {
+                $discount = ['name' => $item->name, 'type' => "precentage", 'amount' => $item->discount];
+                $total = 0;
+                $products = $item->products->map(function($element) use ($discount, &$total) {
+                    $element->discount = (object) $discount;
+                    $total += $element->price - ($discount['amount'] * $element->price / 100);
+                    return $element;
+                });
+                return [
+                    "name" => $item->name,
+                    "total" => $total,
+                    "discount" => $item->discount,
+                    "products" => ProductResource::collection($products),
+                ];
+            });
+            
+        return response()->json(['offers' => $offers]);
+    }
 }

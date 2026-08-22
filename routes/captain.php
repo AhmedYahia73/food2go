@@ -49,7 +49,11 @@ Route::middleware(['auth:sanctum', 'IsCaptain'])->group(function(){
         Route::get('/products', 'products_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/favourite_products', 'favourite_products_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
         Route::get('/search_products', 'search_products')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
-        // ───────────────────────────────────────────────────────────────────
+        Route::get('/payment_methods', 'payment_methods_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/offers', 'offers_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/bundles', 'bundles_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        Route::get('/discounts', 'discounts_list')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
+        // 🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹🔹───────────────────────────────────────────────────────────────────
 
 
         Route::get('/selection_lists', 'my_selection_lists')->withOutMiddleware(['auth:sanctum', 'IsCaptain']);
