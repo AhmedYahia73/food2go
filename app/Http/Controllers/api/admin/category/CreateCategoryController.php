@@ -73,6 +73,10 @@ class CreateCategoryController extends Controller
                 ->increment('priority');
             }
         }
+        if(!$request->priority){
+            $categoryRequest['priority'] = $this->categories
+            ->max("priority") + 1;
+        }
         $categories = $this->categories
         ->create($categoryRequest); // create category
         foreach ($request->category_names as $item) {
