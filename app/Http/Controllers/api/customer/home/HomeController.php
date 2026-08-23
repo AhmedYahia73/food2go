@@ -12,6 +12,7 @@ use App\Http\Resources\AddonResource;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
+use App\Models\CategoryClick;
 use App\Models\TimeSittings;
 use App\Models\Category;
 use App\Models\Product;
@@ -694,7 +695,10 @@ class HomeController extends Controller
     }
 
     public function products_in_category(Request $request, $id){
-        
+        CategoryClick::create([
+            'category_id' => $id,
+            'user_id'     => auth()->id(),
+        ]);
         $app_type = $request->app_type ?? "app";
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;
