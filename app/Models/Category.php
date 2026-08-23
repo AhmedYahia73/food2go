@@ -22,6 +22,7 @@ class Category extends Model
         'priority',
         'active',
         'app_type', // "all", "web", "app"
+        "module" // all, online, pos
     ];
     protected $appends = ['image_link', 'banner_link'];
 

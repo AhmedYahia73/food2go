@@ -157,6 +157,10 @@ class HomeController extends Controller
         'addons' => function($query) use($locale){
             $query->withLocale($locale);
         }])
+        ->where(function($query){
+            $query->where("module", "online")
+            ->orWhere("module", "all");
+        })
         ->orderBy('priority')
         ->withLocale($locale)
         ->where('category_id', null)
@@ -648,6 +652,10 @@ class HomeController extends Controller
         $categories = $this->categories
         ->orderBy('priority')
         ->where('status', 1)
+        ->where(function($query){
+            $query->where("module", "online")
+            ->orWhere("module", "all");
+        })
         ->with(['sub_categories' => function($query) use($locale, $category_off){
             $query->where('status', 1)
             ->whereNotIn('id', $category_off->toArray())

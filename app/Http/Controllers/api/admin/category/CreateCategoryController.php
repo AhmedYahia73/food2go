@@ -22,6 +22,7 @@ class CreateCategoryController extends Controller
         'priority',
         'active',
         'app_type',
+        "module",
     ];
     use image;
     use translaion;
