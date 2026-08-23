@@ -33,6 +33,7 @@ class CategoryRequest extends FormRequest
             'category_names.*.category_name' => ['required'],
             'category_names.*.tranlation_id' => ['required'],
             'app_type' => ["required", "in:all,web,app"],
+            'module' => ["required", "in:all,online,pos"],
         ];
     }
 
