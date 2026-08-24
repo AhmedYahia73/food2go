@@ -30,6 +30,10 @@ class Category extends Model
         return $this->belongsToMany(Discount::class, "discount_category", "category_id", "discount_id");
     }
 
+    public function clicks(){
+        return $this->hasMany(CategoryClick::class, "category_id");
+    }
+
     public function category_off(){
         return $this->hasMany(BranchOff::class, "category_id");
     }
