@@ -940,13 +940,22 @@ class HomeController extends Controller
     }
 
     public function call_category(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'sometimes|exists:users,id',
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        } 
+
         $app_type = "mobile";
         if($request->app_type && $request->app_type == "web"){
             $app_type = "web";
         }
         CategoryClick::create([
             'category_id' => $id,
-            'user_id'     => auth()->id(),
+            'user_id'     => $request->user_id ?? null,
             'app_type'    => $app_type,
         ]);
 
