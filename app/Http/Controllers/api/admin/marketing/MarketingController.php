@@ -54,7 +54,7 @@ class MarketingController extends Controller
         $categories->sortBy('clicks_count', SORT_REGULAR, $request->sort == 'desc');
 
         return response()->json([
-            'message' => 'MarketingController index',
+            'categories' => $categories,
         ]);
     }
 }
