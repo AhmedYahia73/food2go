@@ -51,7 +51,12 @@ class MarketingController extends Controller
             ];
         });
 
-        $categories->sortBy('clicks_count', SORT_REGULAR, $request->sort == 'desc');
+        if ($request->sort == 'desc') {
+            $categories = $categories->sortByDesc('clicks_count');
+        }
+        else {
+            $categories = $categories->sortBy('clicks_count');
+        }
 
         return response()->json([
             'categories' => $categories,
