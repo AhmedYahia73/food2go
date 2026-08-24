@@ -59,7 +59,7 @@ class MarketingController extends Controller
         }
 
         return response()->json([
-            'categories' => $categories,
+            'categories' => $categories->values(),
         ]);
     }
 }
