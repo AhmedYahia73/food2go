@@ -136,7 +136,7 @@ class SignupController extends Controller
             ]);
         
             // Send OTP to the new user
-            return $this->sendOtp($phone, $code);
+            $this->sendOtp($phone, $code);
         }
         else{
             return response()->json([
@@ -147,102 +147,74 @@ class SignupController extends Controller
             'code' => $code
         ]);
     }
+    
     private function sendOtp($phone, $otp)
-{
-    // Send OTP using Mobishastra API
-    try {
-        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
-        $response = json_decode($response);
-
-        $sms_subscription = collect($response?->user_sms) ?? collect([]); 
-        $sms_subscription = $sms_subscription->where('back_link', url(''))
-        ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
-        ->first();
-
-        $msg_number = $this->sms_balance
-        ->where('package_id', $sms_subscription?->id)
-        ->first();
-
-        if (!empty($sms_subscription) && empty($msg_number)) {
-            $msg_number = $this->sms_balance
-            ->create([
-                'package_id' => $sms_subscription->id,
-                'balance' => $sms_subscription->msg_number,
-            ]);
-        }
-
-        if (empty($sms_subscription) || $msg_number?->balance <= 0) {
-            $customer_login = $this->settings
-            ->where('name', 'customer_login')
+    {
+        // Send OTP using Mobishastra API
+        try {
+           $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+            $response = json_decode($response);
+    
+            $sms_subscription = collect($response?->user_sms) ?? collect([]); 
+            $sms_subscription = $sms_subscription->where('back_link', url(''))
+            ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
             ->first();
-
-            if (empty($customer_login)) {
-                $this->settings
+            $msg_number = $this->sms_balance
+            ->where('package_id', $sms_subscription?->id)
+            ->first();
+            if (!empty($sms_subscription) && empty($msg_number)) {
+                $msg_number = $this->sms_balance
                 ->create([
-                    'name' => 'customer_login',
-                    'setting' => '{"login":"otp","verification":"email"}',
-                ]);
-            } else {
-                $customer_login->update([
-                    'setting' => '{"login":"otp","verification":"email"}',
+                    'package_id' => $sms_subscription->id,
+                    'balance' => $sms_subscription->msg_number,
                 ]);
             }
-
-            return response()->json([
-                'errors' => 'No active SMS package or balance is zero.'
-            ], 400);
-        }
-
-        $sms_integration = $this->sms_integration
-        ->orderByDesc("created_at")
-        ->first();
-
-        if (!$sms_integration) {
-            return response()->json([
-                'errors' => 'SMS integration settings not found.'
-            ], 400);
-        }
-
-        // إرسال الطلب لشركة SMS
-        $smsResponse = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
-            'user' => $sms_integration->user,
-            'pwd' => $sms_integration->pwd,
-            'senderid' => $sms_integration->senderid,
-            'mobileno' => $phone,
-            'msgtext' => "Your activation number: " . $otp,
-            'CountryCode' => $sms_integration->CountryCode,
-            'profileid' => $sms_integration->profileid,
-        ]);
-
-        $responseBody = $smsResponse->body(); // نص الرد من شركة SMS
-
-        if ($smsResponse->successful()) {
-            // خصم الرصيد بعد التأكد من الإرسال
+            if (empty($sms_subscription) || $msg_number->balance <= 0) {
+                $customer_login = $this->settings
+                ->where('name', 'customer_login')
+                ->first();
+                if(empty($customer_login)){
+                    $this->settings
+                    ->create([
+                        'name' => 'customer_login',
+                        'setting' => '{"login":"otp","verification":"email"}',
+                    ]);
+                }
+                else{
+                    $customer_login->update([
+                        'setting' => '{"login":"otp","verification":"email"}',
+                    ]);
+                }
+            }
             $this->sms_balance
             ->where('package_id', $sms_subscription->id)
             ->update([
                 'balance' => $msg_number->balance - 1
             ]);
-
-            return response()->json([
-                'message' => 'OTP sent successfully.',
-                'provider_response' => $responseBody // إظهار رد الشركة
-            ], 200);
-        } else {
-            return response()->json([
-                'errors' => 'Failed to send OTP via SMS Provider.',
-                'status_code' => $smsResponse->status(),
-                'provider_response' => $responseBody // إظهار سبب الفشل القادم من الشركة
-            ], 400);
+            $sms_integration = $this->sms_integration
+            ->orderByDesc("created_at")
+            ->first();
+            $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
+                'user' => $sms_integration->user,
+                'pwd' => $sms_integration->pwd,
+                'senderid' => $sms_integration->senderid,
+                'mobileno' => $phone,
+                'msgtext' => "Your activation number: " . $otp,
+                'CountryCode' => $sms_integration->CountryCode,
+                'profileid' => $sms_integration->profileid,
+            ]);
+    
+            if ($response->successful()) {
+                // Store the OTP in the database 
+    
+                return response()->json(['message' => 'OTP sent successfully.'], 200);
+            } else {
+                throw new Exception('Failed to send OTP.');
+            }
+        } catch (\Throwable $e) {
+            return response()->json(['errors' => 'Unable to send OTP at this time. Please try again later.'], 500);
         }
-
-    } catch (\Throwable $e) {
-        return response()->json([
-            'errors' => 'Unable to send OTP at this time.',
-            'exception_message' => $e->getMessage() // إظهار نص الـ Exception في حال حدث خطأ برمي
-        ], 500);
     }
-}
  
     // private function sendOtp($phone, $otp)
     // {
