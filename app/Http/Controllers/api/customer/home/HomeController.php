@@ -939,10 +939,15 @@ class HomeController extends Controller
         ]);
     }
 
-    public function call_category($id){
+    public function call_category(Request $request, $id){
+        $app_type = "mobile";
+        if($request->app_type && $request->app_type == "web"){
+            $app_type = "web";
+        }
         CategoryClick::create([
             'category_id' => $id,
             'user_id'     => auth()->id(),
+            'app_type'    => $app_type,
         ]);
 
         return response()->json([
