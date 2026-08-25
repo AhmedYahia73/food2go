@@ -139,7 +139,7 @@ class AddressController extends Controller
             return $item;
         });
         $call_center_phone = $this->company_info
-        ->orderByDesc("created_at")
+        ->orderByDesc('id')
         ->first()?->phone; 
 
         return response()->json([
