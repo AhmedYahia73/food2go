@@ -15,4 +15,8 @@ class ModulePayment extends Model
     public function module_financials(){
         return $this->hasMany(ModuleFinancial::class, 'module_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

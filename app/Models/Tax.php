@@ -19,5 +19,9 @@ class Tax extends Model
     public function tax_module(){
         return $this->hasMany(TaxModule::class, 'tax_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     
 }

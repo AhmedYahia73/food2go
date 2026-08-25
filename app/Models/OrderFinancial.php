@@ -32,6 +32,10 @@ class OrderFinancial extends Model
         return $this->belongsTo(Order::class, 'order_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function financials(){
         return $this->belongsTo(FinantiolAcounting::class, 'financial_id');
     }

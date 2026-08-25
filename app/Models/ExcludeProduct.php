@@ -20,6 +20,10 @@ class ExcludeProduct extends Model
         return $this->morphMany(TranslationTbl::class, 'translatable');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function scopeWithLocale($query, $locale = null)
     {
         $locale = $locale ?: app()->getLocale();

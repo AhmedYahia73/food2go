@@ -15,4 +15,8 @@ class KItemAddon extends Model
     public function addon(){
         return $this->belongsTo(Addon::class, "addon_id");
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

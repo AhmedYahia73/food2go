@@ -20,6 +20,10 @@ class KitchenItem extends Model
     public function excludes(){
         return $this->hasMany(KItemExclude::class, "kitchen_item_id");
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
  
     public function extras(){
         return $this->hasMany(KItemExtra::class, "kitchen_item_id");

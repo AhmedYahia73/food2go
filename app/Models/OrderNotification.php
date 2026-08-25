@@ -13,4 +13,8 @@ class OrderNotification extends Model
     protected $fillable = [
         'email',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

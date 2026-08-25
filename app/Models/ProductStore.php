@@ -19,6 +19,10 @@ class ProductStore extends Model
         'product_id',
     ]; 
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function unit(){
         return $this->belongsTo(Unit::class, 'unit_id');
     }

@@ -25,4 +25,8 @@ class LogOrder extends Model
     public function admin(){
         return $this->belongsTo(Admin::class, 'admin_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

@@ -18,6 +18,10 @@ class UpsalingGroup extends Model
     public function products(){
         return $this->belongsToMany(Product::class, "upsaling_group_product", "upsaling_group_id", "product_id");
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     
     public function translations()
     {

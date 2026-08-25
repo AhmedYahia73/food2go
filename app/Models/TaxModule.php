@@ -16,6 +16,10 @@ class TaxModule extends Model
     public function tax(){
         return $this->belongsTo(Tax::class, 'tax_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function module(){
         return $this->hasMany(TaxModuleBranch::class, 'tax_module_id');
     }

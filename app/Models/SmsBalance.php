@@ -14,4 +14,8 @@ class SmsBalance extends Model
         'package_id',
         'balance',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

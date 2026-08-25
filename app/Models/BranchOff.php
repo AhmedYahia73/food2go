@@ -25,6 +25,10 @@ class BranchOff extends Model
         return $this->belongsTo(OptionProduct::class, 'option_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function category(){
         return $this->belongsTo(Category::class);
     }

@@ -16,4 +16,8 @@ class CashierBalance extends Model
         'cashier_man_id',
         'shift_number'
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

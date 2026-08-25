@@ -15,4 +15,8 @@ class Currency extends Model
         'currancy_symbol',
         'currancy_code',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

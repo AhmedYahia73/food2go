@@ -27,6 +27,10 @@ class KitchenOrder extends Model
         'cart_id',
         'date'
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function table(){
         return $this->belongsTo(CafeTable::class, 'table_id');
     }

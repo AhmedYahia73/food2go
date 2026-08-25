@@ -18,6 +18,10 @@ class CashierGap extends Model
         'cashier_man_id',
         'shift',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
  
     public function cashier(){
         return $this->belongsTo(Cashier::class, 'cashier_id');

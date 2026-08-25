@@ -21,6 +21,10 @@ class Waiter extends Model
     ];
     protected $appends = ['role'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getRoleAttribute(){
         return 'waiter';
     }

@@ -20,6 +20,10 @@ class PurchaseStock extends Model
     ];
     protected $appends = ["inability"];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getInabilityAttribute(){
         if(isset($this->attributes['quantity']) && isset($this->attributes['actual_quantity'])){
             return $this->attributes['quantity'] - $this->attributes['actual_quantity'];

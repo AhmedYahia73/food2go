@@ -23,6 +23,10 @@ class PaymentMethod extends Model
     ];
     protected $appends = ['logo_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getLogoLinkAttribute(){
         if(isset($this->attributes['logo'])){
             return url('storage/' . $this->attributes['logo']);

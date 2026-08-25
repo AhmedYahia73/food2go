@@ -27,6 +27,10 @@ class CafeTable extends Model
     ];
     protected $appends = ['qr_code_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getQrCodeLinkAttribute(){
         if ($this->qr_code) {
             return url('storage/' . $this->qr_code);

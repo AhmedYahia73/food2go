@@ -20,4 +20,8 @@ class GroupOptionPrice extends Model
     public function group(){
         return $this->belongsTo(GroupProduct::class, "group_product_id");
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

@@ -19,6 +19,10 @@ class PurchaseRecipe extends Model
         'material_product_id', 
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function material_category(){
         return $this->belongsTo(MaterialCategory::class, "material_category_id");
     }

@@ -19,4 +19,8 @@ class PurchaseCategory extends Model
     public function category(){
         return $this->belongsTo(PurchaseCategory::class, 'category_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

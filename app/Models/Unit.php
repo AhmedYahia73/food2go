@@ -14,4 +14,8 @@ class Unit extends Model
         "name",
         "status",
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

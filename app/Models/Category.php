@@ -26,6 +26,10 @@ class Category extends Model
     ];
     protected $appends = ['image_link', 'banner_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function discounts(){
         return $this->belongsToMany(Discount::class, "discount_category", "category_id", "discount_id");
     }

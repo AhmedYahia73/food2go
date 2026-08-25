@@ -41,6 +41,10 @@ class OrderDetail extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function exclude(){
         return $this->belongsTo(ExcludeProduct::class, 'exclude_id');
     }

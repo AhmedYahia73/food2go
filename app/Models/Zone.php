@@ -22,6 +22,10 @@ class Zone extends Model
         return $this->belongsTo(City::class, 'city_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function branch(){
         return $this->belongsTo(Branch::class, 'branch_id');
     }

@@ -13,4 +13,8 @@ class Translation extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

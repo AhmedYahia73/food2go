@@ -12,4 +12,8 @@ class BundleOption extends Model
         'variation_id',
         'option_id', 
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

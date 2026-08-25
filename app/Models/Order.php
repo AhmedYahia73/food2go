@@ -94,6 +94,10 @@ class Order extends Model
     ];
 
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     protected static function booted()
     {
         static::creating(function ($order) {

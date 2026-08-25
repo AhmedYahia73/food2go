@@ -20,6 +20,10 @@ class InventoryList extends Model
         return $this->belongsTo(PurchaseStore::class, "store_id");
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function products(){
         return $this->hasMany(InventoryProductHistory::class, "inventory_id");
     }

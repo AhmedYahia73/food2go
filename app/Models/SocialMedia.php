@@ -20,4 +20,8 @@ class SocialMedia extends Model
             return url('storage/' . $this->attributes['icon']);
         }
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

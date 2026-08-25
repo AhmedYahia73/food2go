@@ -33,6 +33,10 @@ class Branch extends Authenticatable
     ];
     protected $appends = ['role', 'image_link', 'cover_image_link', 'map'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function translations()
     {
         return $this->morphMany(TranslationTbl::class, 'translatable');

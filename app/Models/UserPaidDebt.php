@@ -21,6 +21,10 @@ class UserPaidDebt extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function admin(){
         return $this->belongsTo(Admin::class, 'admin_id');
     }

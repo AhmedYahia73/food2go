@@ -15,4 +15,8 @@ class DeviceToken extends Model
         'branch_id',
         'token',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

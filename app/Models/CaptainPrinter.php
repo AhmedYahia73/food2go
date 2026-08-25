@@ -19,4 +19,8 @@ class CaptainPrinter extends Model
         'print_type', 
         'captain_order_id', 
     ]; 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

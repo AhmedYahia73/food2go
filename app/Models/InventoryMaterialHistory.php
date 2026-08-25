@@ -21,6 +21,10 @@ class InventoryMaterialHistory extends Model
         return $this->belongsTo(MaterialCategory::class, "category_id");
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function material(){
         return $this->belongsTo(Material::class, "material_id");
     }

@@ -14,4 +14,8 @@ class NewNotification extends Model
         'title',
         'notification',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

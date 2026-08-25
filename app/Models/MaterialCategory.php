@@ -19,4 +19,8 @@ class MaterialCategory extends Model
     public function category(){
         return $this->belongsTo(MaterialCategory::class, 'category_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

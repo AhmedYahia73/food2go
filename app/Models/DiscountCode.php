@@ -19,6 +19,10 @@ class DiscountCode extends Model
         'end',
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function codes(){
         return $this->hasMany(GeneratedDiscountCode::class, 'discount_code_id');
     }

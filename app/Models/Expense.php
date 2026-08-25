@@ -23,6 +23,10 @@ class Expense extends Model
         'note',
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function admin(){
         return $this->belongsTo(Admin::class, 'admin_id');
     }

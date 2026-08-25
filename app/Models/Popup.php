@@ -17,6 +17,10 @@ class Popup extends Model
     ];
     protected $appends = ["image_en_link", "image_ar_link"];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getImageEnLinkAttribute(){
         if(isset($this->attributes['image_en'])){
             return url('storage/' . $this->attributes['image_en']);

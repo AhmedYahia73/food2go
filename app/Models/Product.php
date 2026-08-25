@@ -49,6 +49,10 @@ class Product extends Model
     ];
     protected $appends = ['image_link', 'orders_count', 'taxes', 'orders_count_branch'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function product_off(){
         return $this->hasMany(BranchOff::class, "product_id");
     }

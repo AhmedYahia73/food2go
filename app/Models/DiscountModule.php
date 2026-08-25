@@ -15,6 +15,10 @@ class DiscountModule extends Model
         'status',
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function module(){
         return $this->hasMany(DiscountModuleBranch::class, 'discount_module_id');
     }

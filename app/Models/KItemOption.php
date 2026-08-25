@@ -15,4 +15,8 @@ class KItemOption extends Model
     public function option(){
         return $this->belongsTo(OptionProduct::class, "option_id");
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

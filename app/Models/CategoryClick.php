@@ -11,4 +11,8 @@ class CategoryClick extends Model
         'user_id',
         'app_type',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

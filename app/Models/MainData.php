@@ -70,4 +70,8 @@ class MainData extends Model
             $query->where('locale', $locale);
         }]);
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

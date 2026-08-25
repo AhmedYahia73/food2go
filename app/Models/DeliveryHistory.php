@@ -18,4 +18,8 @@ class DeliveryHistory extends Model
         'latitude',
         'location',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

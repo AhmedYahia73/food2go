@@ -20,4 +20,8 @@ class OrderCartBVariation extends Model
     public function options(){
         return $this->hasMany(OrderCartBOption::class, 'variation_bundle_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

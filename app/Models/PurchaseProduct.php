@@ -18,6 +18,10 @@ class PurchaseProduct extends Model
         'min_stock',
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function start_stock(){
         return $this->hasMany(ProductStore::class, 'product_id');
     }

@@ -14,6 +14,10 @@ class FinancialHistory extends Model
         'amount'
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function from_financial(){
         return $this->belongsTo(FinantiolAcounting::class, 'from_financial_id');
     }

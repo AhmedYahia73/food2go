@@ -27,6 +27,11 @@ class Admin extends Authenticatable
     ];
     protected $appends = ['role', 'image_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+    
     public function getRoleAttribute(){
         return 'admin';
     }

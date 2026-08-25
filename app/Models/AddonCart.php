@@ -19,6 +19,10 @@ class AddonCart extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function addon()
     {
         return $this->belongsTo(Addon::class, "addon_id");

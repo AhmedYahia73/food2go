@@ -22,6 +22,10 @@ class Material extends Model
         return $this->hasMany(MaterialStore::class, 'product_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function unit(){
         return $this->belongsTo(Unit::class, 'unit_id');
     }

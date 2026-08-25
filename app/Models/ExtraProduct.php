@@ -21,6 +21,10 @@ class ExtraProduct extends Model
         'group_id'
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function group_price(){
         return $this->hasMany(GroupExtraPrice::class, 'extra_id');
     }

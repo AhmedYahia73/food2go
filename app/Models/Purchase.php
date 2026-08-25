@@ -26,6 +26,10 @@ class Purchase extends Model
     ];
     protected $appends = ['receipt_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function financial(){
         return $this->belongsToMany(FinantiolAcounting::class, 'purchase_financials', 'purchase_id', 'financial_id')
         ->withPivot('amount');

@@ -18,4 +18,8 @@ class OrderInformation extends Model
         'address',
         'order_id',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

@@ -15,4 +15,8 @@ class ProductPricing extends Model
         'branch_id',
         'price',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

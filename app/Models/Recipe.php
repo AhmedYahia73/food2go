@@ -19,6 +19,10 @@ class Recipe extends Model
         'status',
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function product(){
         return $this->belongsTo(Product::class, 'product_id');
     }

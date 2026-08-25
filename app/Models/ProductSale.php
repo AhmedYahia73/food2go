@@ -15,4 +15,8 @@ class ProductSale extends Model
         'count',
         'date',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

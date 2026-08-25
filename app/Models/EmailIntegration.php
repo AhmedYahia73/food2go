@@ -14,4 +14,8 @@ class EmailIntegration extends Model
         'email',
         'integration_password',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

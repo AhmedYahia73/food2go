@@ -14,4 +14,8 @@ class CashierRole extends Model
         'roles',
         'cashier_man_id',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

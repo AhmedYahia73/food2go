@@ -15,4 +15,8 @@ class ChangeLog extends Model
         'old_payload' => 'array',
         'new_payload' => 'array',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

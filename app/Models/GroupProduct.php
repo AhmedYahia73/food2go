@@ -28,6 +28,10 @@ class GroupProduct extends Model
         }
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function setModuleAttribute($value)
     {
         if (is_array($value)) {
