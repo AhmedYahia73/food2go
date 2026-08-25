@@ -140,8 +140,6 @@ class OtpController extends Controller
             ]);
     
             if ($response->successful()) {
-                // الآن $user مُعرف وتعمل هذه الدالة بدون أخطاء
-                $user->otp()->create(['otp' => $otp]);
     
                 return response()->json([
                     'code' => 'success',
