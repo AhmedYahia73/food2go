@@ -150,11 +150,13 @@ class OtpController extends Controller
             } else {
                 throw new Exception('Failed to send OTP.');
             }
-        } catch (\Throwable $e) {
-            // \Log::error('SMS Error: ' . $e->getMessage()); // مفيد للـ Debugging
-            
+        }
+        catch (\Throwable $e) {
             return response()->json([
-                'errors' => 'Unable to send OTP at this time. Please try again later.'
+                'errors' => 'Unable to send OTP at this time. Please try again later.',
+                'debug_error' => $e->getMessage(), // الخطأ الحقيقي
+                'file' => $e->getFile(),           // الملف الذي حدث فيه الخطأ
+                'line' => $e->getLine()            // رقم السطر
             ], 500);
         }
     }
