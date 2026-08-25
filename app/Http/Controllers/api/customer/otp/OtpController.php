@@ -21,7 +21,7 @@ class OtpController extends Controller
     public function __construct(private User $user,
     private SmsIntegration $sms_integration,
     private SmsBalance $sms_balance, private Setting $settings){}
-    
+
     public function create_code(Request $request){
         // https://bcknd.food2go.online/customer/otp/create_code
         // Keys
@@ -74,8 +74,7 @@ class OtpController extends Controller
     }
  
     
-    private function sendOtp($phone, $otp, $user)
-    {
+    private function sendOtp($phone, $otp, $user){
         // Send OTP using Mobishastra API
         try {
             $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
