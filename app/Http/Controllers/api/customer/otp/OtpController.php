@@ -57,7 +57,7 @@ class OtpController extends Controller
             // Send OTP to the new user
             $api = $this->sendOtp($phone, $code);
             return response()->json([
-                'code' => $api->body(),
+                'code' => $api,
                 'message' => 'OTP sent successfully.',
             ]);
         }
