@@ -28,67 +28,60 @@ class OtpController extends Controller
         // email, phone
         $code = rand(10000, 99999);
         $user_codes = $this->user->get()->pluck('code')->toArray();
-        
         while (in_array($code, $user_codes)) {
             $code = rand(10000, 99999);
         }
-        
         $user = $this->user
-            ->where('email', $request->email)
-            ->orWhere('phone', $request->phone)
-            ->orWhere('phone', '+2' . $request->phone)
-            ->orWhere('phone', '+20' . $request->phone)
-            ->first();
-            
+        ->where('email', $request->email)
+        ->orWhere('phone', $request->phone)
+        ->orWhere('phone', '+2' . $request->phone)
+        ->orWhere('phone', '+20' . $request->phone)
+        ->first();
         if (empty($user)) {
             return response()->json([
                 'faild' => 'Email is wrong'
             ], 400);
         }
-        
         $user->code = $code;
         $user->save();
-        
         if ($request->email) {
             $data = [
                 'code' => $code,
                 'name' => $user->f_name . ' ' . $user->l_name
             ];
             Mail::to($user->email)->send(new OTPMail($data));
-            
-            return response()->json([
-                'code' => 'success',
-            ]);
         } 
         elseif($request->phone) { 
             $phone = $request->phone;
         
-            // تمرير كائن $user إلى دالة sendOtp وإرجاع الرد مباشرة
-            return $this->sendOtp($phone, $code, $user);
+            // Send OTP to the new user
+            $this->sendOtp($phone, $code);
         }
         else{
             return response()->json([
                 'errors' => 'Phone or email is requred'
             ], 400);
         }
+        
+        return response()->json([
+            'code' => 'success',
+        ]);
     }
- 
-    
-    private function sendOtp($phone, $otp, $user){
+
+    private function sendOtp($phone, $otp)
+    {
         // Send OTP using Mobishastra API
         try {
-            $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
+           $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_sms_package')->body();
             $response = json_decode($response);
     
             $sms_subscription = collect($response?->user_sms) ?? collect([]); 
             $sms_subscription = $sms_subscription->where('back_link', url(''))
             ->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
             ->first();
-            
             $msg_number = $this->sms_balance
             ->where('package_id', $sms_subscription?->id)
             ->first();
-            
             if (!empty($sms_subscription) && empty($msg_number)) {
                 $msg_number = $this->sms_balance
                 ->create([
@@ -96,12 +89,10 @@ class OtpController extends Controller
                     'balance' => $sms_subscription->msg_number,
                 ]);
             }
-            
             if (empty($sms_subscription) || $msg_number->balance <= 0) {
                 $customer_login = $this->settings
                 ->where('name', 'customer_login')
                 ->first();
-                
                 if(empty($customer_login)){
                     $this->settings
                     ->create([
@@ -115,20 +106,14 @@ class OtpController extends Controller
                     ]);
                 }
             }
-            
-            // التأكد من وجود الباقة قبل محاولة خصم الرصيد
-            if (!empty($sms_subscription)) {
-                $this->sms_balance
-                ->where('package_id', $sms_subscription->id)
-                ->update([
-                    'balance' => $msg_number->balance - 1
-                ]);
-            }
-            
+            $this->sms_balance
+            ->where('package_id', $sms_subscription->id)
+            ->update([
+                'balance' => $msg_number->balance - 1
+            ]);
             $sms_integration = $this->sms_integration
             ->orderByDesc("created_at")
             ->first();
-            
             $response = Http::timeout(30)->get('http://mshastra.com/sendurl.aspx', [
                 'user' => $sms_integration->user,
                 'pwd' => $sms_integration->pwd,
@@ -140,15 +125,13 @@ class OtpController extends Controller
             ]);
     
             if ($response->successful()) {
+                // Store the OTP in the database 
     
-                return response()->json([
-                    'code' => 'success',
-                    'message' => 'OTP sent successfully.'
-                ], 200);
+                return response()->json(['message' => 'OTP sent successfully.'], 200);
             } else {
                 throw new Exception('Failed to send OTP.');
             }
-        }
+        } 
         catch (\Throwable $e) {
             return response()->json([
                 'errors' => 'Unable to send OTP at this time. Please try again later.',
