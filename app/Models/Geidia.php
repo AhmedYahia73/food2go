@@ -14,4 +14,8 @@ class Geidia extends Model
         'environment',
         'payment_method_id',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

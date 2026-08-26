@@ -24,6 +24,10 @@ class Address extends Model
         return ['customer_id' => $this->customer_id];
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function getCustomerIdAttribute(){
         return (string) ($this->temp_customer_id ?? $this->users()->first()?->id);
     }

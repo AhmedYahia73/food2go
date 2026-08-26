@@ -18,6 +18,10 @@ class OfferOrder extends Model
         'status',
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function offer(){
         return $this->belongsTo(Offer::class, 'offer_id');
     }

@@ -26,6 +26,10 @@ class Kitchen extends Model
         'status',
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function printer(){
         return $this->hasMany(PrinterKitchen::class, "kitchen_id");
     }

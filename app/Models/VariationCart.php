@@ -18,6 +18,10 @@ class VariationCart extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function variation()
     {
         return $this->belongsTo(VariationProduct::class, "variation_id");

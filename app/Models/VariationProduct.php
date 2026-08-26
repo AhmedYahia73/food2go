@@ -24,6 +24,10 @@ class VariationProduct extends Model
         'weight_unit',
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function extra(){
         return $this->hasMany(ExtraProduct::class, 'variation_id');
     }

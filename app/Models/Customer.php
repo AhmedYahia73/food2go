@@ -18,4 +18,8 @@ class Customer extends Model
     public function addresses(){
         return $this->hasMany(Address::class, 'customer_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

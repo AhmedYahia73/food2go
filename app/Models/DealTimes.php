@@ -16,4 +16,8 @@ class DealTimes extends Model
         'from',
         'to',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

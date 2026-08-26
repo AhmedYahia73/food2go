@@ -19,4 +19,8 @@ class SmsIntegration extends Model
         'CountryCode',
         'profileid',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

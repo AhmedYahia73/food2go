@@ -21,6 +21,10 @@ class Manufaturing extends Model
         return $this->belongsTo(PurchaseProduct::class, 'product_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function store(){
         return $this->belongsTo(PurchaseStore::class, 'store_id');
     }

@@ -19,4 +19,8 @@ class ExpenseCategory extends Model
     {
         return $this->morphMany(TranslationTbl::class, 'translatable');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

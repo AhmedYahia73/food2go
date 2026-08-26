@@ -22,6 +22,10 @@ class OptionProduct extends Model
     ];
     protected $appends = ['taxes'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function group_price(){
         return $this->hasMany(GroupOptionPrice::class, "option_id");
     }

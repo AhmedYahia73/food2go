@@ -22,6 +22,10 @@ class StorageMan extends Model
     ];
     protected $appends = ['role', 'image_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getRoleAttribute(){
         return 'store_man';
     }

@@ -23,6 +23,10 @@ class PurchaseTransfer extends Model
         'category_material_id',
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function material(){
         return $this->belongsTo(Material::class, 'material_id');
     }

@@ -17,6 +17,10 @@ class ExtraPricing extends Model
         'extra_id',
         'option_id',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     
     public function extra(){
         return $this->belongsTo(ExtraProduct::class, 'extra_id');

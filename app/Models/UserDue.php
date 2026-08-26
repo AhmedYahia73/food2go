@@ -21,6 +21,10 @@ class UserDue extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function cashier(){
         return $this->belongsTo(CashierMan::class, 'cashier_id');
     } 

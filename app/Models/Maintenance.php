@@ -24,4 +24,8 @@ class Maintenance extends Model
         'end_date',
         'status',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

@@ -18,4 +18,8 @@ class Group extends Model
     public function extra(){
         return $this->hasMany(ExtraGroup::class, 'group_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

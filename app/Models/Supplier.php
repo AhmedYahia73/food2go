@@ -14,4 +14,8 @@ class Supplier extends Model
         'status',
         'balance',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

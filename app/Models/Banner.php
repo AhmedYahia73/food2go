@@ -25,6 +25,11 @@ class Banner extends Model
     ];
     protected $appends = ['image_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+    
     public function getImageLinkAttribute(){
         return url('storage/' . $this->attributes['image']);
     }

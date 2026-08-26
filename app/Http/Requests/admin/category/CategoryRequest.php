@@ -27,12 +27,13 @@ class CategoryRequest extends FormRequest
             'category_id' => ['exists:categories,id', 'nullable'],
             'status' => ['required', 'boolean'],
             'active' => ['required', 'boolean'],
-            'priority' => ['required', 'integer'],
+            'priority' => ['sometimes'],
             'addons_id.*' => ['exists:addons,id'],
             'category_names.*.tranlation_name' => ['required'],
             'category_names.*.category_name' => ['required'],
             'category_names.*.tranlation_id' => ['required'],
             'app_type' => ["required", "in:all,web,app"],
+            'module' => ["required", "in:all,online,pos"],
         ];
     }
 

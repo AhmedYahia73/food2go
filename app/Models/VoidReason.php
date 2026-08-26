@@ -14,4 +14,8 @@ class VoidReason extends Model
         'void_reason',
         'status',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

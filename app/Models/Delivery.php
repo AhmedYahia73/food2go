@@ -38,6 +38,10 @@ class Delivery extends Authenticatable
         return 'delivery';
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function getIdentityImageLinkAttribute(){
         if(isset( $this->attributes['identity_image'])){
             return url('storage/' . $this->attributes['identity_image']);

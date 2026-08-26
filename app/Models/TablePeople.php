@@ -13,4 +13,8 @@ class TablePeople extends Model
         'is_active',
         'shift_number',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

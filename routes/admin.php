@@ -19,6 +19,8 @@ use App\Http\Controllers\api\admin\deal_order\DealOrderController;
 
 use App\Http\Controllers\api\admin\banner\BannerController;
 
+use App\Http\Controllers\api\admin\marketing\MarketingController;
+
 use App\Http\Controllers\api\admin\bundle\BundleController;
 
 use App\Http\Controllers\api\admin\point_offers\PointOffersController;
@@ -434,6 +436,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('free_discount')->group(function(){
         Route::get('/', 'view');
         Route::post('/create_update', 'create_update');
+    });
+
+    Route::controller(MarketingController::class)
+    ->prefix('marketing')->group(function(){
+        Route::get('/category_clicks', 'category_clicks');
     });
 
     Route::controller(RestoreCustomerController::class)

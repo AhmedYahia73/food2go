@@ -21,6 +21,10 @@ class InventoryProductHistory extends Model
         return $this->belongsTo(PurchaseCategory::class, "category_id");
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function product(){
         return $this->belongsTo(PurchaseProduct::class, "product_id");
     }

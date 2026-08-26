@@ -15,4 +15,8 @@ class PurchaseFinancial extends Model
         'financial_id',
         'amount',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

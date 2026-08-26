@@ -18,4 +18,8 @@ class PersonalAccessToken extends Model
         'last_used_at',
         'expires_at',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

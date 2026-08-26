@@ -20,4 +20,8 @@ class TranslationTbl extends Model
     {
        return $this->morphTo();
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

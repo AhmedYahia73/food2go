@@ -18,4 +18,8 @@ class UserPosition extends Model
     public function roles(){
         return $this->hasMany(UserRole::class);
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

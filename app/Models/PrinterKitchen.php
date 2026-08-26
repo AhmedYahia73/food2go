@@ -21,6 +21,10 @@ class PrinterKitchen extends Model
         'pivot', 
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     protected function casts(): array
     {
         return [

@@ -20,4 +20,8 @@ class ReceiptDesign extends Model
         'table_num',
         'preparation_num',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

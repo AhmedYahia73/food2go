@@ -21,4 +21,8 @@ class FilterSaved extends Model
             return null;
         }
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

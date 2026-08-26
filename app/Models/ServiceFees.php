@@ -20,6 +20,10 @@ class ServiceFees extends Model
         "all_products"
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     protected $hidden = array('pivot');
     
     public function branches(){

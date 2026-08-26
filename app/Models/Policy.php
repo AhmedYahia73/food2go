@@ -16,4 +16,8 @@ class Policy extends Model
         'return_policy',
         'delivery_policy',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

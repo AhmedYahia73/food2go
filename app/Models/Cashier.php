@@ -23,6 +23,10 @@ class Cashier extends Model
         'print_ip',
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function branch(){
         return $this->belongsTo(Branch::class, "branch_id");
     }

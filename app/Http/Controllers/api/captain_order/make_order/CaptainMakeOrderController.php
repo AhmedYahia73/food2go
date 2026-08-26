@@ -1475,6 +1475,10 @@ class CaptainMakeOrderController extends Controller
                 'addons' => fn($q) => $q->withLocale($locale)
             ])
             ->withLocale($locale)
+            ->where(function($query){
+                $query->where("module", "pos")
+                ->orWhere("module", "all");
+            })
             ->where('status', 1)
             ->whereNull('category_id')
             ->orderBy("priority") 
@@ -1977,6 +1981,10 @@ class CaptainMakeOrderController extends Controller
             ->withLocale($locale)
             ->where('status', 1)
             ->whereNull('category_id')
+            ->where(function($query){
+                $query->where("module", "pos")
+                ->orWhere("module", "all");
+            })
             ->orderBy('priority')
             ->get()
             ->each(function ($item) use ($category_off) {

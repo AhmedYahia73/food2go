@@ -18,4 +18,8 @@ class ModuleFinancial extends Model
     public function financial(){
         return $this->belongsTo(FinantiolAcounting::class, 'financial_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

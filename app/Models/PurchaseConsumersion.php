@@ -23,6 +23,10 @@ class PurchaseConsumersion extends Model
         'status',
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function category_material(){
         return $this->belongsTo(MaterialCategory::class, 'category_material_id');
     }

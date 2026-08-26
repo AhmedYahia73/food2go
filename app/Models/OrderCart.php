@@ -31,6 +31,10 @@ class OrderCart extends Model
         'captain_id',
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getcartAttribute($data){
         return json_decode($data);
     }

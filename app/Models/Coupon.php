@@ -31,6 +31,10 @@ class Coupon extends Model
         'status',
     ];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function products(){
         return $this->belongsToMany(Product::class, 'product_coupon');
     }

@@ -24,6 +24,10 @@ class Addon extends Model
         return $this->belongsTo(Tax::class, 'tax_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function categories(){
         return $this->belongsToMany(Category::class, 'category_addon', 'addon_id', 'category_id');
     }

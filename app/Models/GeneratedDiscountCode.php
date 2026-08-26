@@ -19,4 +19,8 @@ class GeneratedDiscountCode extends Model
     public function group(){
         return $this->belongsTo(DiscountCode::class, 'discount_code_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

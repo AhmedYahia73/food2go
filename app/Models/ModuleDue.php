@@ -11,4 +11,8 @@ class ModuleDue extends Model
         'branch_id',
         'due',
     ];  
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

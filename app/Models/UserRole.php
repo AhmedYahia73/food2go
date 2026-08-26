@@ -15,4 +15,8 @@ class UserRole extends Model
         'role',
         'action',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

@@ -38,6 +38,10 @@ class CashierMan extends Model
     ];
     protected $appends = ['role', 'image_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getImageLinkAttribute(){
         if(isset($this->attributes['image'])){
             return url('storage/' . $this->attributes['image']);

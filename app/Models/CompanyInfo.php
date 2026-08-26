@@ -37,6 +37,10 @@ class CompanyInfo extends Model
     ];
     protected $appends = ['logo_link', 'fav_icon_link', 'cover_app_image_link'];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getLogoLinkAttribute(){
         return url('storage/' . $this->attributes['logo']);
     }

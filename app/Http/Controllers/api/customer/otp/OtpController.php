@@ -125,15 +125,20 @@ class OtpController extends Controller
             ]);
     
             if ($response->successful()) {
-                // Store the OTP in the database
-                $user->otp()->create(['otp' => $otp]);
+                // Store the OTP in the database 
     
                 return response()->json(['message' => 'OTP sent successfully.'], 200);
             } else {
                 throw new Exception('Failed to send OTP.');
             }
-        } catch (\Throwable $e) {
-            return response()->json(['errors' => 'Unable to send OTP at this time. Please try again later.'], 500);
+        } 
+        catch (\Throwable $e) {
+            return response()->json([
+                'errors' => 'Unable to send OTP at this time. Please try again later.',
+                'debug_error' => $e->getMessage(), // الخطأ الحقيقي
+                'file' => $e->getFile(),           // الملف الذي حدث فيه الخطأ
+                'line' => $e->getLine()            // رقم السطر
+            ], 500);
         }
     }
 

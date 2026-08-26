@@ -14,4 +14,8 @@ class Setting extends Model
         'name',
         'setting',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

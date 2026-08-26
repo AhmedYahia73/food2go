@@ -21,6 +21,10 @@ class CashierShift extends Model
         'financial_id',
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function cashier_man(){
         return $this->belongsTo(CashierMan::class ,'cashier_man_id');
     }

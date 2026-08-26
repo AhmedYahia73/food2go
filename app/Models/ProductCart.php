@@ -20,6 +20,10 @@ class ProductCart extends Model
         return $this->belongsTo(Product::class);
     }
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function variations_cart()
     {
         return $this->hasMany(VariationCart::class, "product_cart_id");

@@ -22,6 +22,7 @@ class CreateCategoryController extends Controller
         'priority',
         'active',
         'app_type',
+        "module",
     ];
     use image;
     use translaion;
@@ -71,6 +72,10 @@ class CreateCategoryController extends Controller
                 ->whereNotNull('category_id')
                 ->increment('priority');
             }
+        }
+        if(!$request->priority){
+            $categoryRequest['priority'] = $this->categories
+            ->max("priority") + 1;
         }
         $categories = $this->categories
         ->create($categoryRequest); // create category

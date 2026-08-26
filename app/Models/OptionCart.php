@@ -20,6 +20,10 @@ class OptionCart extends Model
         return $this->belongsTo(Product::class);
     } 
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function option()
     {
         return $this->belongsTo(OptionProduct::class, "option_id");

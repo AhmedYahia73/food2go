@@ -21,6 +21,10 @@ class DeliveryBalanceHistory extends Model
         return $this->belongsTo(Branch::class, 'branch_id');
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     public function delivery(){
         return $this->belongsTo(Delivery::class, 'delivery_id');
     }

@@ -17,6 +17,10 @@ class OrderBundle extends Model
         return $this->belongsTo(Bundle::class, 'bundle_id');
     } 
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function bundle_products(){
         return $this->hasMany(OrderBundleProduct::class, "order_bundle_id");
     }

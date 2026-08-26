@@ -20,6 +20,10 @@ class Discount extends Model
         "end_date",
     ];
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     protected static function booted(): void
     {
         static::addGlobalScope('active_period', function (Builder $builder) {

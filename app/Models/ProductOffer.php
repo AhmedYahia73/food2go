@@ -23,6 +23,10 @@ class ProductOffer extends Model
         return $this->belongsToMany(Product::class, "product_offer_product", "product_offer_id", "product_id");
     }
 
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
+
     protected function casts(): array
     {
         return [

@@ -17,6 +17,10 @@ class OrderBundleProduct extends Model
         return $this->belongsTo(Product::class, "product_id");
     }
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function variations(){
         return $this->hasMany(OrderVariationBundle::class, "order_bundle_p_id");
     }

@@ -14,4 +14,8 @@ class CallWaiter extends Model
         'table_id',
         'status',
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

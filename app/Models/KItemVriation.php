@@ -19,4 +19,8 @@ class KItemVriation extends Model
     public function option_items(){
         return $this->hasMany(OptionProduct::class, "kitchen_variation_id");
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

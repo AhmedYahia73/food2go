@@ -15,4 +15,8 @@ class UserAddress extends Pivot
     public $incrementing = true;
     public $keyType = 'string';
     protected $guarded = [];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

@@ -15,4 +15,8 @@ class KItemExclude extends Model
     public function exclude(){
         return $this->belongsTo(ExcludeProduct::class, "exclude_id");
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

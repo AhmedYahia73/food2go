@@ -24,4 +24,8 @@ class ExpenseList extends Model
     public function category(){
         return $this->belongsTo(ExpenseCategory::class, 'category_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

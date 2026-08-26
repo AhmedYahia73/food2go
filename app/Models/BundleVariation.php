@@ -20,4 +20,8 @@ class BundleVariation extends Model
     public function options(){
         return $this->hasMany(BundleOption::class, 'variation_id');
     }
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }

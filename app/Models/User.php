@@ -48,6 +48,10 @@ class User extends Authenticatable
     ];
     protected $appends = ['role', 'orders_count', 'image_link', 'name', 'type', 'orders_count_branch', "can_debit"];
 
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
     public function getphoneAttribute(){
         if (isset($this->attributes['phone'])) {
             $phone = $this->attributes['phone'];

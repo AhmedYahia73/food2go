@@ -20,4 +20,8 @@ class PaymentMethodAuto extends Model
         'Hmac',
         'payment_method_id', 
     ];
+
+    public function getIdAttribute($value){
+        return (int) $value;
+    }
 }
