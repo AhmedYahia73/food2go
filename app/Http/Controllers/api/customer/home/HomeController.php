@@ -242,7 +242,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 }
                 return $product;
             });
@@ -438,7 +438,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 }
                 return $product;
             });
@@ -752,7 +752,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 }
                 if ($product->taxes->setting == 'included') {
                     $price = empty($product->tax) ? $product->price: 
