@@ -544,6 +544,7 @@ class HomeController extends Controller
             $query->where("products.id", $product->id);
         })
         ->get();
+        $product = collect($product->toArray(request()));
 
         return response()->json([
             'id' => $product->id,
