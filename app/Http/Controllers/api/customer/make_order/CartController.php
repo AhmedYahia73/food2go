@@ -48,7 +48,7 @@ class CartController extends Controller
             'variations_cart.options_cart.option.option_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             'addons_cart.addon.translations', 'addons_cart.addon.tax',
             'extras_cart.extra.translations',
-            'extras_cart.extra.pricing' => fn($q) => $q->where('branch_id', $branch_id),
+            'extras_cart.extra.pricing',
         ])
         ->where('user_id', $userId)
         ->get();
