@@ -37,27 +37,40 @@ class ProductResource extends JsonResource
         : null;
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
-            $price = $this->price;
+            $original_price = $this->price; // السعر الأصلي (شامل الضريبة)
+
+            // 1. حساب السعر بعد الخصم (وهذا السعر سيظل شامل للضريبة)
             if (!empty($my_discount)) {
                 if ($my_discount->type == 'precentage') {
-                    $discount = $price - $my_discount->amount * $price / 100;
+                    $discount = $original_price - ($my_discount->amount * $original_price / 100);
                 } else {
-                    $discount = $price - $my_discount->amount;
+                    $discount = $original_price - $my_discount->amount;
                 }
-                $final_price = empty($this->tax) ? $discount: 
-                ($this->tax->type == 'value' ? $discount + $this->tax->amount 
-                : $discount + $this->tax->amount * $discount / 100);
+            } else {
+                $discount = $original_price;
             }
-            else{
-                $discount = $price;
-                $final_price = empty($this->tax) ? $discount: 
-                ($this->tax->type == 'value' ? $discount + $this->tax->amount 
-                : $discount + $this->tax->amount * $discount / 100);
+
+            // 2. بما أن الضريبة "مشمولة"، السعر النهائي هو نفسه السعر بعد الخصم ولن نجمع عليه ضرائب جديدة
+            $final_price = $discount;
+
+            // 3. الآن نقوم باستخراج (السعر قبل الضريبة) و (قيمة الضريبة) من السعر النهائي
+            $tax_amount = 0;
+            $price_before_tax = $final_price;
+
+            if (!empty($this->tax)) {
+                if ($this->tax->type == 'value') {
+                    $tax_amount = $this->tax->amount;
+                    $price_before_tax = $final_price - $tax_amount;
+                } else {
+                    // معادلة استخراج السعر الأساسي إذا كانت الضريبة نسبة مئوية ومشمولة
+                    $price_before_tax = $final_price / (1 + ($this->tax->amount / 100));
+                    $tax_amount = $final_price - $price_before_tax;
+                }
             }
-            $tax = ($this->tax->type == 'value' ? $discount + $this->tax->amount 
-                : $discount + $this->tax->amount * $discount / 100);
-            $price = (1 / (1 + $tax / 100)) * $final_price;
-            $tax = $price;
+
+            // تعيين السعر ليكون السعر قبل الضريبة بناءً على طلبك
+            $price = $price_before_tax;
+
             return [
                 'id' => $this->id,
                 'allExtras' => ExtraResource::collection($this->whenLoaded('extra')),
@@ -70,13 +83,13 @@ class ProductResource extends JsonResource
                 'item_type' => $this->item_type,
                 'stock_type' => $this->stock_type,
                 'number' => $this->number,
-                'price' => $price,
-                'price_after_discount' => $discount,
-                'price_after_tax' => $final_price,
+                'price' => $price, // السعر قبل الضريبة 
+                'price_after_discount' => $discount, // السعر بعد الخصم (لكنه شامل الضريبة)
+                'price_after_tax' => $final_price, // السعر النهائي المطلوب دفعه
                 'final_price' =>  $final_price,
-                'discount_val' => $price - $discount,
-                'tax_only' => round($final_price - $discount, 2),
-                'tax_val' => round($final_price - $price, 2),
+                'discount_val' => $original_price - $discount, // قيمة الخصم الفعلية
+                'tax_only' => round($tax_amount, 2), // قيمة الضريبة فقط المستخرجة
+                'tax_val' => round($tax_amount, 2),
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
@@ -104,7 +117,7 @@ class ProductResource extends JsonResource
                 'weight_status' => $this->weight_status ?? 0,
                 'product_code' => $this->product_code,
             ];
-        } 
+        }
         else {
             $price = $this->price;
 
