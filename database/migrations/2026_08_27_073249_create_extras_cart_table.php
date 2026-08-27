@@ -10,10 +10,12 @@ return new class extends Migration
     {
         Schema::create('extras_cart', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('product_cart_id');
+            $table->unsignedBigInteger('extra_id');
+            $table->unsignedBigInteger('product_id');
             $table->integer('quantity')->default(1);
             $table->timestamps();
 
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->foreign('product_cart_id')->references('id')->on('product_carts')->onDelete('cascade');
             $table->foreign('extra_id')->references('id')->on('extra_products')->onDelete('cascade');
         });
