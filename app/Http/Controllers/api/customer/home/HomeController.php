@@ -8,6 +8,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\pos\ProductResource as ProductPosResource;
 use App\Http\Resources\AddonResource;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
@@ -333,7 +334,7 @@ class HomeController extends Controller
         $tax = get_tax_setting();
 
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products);
+        $products = ProductPosResource::collection($products);
 
         return response()->json([
             'categories' => $categories,

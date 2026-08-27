@@ -2,6 +2,12 @@
 
 namespace App\Http\Resources\pos;
 
+use App\Http\Resources\CategoryResource;
+use App\Http\Resources\GroupProductResource;
+use App\Http\Resources\pos\AddonResource;
+use App\Http\Resources\pos\ExcludeResource;
+use App\Http\Resources\pos\ExtraResource;
+use App\Http\Resources\pos\VariationResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,13 +18,12 @@ class ProductResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+   
     public function toArray(Request $request): array
-    
     {
         $allExtras = [];
         $allExtras = $this->extra->toArray();  
-        $total_discount = 0;
-        $total_tax = 0;
+
         if (!empty($this->addons) && !empty($this->category_addons) && !empty($this->sub_category_addons)) {   
             $addons = collect([])
             ->merge(AddonResource::collection($this->whenLoaded('addons')))
@@ -33,20 +38,18 @@ class ProductResource extends JsonResource
         else{  
             $addons = AddonResource::collection($this->whenLoaded('addons'));
         }
+    
         $my_discount = $this?->discount?->start_date <= date("Y-m-d")
         && $this?->discount?->end_date >= date("Y-m-d") ? $this?->discount
         : null;
-    
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
             $price = $this->price;
             if (!empty($my_discount)) {
                 if ($my_discount->type == 'precentage') {
                     $discount = $price - $my_discount->amount * $price / 100;
-                    $total_discount = $my_discount->amount * $price / 100;
                 } else {
                     $discount = $price - $my_discount->amount;
-                    $total_discount = $my_discount->amount;
                 }
                 $price = empty($this->tax) ? $discount: 
                 ($this->tax->type == 'value' ? $discount + $this->tax->amount 
@@ -58,7 +61,6 @@ class ProductResource extends JsonResource
                 ($this->tax->type == 'value' ? $discount + $this->tax->amount 
                 : $discount + $this->tax->amount * $discount / 100);
             }
-            $total_tax = 0;
             $tax = $price;
             return [
                 'id' => $this->id,
@@ -69,17 +71,40 @@ class ProductResource extends JsonResource
                 'image' => $this->image,
                 'category_id' => $this->category_id,
                 'sub_category_id' => $this->sub_category_id,
-                'price' => $this->price,
-                'total_discount' => $total_discount,
-                'total_tax' => $total_tax,
+                'item_type' => $this->item_type,
+                'stock_type' => $this->stock_type,
+                'number' => $this->number,
+                'price' => $price,
+                'price_after_discount' => $discount,
+                'price_after_tax' => $price,
                 'final_price' =>  $tax,
-                'image_link' => $this->image_link,
+                'discount_val' => $price - $discount,
+                'tax_only' => round($tax - $discount, 2),
+                'tax_val' => round($tax - $price, 2),
+                'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
+                'discount_id' => $this->discount_id,
+                'tax_id' => $this->tax_id,
                 'status' => $this->status,
+                'recommended' => $this->recommended,
+                'points' => $this->points,
+                'image_link' => $this->image_link,
+                'orders_count' => $this->orders_count,
+                'category' => CategoryResource::collection($this->whenLoaded('category')),
+                'subCategory' => CategoryResource::collection($this->whenLoaded('subCategory')),
+                'discount' => $this->whenLoaded('discount'),
+                'tax' => $this->whenLoaded('tax'),
+                'group_products' => GroupProductResource::collection($this->whenLoaded('group_products')),
                 'addons' => $addons, 
                 'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')), 
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
+                'favourite_product' => $this->whenLoaded('favourite_product'),
+                'sales_count' => $this->whenLoaded('sales_count'),
+                'favourite' => is_bool($this->favourites) ? $this->favourite : false,
+                'tax_obj' => $this->tax,
+                'created_at' => $this->created_at,
+                'updated_at' => $this->updated_at,
                 'weight_status' => $this->weight_status ?? 0,
                 'product_code' => $this->product_code,
             ];
@@ -90,10 +115,8 @@ class ProductResource extends JsonResource
             if (!empty($my_discount)) {
                 if ($my_discount->type == 'precentage') {
                     $discount = $price - $my_discount->amount * $price / 100;
-                    $total_discount = $my_discount->amount * $price / 100;
                 } else {
                     $discount = $price - $my_discount->amount;
-                    $total_discount = $my_discount->amount;
                 }
             }
             else{
@@ -103,16 +126,14 @@ class ProductResource extends JsonResource
             if (!empty($this->tax)) {
                 if ($this->tax->type == 'precentage') {
                     $tax = $discount + $this->tax->amount * $discount / 100;
-                    $total_tax = $this->tax->amount * $discount / 100;
                 } else {
                     $tax = $discount + $this->tax->amount;
-                    $total_tax = $this->tax->amount;
                 }
             }
             else{
                 $tax = $discount;
             }
-            return [  
+            return [
                 'id' => $this->id,
                 'allExtras' => ExtraResource::collection($this->whenLoaded('extra')),
                 'taxes' => $this->taxes->setting,
@@ -121,17 +142,40 @@ class ProductResource extends JsonResource
                 'image' => $this->image,
                 'category_id' => $this->category_id,
                 'sub_category_id' => $this->sub_category_id,
-                'price' => $this->price,
-                'total_discount' => $total_discount,
-                'total_tax' => $total_tax,
+                'item_type' => $this->item_type,
+                'stock_type' => $this->stock_type,
+                'group_products' => GroupProductResource::collection($this->whenLoaded('group_products')),
+                'number' => $this->number,
+                'price' => $price,
+                'price_after_discount' => $discount,
+                'price_after_tax' => $tax,
                 'final_price' =>  $tax,
+                'discount_val' => $price - $discount,
+                'tax_only' => round($tax - $discount, 2),
+                'tax_val' => round($tax - $price, 2),
+                'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
+                'discount_id' => $this->discount_id,
+                'tax_id' => $this->tax_id,
                 'status' => $this->status,
+                'recommended' => $this->recommended,
+                'points' => $this->points,
                 'image_link' => $this->image_link,
+                'orders_count' => $this->orders_count,
+                'category' => CategoryResource::collection($this->whenLoaded('category')),
+                'subCategory' => CategoryResource::collection($this->whenLoaded('subCategory')),
+                'discount' => $this->whenLoaded('discount'),
+                'tax' => $this->whenLoaded('tax'),
                 'addons' => $addons, 
                 'excludes' => ExcludeResource::collection($this->whenLoaded('excludes')), 
                 'variations' => VariationResource::collection($this->whenLoaded('variations')),
+                'favourite_product' => $this->whenLoaded('favourite_product'),
+                'sales_count' => $this->whenLoaded('sales_count'),
+                'favourite' => is_bool($this->favourites) ? $this->favourite : false,
+                'created_at' => $this->created_at,
+                'updated_at' => $this->updated_at,
+                'tax_obj' => $this->tax,
                 'weight_status' => $this->weight_status ?? 0,
                 'product_code' => $this->product_code,
             ];
