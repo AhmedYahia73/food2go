@@ -34,10 +34,7 @@ class OptionResource extends JsonResource
             else{
                 $discount = $price;
             }
-            $price = empty($tax_module) ? $discount: 
-            ($tax_module->type == 'value' ? $discount 
-            : $discount + $tax_module->amount * $discount / 100);
-            $total_option_price = $price + $this?->product?->price;
+ 
             $tax = $price;
             return [
                 'id' => $this->id,
