@@ -69,7 +69,7 @@ class ProductResource extends JsonResource
             }
 
             // تعيين السعر ليكون السعر قبل الضريبة بناءً على طلبك
-            $price = $price_before_tax;
+            $price = $final_price;
 
             return [
                 'id' => $this->id,
