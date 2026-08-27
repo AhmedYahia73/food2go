@@ -18,12 +18,11 @@ class OptionResource extends JsonResource
         $my_discount = $this?->product?->discount?->start_date <= date("Y-m-d")
         && $this?->product?->discount?->end_date >= date("Y-m-d") ? $this?->product?->discount
         : null;
-        $product_price =$this?->product?->final_price;
         $locale = app()->getLocale(); // Use the application's current locale
         $tax_module = $this->new_tax ?? $this?->product?->tax;
         if ($this->taxes->setting == 'included') {
             $price = $this->price;
-            $total_option_price = $price + $product_price;
+            $total_option_price = $price + $this?->product?->price;
             if (!empty($my_discount)) {
                 if ($my_discount->type == 'precentage') {
                     $discount = $price - $my_discount->amount * $price / 100;
@@ -37,7 +36,7 @@ class OptionResource extends JsonResource
             $price = empty($tax_module) ? $discount: 
             ($tax_module->type == 'value' ? $discount 
             : $discount + $tax_module->amount * $discount / 100);
-            $total_option_price = $price + $product_price;
+            $total_option_price = $price + $this?->product?->price;
             $tax = $price;
             return [
                 'id' => $this->id,
@@ -60,7 +59,7 @@ class OptionResource extends JsonResource
         }
         else{
             $price = $this->price;
-            $total_option_price = $price + $product_price;
+            $total_option_price = $price + $this?->product?->price;
             
             
             if (!empty($my_discount)) {

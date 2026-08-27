@@ -44,16 +44,19 @@ class ProductResource extends JsonResource
                 } else {
                     $discount = $price - $my_discount->amount;
                 }
-                $price = empty($this->tax) ? $discount: 
+                $final_price = empty($this->tax) ? $discount: 
                 ($this->tax->type == 'value' ? $discount + $this->tax->amount 
                 : $discount + $this->tax->amount * $discount / 100);
             }
             else{
                 $discount = $price;
-                $price = empty($this->tax) ? $discount: 
+                $final_price = empty($this->tax) ? $discount: 
                 ($this->tax->type == 'value' ? $discount + $this->tax->amount 
                 : $discount + $this->tax->amount * $discount / 100);
             }
+            $tax = ($this->tax->type == 'value' ? $discount + $this->tax->amount 
+                : $discount + $this->tax->amount * $discount / 100);
+            $price = (1 / (1 + $tax / 100)) * $final_price;
             $tax = $price;
             return [
                 'id' => $this->id,
@@ -69,11 +72,11 @@ class ProductResource extends JsonResource
                 'number' => $this->number,
                 'price' => $price,
                 'price_after_discount' => $discount,
-                'price_after_tax' => $price,
-                'final_price' =>  $tax,
+                'price_after_tax' => $final_price,
+                'final_price' =>  $final_price,
                 'discount_val' => $price - $discount,
-                'tax_only' => round($tax - $discount, 2),
-                'tax_val' => round($tax - $price, 2),
+                'tax_only' => round($final_price - $discount, 2),
+                'tax_val' => round($final_price - $price, 2),
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
