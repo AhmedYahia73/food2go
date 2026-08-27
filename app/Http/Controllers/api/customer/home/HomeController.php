@@ -544,7 +544,6 @@ class HomeController extends Controller
             $query->where("products.id", $product->id);
         })
         ->get();
-        $product = collect($product->toArray(request()));
 
         return response()->json([
             'id' => $product->id,
@@ -552,7 +551,7 @@ class HomeController extends Controller
             'category_id' => $product->category_id,
             'sub_category_id' => $product->sub_category_id,
             'description' => $product->toArray(request())['description'], 
-            'price' => $product->price, 
+            'price' => $product->toArray(request())['price'], 
             'price_after_discount' => $product->toArray(request())['price_after_discount'], 
             'price_after_tax' => $product->toArray(request())['price_after_tax'], 
             'discount_val' => $product->toArray(request())['discount_val'], 
