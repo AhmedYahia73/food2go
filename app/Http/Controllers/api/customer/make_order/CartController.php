@@ -140,7 +140,13 @@ class CartController extends Controller
                 }
                 $product_tax_val = $tax_amt - $discounted_price;
                 $product_discount_val = $product_price - $discounted_price;
-                $base_product_price = $product_price;
+                
+                // When excluded, add tax to the base product price so it reflects in the total
+                // Note: using $tax_amt ensures the total includes the base product tax + original price. 
+                // But wait, $tax_amt is the discounted price + tax. The total calculation is: 
+                // product_total = qty * (options_total + base_product_price) ...
+                // If base_product_price is the full original price + tax, we should do:
+                $base_product_price = $product_price + $product_tax_val;
             }
 
             $variations = [];
@@ -190,6 +196,8 @@ class CartController extends Controller
                     }
                     
                     $addon_tax_val = $tax_amt - $addon_price;
+                    // When excluded, add tax to the addon price so it reflects in the total
+                    $addon_price = $tax_amt;
                 }
 
                 $addon_total_tax += ($addon_tax_val * $addon_cart->quantity);
