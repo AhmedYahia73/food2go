@@ -1097,7 +1097,7 @@ class HomeController extends Controller
             });
         }  
 
-        $products = ProductResource::collection($products)->toArray(request());
+        $products = ProductResource::collection($products);
 
         return response()->json([
             'products' => $products, 
@@ -1260,41 +1260,60 @@ class HomeController extends Controller
                     $product->tax = $product->tax;
                 }
                 if ($product->taxes->setting == 'included') {
-                    $price = empty($product->tax) ? $product->price: 
-                    ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
-                    : $product->price + $product->tax->amount * $product->price / 100);
                     
+                    // 1. نحتفظ بالسعر الأصلي (وهو شامل الضريبة)
+                    $original_price = $product->price;
+                    
+                    // 2. حساب السعر بعد الخصم (وسيظل شامل للضريبة)
                     if (!empty($product->discount)) {
                         if ($product->discount->type == 'precentage') {
-                            $discount = $price - $product->discount->amount * $price / 100;
-                            $discount_val = $product->discount->amount * $price / 100;
+                            $discount = $original_price - ($product->discount->amount * $original_price / 100);
                         } else {
-                            $discount = $price - $product->discount->amount;
-                            $discount_val = $product->discount->amount;
+                            $discount = $original_price - $product->discount->amount;
+                        }
+                    } else {
+                        $discount = $original_price;
+                    }
+                    
+                    // 3. السعر النهائي هو السعر بعد الخصم (لأن الضريبة مشمولة بالفعل)
+                    $final_price = $discount;
+                    
+                    // 4. استخراج السعر قبل الضريبة وقيمتها من السعر النهائي
+                    $price_before_tax = $final_price;
+                    $tax_amount = 0;
+                    
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'value') {
+                            $tax_amount = $product->tax->amount;
+                            $price_before_tax = $final_price - $tax_amount;
+                        } else {
+                            // المعادلة العكسية لو الضريبة نسبة مئوية
+                            $price_before_tax = $final_price / (1 + ($product->tax->amount / 100));
+                            $tax_amount = $final_price - $price_before_tax;
                         }
                     }
-                    else{
-                        $discount = $price;
-                        $discount_val = 0;
-                    }
-                    $tax = $price;
+                    
                     return [
                         'id' => $product->id,
                         'taxes' => $product->taxes->setting,
                         'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
                         'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
-                        'price' => $price,
-                        'price_after_discount' => $discount,
-                        'price_after_tax' => $tax,
+                        
+                        // التعديلات تمت هنا لتعكس الحسبة الصحيحة
+                        'price' => round($price_before_tax, 2), // السعر الصافي بدون ضريبة
+                        'price_after_discount' => $discount, // السعر بعد الخصم (شامل الضريبة)
+                        'price_after_tax' => $final_price, // السعر النهائي
+                        
                         'category_id' => $product->category_id,
                         'sub_category_id' => $product->sub_category_id,
                         'recommended' => $product->recommended,
                         'image_link' => $product->image_link,
-                        'discount' => $price - $discount,
-                        'tax' => $tax - $price,
+                        
+                        'discount' => round($original_price - $discount, 2), // قيمة الخصم الفعلية
+                        'tax' => round($tax_amount, 2), // قيمة الضريبة المستخرجة
                         'favourite' => is_bool($product->favourites) ? $product->favourites : false,
                     ];
-                } 
+                }
                 else {
                     $price = $product->price;
                     
@@ -1381,40 +1400,59 @@ class HomeController extends Controller
                     $product->tax = null;
                 }
                 if ($product->taxes->setting == 'included') {
-                    $price = empty($product->tax) ? $product->price: 
-                    ($product->tax->type == 'value' ? $product->price + $product->tax->amount 
-                    : $product->price + $product->tax->amount * $product->price / 100);
                     
+                    // 1. نحتفظ بالسعر الأصلي (شامل الضريبة)
+                    $original_price = $product->price;
+                    
+                    // 2. حساب السعر بعد الخصم (هذا السعر سيظل شامل للضريبة)
                     if (!empty($product->discount)) {
                         if ($product->discount->type == 'precentage') {
-                            $discount = $price - $product->discount->amount * $price / 100;
-                            $discount_val = $product->discount->amount * $price / 100;
+                            $discount = $original_price - ($product->discount->amount * $original_price / 100);
                         } else {
-                            $discount = $price - $product->discount->amount;
-                            $discount_val = $product->discount->amount;
+                            $discount = $original_price - $product->discount->amount;
+                        }
+                    } else {
+                        $discount = $original_price;
+                    }
+                    
+                    // 3. السعر النهائي هو نفسه السعر بعد الخصم (لأن الضريبة مشمولة)
+                    $final_price = $discount;
+                    
+                    // 4. استخراج السعر قبل الضريبة وقيمتها من السعر النهائي
+                    $price_before_tax = $final_price;
+                    $tax_amount = 0;
+                    
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'value') {
+                            $tax_amount = $product->tax->amount;
+                            $price_before_tax = $final_price - $tax_amount;
+                        } else {
+                            // المعادلة العكسية لو الضريبة نسبة مئوية
+                            $price_before_tax = $final_price / (1 + ($product->tax->amount / 100));
+                            $tax_amount = $final_price - $price_before_tax;
                         }
                     }
-                    else{
-                        $discount = $price;
-                        $discount_val = 0;
-                    }
-                    $tax = $price;
+                    
                     return [
                         'id' => $product->id,
                         'taxes' => $product->taxes->setting,
                         'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
                         'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
-                        'price' => $price,
-                        'price_after_discount' => $discount,
-                        'price_after_tax' => $tax,
+                        
+                        // التعديلات تمت هنا لتعكس الأرقام الصحيحة
+                        'price' => round($price_before_tax, 2), // السعر الصافي بدون ضريبة
+                        'price_after_discount' => $discount, // السعر بعد الخصم (شامل الضريبة)
+                        'price_after_tax' => $final_price, // السعر النهائي
+                        
                         'recommended' => $product->recommended,
                         'image_link' => $product->image_link,
                         'category_id' => $product->category_id,
                         'sub_category_id' => $product->sub_category_id,
-                        'discount' => $price - $discount,
-                        'tax' => $tax - $price,
+                        
+                        'discount' => round($original_price - $discount, 2), // قيمة الخصم الفعلية
+                        'tax' => round($tax_amount, 2), // قيمة الضريبة المستخرجة
                     ];
-                } 
+                }
                 else {
                     $price = $product->price;
                     
