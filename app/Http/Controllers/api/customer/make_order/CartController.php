@@ -74,18 +74,17 @@ class CartController extends Controller
             $product_price = $product->product_pricing->first()?->price ?? $product->price;
             
             // Tax Module filtering logic
-            $tax_module = $product->tax?->tax_module?->map(function ($taxItem) use ($module, $branch_id, $product) {
+            $tax_module = $product->tax_module?->map(function ($taxItem) use ($module, $branch_id) {
                 $isFound = $taxItem->module
                 ->where('module', $module) 
                 ->whereIn('app_type', ['online', 'all'])
-                ->where("branch_id", $branch_id)
-                ->first();
-                if($isFound){
-                    return $product->tax;
+                ->where("branch_id", $branch_id);
+                if($isFound->count() > 0){
+                    return $taxItem->tax;
                 }
             })->filter()->first();
             
-            $product->tax = !empty($tax_module) ? $tax_module : null;
+            $product->tax = !empty($tax_module) ? $tax_module : $product->tax;
 
             // Discount filtering
             $my_discount = $product->discount?->start_date <= date("Y-m-d") && $product->discount?->end_date >= date("Y-m-d") ? $product->discount : null;
@@ -193,18 +192,44 @@ class CartController extends Controller
             }
             
             // Process Variations & Options
+            $options_total_tax = 0;
             foreach($cart->variations_cart as $var_cart) {
                 $options = [];
                 foreach($var_cart->options_cart as $opt_cart) {
                     $opt = $opt_cart->option;
                     if($opt) {
                         $opt_price = $opt->option_pricing->first()?->price ?? $opt->price;
+                        $opt_tax_val = 0;
+
+                        if ($product->taxes?->setting == 'included') {
+                            if (!empty($product->tax)) {
+                                if ($product->tax->type == 'precentage') {
+                                    $opt_tax_val = $opt_price - ($opt_price / (1 + ($product->tax->amount / 100)));
+                                    $opt_price_without_tax = $opt_price - $opt_tax_val;
+                                    // Wait, backend logic usually just treats included tax as simple percentage, 
+                                    // but let's stick to what the original code did for included:
+                                    // ($discounted_price + $product->tax->amount * $discounted_price / 100) - $discounted_price
+                                    // Wait, the original code added tax to price_with_tax instead of extracting it! 
+                                    // Let's extract it properly as it is included
+                                    $opt_tax_val = $opt_price - ($opt_price / (1 + ($product->tax->amount / 100)));
+                                }
+                            }
+                        } else {
+                            if (!empty($product->tax)) {
+                                if ($product->tax->type == 'precentage') {
+                                    $opt_tax_val = $opt_price * $product->tax->amount / 100;
+                                }
+                            }
+                        }
+
+                        $options_total_tax += ($opt_tax_val * $opt_cart->quantity);
                         $options_total_price += ($opt_price * $opt_cart->quantity);
                         $options[] = [
                             'id' => $opt_cart->option_id,
                             'name' => $getTranslation($opt),
                             'quantity' => $opt_cart->quantity,
-                            'price' => $opt_price
+                            'price' => $opt_price,
+                            'tax_val' => $opt_tax_val,
                         ];
                     }
                 }
@@ -252,7 +277,7 @@ class CartController extends Controller
             // Total: (base_product + options) × qty + addons + extras
             $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price + $extra_total_price;
             
-            $total_tax = ($product_tax_val * $cart->quantity) + $addon_total_tax + $extra_total_tax;
+            $total_tax = ($product_tax_val * $cart->quantity) + $options_total_tax + $addon_total_tax + $extra_total_tax;
             $total_discount = ($product_discount_val * $cart->quantity) + $addon_total_discount;
 
             $cart_total_price += $product_total;
