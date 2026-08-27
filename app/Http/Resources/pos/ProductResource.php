@@ -44,25 +44,32 @@ class ProductResource extends JsonResource
         : null;
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
-            $new_tax = null;
-            $price = $this->price;
+            $new_tax = $this->tax;
+            $price_with_tax = $this->price;
+            
             if (!empty($my_discount)) {
                 if ($my_discount->type == 'precentage') {
-                    $discount = $price - $my_discount->amount * $price / 100;
+                    $discounted_price_with_tax = $price_with_tax - $my_discount->amount * $price_with_tax / 100;
                 } else {
-                    $discount = $price - $my_discount->amount;
+                    $discounted_price_with_tax = $price_with_tax - $my_discount->amount;
                 }
-                $price = empty($new_tax) ? $discount: 
-                ($new_tax->type == 'value' ? $discount + $new_tax->amount 
-                : $discount + $new_tax->amount * $discount / 100);
+            } else {
+                $discounted_price_with_tax = $price_with_tax;
             }
-            else{
-                $discount = $price;
-                $price = empty($new_tax) ? $discount: 
-                ($new_tax->type == 'value' ? $discount + $new_tax->amount 
-                : $discount + $new_tax->amount * $discount / 100);
+
+            if (empty($new_tax)) {
+                $tax_val = 0;
+                $price_before_tax = $discounted_price_with_tax;
+            } else {
+                if ($new_tax->type == 'value') {
+                    $tax_val = $new_tax->amount;
+                    $price_before_tax = $discounted_price_with_tax - $tax_val;
+                } else {
+                    $price_before_tax = $discounted_price_with_tax / (1 + ($new_tax->amount / 100));
+                    $tax_val = $discounted_price_with_tax - $price_before_tax;
+                }
             }
-            $tax = $price;
+            
             return [
                 'id' => $this->id,
                 'allExtras' => ExtraResource::collection($this->whenLoaded('extra')),
@@ -75,13 +82,13 @@ class ProductResource extends JsonResource
                 'item_type' => $this->item_type,
                 'stock_type' => $this->stock_type,
                 'number' => $this->number,
-                'price' => $price,
-                'price_after_discount' => $discount,
-                'price_after_tax' => $price,
-                'final_price' =>  $tax,
-                'discount_val' => $price - $discount,
-                'tax_only' => round($tax - $discount, 2),
-                'tax_val' => round($tax - $price, 2),
+                'price' => $price_before_tax + ($price_with_tax - $discounted_price_with_tax), // original price before discount and tax
+                'price_after_discount' => $price_before_tax,
+                'price_after_tax' => $discounted_price_with_tax,
+                'final_price' =>  $discounted_price_with_tax,
+                'discount_val' => $price_with_tax - $discounted_price_with_tax,
+                'tax_only' => round($tax_val, 2),
+                'tax_val' => round($tax_val, 2),
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,

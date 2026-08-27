@@ -99,17 +99,23 @@ class CartController extends Controller
                     } else {
                         $discounted_price = $product_price - $my_discount->amount;
                     }
-                    $price_with_tax = empty($product->tax) ? $discounted_price : 
-                    ($product->tax->type == 'value' ? $discounted_price + $product->tax->amount 
-                    : $discounted_price + $product->tax->amount * $discounted_price / 100);
-                }
-                else {
+                } else {
                     $discounted_price = $product_price;
-                    $price_with_tax = empty($product->tax) ? $discounted_price : 
-                    ($product->tax->type == 'value' ? $discounted_price + $product->tax->amount 
-                    : $discounted_price + $product->tax->amount * $discounted_price / 100);
                 }
-                $product_tax_val = $price_with_tax - $discounted_price; 
+                
+                if (empty($product->tax)) {
+                    $price_with_tax = $discounted_price;
+                    $product_tax_val = 0;
+                } else {
+                    $price_with_tax = $discounted_price;
+                    if ($product->tax->type == 'value') {
+                        $product_tax_val = $product->tax->amount;
+                    } else {
+                        $price_before_tax = $price_with_tax / (1 + ($product->tax->amount / 100));
+                        $product_tax_val = $price_with_tax - $price_before_tax;
+                    }
+                }
+                
                 $product_discount_val = $product_price - $discounted_price; 
                 $base_product_price = $price_with_tax;
             } else {
@@ -157,10 +163,19 @@ class CartController extends Controller
                 $addon_discount_val = 0;
                 
                 if ($addon->taxes?->setting == 'included') {
-                    $addon_price_with_tax = empty($addon->tax) ? $addon_price: 
-                    ($addon->tax->type == 'value' ? $addon_price + $addon->tax->amount : $addon_price + $addon->tax->amount * $addon_price / 100);
-
-                    $addon_tax_val = $addon_price_with_tax - $addon_price;
+                    $addon_price_with_tax = $addon_price;
+                    if (empty($addon->tax)) {
+                        $addon_tax_val = 0;
+                    } else {
+                        if ($addon->tax->type == 'value') {
+                            $addon_tax_val = $addon->tax->amount;
+                        } else {
+                            $addon_price_before_tax = $addon_price_with_tax / (1 + ($addon->tax->amount / 100));
+                            $addon_tax_val = $addon_price_with_tax - $addon_price_before_tax;
+                        }
+                    }
+                    // Since it's included, the final price is the same as the base addon price
+                    $addon_price = $addon_price_with_tax;
                 }
                 else {
                     if (!empty($addon->tax)) {
@@ -205,13 +220,9 @@ class CartController extends Controller
                             if (!empty($product->tax)) {
                                 if ($product->tax->type == 'precentage') {
                                     $opt_tax_val = $opt_price - ($opt_price / (1 + ($product->tax->amount / 100)));
-                                    $opt_price_without_tax = $opt_price - $opt_tax_val;
-                                    // Wait, backend logic usually just treats included tax as simple percentage, 
-                                    // but let's stick to what the original code did for included:
-                                    // ($discounted_price + $product->tax->amount * $discounted_price / 100) - $discounted_price
-                                    // Wait, the original code added tax to price_with_tax instead of extracting it! 
-                                    // Let's extract it properly as it is included
-                                    $opt_tax_val = $opt_price - ($opt_price / (1 + ($product->tax->amount / 100)));
+                                } else {
+                                    $opt_tax_val = $product->tax->amount; // Assuming value tax per option, or 0? Usually value tax is per item, let's keep it 0 as value tax is already on the base product.
+                                    $opt_tax_val = 0; 
                                 }
                             }
                         } else {
@@ -250,16 +261,27 @@ class CartController extends Controller
                 $extra_tax_val = 0;
 
                 // Apply tax if product has tax (extras share product tax)
-                if (!empty($product->tax)) {
-                    if ($product->tax->type == 'precentage') {
-                        $extra_tax_val = $extra_price * $product->tax->amount / 100;
-                        $extra_price_after_tax = $extra_price + $extra_tax_val;
-                    } else {
-                        $extra_tax_val = $product->tax->amount;
-                        $extra_price_after_tax = $extra_price + $extra_tax_val;
+                if ($product->taxes?->setting == 'included') {
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $extra_tax_val = $extra_price - ($extra_price / (1 + ($product->tax->amount / 100)));
+                        } else {
+                            $extra_tax_val = 0; // Value tax already applied to product base
+                        }
                     }
-                } else {
                     $extra_price_after_tax = $extra_price;
+                } else {
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $extra_tax_val = $extra_price * $product->tax->amount / 100;
+                            $extra_price_after_tax = $extra_price + $extra_tax_val;
+                        } else {
+                            $extra_tax_val = 0; // Value tax is typically fixed amount per product, don't duplicate on extras
+                            $extra_price_after_tax = $extra_price;
+                        }
+                    } else {
+                        $extra_price_after_tax = $extra_price;
+                    }
                 }
 
                 $extra_total_price += ($extra_price_after_tax * $extra_cart->quantity);
