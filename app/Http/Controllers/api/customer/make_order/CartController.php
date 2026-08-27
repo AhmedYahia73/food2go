@@ -9,6 +9,7 @@ use App\Models\ProductCart;
 use App\Models\VariationCart;
 use App\Models\OptionCart;
 use App\Models\AddonCart;
+use App\Models\ExtraCart;
 use App\Models\Product;
 
 class CartController extends Controller
@@ -25,7 +26,7 @@ class CartController extends Controller
         }
 
         $userId = auth()->id();
-        $locale = $request->locale; // Optional locale parameter (e.g. 'en', 'ar')
+        $locale = $request->locale;
         
         $branch_id = 0;
         $module = "delivery";
@@ -45,7 +46,9 @@ class CartController extends Controller
             'variations_cart.variation.translations', 
             'variations_cart.options_cart.option.translations', 
             'variations_cart.options_cart.option.option_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-            'addons_cart.addon.translations', 'addons_cart.addon.tax'
+            'addons_cart.addon.translations', 'addons_cart.addon.tax',
+            'extras_cart.extra.translations',
+            'extras_cart.extra.pricing' => fn($q) => $q->where('branch_id', $branch_id),
         ])
         ->where('user_id', $userId)
         ->get();
@@ -55,11 +58,12 @@ class CartController extends Controller
         $cart_total_tax = 0;
         $cart_total_discount = 0;
         
-        $getTranslation = function($model) use ($locale) {
+        $getTranslation = function($model, $field = 'name') use ($locale) {
             if (!$model) return '';
-            if (!$locale) return $model->name;
-            $translation = $model->translations->where('locale', $locale)->first();
-            return $translation ? $translation->value : $model->name;
+            if (!$locale) return $model->$field ?? $model->name;
+            $translation = $model->translations->where('locale', $locale)->where('column_name', $field)->first()
+                        ?? $model->translations->where('locale', $locale)->first();
+            return $translation ? $translation->value : ($model->$field ?? $model->name);
         };
         
         foreach($carts as $cart) {
@@ -136,10 +140,13 @@ class CartController extends Controller
 
             $variations = [];
             $addons = [];
+            $extras = [];
             $options_total_price = 0;
             $addon_total_tax = 0;
             $addon_total_discount = 0;
             $addon_total_price = 0;
+            $extra_total_price = 0;
+            $extra_total_tax = 0;
             
             // Process Addons
             foreach($cart->addons_cart as $addon_cart) {
@@ -169,7 +176,6 @@ class CartController extends Controller
                     }
                     
                     $addon_tax_val = $tax_amt - $addon_price;
-                    
                 }
 
                 $addon_total_tax += ($addon_tax_val * $addon_cart->quantity);
@@ -208,10 +214,45 @@ class CartController extends Controller
                     'options' => $options
                 ];
             }
+
+            // Process Extras
+            foreach($cart->extras_cart as $extra_cart) {
+                $extra = $extra_cart->extra;
+                if(!$extra) continue;
+
+                // Use branch-specific pricing if available
+                $extra_price = $extra->pricing->first()?->price ?? $extra->price;
+                $extra_tax_val = 0;
+
+                // Apply tax if product has tax (extras share product tax)
+                if (!empty($product->tax)) {
+                    if ($product->tax->type == 'precentage') {
+                        $extra_tax_val = $extra_price * $product->tax->amount / 100;
+                        $extra_price_after_tax = $extra_price + $extra_tax_val;
+                    } else {
+                        $extra_tax_val = $product->tax->amount;
+                        $extra_price_after_tax = $extra_price + $extra_tax_val;
+                    }
+                } else {
+                    $extra_price_after_tax = $extra_price;
+                }
+
+                $extra_total_price += ($extra_price_after_tax * $extra_cart->quantity);
+                $extra_total_tax += ($extra_tax_val * $extra_cart->quantity);
+
+                $extras[] = [
+                    'id' => $extra_cart->extra_id,
+                    'name' => $getTranslation($extra),
+                    'price' => $extra_price_after_tax,
+                    'quantity' => $extra_cart->quantity,
+                    'tax_val' => $extra_tax_val,
+                ];
+            }
             
-            $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price;
+            // Total: (base_product + options) × qty + addons + extras
+            $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price + $extra_total_price;
             
-            $total_tax = ($product_tax_val * $cart->quantity) + $addon_total_tax;
+            $total_tax = ($product_tax_val * $cart->quantity) + $addon_total_tax + $extra_total_tax;
             $total_discount = ($product_discount_val * $cart->quantity) + $addon_total_discount;
 
             $cart_total_price += $product_total;
@@ -233,6 +274,7 @@ class CartController extends Controller
                 'quantity' => $cart->quantity,
                 'variations' => $variations,
                 'addons' => $addons,
+                'extras' => $extras,
             ];
         }
 
@@ -264,6 +306,10 @@ class CartController extends Controller
             'products.*.addons' => 'nullable|array',
             'products.*.addons.*.id' => 'required|exists:addons,id',
             'products.*.addons.*.quantity' => 'required|integer|min:1',
+
+            'products.*.extras' => 'nullable|array',
+            'products.*.extras.*.id' => 'required|exists:extra_products,id',
+            'products.*.extras.*.quantity' => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) {
@@ -281,9 +327,6 @@ class CartController extends Controller
 
     public function update(Request $request, $id)
     {
-        // $id here refers to product_carts.id
-        // The payload for edit is expected to be a single product object or wrapped in products array
-        // We will validate as products array but only use the first one if present, or just validate as single
         $validator = Validator::make($request->all(), [
             'products' => 'required|array',
             'products.0.id' => 'required|exists:products,id',
@@ -308,7 +351,8 @@ class CartController extends Controller
         }
         $cart->variations_cart()->delete();
         $cart->addons_cart()->delete();
-        $cart->delete(); // delete the old cart item
+        $cart->extras_cart()->delete();
+        $cart->delete();
 
         // Recreate it using the new data
         $productData = $request->products[0];
@@ -326,7 +370,7 @@ class CartController extends Controller
             return response()->json(['message' => 'Cart not found'], 404);
         }
 
-        $cart->delete(); // relationships should cascade if DB foreign keys are set up, but let's be safe
+        $cart->delete();
         
         return response()->json(['message' => 'Cart item deleted successfully']);
     }
@@ -369,6 +413,18 @@ class CartController extends Controller
                     'addon_id' => $addonData['id'],
                     'product_id' => $productData['id'],
                     'quantity' => $addonData['quantity'],
+                ]);
+            }
+        }
+
+        // Save extras
+        if (!empty($productData['extras'])) {
+            foreach ($productData['extras'] as $extraData) {
+                ExtraCart::create([
+                    'product_cart_id' => $cart->id,
+                    'extra_id' => $extraData['id'],
+                    'product_id' => $productData['id'],
+                    'quantity' => $extraData['quantity'],
                 ]);
             }
         }
