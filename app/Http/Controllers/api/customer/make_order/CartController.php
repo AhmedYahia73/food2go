@@ -274,9 +274,10 @@ class CartController extends Controller
                     if (!empty($product->tax)) {
                         if ($product->tax->type == 'precentage') {
                             $extra_tax_val = $extra_price * $product->tax->amount / 100;
-                            $extra_price_after_tax = $extra_price + $extra_tax_val;
+                            // Do not add tax to extra_price_after_tax because for 'excluded', tax is collected separately in total_tax
+                            $extra_price_after_tax = $extra_price;
                         } else {
-                            $extra_tax_val = 0; // Value tax is typically fixed amount per product, don't duplicate on extras
+                            $extra_tax_val = 0; 
                             $extra_price_after_tax = $extra_price;
                         }
                     } else {
