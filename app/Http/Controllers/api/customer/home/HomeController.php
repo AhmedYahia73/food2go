@@ -1097,7 +1097,7 @@ class HomeController extends Controller
             });
         }  
 
-        $products = ProductResource::collection($products);
+        $products = ProductResource::collection($products)->toArray(request());
 
         return response()->json([
             'products' => $products, 
