@@ -44,6 +44,7 @@ class ProductResource extends JsonResource
         : null;
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
+            $new_tax = null;
             $price = $this->price;
             if (!empty($my_discount)) {
                 if ($my_discount->type == 'precentage') {
@@ -51,15 +52,15 @@ class ProductResource extends JsonResource
                 } else {
                     $discount = $price - $my_discount->amount;
                 }
-                $price = empty($this->tax) ? $discount: 
-                ($this->tax->type == 'value' ? $discount + $this->tax->amount 
-                : $discount + $this->tax->amount * $discount / 100);
+                $price = empty($new_tax) ? $discount: 
+                ($new_tax->type == 'value' ? $discount + $new_tax->amount 
+                : $discount + $new_tax->amount * $discount / 100);
             }
             else{
                 $discount = $price;
-                $price = empty($this->tax) ? $discount: 
-                ($this->tax->type == 'value' ? $discount + $this->tax->amount 
-                : $discount + $this->tax->amount * $discount / 100);
+                $price = empty($new_tax) ? $discount: 
+                ($new_tax->type == 'value' ? $discount + $new_tax->amount 
+                : $discount + $new_tax->amount * $discount / 100);
             }
             $tax = $price;
             return [
@@ -80,7 +81,7 @@ class ProductResource extends JsonResource
                 'final_price' =>  $tax,
                 'discount_val' => $price - $discount,
                 'tax_only' => round($tax - $discount, 2),
-                'tax_val' => 0,
+                'tax_val' => round($tax - $price, 2),
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
@@ -102,7 +103,7 @@ class ProductResource extends JsonResource
                 'favourite_product' => $this->whenLoaded('favourite_product'),
                 'sales_count' => $this->whenLoaded('sales_count'),
                 'favourite' => is_bool($this->favourites) ? $this->favourite : false,
-                'tax_obj' => $this->tax,
+                'tax_obj' => $new_tax,
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
                 'weight_status' => $this->weight_status ?? 0,
