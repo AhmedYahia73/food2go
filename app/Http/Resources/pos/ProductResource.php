@@ -80,7 +80,7 @@ class ProductResource extends JsonResource
                 'final_price' =>  $tax,
                 'discount_val' => $price - $discount,
                 'tax_only' => round($tax - $discount, 2),
-                'tax_val' => round($tax - $price, 2),
+                'tax_val' => 0,
                 'product_time_status' => $this->product_time_status,
                 'from' => $this->from,
                 'to' => $this->to,
