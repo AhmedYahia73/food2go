@@ -83,7 +83,7 @@ class ProductResource extends JsonResource
                 'item_type' => $this->item_type,
                 'stock_type' => $this->stock_type,
                 'number' => $this->number,
-                'price' => $final_price, // السعر قبل الضريبة 
+                'price' => $final_price - $tax_amount, // السعر قبل الضريبة 
                 'price_after_discount' => $discount, // السعر بعد الخصم (لكنه شامل الضريبة)
                 'price_after_tax' => $final_price, // السعر النهائي المطلوب دفعه
                 'final_price' =>  $final_price,

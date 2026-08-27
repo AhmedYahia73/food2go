@@ -63,7 +63,7 @@ class OptionResource extends JsonResource
                 'id' => $this->id,
                 'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
                 // التعديلات تمت هنا لتعكس الأرقام الصحيحة
-                'price' => round($final_price, 2), 
+                'price' => round($price_before_tax, 2), 
                 'total_option_price' => $total_option_price,
                 'after_disount' => $discount,
                 'price_after_tax' => $final_price,
