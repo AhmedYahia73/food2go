@@ -1658,10 +1658,10 @@ trait PlaceOrder
                 $extra_total_tax += ($extra_tax_val * $extra_cart->quantity);
             }
 
-            $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price + $extra_total_price;
+            $product_total = $cart->quantity * ($options_total_price + $base_product_price + $addon_total_price + $extra_total_price);
             $cart_total_price += $product_total;
-            $cart_total_tax += ($product_tax_val * $cart->quantity) + $options_total_tax + $addon_total_tax + $extra_total_tax;
-            $cart_total_discount += ($product_discount_val * $cart->quantity) + $addon_total_discount;
+            $cart_total_tax += $cart->quantity * ($product_tax_val + $options_total_tax + $addon_total_tax + $extra_total_tax);
+            $cart_total_discount += $cart->quantity * ($product_discount_val + $addon_total_discount);
         }
 
         $coupon_discount = $request->coupon_discount ?? 0;
