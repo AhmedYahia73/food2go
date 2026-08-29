@@ -532,49 +532,15 @@ class ClientMakeOrderController extends Controller
         $product_off = $branch_off->pluck('product_id')->filter(); 
         $option_off = $branch_off->pluck('option_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
-        $products = $this->product
-        ->orderBy('order')
-        ->with([
-            'addons' => fn($q) => $q->withLocale($locale),
-            'category_addons' => fn($q) => $q->withLocale($locale),
-            'sub_category_addons' => fn($q) => $q->withLocale($locale),
-            'excludes' => fn($q) => $q->withLocale($locale),
-            'discount', 'extra', 'sales_count', 'tax',
-            'variations' => fn($q) => $q->with([
-                'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
-            ])->withLocale($locale),
-        
-            'group_products' => fn($q) => $q
-            ->with(['products' => fn($q) => $q
-            ->select("products.id", "products.name")->withLocale($locale)]),
-        ])
-        ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
-        ->where('status', 1)
-        ->whereNotIn('category_id', $category_off)
-        //->whereNotIn('sub_category_id', $category_off)
-        ->whereNotIn('products.id', $product_off)
-        ->get();
 
-        $products = $products->map(function($product) use ($branch_id, $option_off) {
-            $product->price = $product->product_pricing
-                ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
+        $baseQuery = $this->buildBaseProductQuery($locale, $branch_id);
+         $today = date('Y-m-d');
+ 
+        $module = "dine_in";
 
-            $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
-                $variation->options = $variation->options
-                    ->where('status', 1)
-                    ->values()
-                    ->reject(fn($opt) => $option_off->contains($opt->id))
-                    ->map(function($opt) use ($branch_id) {
-                        $opt->price = $opt->option_pricing
-                            ->firstWhere('branch_id', $branch_id)?->price ?? $opt->price;
-                        return $opt;
-                    });
-
-                return $variation;
-            });
-            return $product;
-        });
+        $processProducts = $this->buildProductProcessor($category_off, $product_off, $option_off, $branch_id, $module, $today);
+        $products = $processProducts($baseQuery);
+        $products = ProductResource::collection($products);
 
         return response()->json([
             "products" => $products
