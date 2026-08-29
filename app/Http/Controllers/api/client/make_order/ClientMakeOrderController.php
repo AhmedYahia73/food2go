@@ -500,15 +500,7 @@ class ClientMakeOrderController extends Controller
             ]);
             $tax = $tax->setting;
         }
-        $baseQuery = $this->buildBaseProductQuery($locale, $branch_id);
-         $today = date('Y-m-d');
- 
-        $module = "dine_in";
-
-        $processProducts = $this->buildProductProcessor($category_off, $product_off, $option_off, $branch_id, $module, $today);
-        $products = $processProducts($baseQuery);
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products);
 
         return response()->json([
             'categories' => $categories,
