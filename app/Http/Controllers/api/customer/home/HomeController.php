@@ -34,6 +34,7 @@ use App\Models\PaymentMethod;
 use App\Models\Addon;
 use App\Models\ServiceFees;
 use App\Models\Popup;
+use App\Models\CafeTable;
 
 class HomeController extends Controller
 {
@@ -314,7 +315,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 }
                 return $product;
             });
@@ -506,7 +507,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 } 
                 return $product;
             });
@@ -591,6 +592,13 @@ class HomeController extends Controller
             ->first();
             $branch_id = $address?->zone?->branch_id;
         }
+        if ($request->table_id && !empty($request->table_id)) {
+            $table = CafeTable::with('location')->find($request->table_id);
+            if ($table) {
+                $branch_id = $table->branch_id ?? $table->location?->branch_id ?? $branch_id;
+                $module = "dine_in";
+            }
+        }
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();
@@ -730,7 +738,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 } 
                 return $product;
             });
@@ -815,6 +823,13 @@ class HomeController extends Controller
             ->first();
             $branch_id = $address?->zone?->branch_id;
         }
+        if ($request->table_id && !empty($request->table_id)) {
+            $table = CafeTable::with('location')->find($request->table_id);
+            if ($table) {
+                $branch_id = $table->branch_id ?? $table->location?->branch_id ?? $branch_id;
+                $module = "dine_in";
+            }
+        }
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
         ->get();
@@ -954,7 +969,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 } 
                 return $product;
             });
@@ -1249,7 +1264,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 }
                 return $product;
             });
@@ -1315,7 +1330,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 }
                 return $product;
             });
@@ -1429,6 +1444,13 @@ class HomeController extends Controller
             ->where('id', $request->address_id)
             ->first();
             $branch_id = $address?->zone?->branch_id;
+        }
+        if ($request->table_id && !empty($request->table_id)) {
+            $table = CafeTable::with('location')->find($request->table_id);
+            if ($table) {
+                $branch_id = $table->branch_id ?? $table->location?->branch_id ?? $branch_id;
+                $module = "dine_in";
+            }
         }
         $branch_off = $this->branch_off
         ->where('branch_id', $branch_id)
@@ -1621,7 +1643,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 }
                 if ($product->taxes->setting == 'included') {
                     
@@ -1784,7 +1806,7 @@ class HomeController extends Controller
                 $product->tax = $tax_module;
             }
             else{
-                $product->tax = null;
+                $product->tax = $product->tax;
             }
             if ($product->taxes->setting == 'included') {
                 $price = empty($product->tax) ? $product->price: 
@@ -1921,7 +1943,7 @@ class HomeController extends Controller
                 $product->tax = $tax_module;
             }
             else{
-                $product->tax = null;
+                $product->tax = $product->tax;
             }
             if ($product->taxes->setting == 'included') {
                 $price = empty($product->tax) ? $product->price: 
@@ -2213,7 +2235,7 @@ class HomeController extends Controller
                     $product->tax = $tax_module;
                 }
                 else{
-                    $product->tax = null;
+                    $product->tax = $product->tax;
                 }
                 return $product;
             })->filter();
@@ -2476,7 +2498,7 @@ class HomeController extends Controller
                 $product->tax = $tax_module;
             }
             else{
-                $product->tax = null;
+                $product->tax = $product->tax;
             }
             return $product;
         });
