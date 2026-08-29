@@ -67,6 +67,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/recommandation_product', 'recommandation_product')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/discount_product', 'discount_product')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/product_item/{id}', 'product_item')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/product_item_web/{id}', 'product_item_web')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/product_web_item/{id}', 'product_web_item')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
 
         Route::post('/filter_product', 'filter_product');
