@@ -501,7 +501,6 @@ class ClientMakeOrderController extends Controller
             $tax = $tax->setting;
         }
         $categories = CategoryResource::collection($categories);
-        $products = ProductResource::collection($products);
 
         return response()->json([
             'categories' => $categories,
@@ -533,49 +532,15 @@ class ClientMakeOrderController extends Controller
         $product_off = $branch_off->pluck('product_id')->filter(); 
         $option_off = $branch_off->pluck('option_id')->filter();
         $category_off = $branch_off->pluck('category_id')->filter();
-        $products = $this->product
-        ->orderBy('order')
-        ->with([
-            'addons' => fn($q) => $q->withLocale($locale),
-            'category_addons' => fn($q) => $q->withLocale($locale),
-            'sub_category_addons' => fn($q) => $q->withLocale($locale),
-            'excludes' => fn($q) => $q->withLocale($locale),
-            'discount', 'extra', 'sales_count', 'tax',
-            'variations' => fn($q) => $q->with([
-                'options' => fn($oq) => $oq->with(['option_pricing']) // تأكد دي مطلوبة
-            ])->withLocale($locale),
-        
-            'group_products' => fn($q) => $q
-            ->with(['products' => fn($q) => $q
-            ->select("products.id", "products.name")->withLocale($locale)]),
-        ])
-        ->withLocale($locale)
-        ->where('item_type', '!=', 'offline')
-        ->where('status', 1)
-        ->whereNotIn('category_id', $category_off)
-        //->whereNotIn('sub_category_id', $category_off)
-        ->whereNotIn('products.id', $product_off)
-        ->get();
 
-        $products = $products->map(function($product) use ($branch_id, $option_off) {
-            $product->price = $product->product_pricing
-                ->firstWhere('branch_id', $branch_id)?->price ?? $product->price;
+        $baseQuery = $this->buildBaseProductQuery($locale, $branch_id);
+         $today = date('Y-m-d');
+ 
+        $module = "dine_in";
 
-            $product->variations = $product->variations->map(function($variation) use ($option_off, $branch_id) {
-                $variation->options = $variation->options
-                    ->where('status', 1)
-                    ->values()
-                    ->reject(fn($opt) => $option_off->contains($opt->id))
-                    ->map(function($opt) use ($branch_id) {
-                        $opt->price = $opt->option_pricing
-                            ->firstWhere('branch_id', $branch_id)?->price ?? $opt->price;
-                        return $opt;
-                    });
-
-                return $variation;
-            });
-            return $product;
-        });
+        $processProducts = $this->buildProductProcessor($category_off, $product_off, $option_off, $branch_id, $module, $today);
+        $products = $processProducts($baseQuery);
+        $products = ProductResource::collection($products);
 
         return response()->json([
             "products" => $products
@@ -1203,4 +1168,90 @@ class ClientMakeOrderController extends Controller
         ]);
     }
 
+    /**
+     * Build eager-loaded base product query
+     */
+    private function buildBaseProductQuery($locale, $branch_id)
+    {
+        return $this->products
+            ->orderBy('order')
+            ->with([
+                'addons'              => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale),
+                'category_addons'     => fn($q) => $q->withLocale($locale),
+                'excludes'            => fn($q) => $q->withLocale($locale),
+                'extra', 'sales_count', 'tax', 'product_pricing', 'pos_pricing', 'translations',
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($qo) => $qo->where('status', 1)->withLocale($locale)->with([
+                        'extra'          => fn($qe) => $qe->with('parent_extra')->withLocale($locale),
+                        'option_pricing',
+                    ]),
+                ]),
+                'tax_module' => fn($q) => $q
+                    ->whereHas('module', fn($qm) => $qm->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all']))
+                    ->with(['tax', 'module']),
+                'discount' => fn($q) => $q->where(fn($d) => $d->whereJsonContains('module', 'pos')->orWhereJsonContains('module', 'all')),
+                'group_products' => fn($q) => $q->with([
+                    'products' => fn($q) => $q->select('products.id', 'products.name')->withLocale($locale),
+                ]),
+            ])
+            ->withLocale($locale)
+            ->where('item_type', '!=', 'online')
+            ->where('status', 1);
+    }
+
+    /**
+     * Shared product processor closure (DRY helper)
+     */
+    private function buildProductProcessor(array $category_off, array $product_off, array $option_off, $branch_id, $module, $today): \Closure
+    {
+        return function ($query) use ($category_off, $product_off, $option_off, $branch_id, $module, $today) {
+            return $query->get()->map(function ($product) use ($category_off, $product_off, $option_off, $branch_id, $module, $today) {
+                if (in_array($product->category_id, $category_off) ||
+                    in_array($product->sub_category_id, $category_off) ||
+                    in_array($product->id, $product_off)) {
+                    return null;
+                }
+
+                $new_price = $product->product_pricing->firstWhere('branch_id', $branch_id)?->price;
+                if (empty($new_price)) {
+                    $new_price = $product->pos_pricing->firstWhere('module', $module)?->price ?? $product->price;
+                }
+                $product->price    = $new_price;
+                $product->favourite = false;
+
+                if ($product->stock_type == 'fixed') {
+                    $product->count    = $product->sales_count->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                } elseif ($product->stock_type == 'daily') {
+                    $product->count    = $product->sales_count->where('date', $today)->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                }
+
+                $resolved_tax = $product->tax_module->first()?->tax ?? $product->tax ?? null;
+
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id, $resolved_tax) {
+                    $variation->options = $variation->options
+                        ->reject(fn($option) => in_array($option->id, $option_off))
+                        ->map(function ($element) use ($branch_id, $resolved_tax) {
+                            $element->price   = $element->option_pricing->firstWhere('branch_id', $branch_id)?->price ?? $element->price;
+                            $element->new_tax = $resolved_tax;
+                            return $element;
+                        });
+                    return $variation;
+                });
+
+                $product->addons = $product->addons->map(function ($addon) use ($product) {
+                    $addon->discount = $product->discount;
+                    return $addon;
+                });
+
+                if (!empty($resolved_tax)) {
+                    $product->tax = $resolved_tax;
+                }
+
+                return $product;
+            })->filter();
+        };
+    }
 }

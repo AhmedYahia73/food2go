@@ -18,7 +18,9 @@ class ExcludeResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->translations->where('key', $this->name)->first()?->value ?? $this->name,
-            'product_id' => $this->product_id, 
+            'product_id' => $this->product_id,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

@@ -1523,23 +1523,33 @@ trait PlaceOrder
             if(!$product) continue;
 
             $product_price = $product->product_pricing->first()?->price ?? $product->price;
-            $tax_module = $product->tax?->tax_module?->map(function ($taxItem) use ($module, $branch_id, $product) {
-                $isFound = $taxItem->module->where('module', $module)->whereIn('app_type', ['online', 'all'])->where("branch_id", $branch_id)->first();
-                if($isFound) return $product->tax;
+            $tax_module = $product->tax_module?->map(function ($taxItem) use ($module, $branch_id) {
+                $isFound = $taxItem->module->where('module', $module)->whereIn('app_type', ['online', 'all'])->where("branch_id", $branch_id);
+                if($isFound->count() > 0) return $taxItem->tax;
             })->filter()->first();
-            $product->tax = !empty($tax_module) ? $tax_module : null;
+            $product->tax = !empty($tax_module) ? $tax_module : $product->tax;
             $my_discount = $product->discount?->start_date <= date("Y-m-d") && $product->discount?->end_date >= date("Y-m-d") ? $product->discount : null;
 
             $product_tax_val = 0; $product_discount_val = 0;
             if ($product->taxes?->setting == 'included') {
                 if (!empty($my_discount)) {
                     $discounted_price = ($my_discount->type == 'precentage') ? $product_price - $my_discount->amount * $product_price / 100 : $product_price - $my_discount->amount;
-                    $price_with_tax = empty($product->tax) ? $discounted_price : ($product->tax->type == 'value' ? $discounted_price + $product->tax->amount : $discounted_price + $product->tax->amount * $discounted_price / 100);
                 } else {
                     $discounted_price = $product_price;
-                    $price_with_tax = empty($product->tax) ? $discounted_price : ($product->tax->type == 'value' ? $discounted_price + $product->tax->amount : $discounted_price + $product->tax->amount * $discounted_price / 100);
                 }
-                $product_tax_val = $price_with_tax - $discounted_price; 
+                
+                if (empty($product->tax)) {
+                    $price_with_tax = $discounted_price;
+                    $product_tax_val = 0;
+                } else {
+                    $price_with_tax = $discounted_price;
+                    if ($product->tax->type == 'value') {
+                        $product_tax_val = $product->tax->amount;
+                    } else {
+                        $price_before_tax = $price_with_tax / (1 + ($product->tax->amount / 100));
+                        $product_tax_val = $price_with_tax - $price_before_tax;
+                    }
+                }
                 $product_discount_val = $product_price - $discounted_price; 
                 $base_product_price = $price_with_tax;
             } else {
@@ -1555,20 +1565,34 @@ trait PlaceOrder
                 }
                 $product_tax_val = $tax_amt - $discounted_price;
                 $product_discount_val = $product_price - $discounted_price;
-                $base_product_price = $tax_amt;
+                $base_product_price = $product_price + $product_tax_val;
             }
 
-            $options_total_price = 0; $addon_total_tax = 0; $addon_total_discount = 0; $addon_total_price = 0;
+            $options_total_price = 0; $options_total_tax = 0; 
+            $addon_total_tax = 0; $addon_total_discount = 0; $addon_total_price = 0;
+            $extra_total_price = 0; $extra_total_tax = 0;
+
             foreach($cart->addons_cart as $addon_cart) {
                 $addon = $addon_cart->addon;
                 if(!$addon) continue;
                 $addon_price = $addon->price; $addon_tax_val = 0; $addon_discount_val = 0;
                 if ($addon->taxes?->setting == 'included') {
-                    $addon_price_with_tax = empty($addon->tax) ? $addon_price : ($addon->tax->type == 'value' ? $addon_price + $addon->tax->amount : $addon_price + $addon->tax->amount * $addon_price / 100);
-                    $addon_tax_val = $addon_price_with_tax - $addon_price;
+                    $addon_price_with_tax = $addon_price;
+                    if (empty($addon->tax)) {
+                        $addon_tax_val = 0;
+                    } else {
+                        if ($addon->tax->type == 'value') {
+                            $addon_tax_val = $addon->tax->amount;
+                        } else {
+                            $addon_price_before_tax = $addon_price_with_tax / (1 + ($addon->tax->amount / 100));
+                            $addon_tax_val = $addon_price_with_tax - $addon_price_before_tax;
+                        }
+                    }
+                    $addon_price = $addon_price_with_tax;
                 } else {
                     $tax_amt = empty($addon->tax) ? $addon_price : (($addon->tax->type == 'precentage') ? $addon_price + $addon->tax->amount * $addon_price / 100 : $addon_price + $addon->tax->amount);
                     $addon_tax_val = $tax_amt - $addon_price;
+                    $addon_price = $tax_amt;
                 }
                 $addon_total_tax += ($addon_tax_val * $addon_cart->quantity);
                 $addon_total_discount += ($addon_discount_val * $addon_cart->quantity);
@@ -1580,14 +1604,64 @@ trait PlaceOrder
                     $opt = $opt_cart->option;
                     if($opt) {
                         $opt_price = $opt->option_pricing->first()?->price ?? $opt->price;
+                        $opt_tax_val = 0;
+                        if ($product->taxes?->setting == 'included') {
+                            if (!empty($product->tax)) {
+                                if ($product->tax->type == 'precentage') {
+                                    $opt_tax_val = $opt_price - ($opt_price / (1 + ($product->tax->amount / 100)));
+                                } else {
+                                    $opt_tax_val = 0; 
+                                }
+                            }
+                        } else {
+                            if (!empty($product->tax)) {
+                                if ($product->tax->type == 'precentage') {
+                                    $opt_tax_val = $opt_price * $product->tax->amount / 100;
+                                    $opt_price = $opt_price + $opt_tax_val;
+                                }
+                            }
+                        }
+                        $options_total_tax += ($opt_tax_val * $opt_cart->quantity);
                         $options_total_price += ($opt_price * $opt_cart->quantity);
                     }
                 }
             }
-            $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price;
+            
+            foreach($cart->extras_cart as $extra_cart) {
+                $extra = $extra_cart->extra;
+                if(!$extra) continue;
+                $extra_price = $extra->pricing->first()?->price ?? $extra->price;
+                $extra_tax_val = 0;
+                if ($product->taxes?->setting == 'included') {
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $extra_tax_val = $extra_price - ($extra_price / (1 + ($product->tax->amount / 100)));
+                        } else {
+                            $extra_tax_val = 0;
+                        }
+                    }
+                    $extra_price_after_tax = $extra_price;
+                } else {
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $extra_tax_val = $extra_price * $product->tax->amount / 100;
+                            $extra_price_after_tax = $extra_price + $extra_tax_val;
+                        } else {
+                            $extra_tax_val = 0; 
+                            $extra_price_after_tax = $extra_price;
+                        }
+                    } else {
+                        $extra_price_after_tax = $extra_price;
+                    }
+                }
+                $extra_total_price += ($extra_price_after_tax * $extra_cart->quantity);
+                $extra_total_tax += ($extra_tax_val * $extra_cart->quantity);
+            }
+
+            $product_total = $cart->quantity * ($options_total_price + $base_product_price + $addon_total_price + $extra_total_price);
             $cart_total_price += $product_total;
-            $cart_total_tax += ($product_tax_val * $cart->quantity) + $addon_total_tax;
-            $cart_total_discount += ($product_discount_val * $cart->quantity) + $addon_total_discount;
+            $cart_total_tax += $cart->quantity * ($product_tax_val + $options_total_tax + $addon_total_tax + $extra_total_tax);
+            $cart_total_discount += $cart->quantity * ($product_discount_val + $addon_total_discount);
         }
 
         $coupon_discount = $request->coupon_discount ?? 0;

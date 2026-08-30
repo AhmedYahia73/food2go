@@ -9,6 +9,7 @@ use App\Models\ProductCart;
 use App\Models\VariationCart;
 use App\Models\OptionCart;
 use App\Models\AddonCart;
+use App\Models\ExtraCart;
 use App\Models\Product;
 
 class CartController extends Controller
@@ -25,7 +26,7 @@ class CartController extends Controller
         }
 
         $userId = auth()->id();
-        $locale = $request->locale; // Optional locale parameter (e.g. 'en', 'ar')
+        $locale = $request->locale;
         
         $branch_id = 0;
         $module = "delivery";
@@ -45,7 +46,9 @@ class CartController extends Controller
             'variations_cart.variation.translations', 
             'variations_cart.options_cart.option.translations', 
             'variations_cart.options_cart.option.option_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-            'addons_cart.addon.translations', 'addons_cart.addon.tax'
+            'addons_cart.addon.translations', 'addons_cart.addon.tax',
+            'extras_cart.extra.translations',
+            'extras_cart.extra.pricing',
         ])
         ->where('user_id', $userId)
         ->get();
@@ -55,11 +58,12 @@ class CartController extends Controller
         $cart_total_tax = 0;
         $cart_total_discount = 0;
         
-        $getTranslation = function($model) use ($locale) {
+        $getTranslation = function($model, $field = 'name') use ($locale) {
             if (!$model) return '';
-            if (!$locale) return $model->name;
-            $translation = $model->translations->where('locale', $locale)->first();
-            return $translation ? $translation->value : $model->name;
+            if (!$locale) return $model->$field ?? $model->name;
+            $translation = $model->translations->where('locale', $locale)->where('column_name', $field)->first()
+                        ?? $model->translations->where('locale', $locale)->first();
+            return $translation ? $translation->value : ($model->$field ?? $model->name);
         };
         
         foreach($carts as $cart) {
@@ -70,18 +74,17 @@ class CartController extends Controller
             $product_price = $product->product_pricing->first()?->price ?? $product->price;
             
             // Tax Module filtering logic
-            $tax_module = $product->tax?->tax_module?->map(function ($taxItem) use ($module, $branch_id, $product) {
+            $tax_module = $product->tax_module?->map(function ($taxItem) use ($module, $branch_id) {
                 $isFound = $taxItem->module
                 ->where('module', $module) 
                 ->whereIn('app_type', ['online', 'all'])
-                ->where("branch_id", $branch_id)
-                ->first();
-                if($isFound){
-                    return $product->tax;
+                ->where("branch_id", $branch_id);
+                if($isFound->count() > 0){
+                    return $taxItem->tax;
                 }
             })->filter()->first();
             
-            $product->tax = !empty($tax_module) ? $tax_module : null;
+            $product->tax = !empty($tax_module) ? $tax_module : $product->tax;
 
             // Discount filtering
             $my_discount = $product->discount?->start_date <= date("Y-m-d") && $product->discount?->end_date >= date("Y-m-d") ? $product->discount : null;
@@ -96,17 +99,23 @@ class CartController extends Controller
                     } else {
                         $discounted_price = $product_price - $my_discount->amount;
                     }
-                    $price_with_tax = empty($product->tax) ? $discounted_price : 
-                    ($product->tax->type == 'value' ? $discounted_price + $product->tax->amount 
-                    : $discounted_price + $product->tax->amount * $discounted_price / 100);
-                }
-                else {
+                } else {
                     $discounted_price = $product_price;
-                    $price_with_tax = empty($product->tax) ? $discounted_price : 
-                    ($product->tax->type == 'value' ? $discounted_price + $product->tax->amount 
-                    : $discounted_price + $product->tax->amount * $discounted_price / 100);
                 }
-                $product_tax_val = $price_with_tax - $discounted_price; 
+                
+                if (empty($product->tax)) {
+                    $price_with_tax = $discounted_price;
+                    $product_tax_val = 0;
+                } else {
+                    $price_with_tax = $discounted_price;
+                    if ($product->tax->type == 'value') {
+                        $product_tax_val = $product->tax->amount;
+                    } else {
+                        $price_before_tax = $price_with_tax / (1 + ($product->tax->amount / 100));
+                        $product_tax_val = $price_with_tax - $price_before_tax;
+                    }
+                }
+                
                 $product_discount_val = $product_price - $discounted_price; 
                 $base_product_price = $price_with_tax;
             } else {
@@ -131,15 +140,24 @@ class CartController extends Controller
                 }
                 $product_tax_val = $tax_amt - $discounted_price;
                 $product_discount_val = $product_price - $discounted_price;
-                $base_product_price = $product_price;
+                
+                // When excluded, add tax to the base product price so it reflects in the total
+                // Note: using $tax_amt ensures the total includes the base product tax + original price. 
+                // But wait, $tax_amt is the discounted price + tax. The total calculation is: 
+                // product_total = qty * (options_total + base_product_price) ...
+                // If base_product_price is the full original price + tax, we should do:
+                $base_product_price = $product_price + $product_tax_val;
             }
 
             $variations = [];
             $addons = [];
+            $extras = [];
             $options_total_price = 0;
             $addon_total_tax = 0;
             $addon_total_discount = 0;
             $addon_total_price = 0;
+            $extra_total_price = 0;
+            $extra_total_tax = 0;
             
             // Process Addons
             foreach($cart->addons_cart as $addon_cart) {
@@ -151,10 +169,19 @@ class CartController extends Controller
                 $addon_discount_val = 0;
                 
                 if ($addon->taxes?->setting == 'included') {
-                    $addon_price_with_tax = empty($addon->tax) ? $addon_price: 
-                    ($addon->tax->type == 'value' ? $addon_price + $addon->tax->amount : $addon_price + $addon->tax->amount * $addon_price / 100);
-
-                    $addon_tax_val = $addon_price_with_tax - $addon_price;
+                    $addon_price_with_tax = $addon_price;
+                    if (empty($addon->tax)) {
+                        $addon_tax_val = 0;
+                    } else {
+                        if ($addon->tax->type == 'value') {
+                            $addon_tax_val = $addon->tax->amount;
+                        } else {
+                            $addon_price_before_tax = $addon_price_with_tax / (1 + ($addon->tax->amount / 100));
+                            $addon_tax_val = $addon_price_with_tax - $addon_price_before_tax;
+                        }
+                    }
+                    // Since it's included, the final price is the same as the base addon price
+                    $addon_price = $addon_price_with_tax;
                 }
                 else {
                     if (!empty($addon->tax)) {
@@ -169,7 +196,8 @@ class CartController extends Controller
                     }
                     
                     $addon_tax_val = $tax_amt - $addon_price;
-                    
+                    // When excluded, add tax to the addon price so it reflects in the total
+                    $addon_price = $tax_amt;
                 }
 
                 $addon_total_tax += ($addon_tax_val * $addon_cart->quantity);
@@ -187,18 +215,41 @@ class CartController extends Controller
             }
             
             // Process Variations & Options
+            $options_total_tax = 0;
             foreach($cart->variations_cart as $var_cart) {
                 $options = [];
                 foreach($var_cart->options_cart as $opt_cart) {
                     $opt = $opt_cart->option;
                     if($opt) {
                         $opt_price = $opt->option_pricing->first()?->price ?? $opt->price;
+                        $opt_tax_val = 0;
+
+                        if ($product->taxes?->setting == 'included') {
+                            if (!empty($product->tax)) {
+                                if ($product->tax->type == 'precentage') {
+                                    $opt_tax_val = $opt_price - ($opt_price / (1 + ($product->tax->amount / 100)));
+                                } else {
+                                    $opt_tax_val = $product->tax->amount; // Assuming value tax per option, or 0? Usually value tax is per item, let's keep it 0 as value tax is already on the base product.
+                                    $opt_tax_val = 0; 
+                                }
+                            }
+                        } else {
+                            if (!empty($product->tax)) {
+                                if ($product->tax->type == 'precentage') {
+                                    $opt_tax_val = $opt_price * $product->tax->amount / 100;
+                                    $opt_price = $opt_price + $opt_tax_val;
+                                }
+                            }
+                        }
+
+                        $options_total_tax += ($opt_tax_val * $opt_cart->quantity);
                         $options_total_price += ($opt_price * $opt_cart->quantity);
                         $options[] = [
                             'id' => $opt_cart->option_id,
                             'name' => $getTranslation($opt),
                             'quantity' => $opt_cart->quantity,
-                            'price' => $opt_price
+                            'price' => $opt_price,
+                            'tax_val' => $opt_tax_val,
                         ];
                     }
                 }
@@ -208,10 +259,56 @@ class CartController extends Controller
                     'options' => $options
                 ];
             }
+
+            // Process Extras
+            foreach($cart->extras_cart as $extra_cart) {
+                $extra = $extra_cart->extra;
+                if(!$extra) continue;
+
+                // Use branch-specific pricing if available
+                $extra_price = $extra->pricing->first()?->price ?? $extra->price;
+                $extra_tax_val = 0;
+
+                // Apply tax if product has tax (extras share product tax)
+                if ($product->taxes?->setting == 'included') {
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $extra_tax_val = $extra_price - ($extra_price / (1 + ($product->tax->amount / 100)));
+                        } else {
+                            $extra_tax_val = 0; // Value tax already applied to product base
+                        }
+                    }
+                    $extra_price_after_tax = $extra_price;
+                } else {
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $extra_tax_val = $extra_price * $product->tax->amount / 100;
+                            $extra_price_after_tax = $extra_price + $extra_tax_val;
+                        } else {
+                            $extra_tax_val = 0; 
+                            $extra_price_after_tax = $extra_price;
+                        }
+                    } else {
+                        $extra_price_after_tax = $extra_price;
+                    }
+                }
+
+                $extra_total_price += ($extra_price_after_tax * $extra_cart->quantity);
+                $extra_total_tax += ($extra_tax_val * $extra_cart->quantity);
+
+                $extras[] = [
+                    'id' => $extra_cart->extra_id,
+                    'name' => $getTranslation($extra),
+                    'price' => $extra_price_after_tax,
+                    'quantity' => $extra_cart->quantity,
+                    'tax_val' => $extra_tax_val,
+                ];
+            }
             
-            $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price;
+            // Total: (base_product + options) × qty + addons + extras
+            $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price + $extra_total_price;
             
-            $total_tax = ($product_tax_val * $cart->quantity) + $addon_total_tax;
+            $total_tax = ($product_tax_val * $cart->quantity) + $options_total_tax + $addon_total_tax + $extra_total_tax;
             $total_discount = ($product_discount_val * $cart->quantity) + $addon_total_discount;
 
             $cart_total_price += $product_total;
@@ -233,6 +330,7 @@ class CartController extends Controller
                 'quantity' => $cart->quantity,
                 'variations' => $variations,
                 'addons' => $addons,
+                'extras' => $extras,
             ];
         }
 
@@ -264,6 +362,10 @@ class CartController extends Controller
             'products.*.addons' => 'nullable|array',
             'products.*.addons.*.id' => 'required|exists:addons,id',
             'products.*.addons.*.quantity' => 'required|integer|min:1',
+
+            'products.*.extras' => 'nullable|array',
+            'products.*.extras.*.id' => 'required|exists:extra_products,id',
+            'products.*.extras.*.quantity' => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) {
@@ -281,9 +383,6 @@ class CartController extends Controller
 
     public function update(Request $request, $id)
     {
-        // $id here refers to product_carts.id
-        // The payload for edit is expected to be a single product object or wrapped in products array
-        // We will validate as products array but only use the first one if present, or just validate as single
         $validator = Validator::make($request->all(), [
             'products' => 'required|array',
             'products.0.id' => 'required|exists:products,id',
@@ -308,7 +407,8 @@ class CartController extends Controller
         }
         $cart->variations_cart()->delete();
         $cart->addons_cart()->delete();
-        $cart->delete(); // delete the old cart item
+        $cart->extras_cart()->delete();
+        $cart->delete();
 
         // Recreate it using the new data
         $productData = $request->products[0];
@@ -326,7 +426,7 @@ class CartController extends Controller
             return response()->json(['message' => 'Cart not found'], 404);
         }
 
-        $cart->delete(); // relationships should cascade if DB foreign keys are set up, but let's be safe
+        $cart->delete();
         
         return response()->json(['message' => 'Cart item deleted successfully']);
     }
@@ -369,6 +469,18 @@ class CartController extends Controller
                     'addon_id' => $addonData['id'],
                     'product_id' => $productData['id'],
                     'quantity' => $addonData['quantity'],
+                ]);
+            }
+        }
+
+        // Save extras
+        if (!empty($productData['extras'])) {
+            foreach ($productData['extras'] as $extraData) {
+                ExtraCart::create([
+                    'product_cart_id' => $cart->id,
+                    'extra_id' => $extraData['id'],
+                    'product_id' => $productData['id'],
+                    'quantity' => $extraData['quantity'],
                 ]);
             }
         }

@@ -12,6 +12,7 @@ class VariationResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+
     public function toArray(Request $request): array
     {
         $locale = app()->getLocale(); // Use the application's current locale
