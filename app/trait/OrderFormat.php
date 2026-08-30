@@ -125,6 +125,7 @@ trait OrderFormat
             $products[] = [
                 "extras" => $extras,
                 "addons" => $addons,
+                "excludes" => $excludes,
                 "variations" => $variations,
                 "product" => $product,
             ];
@@ -279,7 +280,7 @@ trait OrderFormat
                 $product_item = [
                     "extras" => $extras,
                     "addons" => $addons,
-                    "addons" => $addons,
+                    "excludes" => $excludes,
                     "variations" => $variations,
                     "product" => $product,
                 ];
@@ -442,6 +443,7 @@ trait OrderFormat
             $products[] = [
                 "extras" => $extras,
                 "addons" => $addons,
+                "excludes" => $excludes,
                 "variations" => $variations,
                 "product" => $product,
             ];
@@ -599,6 +601,7 @@ trait OrderFormat
             $products[] = [
                 "extras" => $extras,
                 "addons" => $addons,
+                "excludes" => $excludes,
                 "variations" => $variations,
                 "product" => $product,
             ];
@@ -893,6 +896,7 @@ trait OrderFormat
             $products[] = [
                 "extras" => $extras,
                 "addons" => $addons,
+                "excludes" => $excludes,
                 "variations" => $variations,
                 "product" => $product,
             ];
