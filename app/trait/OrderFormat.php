@@ -73,40 +73,40 @@ trait OrderFormat
             $excludes = [];
             $variations = [];
             $product = [];
-            foreach ($item['extras'] as $element) {
+            foreach ($item['extras'] ?? [] as $element) {
                 $extras[] = [
                     "id" => $element['id'],
                     "name" => $translations[$element['name']] ?? $element['name'],
-                    "price" => $element['price'],
+                    "price" => $element['price'] ?? 0,
                 ];
             }
-            foreach ($item['addons'] as $element) {
+            foreach ($item['addons'] ?? [] as $element) {
                 $addons[] = [
-                    "id" => $element['addon']['id'],
-                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
-                    "price" => $element['addon']['price'],
-                    "count" => $element['count'],
+                    "id" => $element['addon']['id'] ?? $element['id'] ?? null,
+                    "name" => $translations[$element['addon']['name'] ?? ''] ?? ($element['addon']['name'] ?? ($element['name'] ?? '')),
+                    "price" => $element['addon']['price'] ?? ($element['price'] ?? 0),
+                    "count" => $element['count'] ?? 1,
                 ];
             }
-            foreach ($item['excludes'] as $element) {
+            foreach ($item['excludes'] ?? [] as $element) {
                 $excludes[] = [
                     "id" => $element['id'],
                     "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
-            foreach ($item['variations'] as $element) {
+            foreach ($item['variations'] ?? [] as $element) {
                 $options = [];
-                foreach ($element['options'] as $value) {
+                foreach ($element['options'] ?? [] as $value) {
                     $options[] = [
                         "id" => $value['id'],
                         "name" => $translations[$value['name']] ?? $value['name'],
-                        "price" => $value['price'],
-                        "total_option_price" => $value['total_option_price'],
+                        "price" => $value['price'] ?? 0,
+                        "total_option_price" => $value['total_option_price'] ?? ($value['price'] ?? 0),
                     ];
                 }
                 $variations[] = [
-                    "id" => $element['variation']['id'],
-                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
+                    "id" => $element['variation']['id'] ?? null,
+                    "name" => $translations[$element['variation']['name'] ?? ''] ?? ($element['variation']['name'] ?? ''),
                     "options" => $options,
                 ];
             }
@@ -228,40 +228,40 @@ trait OrderFormat
                 $excludes = [];
                 $variations = [];
                 $product = [];
-                foreach ($item['extras'] as $element) {
+                foreach ($item['extras'] ?? [] as $element) {
                     $extras[] = [
                         "id" => $element['id'],
                         "name" => $translations[$element['name']] ?? $element['name'],
-                        "price" => $element['price'],
+                        "price" => $element['price'] ?? 0,
                     ];
                 }
-                foreach ($item['addons'] as $element) {
+                foreach ($item['addons'] ?? [] as $element) {
                     $addons[] = [
-                        "id" => $element['addon']['id'],
-                        "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
-                        "price" => $element['addon']['price'],
-                        "count" => $element['count'],
+                        "id" => $element['addon']['id'] ?? $element['id'] ?? null,
+                        "name" => $translations[$element['addon']['name'] ?? ''] ?? ($element['addon']['name'] ?? ($element['name'] ?? '')),
+                        "price" => $element['addon']['price'] ?? ($element['price'] ?? 0),
+                        "count" => $element['count'] ?? 1,
                     ];
                 }
-                foreach ($item['excludes'] as $element) {
+                foreach ($item['excludes'] ?? [] as $element) {
                     $excludes[] = [
                         "id" => $element['id'],
                         "name" => $translations[$element['name']] ?? $element['name'],
                     ];
                 }
-                foreach ($item['variations'] as $element) {
+                foreach ($item['variations'] ?? [] as $element) {
                     $options = [];
-                    foreach ($element['options'] as $value) {
+                    foreach ($element['options'] ?? [] as $value) {
                         $options[] = [
                             "id" => $value['id'],
                             "name" => $translations[$value['name']] ?? $value['name'],
-                            "price" => $value['price'],
-                            "total_option_price" => $value['total_option_price'],
+                            "price" => $value['price'] ?? 0,
+                            "total_option_price" => $value['total_option_price'] ?? ($value['price'] ?? 0),
                         ];
                     }
                     $variations[] = [
-                        "id" => $element['variation']['id'],
-                        "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
+                        "id" => $element['variation']['id'] ?? null,
+                        "name" => $translations[$element['variation']['name'] ?? ''] ?? ($element['variation']['name'] ?? ''),
                         "options" => $options,
                     ];
                 }
@@ -391,40 +391,40 @@ trait OrderFormat
             $excludes = [];
             $variations = [];
             $product = [];
-            foreach ($item['extras'] as $element) {
+            foreach ($item['extras'] ?? [] as $element) {
                 $extras[] = [
                     "id" => $element['id'],
                     "name" => $translations[$element['name']] ?? $element['name'],
-                    "price" => $element['price'],
+                    "price" => $element['price'] ?? 0,
                 ];
             }
-            foreach ($item['addons'] as $element) {
+            foreach ($item['addons'] ?? [] as $element) {
                 $addons[] = [
-                    "id" => $element['addon']['id'],
-                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
-                    "price" => $element['addon']['price'],
-                    "count" => $element['count'],
+                    "id" => $element['addon']['id'] ?? $element['id'] ?? null,
+                    "name" => $translations[$element['addon']['name'] ?? ''] ?? ($element['addon']['name'] ?? ($element['name'] ?? '')),
+                    "price" => $element['addon']['price'] ?? ($element['price'] ?? 0),
+                    "count" => $element['count'] ?? 1,
                 ];
             }
-            foreach ($item['excludes'] as $element) {
+            foreach ($item['excludes'] ?? [] as $element) {
                 $excludes[] = [
                     "id" => $element['id'],
                     "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
-            foreach ($item['variations'] as $element) {
+            foreach ($item['variations'] ?? [] as $element) {
                 $options = [];
-                foreach ($element['options'] as $value) {
+                foreach ($element['options'] ?? [] as $value) {
                     $options[] = [
                         "id" => $value['id'],
                         "name" => $translations[$value['name']] ?? $value['name'],
-                        "price" => $value['price'],
-                        "total_option_price" => $value['total_option_price'],
+                        "price" => $value['price'] ?? 0,
+                        "total_option_price" => $value['total_option_price'] ?? ($value['price'] ?? 0),
                     ];
                 }
                 $variations[] = [
-                    "id" => $element['variation']['id'],
-                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
+                    "id" => $element['variation']['id'] ?? null,
+                    "name" => $translations[$element['variation']['name'] ?? ''] ?? ($element['variation']['name'] ?? ''),
                     "options" => $options,
                 ];
             }
@@ -555,38 +555,38 @@ trait OrderFormat
             $excludes = [];
             $variations = [];
             $product = [];
-            foreach ($item['extras'] as $element) {
+            foreach ($item['extras'] ?? [] as $element) {
                 $extras[] = [
                     "id" => $element['id'],
                     "name" => $translations[$element['name']] ?? $element['name'],
-                    "price" => $element['price'],
+                    "price" => $element['price'] ?? 0,
                 ];
             }
-            foreach ($item['addons'] as $element) {
+            foreach ($item['addons'] ?? [] as $element) {
                 $addons[] = [
-                    "id" => $element['addon']['id'],
-                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
-                    "price" => $element['addon']['price'],
-                    "count" => $element['count'],
+                    "id" => $element['addon']['id'] ?? $element['id'] ?? null,
+                    "name" => $translations[$element['addon']['name'] ?? ''] ?? ($element['addon']['name'] ?? ($element['name'] ?? '')),
+                    "price" => $element['addon']['price'] ?? ($element['price'] ?? 0),
+                    "count" => $element['count'] ?? 1,
                 ];
             }
-            foreach ($item['excludes'] as $element) {
+            foreach ($item['excludes'] ?? [] as $element) {
                 $excludes[] = [
                     "id" => $element['id'],
                     "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
-            foreach ($item['variations'] as $element) {
+            foreach ($item['variations'] ?? [] as $element) {
                 $options = [];
-                foreach ($element['options'] as $value) {
+                foreach ($element['options'] ?? [] as $value) {
                     $options[] = [
                         "id" => $value['id'],
                         "name" => $translations[$value['name']] ?? $value['name'],
                     ];
                 }
                 $variations[] = [
-                    "id" => $element['variation']['id'],
-                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
+                    "id" => $element['variation']['id'] ?? null,
+                    "name" => $translations[$element['variation']['name'] ?? ''] ?? ($element['variation']['name'] ?? ''),
                     "options" => $options,
                 ];
             }
@@ -645,7 +645,7 @@ trait OrderFormat
             $variations = [];
             $product = [];
             $product_price = 0;
-            foreach ($item['extras'] as $element) {
+            foreach ($item['extras'] ?? [] as $element) {
                 $extra_price_item = GroupExtraPrice::where("extra_id", $element['id'])
                 ->where("group_product_id", $order->module_id)
                 ->first();
@@ -653,7 +653,7 @@ trait OrderFormat
                     $extra_price = $extra_price_item->price;
                 }
                 else{
-                    $extra_price = $element['price'] + $element['price'] * $precentage / 100;
+                    $extra_price = ($element['price'] ?? 0) + ($element['price'] ?? 0) * $precentage / 100;
                 }
                 $product_price += $extra_price;
                 $extras[] = [
@@ -661,7 +661,7 @@ trait OrderFormat
                     "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
-            foreach ($item['excludes'] as $element) {
+            foreach ($item['excludes'] ?? [] as $element) {
                 $name = TranslationTbl::
                 where("key", $element['name'])
                 ->where("locale", $locale)
@@ -672,34 +672,39 @@ trait OrderFormat
                     "name" => $name,
                 ];
             }
-            foreach ($item['addons'] as $element) {
+            foreach ($item['addons'] ?? [] as $element) {
+                $addon_id = $element['addon']['id'] ?? $element['id'] ?? null;
+                $addon_raw_price = $element['addon']['price'] ?? ($element['price'] ?? 0);
+                $addon_name = $element['addon']['name'] ?? ($element['name'] ?? '');
+                $addon_count = $element['count'] ?? 1;
+
                 $addon_price_item = GroupAddonPrice::
-                where("addon_id", $element['addon']['id'])
+                where("addon_id", $addon_id)
                 ->where("group_product_id", $order->module_id)
                 ->first();
                 if (!empty($addon_price_item)) {
                     $addon_price = $addon_price_item->price;
                 }
                 else{
-                    $addon_price = $element['addon']['price'] + $element['addon']['price'] * $precentage / 100;
+                    $addon_price = $addon_raw_price + $addon_raw_price * $precentage / 100;
                 }
                 $addons[] = [
-                    "id" => $element['addon']['id'],
-                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
+                    "id" => $addon_id,
+                    "name" => $translations[$addon_name] ?? $addon_name,
                     "price" => $addon_price,
-                    "count" => $element['count'],
-                    "total" => $addon_price * $element['count'],
+                    "count" => $addon_count,
+                    "total" => $addon_price * $addon_count,
                 ];
-                $total_price_calculated += $addon_price * $element['count'];
+                $total_price_calculated += $addon_price * $addon_count;
             } 
-            foreach ($item['variations'] as $element) { 
+            foreach ($item['variations'] ?? [] as $element) { 
                 $options = [];
-                foreach ($element['options'] as $value) {
+                foreach ($element['options'] ?? [] as $value) {
                     $options[] = [
                         "id" => $value['id'],
                         "name" => $translations[$value['name']] ?? $value['name'],
-                        "price" => $value['price'],
-                        "total_option_price" => $value['total_option_price'],
+                        "price" => $value['price'] ?? 0,
+                        "total_option_price" => $value['total_option_price'] ?? ($value['price'] ?? 0),
                     ];
                     $option_price_item = GroupOptionPrice::
                     where("option_id", $value['id'])
@@ -709,13 +714,13 @@ trait OrderFormat
                         $price = $option_price_item->price;
                     }
                     else{
-                        $price = $value['price'] + $value['price'] * $precentage / 100;
+                        $price = ($value['price'] ?? 0) + ($value['price'] ?? 0) * $precentage / 100;
                     }
                     $product_price += $price; 
                 }
                 $variations[] = [
-                    "id" => $element['variation']['id'],
-                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
+                    "id" => $element['variation']['id'] ?? null,
+                    "name" => $translations[$element['variation']['name'] ?? ''] ?? ($element['variation']['name'] ?? ''),
                     "options" => $options,
                 ]; 
             }
@@ -844,40 +849,40 @@ trait OrderFormat
             $excludes = [];
             $variations = [];
             $product = [];
-            foreach ($item['extras'] as $element) {
+            foreach ($item['extras'] ?? [] as $element) {
                 $extras[] = [
                     "id" => $element['id'],
                     "name" => $translations[$element['name']] ?? $element['name'],
-                    "price" => $element['price'],
+                    "price" => $element['price'] ?? 0,
                 ];
             }
-            foreach ($item['addons'] as $element) {
+            foreach ($item['addons'] ?? [] as $element) {
                 $addons[] = [
-                    "id" => $element['addon']['id'],
-                    "name" => $translations[$element['addon']['name']] ?? $element['addon']['name'],
-                    "price" => $element['addon']['price'],
-                    "count" => $element['count'],
+                    "id" => $element['addon']['id'] ?? $element['id'] ?? null,
+                    "name" => $translations[$element['addon']['name'] ?? ''] ?? ($element['addon']['name'] ?? ($element['name'] ?? '')),
+                    "price" => $element['addon']['price'] ?? ($element['price'] ?? 0),
+                    "count" => $element['count'] ?? 1,
                 ];
             }
-            foreach ($item['excludes'] as $element) {
+            foreach ($item['excludes'] ?? [] as $element) {
                 $excludes[] = [
                     "id" => $element['id'],
                     "name" => $translations[$element['name']] ?? $element['name'],
                 ];
             }
-            foreach ($item['variations'] as $element) {
+            foreach ($item['variations'] ?? [] as $element) {
                 $options = [];
-                foreach ($element['options'] as $value) {
+                foreach ($element['options'] ?? [] as $value) {
                     $options[] = [
                         "id" => $value['id'],
                         "name" => $translations[$value['name']] ?? $value['name'],
-                        "price" => $value['price'],
-                        "total_option_price" => $value['total_option_price'],
+                        "price" => $value['price'] ?? 0,
+                        "total_option_price" => $value['total_option_price'] ?? ($value['price'] ?? 0),
                     ];
                 }
                 $variations[] = [
-                    "id" => $element['variation']['id'],
-                    "name" => $translations[$element['variation']['name']] ?? $element['variation']['name'],
+                    "id" => $element['variation']['id'] ?? null,
+                    "name" => $translations[$element['variation']['name'] ?? ''] ?? ($element['variation']['name'] ?? ''),
                     "options" => $options,
                 ];
             }

@@ -13,6 +13,10 @@ use App\Models\Addon;
 use App\Models\Delivery;
 use App\Models\Offer;
 use App\Models\Deal;
+use App\Models\ExtraProduct;
+use App\Models\ExcludeProduct;
+use App\Models\VariationProduct;
+use App\Models\OptionProduct;
 use Carbon\Carbon;
 
 class Order extends Model
@@ -215,12 +219,150 @@ class Order extends Model
     public function getOrderDetailsDataAttribute(){
         try {
             if(isset($this->attributes['order_details'])){
-                return json_decode($this->attributes['order_details'], true) ?? [];
+                $decoded = json_decode($this->attributes['order_details'], true) ?? [];
+                if (!empty($decoded) && is_array($decoded)) {
+                    $first = reset($decoded);
+                    if (is_array($first) && (isset($first['product_id']) || (!isset($first['product']) && !isset($first['extras'])))) {
+                        return $this->normalizeRawOrderDetails($decoded);
+                    }
+                }
+                return $decoded;
             }
             return [];
         } catch (\Throwable $th) {
             return [];
         }
+    }
+
+    private function normalizeRawOrderDetails(array $rawItems): array {
+        $normalized = [];
+        foreach ($rawItems as $item) {
+            $productRecord = isset($item['product_id']) ? Product::find($item['product_id']) : null;
+            $product = [];
+            if ($productRecord) {
+                $product = [
+                    [
+                        'product' => [
+                            'id' => $productRecord->id,
+                            'name' => $productRecord->name,
+                            'image_link' => $productRecord->image_link ?? $productRecord->image ?? null,
+                            'price' => $productRecord->price,
+                            'price_after_discount' => $productRecord->final_price ?? $productRecord->price,
+                            'price_after_tax' => $productRecord->price,
+                        ],
+                        'count' => $item['count'] ?? 1,
+                        'notes' => $item['note'] ?? $item['notes'] ?? null,
+                    ]
+                ];
+            }
+
+            // Extras
+            $extras = [];
+            $extraIds = $item['extra_id'] ?? $item['extras'] ?? [];
+            if (is_array($extraIds)) {
+                foreach ($extraIds as $extraEl) {
+                    if (is_array($extraEl) && isset($extraEl['id'], $extraEl['name'])) {
+                        $extras[] = $extraEl;
+                    } elseif (is_numeric($extraEl) || is_string($extraEl)) {
+                        $extRecord = ExtraProduct::find($extraEl);
+                        if ($extRecord) {
+                            $extras[] = [
+                                'id' => $extRecord->id,
+                                'name' => $extRecord->name,
+                                'price' => $extRecord->price,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Addons
+            $addons = [];
+            $addonItems = $item['addons'] ?? [];
+            if (is_array($addonItems)) {
+                foreach ($addonItems as $addonEl) {
+                    if (is_array($addonEl) && isset($addonEl['addon'])) {
+                        $addons[] = $addonEl;
+                    } elseif (is_array($addonEl) && isset($addonEl['addon_id'])) {
+                        $adRecord = Addon::find($addonEl['addon_id']);
+                        if ($adRecord) {
+                            $addons[] = [
+                                'addon' => [
+                                    'id' => $adRecord->id,
+                                    'name' => $adRecord->name,
+                                    'price' => $adRecord->price,
+                                ],
+                                'price' => $addonEl['price'] ?? $adRecord->price,
+                                'count' => $addonEl['count'] ?? 1,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Excludes
+            $excludes = [];
+            $excludeIds = $item['exclude_id'] ?? $item['excludes'] ?? [];
+            if (is_array($excludeIds)) {
+                foreach ($excludeIds as $excEl) {
+                    if (is_array($excEl) && isset($excEl['id'], $excEl['name'])) {
+                        $excludes[] = $excEl;
+                    } elseif (is_numeric($excEl) || is_string($excEl)) {
+                        $excRecord = ExcludeProduct::find($excEl);
+                        if ($excRecord) {
+                            $excludes[] = [
+                                'id' => $excRecord->id,
+                                'name' => $excRecord->name,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Variations
+            $variations = [];
+            $varItems = $item['variation'] ?? $item['variations'] ?? [];
+            if (is_array($varItems)) {
+                foreach ($varItems as $varEl) {
+                    if (is_array($varEl) && isset($varEl['variation']['id'])) {
+                        $variations[] = $varEl;
+                    } elseif (is_array($varEl) && isset($varEl['variation_id'])) {
+                        $varRecord = VariationProduct::find($varEl['variation_id']);
+                        $optionIds = is_array($varEl['option_id'] ?? null) ? $varEl['option_id'] : (isset($varEl['option_id']) ? [$varEl['option_id']] : []);
+                        $options = [];
+                        foreach ($optionIds as $oid) {
+                            $optRecord = OptionProduct::find($oid);
+                            if ($optRecord) {
+                                $options[] = [
+                                    'id' => $optRecord->id,
+                                    'name' => $optRecord->name,
+                                    'price' => $optRecord->price,
+                                    'total_option_price' => $optRecord->price,
+                                ];
+                            }
+                        }
+                        if ($varRecord) {
+                            $variations[] = [
+                                'variation' => [
+                                    'id' => $varRecord->id,
+                                    'name' => $varRecord->name,
+                                ],
+                                'options' => $options,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            $normalized[] = [
+                'product' => $product,
+                'extras' => $extras,
+                'addons' => $addons,
+                'excludes' => $excludes,
+                'variations' => $variations,
+            ];
+        }
+        return $normalized;
     }
 
     public function getorderDetailsAttribute($data){
