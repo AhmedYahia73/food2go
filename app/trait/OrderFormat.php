@@ -117,8 +117,8 @@ trait OrderFormat
                     'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
                     'image_link' => $prodData['image_link'] ?? $prodData['image'] ?? null,
                     'price' => $prodData['price'] ?? 0,
-                    'price_after_discount' => $prodData['price_after_discount'] ?? ($prodData['price'] ?? 0),
-                    'price_after_tax' => $prodData['price_after_tax'] ?? ($prodData['price'] ?? 0),
+                    'price_after_discount' => $prodData['price_after_discount'] ?? null,
+                    'price_after_tax' => $prodData['price_after_tax'] ?? null,
                     'count' => $item['product'][0]['count'] ?? 1,
                     'notes' => $item['product'][0]['notes'] ?? null,
                 ];
@@ -273,8 +273,8 @@ trait OrderFormat
                         'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
                         'image_link' => $prodData['image_link'] ?? $prodData['image'] ?? null,
                         'price' => $prodData['price'] ?? 0,
-                        'price_after_discount' => $prodData['price_after_discount'] ?? ($prodData['price'] ?? 0),
-                        'price_after_tax' => $prodData['price_after_tax'] ?? ($prodData['price'] ?? 0),
+                        'price_after_discount' => $prodData['price_after_discount'] ?? null,
+                        'price_after_tax' => $prodData['price_after_tax'] ?? null,
                         'count' => $item['product'][0]['count'] ?? 1,
                         'notes' => $item['product'][0]['notes'] ?? null,
                     ];
@@ -437,8 +437,8 @@ trait OrderFormat
                     'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
                     'image_link' => $prodData['image_link'] ?? $prodData['image'] ?? null,
                     'price' => $prodData['price'] ?? 0,
-                    'price_after_discount' => $prodData['price_after_discount'] ?? ($prodData['price'] ?? 0),
-                    'price_after_tax' => $prodData['price_after_tax'] ?? ($prodData['price'] ?? 0),
+                    'price_after_discount' => $prodData['price_after_discount'] ?? null,
+                    'price_after_tax' => $prodData['price_after_tax'] ?? null,
                     'count' => $item['product'][0]['count'] ?? 1,
                     'notes' => $item['product'][0]['notes'] ?? null,
                 ];
@@ -898,8 +898,8 @@ trait OrderFormat
                     'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
                     'image_link' => $prodData['image_link'] ?? $prodData['image'] ?? null,
                     'price' => $prodData['price'] ?? 0,
-                    'price_after_discount' => $prodData['price_after_discount'] ?? ($prodData['price'] ?? 0),
-                    'price_after_tax' => $prodData['price_after_tax'] ?? ($prodData['price'] ?? 0),
+                    'price_after_discount' => $prodData['price_after_discount'] ?? null,
+                    'price_after_tax' => $prodData['price_after_tax'] ?? null,
                     'count' => $item['product'][0]['count'] ?? 1,
                     'notes' => $item['product'][0]['notes'] ?? null,
                 ];

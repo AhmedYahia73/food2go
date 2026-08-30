@@ -238,17 +238,29 @@ class Order extends Model
         $normalized = [];
         foreach ($rawItems as $item) {
             $productRecord = isset($item['product_id']) ? Product::find($item['product_id']) : null;
+            $isIncluded = ($productRecord?->taxes?->setting ?? null) === 'included';
+            $productTaxObj = $productRecord?->tax;
             $product = [];
             if ($productRecord) {
+                $productGross = (float) ($item['price'] ?? $productRecord->price);
+                $productNet = $productGross;
+                if ($isIncluded && $productTaxObj) {
+                    if ($productTaxObj->type === 'value') {
+                        $productNet = max(0, $productGross - (float)$productTaxObj->amount);
+                    } else {
+                        $rate = (float) $productTaxObj->amount;
+                        $productNet = $productGross / (1 + ($rate / 100));
+                    }
+                }
                 $product = [
                     [
                         'product' => [
                             'id' => $productRecord->id,
                             'name' => $productRecord->name,
                             'image_link' => $productRecord->image_link ?? $productRecord->image ?? null,
-                            'price' => $productRecord->price,
-                            'price_after_discount' => $productRecord->final_price ?? $productRecord->price,
-                            'price_after_tax' => $productRecord->price,
+                            'price' => $isIncluded ? round($productNet, 2) : $productGross,
+                            'price_after_discount' => null,
+                            'price_after_tax' => $productGross,
                         ],
                         'count' => $item['count'] ?? 1,
                         'notes' => $item['note'] ?? $item['notes'] ?? null,
@@ -266,10 +278,20 @@ class Order extends Model
                     } elseif (is_numeric($extraEl) || is_string($extraEl)) {
                         $extRecord = ExtraProduct::find($extraEl);
                         if ($extRecord) {
+                            $extGross = (float) $extRecord->price;
+                            $extNet = $extGross;
+                            if ($isIncluded && $productTaxObj) {
+                                if ($productTaxObj->type === 'value') {
+                                    $extNet = max(0, $extGross - (float)$productTaxObj->amount);
+                                } else {
+                                    $rate = (float) $productTaxObj->amount;
+                                    $extNet = $extGross / (1 + ($rate / 100));
+                                }
+                            }
                             $extras[] = [
                                 'id' => $extRecord->id,
                                 'name' => $extRecord->name,
-                                'price' => $extRecord->price,
+                                'price' => $isIncluded ? round($extNet, 2) : $extGross,
                             ];
                         }
                     }
@@ -333,11 +355,21 @@ class Order extends Model
                         foreach ($optionIds as $oid) {
                             $optRecord = OptionProduct::find($oid);
                             if ($optRecord) {
+                                $optGross = (float) $optRecord->price;
+                                $optNet = $optGross;
+                                if ($isIncluded && $productTaxObj) {
+                                    if ($productTaxObj->type === 'value') {
+                                        $optNet = max(0, $optGross - (float)$productTaxObj->amount);
+                                    } else {
+                                        $rate = (float) $productTaxObj->amount;
+                                        $optNet = $optGross / (1 + ($rate / 100));
+                                    }
+                                }
                                 $options[] = [
                                     'id' => $optRecord->id,
                                     'name' => $optRecord->name,
-                                    'price' => $optRecord->price,
-                                    'total_option_price' => $optRecord->price,
+                                    'price' => $isIncluded ? round($optNet, 2) : $optGross,
+                                    'total_option_price' => $optGross,
                                 ];
                             }
                         }
