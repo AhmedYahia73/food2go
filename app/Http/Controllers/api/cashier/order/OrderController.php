@@ -66,9 +66,18 @@ class OrderController extends Controller
         $locale = $request->locale ?? "en";
         $order = $this->orders
         ->where("id", $id)
+        ->orWhere("order_number", $id)
         ->with("service_fees_item", "financials", 
         "order_address", "user", "casheir")
         ->first();
+
+        if (!$order) {
+            return response()->json([
+                "order_checkout" => null,
+                "message" => "Order not found"
+            ], 404);
+        }
+
         $order_checkout = $this->checkout_format($order, $id, $locale);
         $service_fees_title = $order?->service_fees_item
         ?->title ?? null;
