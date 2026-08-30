@@ -299,16 +299,21 @@ trait POS
                 ];
                 // Add product price
                 $amount_product += $product_item->price; 
-                if (isset($product['exclude_id'])) {
-                    foreach ($product['exclude_id'] as $exclude) {                       
-                        $exclude = $this->excludes
-                        ->where('id', $exclude)
-                        ->withLocale($locale)
-                        ->first();
-                        $exclude = collect([$exclude]);
-                        $exclude = ExcludeResource::collection($exclude);
-                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
-                        $order_details[$key]['excludes'][] = $exclude;
+                $exclude_ids = $product['exclude_id'] ?? $product['excludes'] ?? $product['exclude'] ?? null;
+                if (isset($exclude_ids) && (is_array($exclude_ids) || is_object($exclude_ids))) {
+                    foreach ($exclude_ids as $exclude) {                       
+                        $exId = is_array($exclude) ? ($exclude['id'] ?? null) : (is_object($exclude) ? ($exclude->id ?? null) : $exclude);
+                        if (!empty($exId)) {
+                            $exclude_item = $this->excludes
+                            ->where('id', $exId)
+                            ->withLocale($locale)
+                            ->first();
+                            if ($exclude_item) {
+                                $exclude_coll = collect([$exclude_item]);
+                                $exclude_res = ExcludeResource::collection($exclude_coll);
+                                $order_details[$key]['excludes'][] = count($exclude_res) > 0 ? $exclude_res[0] : null;
+                            }
+                        }
                     }
                 } 
                 if (isset($product['addons'])) {
@@ -522,16 +527,21 @@ trait POS
                 ];
                 // Add product price
                 $amount_product += $product_item->price; 
-                if (isset($product['exclude_id'])) {
-                    foreach ($product['exclude_id'] as $exclude) {                       
-                        $exclude = $this->excludes
-                        ->where('id', $exclude)
-                        ->withLocale($locale)
-                        ->first();
-                        $exclude = collect([$exclude]);
-                        $exclude = ExcludeResource::collection($exclude);
-                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
-                        $order_details[$key]['excludes'][] = $exclude;
+                $exclude_ids = $product['exclude_id'] ?? $product['excludes'] ?? $product['exclude'] ?? null;
+                if (isset($exclude_ids) && (is_array($exclude_ids) || is_object($exclude_ids))) {
+                    foreach ($exclude_ids as $exclude) {                       
+                        $exId = is_array($exclude) ? ($exclude['id'] ?? null) : (is_object($exclude) ? ($exclude->id ?? null) : $exclude);
+                        if (!empty($exId)) {
+                            $exclude_item = $this->excludes
+                            ->where('id', $exId)
+                            ->withLocale($locale)
+                            ->first();
+                            if ($exclude_item) {
+                                $exclude_coll = collect([$exclude_item]);
+                                $exclude_res = ExcludeResource::collection($exclude_coll);
+                                $order_details[$key]['excludes'][] = count($exclude_res) > 0 ? $exclude_res[0] : null;
+                            }
+                        }
                     }
                 } 
                 if (isset($product['addons'])) {
@@ -760,16 +770,21 @@ trait POS
                 ];
                 // Add product price
                 $amount_product += $product_item->price ?? 0; 
-                if (isset($product['exclude_id'])) {
-                    foreach ($product['exclude_id'] as $exclude) {                       
-                        $exclude = $this->excludes
-                        ->where('id', $exclude)
-                        ->withLocale($locale)
-                        ->first();
-                        $exclude = collect([$exclude]);
-                        $exclude = ExcludeResource::collection($exclude);
-                        $exclude = count($exclude) > 0 ? $exclude[0] : null;
-                        $order_details[$key]['excludes'][] = $exclude;
+                $exclude_ids = $product['exclude_id'] ?? $product['excludes'] ?? $product['exclude'] ?? null;
+                if (isset($exclude_ids) && (is_array($exclude_ids) || is_object($exclude_ids))) {
+                    foreach ($exclude_ids as $exclude) {                       
+                        $exId = is_array($exclude) ? ($exclude['id'] ?? null) : (is_object($exclude) ? ($exclude->id ?? null) : $exclude);
+                        if (!empty($exId)) {
+                            $exclude_item = $this->excludes
+                            ->where('id', $exId)
+                            ->withLocale($locale)
+                            ->first();
+                            if ($exclude_item) {
+                                $exclude_coll = collect([$exclude_item]);
+                                $exclude_res = ExcludeResource::collection($exclude_coll);
+                                $order_details[$key]['excludes'][] = count($exclude_res) > 0 ? $exclude_res[0] : null;
+                            }
+                        }
                     }
                 } 
                 if (isset($product['addons'])) {
@@ -1004,17 +1019,20 @@ trait POS
                     // Add product price
                     $amount_product += $product_item->price; 
                 }
-                if (isset($product['exclude_id'])) {
-                    foreach ($product['exclude_id'] as $exclude) {                       
-                        $exclude = $this->excludes
-                        ->where('id', $exclude)
-                        ->withLocale($locale)
-                        ->first();
-                        if($exclude){
-                            $exclude = collect([$exclude]);
-                            $exclude = ExcludeResource::collection($exclude);
-                            $exclude = count($exclude) > 0 ? $exclude[0] : null;
-                            $order_details[$key]['excludes'][] = $exclude;
+                $exclude_ids = $product['exclude_id'] ?? $product['excludes'] ?? $product['exclude'] ?? null;
+                if (isset($exclude_ids) && (is_array($exclude_ids) || is_object($exclude_ids))) {
+                    foreach ($exclude_ids as $exclude) {                       
+                        $exId = is_array($exclude) ? ($exclude['id'] ?? null) : (is_object($exclude) ? ($exclude->id ?? null) : $exclude);
+                        if (!empty($exId)) {
+                            $exclude_item = $this->excludes
+                            ->where('id', $exId)
+                            ->withLocale($locale)
+                            ->first();
+                            if ($exclude_item) {
+                                $exclude_coll = collect([$exclude_item]);
+                                $exclude_res = ExcludeResource::collection($exclude_coll);
+                                $order_details[$key]['excludes'][] = count($exclude_res) > 0 ? $exclude_res[0] : null;
+                            }
                         }
                     }
                 } 
