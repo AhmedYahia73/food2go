@@ -38,5 +38,10 @@ class ProductCart extends Model
     {
         return $this->hasMany(ExtraCart::class, "product_cart_id");
     }
+
+    public function excludes_cart()
+    {
+        return $this->hasMany(ExcludeCart::class, "product_cart_id");
+    }
 }
 

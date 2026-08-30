@@ -1506,7 +1506,9 @@ trait PlaceOrder
             'product.product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
             'variations_cart.variation.translations', 'variations_cart.options_cart.option.translations', 
             'variations_cart.options_cart.option.option_pricing' => fn($q) => $q->where('branch_id', $branch_id),
-            'addons_cart.addon.translations', 'addons_cart.addon.tax'
+            'addons_cart.addon.translations', 'addons_cart.addon.tax',
+            'extras_cart.extra.translations', 'extras_cart.extra.pricing',
+            'excludes_cart.exclude.translations',
         ])->where('user_id', $user->id)->get();
 
         if ($carts->isEmpty()) {
@@ -1730,6 +1732,20 @@ trait PlaceOrder
                 $addon_resource = \App\Http\Resources\AddonResource::collection(collect([$addon]))[0] ?? null;
                 $order_details[$key]['addons'][] = ['addon' => $addon_resource, 'count' => $addon_cart->quantity];
             }
+            foreach($cart->extras_cart as $extra_cart) {
+                $extra = $extra_cart->extra;
+                if ($extra) {
+                    $extra_resource = \App\Http\Resources\ExtraResource::collection(collect([$extra]))[0] ?? null;
+                    $order_details[$key]['extras'][] = $extra_resource;
+                }
+            }
+            foreach($cart->excludes_cart as $exclude_cart) {
+                $exclude = $exclude_cart->exclude;
+                if ($exclude) {
+                    $exclude_resource = \App\Http\Resources\ExcludeResource::collection(collect([$exclude]))[0] ?? null;
+                    $order_details[$key]['excludes'][] = $exclude_resource;
+                }
+            }
             foreach($cart->variations_cart as $var_cart) {
                 foreach($var_cart->options_cart as $opt_cart) {
                     $opt = $opt_cart->option;
@@ -1757,6 +1773,12 @@ trait PlaceOrder
             $this->order_details->create(['order_id' => $order->id, 'product_id' => $cart->product_id, 'count' => $cart->quantity, 'product_index' => $key]);
             foreach($cart->addons_cart as $addon_cart) {
                 $this->order_details->create(['order_id' => $order->id, 'product_id' => $cart->product_id, 'addon_id' => $addon_cart->addon_id, 'count' => $cart->quantity, 'addon_count' => $addon_cart->quantity, 'product_index' => $key]);
+            }
+            foreach($cart->extras_cart as $extra_cart) {
+                $this->order_details->create(['order_id' => $order->id, 'product_id' => $cart->product_id, 'extra_id' => $extra_cart->extra_id, 'count' => $cart->quantity, 'product_index' => $key]);
+            }
+            foreach($cart->excludes_cart as $exclude_cart) {
+                $this->order_details->create(['order_id' => $order->id, 'product_id' => $cart->product_id, 'exclude_id' => $exclude_cart->exclude_id, 'count' => $cart->quantity, 'product_index' => $key]);
             }
             foreach($cart->variations_cart as $var_cart) {
                 foreach($var_cart->options_cart as $opt_cart) {

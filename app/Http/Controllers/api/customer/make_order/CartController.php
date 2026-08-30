@@ -10,6 +10,7 @@ use App\Models\VariationCart;
 use App\Models\OptionCart;
 use App\Models\AddonCart;
 use App\Models\ExtraCart;
+use App\Models\ExcludeCart;
 use App\Models\Product;
 
 class CartController extends Controller
@@ -49,6 +50,7 @@ class CartController extends Controller
             'addons_cart.addon.translations', 'addons_cart.addon.tax',
             'extras_cart.extra.translations',
             'extras_cart.extra.pricing',
+            'excludes_cart.exclude.translations',
         ])
         ->where('user_id', $userId)
         ->get();
@@ -305,6 +307,17 @@ class CartController extends Controller
                 ];
             }
             
+            // Process Excludes
+            $excludes = [];
+            foreach($cart->excludes_cart as $exclude_cart) {
+                $exclude = $exclude_cart->exclude;
+                if(!$exclude) continue;
+                $excludes[] = [
+                    'id' => $exclude_cart->exclude_id,
+                    'name' => $getTranslation($exclude),
+                ];
+            }
+            
             // Total: (base_product + options) × qty + addons + extras
             $product_total = $cart->quantity * ($options_total_price + $base_product_price) + $addon_total_price + $extra_total_price;
             
@@ -331,6 +344,7 @@ class CartController extends Controller
                 'variations' => $variations,
                 'addons' => $addons,
                 'extras' => $extras,
+                'excludes' => $excludes,
             ];
         }
 
@@ -366,6 +380,11 @@ class CartController extends Controller
             'products.*.extras' => 'nullable|array',
             'products.*.extras.*.id' => 'required|exists:extra_products,id',
             'products.*.extras.*.quantity' => 'required|integer|min:1',
+
+            'products.*.excludes' => 'nullable|array',
+            'products.*.excludes.*.id' => 'required_with:products.*.excludes|exists:exclude_products,id',
+            'products.*.exclude_id' => 'nullable|array',
+            'products.*.exclude_id.*' => 'exists:exclude_products,id',
         ]);
 
         if ($validator->fails()) {
@@ -408,6 +427,7 @@ class CartController extends Controller
         $cart->variations_cart()->delete();
         $cart->addons_cart()->delete();
         $cart->extras_cart()->delete();
+        $cart->excludes_cart()->delete();
         $cart->delete();
 
         // Recreate it using the new data
@@ -482,6 +502,32 @@ class CartController extends Controller
                     'product_id' => $productData['id'],
                     'quantity' => $extraData['quantity'],
                 ]);
+            }
+        }
+
+        // Save excludes
+        if (!empty($productData['excludes'])) {
+            foreach ($productData['excludes'] as $excludeData) {
+                $exId = is_array($excludeData) ? ($excludeData['id'] ?? null) : $excludeData;
+                if (!empty($exId)) {
+                    ExcludeCart::create([
+                        'product_cart_id' => $cart->id,
+                        'exclude_id' => $exId,
+                        'product_id' => $productData['id'],
+                    ]);
+                }
+            }
+        }
+        if (!empty($productData['exclude_id'])) {
+            foreach ($productData['exclude_id'] as $excludeData) {
+                $exId = is_array($excludeData) ? ($excludeData['id'] ?? null) : $excludeData;
+                if (!empty($exId)) {
+                    ExcludeCart::create([
+                        'product_cart_id' => $cart->id,
+                        'exclude_id' => $exId,
+                        'product_id' => $productData['id'],
+                    ]);
+                }
             }
         }
     }
