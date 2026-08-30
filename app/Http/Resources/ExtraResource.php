@@ -39,15 +39,18 @@ class ExtraResource extends JsonResource
             
             // 3. استخراج السعر الأساسي (قبل الضريبة)
             $price_before_tax = $final_price;
+            $tax_amount = 0;
             
             $tax_module = $this->product->tax ?? null;
             
             if (!empty($tax_module)) {
                 if ($tax_module->type == 'value') {
-                    $price_before_tax = $final_price - $tax_module->amount;
+                    $tax_amount = $tax_module->amount;
+                    $price_before_tax = $final_price - $tax_amount;
                 } else {
                     // معادلة الاستخراج العكسية لو الضريبة نسبة مئوية
                     $price_before_tax = $final_price / (1 + ($tax_module->amount / 100));
+                    $tax_amount = $final_price - $price_before_tax;
                 }
             }
             
@@ -56,6 +59,8 @@ class ExtraResource extends JsonResource
                 'price_after_discount' => $discount,      // السعر بعد الخصم (شامل الضريبة)
                 'price_after_tax' => $final_price,       // السعر النهائي
                 'final_price' =>  $final_price,          // السعر النهائي
+                'tax_val' => round($tax_amount, 2),
+                'tax_only' => round($tax_amount, 2),
                 'name' => TranslationTbl::where('key', $this->name)
                     ->where('locale', $locale)->first()?->value ?? $this->name,
                 'product_id' => $this->product_id,
@@ -63,7 +68,7 @@ class ExtraResource extends JsonResource
                 'option_id' => $this->option_id,
                 'min' => $this->min,
                 'max' => $this->max,
-                // التعديل هنا: السعر الصافي بدون ضريبة
+                // السعر الصافي بدون ضريبة
                 'price' => round($price_before_tax, 2),  
             ]; 
         }
@@ -76,21 +81,25 @@ class ExtraResource extends JsonResource
             else{
                 $discount = $price;
             }
+            $tax = $discount;
+            $tax_amount = 0;
             if (!empty($this->product->tax)) {
                 if ($this->product->tax->type == 'precentage') {
-                    $tax = $discount + $this->product->tax->amount * $discount / 100;
+                    $tax_amount = $this->product->tax->amount * $discount / 100;
+                    $tax = $discount + $tax_amount;
                 } else {
-                    $tax = $discount;
+                    $tax_amount = $this->product->tax->amount;
+                    $tax = $discount + $tax_amount;
                 }
-            }
-            else{
-                $tax = $discount;
             }
             return [
                 'id' => $this->id,
                 'price_after_discount' => $discount,
                 'price_after_tax' => $tax,
-                'final_price' =>  $tax,
+                'final_price' =>  $discount,
+                'tax_val' => round($tax_amount, 2),
+                'tax_only' => round($tax_amount, 2),
+                'discount_val' => round($price - $discount, 2),
                 'name' => TranslationTbl::where('key', $this->name)
                 ->where('locale', $locale)->first()?->value ?? $this->name,
                 'product_id' => $this->product_id,
