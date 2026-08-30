@@ -111,15 +111,16 @@ trait OrderFormat
                 ];
             }
             if(isset($item['product'][0]['product'])){
+                $prodData = $item['product'][0]['product'];
                 $product = [
-                    'id' => $item['product'][0]['product']['id'],
-                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
-                    'image_link' => $item['product'][0]['product']['image_link'],
-                    'price' => $item['product'][0]['product']['price'],
-                    'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
-                    'price_after_tax' => $item['product'][0]['product']['price_after_tax'],
-                    'count' => $item['product'][0]['count'],
-                    'notes' => $item['product'][0]['notes'],
+                    'id' => $prodData['id'] ?? null,
+                    'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
+                    'image_link' => $prodData['image_link'] ?? $prodData['image'] ?? null,
+                    'price' => $prodData['price'] ?? 0,
+                    'price_after_discount' => $prodData['price_after_discount'] ?? ($prodData['price'] ?? 0),
+                    'price_after_tax' => $prodData['price_after_tax'] ?? ($prodData['price'] ?? 0),
+                    'count' => $item['product'][0]['count'] ?? 1,
+                    'notes' => $item['product'][0]['notes'] ?? null,
                 ];
             }  
             $products[] = [
@@ -266,15 +267,16 @@ trait OrderFormat
                     ];
                 }
                 if(isset($item['product'][0]['product'])){
+                    $prodData = $item['product'][0]['product'];
                     $product = [
-                        'id' => $item['product'][0]['product']['id'],
-                        'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
-                        'image_link' => $item['product'][0]['product']['image_link'],
-                        'price' => $item['product'][0]['product']['price'],
-                        'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
-                        'price_after_tax' => $item['product'][0]['product']['price_after_tax'],
-                        'count' => $item['product'][0]['count'],
-                        'notes' => $item['product'][0]['notes'],
+                        'id' => $prodData['id'] ?? null,
+                        'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
+                        'image_link' => $prodData['image_link'] ?? $prodData['image'] ?? null,
+                        'price' => $prodData['price'] ?? 0,
+                        'price_after_discount' => $prodData['price_after_discount'] ?? ($prodData['price'] ?? 0),
+                        'price_after_tax' => $prodData['price_after_tax'] ?? ($prodData['price'] ?? 0),
+                        'count' => $item['product'][0]['count'] ?? 1,
+                        'notes' => $item['product'][0]['notes'] ?? null,
                     ];
                 }  
                 $product_item = [
@@ -429,15 +431,16 @@ trait OrderFormat
                 ];
             }
             if(isset($item['product'][0]['product'])){
+                $prodData = $item['product'][0]['product'];
                 $product = [
-                    'id' => $item['product'][0]['product']['id'],
-                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
-                    'image_link' => $item['product'][0]['product']['image_link'],
-                    'price' => $item['product'][0]['product']['price'],
-                    'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
-                    'price_after_tax' => $item['product'][0]['product']['price_after_tax'],
-                    'count' => $item['product'][0]['count'],
-                    'notes' => $item['product'][0]['notes'],
+                    'id' => $prodData['id'] ?? null,
+                    'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
+                    'image_link' => $prodData['image_link'] ?? $prodData['image'] ?? null,
+                    'price' => $prodData['price'] ?? 0,
+                    'price_after_discount' => $prodData['price_after_discount'] ?? ($prodData['price'] ?? 0),
+                    'price_after_tax' => $prodData['price_after_tax'] ?? ($prodData['price'] ?? 0),
+                    'count' => $item['product'][0]['count'] ?? 1,
+                    'notes' => $item['product'][0]['notes'] ?? null,
                 ];
             }  
             $products[] = [
@@ -725,12 +728,14 @@ trait OrderFormat
                 ]; 
             }
             if(isset($item['product'][0]['product'])){
-                $price = $item['product'][0]['product']['price'];
-                $count = $item['product'][0]['count'];
-                $product_price_item = GroupPrice::
-                where("product_id", $item['product'][0]['product']['id'])
+                $prodData = $item['product'][0]['product'];
+                $price = $prodData['price'] ?? 0;
+                $count = $item['product'][0]['count'] ?? 1;
+                $pId = $prodData['id'] ?? null;
+                $product_price_item = $pId ? GroupPrice::
+                where("product_id", $pId)
                 ->where("group_product_id", $order->module_id)
-                ->first();
+                ->first() : null;
                 if (!empty($product_price_item)) {
                     $price = $product_price_item->price;
                 }
@@ -739,8 +744,8 @@ trait OrderFormat
                 }
                 $product_price += $price;
                 $product = [
-                    'id' => $item['product'][0]['product']['id'],
-                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
+                    'id' => $pId,
+                    'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
                     'price' => $product_price,
                     'total_price' => $product_price * $count,
                     'count' => $count,
@@ -887,15 +892,16 @@ trait OrderFormat
                 ];
             }
             if(isset($item['product'][0]['product'])){
+                $prodData = $item['product'][0]['product'];
                 $product = [
-                    'id' => $item['product'][0]['product']['id'],
-                    'name' => $translations[$item['product'][0]['product']['name']] ?? $item['product'][0]['product']['name'],
-                    'image_link' => $item['product'][0]['product']['image_link'],
-                    'price' => $item['product'][0]['product']['price'],
-                    'price_after_discount' => $item['product'][0]['product']['price_after_discount'],
-                    'price_after_tax' => $item['product'][0]['product']['price_after_tax'],
-                    'count' => $item['product'][0]['count'],
-                    'notes' => $item['product'][0]['notes'],
+                    'id' => $prodData['id'] ?? null,
+                    'name' => $translations[$prodData['name'] ?? ''] ?? ($prodData['name'] ?? ''),
+                    'image_link' => $prodData['image_link'] ?? $prodData['image'] ?? null,
+                    'price' => $prodData['price'] ?? 0,
+                    'price_after_discount' => $prodData['price_after_discount'] ?? ($prodData['price'] ?? 0),
+                    'price_after_tax' => $prodData['price_after_tax'] ?? ($prodData['price'] ?? 0),
+                    'count' => $item['product'][0]['count'] ?? 1,
+                    'notes' => $item['product'][0]['notes'] ?? null,
                 ];
             }  
             $products[] = [
