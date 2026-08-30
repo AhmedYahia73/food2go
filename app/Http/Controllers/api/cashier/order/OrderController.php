@@ -113,484 +113,697 @@ class OrderController extends Controller
         ]);
     }
 
-    public function pos_orders(Request $request){
+    // public function pos_orders(Request $request){
+    //     $validator = Validator::make($request->all(), [
+    //         'password' => 'required',
+    //     ]);
+    //     if ($validator->fails()) { // if Validate Make Error Return Message Error
+    //         return response()->json([
+    //             'errors' => $validator->errors(),
+    //         ],400);
+    //     }
+    //     $delivery_time = $this->settings
+    //     ->where("name", "delivery_time")
+    //     ->first()
+    //     ->setting ?? "00:00:00";
+    //     $password = $this->settings
+    //     ->where('name', 'password')
+    //     ->first()?->setting ?? null; 
+    //     $fake_order_password = Setting::
+    //     where("name", "fake_order_password")
+    //     ->first()?->setting ?? null;
+    //     if($request->password == $password){
+    //         $order_recentage = $this->settings
+    //         ->where("name", "order_precentage")
+    //         ->first()?->setting ?? 100;
+    //         $order_recentage = intval($order_recentage);
+    //         $orders = $this->orders
+    //         // ->where(function($query){
+    //         //     $query->where('pos', 1)
+    //         //     ->orWhere('pos', 0)
+    //         //     ->where('order_status', '!=', 'pending');
+    //         // })
+    //         // ->where(function($query){
+    //         //     $query->where("take_away_status", "pick_up")
+    //         //     ->where("order_type", "take_away")
+    //         //     ->orWhere("delivery_status", "delivered")
+    //         //     ->where("order_type", "delivery")
+    //         //     ->orWhere("order_type", "dine_in")
+    //         //     ->orWhere('pos', 0);
+    //         // })
+    //         ->where("branch_id", $request->user()->branch_id) 
+    //         ->where(function($query) {
+    //             $query->where('status', 1)
+    //             ->orWhereNull('status');
+    //         }) 
+    //         ->where('order_active', 1)
+    //         ->orderByDesc("created_at")
+    //         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+    //             $query->select('id', 'zone_id')
+    //             ->with('zone:id,zone');
+    //         }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+    //         'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+    //         ->get()
+    //         ->map(function($item, $key) use($delivery_time){
+    //             $order_type = "";
+    //             $food_preparion_time = "00:00";
+    //             if ($item->order_type == "dine_in") {
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+    //                 $order_type = "pickup";
+    //             }
+    //             elseif ($item->order_type == "take_away") {
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+    //                 $order_type = $item->take_away_status;
+    //             }
+    //             elseif ($item->order_type == "delivery") {
+    //                 $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+    //                 $time2 = Carbon::parse($delivery_time);
+    //                 $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+    //                 $result = gmdate('i:s', $totalSeconds);
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
+    //                 $order_type = $item->delivery_status;
+    //             }
+    //             return [ 
+    //                 'id' => $item->id,
+    //                 'order_number' => $item->order_number ?? ($item->id > 1000000000 ? (int)substr((string)$item->id, -4) : ($item->id - app('first_order_today'))),
+    //                 'created_at' => $item->created_at,
+    //                 'amount' => $item->amount,
+    //                 'operation_status' => $item->operation_status,
+    //                 'order_type' => $item->order_type,
+    //                 'order_status' => $order_type,
+    //                 'type' => $item->pos ? 'Point of Sale' : "Online Order",
+    //                 'source' => $item->source,
+    //                 'status' => $item->status,
+    //                 'points' => $item->points, 
+    //                 "delivery_fees" => $item->delivery_fees,
+    //                 'rejected_reason' => $item->rejected_reason,
+    //                 'transaction_id' => $item->transaction_id,
+    //                 'food_preparion_time' => $food_preparion_time,
+    //                 'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
+    //                 || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
+    //                 'user' => [
+    //                     'f_name' => $item?->user?->f_name,
+    //                     'l_name' => $item?->user?->l_name,
+    //                     'phone' => $item?->user?->phone],
+    //                 'branch' => ['name' => $item?->branch?->name, ],
+    //                 'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+    //                 'admin' => ['name' => $item?->admin?->name,],
+    //                 'payment_method' => ['id' => $item?->payment_method?->id,
+    //                                     'name' => $item?->payment_method?->name],
+    //                 'financial_accountigs' => $item->financial_accountigs,
+    //                 'schedule' => ['name' => $item?->schedule?->name],
+    //                 'delivery' => ['name' => $item?->delivery?->name], 
+    //             ];
+    //         })->filter(function ($order, $index) use($order_recentage) {
+    //             $positionInBlock = $index % 10;
+    //             return $positionInBlock < ($order_recentage / 10);
+    //         });
+    //         // $orders2 = $this->orders
+    //         // ->where(function($query){
+    //         //     $query->where('pos', 1)
+    //         //     ->orWhere('pos', 0)
+    //         //     ->where('order_status', '!=', 'pending');
+    //         // })
+    //         // ->where(function($query){
+    //         //     $query->where("take_away_status", "!=", "pick_up")
+    //         //     ->where("order_type", "take_away")
+    //         //     ->orWhere("delivery_status", "!=", "done")
+    //         //     ->where("order_type", "delivery");
+
+    //         // })
+    //         // //->where("shift", $request->user()->shift_number) 
+    //         // ->where(function($query) {
+    //         //     $query->where('status', 1)
+    //         //     ->orWhereNull('status');
+    //         // }) 
+    //         // ->orderByDesc("created_at")
+    //         // ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+    //         //     $query->select('id', 'zone_id')
+    //         //     ->with('zone:id,zone');
+    //         // }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+    //         // 'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+    //         // ->get()
+    //         // ->map(function($item) use($delivery_time){
+    //         //     $order_type = "";
+    //         //     $food_preparion_time = "00:00";
+    //         //     if ($item->order_type == "dine_in") {
+    //         //         $order_type = "pickup";
+    //         //         $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+    //         //     }
+    //         //     elseif ($item->order_type == "take_away") {
+    //         //         $order_type = $item->take_away_status;
+    //         //         $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+    //         //     }
+    //         //     elseif ($item->order_type == "delivery") {
+    //         //         $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+    //         //         $time2 = Carbon::parse($delivery_time);
+    //         //         $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+    //         //         $result = gmdate('i:s', $totalSeconds);
+    //         //         $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
+    //         //         $order_type = $item->delivery_status;
+    //         //     }
+    //         //     return [ 
+    //         //         'id' => $item->id,
+    //         //         'order_number' => $item->order_number,
+    //         //         'created_at' => $item->created_at,
+    //         //         'preparing_time' => $item->created_at,
+    //         //         'amount' => $item->amount,
+    //         //         'operation_status' => $item->operation_status,
+    //         //         'order_type' => $item->order_type,
+    //         //         'type' => $item->pos ? 'Point of Sale' : "Online Order",
+    //         //         'order_status' => $order_type,
+    //         //         'source' => $item->source,
+    //         //         'status' => $item->status,
+    //         //         'points' => $item->points, 
+    //         //         'food_preparion_time' => $food_preparion_time, 
+    //         //         'rejected_reason' => $item->rejected_reason,
+    //         //         'transaction_id' => $item->transaction_id,
+    //         //         'user' => [
+    //         //             'f_name' => $item?->user?->f_name,
+    //         //             'l_name' => $item?->user?->l_name,
+    //         //             'phone' => $item?->user?->phone],
+    //         //         'branch' => ['name' => $item?->branch?->name, ],
+    //         //         'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+    //         //         'admin' => ['name' => $item?->admin?->name,],
+    //         //         'payment_method' => ['id' => $item?->payment_method?->id,
+    //         //                             'name' => $item?->payment_method?->name],
+    //         //         'financial_accountigs' => $item->financial_accountigs,
+    //         //         'schedule' => ['name' => $item?->schedule?->name],
+    //         //         'delivery' => ['name' => $item?->delivery?->name], 
+    //         //     ];
+    //         // });
+    //         $orders = collect($orders)->sortByDesc('id')->values();
+    //         $order_type = [
+    //             "dine_in",
+    //             "take_away",
+    //             "delivery",
+    //         ];
+    //         $pagedData = $this->paginateOrders($orders, $request);
+    //         return response()->json([
+    //             "state" => 1,
+    //             "orders" => $pagedData['orders'],
+    //             "pagination" => $pagedData['pagination'],
+    //             "order_type" => $order_type, 
+    //         ]);
+    //     }
+    //     elseif(password_verify($request->input('password'), $request->user()->password) && $request->user()->real_order){
+    //        $order_recentage = $this->settings
+    //         ->where("name", "order_precentage")
+    //         ->first()?->setting ?? 100;
+    //         $order_recentage = intval($order_recentage);
+    //         $orders = $this->orders
+    //         // ->where(function($query){
+    //         //     $query->where('pos', 1)
+    //         //     ->orWhere('pos', 0)
+    //         //     ->where('order_status', '!=', 'pending');
+    //         // })
+    //         // ->where(function($query){
+    //         //     $query->where("take_away_status", "pick_up")
+    //         //     ->where("order_type", "take_away")
+    //         //     ->orWhere("delivery_status", "delivered")
+    //         //     ->where("order_type", "delivery")
+    //         //     ->orWhere("order_type", "dine_in")
+    //         //     ->orWhere('pos', 0);
+
+    //         // })
+    //         //->where("shift", $request->user()->shift_number) 
+    //         ->where(function($query) {
+    //             $query->where('status', 1)
+    //             ->orWhereNull('status');
+    //         }) 
+    //         ->where('order_active', 1)
+    //         ->where("branch_id", $request->user()->branch_id) 
+    //         ->orderByDesc("created_at")
+    //         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+    //             $query->select('id', 'zone_id')
+    //             ->with('zone:id,zone');
+    //         }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+    //         'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+    //         ->get()
+    //         ->map(function($item, $key) use($delivery_time){
+    //             $order_type = "";
+    //             $food_preparion_time = "00:00";
+    //             if ($item->order_type == "dine_in") {
+    //                 $order_type = "pickup";
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+    //             }
+    //             elseif ($item->order_type == "take_away") {
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+    //                 $order_type = $item->take_away_status;
+    //             }
+    //             elseif ($item->order_type == "delivery") {
+    //                 $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+    //                 $time2 = Carbon::parse($delivery_time);
+    //                 $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+    //                 $result = gmdate('i:s', $totalSeconds);
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+                    
+    //                 $order_type = $item->delivery_status;
+    //             }
+    //             return [ 
+    //                 'id' => $item->id,
+    //                 'order_number' => $item->order_number ?? ($item->id > 1000000000 ? (int)substr((string)$item->id, -4) : ($item->id - app('first_order_today'))),
+    //                 'created_at' => $item->created_at,
+    //                 'amount' => $item->amount,
+    //                 'operation_status' => $item->operation_status,
+    //                 'order_type' => $item->order_type,
+    //                 "delivery_fees" => $item->delivery_fees,
+    //                 'order_status' => $order_type,
+    //                 'type' => $item->pos ? 'Point of Sale' : "Online Order",
+    //                 'source' => $item->source,
+    //                 'status' => $item->status,
+    //                 'points' => $item->points, 
+    //                 'rejected_reason' => $item->rejected_reason,
+    //                 'transaction_id' => $item->transaction_id,
+    //                 'food_preparion_time' => $food_preparion_time,
+    //                 'user' => [
+    //                     'f_name' => $item?->user?->f_name,
+    //                     'l_name' => $item?->user?->l_name,
+    //                     'phone' => $item?->user?->phone],
+    //                 'branch' => ['name' => $item?->branch?->name, ],
+    //                 'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+    //                 'admin' => ['name' => $item?->admin?->name,],
+    //                 'payment_method' => ['id' => $item?->payment_method?->id,
+    //                                     'name' => $item?->payment_method?->name],
+    //                 'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
+    //                 || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
+    //                 'financial_accountigs' => $item->financial_accountigs,
+    //                 'schedule' => ['name' => $item?->schedule?->name],
+    //                 'delivery' => ['name' => $item?->delivery?->name], 
+    //             ];
+    //         });
+    //         $orders = collect($orders)->sortByDesc('id')->values();
+    //         $order_type = [
+    //             "dine_in",
+    //             "take_away",
+    //             "delivery",
+    //         ];
+    //         $pagedData = $this->paginateOrders($orders, $request);
+    //         return response()->json([
+    //             "orders" => $pagedData['orders'],
+    //             "pagination" => $pagedData['pagination'],
+    //             "order_type" => $order_type, 
+    //             "state" => 2,
+    //         ]);
+    //     }
+    //     elseif($request->password == $fake_order_password){
+    //         $fake_order_precentage = Setting::
+    //         where("name", "fake_order_precentage")
+    //         ->first()?->setting ?? null;
+    //         $fake_order_limit = Setting::
+    //         where("name", "fake_order_limit")
+    //         ->first()?->setting ?? null;
+    //         $fake_order_status = Setting::
+    //         where("name", "fake_order_status")
+    //         ->first()?->setting ?? null;
+    //         $time_sittings = $this->TimeSittings 
+    //         ->get();
+    //         if ($time_sittings->count() > 0) { 
+    //                 $from = $time_sittings[0]->from;
+    //                 $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
+    //                 $hours = $time_sittings[$time_sittings->count() - 1]->hours;
+    //                 $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
+    //                 $from = date('Y-m-d') . ' ' . $from;
+    //                 $start = Carbon::parse($from);
+    //                 $end = Carbon::parse($end);
+    //                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+    //                 if ($start >= $end) {
+    //                     $end = $end->addDay();
+    //                 }
+    //                 if($start >= now()){
+    //                     $start = $start->subDay();
+    //                 }
+    //                 // if ($start > $end) {
+    //                 //     $end = Carbon::parse($from)->addHours($hours)->subDay();
+    //                 // }
+    //                 // else{
+    //                 //     $end = Carbon::parse($from)->addHours(intval($hours));
+    //                 // } format('Y-m-d H:i:s')
+    //             } else {
+    //                 $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+    //                 $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+    //             }  
+    //         // ___________________________________________________________
+            
+    //         $delivery_time = $this->settings
+    //         ->where("name", "delivery_time")
+    //         ->first()
+    //         ->setting ?? "00:00:00";
+    //         $orders = $this->orders
+    //         // ->where(function($query){
+    //         //     $query->where('pos', 1)
+    //         //     ->orWhere('pos', 0)
+    //         //     ->where('order_status', '!=', 'pending');
+    //         // })
+    //         // ->where(function($query){
+    //         //     $query->where("take_away_status", "pick_up")
+    //         //     ->where("order_type", "take_away")
+    //         //     ->orWhere("delivery_status", "delivered")
+    //         //     ->where("order_type", "delivery")
+    //         //     ->orWhere("order_type", "dine_in")
+    //         //     ->orWhere('pos', 0);
+
+    //         // })
+    //         ->where("branch_id", $request->user()->branch_id) 
+    //         ->whereBetween("created_at", [$start, $end]) 
+    //         ->where(function($query) {
+    //             $query->where('status', 1)
+    //             ->orWhereNull('status');
+    //         })
+    //         ->where('order_active', 1) 
+    //         ->orderByDesc("created_at")
+    //         ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
+    //             $query->select('id', 'zone_id')
+    //             ->with('zone:id,zone');
+    //         }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
+    //         'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
+    //         ->get()
+    //         ->map(function($item, $key) use($delivery_time){
+    //             $order_type = "";
+    //             $food_preparion_time = "00:00";
+    //             if ($item->order_type == "dine_in") {
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+    //                 $order_type = "pickup";
+    //             }
+    //             elseif ($item->order_type == "take_away") {
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+    //                 $order_type = $item->take_away_status;
+    //             }
+    //             elseif ($item->order_type == "delivery") {
+    //                 $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
+    //                 $time2 = Carbon::parse($delivery_time);
+    //                 $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
+    //                 $result = gmdate('i:s', $totalSeconds);
+    //                 $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
+
+    //                 $order_type = $item->delivery_status;
+    //             }
+    //             return [ 
+    //                 'id' => $item->id, 
+    //                 'order_number' => $item->order_number ?? ($item->id > 1000000000 ? (int)substr((string)$item->id, -4) : ($item->id - app('first_order_today'))),
+    //                 'created_at' => $item->created_at,
+    //                 "delivery_fees" => $item->delivery_fees,
+    //                 'amount' => $item->amount,
+    //                 'operation_status' => $item->operation_status,
+    //                 'order_type' => $item->order_type,
+    //                 'order_status' => $order_type,
+    //                 'type' => $item->pos ? 'Point of Sale' : "Online Order",
+    //                 'source' => $item->source,
+    //                 'status' => $item->status,
+    //                 'points' => $item->points, 
+    //                 'rejected_reason' => $item->rejected_reason,
+    //                 'transaction_id' => $item->transaction_id,
+    //                 'food_preparion_time' => $food_preparion_time,
+    //                 'user' => [
+    //                     'f_name' => $item?->user?->f_name,
+    //                     'l_name' => $item?->user?->l_name,
+    //                     'phone' => $item?->user?->phone],
+    //                 'branch' => ['name' => $item?->branch?->name, ],
+    //                 'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+    //                 'admin' => ['name' => $item?->admin?->name,],
+    //                 'payment_method' => ['id' => $item?->payment_method?->id,
+    //                                     'name' => $item?->payment_method?->name],
+    //                 'financial_accountigs' => $item->financial_accountigs,
+    //                 'schedule' => ['name' => $item?->schedule?->name],
+    //                 'delivery' => ['name' => $item?->delivery?->name], 
+    //                 'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
+    //                 || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
+    //             ];
+    //         });
+    //         $orders = collect($orders)->sortByDesc('id')->values();
+    //         $order_type = [
+    //             "dine_in",
+    //             "take_away",
+    //             "delivery",
+    //         ];
+    //         $pagedData = $this->paginateOrders($orders, $request);
+    //         return response()->json([
+    //             "orders" => $pagedData['orders'],
+    //             "pagination" => $pagedData['pagination'],
+    //             "order_type" => $order_type,
+    //             "state" => 3,
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         "errors" => "password is wrong"
+    //     ], 400);
+    // }
+
+    // private function paginateOrders($orders, Request $request) {
+    //     if ($request->date_from || $request->date_to) {
+    //         $orders = collect($orders)->filter(function($order) use ($request) {
+    //             $dateStr = explode(' ', (string)$order['created_at'])[0];
+    //             $dateStr = explode('T', $dateStr)[0];
+    //             $pass = true;
+    //             if ($request->date_from && $dateStr < $request->date_from) $pass = false;
+    //             if ($request->date_to && $dateStr > $request->date_to) $pass = false;
+    //             return $pass;
+    //         })->values();
+    //     }
+
+    //     if ($request->search) {
+    //         $search = strtolower($request->search);
+    //         $orders = collect($orders)->filter(function($order) use ($search) {
+    //             $numMatch = str_contains(strtolower((string)($order['order_number'] ?? '')), $search) || str_contains(strtolower((string)($order['id'] ?? '')), $search);
+    //             $nameMatch = str_contains(strtolower((string)($order['user']['f_name'] ?? '')), $search) || str_contains(strtolower((string)($order['user']['l_name'] ?? '')), $search);
+    //             $phoneMatch = str_contains(strtolower((string)($order['user']['phone'] ?? '')), $search);
+    //             return $numMatch || $nameMatch || $phoneMatch;
+    //         })->values();
+    //     }
+
+    //     $page = (int) $request->input('page', 1);
+    //     $limit = (int) $request->input('limit', 10);
+    //     $total = count($orders);
+    //     $last_page = ceil($total / $limit) ?: 1;
+    //     $paged = collect($orders)->slice(($page - 1) * $limit, $limit)->values();
+
+    //     return [
+    //         "orders" => $paged,
+    //         "pagination" => [
+    //             "total" => $total,
+    //             "per_page" => $limit,
+    //             "current_page" => $page,
+    //             "last_page" => $last_page
+    //         ]
+    //     ];
+    // }
+    public function pos_orders(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'password' => 'required',
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
+
+        if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
-            ],400);
+            ], 400);
         }
-        $delivery_time = $this->settings
-        ->where("name", "delivery_time")
-        ->first()
-        ->setting ?? "00:00:00";
-        $password = $this->settings
-        ->where('name', 'password')
-        ->first()?->setting ?? null; 
-        $fake_order_password = Setting::
-        where("name", "fake_order_password")
-        ->first()?->setting ?? null;
-        if($request->password == $password){
-            $order_recentage = $this->settings
-            ->where("name", "order_precentage")
-            ->first()?->setting ?? 100;
-            $order_recentage = intval($order_recentage);
-            $orders = $this->orders
-            // ->where(function($query){
-            //     $query->where('pos', 1)
-            //     ->orWhere('pos', 0)
-            //     ->where('order_status', '!=', 'pending');
-            // })
-            // ->where(function($query){
-            //     $query->where("take_away_status", "pick_up")
-            //     ->where("order_type", "take_away")
-            //     ->orWhere("delivery_status", "delivered")
-            //     ->where("order_type", "delivery")
-            //     ->orWhere("order_type", "dine_in")
-            //     ->orWhere('pos', 0);
-            // })
-            ->where("branch_id", $request->user()->branch_id) 
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            }) 
+
+        $deliveryTime = $this->settings->where("name", "delivery_time")->first()?->setting ?? "00:00:00";
+        $password = $this->settings->where('name', 'password')->first()?->setting ?? null;
+        $fakeOrderPassword = Setting::where("name", "fake_order_password")->first()?->setting ?? null;
+        $orderTypeList = ["dine_in", "take_away", "delivery"];
+
+        $state = null;
+        $orderPercentage = 100;
+        $startDate = null;
+        $endDate = null;
+
+        // 1. تحديد الـ State والنطاق بناءً على الباسورد
+        if ($request->password == $password) {
+            $state = 1;
+            $orderPercentage = intval($this->settings->where("name", "order_precentage")->first()?->setting ?? 100);
+        } elseif (password_verify($request->input('password'), $request->user()->password) && $request->user()->real_order) {
+            $state = 2;
+        } elseif ($request->password == $fakeOrderPassword) {
+            $state = 3;
+            [$startDate, $endDate] = $this->resolveTimeSettingsRange();
+        } else {
+            return response()->json(["errors" => "password is wrong"], 400);
+        }
+
+        // 2. بناء الـ Eloquent Query (كل الفلترة والترتيب في الـ DB)
+        $query = $this->orders->query()
+            ->where("branch_id", $request->user()->branch_id)
             ->where('order_active', 1)
-            ->orderByDesc("created_at")
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
-                $query->select('id', 'zone_id')
-                ->with('zone:id,zone');
-            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
-            ->get()
-            ->map(function($item, $key) use($delivery_time){
-                $order_type = "";
-                $food_preparion_time = "00:00";
-                if ($item->order_type == "dine_in") {
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-                    $order_type = "pickup";
-                }
-                elseif ($item->order_type == "take_away") {
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-                    $order_type = $item->take_away_status;
-                }
-                elseif ($item->order_type == "delivery") {
-                    $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
-                    $time2 = Carbon::parse($delivery_time);
-                    $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
-                    $result = gmdate('i:s', $totalSeconds);
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-
-                    $order_type = $item->delivery_status;
-                }
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number ?? ($item->id > 1000000000 ? (int)substr((string)$item->id, -4) : ($item->id - app('first_order_today'))),
-                    'created_at' => $item->created_at,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'order_type' => $item->order_type,
-                    'order_status' => $order_type,
-                    'type' => $item->pos ? 'Point of Sale' : "Online Order",
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    "delivery_fees" => $item->delivery_fees,
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                    'food_preparion_time' => $food_preparion_time,
-                    'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
-                    || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['id' => $item?->payment_method?->id,
-                                        'name' => $item?->payment_method?->name],
-                    'financial_accountigs' => $item->financial_accountigs,
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
-                ];
-            })->filter(function ($order, $index) use($order_recentage) {
-                $positionInBlock = $index % 10;
-                return $positionInBlock < ($order_recentage / 10);
+            ->where(function ($q) {
+                $q->where('status', 1)->orWhereNull('status');
             });
-            // $orders2 = $this->orders
-            // ->where(function($query){
-            //     $query->where('pos', 1)
-            //     ->orWhere('pos', 0)
-            //     ->where('order_status', '!=', 'pending');
-            // })
-            // ->where(function($query){
-            //     $query->where("take_away_status", "!=", "pick_up")
-            //     ->where("order_type", "take_away")
-            //     ->orWhere("delivery_status", "!=", "done")
-            //     ->where("order_type", "delivery");
 
-            // })
-            // //->where("shift", $request->user()->shift_number) 
-            // ->where(function($query) {
-            //     $query->where('status', 1)
-            //     ->orWhereNull('status');
-            // }) 
-            // ->orderByDesc("created_at")
-            // ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
-            //     $query->select('id', 'zone_id')
-            //     ->with('zone:id,zone');
-            // }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            // 'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
-            // ->get()
-            // ->map(function($item) use($delivery_time){
-            //     $order_type = "";
-            //     $food_preparion_time = "00:00";
-            //     if ($item->order_type == "dine_in") {
-            //         $order_type = "pickup";
-            //         $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-            //     }
-            //     elseif ($item->order_type == "take_away") {
-            //         $order_type = $item->take_away_status;
-            //         $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-            //     }
-            //     elseif ($item->order_type == "delivery") {
-            //         $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
-            //         $time2 = Carbon::parse($delivery_time);
-            //         $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
-            //         $result = gmdate('i:s', $totalSeconds);
-            //         $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-
-            //         $order_type = $item->delivery_status;
-            //     }
-            //     return [ 
-            //         'id' => $item->id,
-            //         'order_number' => $item->order_number,
-            //         'created_at' => $item->created_at,
-            //         'preparing_time' => $item->created_at,
-            //         'amount' => $item->amount,
-            //         'operation_status' => $item->operation_status,
-            //         'order_type' => $item->order_type,
-            //         'type' => $item->pos ? 'Point of Sale' : "Online Order",
-            //         'order_status' => $order_type,
-            //         'source' => $item->source,
-            //         'status' => $item->status,
-            //         'points' => $item->points, 
-            //         'food_preparion_time' => $food_preparion_time, 
-            //         'rejected_reason' => $item->rejected_reason,
-            //         'transaction_id' => $item->transaction_id,
-            //         'user' => [
-            //             'f_name' => $item?->user?->f_name,
-            //             'l_name' => $item?->user?->l_name,
-            //             'phone' => $item?->user?->phone],
-            //         'branch' => ['name' => $item?->branch?->name, ],
-            //         'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-            //         'admin' => ['name' => $item?->admin?->name,],
-            //         'payment_method' => ['id' => $item?->payment_method?->id,
-            //                             'name' => $item?->payment_method?->name],
-            //         'financial_accountigs' => $item->financial_accountigs,
-            //         'schedule' => ['name' => $item?->schedule?->name],
-            //         'delivery' => ['name' => $item?->delivery?->name], 
-            //     ];
-            // });
-            $orders = collect($orders)->sortByDesc('id')->values();
-            $order_type = [
-                "dine_in",
-                "take_away",
-                "delivery",
-            ];
-            $pagedData = $this->paginateOrders($orders, $request);
-            return response()->json([
-                "state" => 1,
-                "orders" => $pagedData['orders'],
-                "pagination" => $pagedData['pagination'],
-                "order_type" => $order_type, 
-            ]);
+        if ($startDate && $endDate) {
+            $query->whereBetween("created_at", [$startDate, $endDate]);
         }
-        elseif(password_verify($request->input('password'), $request->user()->password) && $request->user()->real_order){
-           $order_recentage = $this->settings
-            ->where("name", "order_precentage")
-            ->first()?->setting ?? 100;
-            $order_recentage = intval($order_recentage);
-            $orders = $this->orders
-            // ->where(function($query){
-            //     $query->where('pos', 1)
-            //     ->orWhere('pos', 0)
-            //     ->where('order_status', '!=', 'pending');
-            // })
-            // ->where(function($query){
-            //     $query->where("take_away_status", "pick_up")
-            //     ->where("order_type", "take_away")
-            //     ->orWhere("delivery_status", "delivered")
-            //     ->where("order_type", "delivery")
-            //     ->orWhere("order_type", "dine_in")
-            //     ->orWhere('pos', 0);
 
-            // })
-            //->where("shift", $request->user()->shift_number) 
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            }) 
-            ->where('order_active', 1)
-            ->where("branch_id", $request->user()->branch_id) 
-            ->orderByDesc("created_at")
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
-                $query->select('id', 'zone_id')
-                ->with('zone:id,zone');
-            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
-            ->get()
-            ->map(function($item, $key) use($delivery_time){
-                $order_type = "";
-                $food_preparion_time = "00:00";
-                if ($item->order_type == "dine_in") {
-                    $order_type = "pickup";
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-                }
-                elseif ($item->order_type == "take_away") {
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-                    $order_type = $item->take_away_status;
-                }
-                elseif ($item->order_type == "delivery") {
-                    $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
-                    $time2 = Carbon::parse($delivery_time);
-                    $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
-                    $result = gmdate('i:s', $totalSeconds);
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-                    
-                    $order_type = $item->delivery_status;
-                }
-                return [ 
-                    'id' => $item->id,
-                    'order_number' => $item->order_number ?? ($item->id > 1000000000 ? (int)substr((string)$item->id, -4) : ($item->id - app('first_order_today'))),
-                    'created_at' => $item->created_at,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'order_type' => $item->order_type,
-                    "delivery_fees" => $item->delivery_fees,
-                    'order_status' => $order_type,
-                    'type' => $item->pos ? 'Point of Sale' : "Online Order",
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                    'food_preparion_time' => $food_preparion_time,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['id' => $item?->payment_method?->id,
-                                        'name' => $item?->payment_method?->name],
-                    'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
-                    || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
-                    'financial_accountigs' => $item->financial_accountigs,
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
-                ];
+        // فلترة التاريخ بالـ DB
+        if ($request->date_from) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->date_to) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // فلترة البحث بـ LIKE والعلاقات بالـ DB
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                    ->orWhere('id', $search)
+                    ->orWhereHas('user', function ($u) use ($search) {
+                        $u->where('f_name', 'like', "%{$search}%")
+                            ->orWhere('l_name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
             });
-            $orders = collect($orders)->sortByDesc('id')->values();
-            $order_type = [
-                "dine_in",
-                "take_away",
-                "delivery",
-            ];
-            $pagedData = $this->paginateOrders($orders, $request);
-            return response()->json([
-                "orders" => $pagedData['orders'],
-                "pagination" => $pagedData['pagination'],
-                "order_type" => $order_type, 
-                "state" => 2,
-            ]);
-        }
-        elseif($request->password == $fake_order_password){
-            $fake_order_precentage = Setting::
-            where("name", "fake_order_precentage")
-            ->first()?->setting ?? null;
-            $fake_order_limit = Setting::
-            where("name", "fake_order_limit")
-            ->first()?->setting ?? null;
-            $fake_order_status = Setting::
-            where("name", "fake_order_status")
-            ->first()?->setting ?? null;
-            $time_sittings = $this->TimeSittings 
-            ->get();
-            if ($time_sittings->count() > 0) { 
-                    $from = $time_sittings[0]->from;
-                    $end = date('Y-m-d') . ' ' . $time_sittings[$time_sittings->count() - 1]->from;
-                    $hours = $time_sittings[$time_sittings->count() - 1]->hours;
-                    $minutes = $time_sittings[$time_sittings->count() - 1]->minutes;
-                    $from = date('Y-m-d') . ' ' . $from;
-                    $start = Carbon::parse($from);
-                    $end = Carbon::parse($end);
-                    $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
-                    if ($start >= $end) {
-                        $end = $end->addDay();
-                    }
-                    if($start >= now()){
-                        $start = $start->subDay();
-                    }
-                    // if ($start > $end) {
-                    //     $end = Carbon::parse($from)->addHours($hours)->subDay();
-                    // }
-                    // else{
-                    //     $end = Carbon::parse($from)->addHours(intval($hours));
-                    // } format('Y-m-d H:i:s')
-                } else {
-                    $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-                    $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
-                }  
-            // ___________________________________________________________
-            
-            $delivery_time = $this->settings
-            ->where("name", "delivery_time")
-            ->first()
-            ->setting ?? "00:00:00";
-            $orders = $this->orders
-            // ->where(function($query){
-            //     $query->where('pos', 1)
-            //     ->orWhere('pos', 0)
-            //     ->where('order_status', '!=', 'pending');
-            // })
-            // ->where(function($query){
-            //     $query->where("take_away_status", "pick_up")
-            //     ->where("order_type", "take_away")
-            //     ->orWhere("delivery_status", "delivered")
-            //     ->where("order_type", "delivery")
-            //     ->orWhere("order_type", "dine_in")
-            //     ->orWhere('pos', 0);
-
-            // })
-            ->where("branch_id", $request->user()->branch_id) 
-            ->whereBetween("created_at", [$start, $end]) 
-            ->where(function($query) {
-                $query->where('status', 1)
-                ->orWhereNull('status');
-            })
-            ->where('order_active', 1) 
-            ->orderByDesc("created_at")
-            ->with(['user:id,f_name,l_name,phone,image', 'branch:id,name,food_preparion_time', 'address' => function($query){
-                $query->select('id', 'zone_id')
-                ->with('zone:id,zone');
-            }, 'admin:id,name,email,phone,image', 'payment_method:id,name,logo',
-            'schedule:id,name', 'delivery', 'financial_accountigs:id,name'])
-            ->get()
-            ->map(function($item, $key) use($delivery_time){
-                $order_type = "";
-                $food_preparion_time = "00:00";
-                if ($item->order_type == "dine_in") {
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-                    $order_type = "pickup";
-                }
-                elseif ($item->order_type == "take_away") {
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-                    $order_type = $item->take_away_status;
-                }
-                elseif ($item->order_type == "delivery") {
-                    $time1 = Carbon::parse($item?->branch?->food_preparion_time ?? "00:00");
-                    $time2 = Carbon::parse($delivery_time);
-                    $totalSeconds = $time1->secondsSinceMidnight() + $time2->secondsSinceMidnight();
-                    $result = gmdate('i:s', $totalSeconds);
-                    $food_preparion_time = $item?->branch?->food_preparion_time ?? "00:00";
-
-                    $order_type = $item->delivery_status;
-                }
-                return [ 
-                    'id' => $item->id, 
-                    'order_number' => $item->order_number ?? ($item->id > 1000000000 ? (int)substr((string)$item->id, -4) : ($item->id - app('first_order_today'))),
-                    'created_at' => $item->created_at,
-                    "delivery_fees" => $item->delivery_fees,
-                    'amount' => $item->amount,
-                    'operation_status' => $item->operation_status,
-                    'order_type' => $item->order_type,
-                    'order_status' => $order_type,
-                    'type' => $item->pos ? 'Point of Sale' : "Online Order",
-                    'source' => $item->source,
-                    'status' => $item->status,
-                    'points' => $item->points, 
-                    'rejected_reason' => $item->rejected_reason,
-                    'transaction_id' => $item->transaction_id,
-                    'food_preparion_time' => $food_preparion_time,
-                    'user' => [
-                        'f_name' => $item?->user?->f_name,
-                        'l_name' => $item?->user?->l_name,
-                        'phone' => $item?->user?->phone],
-                    'branch' => ['name' => $item?->branch?->name, ],
-                    'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
-                    'admin' => ['name' => $item?->admin?->name,],
-                    'payment_method' => ['id' => $item?->payment_method?->id,
-                                        'name' => $item?->payment_method?->name],
-                    'financial_accountigs' => $item->financial_accountigs,
-                    'schedule' => ['name' => $item?->schedule?->name],
-                    'delivery' => ['name' => $item?->delivery?->name], 
-                    'payment' => ($item->payment_method_id == 2 && $item->operation_status != "delivered")
-                    || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0)? "UnPaid" : "Paid",
-                ];
-            });
-            $orders = collect($orders)->sortByDesc('id')->values();
-            $order_type = [
-                "dine_in",
-                "take_away",
-                "delivery",
-            ];
-            $pagedData = $this->paginateOrders($orders, $request);
-            return response()->json([
-                "orders" => $pagedData['orders'],
-                "pagination" => $pagedData['pagination'],
-                "order_type" => $order_type,
-                "state" => 3,
-            ]);
         }
 
-        return response()->json([
-            "errors" => "password is wrong"
-        ], 400);
-    }
+        // Eager Loading للعلاقات المحددة فقط وتصحيح الترتيب التنازلي الحقيقي
+        $query->with([
+            'user:id,f_name,l_name,phone,image',
+            'branch:id,name,food_preparion_time',
+            'address' => function ($q) {
+                $q->select('id', 'zone_id')->with('zone:id,zone');
+            },
+            'admin:id,name,email,phone,image',
+            'payment_method:id,name,logo',
+            'schedule:id,name',
+            'delivery',
+            'financial_accountigs:id,name'
+        ])->latest('created_at');
 
-    private function paginateOrders($orders, Request $request) {
-        if ($request->date_from || $request->date_to) {
-            $orders = collect($orders)->filter(function($order) use ($request) {
-                $dateStr = explode(' ', (string)$order['created_at'])[0];
-                $dateStr = explode('T', $dateStr)[0];
-                $pass = true;
-                if ($request->date_from && $dateStr < $request->date_from) $pass = false;
-                if ($request->date_to && $dateStr > $request->date_to) $pass = false;
-                return $pass;
-            })->values();
-        }
-
-        if ($request->search) {
-            $search = strtolower($request->search);
-            $orders = collect($orders)->filter(function($order) use ($search) {
-                $numMatch = str_contains(strtolower((string)($order['order_number'] ?? '')), $search) || str_contains(strtolower((string)($order['id'] ?? '')), $search);
-                $nameMatch = str_contains(strtolower((string)($order['user']['f_name'] ?? '')), $search) || str_contains(strtolower((string)($order['user']['l_name'] ?? '')), $search);
-                $phoneMatch = str_contains(strtolower((string)($order['user']['phone'] ?? '')), $search);
-                return $numMatch || $nameMatch || $phoneMatch;
-            })->values();
-        }
-
-        $page = (int) $request->input('page', 1);
+        // 3. تطبيق الـ Percentage Logic وإعادة بناء الـ Pagination
         $limit = (int) $request->input('limit', 10);
-        $total = count($orders);
-        $last_page = ceil($total / $limit) ?: 1;
-        $paged = collect($orders)->slice(($page - 1) * $limit, $limit)->values();
+        $page = (int) $request->input('page', 1);
 
-        return [
-            "orders" => $paged,
-            "pagination" => [
+        if ($state === 1 && $orderPercentage < 100) {
+            // حالة الـ Percentage: جلب البيانات وتحجيمها
+            $allOrders = $query->get()
+                ->map(fn($item) => $this->formatOrderData($item, $deliveryTime))
+                ->filter(function ($order, $index) use ($orderPercentage) {
+                    return ($index % 10) < ($orderPercentage / 10);
+                })
+                ->values();
+
+            $total = $allOrders->count();
+            $pagedOrders = $allOrders->slice(($page - 1) * $limit, $limit)->values();
+            $lastPage = (int) ceil($total / $limit) ?: 1;
+
+            $pagination = [
                 "total" => $total,
                 "per_page" => $limit,
                 "current_page" => $page,
-                "last_page" => $last_page
-            ]
+                "last_page" => $lastPage
+            ];
+        } else {
+            // حالة الـ Database Pagination القياسية والأسرع
+            $paginator = $query->paginate($limit);
+
+            $pagedOrders = collect($paginator->items())->map(fn($item) => $this->formatOrderData($item, $deliveryTime));
+
+            $pagination = [
+                "total" => $paginator->total(),
+                "per_page" => $paginator->perPage(),
+                "current_page" => $paginator->currentPage(),
+                "last_page" => $paginator->lastPage()
+            ];
+        }
+
+        return response()->json([
+            "state" => $state,
+            "orders" => $pagedOrders,
+            "pagination" => $pagination,
+            "order_type" => $orderTypeList,
+        ]);
+    }
+
+    /**
+     * توحيد تنسيق بيانات الطلب (Data Mapping)
+     */
+    private function formatOrderData($item, $deliveryTime)
+    {
+        $orderType = "";
+        $foodPreparationTime = "00:00";
+
+        if ($item->order_type == "dine_in") {
+            $foodPreparationTime = $item?->branch?->food_preparion_time ?? "00:00";
+            $orderType = "pickup";
+        } elseif ($item->order_type == "take_away") {
+            $foodPreparationTime = $item?->branch?->food_preparion_time ?? "00:00";
+            $orderType = $item->take_away_status;
+        } elseif ($item->order_type == "delivery") {
+            $foodPreparationTime = $item?->branch?->food_preparion_time ?? "00:00";
+            $orderType = $item->delivery_status;
+        }
+
+        $isUnpaid = ($item->payment_method_id == 2 && $item->operation_status != "delivered")
+            || (empty($item->payment_method_id) && $item->financial_accountigs->count() == 0);
+
+        return [
+            'id' => $item->id,
+            'order_number' => $item->order_number ?? ($item->id > 1000000000 ? (int) substr((string) $item->id, -4) : ($item->id - app('first_order_today'))),
+            'created_at' => $item->created_at,
+            'amount' => $item->amount,
+            'operation_status' => $item->operation_status,
+            'order_type' => $item->order_type,
+            'order_status' => $orderType,
+            'type' => $item->pos ? 'Point of Sale' : "Online Order",
+            'source' => $item->source,
+            'status' => $item->status,
+            'points' => $item->points,
+            'delivery_fees' => $item->delivery_fees,
+            'rejected_reason' => $item->rejected_reason,
+            'transaction_id' => $item->transaction_id,
+            'food_preparion_time' => $foodPreparationTime,
+            'payment' => $isUnpaid ? "UnPaid" : "Paid",
+            'user' => [
+                'f_name' => $item?->user?->f_name,
+                'l_name' => $item?->user?->l_name,
+                'phone' => $item?->user?->phone,
+            ],
+            'branch' => ['name' => $item?->branch?->name],
+            'address' => ['zone' => ['zone' => $item?->address?->zone?->zone]],
+            'admin' => ['name' => $item?->admin?->name],
+            'payment_method' => [
+                'id' => $item?->payment_method?->id,
+                'name' => $item?->payment_method?->name,
+            ],
+            'financial_accountigs' => $item->financial_accountigs,
+            'schedule' => ['name' => $item?->schedule?->name],
+            'delivery' => ['name' => $item?->delivery?->name],
         ];
     }
 
+    /**
+     * حساب نطاق الوقت لـ Fake Orders
+     */
+    private function resolveTimeSettingsRange(): array
+    {
+        $timeSettings = $this->TimeSittings->get();
+
+        if ($timeSettings->count() > 0) {
+            $from = date('Y-m-d') . ' ' . $timeSettings[0]->from;
+            $end = date('Y-m-d') . ' ' . $timeSettings[$timeSettings->count() - 1]->from;
+            $hours = $timeSettings[$timeSettings->count() - 1]->hours;
+            $minutes = $timeSettings[$timeSettings->count() - 1]->minutes;
+
+            $start = Carbon::parse($from);
+            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+
+            if ($start >= $end) {
+                $end = $end->addDay();
+            }
+            if ($start >= now()) {
+                $start = $start->subDay();
+            }
+        } else {
+            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+        }
+
+        return [$start, $end];
+    }
     public function online_orders(Request $request){
  
         $time_sittings = $this->TimeSittings 
