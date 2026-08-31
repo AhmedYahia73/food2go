@@ -54,9 +54,10 @@ class TaxController extends Controller
         // Keys
         // name, type, amount
         $taxRequest = $request->only($this->taxRequest);
-        $this->tax
-        ->where('id', $id)
-        ->update($taxRequest);
+        $tax = $this->tax->find($id);
+        if ($tax) {
+            $tax->update($taxRequest);
+        }
 
         return response()->json([
             'success' => 'You update data success'
