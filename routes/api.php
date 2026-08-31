@@ -72,7 +72,7 @@ Route::prefix('customer_login')->controller(BusinessSetupController::class)
 
 Route::prefix('user/auth')->group(function(){
     Route::controller(LoginController::class)->group(function(){
-        Route::post('users', 'index');
+        Route::get('users', 'index');
         Route::post('login', 'login');
     });
     Route::controller(SignupController::class)->group(function(){
