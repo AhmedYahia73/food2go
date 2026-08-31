@@ -1112,9 +1112,14 @@ trait PlaceOrder
                 $order_data[$key]->bundles = $order->bundles_items; 
                 $order_data[$key]->time_start = $order->time_start ?? null;
                 $order_data[$key]->time_end = $order->time_end ?? null;
-                $order_data[$key]->time_ended = $order->time_end ? true : false;
+                $order_data[$key]->time_ended = !empty($order->time_end);
+                if (!empty($order->time_start) && !empty($order->time_end)) {
+                    $startMs = (float)$order->time_start;
+                    $endMs = (float)$order->time_end;
+                    $order_data[$key]->elapsed_minutes = ceil(max(0, ($endMs - $startMs) / 60000));
+                }
                 if (isset($product->product_time) && $product->product_time) {
-                    $order_data[$key]->totalPrice = $order->time_end ? $order->amount : 0;
+                    $order_data[$key]->totalPrice = !empty($order->time_end) ? $order->amount : 0;
                 }
             } 
         }
