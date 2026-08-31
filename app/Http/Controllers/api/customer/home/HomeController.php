@@ -1796,7 +1796,8 @@ class HomeController extends Controller
                 "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", $app_type)->orWhereJsonContains("module", "all"))
             ])
             ->withLocale($locale)
-            ->where('item_type', 'offline')
+            ->where('item_type', "!=", 'online')
+            ->where("product_time", false)
             ->where('status', 1)
             ->where(function($query) use($id){
                 $query->where('sub_category_id', $id)
@@ -1936,7 +1937,8 @@ class HomeController extends Controller
                     ->first();
                 }
             ])
-            ->where('item_type', 'offline')
+            ->where('item_type', "!=", 'online')
+            ->where("product_time", false)
             ->where('status', 1) 
             ->where(function($query) use($id){
                 $query->where('sub_category_id', $id)
