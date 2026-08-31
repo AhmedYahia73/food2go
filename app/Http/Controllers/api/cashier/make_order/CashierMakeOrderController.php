@@ -1030,7 +1030,7 @@ class CashierMakeOrderController extends Controller
                 'prepration_status' => $request->prepration_status,
             ]);
             // Also update the JSON cart data to reflect the prepration_status
-            $cart_data = json_decode($order_cart->cart, true);
+            $cart_data = json_decode(json_encode($order_cart->cart), true);
             if (is_array($cart_data)) {
                 foreach ($cart_data as &$item) {
                     if (isset($item['product']) && is_array($item['product'])) {
