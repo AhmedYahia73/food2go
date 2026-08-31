@@ -31,7 +31,7 @@ use App\Models\FinantiolAcounting;
 use App\Models\CompanyInfo;
 use App\Models\PreparationMan;
 use App\Models\ReceiptDesign;
-use App\Models\Order;
+use App\Models\Order; 
 
 class LoginController extends Controller
 {
@@ -44,6 +44,29 @@ class LoginController extends Controller
     private CompanyInfo $company_info, private PreparationMan $preparation_man,
     private Order $orders
     ){}
+
+    public function index(){
+        $users = User::
+        withCount('orders')
+        ->get()
+        ->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->f_name . " " . $user->l_name,
+                'phone_2' => $user->phone_2,
+                'image' => $user->image,
+                'wallet' => $user->wallet,
+                'points' => $user->points, 
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'orders_count' => $user->orders_count,
+            ];
+        });
+
+        return response()->json([
+            'users' => $users
+        ]);
+    }
 
     public function store_man(Request $request){
         // kitchen
