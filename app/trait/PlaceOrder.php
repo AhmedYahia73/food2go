@@ -53,6 +53,8 @@ trait PlaceOrder
         "service_fees",
         "service_fees_id",
         "delivery_fees",
+        "time_start",
+        "time_end",
     ];
     protected $orderRequest = ['user_id', 'cart'];
     protected $priceCycle;

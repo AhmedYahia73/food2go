@@ -29,6 +29,8 @@ class OrderCart extends Model
         'order_id',
         'type',
         'captain_id',
+        'time_start',
+        'time_end',
     ];
 
 
