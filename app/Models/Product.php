@@ -46,6 +46,13 @@ class Product extends Model
         'order',
         'product_code',
         'app_type', // "all", "web", "app"
+        
+        'product_time',
+        'unit_time',
+        'extra_time',
+        'extra_unit_time',
+        'extra_time_price',
+        'min_time',
     ];
     protected $appends = ['image_link', 'orders_count', 'taxes', 'orders_count_branch'];
 

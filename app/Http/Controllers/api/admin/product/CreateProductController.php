@@ -50,6 +50,12 @@ class CreateProductController extends Controller
         'order',
         'product_code',
         'app_type',
+        'product_time',
+        'unit_time',
+        'extra_time',
+        'extra_unit_time',
+        'extra_time_price',
+        'min_time',
     ];
     use image;
     use translaion;
@@ -96,6 +102,33 @@ class CreateProductController extends Controller
             $productRequest = $request->only($this->productRequest);
             $productRequest['name'] = $default['product_name'];
             $productRequest['description'] = $default_description['product_description'] ?? null;
+            
+            $is_product_time = filter_var($request->product_time, FILTER_VALIDATE_BOOLEAN) || $request->product_time == 1;
+            if ($is_product_time) {
+                $productRequest['product_time'] = 1;
+                $productRequest['app_type'] = 'all';
+                $productRequest['item_type'] = 'offline';
+                $productRequest['recommended'] = 0;
+                $productRequest['recipe'] = 0;
+                $productRequest['product_time_status'] = 0;
+                $productRequest['weight_status'] = 0;
+                $productRequest['from'] = null;
+                $productRequest['to'] = null;
+                $productRequest['min_time'] = $request->min_time ?? 0;
+                if (!filter_var($request->extra_time, FILTER_VALIDATE_BOOLEAN) && $request->extra_time != 1) {
+                    $productRequest['extra_time'] = 0;
+                    $productRequest['extra_unit_time'] = null;
+                    $productRequest['extra_time_price'] = null;
+                }
+            } else {
+                $productRequest['product_time'] = 0;
+                $productRequest['unit_time'] = null;
+                $productRequest['extra_time'] = 0;
+                $productRequest['extra_unit_time'] = null;
+                $productRequest['extra_time_price'] = null;
+                $productRequest['min_time'] = null;
+            }
+
             $extra_num = [];
     
             if (is_file($request->image)) {
@@ -128,7 +161,7 @@ class CreateProductController extends Controller
             if ($request->addons) {
                 $product->addons()->attach($request->addons); // add addons of product
             }
-            if ($request->excludes) {
+            if (!$is_product_time && $request->excludes) {
                 foreach ($request->excludes as $item) {
                     $exclude = $this->excludes
                     ->create([
@@ -146,7 +179,7 @@ class CreateProductController extends Controller
                     }
                 }
             }// add extra
-            if (is_array($request->extra)) {
+            if (!$is_product_time && is_array($request->extra)) {
                 $extra_group = $this->extra_group
                 ->whereIn('id', $request->extra)
                 ->with('translations')
@@ -182,7 +215,7 @@ class CreateProductController extends Controller
                 }
             }// add extra
             // ______________________________________________________________
-            if ($request->variations) {
+            if (!$is_product_time && $request->variations) {
                 foreach ($request->variations as $item) {
                     $variation = $this->variations
                     ->create([
@@ -307,6 +340,32 @@ class CreateProductController extends Controller
         $productRequest['name'] = $default['product_name'];
         $productRequest['description'] = $default_description['product_description'] ?? null;
         
+        $is_product_time = filter_var($request->product_time, FILTER_VALIDATE_BOOLEAN) || $request->product_time == 1;
+        if ($is_product_time) {
+            $productRequest['product_time'] = 1;
+            $productRequest['app_type'] = 'all';
+            $productRequest['item_type'] = 'offline';
+            $productRequest['recommended'] = 0;
+            $productRequest['recipe'] = 0;
+            $productRequest['product_time_status'] = 0;
+            $productRequest['weight_status'] = 0;
+            $productRequest['from'] = null;
+            $productRequest['to'] = null;
+            $productRequest['min_time'] = $request->min_time ?? 0;
+            if (!filter_var($request->extra_time, FILTER_VALIDATE_BOOLEAN) && $request->extra_time != 1) {
+                $productRequest['extra_time'] = 0;
+                $productRequest['extra_unit_time'] = null;
+                $productRequest['extra_time_price'] = null;
+            }
+        } else {
+            $productRequest['product_time'] = 0;
+            $productRequest['unit_time'] = null;
+            $productRequest['extra_time'] = 0;
+            $productRequest['extra_unit_time'] = null;
+            $productRequest['extra_time_price'] = null;
+            $productRequest['min_time'] = null;
+        }
+
         $product = $this->products->
         where('id', $id)
         ->first(); // get product
@@ -361,7 +420,7 @@ class CreateProductController extends Controller
         $this->excludes
         ->where('product_id', $id)
         ->delete(); // delete old excludes
-        if ($request->excludes) {
+        if (!$is_product_time && $request->excludes) {
             foreach ($request->excludes as $item) {
                 $exclude = $this->excludes
                 ->create([
@@ -388,7 +447,7 @@ class CreateProductController extends Controller
         $this->extra
         ->where('product_id', $id)
         ->delete(); // delete old extra
-        if (is_array($request->extra)) {
+        if (!$is_product_time && is_array($request->extra)) {
             $extra_group = $this->extra_group
             ->whereIn('id', $request->extra)
             ->with('translations')
@@ -433,7 +492,7 @@ class CreateProductController extends Controller
         $this->variations
         ->where('product_id', $id)
         ->delete(); // delete old product
-        if ($request->variations) {
+        if (!$is_product_time && $request->variations) {
             foreach ($request->variations as $item) {
                 $variation = $this->variations
                 ->create([

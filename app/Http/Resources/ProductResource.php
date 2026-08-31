@@ -116,6 +116,12 @@ class ProductResource extends JsonResource
                 'updated_at' => $this->updated_at,
                 'weight_status' => $this->weight_status ?? 0,
                 'product_code' => $this->product_code,
+                'product_time' => (bool)($this->product_time ?? false),
+                'unit_time' => $this->unit_time,
+                'extra_time' => (bool)($this->extra_time ?? false),
+                'extra_unit_time' => $this->extra_unit_time,
+                'extra_time_price' => $this->extra_time_price,
+                'min_time' => $this->min_time ?? 0,
             ];
         }
         else {
@@ -187,6 +193,12 @@ class ProductResource extends JsonResource
                 'tax_obj' => $this->tax,
                 'weight_status' => $this->weight_status ?? 0,
                 'product_code' => $this->product_code,
+                'product_time' => (bool)($this->product_time ?? false),
+                'unit_time' => $this->unit_time,
+                'extra_time' => (bool)($this->extra_time ?? false),
+                'extra_unit_time' => $this->extra_unit_time,
+                'extra_time_price' => $this->extra_time_price,
+                'min_time' => $this->min_time ?? 0,
             ];
         }
     }
