@@ -1174,12 +1174,12 @@ class CashierMakeOrderController extends Controller
             return $item;
         });
         $orders = collect([]);
-        $arr = [];
         foreach ($order_cart as $key => $item) {
             $order_items = $this->order_format($item, $key); 
             foreach ($order_items as $order_item) {
                 $newItem = collect($order_item);
-                $index = $orders->search(function ($item) use ($newItem) {
+                $isProductTime = data_get($newItem, 'product_time');
+                $index = $isProductTime ? false : $orders->search(function ($item) use ($newItem) {
                     return data_get($item, 'variation_selected') == data_get($newItem, 'variation_selected')
                         && data_get($item, 'id') == data_get($newItem, 'id')
                         && data_get($item, 'extras') == data_get($newItem, 'extras')
