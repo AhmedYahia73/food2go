@@ -1110,6 +1110,12 @@ trait PlaceOrder
                 $order_data[$key]->variation_selected = $variation;
                 $order_data[$key]->addons_selected = $addons; 
                 $order_data[$key]->bundles = $order->bundles_items; 
+                $order_data[$key]->time_start = $order->time_start ?? null;
+                $order_data[$key]->time_end = $order->time_end ?? null;
+                $order_data[$key]->time_ended = $order->time_end ? true : false;
+                if (isset($product->product_time) && $product->product_time) {
+                    $order_data[$key]->totalPrice = $order->time_end ? $order->amount : 0;
+                }
             } 
         }
         return array_values($order_data);

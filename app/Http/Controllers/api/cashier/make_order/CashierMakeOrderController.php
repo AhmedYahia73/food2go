@@ -1012,6 +1012,39 @@ class CashierMakeOrderController extends Controller
             "cart_id" => $order['payment']->id
         ]);
     }
+    public function end_time_session(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'cart_id' => 'required|exists:order_carts,id',
+            'time_end' => 'required',
+            'amount' => 'required|numeric',
+            'prepration_status' => 'required|string'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+        $order_cart = OrderCart::where('id', $request->cart_id)->first();
+        if ($order_cart) {
+            $order_cart->update([
+                'time_end' => $request->time_end,
+                'amount' => $request->amount,
+                'prepration_status' => $request->prepration_status,
+            ]);
+            // Also update the JSON cart data to reflect the prepration_status
+            $cart_data = json_decode($order_cart->cart, true);
+            if (is_array($cart_data)) {
+                foreach ($cart_data as &$item) {
+                    if (isset($item['product']) && is_array($item['product'])) {
+                        foreach ($item['product'] as &$prod) {
+                            $prod['prepration'] = $request->prepration_status;
+                        }
+                    }
+                }
+                $order_cart->cart = json_encode($cart_data);
+                $order_cart->save();
+            }
+        }
+        return response()->json(['success' => true]);
+    }
 
     public function update_dine_in_order(DineinItemRequest $request){
         // /cashier/dine_in_order
