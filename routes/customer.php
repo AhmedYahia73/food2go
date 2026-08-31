@@ -63,6 +63,7 @@ Route::middleware(['auth:sanctum', 'IsCustomer'])->group(function(){
         Route::get('/discount_products_mobile', 'discount_products_mobile')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/retuarant_settings_mobile', 'retuarant_settings_mobile')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/call_category/{id}', 'call_category')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
+        Route::get('/products_in_category_pos/{id}', 'products_in_category_pos')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/products_in_category/{id}', 'products_in_category')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/recommandation_product', 'recommandation_product')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);
         Route::get('/discount_product', 'discount_product')->withOutMiddleware(['auth:sanctum', 'IsCustomer']);

@@ -1748,6 +1748,325 @@ class HomeController extends Controller
         ]);
     }
 
+    public function products_in_category_pos(Request $request, $id){
+  
+        $app_type = $request->app_type ?? "app";
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
+        $branch_id = 0;
+        $module = "delivery";
+        if ($request->branch_id && !empty($request->branch_id)) {
+            $branch_id = $request->branch_id;
+            $module = "take_away";
+        }
+        if ($request->address_id && !empty($request->address_id)) {
+            $address = $this->address
+            ->where('id', $request->address_id)
+            ->first();
+            $branch_id = $address?->zone?->branch_id;
+        }
+        if ($request->table_id && !empty($request->table_id)) {
+            $table = CafeTable::with('location')->find($request->table_id);
+            if ($table) {
+                $branch_id = $table->branch_id ?? $table->location?->branch_id ?? $branch_id;
+                $module = "dine_in";
+            }
+        }
+        $branch_off = $this->branch_off
+        ->where('branch_id', $branch_id)
+        ->get();
+        $product_off = $branch_off->pluck('product_id')->filter(); 
+        $option_off = $branch_off->pluck('option_id')->filter();
+        $tax = get_tax_setting();
+
+    
+        if ($request->user_id) {
+            $user_id = $request->user_id;
+            $products = $this->product
+            ->orderBy('order')
+            ->whereIn("app_type", ["all", $app_type])
+            ->with([ 
+                'favourite_product' => fn($q) => $q->where('users.id', $user_id),
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),       
+                "tax_module.module" => function($query) use($module, $branch_id){
+                    $query->where("module", $module)
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id)
+                    ->first();
+                },
+                "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", $app_type)->orWhereJsonContains("module", "all"))
+            ])
+            ->withLocale($locale)
+            ->where('item_type', 'offline')
+            ->where('status', 1)
+            ->where(function($query) use($id){
+                $query->where('sub_category_id', $id)
+                ->orWhere('category_id', $id);
+            })
+            // ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('products.id', $product_off)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id, $module) {
+                $product->favourites = $product->favourite_product->isNotEmpty();
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;
+
+                $tax_module = $product?->tax_module
+                ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+                    if($taxItem->module->count() > 0){
+                        return $taxItem?->tax;
+                    }
+
+                })
+                ->filter()
+                ->first(); 
+                if(!empty($tax_module)){
+                    $product->tax = $tax_module;
+                }
+                else{
+                    $product->tax = $product->tax;
+                }
+                if ($product->taxes->setting == 'included') {
+                    
+                    // 1. نحتفظ بالسعر الأصلي (وهو شامل الضريبة)
+                    $original_price = $product->price;
+                    
+                    // 2. حساب السعر بعد الخصم (وسيظل شامل للضريبة)
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $original_price - ($product->discount->amount * $original_price / 100);
+                        } else {
+                            $discount = $original_price - $product->discount->amount;
+                        }
+                    } else {
+                        $discount = $original_price;
+                    }
+                    
+                    // 3. السعر النهائي هو السعر بعد الخصم (لأن الضريبة مشمولة بالفعل)
+                    $final_price = $discount;
+                    
+                    // 4. استخراج السعر قبل الضريبة وقيمتها من السعر النهائي
+                    $price_before_tax = $final_price;
+                    $tax_amount = 0;
+                    
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'value') {
+                            $tax_amount = $product->tax->amount;
+                            $price_before_tax = $final_price - $tax_amount;
+                        } else {
+                            // المعادلة العكسية لو الضريبة نسبة مئوية
+                            $price_before_tax = $final_price / (1 + ($product->tax->amount / 100));
+                            $tax_amount = $final_price - $price_before_tax;
+                        }
+                    }
+                    
+                    return [
+                        'id' => $product->id,
+                        'taxes' => $product->taxes->setting,
+                        'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                        'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                        
+                        // التعديلات تمت هنا لتعكس الحسبة الصحيحة
+                        'price' => round($price_before_tax, 2), // السعر الصافي بدون ضريبة
+                        'price_after_discount' => $discount, // السعر بعد الخصم (شامل الضريبة)
+                        'price_after_tax' => $final_price, // السعر النهائي
+                        
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        'recommended' => $product->recommended,
+                        'image_link' => $product->image_link,
+                        
+                        'discount' => round($original_price - $discount, 2), // قيمة الخصم الفعلية
+                        'tax' => round($tax_amount, 2), // قيمة الضريبة المستخرجة
+                        'favourite' => is_bool($product->favourites) ? $product->favourites : false,
+                    ];
+                }
+                else {
+                    $price = $product->price;
+                    
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $tax = $price + $product->tax->amount * $price / 100;
+                        } else {
+                            $tax = $price + $product->tax->amount;
+                        }
+                    }
+                    else{
+                        $tax = $price;
+                    }
+
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $price - $product->discount->amount * $price / 100;
+                        } else {
+                            $discount = $price - $product->discount->amount;
+                        }
+                    }
+                    else{
+                        $discount = $price;
+                    }
+                    return [
+                        'id' => $product->id,
+                        'taxes' => $product->taxes->setting,
+                        'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                        'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                        'price' => $price,
+                        'price_after_discount' => $discount,
+                        'price_after_tax' => $tax,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        'recommended' => $product->recommended,
+                        'image_link' => $product->image_link,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
+                        'favourite' => is_bool($product->favourites) ? $product->favourites : false,
+                    ];
+                } 
+            });
+
+        }
+        else{
+            $products = $this->product 
+            ->orderBy('order')
+            ->withLocale($locale)
+            ->with([ 
+                'product_pricing' => fn($q) => $q->where('branch_id', $branch_id),
+                "tax_module.module" => function($query) use($module, $branch_id){
+                    $query->where("module", $module)
+                    ->whereIn('app_type', ['online', 'all'])
+                    ->Where("branch_id", $branch_id)
+                    ->first();
+                }
+            ])
+            ->where('item_type', 'offline')
+            ->where('status', 1) 
+            ->where(function($query) use($id){
+                $query->where('sub_category_id', $id)
+                ->orWhere('category_id', $id);
+            })
+            // ->whereNotIn('sub_category_id', $category_off)
+            ->whereNotIn('products.id', $product_off)
+            ->get()
+            ->map(function ($product) use ($option_off, $branch_id, $module) {
+                $product->favourite = $product->favourite_product->isNotEmpty();
+                $product->price = $product->product_pricing->first()?->price ?? $product->price;   
+
+                $tax_module = $product?->tax_module
+                ?->map(function ($taxItem) use ($module, $branch_id, $product) {
+                    if($taxItem->module->count() > 0){
+                        return $taxItem?->tax;
+                    }
+
+                })
+                ->filter()
+                ->first(); 
+                if(!empty($tax_module)){
+                    $product->tax = $tax_module;
+                }
+                else{
+                    $product->tax = $product->tax;
+                }
+                if ($product->taxes->setting == 'included') {
+                    
+                    // 1. نحتفظ بالسعر الأصلي (شامل الضريبة)
+                    $original_price = $product->price;
+                    
+                    // 2. حساب السعر بعد الخصم (هذا السعر سيظل شامل للضريبة)
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $original_price - ($product->discount->amount * $original_price / 100);
+                        } else {
+                            $discount = $original_price - $product->discount->amount;
+                        }
+                    } else {
+                        $discount = $original_price;
+                    }
+                    
+                    // 3. السعر النهائي هو نفسه السعر بعد الخصم (لأن الضريبة مشمولة)
+                    $final_price = $discount;
+                    
+                    // 4. استخراج السعر قبل الضريبة وقيمتها من السعر النهائي
+                    $price_before_tax = $final_price;
+                    $tax_amount = 0;
+                    
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'value') {
+                            $tax_amount = $product->tax->amount;
+                            $price_before_tax = $final_price - $tax_amount;
+                        } else {
+                            // المعادلة العكسية لو الضريبة نسبة مئوية
+                            $price_before_tax = $final_price / (1 + ($product->tax->amount / 100));
+                            $tax_amount = $final_price - $price_before_tax;
+                        }
+                    }
+                    
+                    return [
+                        'id' => $product->id,
+                        'taxes' => $product->taxes->setting,
+                        'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                        'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                        
+                        // التعديلات تمت هنا لتعكس الأرقام الصحيحة
+                        'price' => round($price_before_tax, 2), // السعر الصافي بدون ضريبة
+                        'price_after_discount' => $discount, // السعر بعد الخصم (شامل الضريبة)
+                        'price_after_tax' => $final_price, // السعر النهائي
+                        
+                        'recommended' => $product->recommended,
+                        'image_link' => $product->image_link,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        
+                        'discount' => round($original_price - $discount, 2), // قيمة الخصم الفعلية
+                        'tax' => round($tax_amount, 2), // قيمة الضريبة المستخرجة
+                    ];
+                }
+                else {
+                    $price = $product->price;
+                    
+                    if (!empty($product->tax)) {
+                        if ($product->tax->type == 'precentage') {
+                            $tax = $price + $product->tax->amount * $price / 100;
+                        } else {
+                            $tax = $price + $product->tax->amount;
+                        }
+                    }
+                    else{
+                        $tax = $price;
+                    }
+
+                    if (!empty($product->discount)) {
+                        if ($product->discount->type == 'precentage') {
+                            $discount = $price - $product->discount->amount * $price / 100;
+                        } else {
+                            $discount = $price - $product->discount->amount;
+                        }
+                    }
+                    else{
+                        $discount = $price;
+                    }
+                    return [
+                        'id' => $product->id,
+                        'taxes' => $product->taxes->setting,
+                        'name' => $product->translations->where('key', $product->name)->first()?->value ?? $product->name,
+                        'description' => $product->translations->where('key', $product->description)->first()?->value ?? $product->description,
+                        'price' => $price,
+                        'price_after_discount' => $discount,
+                        'price_after_tax' => $tax,
+                        'category_id' => $product->category_id,
+                        'sub_category_id' => $product->sub_category_id,
+                        'recommended' => $product->recommended,
+                        'image_link' => $product->image_link,
+                        'discount' => $price - $discount,
+                        'tax' => $tax - $price,
+                    ];
+                } 
+            });
+        }
+
+        return response()->json([
+            'products' => $products,
+            'tax' => $tax,
+        ]);
+    }
+
     public function recommandation_product(Request $request){
         $locale = $request->locale ?? $request->query('locale', app()->getLocale()); // Get Local Translation
         $branch_id = 0;
