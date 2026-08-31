@@ -158,9 +158,9 @@ class CreateProductController extends Controller
                     }
                 }
              }
-            if ($request->addons) {
-                $product->addons()->attach($request->addons); // add addons of product
-            }
+             if (!$is_product_time && $request->addons) {
+                 $product->addons()->attach($request->addons); // add addons of product
+             }
             if (!$is_product_time && $request->excludes) {
                 foreach ($request->excludes as $item) {
                     $exclude = $this->excludes
@@ -407,8 +407,10 @@ class CreateProductController extends Controller
             $this->deleteImage($product->image);
         } // if send image upload it and delete old image
         $product->update($productRequest); // create product
-        if ($request->addons) {
+        if (!$is_product_time && $request->addons) {
             $product->addons()->sync($request->addons); // add addons of product
+        } else if ($is_product_time) {
+            $product->addons()->detach();
         }
         $exclude = $this->excludes
         ->where('product_id', $id)
