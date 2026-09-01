@@ -89,3 +89,5 @@ Route::post('/sync/push', [SyncController::class, 'push']);
 Route::get('/sync/pull', [SyncController::class, 'pull']);
 Route::get('/sync/bootstrap/{table}', [SyncController::class, 'bootstrap']);
 
+
+Route::get('/debug-product-149', function() { return \App\Models\Product::with('variations.options', 'tax_obj', 'taxes')->find(149); });
