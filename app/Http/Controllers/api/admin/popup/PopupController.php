@@ -68,20 +68,36 @@ class PopupController extends Controller
         $popup = $this->popup
         ->first();
         if(empty($popup)){
-            $imag_path = $this->upload($request, 'image_en', 'admin/popup/image_en');
-            $popupRequest['image_en'] = $imag_path;
-            $imag_path = $this->upload($request, 'image_ar', 'admin/popup/image_ar');
-            $popupRequest['image_ar'] = $imag_path;
+            if($request->image_en){
+                $imag_path = $this->upload($request, 'image_en', 'admin/popup/image_en');
+                $popupRequest['image_en'] = $imag_path;
+            }
+            if($request->image_ar){
+                $imag_path = $this->upload($request, 'image_ar', 'admin/popup/image_ar');
+                $popupRequest['image_ar'] = $imag_path;
+            }
             $this->popup
             ->create($popupRequest);
         }
         else{
-            $imag_path = $this->upload($request, 'image_en', 'admin/popup/image_en');
-            $popupRequest['image_en'] = $imag_path;
-            $imag_path = $this->upload($request, 'image_ar', 'admin/popup/image_ar');
-            $popupRequest['image_ar'] = $imag_path;
-            $this->deleteImage($popup->image_en);
-            $this->deleteImage($popup->image_ar);
+            if($request->image_en){
+                $imag_path = $this->upload($request, 'image_en', 'admin/popup/image_en');
+                $popupRequest['image_en'] = $imag_path;
+                $this->deleteImage($popup->image_en);
+            }
+            else{
+                $popupRequest['image_en'] = null;
+                $this->deleteImage($popup->image_en);
+            }
+            if($request->image_ar){
+                $imag_path = $this->upload($request, 'image_ar', 'admin/popup/image_ar');
+                $popupRequest['image_ar'] = $imag_path;
+                $this->deleteImage($popup->image_ar);
+            }
+            else{ 
+                $popupRequest['image_ar'] = null;
+                $this->deleteImage($popup->image_ar);
+            }
             $popup->update($popupRequest);
         }
 
