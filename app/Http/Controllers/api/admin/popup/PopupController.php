@@ -68,11 +68,11 @@ class PopupController extends Controller
         $popup = $this->popup
         ->first();
         if(empty($popup)){
-            if($request->image_en){
+            if($request->image_en && $request->image_en != "null"){
                 $imag_path = $this->upload($request, 'image_en', 'admin/popup/image_en');
                 $popupRequest['image_en'] = $imag_path;
             }
-            if($request->image_ar){
+            if($request->image_ar && $request->image_ar != "null"){
                 $imag_path = $this->upload($request, 'image_ar', 'admin/popup/image_ar');
                 $popupRequest['image_ar'] = $imag_path;
             }
@@ -80,24 +80,16 @@ class PopupController extends Controller
             ->create($popupRequest);
         }
         else{
-            if($request->image_en){
+            if($request->image_en && $request->image_en != "null"){
                 $imag_path = $this->upload($request, 'image_en', 'admin/popup/image_en');
                 $popupRequest['image_en'] = $imag_path;
                 $this->deleteImage($popup->image_en);
-            }
-            else{
-                $popupRequest['image_en'] = null;
-                $this->deleteImage($popup->image_en);
-            }
-            if($request->image_ar){
+            } 
+            if($request->image_ar && $request->image_ar != "null"){
                 $imag_path = $this->upload($request, 'image_ar', 'admin/popup/image_ar');
                 $popupRequest['image_ar'] = $imag_path;
                 $this->deleteImage($popup->image_ar);
-            }
-            else{ 
-                $popupRequest['image_ar'] = null;
-                $this->deleteImage($popup->image_ar);
-            }
+            } 
             $popup->update($popupRequest);
         }
 
