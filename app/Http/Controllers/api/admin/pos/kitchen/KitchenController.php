@@ -274,9 +274,8 @@ class KitchenController extends Controller
         if($request->password){
             $kitchenRequest['password'] = Hash::make($request->password);
         }
-        $kitchen = $this->kitchen
-        ->where('id', $id)
-        ->findOrFail();
+        $kitchen = $this->kitchen 
+        ->findOrFail($id);
         $kitchen->update($kitchenRequest);
  
         PrinterKitchen::
