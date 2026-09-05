@@ -1005,7 +1005,8 @@ class OrderController extends Controller
         $end = $end->format('Y-m-d H:i:s');
         $orders = $this->orders
         ->select('id')
-        ->where('pos', 0) 
+        ->where('pos', 0)
+        ->where('branch_id', $request->user()->branch_id)
         ->whereBetween('created_at', [$start, $end])
         ->where(function($query) {
             $query->where('status', 1)
@@ -1022,8 +1023,7 @@ class OrderController extends Controller
         return response()->json([
             "orders" => $orders, 
             "orders_count" => $orders->count(), 
-            "start" => $start,
-            "end" => $end
+            "branch_id" => $request->user()->branch_id, 
         ]);
     }
 
