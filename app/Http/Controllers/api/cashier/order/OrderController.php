@@ -1022,8 +1022,7 @@ class OrderController extends Controller
 
         return response()->json([
             "orders" => $orders, 
-            "orders_count" => $orders->count(), 
-            "branch_id" => $request->user()->branch_id, 
+            "orders_count" => $orders->count(),  
         ]);
     }
 
