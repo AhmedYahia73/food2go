@@ -19,14 +19,17 @@
     </div>
 
     <script>
-        // 1. إعداد واجهة Laravel Echo لمشروع mostafagadbcknd
+        // 1. إعداد واجهة Laravel Echo
+        const wsHost = window.location.hostname;
+        const isHttps = window.location.protocol === 'https:';
+
         window.Echo = new window.Echo({
             broadcaster: 'reverb',
-            key: {{ env('REVERB_APP_KEY') }},
-            wsHost: {{ url('') }},
-            wsPort: 443,
-            wssPort: 443,
-            forceTLS: true,
+            key: '{{ env('REVERB_APP_KEY') }}',
+            wsHost: wsHost,
+            wsPort: isHttps ? 443 : 8080,
+            wssPort: isHttps ? 443 : 8080,
+            forceTLS: isHttps,
             enabledTransports: ['ws', 'wss'],
         });
 
