@@ -22,8 +22,8 @@
         // 1. إعداد واجهة Laravel Echo لمشروع mostafagadbcknd
         window.Echo = new window.Echo({
             broadcaster: 'reverb',
-            key: '6756764564',
-            wsHost: 'mostafagadbcknd.food2go.online',
+            key: env('REVERB_APP_KEY'),
+            wsHost: env('REVERB_HOST'),
             wsPort: 443,
             wssPort: 443,
             forceTLS: true,
