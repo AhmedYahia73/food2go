@@ -1001,11 +1001,13 @@ class OrderController extends Controller
             "scheduled",
             "refund",
         ];
+        $start = $start->format('Y-m-d H:i:s');
+        $end = $end->format('Y-m-d H:i:s');
         $orders = $this->orders
         ->select('id')
         ->where('pos', 0)
         ->where('branch_id', $request->user()->branch_id)
-        ->whereBetween('created_at', [$start->format("Y-m-d H:i:s"), $end->format("Y-m-d H:i:s")])
+        ->whereBetween('created_at', [$start, $end])
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
