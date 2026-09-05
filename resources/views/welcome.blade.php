@@ -22,8 +22,8 @@
         // 1. إعداد واجهة Laravel Echo لمشروع mostafagadbcknd
         window.Echo = new window.Echo({
             broadcaster: 'reverb',
-            key: env('REVERB_APP_KEY'),
-            wsHost: env('REVERB_HOST'),
+            key: {{ env('REVERB_APP_KEY') }},
+            wsHost: {{ env('REVERB_HOST') }},
             wsPort: 443,
             wssPort: 443,
             forceTLS: true,
