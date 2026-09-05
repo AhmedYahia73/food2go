@@ -1005,7 +1005,7 @@ class OrderController extends Controller
         ->select('id')
         ->where('pos', 0)
         ->where('branch_id', $request->user()->branch_id)
-        ->whereBetween('created_at', [$start, $end])
+        ->whereBetween('created_at', [$start->format("Y-m-d H:i:s"), $end->format("Y-m-d H:i:s")])
         ->where(function($query) {
             $query->where('status', 1)
             ->orWhereNull('status');
