@@ -1004,8 +1004,14 @@ class OrderController extends Controller
         $start = $start->format('Y-m-d H:i:s');
         $end = $end->format('Y-m-d H:i:s');
         $orders = $this->orders
-        ->select('id') 
+        ->select('id')
+        ->where('pos', 0) 
         ->whereBetween('created_at', [$start, $end])
+        ->where(function($query) {
+            $query->where('status', 1)
+            ->orWhereNull('status');
+        })
+        ->where("is_read", 0)
         ->orderByDesc("created_at")
         ->pluck("id");
         // ->filter(function ($order, $index) use($order_recentage) {
