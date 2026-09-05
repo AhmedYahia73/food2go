@@ -958,6 +958,7 @@ class OrderController extends Controller
 
     public function notifications(Request $request){
         $time_sittings = $this->TimeSittings 
+        ->where("branch_id", $request->user()->branch_id)
         ->get();
         $delivery_time = $this->settings
         ->where("name", "delivery_time")
@@ -1020,6 +1021,8 @@ class OrderController extends Controller
         return response()->json([
             "orders" => $orders, 
             "orders_count" => $orders->count(), 
+            "from" => $start->format('Y-m-d H:i:s'),
+            "to" => $end->format('Y-m-d H:i:s'),
         ]);
     }
 
