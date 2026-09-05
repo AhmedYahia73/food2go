@@ -1003,9 +1003,7 @@ class OrderController extends Controller
         ];
         $orders = $this->orders
         ->select('id')
-        ->where('pos', 0)
-        ->where('branch_id', $request->user()->branch_id)
-        ->whereBetween('created_at', [$start, $end]) 
+        ->where('pos', 0) 
         ->orderByDesc("created_at")
         ->pluck("id");
         // ->filter(function ($order, $index) use($order_recentage) {
