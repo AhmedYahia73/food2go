@@ -23,7 +23,7 @@
         window.Echo = new window.Echo({
             broadcaster: 'reverb',
             key: {{ env('REVERB_APP_KEY') }},
-            wsHost: {{ env('REVERB_HOST') }},
+            wsHost: {{ url() }},
             wsPort: 443,
             wssPort: 443,
             forceTLS: true,
