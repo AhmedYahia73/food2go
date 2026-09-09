@@ -281,7 +281,6 @@ class PurchaseTransferController extends Controller
                 ->value('quantity') ?? 0;
 
             if ($available < $item['quintity']) {
-                // Get product name for a friendly error message
                 $productName = $this->products
                     ->where('id', $item['product_id'])
                     ->value('name') ?? "Product #{$item['product_id']}";
@@ -298,7 +297,9 @@ class PurchaseTransferController extends Controller
         }
 
         // ── 3. Execute inside a DB transaction ───────────────────────────────
-        DB::transaction(function () use ($products, $fromStoreId, $toStoreId, $adminId) {
+        $createdItems = [];
+
+        DB::transaction(function () use ($products, $fromStoreId, $toStoreId, $adminId, &$createdItems) {
 
             foreach ($products as $item) {
                 $quintity   = $item['quintity'];
@@ -306,8 +307,27 @@ class PurchaseTransferController extends Controller
                 $categoryId = $item['category_id'];
                 $unitId     = $item['unit_id'];
 
-                // 3a. Record the transfer
-                $this->purchases->create([
+                // 3a. Compute weighted-average unit cost from purchase history
+                $purchaseHistory = DB::table('purchases')
+                    ->where('store_id',   $fromStoreId)
+                    ->where('product_id', $productId)
+                    ->orderByDesc('created_at')
+                    ->get(['total_coast', 'quintity']);
+
+                $remainingQty = $quintity;
+                $costSum      = 0;
+                $costCount    = 0;
+                foreach ($purchaseHistory as $ph) {
+                    if ($remainingQty <= 0) break;
+                    $costCount++;
+                    $costSum      += $ph->total_coast / ($ph->quintity ?: 1);
+                    $remainingQty -= $ph->quintity;
+                }
+                $unitCost  = $costCount > 0 ? $costSum / $costCount : 0;
+                $totalCost = round($unitCost * $quintity, 2);
+
+                // 3b. Record the transfer
+                $newTransfer = $this->purchases->create([
                     'from_store_id' => $fromStoreId,
                     'to_store_id'   => $toStoreId,
                     'category_id'   => $categoryId,
@@ -318,7 +338,7 @@ class PurchaseTransferController extends Controller
                     'status'        => 'approve',
                 ]);
 
-                // 3b. Deduct from source store
+                // 3c. Deduct from source store
                 $fromStock = $this->stock
                     ->where('store_id',   $fromStoreId)
                     ->where('product_id', $productId)
@@ -339,7 +359,7 @@ class PurchaseTransferController extends Controller
                     ]);
                 }
 
-                // 3c. Add to destination store
+                // 3d. Add to destination store
                 $toStock = $this->stock
                     ->where('store_id',   $toStoreId)
                     ->where('product_id', $productId)
@@ -359,12 +379,77 @@ class PurchaseTransferController extends Controller
                         'unit_id'         => $unitId,
                     ]);
                 }
+
+                // 3e. Collect receipt data
+                $category = $this->categories->find($categoryId);
+                $product  = $this->products->find($productId);
+                $unit     = $this->units->find($unitId);
+
+                $createdItems[] = [
+                    'id'         => $newTransfer->id,
+                    'category'   => $category?->name,
+                    'product'    => $product?->name,
+                    'unit'       => $unit?->name,
+                    'quintity'   => $quintity,
+                    'unit_cost'  => round($unitCost, 4),
+                    'total_cost' => $totalCost,
+                ];
             }
         });
 
+        $fromStore = $this->stores->find($fromStoreId);
+        $toStore   = $this->stores->find($toStoreId);
+
         return response()->json([
-            'success' => 'Transfer completed successfully',
-            'count'   => count($products),
+            'success'    => 'Transfer completed successfully',
+            'count'      => count($products),
+            'from_store' => $fromStore?->name,
+            'to_store'   => $toStore?->name,
+            'date'       => now()->toDateTimeString(),
+            'items'      => $createdItems,
+        ]);
+    }
+
+    /**
+     * Return cost breakdown for a single transfer record (used by the history table PDF button).
+     */
+    public function transferCost(Request $request, $id)
+    {
+        $transfer = $this->purchases
+            ->with('category', 'product', 'from_store', 'to_store', 'unit')
+            ->findOrFail($id);
+
+        // Weighted average unit cost from purchase history in the source store
+        $purchaseHistory = DB::table('purchases')
+            ->where('store_id',   $transfer->from_store_id)
+            ->where('product_id', $transfer->product_id)
+            ->orderByDesc('created_at')
+            ->get(['total_coast', 'quintity']);
+
+        $remainingQty = $transfer->quintity;
+        $costSum      = 0;
+        $costCount    = 0;
+        foreach ($purchaseHistory as $ph) {
+            if ($remainingQty <= 0) break;
+            $costCount++;
+            $costSum      += $ph->total_coast / ($ph->quintity ?: 1);
+            $remainingQty -= $ph->quintity;
+        }
+        $unitCost  = $costCount > 0 ? $costSum / $costCount : 0;
+        $totalCost = round($unitCost * $transfer->quintity, 2);
+
+        return response()->json([
+            'id'         => $transfer->id,
+            'from_store' => $transfer?->from_store?->name,
+            'to_store'   => $transfer?->to_store?->name,
+            'category'   => $transfer?->category?->name,
+            'product'    => $transfer?->product?->name,
+            'unit'       => $transfer?->unit?->name,
+            'quintity'   => $transfer->quintity,
+            'unit_cost'  => round($unitCost, 4),
+            'total_cost' => $totalCost,
+            'status'     => $transfer->status,
+            'date'       => $transfer->created_at,
         ]);
     }
 }

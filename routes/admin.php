@@ -760,7 +760,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('purchase_transfer')->group(function(){
         Route::get('/', 'view');
         Route::put('/status/{id}', 'status');
-        Route::post('/transfer', 'transfer'); 
+        Route::post('/transfer', 'transfer');
+        Route::get('/transfer_cost/{id}', 'transferCost');
     });
     
     Route::controller(StoreController::class)
