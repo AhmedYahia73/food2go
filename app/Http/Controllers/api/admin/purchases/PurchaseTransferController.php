@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\purchases;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\PurchaseTransfer;
 use App\Models\Purchase;
@@ -235,157 +236,135 @@ class PurchaseTransferController extends Controller
         ]);
     }
 
+    /**
+     * Transfer multiple products between stores in a single request.
+     *
+     * Expected payload:
+     * {
+     *   "from_store_id": 1,
+     *   "to_store_id": 2,
+     *   "products": [
+     *     { "quintity": 22, "unit_id": 1, "category_id": 1, "product_id": 1 },
+     *     { "quintity": 5,  "unit_id": 2, "category_id": 1, "product_id": 3 }
+     *   ]
+     * }
+     */
     public function transfer(Request $request){
+
+        // ── 1. Top-level validation ──────────────────────────────────────────
         $validator = Validator::make($request->all(), [
-            'from_store_id' => ['required', 'exists:purchase_stores,id'], 
-            'to_store_id' => ['required', 'exists:purchase_stores,id'], 
-            'category_id' => ['exists:purchase_categories,id'], 
-            'product_id' => ['exists:purchase_products,id'], 
-            
-            'material_id' => ['exists:materials,id'],
-            'category_material_id' => ['exists:material_categories,id'],
-
-            'quintity' => ['required', 'numeric'],
-            'unit_id' => ['required', 'exists:units,id'],
+            'from_store_id'          => ['required', 'exists:purchase_stores,id'],
+            'to_store_id'            => ['required', 'exists:purchase_stores,id', 'different:from_store_id'],
+            'products'               => ['required', 'array', 'min:1'],
+            'products.*.quintity'    => ['required', 'numeric', 'min:0.001'],
+            'products.*.unit_id'     => ['required', 'exists:units,id'],
+            'products.*.category_id' => ['required', 'exists:purchase_categories,id'],
+            'products.*.product_id'  => ['required', 'exists:purchase_products,id'],
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
-            return response()->json([
-                'errors' => $validator->errors(),
-            ],400);
-        }
-        if(empty($request->material_id) && empty($request->product_id)){
-            return response()->json([
-                "errors" => "You must enter material_id or product_id"
-            ], 400);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $this->purchases
-        ->create([
-            'from_store_id' => $request->from_store_id,
-            'to_store_id' => $request->to_store_id,
-            'category_id' => $request->category_id ?? null,
-            'product_id' => $request->product_id ?? null,
-            'material_id' => $request->material_id ?? null,
-            'category_material_id' => $request->category_material_id ?? null,
-            'admin_id' => $request->user()->id,
-            'quintity' => $request->quintity,
-            'unit_id' => $request->unit_id,
-            'status' => 'approve',
-        ]);
-        // stock
-        if(!empty($request->product_id)){ 
-            $from_store = $this->stock
-            ->where('store_id', $request->from_store_id)
-            ->where('product_id', $request->product_id)
-            ->first();
-            $to_store = $this->stock
-            ->where('store_id', $request->to_store_id)
-            ->where('product_id', $request->product_id)
-            ->first();
-            if(empty($from_store)){
-                $product = $this->products
-                ->where("id", $request->product_id)
-                ->first();
-                $this->stock
-                ->create([
-                    'category_id' => $request->category_id,
-                    'product_id' => $request->product_id,
-                    'store_id' => $request->from_store_id,
-                    'quantity' => -$request->quintity,
-                    'actual_quantity' => -$request->quintity,
-                    'unit_id' => -$product->unit_id,
-                ]);
-            }
-            else{
-                $stock = $this->stock
-                ->where('category_id', $request->category_id)
-                ->where('product_id', $request->product_id)
-                ->where('store_id', $request->from_store_id)
-                ->first();
-                $stock->quantity -= $request->quintity;
-                $stock->actual_quantity -= $request->quintity;
-                $stock->save();
-            }
+        $fromStoreId = $request->from_store_id;
+        $toStoreId   = $request->to_store_id;
+        $products    = $request->products;
+        $adminId     = $request->user()->id;
 
-            if(empty($to_store)){
-                $this->stock
-                ->create([
-                    'category_id' => $request->category_id,
-                    'product_id' => $request->product_id,
-                    'store_id' => $request->to_store_id,
-                    'quantity' => $request->quintity,
-                    'actual_quantity' => $request->quintity,
-                    'unit_id' => $request->unit_id,
-                ]);
-            }
-            else{
-                $stock = $this->stock
-                ->where('category_id', $request->category_id)
-                ->where('product_id', $request->product_id)
-                ->where('store_id', $request->to_store_id)
-                ->first();
-                $stock->quantity += $request->quintity;
-                $stock->actual_quantity += $request->quintity;
-                $stock->save();
+        // ── 2. Stock availability validation (before touching DB) ────────────
+        $stockErrors = [];
+
+        foreach ($products as $index => $item) {
+            $available = $this->stock
+                ->where('store_id',   $fromStoreId)
+                ->where('product_id', $item['product_id'])
+                ->value('quantity') ?? 0;
+
+            if ($available < $item['quintity']) {
+                // Get product name for a friendly error message
+                $productName = $this->products
+                    ->where('id', $item['product_id'])
+                    ->value('name') ?? "Product #{$item['product_id']}";
+
+                $stockErrors["products.{$index}.quintity"] = [
+                    "Insufficient stock for \"{$productName}\": "
+                    . "requested {$item['quintity']}, available {$available}."
+                ];
             }
         }
-        else{ 
-            $from_store = $this->material_stock
-            ->where('store_id', $request->from_store_id)
-            ->where('material_id', $request->material_id)
-            ->first();
-            $to_store = $this->material_stock
-            ->where('store_id', $request->to_store_id)
-            ->where('material_id', $request->material_id)
-            ->first();
-            if(empty($from_store)){
-                $product = $this->products
-                ->where("id", $request->material_id)
-                ->first();
-                $this->material_stock
-                ->create([
-                    'category_id' => $request->category_material_id,
-                    'material_id' => $request->material_id,
-                    'store_id' => $request->from_store_id,
-                    'quantity' => -$request->quintity,
-                    'unit_id' => $request->unit_id,
-                    "actual_quantity" => -$request->quintity,
-                ]);
-            }
-            else{
-                $material_stock = $this->material_stock
-                ->where('material_id', $request->material_id)
-                ->where('store_id', $request->from_store_id)
-                ->first();
-                $material_stock->quantity -= $request->quintity;
-                $material_stock->actual_quantity -= $request->quintity;
-                $material_stock->save();
-            }
 
-            if(empty($to_store)){
-                $this->material_stock
-                ->create([
-                    'category_id' => $request->category_material_id,
-                    'material_id' => $request->material_id,
-                    'store_id' => $request->to_store_id,
-                    'quantity' => $request->quintity,
-                    'unit_id' => $request->unit_id,
-                    "actual_quantity" => $request->quintity,
-                ]);
-            }
-            else{
-                $material_stock = $this->material_stock
-                ->where('material_id', $request->material_id)
-                ->where('store_id', $request->to_store_id)
-                ->first();
-                $material_stock->quantity += $request->quintity;
-                $material_stock->actual_quantity += $request->quintity;
-                $material_stock->save();
-            } 
+        if (!empty($stockErrors)) {
+            return response()->json(['errors' => $stockErrors], 422);
         }
+
+        // ── 3. Execute inside a DB transaction ───────────────────────────────
+        DB::transaction(function () use ($products, $fromStoreId, $toStoreId, $adminId) {
+
+            foreach ($products as $item) {
+                $quintity   = $item['quintity'];
+                $productId  = $item['product_id'];
+                $categoryId = $item['category_id'];
+                $unitId     = $item['unit_id'];
+
+                // 3a. Record the transfer
+                $this->purchases->create([
+                    'from_store_id' => $fromStoreId,
+                    'to_store_id'   => $toStoreId,
+                    'category_id'   => $categoryId,
+                    'product_id'    => $productId,
+                    'admin_id'      => $adminId,
+                    'quintity'      => $quintity,
+                    'unit_id'       => $unitId,
+                    'status'        => 'approve',
+                ]);
+
+                // 3b. Deduct from source store
+                $fromStock = $this->stock
+                    ->where('store_id',   $fromStoreId)
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if ($fromStock) {
+                    $fromStock->quantity        -= $quintity;
+                    $fromStock->actual_quantity -= $quintity;
+                    $fromStock->save();
+                } else {
+                    $this->stock->create([
+                        'category_id'     => $categoryId,
+                        'product_id'      => $productId,
+                        'store_id'        => $fromStoreId,
+                        'quantity'        => -$quintity,
+                        'actual_quantity' => -$quintity,
+                        'unit_id'         => $unitId,
+                    ]);
+                }
+
+                // 3c. Add to destination store
+                $toStock = $this->stock
+                    ->where('store_id',   $toStoreId)
+                    ->where('product_id', $productId)
+                    ->first();
+
+                if ($toStock) {
+                    $toStock->quantity        += $quintity;
+                    $toStock->actual_quantity += $quintity;
+                    $toStock->save();
+                } else {
+                    $this->stock->create([
+                        'category_id'     => $categoryId,
+                        'product_id'      => $productId,
+                        'store_id'        => $toStoreId,
+                        'quantity'        => $quintity,
+                        'actual_quantity' => $quintity,
+                        'unit_id'         => $unitId,
+                    ]);
+                }
+            }
+        });
 
         return response()->json([
-            'success' => 'You update status success'
+            'success' => 'Transfer completed successfully',
+            'count'   => count($products),
         ]);
     }
 }
