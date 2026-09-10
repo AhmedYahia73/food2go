@@ -226,8 +226,10 @@ class InventoryProductController extends Controller
             ->orderByDesc("created_at")
             ->get();
             $purchase_arr = [];
-            $total_quantity = $stock_quintity - $item['quantity'];
-            $item_quantity = $stock_quintity - $item['quantity'];
+            // $total_quantity = $stock_quintity - $item['quantity'];
+            // $item_quantity = $stock_quintity - $item['quantity'];
+            $total_quantity = $item['quantity'] - $stock_quintity;
+            $item_quantity = $item['quantity'] - $stock_quintity;
        
             //_________________________________________
             $cost_item = 0;
@@ -247,7 +249,8 @@ class InventoryProductController extends Controller
             where("inventory_id", $id)
             ->where("product_id", $item['id'])
             ->update([
-                'quantity' => $item['quantity'],
+                //'quantity' => $item['quantity'],
+                'actual_quantity' => $item['quantity'],
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
@@ -262,7 +265,6 @@ class InventoryProductController extends Controller
                 "actual_quantity" => $one_item?->actual_quantity ?? null,
                 "inability" => $one_item?->inability ?? null,
                 "cost" => $one_item?->cost ?? null,
-                "date" => $one_item?->created_at ?? null,
                 "date" => $one_item?->created_at ?? null,
                 "category" => $one_item?->category?->name,
                 "product" => $one_item?->product?->name,

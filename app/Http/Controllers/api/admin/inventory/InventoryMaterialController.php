@@ -213,8 +213,10 @@ class InventoryMaterialController extends Controller
             ->where('material_id', $item['id'])
             ->orderByDesc("created_at")
             ->get(); 
-            $total_quantity = $stock_quintity - $item['quantity'];
-            $item_quantity = $stock_quintity - $item['quantity'];
+            // $total_quantity = $stock_quintity - $item['quantity'];
+            // $item_quantity = $stock_quintity - $item['quantity'];
+            $total_quantity = $item['quantity'] - $stock_quintity ;
+            $item_quantity = $item['quantity'] - $stock_quintity;
  
             //_________________________________________
             $cost_item = 0;
@@ -230,12 +232,13 @@ class InventoryMaterialController extends Controller
                 $stock_quintity -= $element->quintity;
             } 
             $cost += $cost_item * $item['quantity'] / ($count_item == 0 ? 1 : $count_item);
-
+ 
             InventoryMaterialHistory::
             where("inventory_id", $id)
             ->where("material_id", $item['id'])
             ->update([
-                'quantity' => $item['quantity'],
+                //'quantity' => $item['quantity'],
+                'actual_quantity' => $item['quantity'],
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
