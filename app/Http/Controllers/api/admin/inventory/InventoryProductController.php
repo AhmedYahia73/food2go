@@ -294,7 +294,7 @@ class InventoryProductController extends Controller
     public function inability_list(Request $request, $id){
         $inability = InventoryProductHistory::
         where("inventory_id", $id)
-        ->whereColumn('actual_quantity', '>', 'quantity')
+        //->whereColumn('actual_quantity', '>', 'quantity')
         ->with("category", "product")
         ->get()
         ->map(function($item){
