@@ -257,7 +257,6 @@ class InventoryProductController extends Controller
             $one_item = InventoryProductHistory::
             where("inventory_id", $id)
             ->where("product_id", $item['id'])
-            ->orderByDesc("created_at")
             ->first();
             $arr_items[] = [
                 "id" => $one_item?->id ?? null,
