@@ -64,79 +64,111 @@ class PurchaseProductController extends Controller
     }
 
     public function product_stock(Request $request){
+
         $validator = Validator::make($request->all(), [
             'store_id' => ['required', 'exists:purchase_stores,id'], 
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
+
+        if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
-            ],400);
+            ], 400);
         }
 
-        $purchase = Purchase::
-        where("store_id", $request->store_id)
-        ->orderByDesc("created_at")
-        ->get();
-        $stocks = $this->stock
-        ->where("store_id", $request->store_id)
-        ->get();
-        $product = $this->product 
-        ->with("stock")
-        ->get()
-        ->map(function($item) use($stocks, $purchase, $request){
-            $stock = $item?->stock_items
-            ?->where("store_id", $request->store_id)
-            ?->first()?->quantity ?? 0;
-            $quantity_stock = $stock;
-            $purchase = $purchase
-            ->where("product_id", $item->id)
-            ->values();
-            $cost = $item->start_stock
-            ->where("store_id", $request->store_id)
-            ->first()?->cost ?? 0;
-            $count = $item->start_stock
-            ->where("store_id", $request->store_id)
-            ->first()?->start_stock ?? 0;
-            $stock += $count;
-            $last_cost = $cost; 
-            foreach ($purchase as $element) {
-                if($quantity_stock > 0){
-                    $count++;
-                    $cost += $element->total_coast / $element->quintity;
+        $storeId = $request->store_id;
+
+        // 1. جلب المخزون لكل المنتجات في هذا المتجر
+        $storeStocks = PurchaseStock::where("store_id", $storeId)
+            ->pluck('quantity', 'product_id');
+
+        // 2. جلب كل المشتريات للمتجر مرتبة من الأحدث للأقدم مرة واحدة
+        // استخدمنا select لجلب الحقول المطلوبة فقط لتوفير الميموري (الرامات)
+        $allPurchases = Purchase::where("store_id", $storeId)
+            ->select('product_id', 'quintity', 'total_cost') // تأكد أن اسم الحقل في الداتا بيز quintity كما كتبته أنت
+            ->orderByDesc("created_at")
+            ->get()
+            ->groupBy('product_id'); // تجميع المشتريات لكل منتج معاً
+
+        // 3. جلب المنتجات مع الأقسام وحساب التكلفة
+        $products = $this->product->with('category')->get()->map(function($item) use($storeStocks, $allPurchases) {
+            
+            // المخزون الحالي للمنتج
+            $stock = $storeStocks[$item->id] ?? 0; 
+            
+            // مشتريات هذا المنتج (مرتبة من الأحدث للأقدم بفضل استعلام الداتا بيز)
+            $productPurchases = $allPurchases[$item->id] ?? collect();
+            
+            // حساب آخر تكلفة شراء
+            $lastPurchase = $productPurchases->first();
+            $lastCost = ($lastPurchase && $lastPurchase->quintity > 0) 
+                ? ($lastPurchase->total_cost / $lastPurchase->quintity) 
+                : 0;
+
+            // ==========================================
+            // اللوجيك الجديد لحساب متوسط تكلفة المخزون المتبقي
+            // ==========================================
+            $cost = 0;
+            
+            if ($stock > 0 && $productPurchases->isNotEmpty()) {
+                $remainingStockToValuate = $stock; // الكمية التي نحتاج حساب تكلفتها
+                $totalValueOfStock = 0; // إجمالي قيمة المخزون
+
+                foreach ($productPurchases as $purchase) {
+                    // إذا خلصنا حساب كل المخزون، نوقف اللوب
+                    if ($remainingStockToValuate <= 0) break; 
+                    
+                    // لتجنب القسمة على صفر إذا كانت كمية الشراء صفر بالخطأ
+                    if ($purchase->quintity <= 0) continue; 
+
+                    // سعر القطعة في هذه الفاتورة
+                    $unitPrice = $purchase->total_cost / $purchase->quintity;
+
+                    // الكمية التي سنأخذها من هذه الفاتورة (إما كمية الفاتورة كلها، أو ما تبقى من المخزون)
+                    $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchase->quintity);
+
+                    // إضافة قيمة هذه الكمية لإجمالي قيمة المخزون
+                    $totalValueOfStock += ($qtyToTakeFromPurchase * $unitPrice);
+
+                    // خصم الكمية التي حسبناها من إجمالي المخزون المراد حساب تكلفته
+                    $remainingStockToValuate -= $qtyToTakeFromPurchase;
                 }
-                else{
-                    break;
+
+                // الكمية الفعلية التي تم تسعيرها (في حال كان المخزون الفعلي أكبر من كل كميات الشراء المسجلة)
+                $actualValuatedQty = $stock - $remainingStockToValuate;
+
+                // متوسط التكلفة للقطعة الواحدة من المخزون المتبقي
+                if ($actualValuatedQty > 0) {
+                    $cost = $totalValueOfStock / $actualValuatedQty;
                 }
-                $quantity_stock -= $element->quintity;
             }
-            $cost /= ($count == 0 ? 1 : $count);
-            $last_cost = isset($purchase[0]) ? $purchase[0]->total_coast / $purchase[0]->quintity : 0;
+
             return [
                 'id' => $item->id,
                 'name' => $item->name,
                 'description' => $item->description,
                 'status' => $item->status,
                 'category_id' => $item->category_id,
-                'category' => $item?->category?->name,
+                'category' => $item->category?->name,
                 'min_stock' => $item->min_stock,
-                "stock" => $stock,
-                "cost" => $cost,
-                "last_cost" => $last_cost,
-                "total_cost" => $cost * $stock,
-                "total_last_cost" => $last_cost * $stock,
-                
+                'stock' => $stock,
+                'cost' => round($cost, 2), // متوسط التكلفة بناءً على المتبقي فقط
+                'last_cost' => round($lastCost, 2), // سعر آخر قطعة تم شراؤها
+                'total_cost' => round($cost * $stock, 2),
+                'total_last_cost' => round($lastCost * $stock, 2),
             ];
         }); 
+
+        // 4. جلب الأقسام
         $categories = $this->categories
-        ->select('id', 'name', 'category_id')
-        ->where('status', 1)
-        ->get();
+            ->select('id', 'name', 'category_id')
+            ->where('status', 1)
+            ->get();
 
         return response()->json([
-            'products' => $product,
+            'products' => $products,
             'categories' => $categories,
-            "total_cost" => collect($product)->sum("total_cost"),
-            "total_last_cost" => collect($product)->sum("total_last_cost"),
+            'total_cost' => round($products->sum('total_cost'), 2),
+            'total_last_cost' => round($products->sum('total_last_cost'), 2),
         ]);
     }
     
