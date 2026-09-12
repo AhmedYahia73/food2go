@@ -183,6 +183,7 @@ class InventoryProductController extends Controller
                 "product" => $item?->product?->name,
                 "product_id" => $item?->product?->id,
                 "quantity" => $item?->quantity, 
+                "actual_quantity" => $item?->actual_quantity, 
                 "inability" => $item?->inability,
                 "cost" => $item?->cost,
             ];
@@ -197,7 +198,8 @@ class InventoryProductController extends Controller
         $validator = Validator::make($request->all(), [
             'products' => 'required|array',
             'products.*.id' => 'required|exists:purchase_products,id',
-            'products.*.quantity' => 'required|numeric', 
+            'products.*.actual_quantity' => 'nullable|numeric', 
+            'products.*.quantity' => 'nullable|numeric', 
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
             return response()->json([
@@ -226,8 +228,9 @@ class InventoryProductController extends Controller
             ->orderByDesc("created_at")
             ->get();
             $purchase_arr = [];
-            $total_quantity = $stock_quintity - $item['quantity'];
-            $item_quantity = $stock_quintity - $item['quantity'];
+            $qty = isset($item['actual_quantity']) ? $item['actual_quantity'] : ($item['quantity'] ?? 0);
+            $total_quantity = $qty - $stock_quintity;
+            $item_quantity = $qty - $stock_quintity;
        
             //_________________________________________
             $cost_item = 0;
@@ -242,12 +245,13 @@ class InventoryProductController extends Controller
                 }
                 $stock_quintity -= $element->quintity;
             } 
-            $cost += $cost_item * $item['quantity'] / ($count_item == 0 ? 1 : $count_item);
+            $cost += $cost_item * $qty / ($count_item == 0 ? 1 : $count_item);
             InventoryProductHistory::
             where("inventory_id", $id)
             ->where("product_id", $item['id'])
             ->update([
-                'quantity' => $item['quantity'],
+                //'quantity' => $item['quantity'],
+                'actual_quantity' => $qty,
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
@@ -263,13 +267,12 @@ class InventoryProductController extends Controller
                 "inability" => $one_item?->inability ?? null,
                 "cost" => $one_item?->cost ?? null,
                 "date" => $one_item?->created_at ?? null,
-                "date" => $one_item?->created_at ?? null,
                 "category" => $one_item?->category?->name,
                 "product" => $one_item?->product?->name,
             ];
             if(!empty($stock)){
-                $stock->quantity = $item['quantity'];
-                $stock->actual_quantity = $item['quantity'];
+                $stock->quantity = $qty;
+                $stock->actual_quantity = $qty;
                 $stock->save();
             }
             else{
@@ -278,8 +281,8 @@ class InventoryProductController extends Controller
                     "category_id" => $product_item->category_id,
                     "product_id" => $item['id'], 
                     "store_id" => $InventoryList?->store_id,
-                    "quantity" => $item['quantity'],
-                    "actual_quantity" => $item['quantity'],
+                    "quantity" => $qty,
+                    "actual_quantity" => $qty,
                 ]);
             }
         }
@@ -294,7 +297,7 @@ class InventoryProductController extends Controller
     public function inability_list(Request $request, $id){
         $inability = InventoryProductHistory::
         where("inventory_id", $id)
-        ->whereColumn('actual_quantity', '>', 'quantity')
+        //->whereColumn('actual_quantity', '>', 'quantity')
         ->with("category", "product")
         ->get()
         ->map(function($item){
