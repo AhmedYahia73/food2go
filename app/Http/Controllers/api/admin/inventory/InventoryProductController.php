@@ -14,7 +14,6 @@ use App\Models\InventoryProductHistory;
 use App\Models\Purchase;
 use App\Models\InventoryList;
 use App\Models\PurchaseWasted;
-use App\Models\MaterialStock;
 
 class InventoryProductController extends Controller
 {
@@ -45,52 +44,9 @@ class InventoryProductController extends Controller
     public function update_inventory_status(Request $request, $id){
         $inventory_list = $this->inventory_list
         ->where("id", $id)
-        ->firstOrFail();
-        $inventory_list->update([
+        ->update([
             "status" => "final"
         ]);
-        $products = $inventory_list->products;
-        $materials = $inventory_list->materials;
-        foreach ($products as $item) {
-            $purchase = PurchaseStock::
-            where("store_id", $inventory_list->store_id)
-            ->where("product_id", $item->product_id)
-            ->first();
-            if($purchase){
-                $purchase->quantity = $item->actual_quantity;
-                $purchase->actual_quantity = $item->actual_quantity;
-                $purchase->save();
-            }
-            else{
-                PurchaseStock::create([
-                    'category_id' => $item->category_id,
-                    'product_id' => $item->product_id,
-                    'store_id' => $inventory_list->store_id,
-                    'quantity' => $item->actual_quantity,
-                    'actual_quantity' => $item->actual_quantity, 
-                ]);
-            }
-        }
-        foreach ($materials as $item) {
-            $purchase = MaterialStock::
-            where("store_id", $inventory_list->store_id)
-            ->where("material_id", $item->material_id)
-            ->first(); 
-            if($purchase){
-                $purchase->quantity = $item->actual_quantity;
-                $purchase->actual_quantity = $item->actual_quantity;
-                $purchase->save();
-            }
-            else{
-                MaterialStock::create([
-                    'category_id' => $item->category_id,
-                    'material_id' => $item->material_id,
-                    'store_id' => $inventory_list->store_id,
-                    'quantity' => $item->actual_quantity,
-                    'actual_quantity' => $item->actual_quantity, 
-                ]);
-            }
-        }
 
         return response()->json([
             "success" => "final", 
