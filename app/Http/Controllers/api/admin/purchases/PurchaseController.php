@@ -355,6 +355,10 @@ class PurchaseController extends Controller
             'financial' => ['nullable', 'array'],
             'financial.*.id' => ['required_with:financial', 'exists:finantiol_acountings,id'],
             'financial.*.amount' => ['required_with:financial', 'numeric', 'min:0.01'],
+
+            'due_invoices' => ['nullable', 'array'],
+            'due_invoices.*.due' => ['required_with:due_invoices', 'numeric', 'min:0.01'],
+            'due_invoices.*.date' => ['required_with:due_invoices', 'date'],
         ]);
 
         if ($validator->fails()) {
@@ -490,13 +494,13 @@ class PurchaseController extends Controller
             }
         }
 
-        // Create initial invoice and financials if payment > 0
+        // 1. Create initial paid invoice if payment > 0
         if ($totalPayment > 0) {
             $invoice = $this->purchase_invoices->create([
                 'purchase_id' => $purchase->id,
                 'payment' => $totalPayment,
                 'due' => 0,
-                'date' => now()->toDateString(),
+                'date' => $request->date ?? now()->toDateString(),
             ]);
 
             if (!empty($request->financial)) {
@@ -516,6 +520,30 @@ class PurchaseController extends Controller
                         }
                     }
                 }
+            }
+        }
+
+        // 2. Create scheduled due invoices / installments if due > 0
+        if ($due > 0) {
+            if (!empty($request->due_invoices) && is_array($request->due_invoices)) {
+                foreach ($request->due_invoices as $inv) {
+                    $invDue = (float) ($inv['due'] ?? 0);
+                    if ($invDue > 0) {
+                        $this->purchase_invoices->create([
+                            'purchase_id' => $purchase->id,
+                            'payment' => 0,
+                            'due' => $invDue,
+                            'date' => $inv['date'] ?? $request->date,
+                        ]);
+                    }
+                }
+            } else {
+                $this->purchase_invoices->create([
+                    'purchase_id' => $purchase->id,
+                    'payment' => 0,
+                    'due' => $due,
+                    'date' => $request->date ?? now()->toDateString(),
+                ]);
             }
         }
 
@@ -589,6 +617,10 @@ class PurchaseController extends Controller
             'financial' => ['nullable', 'array'],
             'financial.*.id' => ['required_with:financial', 'exists:finantiol_acountings,id'],
             'financial.*.amount' => ['required_with:financial', 'numeric', 'min:0.01'],
+
+            'due_invoices' => ['nullable', 'array'],
+            'due_invoices.*.due' => ['required_with:due_invoices', 'numeric', 'min:0.01'],
+            'due_invoices.*.date' => ['required_with:due_invoices', 'date'],
         ]);
 
         if ($validator->fails()) {
@@ -757,6 +789,30 @@ class PurchaseController extends Controller
             }
         }
 
+        // Create scheduled due invoices / installments if newDue > 0
+        if ($newDue > 0) {
+            if (!empty($request->due_invoices) && is_array($request->due_invoices)) {
+                foreach ($request->due_invoices as $inv) {
+                    $invDue = (float) ($inv['due'] ?? 0);
+                    if ($invDue > 0) {
+                        $this->purchase_invoices->create([
+                            'purchase_id' => $id,
+                            'payment' => 0,
+                            'due' => $invDue,
+                            'date' => $inv['date'] ?? $request->date,
+                        ]);
+                    }
+                }
+            } else {
+                $this->purchase_invoices->create([
+                    'purchase_id' => $id,
+                    'payment' => 0,
+                    'due' => $newDue,
+                    'date' => $request->date ?? now()->toDateString(),
+                ]);
+            }
+        }
+
         return response()->json([
             'success' => 'You update data success',
         ]);
@@ -766,15 +822,24 @@ class PurchaseController extends Controller
         $invoices = $this->purchase_invoices
             ->with('financials.financial:id,name')
             ->where('purchase_id', $id)
-            ->latest()
+            ->orderBy('date', 'asc')
+            ->orderBy('id', 'asc')
             ->get()
             ->map(function($invoice){
+                $due = (float) $invoice->due;
+                $payment = (float) $invoice->payment;
+                $today = now()->toDateString();
+                $status = ($due <= 0 && $payment > 0)
+                    ? 'paid'
+                    : (($invoice->date && $invoice->date < $today) ? 'overdue' : 'upcoming');
+
                 return [
                     'id' => $invoice->id,
                     'purchase_id' => $invoice->purchase_id,
-                    'payment' => (float) $invoice->payment,
-                    'due' => (float) $invoice->due,
+                    'payment' => $payment,
+                    'due' => $due,
                     'date' => $invoice->date,
+                    'status' => $status,
                     'created_at' => $invoice->created_at?->format('Y-m-d H:i'),
                     'financials' => $invoice->financials->map(function($f){
                         return [
@@ -799,6 +864,7 @@ class PurchaseController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
+            'invoice_id' => ['nullable', 'exists:purchase_invoices,id'],
             'payment' => ['required', 'numeric', 'min:0.01'],
             'due' => ['nullable', 'numeric', 'min:0'],
             'date' => ['required', 'date'],
@@ -814,14 +880,51 @@ class PurchaseController extends Controller
         }
 
         $payment = (float) $request->payment;
-        $invoiceDue = (float) ($request->due ?? 0);
+        $currentDue = (float) $purchase->due;
 
-        $invoice = $this->purchase_invoices->create([
-            'purchase_id' => $id,
-            'payment' => $payment,
-            'due' => $invoiceDue,
-            'date' => $request->date,
-        ]);
+        if ($payment > ($currentDue + 0.001)) {
+            return response()->json([
+                'errors' => ['payment' => ['Payment amount cannot exceed remaining due (' . $currentDue . ').']],
+            ], 400);
+        }
+
+        $newRemainingDue = max(0, $currentDue - $payment);
+
+        $targetInvoice = null;
+        if (!empty($request->invoice_id)) {
+            $targetInvoice = $this->purchase_invoices->where('purchase_id', $id)->where('id', $request->invoice_id)->first();
+        }
+
+        if ($targetInvoice) {
+            $targetInvoice->payment = (float) $targetInvoice->payment + $payment;
+            $targetInvoice->due = max(0, (float) $targetInvoice->due - $payment);
+            $targetInvoice->date = $request->date ?? $targetInvoice->date;
+            $targetInvoice->save();
+            $invoice = $targetInvoice;
+        } else {
+            $earliestUnpaid = $this->purchase_invoices
+                ->where('purchase_id', $id)
+                ->where('due', '>', 0)
+                ->orderBy('date', 'asc')
+                ->orderBy('id', 'asc')
+                ->first();
+
+            if ($earliestUnpaid) {
+                $earliestUnpaid->payment = (float) $earliestUnpaid->payment + $payment;
+                $earliestUnpaid->due = max(0, (float) $earliestUnpaid->due - $payment);
+                $earliestUnpaid->date = $request->date ?? $earliestUnpaid->date;
+                $earliestUnpaid->save();
+                $invoice = $earliestUnpaid;
+            } else {
+                $invoiceDue = $request->has('due') ? (float) $request->due : $newRemainingDue;
+                $invoice = $this->purchase_invoices->create([
+                    'purchase_id' => $id,
+                    'payment' => $payment,
+                    'due' => $invoiceDue,
+                    'date' => $request->date,
+                ]);
+            }
+        }
 
         foreach ($request->financial as $f) {
             $amount = (float) ($f['amount'] ?? 0);
@@ -851,7 +954,7 @@ class PurchaseController extends Controller
 
         // Update purchase total payment and due
         $purchase->payment = (float) $purchase->payment + $payment;
-        $purchase->due = max(0, (float) $purchase->total_coast - (float) $purchase->payment);
+        $purchase->due = $newRemainingDue;
         $purchase->save();
 
         return response()->json([
