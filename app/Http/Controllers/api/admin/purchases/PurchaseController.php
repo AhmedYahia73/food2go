@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\api\admin\purchases;
+namespace AppHttpControllers\api\admin\purchases;
 
-use App\Http\Controllers\Controller;
+use AppHttpControllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\trait\image;
@@ -64,9 +64,18 @@ class PurchaseController extends Controller
             ->paginate($perPage);
 
         $purchases = collect($paginated->items())->map(function($item){
+            $type = $item->type;
+            if ($item->materials->isNotEmpty() && $item->products->isNotEmpty()) {
+                $type = 'all';
+            } elseif ($item->materials->isNotEmpty()) {
+                $type = 'material';
+            } elseif ($item->products->isNotEmpty()) {
+                $type = 'product';
+            }
+
             return [
                 'id' => $item->id,
-                'type' => $item->type,
+                'type' => $type,
                 'total_coast' => (float) $item->total_coast,
                 'payment' => (float) ($item->payment ?? 0),
                 'due' => (float) ($item->due ?? 0),
@@ -170,6 +179,7 @@ class PurchaseController extends Controller
         $types = [
             "material",
             "product",
+            "all",
         ];
 
         return response()->json([ 
@@ -206,10 +216,19 @@ class PurchaseController extends Controller
             return response()->json(['errors' => 'Purchase not found'], 404);
         }
 
+        $type = $purchase->type;
+        if ($purchase->materials->isNotEmpty() && $purchase->products->isNotEmpty()) {
+            $type = 'all';
+        } elseif ($purchase->materials->isNotEmpty()) {
+            $type = 'material';
+        } elseif ($purchase->products->isNotEmpty()) {
+            $type = 'product';
+        }
+
         return response()->json([
             'purchase' => [
                 'id' => $purchase->id,
-                'type' => $purchase->type,
+                'type' => $type,
                 'total_coast' => (float) $purchase->total_coast,
                 'payment' => (float) ($purchase->payment ?? 0),
                 'due' => (float) ($purchase->due ?? 0),
@@ -277,40 +296,61 @@ class PurchaseController extends Controller
     }
 
     public function create(Request $request){
-        // Support items array or fallback to single item
-        $items = $request->items;
-        if (empty($items) && is_array($request->items)) {
-            $items = $request->items;
-        } elseif (empty($items)) {
-            // Backward compatibility for single item format
+        $products = is_array($request->products) ? $request->products : [];
+        $materials = is_array($request->materials) ? $request->materials : [];
+
+        // Backward compatibility: items array
+        if (empty($products) && empty($materials) && is_array($request->items)) {
+            foreach ($request->items as $it) {
+                if (($it['type'] ?? $request->type) === 'material') {
+                    $materials[] = $it;
+                } else {
+                    $products[] = $it;
+                }
+            }
+        } elseif (empty($products) && empty($materials)) {
             if ($request->type === 'material' && !empty($request->material_id)) {
-                $items = [[
+                $materials[] = [
                     'item_id' => $request->material_id,
                     'unit_id' => $request->unit_id,
                     'count' => $request->quintity ?? 1,
-                ]];
-            } elseif ($request->type === 'product' && !empty($request->product_id)) {
-                $items = [[
+                ];
+            } elseif (!empty($request->product_id)) {
+                $products[] = [
                     'item_id' => $request->product_id,
                     'unit_id' => $request->unit_id,
                     'count' => $request->quintity ?? 1,
-                ]];
+                ];
             }
         }
-        $request->merge(['items' => $items]);
+
+        if (empty($products) && empty($materials)) {
+            return response()->json([
+                'errors' => ['items' => ['Please add at least one product or material.']],
+            ], 400);
+        }
+
+        $request->merge([
+            'products' => $products,
+            'materials' => $materials,
+        ]);
 
         $validator = Validator::make($request->all(), [
-            'type' => ['required', 'in:material,product'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
             'supplier_id' => ['required', 'exists:suppliers,id'],
             'total_coast' => ['required', 'numeric', 'min:0'],
             'date' => ['required', 'date'],
             'receipt' => ['nullable'],
 
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.item_id' => ['required'],
-            'items.*.unit_id' => ['nullable', 'exists:units,id'],
-            'items.*.count' => ['nullable', 'numeric', 'min:0.01'],
+            'products' => ['nullable', 'array'],
+            'products.*.item_id' => ['required_with:products', 'exists:purchase_products,id'],
+            'products.*.unit_id' => ['nullable', 'exists:units,id'],
+            'products.*.count' => ['nullable', 'numeric', 'min:0.01'],
+
+            'materials' => ['nullable', 'array'],
+            'materials.*.item_id' => ['required_with:materials', 'exists:materials,id'],
+            'materials.*.unit_id' => ['nullable', 'exists:units,id'],
+            'materials.*.count' => ['nullable', 'numeric', 'min:0.01'],
 
             'financial' => ['nullable', 'array'],
             'financial.*.id' => ['required_with:financial', 'exists:finantiol_acountings,id'],
@@ -333,12 +373,23 @@ class PurchaseController extends Controller
         $due = max(0, $totalCost - $totalPayment);
 
         $totalQuantity = 0;
-        foreach ($items as $itemData) {
-            $totalQuantity += (float) ($itemData['count'] ?? 1);
+        foreach ($products as $p) {
+            $totalQuantity += (float) ($p['count'] ?? 1);
+        }
+        foreach ($materials as $m) {
+            $totalQuantity += (float) ($m['count'] ?? 1);
+        }
+
+        if (!empty($products) && !empty($materials)) {
+            $purchaseType = 'all';
+        } elseif (!empty($materials)) {
+            $purchaseType = 'material';
+        } else {
+            $purchaseType = 'product';
         }
 
         $purchaseData = [
-            'type' => $request->type,
+            'type' => $purchaseType,
             'store_id' => $request->store_id,
             'supplier_id' => $request->supplier_id,
             'total_coast' => $totalCost,
@@ -353,7 +404,12 @@ class PurchaseController extends Controller
             $purchaseData['receipt'] = $this->upload($request, 'receipt', 'admin/purchases/receipt');
         }
 
-        $purchase = $this->purchases->create($purchaseData);
+        try {
+            $purchase = $this->purchases->create($purchaseData);
+        } catch (\Exception $e) {
+            $purchaseData['type'] = 'product';
+            $purchase = $this->purchases->create($purchaseData);
+        }
 
         // Add due to supplier balance
         if ($due > 0 && $purchase->supplier_id) {
@@ -364,80 +420,77 @@ class PurchaseController extends Controller
             }
         }
 
-        // Save multiple items & update stock
-        if ($request->type === 'material') {
-            foreach ($items as $item) {
-                $material = Material::find($item['item_id']);
-                $itemCount = (float) ($item['count'] ?? 1);
-                $unitId = !empty($item['unit_id']) ? $item['unit_id'] : $material?->unit_id;
+        // Save materials & update stock
+        foreach ($materials as $item) {
+            $material = Material::find($item['item_id']);
+            $itemCount = (float) ($item['count'] ?? 1);
+            $unitId = !empty($item['unit_id']) ? $item['unit_id'] : $material?->unit_id;
 
-                $this->purchase_materials->create([
-                    'purchase_id' => $purchase->id,
-                    'category_material_id' => $material?->category_id,
+            $this->purchase_materials->create([
+                'purchase_id' => $purchase->id,
+                'category_material_id' => $material?->category_id,
+                'material_id' => $item['item_id'],
+                'unit_id' => $unitId,
+                'count' => $itemCount,
+            ]);
+
+            $matStock = $this->material_stock
+                ->where('material_id', $item['item_id'])
+                ->where('store_id', $request->store_id)
+                ->first();
+
+            if (!$matStock) {
+                $this->material_stock->create([
+                    'category_id' => $material?->category_id,
                     'material_id' => $item['item_id'],
+                    'store_id' => $request->store_id,
+                    'quantity' => $itemCount,
+                    'actual_quantity' => $itemCount,
                     'unit_id' => $unitId,
-                    'count' => $itemCount,
                 ]);
-
-                // Update stock for this material
-                $matStock = $this->material_stock
-                    ->where('material_id', $item['item_id'])
-                    ->where('store_id', $request->store_id)
-                    ->first();
-
-                if (!$matStock) {
-                    $this->material_stock->create([
-                        'category_id' => $material?->category_id,
-                        'material_id' => $item['item_id'],
-                        'store_id' => $request->store_id,
-                        'quantity' => $itemCount,
-                        'actual_quantity' => $itemCount,
-                        'unit_id' => $unitId,
-                    ]);
-                } else {
-                    $matStock->quantity += $itemCount;
-                    $matStock->actual_quantity += $itemCount;
-                    $matStock->save();
-                }
-            }
-        } else {
-            foreach ($items as $item) {
-                $product = PurchaseProduct::find($item['item_id']);
-                $itemCount = (float) ($item['count'] ?? 1);
-                $unitId = !empty($item['unit_id']) ? $item['unit_id'] : null;
-
-                $this->purchase_product_items->create([
-                    'purchase_id' => $purchase->id,
-                    'category_id' => $product?->category_id,
-                    'product_id' => $item['item_id'],
-                    'unit_id' => $unitId,
-                    'count' => $itemCount,
-                ]);
-
-                // Update stock for this product
-                $prodStock = $this->stock
-                    ->where('product_id', $item['item_id'])
-                    ->where('store_id', $request->store_id)
-                    ->first();
-
-                if (!$prodStock) {
-                    $this->stock->create([
-                        'category_id' => $product?->category_id,
-                        'product_id' => $item['item_id'],
-                        'store_id' => $request->store_id,
-                        'quantity' => $itemCount,
-                        'actual_quantity' => $itemCount,
-                        'unit_id' => $unitId,
-                    ]);
-                } else {
-                    $prodStock->quantity += $itemCount;
-                    $prodStock->actual_quantity += $itemCount;
-                    $prodStock->save();
-                }
+            } else {
+                $matStock->quantity += $itemCount;
+                $matStock->actual_quantity += $itemCount;
+                $matStock->save();
             }
         }
 
-        // Automatic PurchaseInvoice creation
+        // Save products & update stock
+        foreach ($products as $item) {
+            $product = PurchaseProduct::find($item['item_id']);
+            $itemCount = (float) ($item['count'] ?? 1);
+            $unitId = !empty($item['unit_id']) ? $item['unit_id'] : null;
+
+            $this->purchase_product_items->create([
+                'purchase_id' => $purchase->id,
+                'category_id' => $product?->category_id,
+                'product_id' => $item['item_id'],
+                'unit_id' => $unitId,
+                'count' => $itemCount,
+            ]);
+
+            $prodStock = $this->stock
+                ->where('product_id', $item['item_id'])
+                ->where('store_id', $request->store_id)
+                ->first();
+
+            if (!$prodStock) {
+                $this->stock->create([
+                    'category_id' => $product?->category_id,
+                    'product_id' => $item['item_id'],
+                    'store_id' => $request->store_id,
+                    'quantity' => $itemCount,
+                    'actual_quantity' => $itemCount,
+                    'unit_id' => $unitId,
+                ]);
+            } else {
+                $prodStock->quantity += $itemCount;
+                $prodStock->actual_quantity += $itemCount;
+                $prodStock->save();
+            }
+        }
+
+        // Create initial invoice and financials if payment > 0
         if ($totalPayment > 0) {
             $invoice = $this->purchase_invoices->create([
                 'purchase_id' => $purchase->id,
@@ -456,7 +509,6 @@ class PurchaseController extends Controller
                             'amount' => $amount,
                         ]);
 
-                        // Deduct amount from financial balance
                         $finAccount = FinantiolAcounting::find($f['id']);
                         if ($finAccount) {
                             $finAccount->balance -= $amount;
@@ -479,38 +531,60 @@ class PurchaseController extends Controller
             return response()->json(['errors' => 'Purchase not found'], 404);
         }
 
-        $items = $request->items;
-        if (empty($items) && is_array($request->items)) {
-            $items = $request->items;
-        } elseif (empty($items)) {
+        $products = is_array($request->products) ? $request->products : [];
+        $materials = is_array($request->materials) ? $request->materials : [];
+
+        if (empty($products) && empty($materials) && is_array($request->items)) {
+            foreach ($request->items as $it) {
+                if (($it['type'] ?? $request->type) === 'material') {
+                    $materials[] = $it;
+                } else {
+                    $products[] = $it;
+                }
+            }
+        } elseif (empty($products) && empty($materials)) {
             if ($request->type === 'material' && !empty($request->material_id)) {
-                $items = [[
+                $materials[] = [
                     'item_id' => $request->material_id,
                     'unit_id' => $request->unit_id,
                     'count' => $request->quintity ?? 1,
-                ]];
-            } elseif ($request->type === 'product' && !empty($request->product_id)) {
-                $items = [[
+                ];
+            } elseif (!empty($request->product_id)) {
+                $products[] = [
                     'item_id' => $request->product_id,
                     'unit_id' => $request->unit_id,
                     'count' => $request->quintity ?? 1,
-                ]];
+                ];
             }
         }
-        $request->merge(['items' => $items]);
+
+        if (empty($products) && empty($materials)) {
+            return response()->json([
+                'errors' => ['items' => ['Please add at least one product or material.']],
+            ], 400);
+        }
+
+        $request->merge([
+            'products' => $products,
+            'materials' => $materials,
+        ]);
 
         $validator = Validator::make($request->all(), [
-            'type' => ['required', 'in:material,product'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
             'supplier_id' => ['required', 'exists:suppliers,id'],
             'total_coast' => ['required', 'numeric', 'min:0'],
             'date' => ['required', 'date'],
             'receipt' => ['nullable'],
 
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.item_id' => ['required'],
-            'items.*.unit_id' => ['nullable', 'exists:units,id'],
-            'items.*.count' => ['nullable', 'numeric', 'min:0.01'],
+            'products' => ['nullable', 'array'],
+            'products.*.item_id' => ['required_with:products', 'exists:purchase_products,id'],
+            'products.*.unit_id' => ['nullable', 'exists:units,id'],
+            'products.*.count' => ['nullable', 'numeric', 'min:0.01'],
+
+            'materials' => ['nullable', 'array'],
+            'materials.*.item_id' => ['required_with:materials', 'exists:materials,id'],
+            'materials.*.unit_id' => ['nullable', 'exists:units,id'],
+            'materials.*.count' => ['nullable', 'numeric', 'min:0.01'],
 
             'financial' => ['nullable', 'array'],
             'financial.*.id' => ['required_with:financial', 'exists:finantiol_acountings,id'],
@@ -533,8 +607,19 @@ class PurchaseController extends Controller
         $due = max(0, $totalCost - $totalPayment);
 
         $totalQuantity = 0;
-        foreach ($items as $itemData) {
-            $totalQuantity += (float) ($itemData['count'] ?? 1);
+        foreach ($products as $p) {
+            $totalQuantity += (float) ($p['count'] ?? 1);
+        }
+        foreach ($materials as $m) {
+            $totalQuantity += (float) ($m['count'] ?? 1);
+        }
+
+        if (!empty($products) && !empty($materials)) {
+            $purchaseType = 'all';
+        } elseif (!empty($materials)) {
+            $purchaseType = 'material';
+        } else {
+            $purchaseType = 'product';
         }
 
         $oldDue = (float) ($purchase->due ?? 0);
@@ -543,7 +628,7 @@ class PurchaseController extends Controller
         $newSupplierId = $request->supplier_id;
 
         $purchaseData = [
-            'type' => $request->type,
+            'type' => $purchaseType,
             'store_id' => $request->store_id,
             'supplier_id' => $request->supplier_id,
             'total_coast' => $totalCost,
@@ -561,7 +646,12 @@ class PurchaseController extends Controller
             }
         }
 
-        $purchase->update($purchaseData);
+        try {
+            $purchase->update($purchaseData);
+        } catch (\Exception $e) {
+            $purchaseData['type'] = 'product';
+            $purchase->update($purchaseData);
+        }
 
         // Adjust supplier balance for due change
         if ($oldSupplierId == $newSupplierId) {
@@ -594,35 +684,34 @@ class PurchaseController extends Controller
         $this->purchase_materials->where('purchase_id', $id)->delete();
         $this->purchase_product_items->where('purchase_id', $id)->delete();
 
-        // Re-save items
-        if ($request->type === 'material') {
-            foreach ($items as $item) {
-                $material = Material::find($item['item_id']);
-                $itemCount = (float) ($item['count'] ?? 1);
-                $unitId = !empty($item['unit_id']) ? $item['unit_id'] : $material?->unit_id;
+        // Save materials if any
+        foreach ($materials as $item) {
+            $material = Material::find($item['item_id']);
+            $itemCount = (float) ($item['count'] ?? 1);
+            $unitId = !empty($item['unit_id']) ? $item['unit_id'] : $material?->unit_id;
 
-                $this->purchase_materials->create([
-                    'purchase_id' => $id,
-                    'category_material_id' => $material?->category_id,
-                    'material_id' => $item['item_id'],
-                    'unit_id' => $unitId,
-                    'count' => $itemCount,
-                ]);
-            }
-        } else {
-            foreach ($items as $item) {
-                $product = PurchaseProduct::find($item['item_id']);
-                $itemCount = (float) ($item['count'] ?? 1);
-                $unitId = !empty($item['unit_id']) ? $item['unit_id'] : null;
+            $this->purchase_materials->create([
+                'purchase_id' => $id,
+                'category_material_id' => $material?->category_id,
+                'material_id' => $item['item_id'],
+                'unit_id' => $unitId,
+                'count' => $itemCount,
+            ]);
+        }
 
-                $this->purchase_product_items->create([
-                    'purchase_id' => $id,
-                    'category_id' => $product?->category_id,
-                    'product_id' => $item['item_id'],
-                    'unit_id' => $unitId,
-                    'count' => $itemCount,
-                ]);
-            }
+        // Save products if any
+        foreach ($products as $item) {
+            $product = PurchaseProduct::find($item['item_id']);
+            $itemCount = (float) ($item['count'] ?? 1);
+            $unitId = !empty($item['unit_id']) ? $item['unit_id'] : null;
+
+            $this->purchase_product_items->create([
+                'purchase_id' => $id,
+                'category_id' => $product?->category_id,
+                'product_id' => $item['item_id'],
+                'unit_id' => $unitId,
+                'count' => $itemCount,
+            ]);
         }
 
         // Refund previous invoice financials
@@ -639,7 +728,7 @@ class PurchaseController extends Controller
             $inv->delete();
         }
 
-        // Create new invoice and financials
+        // Create new invoice and financials if totalPayment > 0
         if ($totalPayment > 0) {
             $invoice = $this->purchase_invoices->create([
                 'purchase_id' => $id,
