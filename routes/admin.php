@@ -149,6 +149,7 @@ use App\Http\Controllers\api\admin\report\FilterController;
 use App\Http\Controllers\api\admin\settings\TransferFinancialController;
 use App\Http\Controllers\api\admin\preparation_man\PreparationManController;
 use App\Http\Controllers\api\admin\group_price\DueGroupController;
+use App\Http\Controllers\api\admin\supplier\SupplierController;
 
 use App\Http\Controllers\api\admin\delivery_balance\DeliveryBalanceController;
 use App\Http\Controllers\api\admin\customer\RestoreCustomerController;
@@ -328,6 +329,15 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/update/{id}', 'update');
         Route::delete('/delete/{id}', 'destroy');
         Route::get('/{id}', 'index'); 
+    });
+
+    Route::controller(SupplierController::class)
+    ->prefix('supplier')->group(function(){
+        Route::get('/', 'view');
+        Route::get('/item/{id}', 'supplier'); 
+        Route::post('/add', 'create');
+        Route::post('/update/{id}', 'modify');
+        Route::delete('/delete/{id}', 'delete');
     });
 
     Route::controller(CashierGapController::class)

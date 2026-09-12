@@ -14,15 +14,17 @@ class Purchase extends Model
         'category_id',
         'category_material_id',
         'material_id',
-        "type",
         'product_id',
+        'unit_id',
+        "type",
         'admin_id', 
         'store_id',
         'total_coast',
+        'payment',
+        'due',
         'quintity',
         'receipt',
         'date',
-        'unit_id',
     ];
     protected $appends = ['receipt_link'];
 
