@@ -167,13 +167,13 @@ class MaterialController extends Controller
         $categories = $this->categories
             ->select('id', 'name', 'category_id')
             ->where('status', 1)
-            ->get();
+            ->get(); 
 
         return response()->json([
-            'products' => $products,
+            'materials' => $products,
             'categories' => $categories,
-            'total_cost' => round($products->sum('total_cost'), 2),
-            'total_last_cost' => round($products->sum('total_last_cost'), 2),
+            "total_cost" => collect($products)->sum("total_cost"),
+            "total_last_cost" => collect($products)->sum("total_last_cost"),
         ]);
     }
     
