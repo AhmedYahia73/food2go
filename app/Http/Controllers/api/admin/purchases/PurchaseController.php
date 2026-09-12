@@ -355,6 +355,15 @@ class PurchaseController extends Controller
 
         $purchase = $this->purchases->create($purchaseData);
 
+        // Add due to supplier balance
+        if ($due > 0 && $purchase->supplier_id) {
+            $supplier = $this->suppliers->find($purchase->supplier_id);
+            if ($supplier) {
+                $supplier->balance = (float) ($supplier->balance ?? 0) + $due;
+                $supplier->save();
+            }
+        }
+
         // Save multiple items & update stock
         if ($request->type === 'material') {
             foreach ($items as $item) {
@@ -528,6 +537,11 @@ class PurchaseController extends Controller
             $totalQuantity += (float) ($itemData['count'] ?? 1);
         }
 
+        $oldDue = (float) ($purchase->due ?? 0);
+        $oldSupplierId = $purchase->supplier_id;
+        $newDue = $due;
+        $newSupplierId = $request->supplier_id;
+
         $purchaseData = [
             'type' => $request->type,
             'store_id' => $request->store_id,
@@ -548,6 +562,33 @@ class PurchaseController extends Controller
         }
 
         $purchase->update($purchaseData);
+
+        // Adjust supplier balance for due change
+        if ($oldSupplierId == $newSupplierId) {
+            $diff = $newDue - $oldDue;
+            if ($diff != 0 && $newSupplierId) {
+                $supplier = $this->suppliers->find($newSupplierId);
+                if ($supplier) {
+                    $supplier->balance = (float) ($supplier->balance ?? 0) + $diff;
+                    $supplier->save();
+                }
+            }
+        } else {
+            if ($oldDue > 0 && $oldSupplierId) {
+                $oldSupplier = $this->suppliers->find($oldSupplierId);
+                if ($oldSupplier) {
+                    $oldSupplier->balance = (float) ($oldSupplier->balance ?? 0) - $oldDue;
+                    $oldSupplier->save();
+                }
+            }
+            if ($newDue > 0 && $newSupplierId) {
+                $newSupplier = $this->suppliers->find($newSupplierId);
+                if ($newSupplier) {
+                    $newSupplier->balance = (float) ($newSupplier->balance ?? 0) + $newDue;
+                    $newSupplier->save();
+                }
+            }
+        }
 
         // Remove old items
         $this->purchase_materials->where('purchase_id', $id)->delete();
@@ -710,6 +751,15 @@ class PurchaseController extends Controller
             }
         }
 
+        // Deduct payment from supplier balance (settling the debt)
+        if ($payment > 0 && $purchase->supplier_id) {
+            $supplier = $this->suppliers->find($purchase->supplier_id);
+            if ($supplier) {
+                $supplier->balance = (float) ($supplier->balance ?? 0) - $payment;
+                $supplier->save();
+            }
+        }
+
         // Update purchase total payment and due
         $purchase->payment = (float) $purchase->payment + $payment;
         $purchase->due = max(0, (float) $purchase->total_coast - (float) $purchase->payment);
@@ -718,6 +768,79 @@ class PurchaseController extends Controller
         return response()->json([
             'success' => 'Invoice payment added successfully',
             'invoice' => $invoice,
+        ]);
+    }
+
+    public function delete(Request $request, $id){
+        $purchase = $this->purchases->where('id', $id)->first();
+        if (!$purchase) {
+            return response()->json(['errors' => 'Purchase not found'], 404);
+        }
+
+        // 1. Deduct remaining unpaid due from supplier balance
+        if ($purchase->due > 0 && $purchase->supplier_id) {
+            $supplier = $this->suppliers->find($purchase->supplier_id);
+            if ($supplier) {
+                $supplier->balance = (float) ($supplier->balance ?? 0) - (float) $purchase->due;
+                $supplier->save();
+            }
+        }
+
+        // 2. Refund financial accounts from invoice payments
+        $invoices = $this->purchase_invoices->where('purchase_id', $id)->with('financials')->get();
+        foreach ($invoices as $inv) {
+            foreach ($inv->financials as $fin) {
+                $account = FinantiolAcounting::find($fin->financial_id);
+                if ($account) {
+                    $account->balance += $fin->amount;
+                    $account->save();
+                }
+            }
+            $inv->financials()->delete();
+            $inv->delete();
+        }
+
+        // 3. Revert stock
+        if ($purchase->type === 'material') {
+            $materials = $this->purchase_materials->where('purchase_id', $id)->get();
+            foreach ($materials as $m) {
+                $matStock = $this->material_stock
+                    ->where('material_id', $m->material_id)
+                    ->where('store_id', $purchase->store_id)
+                    ->first();
+                if ($matStock) {
+                    $matStock->quantity = max(0, $matStock->quantity - $m->count);
+                    $matStock->actual_quantity = max(0, $matStock->actual_quantity - $m->count);
+                    $matStock->save();
+                }
+            }
+            $this->purchase_materials->where('purchase_id', $id)->delete();
+        } else {
+            $products = $this->purchase_product_items->where('purchase_id', $id)->get();
+            foreach ($products as $p) {
+                $prodStock = $this->stock
+                    ->where('product_id', $p->product_id)
+                    ->where('store_id', $purchase->store_id)
+                    ->first();
+                if ($prodStock) {
+                    $prodStock->quantity = max(0, $prodStock->quantity - $p->count);
+                    $prodStock->actual_quantity = max(0, $prodStock->actual_quantity - $p->count);
+                    $prodStock->save();
+                }
+            }
+            $this->purchase_product_items->where('purchase_id', $id)->delete();
+        }
+
+        // 4. Delete receipt image if exists
+        if ($purchase->receipt) {
+            $this->deleteImage($purchase->receipt);
+        }
+
+        // 5. Delete purchase record
+        $purchase->delete();
+
+        return response()->json([
+            'success' => 'You delete data success',
         ]);
     }
 }
