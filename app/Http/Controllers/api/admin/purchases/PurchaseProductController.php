@@ -154,7 +154,6 @@ class PurchaseProductController extends Controller
                 'last_cost' => round($lastCost, 2), // سعر آخر قطعة تم شراؤها
                 'total_cost' => round($cost * $stock, 2),
                 'total_last_cost' => round($lastCost * $stock, 2),
-                "storeStocks" => $storeStocks
             ];
         }); 
 
