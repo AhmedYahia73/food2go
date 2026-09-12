@@ -14,6 +14,7 @@ use App\Models\InventoryProductHistory;
 use App\Models\Purchase;
 use App\Models\InventoryList;
 use App\Models\PurchaseWasted;
+use App\Models\MaterialStock;
 
 class InventoryProductController extends Controller
 {
@@ -44,9 +45,52 @@ class InventoryProductController extends Controller
     public function update_inventory_status(Request $request, $id){
         $inventory_list = $this->inventory_list
         ->where("id", $id)
-        ->update([
+        ->firstOrFail();
+        $inventory_list->update([
             "status" => "final"
         ]);
+        $products = $inventory_list->products;
+        $materials = $inventory_list->materials;
+        foreach ($products as $item) {
+            $purchase = PurchaseStock::
+            where("store_id", $inventory_list->store_id)
+            ->where("product_id", $item->product_id)
+            ->first();
+            if($purchase){
+                $purchase->quantity = $item->actual_quantity;
+                $purchase->actual_quantity = $item->actual_quantity;
+                $purchase->save();
+            }
+            else{
+                PurchaseStock::create([
+                    'category_id' => $item->category_id,
+                    'product_id' => $item->product_id,
+                    'store_id' => $inventory_list->store_id,
+                    'quantity' => $item->actual_quantity,
+                    'actual_quantity' => $item->actual_quantity, 
+                ]);
+            }
+        }
+        foreach ($materials as $item) {
+            $purchase = MaterialStock::
+            where("store_id", $inventory_list->store_id)
+            ->where("material_id", $item->material_id)
+            ->first(); 
+            if($purchase){
+                $purchase->quantity = $item->actual_quantity;
+                $purchase->actual_quantity = $item->actual_quantity;
+                $purchase->save();
+            }
+            else{
+                MaterialStock::create([
+                    'category_id' => $item->category_id,
+                    'material_id' => $item->material_id,
+                    'store_id' => $inventory_list->store_id,
+                    'quantity' => $item->actual_quantity,
+                    'actual_quantity' => $item->actual_quantity, 
+                ]);
+            }
+        }
 
         return response()->json([
             "success" => "final", 
@@ -105,6 +149,60 @@ class InventoryProductController extends Controller
         ]);
     } 
 
+    /**
+     * Calculate valuation metrics for product stock using the exact same logic as PurchaseProductController::product_stock.
+     *
+     * @param int $storeId
+     * @param int $productId
+     * @param float $quantity
+     * @return array ['unit_cost' => float, 'total_cost' => float, 'last_cost' => float]
+     */
+    private function calculateProductStockCost(int $storeId, int $productId, float $quantity): array
+    {
+        $purchases = Purchase::where('store_id', $storeId)
+            ->where('product_id', $productId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($purchases->isEmpty()) {
+            $purchases = Purchase::where('product_id', $productId)
+                ->orderByDesc('created_at')
+                ->get();
+        }
+
+        $lastPurchase = $purchases->first();
+        $lastCost = ($lastPurchase && $lastPurchase->quintity > 0)
+            ? ($lastPurchase->total_coast / $lastPurchase->quintity)
+            : 0;
+
+        $unitCost = 0;
+        if ($quantity > 0 && $purchases->isNotEmpty()) {
+            $remainingStockToValuate = $quantity;
+            $totalValueOfStock = 0;
+
+            foreach ($purchases as $purchase) {
+                if ($remainingStockToValuate <= 0) break;
+                if ($purchase->quintity <= 0) continue;
+
+                $unitPrice = $purchase->total_coast / $purchase->quintity;
+                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchase->quintity);
+                $totalValueOfStock += ($qtyToTakeFromPurchase * $unitPrice);
+                $remainingStockToValuate -= $qtyToTakeFromPurchase;
+            }
+
+            $actualValuatedQty = $quantity - $remainingStockToValuate;
+            if ($actualValuatedQty > 0) {
+                $unitCost = $totalValueOfStock / $actualValuatedQty;
+            }
+        }
+
+        return [
+            'unit_cost'  => round($unitCost, 2),
+            'total_cost' => round($unitCost * $quantity, 2),
+            'last_cost'  => round($lastCost, 2),
+        ];
+    }
+
     public function create_inventory(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => 'required|exists:purchase_stores,id',
@@ -120,54 +218,60 @@ class InventoryProductController extends Controller
             ],400);
         }
 
-        $inventory = InventoryList::
-        create([
-            "store_id" => $request->store_id,
+        $storeId = (int)$request->store_id;
+
+        $inventory = InventoryList::create([
+            "store_id" => $storeId,
             "type" => 'product',
         ]);
-        $all_quantity = 0;
-        $items_count = 0;
+
         $products = collect([]);
         if($request->products && count($request->products) > 0){
-            $products = $request->products;
-            $products = PurchaseProduct::
-            with("stock")
-            ->whereIn("id", $products)
-            ->get();
+            $products = PurchaseProduct::whereIn("id", $request->products)->get();
         }
         elseif($request->categories && count($request->categories) > 0){
-            $products = PurchaseProduct::
-            with("stock")
-            ->whereIn("category_id", $request->categories)
-            ->get();
+            $products = PurchaseProduct::whereIn("category_id", $request->categories)->get();
         }
         elseif($request->type == "full"){
-            $products = PurchaseProduct::
-            with("stock") 
-            ->get();
+            $products = PurchaseProduct::all();
         }
+
+        // 1. جلب المخزون لكل المنتجات في هذا المتجر بشكل دقيق
+        $storeStocks = PurchaseStock::where("store_id", $storeId)
+            ->pluck('quantity', 'product_id');
+
+        $all_quantity = 0;
+        $all_cost = 0;
+        $items_count = 0;
+
         foreach ($products as $item) { 
-            $stock = $item?->stock;
-            $stock_quintity = $stock?->quantity ?? 0;
+            $stock_quintity = (float)($storeStocks[$item->id] ?? 0);
             $all_quantity += $stock_quintity;
+            $items_count++;
+
+            // 2. حساب التكلفة بناءً على رصيد المخزون الفعلي لهذا المتجر
+            $costMetrics = $this->calculateProductStockCost($storeId, (int)$item->id, $stock_quintity);
+            $item_cost = $costMetrics['total_cost'];
+            $all_cost += $item_cost;
             
-            $product_inventory = InventoryProductHistory::
-            create([
+            InventoryProductHistory::create([
                 'category_id' => $item->category_id,
                 'product_id' => $item->id,
                 'inventory_id' => $inventory->id,
                 'quantity' => $stock_quintity, 
                 'actual_quantity' => $stock_quintity, 
                 'inability' => 0,
-                'cost' => 0,
+                'cost' => $item_cost,
             ]);
         }  
-        $inventory->product_num = ++$items_count;;
+
+        $inventory->product_num = $items_count;
         $inventory->total_quantity = $all_quantity;
+        $inventory->cost = round($all_cost, 2);
         $inventory->save();
 
         return response()->json([
-            "stocks" => $stock ?? [],
+            "stocks" => $storeStocks,
             "inventory" => $inventory,
         ]);
     }
@@ -212,40 +316,25 @@ class InventoryProductController extends Controller
         ->with("store")
         ->first();
         $arr_items = [];
+        $storeId = (int)$InventoryList?->store_id;
+
         foreach ($request->products as $item) {
             $product_item = PurchaseProduct::
             where("id", $item['id'])
             ->first();
-            $cost = 0;
             $stock = $this->stocks
             ->where("product_id", $item['id'])
-            ->where("store_id", $InventoryList?->store_id)
+            ->where("store_id", $storeId)
             ->first();
             $stock_quintity = $stock->quantity ?? 0;
-            $purchase = $this->purchase
-            ->where('store_id', $InventoryList?->store_id)
-            ->where('product_id', $item['id'])
-            ->orderByDesc("created_at")
-            ->get();
-            $purchase_arr = [];
-            $qty = isset($item['actual_quantity']) ? $item['actual_quantity'] : ($item['quantity'] ?? 0);
+            $qty = isset($item['actual_quantity']) ? (float)$item['actual_quantity'] : (float)($item['quantity'] ?? 0);
             $total_quantity = $qty - $stock_quintity;
             $item_quantity = $qty - $stock_quintity;
        
-            //_________________________________________
-            $cost_item = 0;
-            $count_item = 0;
-            foreach ($purchase as $element) { 
-                if($stock_quintity > 0){
-                    $count_item++;
-                    $cost_item += $element->total_coast / ($element->quintity == 0 ? 1 : $element->quintity);
-                }
-                else{
-                    break;
-                }
-                $stock_quintity -= $element->quintity;
-            } 
-            $cost += $cost_item * $qty / ($count_item == 0 ? 1 : $count_item);
+            // حساب التكلفة الدقيقة للكمية الفعلية
+            $costMetrics = $this->calculateProductStockCost($storeId, (int)$item['id'], $qty);
+            $cost = $costMetrics['total_cost'];
+
             InventoryProductHistory::
             where("inventory_id", $id)
             ->where("product_id", $item['id'])
@@ -280,7 +369,7 @@ class InventoryProductController extends Controller
                 ->create([
                     "category_id" => $product_item->category_id,
                     "product_id" => $item['id'], 
-                    "store_id" => $InventoryList?->store_id,
+                    "store_id" => $storeId,
                     "quantity" => $qty,
                     "actual_quantity" => $qty,
                 ]);

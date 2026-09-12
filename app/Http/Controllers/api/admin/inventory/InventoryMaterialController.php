@@ -93,6 +93,60 @@ class InventoryMaterialController extends Controller
         ]);
     } 
 
+    /**
+     * Calculate valuation metrics for raw material stock using the exact same logic as MaterialController::material_stock.
+     *
+     * @param int $storeId
+     * @param int $materialId
+     * @param float $quantity
+     * @return array ['unit_cost' => float, 'total_cost' => float, 'last_cost' => float]
+     */
+    private function calculateMaterialStockCost(int $storeId, int $materialId, float $quantity): array
+    {
+        $purchases = Purchase::where('store_id', $storeId)
+            ->where('material_id', $materialId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($purchases->isEmpty()) {
+            $purchases = Purchase::where('material_id', $materialId)
+                ->orderByDesc('created_at')
+                ->get();
+        }
+
+        $lastPurchase = $purchases->first();
+        $lastCost = ($lastPurchase && $lastPurchase->quintity > 0)
+            ? ($lastPurchase->total_coast / $lastPurchase->quintity)
+            : 0;
+
+        $unitCost = 0;
+        if ($quantity > 0 && $purchases->isNotEmpty()) {
+            $remainingStockToValuate = $quantity;
+            $totalValueOfStock = 0;
+
+            foreach ($purchases as $purchase) {
+                if ($remainingStockToValuate <= 0) break;
+                if ($purchase->quintity <= 0) continue;
+
+                $unitPrice = $purchase->total_coast / $purchase->quintity;
+                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchase->quintity);
+                $totalValueOfStock += ($qtyToTakeFromPurchase * $unitPrice);
+                $remainingStockToValuate -= $qtyToTakeFromPurchase;
+            }
+
+            $actualValuatedQty = $quantity - $remainingStockToValuate;
+            if ($actualValuatedQty > 0) {
+                $unitCost = $totalValueOfStock / $actualValuatedQty;
+            }
+        }
+
+        return [
+            'unit_cost'  => round($unitCost, 2),
+            'total_cost' => round($unitCost * $quantity, 2),
+            'last_cost'  => round($lastCost, 2),
+        ];
+    }
+
     public function create_inventory(Request $request){
         $validator = Validator::make($request->all(), [
             'store_id' => 'required|exists:purchase_stores,id',
@@ -108,54 +162,60 @@ class InventoryMaterialController extends Controller
             ],400);
         }
 
-        $inventory = InventoryList::
-        create([
-            "store_id" => $request->store_id,
+        $storeId = (int)$request->store_id;
+
+        $inventory = InventoryList::create([
+            "store_id" => $storeId,
             "type" => 'material',
         ]);
-        $all_quantity = 0;
-        $items_count = 0;
+
         $materials = collect([]);
         if($request->materials && count($request->materials) > 0){
-            $materials = $request->materials;
-            $materials = Material::
-            whereIn("id", $materials)
-            ->with("stock")
-            ->get();
+            $materials = Material::whereIn("id", $request->materials)->get();
         }
         elseif($request->category_materials && count($request->category_materials) > 0){
-            $materials = Material::
-            whereIn("category_id", $request->category_materials)
-            ->with("stock")
-            ->get();
+            $materials = Material::whereIn("category_id", $request->category_materials)->get();
         }
         elseif($request->type == "full"){
-            $materials = Material::
-            with("stock") 
-            ->get();
+            $materials = Material::all();
         }
+
+        // 1. جلب المخزون لكل المواد في هذا المتجر بشكل دقيق
+        $storeStocks = MaterialStock::where("store_id", $storeId)
+            ->pluck('quantity', 'material_id');
+
+        $all_quantity = 0;
+        $all_cost = 0;
+        $items_count = 0;
+
         foreach ($materials as $item) {
-            $stock = $item?->stock;
-            $stock_quintity = $stock?->quantity ?? 0;
+            $stock_quintity = (float)($storeStocks[$item->id] ?? 0);
             $all_quantity += $stock_quintity;
-            
-            $material_inventory = InventoryMaterialHistory::
-            create([
+            $items_count++;
+
+            // 2. حساب التكلفة بناءً على رصيد المخزون الفعلي للمادة بهذا المتجر
+            $costMetrics = $this->calculateMaterialStockCost($storeId, (int)$item->id, $stock_quintity);
+            $item_cost = $costMetrics['total_cost'];
+            $all_cost += $item_cost;
+
+            InventoryMaterialHistory::create([
                 'category_id' => $item->category_id,
                 'material_id' => $item->id,
                 'inventory_id' => $inventory->id,
                 'quantity' => $stock_quintity, 
                 'actual_quantity' => $stock_quintity, 
                 'inability' => 0,
-                'cost' => 0,
+                'cost' => $item_cost,
             ]);
         }  
-        $inventory->product_num = ++$items_count;;
+
+        $inventory->product_num = $items_count;
         $inventory->total_quantity = $all_quantity;
+        $inventory->cost = round($all_cost, 2);
         $inventory->save();
 
         return response()->json([
-            "stocks" => $stock ?? [],
+            "stocks" => $storeStocks,
             "inventory" => $inventory,
         ]);
     }
@@ -200,39 +260,24 @@ class InventoryMaterialController extends Controller
         where("id", $id)
         ->with("store")
         ->first();
+        $storeId = (int)$InventoryList?->store_id;
+
         foreach ($request->materials as $item) {
             $material_item = Material::
             where("id", $item['id'])
             ->first();
-            $cost = 0;
             $stock = $this->stocks
             ->where("material_id", $item['id'])
-            ->where("store_id", $InventoryList?->store_id)
+            ->where("store_id", $storeId)
             ->first();
             $stock_quintity = $stock->quantity ?? 0; 
-            $purchase = $this->purchase
-            ->where('store_id', $InventoryList?->store_id)
-            ->where('material_id', $item['id'])
-            ->orderByDesc("created_at")
-            ->get(); 
-            $qty = isset($item['actual_quantity']) ? $item['actual_quantity'] : ($item['quantity'] ?? 0);
-            $total_quantity = $qty - $stock_quintity ;
+            $qty = isset($item['actual_quantity']) ? (float)$item['actual_quantity'] : (float)($item['quantity'] ?? 0);
+            $total_quantity = $qty - $stock_quintity;
             $item_quantity = $qty - $stock_quintity;
  
-            //_________________________________________
-            $cost_item = 0;
-            $count_item = 0;
-            foreach ($purchase as $element) { 
-                if($stock_quintity > 0){
-                    $count_item++;
-                    $cost_item += $element->total_coast / ($element->quintity == 0 ? 1 : $element->quintity);
-                }
-                else{
-                    break;
-                }
-                $stock_quintity -= $element->quintity;
-            } 
-            $cost += $cost_item * $qty / ($count_item == 0 ? 1 : $count_item);
+            // حساب التكلفة الدقيقة للكمية الفعلية للمادة
+            $costMetrics = $this->calculateMaterialStockCost($storeId, (int)$item['id'], $qty);
+            $cost = $costMetrics['total_cost'];
  
             InventoryMaterialHistory::
             where("inventory_id", $id)
@@ -268,7 +313,7 @@ class InventoryMaterialController extends Controller
                 ->create([
                     "category_id" => $material_item->category_id,
                     "material_id" => $item['id'], 
-                    "store_id" => $InventoryList?->store_id,
+                    "store_id" => $storeId,
                     "quantity" => $qty,
                     "actual_quantity" => $qty,
                 ]);
