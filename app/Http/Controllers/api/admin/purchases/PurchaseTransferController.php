@@ -237,6 +237,67 @@ class PurchaseTransferController extends Controller
     }
 
     /**
+     * Calculate cost metrics (cost, last_cost, total_cost, total_last_cost)
+     * using the exact same weighted-average valuation logic as
+     * MaterialController::material_stock and PurchaseProductController::product_stock.
+     *
+     * @param int $storeId
+     * @param string $idColumn 'material_id' or 'product_id'
+     * @param int $itemId
+     * @param float $quantity
+     * @return array
+     */
+    private function calculateItemCost(int $storeId, string $idColumn, int $itemId, float $quantity): array
+    {
+        $purchases = Purchase::where('store_id', $storeId)
+            ->where($idColumn, $itemId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Fallback: If no direct purchases in this store, check all stores for this item
+        if ($purchases->isEmpty()) {
+            $purchases = Purchase::where($idColumn, $itemId)
+                ->orderByDesc('created_at')
+                ->get();
+        }
+
+        // 1. حساب آخر تكلفة شراء
+        $lastPurchase = $purchases->first();
+        $lastCost = ($lastPurchase && $lastPurchase->quintity > 0)
+            ? ($lastPurchase->total_coast / $lastPurchase->quintity)
+            : 0;
+
+        // 2. حساب متوسط تكلفة الكمية بناءً على أحدث فواتير الشراء
+        $cost = 0;
+        if ($quantity > 0 && $purchases->isNotEmpty()) {
+            $remainingStockToValuate = $quantity;
+            $totalValueOfStock = 0;
+
+            foreach ($purchases as $purchase) {
+                if ($remainingStockToValuate <= 0) break;
+                if ($purchase->quintity <= 0) continue;
+
+                $unitPrice = $purchase->total_coast / $purchase->quintity;
+                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchase->quintity);
+                $totalValueOfStock += ($qtyToTakeFromPurchase * $unitPrice);
+                $remainingStockToValuate -= $qtyToTakeFromPurchase;
+            }
+
+            $actualValuatedQty = $quantity - $remainingStockToValuate;
+            if ($actualValuatedQty > 0) {
+                $cost = $totalValueOfStock / $actualValuatedQty;
+            }
+        }
+
+        return [
+            'cost'            => round($cost, 2),
+            'unit_cost'       => round($cost, 4), // kept for backwards compatibility
+            'last_cost'       => round($lastCost, 2),
+            'total_cost'      => round($cost * $quantity, 2),
+            'total_last_cost' => round($lastCost * $quantity, 2),
+        ];
+    }
+
     /**
      * Transfer multiple products or raw materials between stores in a single request.
      *
@@ -247,8 +308,42 @@ class PurchaseTransferController extends Controller
      *   "transfer_type": "product" | "material",
      *   "products": [ ... ] OR "materials": [ ... ]
      * }
+     * Also supports flat single-item payload:
+     * {
+     *   "from_store_id": 1,
+     *   "to_store_id": 2,
+     *   "product_id": 5,
+     *   "category_id": 2,
+     *   "unit_id": 1,
+     *   "quintity": 10
+     * }
      */
     public function transfer(Request $request){
+        // Support single-item payloads (e.g. from standard transfer form) as well as batch arrays
+        if (!$request->has('products') && !$request->has('materials')) {
+            if ($request->filled('material_id')) {
+                $request->merge([
+                    'transfer_type' => 'material',
+                    'materials' => [[
+                        'material_id'          => $request->material_id,
+                        'category_material_id' => $request->category_material_id ?? $request->category_id,
+                        'unit_id'              => $request->unit_id,
+                        'quintity'             => $request->quintity,
+                    ]],
+                ]);
+            } elseif ($request->filled('product_id')) {
+                $request->merge([
+                    'transfer_type' => 'product',
+                    'products' => [[
+                        'product_id'  => $request->product_id,
+                        'category_id' => $request->category_id,
+                        'unit_id'     => $request->unit_id,
+                        'quintity'    => $request->quintity,
+                    ]],
+                ]);
+            }
+        }
+
         $transferType = $request->input('transfer_type');
         if (!$transferType) {
             $transferType = !empty($request->materials) ? 'material' : 'product';
@@ -282,8 +377,8 @@ class PurchaseTransferController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $fromStoreId = $request->from_store_id;
-        $toStoreId   = $request->to_store_id;
+        $fromStoreId = (int)$request->from_store_id;
+        $toStoreId   = (int)$request->to_store_id;
         $adminId     = $request->user()->id;
 
         // ── 2. Stock availability validation (before touching DB) ────────────
@@ -339,29 +434,13 @@ class PurchaseTransferController extends Controller
 
             if ($transferType === 'material') {
                 foreach ($items as $item) {
-                    $quintity   = $item['quintity'];
-                    $materialId = $item['material_id'];
+                    $quintity   = (float)$item['quintity'];
+                    $materialId = (int)$item['material_id'];
                     $catMatId   = $item['category_material_id'] ?? $item['category_id'] ?? null;
                     $unitId     = $item['unit_id'];
 
-                    // Weighted-average unit cost for material from purchase history
-                    $purchaseHistory = DB::table('purchases')
-                        ->where('store_id',    $fromStoreId)
-                        ->where('material_id', $materialId)
-                        ->orderByDesc('created_at')
-                        ->get(['total_coast', 'quintity']);
-
-                    $remainingQty = $quintity;
-                    $costSum      = 0;
-                    $costCount    = 0;
-                    foreach ($purchaseHistory as $ph) {
-                        if ($remainingQty <= 0) break;
-                        $costCount++;
-                        $costSum      += $ph->total_coast / ($ph->quintity ?: 1);
-                        $remainingQty -= $ph->quintity;
-                    }
-                    $unitCost  = $costCount > 0 ? $costSum / $costCount : 0;
-                    $totalCost = round($unitCost * $quintity, 2);
+                    // Calculate cost metrics exactly like MaterialController::material_stock
+                    $costMetrics = $this->calculateItemCost($fromStoreId, 'material_id', $materialId, $quintity);
 
                     // Record the transfer
                     $newTransfer = $this->purchases->create([
@@ -422,41 +501,28 @@ class PurchaseTransferController extends Controller
                     $unit     = $this->units->find($unitId);
 
                     $createdItems[] = [
-                        'id'         => $newTransfer->id,
-                        'type'       => 'material',
-                        'category'   => $category?->name ?? '-',
-                        'product'    => $material?->name ?? '-',
-                        'unit'       => $unit?->name ?? '-',
-                        'quintity'   => $quintity,
-                        'unit_cost'  => round($unitCost, 4),
-                        'total_cost' => $totalCost,
+                        'id'              => $newTransfer->id,
+                        'type'            => 'material',
+                        'category'        => $category?->name ?? '-',
+                        'product'         => $material?->name ?? '-',
+                        'unit'            => $unit?->name ?? '-',
+                        'quintity'        => $quintity,
+                        'cost'            => $costMetrics['cost'],
+                        'unit_cost'       => $costMetrics['unit_cost'],
+                        'last_cost'       => $costMetrics['last_cost'],
+                        'total_cost'      => $costMetrics['total_cost'],
+                        'total_last_cost' => $costMetrics['total_last_cost'],
                     ];
                 }
             } else {
                 foreach ($items as $item) {
-                    $quintity   = $item['quintity'];
-                    $productId  = $item['product_id'];
-                    $categoryId = $item['category_id'];
+                    $quintity   = (float)$item['quintity'];
+                    $productId  = (int)$item['product_id'];
+                    $categoryId = (int)$item['category_id'];
                     $unitId     = $item['unit_id'];
 
-                    // Weighted-average unit cost for product from purchase history
-                    $purchaseHistory = DB::table('purchases')
-                        ->where('store_id',   $fromStoreId)
-                        ->where('product_id', $productId)
-                        ->orderByDesc('created_at')
-                        ->get(['total_coast', 'quintity']);
-
-                    $remainingQty = $quintity;
-                    $costSum      = 0;
-                    $costCount    = 0;
-                    foreach ($purchaseHistory as $ph) {
-                        if ($remainingQty <= 0) break;
-                        $costCount++;
-                        $costSum      += $ph->total_coast / ($ph->quintity ?: 1);
-                        $remainingQty -= $ph->quintity;
-                    }
-                    $unitCost  = $costCount > 0 ? $costSum / $costCount : 0;
-                    $totalCost = round($unitCost * $quintity, 2);
+                    // Calculate cost metrics exactly like PurchaseProductController::product_stock
+                    $costMetrics = $this->calculateItemCost($fromStoreId, 'product_id', $productId, $quintity);
 
                     // Record the transfer
                     $newTransfer = $this->purchases->create([
@@ -517,14 +583,17 @@ class PurchaseTransferController extends Controller
                     $unit     = $this->units->find($unitId);
 
                     $createdItems[] = [
-                        'id'         => $newTransfer->id,
-                        'type'       => 'product',
-                        'category'   => $category?->name ?? '-',
-                        'product'    => $product?->name ?? '-',
-                        'unit'       => $unit?->name ?? '-',
-                        'quintity'   => $quintity,
-                        'unit_cost'  => round($unitCost, 4),
-                        'total_cost' => $totalCost,
+                        'id'              => $newTransfer->id,
+                        'type'            => 'product',
+                        'category'        => $category?->name ?? '-',
+                        'product'         => $product?->name ?? '-',
+                        'unit'            => $unit?->name ?? '-',
+                        'quintity'        => $quintity,
+                        'cost'            => $costMetrics['cost'],
+                        'unit_cost'       => $costMetrics['unit_cost'],
+                        'last_cost'       => $costMetrics['last_cost'],
+                        'total_cost'      => $costMetrics['total_cost'],
+                        'total_last_cost' => $costMetrics['total_last_cost'],
                     ];
                 }
             }
@@ -534,13 +603,15 @@ class PurchaseTransferController extends Controller
         $toStore   = $this->stores->find($toStoreId);
 
         return response()->json([
-            'success'       => 'Transfer completed successfully',
-            'transfer_type' => $transferType,
-            'count'         => count($items),
-            'from_store'    => $fromStore?->name,
-            'to_store'      => $toStore?->name,
-            'date'          => now()->toDateTimeString(),
-            'items'         => $createdItems,
+            'success'         => 'Transfer completed successfully',
+            'transfer_type'   => $transferType,
+            'count'           => count($items),
+            'from_store'      => $fromStore?->name,
+            'to_store'        => $toStore?->name,
+            'date'            => now()->toDateTimeString(),
+            'total_cost'      => round(collect($createdItems)->sum('total_cost'), 2),
+            'total_last_cost' => round(collect($createdItems)->sum('total_last_cost'), 2),
+            'items'           => $createdItems,
         ]);
     }
 
@@ -556,39 +627,26 @@ class PurchaseTransferController extends Controller
         $isMaterial = !empty($transfer->material_id);
         $idColumn   = $isMaterial ? 'material_id' : 'product_id';
         $itemId     = $isMaterial ? $transfer->material_id : $transfer->product_id;
+        $quantity   = (float)$transfer->quintity;
 
-        // Weighted average unit cost from purchase history in the source store
-        $purchaseHistory = DB::table('purchases')
-            ->where('store_id', $transfer->from_store_id)
-            ->where($idColumn,  $itemId)
-            ->orderByDesc('created_at')
-            ->get(['total_coast', 'quintity']);
-
-        $remainingQty = $transfer->quintity;
-        $costSum      = 0;
-        $costCount    = 0;
-        foreach ($purchaseHistory as $ph) {
-            if ($remainingQty <= 0) break;
-            $costCount++;
-            $costSum      += $ph->total_coast / ($ph->quintity ?: 1);
-            $remainingQty -= $ph->quintity;
-        }
-        $unitCost  = $costCount > 0 ? $costSum / $costCount : 0;
-        $totalCost = round($unitCost * $transfer->quintity, 2);
+        $costMetrics = $this->calculateItemCost((int)$transfer->from_store_id, $idColumn, (int)$itemId, $quantity);
 
         return response()->json([
-            'id'         => $transfer->id,
-            'type'       => $isMaterial ? 'material' : 'product',
-            'from_store' => $transfer?->from_store?->name,
-            'to_store'   => $transfer?->to_store?->name,
-            'category'   => $isMaterial ? ($transfer?->category_material?->name ?? '-') : ($transfer?->category?->name ?? '-'),
-            'product'    => $isMaterial ? ($transfer?->material?->name ?? '-') : ($transfer?->product?->name ?? '-'),
-            'unit'       => $transfer?->unit?->name,
-            'quintity'   => $transfer->quintity,
-            'unit_cost'  => round($unitCost, 4),
-            'total_cost' => $totalCost,
-            'status'     => $transfer->status,
-            'date'       => $transfer->created_at,
+            'id'              => $transfer->id,
+            'type'            => $isMaterial ? 'material' : 'product',
+            'from_store'      => $transfer?->from_store?->name,
+            'to_store'        => $transfer?->to_store?->name,
+            'category'        => $isMaterial ? ($transfer?->category_material?->name ?? '-') : ($transfer?->category?->name ?? '-'),
+            'product'         => $isMaterial ? ($transfer?->material?->name ?? '-') : ($transfer?->product?->name ?? '-'),
+            'unit'            => $transfer?->unit?->name,
+            'quintity'        => $transfer->quintity,
+            'cost'            => $costMetrics['cost'],
+            'unit_cost'       => $costMetrics['unit_cost'],
+            'last_cost'       => $costMetrics['last_cost'],
+            'total_cost'      => $costMetrics['total_cost'],
+            'total_last_cost' => $costMetrics['total_last_cost'],
+            'status'          => $transfer->status,
+            'date'            => $transfer->created_at,
         ]);
     }
 }
