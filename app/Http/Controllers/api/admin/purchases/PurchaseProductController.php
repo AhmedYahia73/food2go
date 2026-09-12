@@ -84,7 +84,7 @@ class PurchaseProductController extends Controller
         // 2. جلب كل المشتريات للمتجر مرتبة من الأحدث للأقدم مرة واحدة
         // استخدمنا select لجلب الحقول المطلوبة فقط لتوفير الميموري (الرامات)
         $allPurchases = Purchase::where("store_id", $storeId)
-            ->select('product_id', 'quintity', 'total_cost') // تأكد أن اسم الحقل في الداتا بيز quintity كما كتبته أنت
+            ->select('product_id', 'quintity', 'total_coast') // تأكد أن اسم الحقل في الداتا بيز quintity كما كتبته أنت
             ->orderByDesc("created_at")
             ->get()
             ->groupBy('product_id'); // تجميع المشتريات لكل منتج معاً
@@ -101,7 +101,7 @@ class PurchaseProductController extends Controller
             // حساب آخر تكلفة شراء
             $lastPurchase = $productPurchases->first();
             $lastCost = ($lastPurchase && $lastPurchase->quintity > 0) 
-                ? ($lastPurchase->total_cost / $lastPurchase->quintity) 
+                ? ($lastPurchase->total_coast / $lastPurchase->quintity) 
                 : 0;
 
             // ==========================================
@@ -121,7 +121,7 @@ class PurchaseProductController extends Controller
                     if ($purchase->quintity <= 0) continue; 
 
                     // سعر القطعة في هذه الفاتورة
-                    $unitPrice = $purchase->total_cost / $purchase->quintity;
+                    $unitPrice = $purchase->total_coast / $purchase->quintity;
 
                     // الكمية التي سنأخذها من هذه الفاتورة (إما كمية الفاتورة كلها، أو ما تبقى من المخزون)
                     $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchase->quintity);
