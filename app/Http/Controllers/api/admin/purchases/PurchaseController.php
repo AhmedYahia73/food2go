@@ -5,6 +5,7 @@ namespace AppHttpControllers\api\admin\purchases;
 use AppHttpControllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
 use App\trait\image;
 
 use App\Models\Purchase;
