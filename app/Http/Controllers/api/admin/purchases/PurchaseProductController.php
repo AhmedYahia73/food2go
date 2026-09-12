@@ -83,8 +83,7 @@ class PurchaseProductController extends Controller
 
         // 2. جلب كل المشتريات للمتجر مرتبة من الأحدث للأقدم مرة واحدة
         // استخدمنا select لجلب الحقول المطلوبة فقط لتوفير الميموري (الرامات)
-        $allPurchases = Purchase::where("store_id", $storeId)
-            ->select('product_id', 'quintity', 'total_coast') // تأكد أن اسم الحقل في الداتا بيز quintity كما كتبته أنت
+        $allPurchases = Purchase::where("store_id", $storeId) // تأكد أن اسم الحقل في الداتا بيز quintity كما كتبته أنت
             ->orderByDesc("created_at")
             ->get()
             ->groupBy('product_id'); // تجميع المشتريات لكل منتج معاً
@@ -155,6 +154,7 @@ class PurchaseProductController extends Controller
                 'last_cost' => round($lastCost, 2), // سعر آخر قطعة تم شراؤها
                 'total_cost' => round($cost * $stock, 2),
                 'total_last_cost' => round($lastCost * $stock, 2),
+                "storeStocks" => $storeStocks
             ];
         }); 
 
