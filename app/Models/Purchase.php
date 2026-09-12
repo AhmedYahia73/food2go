@@ -11,14 +11,10 @@ class Purchase extends Model
     use HasFactory, LogChanges;
 
     protected $fillable = [
-        'category_id',
-        'category_material_id',
-        'material_id',
-        'product_id',
-        'unit_id',
         "type",
         'admin_id', 
         'store_id',
+        'supplier_id',
         'total_coast',
         'payment',
         'due',
@@ -44,20 +40,20 @@ class Purchase extends Model
         return null;
     }
 
-    public function material(){
-        return $this->belongsTo(Material::class, 'material_id');
+    public function materials(){
+        return $this->hasMany(PurchaseMaterial::class, 'purchase_id');
     }
 
-    public function material_category(){
-        return $this->belongsTo(MaterialCategory::class, 'category_material_id');
+    public function products(){
+        return $this->hasMany(PurchaseProductItem::class, 'purchase_id');
     }
 
-    public function category(){
-        return $this->belongsTo(PurchaseCategory::class, 'category_id');
+    public function invoices(){
+        return $this->hasMany(PurchaseInvoice::class, 'purchase_id');
     }
 
-    public function product(){
-        return $this->belongsTo(PurchaseProduct::class, 'product_id');
+    public function supplier(){
+        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
     public function admin(){
@@ -66,9 +62,5 @@ class Purchase extends Model
 
     public function store(){
         return $this->belongsTo(PurchaseStore::class, 'store_id');
-    }
-
-    public function unit(){
-        return $this->belongsTo(Unit::class, 'unit_id');
     }
 }

@@ -9,7 +9,6 @@ use App\trait\image;
 
 use App\Models\Purchase;
 use App\Models\PurchaseCategory;
-use App\Models\PurchaseFinancial;
 use App\Models\PurchaseProduct;
 use App\Models\PurchaseStore; 
 use App\Models\FinantiolAcounting;
@@ -18,90 +17,156 @@ use App\Models\MaterialCategory;
 use App\Models\MaterialStock;
 use App\Models\Material;
 use App\Models\Unit;
+use App\Models\Supplier;
+use App\Models\PurchaseInvoice;
+use App\Models\PurchaseInvoiceFinancial;
+use App\Models\PurchaseMaterial;
+use App\Models\PurchaseProductItem;
 
 class PurchaseController extends Controller
 {
-    public function __construct(private Purchase $purchases,
-    private PurchaseProduct $products, private PurchaseCategory $categories,
-    private PurchaseStore $stores, private FinantiolAcounting $financial,
-    private PurchaseFinancial $purchase_financial, private Material $materials,
-    private PurchaseStock $stock, private Unit $units,
-    private MaterialCategory $material_categories, private MaterialStock $material_stock){}
     use image;
 
+    public function __construct(
+        private Purchase $purchases,
+        private PurchaseProduct $products,
+        private PurchaseCategory $categories,
+        private PurchaseStore $stores,
+        private FinantiolAcounting $financial,
+        private Material $materials,
+        private PurchaseStock $stock,
+        private Unit $units,
+        private MaterialCategory $material_categories,
+        private MaterialStock $material_stock,
+        private Supplier $suppliers,
+        private PurchaseInvoice $purchase_invoices,
+        private PurchaseInvoiceFinancial $purchase_invoice_financials,
+        private PurchaseMaterial $purchase_materials,
+        private PurchaseProductItem $purchase_product_items,
+    ){}
+
     public function view(Request $request){
-        $purchases = $this->purchases
-        ->with('category', 'product', 'admin', 'store', 'unit', 
-        'material', 'material_category', 'financial')
-        ->get()
-        ->map(function($item){
+        $perPage = (int) $request->get('per_page', 10);
+        $paginated = $this->purchases
+            ->with([
+                'admin:id,name',
+                'store:id,name',
+                'supplier:id,name',
+                'materials.material:id,name',
+                'materials.category:id,name',
+                'materials.unit:id,name',
+                'products.product:id,name',
+                'products.category:id,name',
+                'products.unit:id,name',
+                'invoices.financials.financial:id,name',
+            ])
+            ->latest()
+            ->paginate($perPage);
+
+        $purchases = collect($paginated->items())->map(function($item){
             return [
                 'id' => $item->id,
-                'total_coast' => $item->total_coast,
-                'quintity' => $item->quintity,
-                'unit' => $item?->unit?->name,
-                'unit_id' => $item?->unit_id,
+                'type' => $item->type,
+                'total_coast' => (float) $item->total_coast,
+                'payment' => (float) ($item->payment ?? 0),
+                'due' => (float) ($item->due ?? 0),
+                'quintity' => (float) ($item->quintity ?? 0),
                 'date' => $item->date,
                 'receipt_link' => $item->receipt_link,
-                'category_id' => $item->category_id,
-                'product_id' => $item->product_id,
-                'category_material_id' => $item->category_material_id,
-                'material_id' => $item->material_id,
                 'admin_id' => $item->admin_id,
-                'store_id' => $item->store_id,
-                'category' => $item?->category?->name,
-                'product' => $item?->product?->name,
-                'material_category' => $item?->material_category?->name,
-                'material' => $item?->material?->name,
                 'admin' => $item?->admin?->name,
+                'store_id' => $item->store_id,
                 'store' => $item?->store?->name,
-                'type' => $item->type,
-                'financial' => $item?->financial
-                ?->map(function($element){
+                'supplier_id' => $item->supplier_id,
+                'supplier' => $item?->supplier?->name,
+                'materials' => $item->materials->map(function($m){
                     return [
-                        'id' => $element->id,
-                        'name' => $element->name,
-                        'amount' => $element?->pivot?->amount,
+                        'id' => $m->id,
+                        'material_id' => $m->material_id,
+                        'material' => $m->material?->name,
+                        'category_material_id' => $m->category_material_id,
+                        'category' => $m->category?->name,
+                        'unit_id' => $m->unit_id,
+                        'unit' => $m->unit?->name,
+                        'count' => (float) ($m->count ?? 1),
                     ];
-                })
+                }),
+                'products' => $item->products->map(function($p){
+                    return [
+                        'id' => $p->id,
+                        'product_id' => $p->product_id,
+                        'product' => $p->product?->name,
+                        'category_id' => $p->category_id,
+                        'category' => $p->category?->name,
+                        'unit_id' => $p->unit_id,
+                        'unit' => $p->unit?->name,
+                        'count' => (float) ($p->count ?? 1),
+                    ];
+                }),
+                'invoices' => $item->invoices->map(function($invoice){
+                    return [
+                        'id' => $invoice->id,
+                        'payment' => (float) $invoice->payment,
+                        'due' => (float) $invoice->due,
+                        'date' => $invoice->date,
+                        'created_at' => $invoice->created_at?->format('Y-m-d H:i'),
+                        'financials' => $invoice->financials->map(function($f){
+                            return [
+                                'id' => $f->id,
+                                'financial_id' => $f->financial_id,
+                                'name' => $f->financial?->name ?? '-',
+                                'amount' => (float) $f->amount,
+                            ];
+                        }),
+                    ];
+                }),
             ];
         });
 
         return response()->json([
-            'purchases' => $purchases, 
+            'purchases' => $purchases,
+            'pagination' => [
+                'total' => $paginated->total(),
+                'per_page' => $paginated->perPage(),
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+            ],
         ]);
     }
 
     public function lists(Request $request){
-        
         $categories = $this->categories
-        ->select('id', 'name', 'category_id')
-        ->where('status', 1)
-        ->get();
+            ->select('id', 'name', 'category_id')
+            ->where('status', 1)
+            ->get();
         $products = $this->products
-        ->select('id', 'name', 'category_id')
-        ->where('status', 1)
-        ->get();
+            ->select('id', 'name', 'category_id')
+            ->where('status', 1)
+            ->get();
         $stores = $this->stores
-        ->select('id', 'name')
-        ->where('status', 1)
-        ->get();
+            ->select('id', 'name')
+            ->where('status', 1)
+            ->get();
         $financials = $this->financial
-        ->select('id', 'name', 'logo')
-        ->where('status', 1)
-        ->get();
+            ->select('id', 'name', 'logo')
+            ->where('status', 1)
+            ->get();
         $units = $this->units
-        ->select("name", "id")
-        ->where("status", 1)
-        ->get();
+            ->select("name", "id")
+            ->where("status", 1)
+            ->get();
         $material_categories = $this->material_categories
-        ->select("name", "id", 'category_id')
-        ->where("status", 1)
-        ->get();
+            ->select("name", "id", 'category_id')
+            ->where("status", 1)
+            ->get();
         $materials = $this->materials
-        ->select("name", "id", 'category_id')
-        ->where("status", 1)
-        ->get();
+            ->select("name", "id", 'category_id')
+            ->where("status", 1)
+            ->get();
+        $suppliers = $this->suppliers
+            ->select("name", "id")
+            ->where("status", 1)
+            ->get();
         $types = [
             "material",
             "product",
@@ -115,302 +180,544 @@ class PurchaseController extends Controller
             'units' => $units,
             'material_categories' => $material_categories,
             'materials' => $materials,
+            'suppliers' => $suppliers,
             'types' => $types,
         ]);
     }
 
     public function purchase_item(Request $request, $id){
-        $purchases = $this->purchases
-        ->with('category', 'admin', 'store', 'unit')
-        ->where('id', $id)
-        ->first();
+        $purchase = $this->purchases
+            ->with([
+                'admin:id,name',
+                'store:id,name',
+                'supplier:id,name',
+                'materials.material:id,name',
+                'materials.category:id,name',
+                'materials.unit:id,name',
+                'products.product:id,name',
+                'products.category:id,name',
+                'products.unit:id,name',
+                'invoices.financials.financial:id,name',
+            ])
+            ->where('id', $id)
+            ->first();
+
+        if (!$purchase) {
+            return response()->json(['errors' => 'Purchase not found'], 404);
+        }
 
         return response()->json([
-            'total_coast' => $purchases->total_coast,
-            'quintity' => $purchases->quintity,
-            'date' => $purchases->date,
-            'receipt_link' => $purchases->receipt_link,
-            'category_id' => $purchases->category_id,
-            'product_id' => $purchases->product_id,
-            'category_material_id' => $purchases->category_material_id,
-            'material_id' => $purchases->material_id,
-            'admin_id' => $purchases->admin_id,
-            'store_id' => $purchases->store_id,
-            'category' => $purchases?->category?->name,
-            'store_id' => $purchases->store_id,
-            'unit_id' => $purchases?->unit_id,  
-            'unit' => $purchases?->unit?->name,
-            'admin' => $purchases?->admin?->name,
-            'store' => $purchases?->store?->name,
-            'type' => $purchases->type,
+            'purchase' => [
+                'id' => $purchase->id,
+                'type' => $purchase->type,
+                'total_coast' => (float) $purchase->total_coast,
+                'payment' => (float) ($purchase->payment ?? 0),
+                'due' => (float) ($purchase->due ?? 0),
+                'quintity' => (float) ($purchase->quintity ?? 0),
+                'date' => $purchase->date,
+                'receipt_link' => $purchase->receipt_link,
+                'admin_id' => $purchase->admin_id,
+                'admin' => $purchase?->admin?->name,
+                'store_id' => $purchase->store_id,
+                'store' => $purchase?->store?->name,
+                'supplier_id' => $purchase->supplier_id,
+                'supplier' => $purchase?->supplier?->name,
+                'materials' => $purchase->materials->map(function($m){
+                    return [
+                        'id' => $m->id,
+                        'material_id' => $m->material_id,
+                        'material' => $m->material?->name,
+                        'category_material_id' => $m->category_material_id,
+                        'category' => $m->category?->name,
+                        'unit_id' => $m->unit_id,
+                        'unit' => $m->unit?->name,
+                        'count' => (float) ($m->count ?? 1),
+                    ];
+                }),
+                'products' => $purchase->products->map(function($p){
+                    return [
+                        'id' => $p->id,
+                        'product_id' => $p->product_id,
+                        'product' => $p->product?->name,
+                        'category_id' => $p->category_id,
+                        'category' => $p->category?->name,
+                        'unit_id' => $p->unit_id,
+                        'unit' => $p->unit?->name,
+                        'count' => (float) ($p->count ?? 1),
+                    ];
+                }),
+                'invoices' => $purchase->invoices->map(function($invoice){
+                    return [
+                        'id' => $invoice->id,
+                        'payment' => (float) $invoice->payment,
+                        'due' => (float) $invoice->due,
+                        'date' => $invoice->date,
+                        'created_at' => $invoice->created_at?->format('Y-m-d H:i'),
+                        'financials' => $invoice->financials->map(function($f){
+                            return [
+                                'id' => $f->id,
+                                'financial_id' => $f->financial_id,
+                                'name' => $f->financial?->name ?? '-',
+                                'amount' => (float) $f->amount,
+                            ];
+                        }),
+                    ];
+                }),
+                'financials' => $purchase->invoices->flatMap(function($inv) {
+                    return $inv->financials->map(function($f) {
+                        return [
+                            'id' => $f->financial_id,
+                            'amount' => (float) $f->amount,
+                            'name' => $f->financial?->name ?? '-',
+                        ];
+                    });
+                })->values(),
+            ],
         ]);
     }
 
     public function create(Request $request){
+        // Support items array or fallback to single item
+        $items = $request->items;
+        if (empty($items) && is_array($request->items)) {
+            $items = $request->items;
+        } elseif (empty($items)) {
+            // Backward compatibility for single item format
+            if ($request->type === 'material' && !empty($request->material_id)) {
+                $items = [[
+                    'item_id' => $request->material_id,
+                    'unit_id' => $request->unit_id,
+                    'count' => $request->quintity ?? 1,
+                ]];
+            } elseif ($request->type === 'product' && !empty($request->product_id)) {
+                $items = [[
+                    'item_id' => $request->product_id,
+                    'unit_id' => $request->unit_id,
+                    'count' => $request->quintity ?? 1,
+                ]];
+            }
+        }
+        $request->merge(['items' => $items]);
+
         $validator = Validator::make($request->all(), [
-            'category_id' => ['exists:purchase_categories,id'],
-            'product_id' => ['exists:purchase_products,id'],
-
-            'material_id' => ['exists:materials,id'],
-            'category_material_id' => ['exists:material_categories,id'],
-            "type" => ["required", "in:material,product"],
-
+            'type' => ['required', 'in:material,product'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
-            'unit_id' => ['required', 'exists:units,id'],
-            'total_coast' => ['required', 'numeric'],
-            'quintity' => ['required', 'numeric'],
-            'receipt' => ['required'],
+            'supplier_id' => ['required', 'exists:suppliers,id'],
+            'total_coast' => ['required', 'numeric', 'min:0'],
             'date' => ['required', 'date'],
-            'financial' => ['array'],
-            'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
-            'financial.*.amount' => ['required', 'numeric'],
+            'receipt' => ['nullable'],
+
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.item_id' => ['required'],
+            'items.*.unit_id' => ['nullable', 'exists:units,id'],
+            'items.*.count' => ['nullable', 'numeric', 'min:0.01'],
+
+            'financial' => ['nullable', 'array'],
+            'financial.*.id' => ['required_with:financial', 'exists:finantiol_acountings,id'],
+            'financial.*.amount' => ['required_with:financial', 'numeric', 'min:0.01'],
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
+
+        if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
-            ],400);
-        }
-
-        if (empty($request->material_id) && $request->type == "material") {
-            return response()->json([
-                "errors" => "material is required"
-            ], 400);
-        }
-        if (empty($request->product_id) && $request->type == "product") {
-            return response()->json([
-                "errors" => "material is required"
             ], 400);
         }
 
-        $purchaseRequest = $validator->validated();
-        $purchaseRequest['admin_id'] = $request->user()->id;
-        if (!empty($request->receipt)) {
-            $imag_path = $this->upload($request, 'receipt', 'admin/purchases/receipt');
-            $purchaseRequest['receipt'] = $imag_path;
+        $totalCost = (float) $request->total_coast;
+        $totalPayment = 0;
+        if (!empty($request->financial)) {
+            foreach ($request->financial as $f) {
+                $totalPayment += (float) ($f['amount'] ?? 0);
+            }
         }
-        $purchase = $this->purchases
-        ->create($purchaseRequest);
-        if($request->financial){
-            foreach ($request->financial as $item) {
-                $this->purchase_financial
-                ->create([
+        $due = max(0, $totalCost - $totalPayment);
+
+        $totalQuantity = 0;
+        foreach ($items as $itemData) {
+            $totalQuantity += (float) ($itemData['count'] ?? 1);
+        }
+
+        $purchaseData = [
+            'type' => $request->type,
+            'store_id' => $request->store_id,
+            'supplier_id' => $request->supplier_id,
+            'total_coast' => $totalCost,
+            'payment' => $totalPayment,
+            'due' => $due,
+            'quintity' => $totalQuantity,
+            'date' => $request->date,
+            'admin_id' => $request->user() ? $request->user()->id : null,
+        ];
+
+        if ($request->hasFile('receipt')) {
+            $purchaseData['receipt'] = $this->upload($request, 'receipt', 'admin/purchases/receipt');
+        }
+
+        $purchase = $this->purchases->create($purchaseData);
+
+        // Save multiple items & update stock
+        if ($request->type === 'material') {
+            foreach ($items as $item) {
+                $material = Material::find($item['item_id']);
+                $itemCount = (float) ($item['count'] ?? 1);
+                $unitId = !empty($item['unit_id']) ? $item['unit_id'] : $material?->unit_id;
+
+                $this->purchase_materials->create([
                     'purchase_id' => $purchase->id,
-                    'financial_id' => $item['id'],
-                    'amount' => $item['amount'],
+                    'category_material_id' => $material?->category_id,
+                    'material_id' => $item['item_id'],
+                    'unit_id' => $unitId,
+                    'count' => $itemCount,
                 ]);
 
-                $financial = FinantiolAcounting::
-                where("id", $item['id'])
-                ->first();
-                if($financial){
-                    $financial->balance -= $item['amount'];
-                    $financial->save();
+                // Update stock for this material
+                $matStock = $this->material_stock
+                    ->where('material_id', $item['item_id'])
+                    ->where('store_id', $request->store_id)
+                    ->first();
+
+                if (!$matStock) {
+                    $this->material_stock->create([
+                        'category_id' => $material?->category_id,
+                        'material_id' => $item['item_id'],
+                        'store_id' => $request->store_id,
+                        'quantity' => $itemCount,
+                        'actual_quantity' => $itemCount,
+                        'unit_id' => $unitId,
+                    ]);
+                } else {
+                    $matStock->quantity += $itemCount;
+                    $matStock->actual_quantity += $itemCount;
+                    $matStock->save();
+                }
+            }
+        } else {
+            foreach ($items as $item) {
+                $product = PurchaseProduct::find($item['item_id']);
+                $itemCount = (float) ($item['count'] ?? 1);
+                $unitId = !empty($item['unit_id']) ? $item['unit_id'] : null;
+
+                $this->purchase_product_items->create([
+                    'purchase_id' => $purchase->id,
+                    'category_id' => $product?->category_id,
+                    'product_id' => $item['item_id'],
+                    'unit_id' => $unitId,
+                    'count' => $itemCount,
+                ]);
+
+                // Update stock for this product
+                $prodStock = $this->stock
+                    ->where('product_id', $item['item_id'])
+                    ->where('store_id', $request->store_id)
+                    ->first();
+
+                if (!$prodStock) {
+                    $this->stock->create([
+                        'category_id' => $product?->category_id,
+                        'product_id' => $item['item_id'],
+                        'store_id' => $request->store_id,
+                        'quantity' => $itemCount,
+                        'actual_quantity' => $itemCount,
+                        'unit_id' => $unitId,
+                    ]);
+                } else {
+                    $prodStock->quantity += $itemCount;
+                    $prodStock->actual_quantity += $itemCount;
+                    $prodStock->save();
                 }
             }
         }
-        // deduct from stock
-        if($request->type == "material"){
-            $material_stock = $this->material_stock
-            ->where('material_id', $request->material_id)
-            ->where('store_id', $request->store_id)
-            ->first();
-            if(empty($material_stock)){
-                $this->material_stock
-                ->create([
-                    'category_id' => $request->category_id,
-                    'material_id' => $request->material_id,
-                    'store_id' => $request->store_id,
-                    'quantity' => $request->quintity,
-                    "actual_quantity" => $request->quintity,
-                    'unit_id' => $request->unit_id,
-                ]);
-            }
-            else{
-                $material_stock->quantity += $request->quintity;
-                $material_stock->actual_quantity += $request->quintity;
-                $material_stock->save();
-            }
-        }
-        else{
-            $stock = $this->stock
-            ->where('product_id', $request->product_id)
-            ->where('store_id', $request->store_id)
-            ->first();
-            if(empty($stock)){
-                $this->stock
-                ->create([
-                    'category_id' => $request->category_id,
-                    'product_id' => $request->product_id,
-                    'store_id' => $request->store_id,
-                    'quantity' => $request->quintity,
-                    'actual_quantity' => $request->quintity,
-                    'unit_id' => $request->unit_id,
-                ]);
-            }
-            else{
-                $stock->quantity += $request->quintity;
-                $stock->actual_quantity += $request->quintity;
-                $stock->save();
+
+        // Automatic PurchaseInvoice creation
+        if ($totalPayment > 0) {
+            $invoice = $this->purchase_invoices->create([
+                'purchase_id' => $purchase->id,
+                'payment' => $totalPayment,
+                'due' => 0,
+                'date' => now()->toDateString(),
+            ]);
+
+            if (!empty($request->financial)) {
+                foreach ($request->financial as $f) {
+                    $amount = (float) ($f['amount'] ?? 0);
+                    if ($amount > 0) {
+                        $this->purchase_invoice_financials->create([
+                            'purchase_invoice_id' => $invoice->id,
+                            'financial_id' => $f['id'],
+                            'amount' => $amount,
+                        ]);
+
+                        // Deduct amount from financial balance
+                        $finAccount = FinantiolAcounting::find($f['id']);
+                        if ($finAccount) {
+                            $finAccount->balance -= $amount;
+                            $finAccount->save();
+                        }
+                    }
+                }
             }
         }
 
         return response()->json([
-            'success' => 'You add data success'
+            'success' => 'You add data success',
+            'purchase_id' => $purchase->id,
         ]);
     }
 
     public function modify(Request $request, $id){
+        $purchase = $this->purchases->where('id', $id)->first();
+        if (!$purchase) {
+            return response()->json(['errors' => 'Purchase not found'], 404);
+        }
+
+        $items = $request->items;
+        if (empty($items) && is_array($request->items)) {
+            $items = $request->items;
+        } elseif (empty($items)) {
+            if ($request->type === 'material' && !empty($request->material_id)) {
+                $items = [[
+                    'item_id' => $request->material_id,
+                    'unit_id' => $request->unit_id,
+                    'count' => $request->quintity ?? 1,
+                ]];
+            } elseif ($request->type === 'product' && !empty($request->product_id)) {
+                $items = [[
+                    'item_id' => $request->product_id,
+                    'unit_id' => $request->unit_id,
+                    'count' => $request->quintity ?? 1,
+                ]];
+            }
+        }
+        $request->merge(['items' => $items]);
+
         $validator = Validator::make($request->all(), [
-            'category_id' => ['exists:purchase_categories,id'],
-            'product_id' => ['exists:purchase_products,id'],
-
-            'material_id' => ['exists:materials,id'],
-            'category_material_id' => ['exists:material_categories,id'],
-            "type" => ["required", "in:material,product"],
-
+            'type' => ['required', 'in:material,product'],
             'store_id' => ['required', 'exists:purchase_stores,id'],
-            'unit_id' => ['required', 'exists:units,id'],
-            'total_coast' => ['required', 'numeric'],
-            'quintity' => ['required', 'numeric'],
+            'supplier_id' => ['required', 'exists:suppliers,id'],
+            'total_coast' => ['required', 'numeric', 'min:0'],
             'date' => ['required', 'date'],
+            'receipt' => ['nullable'],
 
-            'financial' => ['array'],
-            'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
-            'financial.*.amount' => ['required', 'numeric'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.item_id' => ['required'],
+            'items.*.unit_id' => ['nullable', 'exists:units,id'],
+            'items.*.count' => ['nullable', 'numeric', 'min:0.01'],
+
+            'financial' => ['nullable', 'array'],
+            'financial.*.id' => ['required_with:financial', 'exists:finantiol_acountings,id'],
+            'financial.*.amount' => ['required_with:financial', 'numeric', 'min:0.01'],
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
+
+        if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
-            ],400);
-        }// 
-
-        if (empty($request->material_id) && $request->type == "material") {
-            return response()->json([
-                "errors" => "material is required"
-            ], 400);
-        }
-        if (empty($request->product_id) && $request->type == "product") {
-            return response()->json([
-                "errors" => "material is required"
             ], 400);
         }
 
-        $purchases = $this->purchases
-        ->where('id', $id)
-        ->first();
-        if(empty($purchases)){
-            return response()->json([
-                'errors' => 'id is wrong'
-            ], 400);
-        }
-        $purchaseRequest = $validator->validated();
-        $purchaseRequest['admin_id'] = $request->user()->id;
-        if (!empty($request->receipt)) {
-            $imag_path = $this->upload($request, 'receipt', 'admin/purchases/receipt');
-            $purchaseRequest['receipt'] = $imag_path;
-            $this->deleteImage($purchases->receipt);
-        }
-        $purchases
-        ->update($purchaseRequest);
-        $purchase_financial = $this->purchase_financial
-        ->where('purchase_id', $id)
-        ->get();
-        foreach ($purchase_financial as $item) {
-            $financial = FinantiolAcounting::
-            where("id", $item->financial_id)
-            ->first();
-            if($financial){
-                $financial->balance += $item->amount;
-                $financial->save();
+        $totalCost = (float) $request->total_coast;
+        $totalPayment = 0;
+        if (!empty($request->financial)) {
+            foreach ($request->financial as $f) {
+                $totalPayment += (float) ($f['amount'] ?? 0);
             }
         }
-        $this->purchase_financial
-        ->where('purchase_id', $id)
-        ->delete();
-        if($request->financial){
-            foreach ($request->financial as $item) {
-                $this->purchase_financial
-                ->create([
-                    'purchase_id' => $id,
-                    'financial_id' => $item['id'],
-                    'amount' => $item['amount'],
-                ]);
+        $due = max(0, $totalCost - $totalPayment);
 
-                $financial = FinantiolAcounting::
-                where("id", $item['id'])
-                ->first();
-                if($financial){
-                    $financial->balance -= $item['amount'];
-                    $financial->save();
+        $totalQuantity = 0;
+        foreach ($items as $itemData) {
+            $totalQuantity += (float) ($itemData['count'] ?? 1);
+        }
+
+        $purchaseData = [
+            'type' => $request->type,
+            'store_id' => $request->store_id,
+            'supplier_id' => $request->supplier_id,
+            'total_coast' => $totalCost,
+            'payment' => $totalPayment,
+            'due' => $due,
+            'quintity' => $totalQuantity,
+            'date' => $request->date,
+            'admin_id' => $request->user() ? $request->user()->id : $purchase->admin_id,
+        ];
+
+        if ($request->hasFile('receipt')) {
+            $purchaseData['receipt'] = $this->upload($request, 'receipt', 'admin/purchases/receipt');
+            if ($purchase->receipt) {
+                $this->deleteImage($purchase->receipt);
+            }
+        }
+
+        $purchase->update($purchaseData);
+
+        // Remove old items
+        $this->purchase_materials->where('purchase_id', $id)->delete();
+        $this->purchase_product_items->where('purchase_id', $id)->delete();
+
+        // Re-save items
+        if ($request->type === 'material') {
+            foreach ($items as $item) {
+                $material = Material::find($item['item_id']);
+                $itemCount = (float) ($item['count'] ?? 1);
+                $unitId = !empty($item['unit_id']) ? $item['unit_id'] : $material?->unit_id;
+
+                $this->purchase_materials->create([
+                    'purchase_id' => $id,
+                    'category_material_id' => $material?->category_id,
+                    'material_id' => $item['item_id'],
+                    'unit_id' => $unitId,
+                    'count' => $itemCount,
+                ]);
+            }
+        } else {
+            foreach ($items as $item) {
+                $product = PurchaseProduct::find($item['item_id']);
+                $itemCount = (float) ($item['count'] ?? 1);
+                $unitId = !empty($item['unit_id']) ? $item['unit_id'] : null;
+
+                $this->purchase_product_items->create([
+                    'purchase_id' => $id,
+                    'category_id' => $product?->category_id,
+                    'product_id' => $item['item_id'],
+                    'unit_id' => $unitId,
+                    'count' => $itemCount,
+                ]);
+            }
+        }
+
+        // Refund previous invoice financials
+        $oldInvoices = $this->purchase_invoices->where('purchase_id', $id)->with('financials')->get();
+        foreach ($oldInvoices as $inv) {
+            foreach ($inv->financials as $fin) {
+                $account = FinantiolAcounting::find($fin->financial_id);
+                if ($account) {
+                    $account->balance += $fin->amount;
+                    $account->save();
                 }
             }
+            $inv->financials()->delete();
+            $inv->delete();
         }
-        
-        // deduct from stock
-        if($request->type == "material"){
-            $material_stock = $this->material_stock
-            ->where('material_id', $request->material_id)
-            ->where('store_id', $request->store_id)
-            ->first();
-            if(empty($material_stock)){
-                $this->material_stock
-                ->create([
-                    'category_id' => $request->category_id,
-                    'material_id' => $request->material_id,
-                    'store_id' => $request->store_id,
-                    'quantity' => $request->quintity - $purchases->quintity,
-                    'unit_id' => $request->unit_id,
-                    "actual_quantity" => $request->quintity - $purchases->quintity,
-                ]);
-            }
-            else{
-                $material_stock->quantity += $request->quintity - $purchases->quintity;
-                $material_stock->actual_quantity += $request->quintity - $purchases->quintity;
-                $material_stock->save();
-            }
-        }
-        else{
-            $stock = $this->stock
-            ->where('product_id', $request->product_id)
-            ->where('store_id', $request->store_id)
-            ->first();
-            if(empty($stock)){
-                $this->stock
-                ->create([
-                    'category_id' => $request->category_id,
-                    'product_id' => $request->product_id,
-                    'store_id' => $request->store_id,
-                    'quantity' => $request->quintity - $purchases->quintity,
-                    'actual_quantity' => $request->quintity - $purchases->quintity,
-                    'unit_id' => $request->unit_id,
-                ]);
-            }
-            else{
-                $stock->actual_quantity += $request->quintity - $purchases->quintity;
-                $stock->quantity += $request->quintity - $purchases->quintity;
-                $stock->save();
+
+        // Create new invoice and financials
+        if ($totalPayment > 0) {
+            $invoice = $this->purchase_invoices->create([
+                'purchase_id' => $id,
+                'payment' => $totalPayment,
+                'due' => 0,
+                'date' => now()->toDateString(),
+            ]);
+
+            if (!empty($request->financial)) {
+                foreach ($request->financial as $f) {
+                    $amount = (float) ($f['amount'] ?? 0);
+                    if ($amount > 0) {
+                        $this->purchase_invoice_financials->create([
+                            'purchase_invoice_id' => $invoice->id,
+                            'financial_id' => $f['id'],
+                            'amount' => $amount,
+                        ]);
+
+                        $finAccount = FinantiolAcounting::find($f['id']);
+                        if ($finAccount) {
+                            $finAccount->balance -= $amount;
+                            $finAccount->save();
+                        }
+                    }
+                }
             }
         }
 
         return response()->json([
-            'success' => 'You update data success'
+            'success' => 'You update data success',
         ]);
     }
 
-    // public function delete(Request $request, $id){
-    //     $purchases = $this->purchases
-    //     ->where('id', $id)
-    //     ->first();
-    //     if(empty($purchases)){
-    //         return response()->json([
-    //             'errors' => 'id is wrong'
-    //         ], 400);
-    //     }
-    //     $this->deleteImage($purchases->receipt);
-    //     $purchases->delete();
+    public function invoices(Request $request, $id){
+        $invoices = $this->purchase_invoices
+            ->with('financials.financial:id,name')
+            ->where('purchase_id', $id)
+            ->latest()
+            ->get()
+            ->map(function($invoice){
+                return [
+                    'id' => $invoice->id,
+                    'purchase_id' => $invoice->purchase_id,
+                    'payment' => (float) $invoice->payment,
+                    'due' => (float) $invoice->due,
+                    'date' => $invoice->date,
+                    'created_at' => $invoice->created_at?->format('Y-m-d H:i'),
+                    'financials' => $invoice->financials->map(function($f){
+                        return [
+                            'id' => $f->id,
+                            'financial_id' => $f->financial_id,
+                            'name' => $f->financial?->name ?? '-',
+                            'amount' => (float) $f->amount,
+                        ];
+                    }),
+                ];
+            });
 
-    //     return response()->json([
-    //         'success' => 'You delete data success'
-    //     ]);
-    // }
+        return response()->json([
+            'invoices' => $invoices,
+        ]);
+    }
+
+    public function add_invoice(Request $request, $id){
+        $purchase = $this->purchases->where('id', $id)->first();
+        if (!$purchase) {
+            return response()->json(['errors' => 'Purchase not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'payment' => ['required', 'numeric', 'min:0.01'],
+            'due' => ['nullable', 'numeric', 'min:0'],
+            'date' => ['required', 'date'],
+            'financial' => ['required', 'array', 'min:1'],
+            'financial.*.id' => ['required', 'exists:finantiol_acountings,id'],
+            'financial.*.amount' => ['required', 'numeric', 'min:0.01'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $payment = (float) $request->payment;
+        $invoiceDue = (float) ($request->due ?? 0);
+
+        $invoice = $this->purchase_invoices->create([
+            'purchase_id' => $id,
+            'payment' => $payment,
+            'due' => $invoiceDue,
+            'date' => $request->date,
+        ]);
+
+        foreach ($request->financial as $f) {
+            $amount = (float) ($f['amount'] ?? 0);
+            if ($amount > 0) {
+                $this->purchase_invoice_financials->create([
+                    'purchase_invoice_id' => $invoice->id,
+                    'financial_id' => $f['id'],
+                    'amount' => $amount,
+                ]);
+
+                $account = FinantiolAcounting::find($f['id']);
+                if ($account) {
+                    $account->balance -= $amount;
+                    $account->save();
+                }
+            }
+        }
+
+        // Update purchase total payment and due
+        $purchase->payment = (float) $purchase->payment + $payment;
+        $purchase->due = max(0, (float) $purchase->total_coast - (float) $purchase->payment);
+        $purchase->save();
+
+        return response()->json([
+            'success' => 'Invoice payment added successfully',
+            'invoice' => $invoice,
+        ]);
+    }
 }

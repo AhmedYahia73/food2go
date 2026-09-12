@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('purchase_id')->constrained('purchases')->onDelete('cascade');
             $table->decimal('payment', 10, 2)->default(0);
             $table->decimal('due', 10, 2)->default(0);
+            $table->date('date')->nullable();
             $table->timestamps();
         });
     }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('purchases', function (Blueprint $table) { 
             $table->decimal('payment', 10, 2)->default(0);
             $table->decimal('due', 10, 2)->default(0);
+            $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
         });
     }
 

@@ -756,6 +756,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/add', 'create')->middleware('can:add_purchase');
         Route::post('/update/{id}', 'modify')->middleware('can:update_purchase');
         Route::delete('/delete/{id}', 'delete')->middleware('can:delete_purchase');
+        Route::get('/invoices/{id}', 'invoices')->middleware('can:view_purchase');
+        Route::post('/invoices/add/{id}', 'add_invoice')->middleware('can:add_purchase');
     });
     
     Route::controller(WastedController::class)
