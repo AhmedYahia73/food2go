@@ -233,6 +233,14 @@ class MaterialController extends Controller
         ->create($productRequest);
         $matrial_store = $request->matrial_store ?? [];
         foreach ($matrial_store as $item) {
+            MaterialStock::create([
+                'category_id' => $request->category_id,
+                'material_id' => $product->id,
+                'store_id' => $item['store_id'],
+                'quantity' => $item['start_stock'],
+                'unit_id' => $item['unit_id'],
+                'actual_quantity' => $item['start_stock'],
+            ]);
             $product->start_stock()
             ->create([
                 "start_stock" => $item['start_stock'],
