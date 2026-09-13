@@ -33,11 +33,11 @@ class PurchaseTransferController extends Controller
         ->with('category', 'product', 'from_store', 'to_store', 'admin',
         'material', 'category_material');
 
-        if ($request->from_store_id !== 'all') {
+        if ($request->from_store_id && $request->from_store_id !== 'all') {
             $query->where('from_store_id', $request->from_store_id);
         }
 
-        if ($request->to_store_id !== 'all') {
+        if ($request->to_store_id && $request->to_store_id !== 'all') {
             $query->where('to_store_id', $request->to_store_id);
         }
 
