@@ -29,9 +29,20 @@ class PurchaseTransferController extends Controller
 
 
     public function view(Request $request){ 
-        $purchases = $this->purchases
+        $query = $this->purchases
         ->with('category', 'product', 'from_store', 'to_store', 'admin',
-        'material', 'category_material')
+        'material', 'category_material');
+
+        if ($request->filled('from_store_id') && $request->from_store_id !== 'all') {
+            $query->where('from_store_id', $request->from_store_id);
+        }
+
+        if ($request->filled('to_store_id') && $request->to_store_id !== 'all') {
+            $query->where('to_store_id', $request->to_store_id);
+        }
+
+        $purchases = $query
+        ->latest('id')
         ->get()
         ->map(function($item){
             return [
