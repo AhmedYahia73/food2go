@@ -18,13 +18,14 @@ class PendingOrderController extends Controller
 
     public function get_pending_orders(Request $request){ 
      
-        $time_sittings = TimeSittings::
-        get();
+        $branch_id = $request->user()->branch_id ?? null;
+        $branch_sittings = $branch_id ? TimeSittings::where('branch_id', $branch_id)->get() : collect();
+        $time_sittings = $branch_sittings->count() > 0 ? $branch_sittings : TimeSittings::get();
 
         $items = [];
         $count = 0;
-        $to = isset($time_sittings[0]) ? $time_sittings[0] : 0; 
-        $from = isset($time_sittings[0]) ? $time_sittings[0] : 0;
+        $to = isset($time_sittings[0]) ? $time_sittings[0] : null; 
+        $from = isset($time_sittings[0]) ? $time_sittings[0] : null;
         foreach ($time_sittings as $item) {
             $items[$item->branch_id][] = $item;
         }
@@ -33,28 +34,36 @@ class PendingOrderController extends Controller
                 $count = count($item);
                 $to = $item[$count - 1];
             } 
-            if($from->from > $item[0]->from){
+            if($from && $from->from > $item[0]->from){
                 $from = $item[0];
             }
         }
-        if ($time_sittings->count() > 0) {
-            $from = $from->from;
+        if ($time_sittings->count() > 0 && $from && $to) {
+            $from_val = $from->from;
             $end = date("Y-m-d") . ' ' . $to->from;
             $hours = $to->hours;
             $minutes = $to->minutes;
-            $from = date("Y-m-d") . ' ' . $from;
-            $start = Carbon::parse($from);
+            $from_val = date("Y-m-d") . ' ' . $from_val;
+            $start = Carbon::parse($from_val);
             $end = Carbon::parse($end);
             $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
             if ($start >= $end) {
                 $end = $end->addDay();
             }
-            if($start >= now()){
+            // Extend closing by 1 hour (after end by one hour)
+            $end = $end->copy()->addHour();
+
+            if ($start >= now()) {
                 $start = $start->subDay();
+                $end = $end->subDay();
             } 
         } else {
             $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59')->addHour();
+            if ($start >= now()) {
+                $start = $start->subDay();
+                $end = $end->subDay();
+            }
         } 
 
         $all_orders = $this->orders
@@ -77,13 +86,38 @@ class PendingOrderController extends Controller
             elseif($item->order_type == "delivery"){
                 $status = $item->delivery_status;
             } 
+
+            $orderDetails = $item->order_details;
+            if (is_string($orderDetails)) {
+                $decoded = json_decode($orderDetails, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $orderDetails = $decoded;
+                }
+            }
+
+            $orderNumber = ($item->order_number && $item->order_number !== 'null') ? $item->order_number : $item->id;
+            $customerName = null;
+            $phone = null;
+            if ($item->user_id && $item->user_id !== 'null') {
+                $u = \App\Models\User::find($item->user_id);
+                if ($u) {
+                    $customerName = trim(($u->f_name ?? '') . ' ' . ($u->l_name ?? '')) ?: ($u->name ?? null);
+                    $phone = $u->phone ?? null;
+                }
+            }
+
 			return [
 				'id' => $item->id,
 				'amount' => $item->amount,
-				'order_details' => $item->order_details,
-				'order_number' => $item->order_number,
-				'notes' => $item->notes,
+				'order_details' => $orderDetails,
+				'order_number' => $orderNumber,
+				'notes' => ($item->notes && $item->notes !== 'null') ? $item->notes : null,
 				'status' => $status,
+                'created_at' => $item->created_at ? $item->created_at->toIso8601String() : null,
+                'date' => $item->date ?: ($item->created_at ? $item->created_at->toDateString() : null),
+                'customer_name' => $customerName,
+                'phone' => $phone,
+                'prepare_order' => $item->prepare_order ?? 0,
 			];
 		});
 
