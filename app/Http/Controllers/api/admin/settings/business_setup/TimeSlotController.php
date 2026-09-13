@@ -192,8 +192,18 @@ class TimeSlotController extends Controller
 
         $time_setting = $this->time_setting
         ->where('id', $id)
-        ->delete();
-        
+        ->first();
+
+        if ($time_setting) {
+            $time_setting->delete();
+        } else {
+            // If already deleted directly or by query builder, still ensure ChangeLog records the delete for sync
+            \App\Models\ChangeLog::create([
+                'table_name' => 'time_sittings',
+                'record_id' => $id,
+                'op' => 'delete',
+            ]);
+        }
 
         return response()->json([
             'success' => "You delete data success",
