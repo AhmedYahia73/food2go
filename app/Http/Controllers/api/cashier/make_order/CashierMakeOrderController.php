@@ -421,8 +421,7 @@ class CashierMakeOrderController extends Controller
         // cashier_id, user_id
         // products[{product_id, addons[{addon_id, count}], exclude_id[], extra_id[], 
         // variation[{variation_id, option_id[]}], count}]
-        if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
-        && !$request->repeated){
+        if($this->is_repeated_order($request)){
             return response()->json([
                 "errors" => "order is repeated"
             ], 400);
@@ -745,8 +744,7 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $reaturant_name = $this->company_info
         ->first()?->name; 
-        if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
-        && !$request->repeated){
+        if($this->is_repeated_order($request)){
             return response()->json([
                 "errors" => "order is repeated"
             ], 400);
@@ -2500,6 +2498,18 @@ class CashierMakeOrderController extends Controller
         return $increment;
     }
 
+    public function is_repeated_order($request){
+        if ($request->repeated) {
+            return false;
+        }
+
+        if (!empty($request->client_order_token)) {
+            return Order::where('client_order_token', $request->client_order_token)->exists();
+        }
+
+        return false;
+    }
+
     public function last_order($amount, $total_tax, $total_discount){
         $order = Order::
         orderByDesc("created_at")
@@ -2515,8 +2525,7 @@ class CashierMakeOrderController extends Controller
     }
 
     public function print_takeaway_order(TakawayRequest $request){
-               if($this->last_order($request->amount, $request->total_tax, $request->total_discount)
-        && !$request->repeated){
+        if($this->is_repeated_order($request)){
             return response()->json([
                 "errors" => "order is repeated"
             ], 400);

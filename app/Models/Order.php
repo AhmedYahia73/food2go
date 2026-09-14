@@ -87,7 +87,8 @@ class Order extends Model
         'void_reason', 
         "is_read",
         "prepare_order",
-        'order_active' // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
+        'order_active', // ده عشان لو مكملش طلب الاوردر يتحفظ فقط
+        'client_order_token',
     ];
     protected $appends = ['order_date', 'status_payment', 'order_details_data'];
 

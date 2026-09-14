@@ -70,6 +70,7 @@ class DineinOrderRequest extends FormRequest
             'source' => 'sometimes',
             'module_order_number' => ['sometimes'],
             'table_id' => ['required', 'exists:cafe_tables,id'],
+            'client_order_token' => ['sometimes', 'nullable', 'string'],
         ];
     }
 

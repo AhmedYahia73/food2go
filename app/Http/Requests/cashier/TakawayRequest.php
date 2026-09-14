@@ -73,6 +73,7 @@ class TakawayRequest extends FormRequest
 
             'service_fees_id' => ["exists:service_fees,id"],
             'service_fees' => ["numeric"],
+            'client_order_token' => ['sometimes', 'nullable', 'string'],
         ];
     }
 

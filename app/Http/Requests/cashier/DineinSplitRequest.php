@@ -42,6 +42,7 @@ class DineinSplitRequest extends FormRequest
             'free_discount' => ['numeric', 'sometimes'],
             'due_module' => ['numeric', 'sometimes'],
             'module_order_number' => ['sometimes'],
+            'client_order_token' => ['sometimes', 'nullable', 'string'],
 
             'bundles' => ['array'],
             'bundles.*.count' => ['required', "numeric"],
