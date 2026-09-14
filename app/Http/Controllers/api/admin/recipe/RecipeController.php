@@ -5,11 +5,13 @@ namespace App\Http\Controllers\api\admin\recipe;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Recipe;
 use App\Models\PurchaseCategory;
 use App\Models\Unit;
 use App\Models\PurchaseProduct;
+use App\Models\PurchaseStore;
 
 class RecipeController extends Controller
 {
@@ -48,12 +50,16 @@ class RecipeController extends Controller
         ->select("id", "name")
         ->where("status", 1)
         ->get();
+        $stores = PurchaseStore::select("id", "name")
+        ->where("status", 1)
+        ->get();
 
         return response()->json([
             "recipe" => $recipe,
             "store_categories" => $categories,
             "store_products" => $products,
             "units" => $units,
+            "stores" => $stores,
         ]);
     }
 
@@ -150,5 +156,77 @@ class RecipeController extends Controller
         return response()->json([
             "success" => "You delete recipe success"
         ]);
+    }
+
+    public function addProductRecipe(Request $request, $id = null){
+        $productId = $id ?? $request->product_id;
+
+        $validator = Validator::make(array_merge($request->all(), ['product_id' => $productId]), [
+            'product_id' => ['required', 'exists:products,id'],
+            'name' => ['required'],
+            'description' => ['sometimes', 'nullable'],
+            'status' => ['required', 'boolean'],
+            'category_id' => ['required', 'exists:purchase_categories,id'],
+            'min_stock' => ['sometimes', 'nullable', 'numeric'],
+            'unit_id' => ['required', 'exists:units,id'],
+            'weight' => ['required', 'numeric'],
+            'product_store' => ['sometimes', 'array'],
+            'product_store.*.start_stock' => ['required', 'numeric'],
+            'product_store.*.cost' => ['required', 'numeric'],
+            'product_store.*.unit_id' => ['required', 'exists:units,id'],
+            'product_store.*.store_id' => ['required', 'exists:purchase_stores,id'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 1. Create Purchase Product
+            $product = $this->product->create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'status' => $request->status,
+                'category_id' => $request->category_id,
+                'min_stock' => $request->min_stock ?? 0,
+            ]);
+
+            // 2. Create Start Stocks for each store
+            $product_store = $request->product_store ?? [];
+            foreach ($product_store as $item) {
+                $product->start_stock()->create([
+                    "start_stock" => $item['start_stock'],
+                    "cost" => $item['cost'],
+                    "unit_id" => $item['unit_id'],
+                    "store_id" => $item['store_id'],
+                ]);
+            }
+
+            // 3. Create Recipe linking menu product with new store product
+            $recipe = $this->recipe->create([
+                "product_id" => $productId,
+                "store_product_id" => $product->id,
+                "store_category_id" => $product->category_id,
+                "unit_id" => $request->unit_id,
+                "weight" => $request->weight,
+                "status" => 1,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'Product and recipe added successfully',
+                'product' => $product,
+                'recipe' => $recipe,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'errors' => 'Failed to create product recipe: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

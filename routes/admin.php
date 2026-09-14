@@ -624,6 +624,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('item/{id}', 'recipe_item')->middleware('can:view_recipe');
         Route::get('/{id}', 'view')->middleware('can:view_recipe');
         Route::post('/add', 'create')->middleware('can:add_recipe');
+        Route::post('/add_product_recipe/{id?}', 'addProductRecipe')->middleware('can:add_recipe');
         Route::post('/update/{id}', 'modify')->middleware('can:update_recipe');
         Route::delete('/delete/{id}', 'delete')->middleware('can:delete_recipe');
     });
