@@ -33,18 +33,24 @@ class PurchaseTransferController extends Controller
         ->with('category', 'product', 'from_store', 'to_store', 'admin',
         'material', 'category_material');
 
-        if ($request->from_store_id && $request->from_store_id !== 'all') {
+        if ($request->filled('from_store_id') && !in_array($request->from_store_id, ['all', 'null', 'undefined', ''])) {
             $query->where('from_store_id', $request->from_store_id);
         }
 
-        if ($request->to_store_id && $request->to_store_id !== 'all') {
+        if ($request->filled('to_store_id') && !in_array($request->to_store_id, ['all', 'null', 'undefined', ''])) {
             $query->where('to_store_id', $request->to_store_id);
         }
 
-        $purchases = $query
+        $perPage = (int) $request->get('per_page', 20);
+        if ($perPage <= 0) {
+            $perPage = 20;
+        }
+
+        $paginated = $query
         ->latest('id')
-        ->get()
-        ->map(function($item){
+        ->paginate($perPage);
+
+        $paginated->getCollection()->transform(function($item){
             return [
                 'id' => $item->id,
                 'from_store_id' => $item->from_store_id,
@@ -105,7 +111,13 @@ class PurchaseTransferController extends Controller
         });
 
         return response()->json([
-            'purchases' => $purchases,
+            'purchases' => $paginated,
+            'pagination' => [
+                'total' => $paginated->total(),
+                'per_page' => $paginated->perPage(),
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+            ],
             'categories' => $categories,
             'products' => $products,
             'stores' => $stores, 
