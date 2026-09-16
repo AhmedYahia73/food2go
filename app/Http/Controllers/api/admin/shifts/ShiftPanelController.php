@@ -52,8 +52,8 @@ class ShiftPanelController extends Controller
 
         $total_orders = Order::
         select("id")
-        ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-        ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+        ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+        ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
         ->where("is_void", 0) 
         ->where("due", 0)
         ->where("due_module", 0)
@@ -87,7 +87,7 @@ class ShiftPanelController extends Controller
         ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
         ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
         ->sum('amount');
-        $start_amount = $shift->amount ?? 0; 
+        $start_amount = $shift->amount ?? null; 
         $expenses = $expenses;
         $financial = FinantiolAcounting::
         where("main", 1)
@@ -96,7 +96,7 @@ class ShiftPanelController extends Controller
         })
         ->first();    
         $order_financial = OrderFinancial::
-        where("financial_id", $financial->id ?? 0)
+        where("financial_id", $financial->id ?? null)
         ->whereHas("order", function($query) use($cashier_shifts){
             $query
             ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id)
@@ -107,7 +107,7 @@ class ShiftPanelController extends Controller
         })
         ->sum("amount");
         $expenses = Expense::
-        where("financial_account_id", $financial->id ?? 0)
+        where("financial_account_id", $financial->id ?? null)
         ->where('created_at', '>=', $shift->start_time ?? now())
         ->where('created_at', '<=', $shift->end_time ?? now())
         ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
@@ -115,7 +115,7 @@ class ShiftPanelController extends Controller
         ->sum('amount');
         $net_cash_drawer = $order_financial + $start_amount - $expenses;
         $actual_total = $total_orders + $start_amount - $expenses; 
-        if($cashier_shifts?->cashier_man?->hall_orders ?? 0){
+        if($cashier_shifts?->cashier_man?->hall_orders ?? null){
             $hall_orders = CafeLocation::query()
             ->selectRaw("
                 cafe_locations.id as hall_id,
@@ -125,15 +125,15 @@ class ShiftPanelController extends Controller
             ->leftJoin('cafe_tables', 'cafe_tables.location_id', '=', 'cafe_locations.id')
             ->leftJoin('orders', function ($join) use ($request) {
                 $join->on('orders.table_id', '=', 'cafe_tables.id')
-                    ->where('orders.branch_id', $cashier_shifts?->cashier_man?->branch_id ?? 0)
-                    ->where('orders.cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
+                    ->where('orders.branch_id', $cashier_shifts?->cashier_man?->branch_id ?? null)
+                    ->where('orders.cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
                     ->where('orders.is_void', 0)
-                    ->where('orders.shift', $cashier_shifts?->cashier_man?->shift_number ?? 0);
+                    ->where('orders.shift', $cashier_shifts?->cashier_man?->shift_number ?? null);
             })
             ->groupBy('cafe_locations.id', 'cafe_locations.name')
             ->get();
         }
-        if ((($cashier_shifts?->cashier_man?->report ?? 0) == "unactive" ) ||
+        if ((($cashier_shifts?->cashier_man?->report ?? null) == "unactive" ) ||
         $cashier_shifts?->cashier_man?->enter_amount ) {
             $validator = Validator::make($request->all(), [
                 'amount' => ['required', 'numeric'], 
@@ -148,12 +148,12 @@ class ShiftPanelController extends Controller
             ->whereHas('branch', function($query) use($cashier_shifts){
                 return $query->where("branches.id", $cashier_shifts?->cashier_man?->branch_id);
             })
-            ->first()?->id ?? 0;
+            ->first()?->id ?? null;
             
             $orders_ids = Order::
             select("id")
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->pluck('id')
@@ -173,15 +173,15 @@ class ShiftPanelController extends Controller
             ->sum('amount');
             $gap = $total_financial_accounts - $cash_expenses - $request->amount; 
             $shift = CashierShift::
-            where("cashier_man_id", $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where("cashier_id", $cashier_shifts?->cashier_man?->cashier_id ?? 0)
+            where("cashier_man_id", $cashier_shifts?->cashier_man?->id ?? null)
+            ->where("cashier_id", $cashier_shifts?->cashier_man?->cashier_id ?? null)
             ->orderByDesc("created_at")
             ->first()?->shift ?? null;
             CashierGap::create([
-                'cashier_id' => $cashier_shifts?->cashier_man?->cashier_id ?? 0,
-                'cashier_man_id' => $cashier_shifts?->cashier_man?->id ?? 0,
+                'cashier_id' => $cashier_shifts?->cashier_man?->cashier_id ?? null,
+                'cashier_man_id' => $cashier_shifts?->cashier_man?->id ?? null,
                 'amount' => $request->amount,
-                'shift' => $cashier_shifts?->cashier_man?->shift_number ?? 0,
+                'shift' => $cashier_shifts?->cashier_man?->shift_number ?? null,
             ]);  
         }   
         if ($cashier_shifts?->cashier_man?->report == "unactive") {
@@ -200,30 +200,30 @@ class ShiftPanelController extends Controller
             $cashier_shifts->save();
             return response()->json($arr);
         }
-        if($cashier_shifts?->cashier_man?->report ?? 0 != "unactive"){
+        if($cashier_shifts?->cashier_man?->report ?? null != "unactive"){
             $order_count = Order::
             select("id")
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->count();
             
             $void_order_count = Order::  
             where("is_void", 1)     
-            ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id ?? 0)
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id ?? null)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->count();
             $void_order_sum = Order::  
             where("is_void", 1)    
-            ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id ?? 0)
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id ?? null)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->sum("amount");
 
             $take_away_orders = Order::
             select("id")
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->where("order_type", "take_away") 
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
@@ -231,8 +231,8 @@ class ShiftPanelController extends Controller
             ->toArray();
             $delivery_orders = Order::
             select("id")
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->where("order_type", "delivery")
             ->where("due_from_delivery", 0)
             ->where("is_void", 0)  
@@ -241,8 +241,8 @@ class ShiftPanelController extends Controller
             ->toArray();
             $dine_in_orders = Order::
             select("id")
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->where("order_type", "dine_in")
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
@@ -250,8 +250,8 @@ class ShiftPanelController extends Controller
             ->toArray();
             
             $shift = CashierShift::
-            where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
+            where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
             ->first();
             $expenses = Expense::
             where('created_at', '>=', $shift->start_time ?? now())
@@ -270,15 +270,15 @@ class ShiftPanelController extends Controller
             
             $due_module = Order:: 
             where("due_module", ">", 0)
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("due_module");
             $due_user = Order:: 
             where("due", 1)
-            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->where("is_void", 0)  
             ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
             ->sum("amount");
@@ -414,7 +414,7 @@ class ShiftPanelController extends Controller
                 })
                 ->orWhereHas("financial_accountigs");
             })
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->with("payment_method")
             ->groupBy("payment_method_id")
             ->groupBy("order_type")
@@ -435,7 +435,7 @@ class ShiftPanelController extends Controller
                 $q->where("status", 1)
                 ->orWhereNull("status");
             }) 
-            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+            ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
             ->with("payment_method")
             ->groupBy("payment_method_id")
             ->groupBy("order_type")
@@ -492,7 +492,7 @@ class ShiftPanelController extends Controller
                 ->join('group_products', 'group_products.id', '=', 'orders.module_id')
                 ->with("group_module")
                 ->groupBy("module_id", 'group_products.name')
-                ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+                ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
                 ->get()
                 ->map(function($item){
                     return [
@@ -517,13 +517,13 @@ class ShiftPanelController extends Controller
                     $q->where("orders.status", 1)
                     ->orWhereNull("orders.status");
                 })
-                ->where('orders.shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+                ->where('orders.shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
                 ->where("orders.is_void", 0)
                 ->with('captain') // لجلب بيانات الكابتن (الاسم وغيره) من العلاقة
                 ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
                 ->get();
                 $start_balance = [
-                    "amount" => $cashier_shift->amount ?? 0,
+                    "amount" => $cashier_shift->amount ?? null,
                     "financial" => $cashier_shifts?->financial?->name,
                 ];
                 $arr = [
@@ -539,7 +539,7 @@ class ShiftPanelController extends Controller
                     'group_modules' => $group_modules, 
                     'expenses' => $expenses, 
                     'online_order' => $online_order,
-                    'report_role' => $cashier_shifts?->cashier_man?->report ?? 0,
+                    'report_role' => $cashier_shifts?->cashier_man?->report ?? null,
                     "void_order_count" => $void_order_count,
                     "void_order_sum" => $void_order_sum,
                     "captain_order" => $captain_order,
@@ -551,11 +551,11 @@ class ShiftPanelController extends Controller
                 if(isset($hall_orders)){
                     $arr['hall_orders'] = $hall_orders;
                 }
-                if($cashier_shifts?->cashier_man?->service_fees ?? 0){
+                if($cashier_shifts?->cashier_man?->service_fees ?? null){
                     $service_fees = Order::
                     select("id")
-                    ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-                    ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+                    ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+                    ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
                     ->where("is_void", 0) 
                     ->where(function($query) {
                         $query->where('status', 1)
@@ -576,11 +576,11 @@ class ShiftPanelController extends Controller
                     ->sum('service_fees');
                     $arr['service_fees'] = $service_fees;
                 }
-                if($cashier_shifts?->cashier_man?->total_tax ?? 0){
+                if($cashier_shifts?->cashier_man?->total_tax ?? null){
                     $total_tax = Order::
                     select("id")
-                    ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-                    ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+                    ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+                    ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
                     ->where("is_void", 0) 
                     ->where(function($query) {
                         $query->where('status', 1)
@@ -602,7 +602,7 @@ class ShiftPanelController extends Controller
                     ->sum('total_tax');
                     $arr['total_tax'] = $total_tax;
                 } 
-                if($cashier_shifts?->cashier_man?->enter_amount ?? 0){
+                if($cashier_shifts?->cashier_man?->enter_amount ?? null){
                     $arr['gap'] = $gap;
                 }
                 $cashier_shifts->end_time = now();
@@ -626,7 +626,7 @@ class ShiftPanelController extends Controller
                     $q->where("orders.status", 1)
                     ->orWhereNull("orders.status");
                 })
-                ->where('orders.shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+                ->where('orders.shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
                 ->where("orders.is_void", 0)
                 ->with('captain') // لجلب بيانات الكابتن (الاسم وغيره) من العلاقة
                 ->groupBy("orders.captain_id", "finantiol_acountings.id", "finantiol_acountings.name")
@@ -642,7 +642,7 @@ class ShiftPanelController extends Controller
                     "total_orders" => $total_orders, 
                     'perimission' => true,
                     'financial_accounts' => $financial_accounts,
-                    'report_role' => $cashier_shifts?->cashier_man?->report ?? 0,
+                    'report_role' => $cashier_shifts?->cashier_man?->report ?? null,
                     'captain_order' => $captain_order,
                     "due_module" => $due_module,
                     "due_user" => $due_user,
@@ -652,14 +652,14 @@ class ShiftPanelController extends Controller
                 if(isset($hall_orders)){
                     $arr['hall_orders'] = $hall_orders;
                 }
-                if($cashier_shifts?->cashier_man?->enter_amount ?? 0){
+                if($cashier_shifts?->cashier_man?->enter_amount ?? null){
                     $arr['gap'] = $gap;
                 }
-                if($cashier_shifts?->cashier_man?->service_fees ?? 0){
+                if($cashier_shifts?->cashier_man?->service_fees ?? null){
                     $service_fees = Order::
                     select("id")
-                    ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-                    ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+                    ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+                    ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
                     ->where("is_void", 0) 
                     ->where(function($query) {
                         $query->where('status', 1)
@@ -681,11 +681,11 @@ class ShiftPanelController extends Controller
                     ->sum('service_fees');
                     $arr['service_fees'] = $service_fees;
                 }
-                if($cashier_shifts?->cashier_man?->total_tax ?? 0){
+                if($cashier_shifts?->cashier_man?->total_tax ?? null){
                     $total_tax = Order::
                     select("id")
-                    ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? 0)
-                    ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? 0)
+                    ->where('cashier_man_id', $cashier_shifts?->cashier_man?->id ?? null)
+                    ->where('shift', $cashier_shifts?->cashier_man?->shift_number ?? null)
                     ->where("is_void", 0) 
                     ->where(function($query) {
                         $query->where('status', 1)
