@@ -171,6 +171,14 @@ class PurchaseTransferController extends Controller
                     $stock->quantity -= $purchases->quintity;
                     $stock->actual_quantity -= $purchases->quintity;
                     $stock->save();
+                    if($stock->quantity < ($stock?->product?->min_stock ?? 0)){
+                        $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                        Notification::create([
+                            'branch_ids' => $branches_ids,
+                            'notification' => "المنتج {$stock?->product?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
+                            'is_read' => false,
+                        ]); 
+                    }
                 }
 
                 if(empty($to_store)){
@@ -228,6 +236,14 @@ class PurchaseTransferController extends Controller
                     $material_stock->quantity -= $purchases->quintity;
                     $material_stock->actual_quantity -= $purchases->quintity;
                     $material_stock->save();
+                    if($material_stock->quantity < ($material_stock?->material?->min_stock ?? 0)){
+                        $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                        Notification::create([
+                            'branch_ids' => $branches_ids,
+                            'notification' => "المادة الخام {$material_stock?->material?->name} وصل للحد الادنى فى المخزن {$material_stock?->store?->name} الكمية المتاحة الان {$material_stock?->quantity}",
+                            'is_read' => false,
+                        ]); 
+                    }
                 }
 
                 if(empty($to_store)){
