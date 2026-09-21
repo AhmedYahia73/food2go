@@ -1981,6 +1981,7 @@ class OrderController extends Controller
             'schedule:id,name', 
             'delivery:id,f_name,l_name'
         ])
+        ->where("status", "!=", 2) 
         ->orderByDesc("created_at") // يفضل دائماً ترتيب الطلبات من الأحدث للأقدم
         ->get(); 
   
