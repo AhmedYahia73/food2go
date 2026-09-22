@@ -553,6 +553,18 @@ class PurchaseTransferController extends Controller
                         $fromStock->quantity        -= $quintity;
                         $fromStock->actual_quantity -= $quintity;
                         $fromStock->save();
+                        $minStock = (float)($fromStock?->material?->min_stock ?? 0);
+                        if(($minStock > 0 && $fromStock->quantity <= $minStock) || ($fromStock->quantity <= 0)){
+                            $branches_ids = $fromStock?->store?->branches?->pluck("id")->toArray() ?? [];
+                            $materialName = $fromStock?->material?->name ?? 'المادة الخام';
+                            $storeName = $fromStock?->store?->name ?? 'المخزن';
+                            $notification = Notification::create([
+                                'branch_ids' => $branches_ids,
+                                'notification' => "المادة الخام {$materialName} وصل للحد الادنى فى المخزن {$storeName} الكمية المتاحة الان {$material_stock->quantity}",
+                                'is_read' => false,
+                            ]); 
+                            NotificationEvent::dispatch($notification);
+                        }
                     } else {
                         $this->material_stock->create([
                             'category_id'     => $catMatId,
@@ -635,6 +647,18 @@ class PurchaseTransferController extends Controller
                         $fromStock->quantity        -= $quintity;
                         $fromStock->actual_quantity -= $quintity;
                         $fromStock->save();
+                        $minStock = (float)($fromStock?->product?->min_stock ?? 0);
+                        if(($minStock > 0 && $fromStock->quantity <= $minStock) || ($fromStock->quantity <= 0)){
+                            $branches_ids = $fromStock?->store?->branches?->pluck("id")->toArray() ?? [];
+                            $productName = $fromStock?->product?->name ?? 'المنتج';
+                            $storeName = $fromStock?->store?->name ?? 'المخزن';
+                            $notification = Notification::create([
+                                'branch_ids' => $branches_ids,
+                                'notification' => "المنتج {$productName} وصل للحد الادنى فى المخزن {$storeName} الكمية المتاحة الان {$stock->quantity}",
+                                'is_read' => false,
+                            ]); 
+                            NotificationEvent::dispatch($notification);
+                        }
                     } else {
                         $this->stock->create([
                             'category_id'     => $categoryId,
@@ -690,7 +714,7 @@ class PurchaseTransferController extends Controller
 
         $fromStore = $this->stores->find($fromStoreId);
         $toStore   = $this->stores->find($toStoreId);
-
+...............
         return response()->json([
             'success'         => 'Transfer completed successfully',
             'transfer_type'   => $transferType,
