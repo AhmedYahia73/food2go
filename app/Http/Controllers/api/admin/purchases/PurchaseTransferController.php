@@ -560,7 +560,7 @@ class PurchaseTransferController extends Controller
                             $storeName = $fromStock?->store?->name ?? 'المخزن';
                             $notification = Notification::create([
                                 'branch_ids' => $branches_ids,
-                                'notification' => "المادة الخام {$materialName} وصل للحد الادنى فى المخزن {$storeName} الكمية المتاحة الان {$material_stock->quantity}",
+                                'notification' => "المادة الخام {$materialName} وصل للحد الادنى فى المخزن {$storeName} الكمية المتاحة الان {$fromStock->quantity}",
                                 'is_read' => false,
                             ]); 
                             NotificationEvent::dispatch($notification);
@@ -654,7 +654,7 @@ class PurchaseTransferController extends Controller
                             $storeName = $fromStock?->store?->name ?? 'المخزن';
                             $notification = Notification::create([
                                 'branch_ids' => $branches_ids,
-                                'notification' => "المنتج {$productName} وصل للحد الادنى فى المخزن {$storeName} الكمية المتاحة الان {$stock->quantity}",
+                                'notification' => "المنتج {$productName} وصل للحد الادنى فى المخزن {$storeName} الكمية المتاحة الان {$fromStock->quantity}",
                                 'is_read' => false,
                             ]); 
                             NotificationEvent::dispatch($notification);
