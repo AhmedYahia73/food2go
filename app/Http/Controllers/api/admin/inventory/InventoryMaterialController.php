@@ -329,11 +329,12 @@ class InventoryMaterialController extends Controller
                 ]);
                 if($stock->quantity < ($stock?->material?->min_stock ?? 0)){
                     $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
-                    Notification::create([
+                    $notification = Notification::create([
                         'branch_ids' => $branches_ids,
                         'notification' => "المادة الخام {$stock?->material?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
                         'is_read' => false,
                     ]); 
+                    NotificationEvent::dispatch($notification);
                 }
             }
         }

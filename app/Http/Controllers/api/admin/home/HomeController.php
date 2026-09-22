@@ -306,27 +306,42 @@ class HomeController extends Controller
     }
 
     public function notifications_count(Request $request){
-        $notifications = Notification::
-        orderByDesc("created_at")
-        ->where("is_read", false);
+        $query = Notification::where("is_read", false);
         if($request->user()->role == "branch"){
-            $notifications->whereJsonContains("branch_ids", $request->user()->id);
+            $query->whereJsonContains("branch_ids", (int)$request->user()->id);
         }
-        $notifications->count();
+        $count = $query->count();
+        return response()->json([
+            "count" => $count,
+            "notifications_count" => $count
+        ]);
+    }
+
+    public function notifications(Request $request){
+        $query = Notification::orderByDesc("created_at");
+        if($request->user()->role == "branch"){
+            $query->whereJsonContains("branch_ids", (int)$request->user()->id);
+        }
+        $notifications = $query->paginate(10);
         return response()->json([
             "notifications" => $notifications
         ]);
     }
 
-    public function notifications(Request $request){
-        $notifications = Notification::
-        orderByDesc("created_at");
-        if($request->user()->role == "branch"){
-            $notifications->whereJsonContains("branch_ids", $request->user()->id);
+    public function mark_notification_read(Request $request){
+        $id = $request->input('id');
+        if($id){
+            Notification::where('id', $id)->update(['is_read' => true]);
+        } else {
+            $query = Notification::where('is_read', false);
+            if($request->user()->role == "branch"){
+                $query->whereJsonContains("branch_ids", (int)$request->user()->id);
+            }
+            $query->update(['is_read' => true]);
         }
-        $notifications->paginate(10);
         return response()->json([
-            "notifications" => $notifications
+            'success' => true,
+            'message' => 'Notification marked as read'
         ]);
     }
 

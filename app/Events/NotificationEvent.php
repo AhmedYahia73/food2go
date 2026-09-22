@@ -31,9 +31,8 @@ class NotificationEvent implements ShouldBroadcastNow
             new Channel('newNotification'),
         ];
         $branch_ids = $this->notification->branch_ids ?? null;
- 
 
-        if ($branch_ids) {
+        if (!empty($branch_ids) && is_iterable($branch_ids)) {
             foreach ($branch_ids as $branch_id) {
                 $channels[] = new Channel('newNotification.' . $branch_id);
             }
@@ -52,10 +51,17 @@ class NotificationEvent implements ShouldBroadcastNow
 
     public function broadcastWith(): array
     {
+        $notificationId = is_object($this->notification) ? ($this->notification->id ?? null) : null;
+        $createdAt = is_object($this->notification) && !empty($this->notification->created_at)
+            ? (is_string($this->notification->created_at) ? $this->notification->created_at : $this->notification->created_at->toISOString())
+            : now()->toISOString();
 
         $data = [ 
+            "id" => $notificationId,
             "notification" => $this->notification->notification ?? null,
-            "is_read" => $this->notification->is_read ?? false,
+            "is_read" => (bool)($this->notification->is_read ?? false),
+            "created_at" => $createdAt,
+            "branch_ids" => $this->notification->branch_ids ?? [],
         ];
         
         Log::info('📦 Broadcasting Data:', $data);

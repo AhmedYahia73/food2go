@@ -872,6 +872,7 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/', 'home')->middleware('can:view_home');
         Route::get('/notifications_count', 'notifications_count');
         Route::get('/notifications', 'notifications');
+        Route::post('/notifications/mark_as_read', 'mark_notification_read');
         Route::get('/home_data', 'home_data')->middleware('can:view_home');
         Route::get('/orders', 'home_orders_count')->middleware('can:view_home');
     });

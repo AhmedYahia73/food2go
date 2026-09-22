@@ -239,7 +239,7 @@ class PurchaseTransferController extends Controller
                     $material_stock->actual_quantity -= $purchases->quintity;
                     $material_stock->save();
                     if($material_stock->quantity < ($material_stock?->material?->min_stock ?? 0)){
-                        $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                        $branches_ids = $material_stock?->store?->branches?->pluck("id")->toArray();
                         $notification = Notification::create([
                             'branch_ids' => $branches_ids,
                             'notification' => "المادة الخام {$material_stock?->material?->name} وصل للحد الادنى فى المخزن {$material_stock?->store?->name} الكمية المتاحة الان {$material_stock?->quantity}",
