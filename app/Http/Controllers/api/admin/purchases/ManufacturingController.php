@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\purchases;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Events\NotificationEvent;
 
 use App\Models\PurchaseRecipe;
 use App\Models\PurchaseProduct;
@@ -17,6 +18,7 @@ use App\Models\PurchaseStore;
 use App\Models\PurchaseStock;
 use App\Models\Purchase;
 use App\Models\Material;
+use App\Models\Notification;
 
 class ManufacturingController extends Controller
 {
@@ -171,6 +173,15 @@ class ManufacturingController extends Controller
                 $stock->quantity -= $item['weight'];
                 $stock->actual_quantity -= $item['weight'];
                 $stock->save();
+                if($stock->quantity < ($stock?->product?->min_stock ?? 0)){
+                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                    $notification = Notification::create([
+                        'branch_ids' => $branches_ids,
+                        'notification' => "المنتج {$stock?->product?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
+                        'is_read' => false,
+                    ]); 
+                    NotificationEvent::dispatch($notification);
+                }
             }
         }
         $purchase_stock = $this->purchase_stock
