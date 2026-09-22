@@ -714,7 +714,6 @@ class PurchaseTransferController extends Controller
 
         $fromStore = $this->stores->find($fromStoreId);
         $toStore   = $this->stores->find($toStoreId);
-...............
         return response()->json([
             'success'         => 'Transfer completed successfully',
             'transfer_type'   => $transferType,
