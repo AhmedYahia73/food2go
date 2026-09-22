@@ -30,7 +30,12 @@ class NotificationEvent implements ShouldBroadcastNow
         $channels = [
             new Channel('newNotification'),
         ];
-        $branch_ids = $this->notification->branch_ids ?? null;
+        $branch_ids = null;
+        if (is_object($this->notification)) {
+            $branch_ids = $this->notification->branch_ids ?? null;
+        } elseif (is_array($this->notification)) {
+            $branch_ids = $this->notification['branch_ids'] ?? null;
+        }
 
         if (!empty($branch_ids) && is_iterable($branch_ids)) {
             foreach ($branch_ids as $branch_id) {
@@ -51,17 +56,37 @@ class NotificationEvent implements ShouldBroadcastNow
 
     public function broadcastWith(): array
     {
-        $notificationId = is_object($this->notification) ? ($this->notification->id ?? null) : null;
-        $createdAt = is_object($this->notification) && !empty($this->notification->created_at)
-            ? (is_string($this->notification->created_at) ? $this->notification->created_at : $this->notification->created_at->toISOString())
-            : now()->toISOString();
+        $notification = $this->notification;
+        $notificationId = null;
+        $text = null;
+        $isRead = false;
+        $createdAt = now()->toISOString();
+        $branchIds = [];
+
+        if (is_object($notification)) {
+            $notificationId = $notification->id ?? null;
+            $text = $notification->notification ?? null;
+            $isRead = (bool)($notification->is_read ?? false);
+            if (!empty($notification->created_at)) {
+                $createdAt = is_string($notification->created_at) ? $notification->created_at : $notification->created_at->toISOString();
+            }
+            $branchIds = $notification->branch_ids ?? [];
+        } elseif (is_array($notification)) {
+            $notificationId = $notification['id'] ?? null;
+            $text = $notification['notification'] ?? ($notification['message'] ?? null);
+            $isRead = (bool)($notification['is_read'] ?? false);
+            $createdAt = $notification['created_at'] ?? now()->toISOString();
+            $branchIds = $notification['branch_ids'] ?? [];
+        } else {
+            $text = (string)$notification;
+        }
 
         $data = [ 
             "id" => $notificationId,
-            "notification" => $this->notification->notification ?? null,
-            "is_read" => (bool)($this->notification->is_read ?? false),
+            "notification" => $text,
+            "is_read" => $isRead,
             "created_at" => $createdAt,
-            "branch_ids" => $this->notification->branch_ids ?? [],
+            "branch_ids" => is_array($branchIds) ? $branchIds : [],
         ];
         
         Log::info('📦 Broadcasting Data:', $data);

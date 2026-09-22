@@ -308,7 +308,12 @@ class HomeController extends Controller
     public function notifications_count(Request $request){
         $query = Notification::where("is_read", false);
         if($request->user()->role == "branch"){
-            $query->whereJsonContains("branch_ids", (int)$request->user()->id);
+            $branchId = (int)$request->user()->id;
+            $query->where(function($q) use ($branchId) {
+                $q->whereJsonContains("branch_ids", $branchId)
+                  ->orWhereJsonContains("branch_ids", (string)$branchId)
+                  ->orWhereNull("branch_ids");
+            });
         }
         $count = $query->count();
         return response()->json([
@@ -320,7 +325,12 @@ class HomeController extends Controller
     public function notifications(Request $request){
         $query = Notification::orderByDesc("created_at");
         if($request->user()->role == "branch"){
-            $query->whereJsonContains("branch_ids", (int)$request->user()->id);
+            $branchId = (int)$request->user()->id;
+            $query->where(function($q) use ($branchId) {
+                $q->whereJsonContains("branch_ids", $branchId)
+                  ->orWhereJsonContains("branch_ids", (string)$branchId)
+                  ->orWhereNull("branch_ids");
+            });
         }
         $notifications = $query->paginate(10);
         return response()->json([
@@ -335,7 +345,12 @@ class HomeController extends Controller
         } else {
             $query = Notification::where('is_read', false);
             if($request->user()->role == "branch"){
-                $query->whereJsonContains("branch_ids", (int)$request->user()->id);
+                $branchId = (int)$request->user()->id;
+                $query->where(function($q) use ($branchId) {
+                    $q->whereJsonContains("branch_ids", $branchId)
+                      ->orWhereJsonContains("branch_ids", (string)$branchId)
+                      ->orWhereNull("branch_ids");
+                });
             }
             $query->update(['is_read' => true]);
         }
