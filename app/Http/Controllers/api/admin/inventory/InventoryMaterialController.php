@@ -104,20 +104,53 @@ class InventoryMaterialController extends Controller
      */
     private function calculateMaterialStockCost(int $storeId, int $materialId, float $quantity): array
     {
-        $purchases = Purchase::where('store_id', $storeId)
-            ->where('material_id', $materialId)
-            ->orderByDesc('created_at')
-            ->get();
+        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', 'material_id');
 
-        if ($purchases->isEmpty()) {
-            $purchases = Purchase::where('material_id', $materialId)
+        if ($hasColumn) {
+            $purchases = Purchase::where('store_id', $storeId)
+                ->where('material_id', $materialId)
                 ->orderByDesc('created_at')
                 ->get();
+
+            if ($purchases->isEmpty()) {
+                $purchases = Purchase::where('material_id', $materialId)
+                    ->orderByDesc('created_at')
+                    ->get();
+            }
+        } else {
+            $purchases = Purchase::where('store_id', $storeId)
+                ->whereHas('materials', function ($q) use ($materialId) {
+                    $q->where('material_id', $materialId);
+                })
+                ->with(['materials' => function ($q) use ($materialId) {
+                    $q->where('material_id', $materialId);
+                }])
+                ->orderByDesc('created_at')
+                ->get();
+
+            if ($purchases->isEmpty()) {
+                $purchases = Purchase::whereHas('materials', function ($q) use ($materialId) {
+                    $q->where('material_id', $materialId);
+                })
+                ->with(['materials' => function ($q) use ($materialId) {
+                    $q->where('material_id', $materialId);
+                }])
+                ->orderByDesc('created_at')
+                ->get();
+            }
         }
 
         $lastPurchase = $purchases->first();
-        $lastCost = ($lastPurchase && $lastPurchase->quintity > 0)
-            ? ($lastPurchase->total_coast / $lastPurchase->quintity)
+        $lastMaterialItem = ($lastPurchase && $lastPurchase->relationLoaded('materials'))
+            ? $lastPurchase->materials->first()
+            : null;
+
+        $lastQty = $lastMaterialItem && $lastMaterialItem->count > 0
+            ? (float)$lastMaterialItem->count
+            : (float)($lastPurchase?->quintity ?? 0);
+
+        $lastCost = ($lastPurchase && $lastQty > 0)
+            ? ($lastPurchase->total_coast / $lastQty)
             : 0;
 
         $unitCost = 0;
@@ -127,10 +160,16 @@ class InventoryMaterialController extends Controller
 
             foreach ($purchases as $purchase) {
                 if ($remainingStockToValuate <= 0) break;
-                if ($purchase->quintity <= 0) continue;
 
-                $unitPrice = $purchase->total_coast / $purchase->quintity;
-                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchase->quintity);
+                $materialItem = $purchase->relationLoaded('materials') ? $purchase->materials->first() : null;
+                $purchaseQty = $materialItem && $materialItem->count > 0
+                    ? (float)$materialItem->count
+                    : (float)$purchase->quintity;
+
+                if ($purchaseQty <= 0) continue;
+
+                $unitPrice = $purchase->total_coast / $purchaseQty;
+                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchaseQty);
                 $totalValueOfStock += ($qtyToTakeFromPurchase * $unitPrice);
                 $remainingStockToValuate -= $qtyToTakeFromPurchase;
             }

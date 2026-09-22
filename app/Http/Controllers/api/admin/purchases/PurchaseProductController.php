@@ -82,11 +82,29 @@ class PurchaseProductController extends Controller
             ->pluck('quantity', 'product_id');
 
         // 2. جلب كل المشتريات للمتجر مرتبة من الأحدث للأقدم مرة واحدة
-        // استخدمنا select لجلب الحقول المطلوبة فقط لتوفير الميموري (الرامات)
-        $allPurchases = Purchase::where("store_id", $storeId) // تأكد أن اسم الحقل في الداتا بيز quintity كما كتبته أنت
-            ->orderByDesc("created_at")
-            ->get()
-            ->groupBy('product_id'); // تجميع المشتريات لكل منتج معاً
+        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', 'product_id');
+        if ($hasColumn) {
+            $allPurchases = Purchase::where("store_id", $storeId)
+                ->orderByDesc("created_at")
+                ->get()
+                ->groupBy('product_id');
+        } else {
+            $purchases = Purchase::where("store_id", $storeId)
+                ->with('products')
+                ->orderByDesc("created_at")
+                ->get();
+            $allPurchases = collect();
+            foreach ($purchases as $purchase) {
+                foreach ($purchase->products as $prod) {
+                    $pCopy = clone $purchase;
+                    $pCopy->quintity = $prod->count;
+                    if (!$allPurchases->has($prod->product_id)) {
+                        $allPurchases->put($prod->product_id, collect());
+                    }
+                    $allPurchases->get($prod->product_id)->push($pCopy);
+                }
+            }
+        }
 
         // 3. جلب المنتجات مع الأقسام وحساب التكلفة
         $products = $this->product->with('category')->get()->map(function($item) use($storeStocks, $allPurchases) {

@@ -88,11 +88,29 @@ class MaterialController extends Controller
             ->pluck('quantity', 'material_id');
 
         // 2. جلب كل المشتريات للمتجر مرتبة من الأحدث للأقدم مرة واحدة
-        // استخدمنا select لجلب الحقول المطلوبة فقط لتوفير الميموري (الرامات)
-        $allPurchases = Purchase::where("store_id", $storeId) // تأكد أن اسم الحقل في الداتا بيز quintity كما كتبته أنت
-            ->orderByDesc("created_at")
-            ->get()
-            ->groupBy('material_id'); // تجميع المشتريات لكل منتج معاً
+        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', 'material_id');
+        if ($hasColumn) {
+            $allPurchases = Purchase::where("store_id", $storeId)
+                ->orderByDesc("created_at")
+                ->get()
+                ->groupBy('material_id');
+        } else {
+            $purchases = Purchase::where("store_id", $storeId)
+                ->with('materials')
+                ->orderByDesc("created_at")
+                ->get();
+            $allPurchases = collect();
+            foreach ($purchases as $purchase) {
+                foreach ($purchase->materials as $mat) {
+                    $pCopy = clone $purchase;
+                    $pCopy->quintity = $mat->count;
+                    if (!$allPurchases->has($mat->material_id)) {
+                        $allPurchases->put($mat->material_id, collect());
+                    }
+                    $allPurchases->get($mat->material_id)->push($pCopy);
+                }
+            }
+        }
 
         // 3. جلب المنتجات مع الأقسام وحساب التكلفة
         $products = $this->product->with('category')->get()->map(function($item) use($storeStocks, $allPurchases) {

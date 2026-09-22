@@ -116,20 +116,53 @@ class InventoryProductController extends Controller
      */
     private function calculateProductStockCost(int $storeId, int $productId, float $quantity): array
     {
-        $purchases = Purchase::where('store_id', $storeId)
-            ->where('product_id', $productId)
-            ->orderByDesc('created_at')
-            ->get();
+        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', 'product_id');
 
-        if ($purchases->isEmpty()) {
-            $purchases = Purchase::where('product_id', $productId)
+        if ($hasColumn) {
+            $purchases = Purchase::where('store_id', $storeId)
+                ->where('product_id', $productId)
                 ->orderByDesc('created_at')
                 ->get();
+
+            if ($purchases->isEmpty()) {
+                $purchases = Purchase::where('product_id', $productId)
+                    ->orderByDesc('created_at')
+                    ->get();
+            }
+        } else {
+            $purchases = Purchase::where('store_id', $storeId)
+                ->whereHas('products', function ($q) use ($productId) {
+                    $q->where('product_id', $productId);
+                })
+                ->with(['products' => function ($q) use ($productId) {
+                    $q->where('product_id', $productId);
+                }])
+                ->orderByDesc('created_at')
+                ->get();
+
+            if ($purchases->isEmpty()) {
+                $purchases = Purchase::whereHas('products', function ($q) use ($productId) {
+                    $q->where('product_id', $productId);
+                })
+                ->with(['products' => function ($q) use ($productId) {
+                    $q->where('product_id', $productId);
+                }])
+                ->orderByDesc('created_at')
+                ->get();
+            }
         }
 
         $lastPurchase = $purchases->first();
-        $lastCost = ($lastPurchase && $lastPurchase->quintity > 0)
-            ? ($lastPurchase->total_coast / $lastPurchase->quintity)
+        $lastProductItem = ($lastPurchase && $lastPurchase->relationLoaded('products'))
+            ? $lastPurchase->products->first()
+            : null;
+
+        $lastQty = $lastProductItem && $lastProductItem->count > 0
+            ? (float)$lastProductItem->count
+            : (float)($lastPurchase?->quintity ?? 0);
+
+        $lastCost = ($lastPurchase && $lastQty > 0)
+            ? ($lastPurchase->total_coast / $lastQty)
             : 0;
 
         $unitCost = 0;
@@ -139,10 +172,16 @@ class InventoryProductController extends Controller
 
             foreach ($purchases as $purchase) {
                 if ($remainingStockToValuate <= 0) break;
-                if ($purchase->quintity <= 0) continue;
 
-                $unitPrice = $purchase->total_coast / $purchase->quintity;
-                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchase->quintity);
+                $productItem = $purchase->relationLoaded('products') ? $purchase->products->first() : null;
+                $purchaseQty = $productItem && $productItem->count > 0
+                    ? (float)$productItem->count
+                    : (float)$purchase->quintity;
+
+                if ($purchaseQty <= 0) continue;
+
+                $unitPrice = $purchase->total_coast / $purchaseQty;
+                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchaseQty);
                 $totalValueOfStock += ($qtyToTakeFromPurchase * $unitPrice);
                 $remainingStockToValuate -= $qtyToTakeFromPurchase;
             }

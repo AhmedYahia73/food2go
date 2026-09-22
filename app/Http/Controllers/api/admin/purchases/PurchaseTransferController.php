@@ -291,22 +291,56 @@ class PurchaseTransferController extends Controller
      */
     private function calculateItemCost(int $storeId, string $idColumn, int $itemId, float $quantity): array
     {
-        $purchases = Purchase::where('store_id', $storeId)
-            ->where($idColumn, $itemId)
-            ->orderByDesc('created_at')
-            ->get();
+        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', $idColumn);
+        $relation = ($idColumn === 'material_id') ? 'materials' : 'products';
 
-        // Fallback: If no direct purchases in this store, check all stores for this item
-        if ($purchases->isEmpty()) {
-            $purchases = Purchase::where($idColumn, $itemId)
+        if ($hasColumn) {
+            $purchases = Purchase::where('store_id', $storeId)
+                ->where($idColumn, $itemId)
                 ->orderByDesc('created_at')
                 ->get();
+
+            // Fallback: If no direct purchases in this store, check all stores for this item
+            if ($purchases->isEmpty()) {
+                $purchases = Purchase::where($idColumn, $itemId)
+                    ->orderByDesc('created_at')
+                    ->get();
+            }
+        } else {
+            $purchases = Purchase::where('store_id', $storeId)
+                ->whereHas($relation, function ($q) use ($idColumn, $itemId) {
+                    $q->where($idColumn, $itemId);
+                })
+                ->with([$relation => function ($q) use ($idColumn, $itemId) {
+                    $q->where($idColumn, $itemId);
+                }])
+                ->orderByDesc('created_at')
+                ->get();
+
+            if ($purchases->isEmpty()) {
+                $purchases = Purchase::whereHas($relation, function ($q) use ($idColumn, $itemId) {
+                    $q->where($idColumn, $itemId);
+                })
+                ->with([$relation => function ($q) use ($idColumn, $itemId) {
+                    $q->where($idColumn, $itemId);
+                }])
+                ->orderByDesc('created_at')
+                ->get();
+            }
         }
 
         // 1. حساب آخر تكلفة شراء
         $lastPurchase = $purchases->first();
-        $lastCost = ($lastPurchase && $lastPurchase->quintity > 0)
-            ? ($lastPurchase->total_coast / $lastPurchase->quintity)
+        $lastItem = ($lastPurchase && $lastPurchase->relationLoaded($relation))
+            ? $lastPurchase->{$relation}->first()
+            : null;
+
+        $lastQty = $lastItem && $lastItem->count > 0
+            ? (float)$lastItem->count
+            : (float)($lastPurchase?->quintity ?? 0);
+
+        $lastCost = ($lastPurchase && $lastQty > 0)
+            ? ($lastPurchase->total_coast / $lastQty)
             : 0;
 
         // 2. حساب متوسط تكلفة الكمية بناءً على أحدث فواتير الشراء
@@ -317,10 +351,16 @@ class PurchaseTransferController extends Controller
 
             foreach ($purchases as $purchase) {
                 if ($remainingStockToValuate <= 0) break;
-                if ($purchase->quintity <= 0) continue;
 
-                $unitPrice = $purchase->total_coast / $purchase->quintity;
-                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchase->quintity);
+                $item = $purchase->relationLoaded($relation) ? $purchase->{$relation}->first() : null;
+                $purchaseQty = $item && $item->count > 0
+                    ? (float)$item->count
+                    : (float)$purchase->quintity;
+
+                if ($purchaseQty <= 0) continue;
+
+                $unitPrice = $purchase->total_coast / $purchaseQty;
+                $qtyToTakeFromPurchase = min($remainingStockToValuate, $purchaseQty);
                 $totalValueOfStock += ($qtyToTakeFromPurchase * $unitPrice);
                 $remainingStockToValuate -= $qtyToTakeFromPurchase;
             }
