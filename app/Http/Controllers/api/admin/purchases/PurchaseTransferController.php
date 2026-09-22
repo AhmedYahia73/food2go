@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Events\NotificationEvent;
 
 use App\Models\PurchaseTransfer;
 use App\Models\Purchase;
@@ -173,11 +174,12 @@ class PurchaseTransferController extends Controller
                     $stock->save();
                     if($stock->quantity < ($stock?->product?->min_stock ?? 0)){
                         $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
-                        Notification::create([
+                        $notification = Notification::create([
                             'branch_ids' => $branches_ids,
                             'notification' => "المنتج {$stock?->product?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
                             'is_read' => false,
                         ]); 
+                        NotificationEvent::dispatch($notification);
                     }
                 }
 
@@ -238,11 +240,12 @@ class PurchaseTransferController extends Controller
                     $material_stock->save();
                     if($material_stock->quantity < ($material_stock?->material?->min_stock ?? 0)){
                         $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
-                        Notification::create([
+                        $notification = Notification::create([
                             'branch_ids' => $branches_ids,
                             'notification' => "المادة الخام {$material_stock?->material?->name} وصل للحد الادنى فى المخزن {$material_stock?->store?->name} الكمية المتاحة الان {$material_stock?->quantity}",
                             'is_read' => false,
                         ]); 
+                        NotificationEvent::dispatch($notification);
                     }
                 }
 

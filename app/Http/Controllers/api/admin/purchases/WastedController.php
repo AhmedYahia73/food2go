@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\purchases;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Events\NotificationEvent;
 
 use App\Models\PurchaseWasted;
 use App\Models\PurchaseCategory;
@@ -193,7 +194,7 @@ class WastedController extends Controller
             ->where('store_id', $request->store_id)
             ->first();
             if(empty($stock)){
-                $this->stock
+                $stock = $this->stock
                 ->create([
                     'category_id' => $request->category_id,
                     'product_id' => $request->product_id,
@@ -201,11 +202,29 @@ class WastedController extends Controller
                     'quantity' => -$request->quantity,
                     'actual_quantity' => -$request->quantity,
                 ]);
+                if($stock->quantity < ($stock?->product?->min_stock ?? 0)){
+                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                    $notification = Notification::create([
+                        'branch_ids' => $branches_ids,
+                        'notification' => "المنتج {$stock?->product?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
+                        'is_read' => false,
+                    ]); 
+                    NotificationEvent::dispatch($notification);
+                }
             }
             else{
                 $stock->quantity -= $request->quantity;
                 $stock->actual_quantity -= $request->quantity;
                 $stock->save();
+                if($stock->quantity < ($stock?->product?->min_stock ?? 0)){
+                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                    $notification = Notification::create([
+                        'branch_ids' => $branches_ids,
+                        'notification' => "المنتج {$stock?->product?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
+                        'is_read' => false,
+                    ]); 
+                    NotificationEvent::dispatch($notification);
+                }
             }
         }
         else{
@@ -214,7 +233,7 @@ class WastedController extends Controller
             ->where('store_id', $request->store_id)
             ->first();
             if(empty($material_stock)){
-                $this->material_stock
+                $material_stock = $this->material_stock
                 ->create([
                     'category_id' => $request->category_id,
                     'material_id' => $request->material_id,
@@ -222,11 +241,29 @@ class WastedController extends Controller
                     'quantity' => -$request->quantity,
                     'actual_quantity' => -$request->quantity,
                 ]);
+                if($material_stock->quantity < ($material_stock?->material?->min_stock ?? 0)){
+                    $branches_ids = $material_stock?->store?->branches?->pluck("id")->toArray();
+                    $notification = Notification::create([
+                        'branch_ids' => $branches_ids,
+                        'notification' => "المادة الخام {$material_stock?->material?->name} وصل للحد الادنى فى المخزن {$material_stock?->store?->name} الكمية المتاحة الان {$material_stock?->quantity}",
+                        'is_read' => false,
+                    ]); 
+                    NotificationEvent::dispatch($notification);
+                }
             }
             else{
                 $material_stock->quantity -= $request->quantity;
                 $material_stock->actual_quantity -= $request->quantity;
                 $material_stock->save();
+                if($material_stock->quantity < ($material_stock?->material?->min_stock ?? 0)){
+                    $branches_ids = $material_stock?->store?->branches?->pluck("id")->toArray();
+                    $notification = Notification::create([
+                        'branch_ids' => $branches_ids,
+                        'notification' => "المادة الخام {$material_stock?->material?->name} وصل للحد الادنى فى المخزن {$material_stock?->store?->name} الكمية المتاحة الان {$material_stock?->quantity}",
+                        'is_read' => false,
+                    ]); 
+                    NotificationEvent::dispatch($notification);
+                }
             }
         }
 

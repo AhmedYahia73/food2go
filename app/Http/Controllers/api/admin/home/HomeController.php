@@ -12,6 +12,7 @@ use App\Models\SmsIntegration;
 use App\Models\SmsBalance; 
 
 use App\Models\Order;
+use App\Models\Notification;
 use App\Models\Product;
 use App\Models\OrderDetail;
 use App\Models\OrderFinancial;
@@ -301,6 +302,31 @@ class HomeController extends Controller
             "discount_hourly" => $discount_hourly,
             "branch_sales" => $branch_sales,
             "expenses_hourly" => $expenses_hourly,
+        ]);
+    }
+
+    public function notifications_count(Request $request){
+        $notifications = Notification::
+        orderByDesc("created_at")
+        ->where("is_read", false);
+        if($request->user()->role == "branch"){
+            $notifications->whereJsonContains("branch_ids", $request->user()->id);
+        }
+        $notifications->count();
+        return response()->json([
+            "notifications" => $notifications
+        ]);
+    }
+
+    public function notifications(Request $request){
+        $notifications = Notification::
+        orderByDesc("created_at");
+        if($request->user()->role == "branch"){
+            $notifications->whereJsonContains("branch_ids", $request->user()->id);
+        }
+        $notifications->paginate(10);
+        return response()->json([
+            "notifications" => $notifications
         ]);
     }
 

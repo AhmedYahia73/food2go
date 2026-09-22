@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api\admin\inventory;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Events\NotificationEvent;
 
 use App\Models\PurchaseStock;
 use App\Models\PurchaseStore;
@@ -319,9 +320,18 @@ class InventoryProductController extends Controller
                 $stock->quantity = $qty;
                 $stock->actual_quantity = $qty;
                 $stock->save();
+                if($stock->quantity < ($stock?->product?->min_stock ?? 0)){
+                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                    $notification = Notification::create([
+                        'branch_ids' => $branches_ids,
+                        'notification' => "المنتج {$stock?->product?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
+                        'is_read' => false,
+                    ]); 
+                    NotificationEvent::dispatch($notification);
+                }
             }
             else{
-                $this->stocks 
+                $stock = $this->stocks 
                 ->create([
                     "category_id" => $product_item->category_id,
                     "product_id" => $item['id'], 
@@ -329,6 +339,15 @@ class InventoryProductController extends Controller
                     "quantity" => $qty,
                     "actual_quantity" => $qty,
                 ]);
+                if($stock->quantity < ($stock?->product?->min_stock ?? 0)){
+                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                    $notification = Notification::create([
+                        'branch_ids' => $branches_ids,
+                        'notification' => "المنتج {$stock?->product?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
+                        'is_read' => false,
+                    ]); 
+                    NotificationEvent::dispatch($notification);
+                }
             }
         }
 
