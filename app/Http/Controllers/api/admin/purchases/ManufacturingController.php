@@ -173,11 +173,14 @@ class ManufacturingController extends Controller
                 $stock->quantity -= $item['weight'];
                 $stock->actual_quantity -= $item['weight'];
                 $stock->save();
-                if($stock->quantity < ($stock?->product?->min_stock ?? 0)){
-                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
+                $minStock = (float)($stock?->material?->min_stock ?? 0);
+                if(($minStock > 0 && $stock->quantity <= $minStock) || ($stock->quantity <= 0)){
+                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray() ?? [];
+                    $materialName = $stock?->material?->name ?? 'المادة الخام';
+                    $storeName = $stock?->store?->name ?? 'المخزن';
                     $notification = Notification::create([
                         'branch_ids' => $branches_ids,
-                        'notification' => "المنتج {$stock?->product?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
+                        'notification' => "المادة الخام {$materialName} وصل للحد الادنى فى المخزن {$storeName} الكمية المتاحة الان {$stock->quantity}",
                         'is_read' => false,
                     ]); 
                     NotificationEvent::dispatch($notification);

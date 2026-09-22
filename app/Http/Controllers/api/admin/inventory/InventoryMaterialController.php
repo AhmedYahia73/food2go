@@ -299,16 +299,19 @@ class InventoryMaterialController extends Controller
  
         $InventoryList = InventoryList::
         where("id", $id)
-        ->with("store")
+        ->with("store.branches")
         ->first();
         $storeId = (int)$InventoryList?->store_id;
+        $store = $InventoryList?->store;
+        $storeName = $store?->name ?? 'المخزن';
+        $branches_ids = $store?->branches?->pluck("id")->toArray() ?? [];
 
         foreach ($request->materials as $item) {
             $material_item = Material::
             where("id", $item['id'])
             ->first();
-            $stock = $this->stocks
-            ->where("material_id", $item['id'])
+            $stock = MaterialStock::
+            where("material_id", $item['id'])
             ->where("store_id", $storeId)
             ->first();
             $stock_quintity = $stock->quantity ?? 0; 
@@ -348,34 +351,39 @@ class InventoryMaterialController extends Controller
                 $stock->quantity = $qty;
                 $stock->actual_quantity = $qty;
                 $stock->save();
-                if($stock->quantity < ($stock?->material?->min_stock ?? 0)){
-                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
-                    $notification = Notification::create([
-                        'branch_ids' => $branches_ids,
-                        'notification' => "المادة الخام {$stock?->material?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
-                        'is_read' => false,
-                    ]);  
-                    NotificationEvent::dispatch($notification);
-                }
             }
             else{
-                $stock = $this->stocks 
-                ->create([
-                    "category_id" => $material_item->category_id,
+                $stock = MaterialStock:: 
+                create([
+                    "category_id" => $material_item?->category_id,
                     "material_id" => $item['id'], 
                     "store_id" => $storeId,
                     "quantity" => $qty,
                     "actual_quantity" => $qty,
                 ]);
-                if($stock->quantity < ($stock?->material?->min_stock ?? 0)){
-                    $branches_ids = $stock?->store?->branches?->pluck("id")->toArray();
-                    $notification = Notification::create([
-                        'branch_ids' => $branches_ids,
-                        'notification' => "المادة الخام {$stock?->material?->name} وصل للحد الادنى فى المخزن {$stock?->store?->name} الكمية المتاحة الان {$stock?->quantity}",
-                        'is_read' => false,
-                    ]); 
-                    NotificationEvent::dispatch($notification);
-                }
+            }
+
+            $effectiveStoreName = $storeName ?: ($stock?->store?->name ?? 'المخزن');
+            $effectiveBranchesIds = !empty($branches_ids) ? $branches_ids : ($stock?->store?->branches?->pluck("id")->toArray() ?? []);
+            $materialName = $material_item?->name ?? $stock?->material?->name ?? ('المادة رقم ' . $item['id']);
+            $minStock = (float)($material_item?->min_stock ?? $stock?->material?->min_stock ?? 0);
+
+            $isLowStock = ($minStock > 0 && $stock->quantity <= $minStock) || ($stock->quantity <= 0);
+
+            if($isLowStock){
+                $notification = Notification::create([
+                    'branch_ids' => $effectiveBranchesIds,
+                    'notification' => "المادة الخام {$materialName} وصل للحد الادنى فى المخزن {$effectiveStoreName} الكمية المتاحة الان {$stock->quantity}",
+                    'is_read' => false,
+                ]);  
+                NotificationEvent::dispatch($notification);
+            } elseif ($item_quantity != 0) {
+                $notification = Notification::create([
+                    'branch_ids' => $effectiveBranchesIds,
+                    'notification' => "تم تعديل كمية المادة الخام {$materialName} فى المخزن {$effectiveStoreName} الكمية الحالية {$stock->quantity}",
+                    'is_read' => false,
+                ]);
+                NotificationEvent::dispatch($notification);
             }
         }
 
