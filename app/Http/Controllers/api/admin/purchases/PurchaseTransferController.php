@@ -18,6 +18,7 @@ use App\Models\MaterialStock;
 use App\Models\MaterialCategory;
 use App\Models\Material;
 use App\Models\Unit;
+use App\Models\Notification;
 
 class PurchaseTransferController extends Controller
 {

@@ -15,6 +15,7 @@ use App\Models\InventoryProductHistory;
 use App\Models\Purchase;
 use App\Models\InventoryList;
 use App\Models\PurchaseWasted;
+use App\Models\Notification;
 
 class InventoryProductController extends Controller
 {

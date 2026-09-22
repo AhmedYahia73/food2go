@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Events\NotificationEvent;
 
+use App\Models\Notification;
 use App\Models\PurchaseWasted;
 use App\Models\PurchaseCategory;
 use App\Models\PurchaseProduct;

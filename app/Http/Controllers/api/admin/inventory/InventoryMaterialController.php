@@ -14,6 +14,7 @@ use App\Models\MaterialCategory;
 use App\Models\InventoryMaterialHistory;
 use App\Models\Purchase;
 use App\Models\InventoryList;
+use App\Models\Notification;
 use App\Models\PurchaseWasted;
 
 class InventoryMaterialController extends Controller
