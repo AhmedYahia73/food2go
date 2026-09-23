@@ -39,7 +39,21 @@ class NotificationEvent implements ShouldBroadcastNow
 
         if (!empty($branch_ids) && is_iterable($branch_ids)) {
             foreach ($branch_ids as $branch_id) {
-                $channels[] = new Channel('newNotification.' . $branch_id);
+                if (!empty($branch_id)) {
+                    $channels[] = new Channel('newNotification.' . $branch_id);
+                }
+            }
+        } else {
+            // General notification: broadcast to all branches so any branch user receives it
+            try {
+                $allBranchIds = \App\Models\Branch::pluck('id')->toArray();
+                foreach ($allBranchIds as $branch_id) {
+                    if (!empty($branch_id)) {
+                        $channels[] = new Channel('newNotification.' . $branch_id);
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Could not fetch branch IDs for general broadcast: ' . $e->getMessage());
             }
         }
 

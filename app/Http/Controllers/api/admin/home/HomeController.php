@@ -312,7 +312,9 @@ class HomeController extends Controller
             $query->where(function($q) use ($branchId) {
                 $q->whereJsonContains("branch_ids", $branchId)
                   ->orWhereJsonContains("branch_ids", (string)$branchId)
-                  ->orWhereNull("branch_ids");
+                  ->orWhereNull("branch_ids")
+                  ->orWhere('branch_ids', '[]')
+                  ->orWhere('branch_ids', '');
             });
         }
         $count = $query->count();
@@ -329,7 +331,9 @@ class HomeController extends Controller
             $query->where(function($q) use ($branchId) {
                 $q->whereJsonContains("branch_ids", $branchId)
                   ->orWhereJsonContains("branch_ids", (string)$branchId)
-                  ->orWhereNull("branch_ids");
+                  ->orWhereNull("branch_ids")
+                  ->orWhere('branch_ids', '[]')
+                  ->orWhere('branch_ids', '');
             });
         }
         $notifications = $query->paginate(10);
@@ -349,7 +353,9 @@ class HomeController extends Controller
                 $query->where(function($q) use ($branchId) {
                     $q->whereJsonContains("branch_ids", $branchId)
                       ->orWhereJsonContains("branch_ids", (string)$branchId)
-                      ->orWhereNull("branch_ids");
+                      ->orWhereNull("branch_ids")
+                      ->orWhere('branch_ids', '[]')
+                      ->orWhere('branch_ids', '');
                 });
             }
             $query->update(['is_read' => true]);

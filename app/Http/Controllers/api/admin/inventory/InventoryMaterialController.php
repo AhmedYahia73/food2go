@@ -105,7 +105,8 @@ class InventoryMaterialController extends Controller
      */
     private function calculateMaterialStockCost(int $storeId, int $materialId, float $quantity): array
     {
-        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', 'material_id');
+        try {
+            $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', 'material_id');
 
         if ($hasColumn) {
             $purchases = Purchase::where('store_id', $storeId)
@@ -181,11 +182,19 @@ class InventoryMaterialController extends Controller
             }
         }
 
-        return [
-            'unit_cost'  => round($unitCost, 2),
-            'total_cost' => round($unitCost * $quantity, 2),
-            'last_cost'  => round($lastCost, 2),
-        ];
+            return [
+                'unit_cost'  => round($unitCost, 2),
+                'total_cost' => round($unitCost * $quantity, 2),
+                'last_cost'  => round($lastCost, 2),
+            ];
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed calculateMaterialStockCost: " . $e->getMessage());
+            return [
+                'unit_cost'  => 0,
+                'total_cost' => 0,
+                'last_cost'  => 0,
+            ];
+        }
     }
 
     public function create_inventory(Request $request){
@@ -267,14 +276,16 @@ class InventoryMaterialController extends Controller
         ->with("category", "material")
         ->get()
         ->map(function($item){
+            $matId = $item->material_id ?? $item?->material?->id;
             return [
+                "id" => $matId,
+                "material_id" => $matId,
                 "category" => $item?->category?->name,
-                "material" => $item?->material?->name,
-                "material_id" => $item?->material?->id,
-                "quantity" => $item?->quantity, 
-                "actual_quantity" => $item?->actual_quantity,
-                "inability" => $item?->inability,
-                "cost" => $item?->cost,
+                "material" => $item?->material?->name ?? ('المادة رقم ' . $matId),
+                "quantity" => $item?->quantity ?? 0, 
+                "actual_quantity" => $item?->actual_quantity ?? $item?->quantity ?? 0,
+                "inability" => $item?->inability ?? 0,
+                "cost" => $item?->cost ?? 0,
             ];
         }); 
 
@@ -284,60 +295,87 @@ class InventoryMaterialController extends Controller
     }
 
     public function modify_materials(Request $request, $id){
+        $rawMaterials = $request->input('materials') ?? $request->input('products');
+
         $validator = Validator::make($request->all(), [
-            'materials' => 'required|array',
-            'materials.*.id' => 'required|exists:materials,id',
-            'materials.*.actual_quantity' => 'nullable|numeric',
-            'materials.*.quantity' => 'nullable|numeric',
+            'materials' => 'required_without:products|array',
+            'products' => 'required_without:materials|array',
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
+        if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
-            ],400);
+            ], 400);
         }
-        $arr_items = [];
- 
+
+        if (empty($rawMaterials) || !is_array($rawMaterials)) {
+            return response()->json([
+                'errors' => ['materials' => ['No materials provided']],
+            ], 400);
+        }
+
         $InventoryList = InventoryList::
         where("id", $id)
         ->with("store.branches")
         ->first();
-        $storeId = (int)$InventoryList?->store_id;
-        $store = $InventoryList?->store;
+
+        if (!$InventoryList) {
+            return response()->json([
+                'errors' => 'Inventory not found',
+            ], 404);
+        }
+
+        $arr_items = [];
+        $storeId = (int)$InventoryList->store_id;
+        $store = $InventoryList->store;
         $storeName = $store?->name ?? 'المخزن';
         $branches_ids = $store?->branches?->pluck("id")->toArray() ?? [];
+        $effectiveBranchesIds = !empty($branches_ids) ? array_values(array_unique($branches_ids)) : null;
 
-        foreach ($request->materials as $item) {
+        $anyNotifSent = false;
+
+        foreach ($rawMaterials as $item) {
+            $itemId = (int)($item['id'] ?? $item['material_id'] ?? 0);
+            if ($itemId <= 0) continue;
+
             $material_item = Material::
-            where("id", $item['id'])
+            where("id", $itemId)
             ->first();
+
             $stock = MaterialStock::
-            where("material_id", $item['id'])
+            where("material_id", $itemId)
             ->where("store_id", $storeId)
             ->first();
+
             $stock_quintity = $stock->quantity ?? 0; 
             $qty = isset($item['actual_quantity']) ? (float)$item['actual_quantity'] : (float)($item['quantity'] ?? 0);
             $total_quantity = $qty - $stock_quintity;
             $item_quantity = $qty - $stock_quintity;
  
             // حساب التكلفة الدقيقة للكمية الفعلية للمادة
-            $costMetrics = $this->calculateMaterialStockCost($storeId, (int)$item['id'], $qty);
-            $cost = $costMetrics['total_cost'];
+            try {
+                $costMetrics = $this->calculateMaterialStockCost($storeId, $itemId, $qty);
+                $cost = $costMetrics['total_cost'];
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Error calculating material stock cost: " . $e->getMessage());
+                $cost = 0;
+            }
  
             InventoryMaterialHistory::
             where("inventory_id", $id)
-            ->where("material_id", $item['id'])
+            ->where("material_id", $itemId)
             ->update([
-                //'quantity' => $item['quantity'],
                 'actual_quantity' => $qty,
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
+
             $one_item = InventoryMaterialHistory::
             where("inventory_id", $id)
-            ->where("material_id", $item['id'])
+            ->where("material_id", $itemId)
+            ->with(['category', 'material'])
             ->first();
-            $arr_items[] = 
-             [
+
+            $arr_items[] = [
                 "id" => $one_item?->id ?? null,
                 "quantity" => $one_item?->quantity ?? null,
                 "actual_quantity" => $one_item?->actual_quantity ?? null,
@@ -345,8 +383,9 @@ class InventoryMaterialController extends Controller
                 "cost" => $one_item?->cost ?? null,
                 "date" => $one_item?->created_at ?? null,
                 "category" => $one_item?->category?->name ?? null,
-                "material" => $one_item?->material?->name ?? null,
+                "material" => $one_item?->material?->name ?? ($material_item?->name ?? 'المادة رقم ' . $itemId),
             ];
+
             if(!empty($stock)){
                 $stock->quantity = $qty;
                 $stock->actual_quantity = $qty;
@@ -356,7 +395,7 @@ class InventoryMaterialController extends Controller
                 $stock = MaterialStock:: 
                 create([
                     "category_id" => $material_item?->category_id,
-                    "material_id" => $item['id'], 
+                    "material_id" => $itemId, 
                     "store_id" => $storeId,
                     "quantity" => $qty,
                     "actual_quantity" => $qty,
@@ -364,8 +403,7 @@ class InventoryMaterialController extends Controller
             }
 
             $effectiveStoreName = $storeName ?: ($stock?->store?->name ?? 'المخزن');
-            $effectiveBranchesIds = !empty($branches_ids) ? $branches_ids : ($stock?->store?->branches?->pluck("id")->toArray() ?? []);
-            $materialName = $material_item?->name ?? $stock?->material?->name ?? ('المادة رقم ' . $item['id']);
+            $materialName = $material_item?->name ?? $stock?->material?->name ?? ('المادة رقم ' . $itemId);
             $minStock = (float)($material_item?->min_stock ?? $stock?->material?->min_stock ?? 0);
 
             $isLowStock = ($minStock > 0 && $stock->quantity <= $minStock) || ($stock->quantity <= 0);
@@ -377,6 +415,7 @@ class InventoryMaterialController extends Controller
                     'is_read' => false,
                 ]);  
                 NotificationEvent::dispatch($notification);
+                $anyNotifSent = true;
             } elseif ($item_quantity != 0) {
                 $notification = Notification::create([
                     'branch_ids' => $effectiveBranchesIds,
@@ -384,13 +423,24 @@ class InventoryMaterialController extends Controller
                     'is_read' => false,
                 ]);
                 NotificationEvent::dispatch($notification);
+                $anyNotifSent = true;
             }
+        }
+
+        // إذا تم التعديل وتأكيد الجرد دون حدوث نقص حاد أو فارق كميات
+        if (!$anyNotifSent && count($rawMaterials) > 0) {
+            $notification = Notification::create([
+                'branch_ids' => $effectiveBranchesIds,
+                'notification' => "تم تحديث وتأكيد جرد المواد الخام للمخزن {$storeName}",
+                'is_read' => false,
+            ]);
+            NotificationEvent::dispatch($notification);
         }
 
         return response()->json([
             "success" => "You update stoks success",
             "report" => $arr_items,
-            "store_name" => $InventoryList?->store?->name,
+            "store_name" => $storeName,
         ]);
     }
 

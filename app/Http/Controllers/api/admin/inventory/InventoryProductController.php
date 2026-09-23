@@ -117,7 +117,8 @@ class InventoryProductController extends Controller
      */
     private function calculateProductStockCost(int $storeId, int $productId, float $quantity): array
     {
-        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', 'product_id');
+        try {
+            $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('purchases', 'product_id');
 
         if ($hasColumn) {
             $purchases = Purchase::where('store_id', $storeId)
@@ -193,11 +194,19 @@ class InventoryProductController extends Controller
             }
         }
 
-        return [
-            'unit_cost'  => round($unitCost, 2),
-            'total_cost' => round($unitCost * $quantity, 2),
-            'last_cost'  => round($lastCost, 2),
-        ];
+            return [
+                'unit_cost'  => round($unitCost, 2),
+                'total_cost' => round($unitCost * $quantity, 2),
+                'last_cost'  => round($lastCost, 2),
+            ];
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed calculateProductStockCost: " . $e->getMessage());
+            return [
+                'unit_cost'  => 0,
+                'total_cost' => 0,
+                'last_cost'  => 0,
+            ];
+        }
     }
 
     public function create_inventory(Request $request){
@@ -279,14 +288,16 @@ class InventoryProductController extends Controller
         ->with("category", "product")
         ->get()
         ->map(function($item){
+            $prodId = $item->product_id ?? $item?->product?->id;
             return [
+                "id" => $prodId,
+                "product_id" => $prodId,
                 "category" => $item?->category?->name,
-                "product" => $item?->product?->name,
-                "product_id" => $item?->product?->id,
-                "quantity" => $item?->quantity, 
-                "actual_quantity" => $item?->actual_quantity, 
-                "inability" => $item?->inability,
-                "cost" => $item?->cost,
+                "product" => $item?->product?->name ?? ('المنتج رقم ' . $prodId),
+                "quantity" => $item?->quantity ?? 0, 
+                "actual_quantity" => $item?->actual_quantity ?? $item?->quantity ?? 0, 
+                "inability" => $item?->inability ?? 0,
+                "cost" => $item?->cost ?? 0,
             ];
         }); 
 
@@ -296,59 +307,86 @@ class InventoryProductController extends Controller
     }
 
     public function modify_products(Request $request, $id){
+        $rawProducts = $request->input('products') ?? $request->input('materials');
+
         $validator = Validator::make($request->all(), [
-            'products' => 'required|array',
-            'products.*.id' => 'required|exists:purchase_products,id',
-            'products.*.actual_quantity' => 'nullable|numeric', 
-            'products.*.quantity' => 'nullable|numeric', 
+            'products' => 'required_without:materials|array',
+            'materials' => 'required_without:products|array',
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
+        if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
-            ],400);
+            ], 400);
         }
-  
+
+        if (empty($rawProducts) || !is_array($rawProducts)) {
+            return response()->json([
+                'errors' => ['products' => ['No products provided']],
+            ], 400);
+        }
+   
         $InventoryList = InventoryList::
         where("id", $id)
         ->with("store.branches")
         ->first();
+
+        if (!$InventoryList) {
+            return response()->json([
+                'errors' => 'Inventory not found',
+            ], 404);
+        }
+
         $arr_items = [];
-        $storeId = (int)$InventoryList?->store_id;
-        $store = $InventoryList?->store;
+        $storeId = (int)$InventoryList->store_id;
+        $store = $InventoryList->store;
         $storeName = $store?->name ?? 'المخزن';
         $branches_ids = $store?->branches?->pluck("id")->toArray() ?? [];
+        $effectiveBranchesIds = !empty($branches_ids) ? array_values(array_unique($branches_ids)) : null;
 
-        foreach ($request->products as $item) {
+        $anyNotifSent = false;
+
+        foreach ($rawProducts as $item) {
+            $itemId = (int)($item['id'] ?? $item['product_id'] ?? 0);
+            if ($itemId <= 0) continue;
+
             $product_item = PurchaseProduct::
-            where("id", $item['id'])
+            where("id", $itemId)
             ->first();
+
             $stock = PurchaseStock::
-            where("product_id", $item['id'])
+            where("product_id", $itemId)
             ->where("store_id", $storeId)
             ->first();
+
             $stock_quintity = $stock->quantity ?? 0;
             $qty = isset($item['actual_quantity']) ? (float)$item['actual_quantity'] : (float)($item['quantity'] ?? 0);
             $total_quantity = $qty - $stock_quintity;
             $item_quantity = $qty - $stock_quintity;
        
             // حساب التكلفة الدقيقة للكمية الفعلية
-            $costMetrics = $this->calculateProductStockCost($storeId, (int)$item['id'], $qty);
-            $cost = $costMetrics['total_cost'];
+            try {
+                $costMetrics = $this->calculateProductStockCost($storeId, $itemId, $qty);
+                $cost = $costMetrics['total_cost'];
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Error calculating product stock cost: " . $e->getMessage());
+                $cost = 0;
+            }
 
             InventoryProductHistory::
             where("inventory_id", $id)
-            ->where("product_id", $item['id'])
+            ->where("product_id", $itemId)
             ->update([
-                //'quantity' => $item['quantity'],
                 'actual_quantity' => $qty,
                 'cost' => $cost,
                 'inability' => $item_quantity,
             ]); 
+
             $one_item = InventoryProductHistory::
             where("inventory_id", $id)
-            ->where("product_id", $item['id'])
-            ->orderByDesc("created_at")
+            ->where("product_id", $itemId)
+            ->with(['category', 'product'])
             ->first();
+
             $arr_items[] = [
                 "id" => $one_item?->id ?? null,
                 "quantity" => $one_item?->quantity ?? null,
@@ -356,9 +394,10 @@ class InventoryProductController extends Controller
                 "inability" => $one_item?->inability ?? null,
                 "cost" => $one_item?->cost ?? null,
                 "date" => $one_item?->created_at ?? null,
-                "category" => $one_item?->category?->name,
-                "product" => $one_item?->product?->name,
+                "category" => $one_item?->category?->name ?? null,
+                "product" => $one_item?->product?->name ?? ($product_item?->name ?? 'المنتج رقم ' . $itemId),
             ];
+
             if(!empty($stock)){
                 $stock->quantity = $qty;
                 $stock->actual_quantity = $qty;
@@ -368,7 +407,7 @@ class InventoryProductController extends Controller
                 $stock = PurchaseStock:: 
                 create([
                     "category_id" => $product_item?->category_id,
-                    "product_id" => $item['id'], 
+                    "product_id" => $itemId, 
                     "store_id" => $storeId,
                     "quantity" => $qty,
                     "actual_quantity" => $qty,
@@ -376,8 +415,7 @@ class InventoryProductController extends Controller
             }
 
             $effectiveStoreName = $storeName ?: ($stock?->store?->name ?? 'المخزن');
-            $effectiveBranchesIds = !empty($branches_ids) ? $branches_ids : ($stock?->store?->branches?->pluck("id")->toArray() ?? []);
-            $productName = $product_item?->name ?? $stock?->product?->name ?? ('المنتج رقم ' . $item['id']);
+            $productName = $product_item?->name ?? $stock?->product?->name ?? ('المنتج رقم ' . $itemId);
             $minStock = (float)($product_item?->min_stock ?? $stock?->product?->min_stock ?? 0);
 
             $isLowStock = ($minStock > 0 && $stock->quantity <= $minStock) || ($stock->quantity <= 0);
@@ -389,6 +427,7 @@ class InventoryProductController extends Controller
                     'is_read' => false,
                 ]); 
                 NotificationEvent::dispatch($notification);
+                $anyNotifSent = true;
             } elseif ($item_quantity != 0) {
                 $notification = Notification::create([
                     'branch_ids' => $effectiveBranchesIds,
@@ -396,13 +435,24 @@ class InventoryProductController extends Controller
                     'is_read' => false,
                 ]);
                 NotificationEvent::dispatch($notification);
+                $anyNotifSent = true;
             }
+        }
+
+        // إذا تم التعديل وتأكيد الجرد دون حدوث نقص حاد أو فارق كميات
+        if (!$anyNotifSent && count($rawProducts) > 0) {
+            $notification = Notification::create([
+                'branch_ids' => $effectiveBranchesIds,
+                'notification' => "تم تحديث وتأكيد جرد المنتجات للمخزن {$storeName}",
+                'is_read' => false,
+            ]);
+            NotificationEvent::dispatch($notification);
         }
 
         return response()->json([
             "success" => "You update stoks success",
             "report" => $arr_items,
-            "store_name" => $InventoryList?->store?->name,
+            "store_name" => $storeName,
         ]);
     }
 
