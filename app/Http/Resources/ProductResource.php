@@ -32,44 +32,43 @@ class ProductResource extends JsonResource
             $addons = AddonResource::collection($this->whenLoaded('addons'));
         }
     
-        $my_discount = $this?->discount?->start_date <= date("Y-m-d")
-        && $this?->discount?->end_date >= date("Y-m-d") ? $this?->discount
+        $today = date("Y-m-d");
+        $my_discount = ((empty($this?->discount?->start_date) || $this?->discount?->start_date <= $today)
+        && (empty($this?->discount?->end_date) || $this?->discount?->end_date >= $today)) ? $this?->discount
         : null;
         $locale = app()->getLocale(); // Use the application's current locale
         if ($this->taxes->setting == 'included') {
             $original_price = $this->price; // السعر الأصلي (شامل الضريبة)
 
-            // 1. حساب السعر بعد الخصم (وهذا السعر سيظل شامل للضريبة)
-            if (!empty($my_discount)) {
-                if ($my_discount->type == 'precentage') {
-                    $discount = $original_price - ($my_discount->amount * $original_price / 100);
-                } else {
-                    $discount = $original_price - $my_discount->amount;
-                }
-            } else {
-                $discount = $original_price;
-            }
-
-            // 2. بما أن الضريبة "مشمولة"، السعر النهائي هو نفسه السعر بعد الخصم ولن نجمع عليه ضرائب جديدة
-            $final_price = $discount;
-
-            // 3. الآن نقوم باستخراج (السعر قبل الضريبة) و (قيمة الضريبة) من السعر النهائي
+            // 1. استخراج (السعر قبل الضريبة) و (قيمة الضريبة) من السعر الأصلي مباشرة
             $tax_amount = 0;
-            $price_before_tax = $final_price;
+            $price_before_tax = $original_price;
 
             if (!empty($this->tax)) {
                 if ($this->tax->type == 'value') {
                     $tax_amount = $this->tax->amount;
-                    $price_before_tax = $final_price - $tax_amount;
+                    $price_before_tax = max(0, $original_price - $tax_amount);
                 } else {
                     // معادلة استخراج السعر الأساسي إذا كانت الضريبة نسبة مئوية ومشمولة
-                    $price_before_tax = $final_price / (1 + ($this->tax->amount / 100));
-                    $tax_amount = $final_price - $price_before_tax;
+                    $price_before_tax = $original_price / (1 + ($this->tax->amount / 100));
+                    $tax_amount = $original_price - $price_before_tax;
                 }
             }
 
-            // تعيين السعر ليكون السعر قبل الضريبة بناءً على طلبك
+            // السعر الصافي قبل الضريبة وقبل الخصم (تُخصم منه الضريبة فقط)
             $price = $price_before_tax;
+
+            // 2. حساب قيمة الخصم والسعر بعد الخصم
+            $discount_val = 0;
+            if (!empty($my_discount)) {
+                if ($my_discount->type == 'precentage') {
+                    $discount_val = ($my_discount->amount * $original_price / 100);
+                } else {
+                    $discount_val = $my_discount->amount;
+                }
+            }
+            $final_price = max(0, $original_price - $discount_val);
+            $discount = $final_price;
 
             return [
                 'id' => $this->id,
