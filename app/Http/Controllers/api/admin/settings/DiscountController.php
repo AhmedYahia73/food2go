@@ -25,7 +25,7 @@ class DiscountController extends Controller
 
     public function view(){
         // https://bcknd.food2go.online/admin/settings/discount
-        $discount = $this->discount->get();
+        $discount = $this->discount->withoutGlobalScope('active_period')->get();
 
         return response()->json([
             'discounts' => $discount
@@ -35,7 +35,7 @@ class DiscountController extends Controller
     public function lists($id){
         $products = Product::
         whereDoesntHave("discounts", function($query) use($id){
-            $query->where("discounts.id", $id);
+            $query->withoutGlobalScope('active_period')->where("discounts.id", $id);
         })
         ->get()
         ->map(function($item){
@@ -46,7 +46,7 @@ class DiscountController extends Controller
         });
         $categories = Category::
         whereDoesntHave("discounts", function($query) use($id){
-            $query->where("discounts.id", $id);
+            $query->withoutGlobalScope('active_period')->where("discounts.id", $id);
         })
         ->get()
         ->map(function($item){
@@ -66,7 +66,7 @@ class DiscountController extends Controller
         // discounts 
         $products = Product::
         whereHas("discounts", function($query) use($id){
-            $query->where("discounts.id", $id);
+            $query->withoutGlobalScope('active_period')->where("discounts.id", $id);
         })
         ->get()
         ->map(function($item){
@@ -77,7 +77,7 @@ class DiscountController extends Controller
         });
         $categories = Category::
         whereHas("discounts", function($query) use($id){
-            $query->where("discounts.id", $id);
+            $query->withoutGlobalScope('active_period')->where("discounts.id", $id);
         })
         ->get()
         ->map(function($item){
@@ -108,23 +108,42 @@ class DiscountController extends Controller
             ],400);
         }
 
-        $products = Product::
-        where("discount_id", $request->discount_id)
-        ->update([
-            "discount_id" => null
-        ]);
-        $products = Product::
-        whereIn("category_id", $request->categories)
-        ->orWhereIn("sub_category_id", $request->categories)
-        ->orWhereIn("id", $request->products)
-        ->update([
-            "discount_id" => $request->discount_id
-        ]);
-         $discount = Discount::
-         where("id", $request->discount_id)
-         ->first();
-         $discount->products()->sync($request->products ?? []);
-         $discount->categories()->sync($request->categories ?? []);
+        // 1. Unset discount_id from all products previously associated with this discount
+        $oldProducts = Product::where("discount_id", $request->discount_id)->get();
+        foreach ($oldProducts as $p) {
+            $p->discount_id = null;
+            $p->save(); // Eloquent save triggers LogChanges trait for desktop sync
+        }
+
+        // 2. Set discount_id on newly selected categories/products
+        $categoryIds = $request->categories ?? [];
+        $productIds = $request->products ?? [];
+        if (!empty($categoryIds) || !empty($productIds)) {
+            $targetProducts = Product::where(function($q) use ($categoryIds, $productIds) {
+                if (!empty($categoryIds)) {
+                    $q->whereIn("category_id", $categoryIds)
+                      ->orWhereIn("sub_category_id", $categoryIds);
+                }
+                if (!empty($productIds)) {
+                    $q->orWhereIn("id", $productIds);
+                }
+            })->get();
+
+            foreach ($targetProducts as $p) {
+                $p->discount_id = $request->discount_id;
+                $p->save(); // Eloquent save triggers LogChanges trait for desktop sync
+            }
+        }
+
+        $discount = Discount::withoutGlobalScope('active_period')
+            ->where("id", $request->discount_id)
+            ->first();
+
+        if ($discount) {
+            $discount->products()->sync($request->products ?? []);
+            $discount->categories()->sync($request->categories ?? []);
+            $discount->touch();
+        }
         
         return response()->json([
             "success" => "You update data success", 
@@ -134,8 +153,9 @@ class DiscountController extends Controller
     public function discount($id){
         // https://bcknd.food2go.online/admin/settings/discount/item/{id}
         $discount = $this->discount
-        ->where('id', $id)
-        ->first();
+            ->withoutGlobalScope('active_period')
+            ->where('id', $id)
+            ->first();
 
         return response()->json([
             'discount' => $discount
@@ -160,9 +180,10 @@ class DiscountController extends Controller
         // Keys
         // name, type, amount
         $discountRequest = $request->only($this->discountRequest);
-        $this->discount
-        ->where('id', $id)
-        ->update($discountRequest);
+        $discount = $this->discount->withoutGlobalScope('active_period')->find($id);
+        if ($discount) {
+            $discount->update($discountRequest);
+        }
 
         return response()->json([
             'success' => 'You update data success'
@@ -171,13 +192,21 @@ class DiscountController extends Controller
 
     public function delete($id){
         // https://bcknd.food2go.online/admin/settings/discount/delete/{id}
-        $this->discount
-        ->where('id', $id)
-        ->delete();
+        $discount = $this->discount->withoutGlobalScope('active_period')->find($id);
+        if ($discount) {
+            // Unset discount_id on all products referencing this discount
+            $affectedProducts = Product::where('discount_id', $id)->get();
+            foreach ($affectedProducts as $product) {
+                $product->discount_id = null;
+                $product->save(); // triggers LogChanges
+            }
+            $discount->products()->detach();
+            $discount->categories()->detach();
+            $discount->delete(); // triggers LogChanges delete
+        }
 
         return response()->json([
             'success' => 'You delete data success'
         ]);
     }
-
 }
