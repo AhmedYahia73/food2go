@@ -79,7 +79,7 @@ class StoreController extends Controller
             'name' => ['required'],
             'location' => ['required'],
             'status' => ['required', 'boolean'],
-            'branches' => ['required', 'array'],
+            'branches' => ['sometimes', 'nullable', 'array'],
             'branches.*' => ['exists:branches,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -91,7 +91,7 @@ class StoreController extends Controller
         $storeRequest = $validator->validated();
         $store = $this->store
         ->create($storeRequest);
-        $store->branches()->attach($request->branches);
+        $store->branches()->attach($request->branches ?? []);
 
         return response()->json([
             'success' => 'You add data success'
@@ -103,7 +103,7 @@ class StoreController extends Controller
             'name' => ['required'],
             'location' => ['required'],
             'status' => ['required', 'boolean'],
-            'branches' => ['required', 'array'],
+            'branches' => ['sometimes', 'nullable', 'array'],
             'branches.*' => ['exists:branches,id'],
         ]);
         if ($validator->fails()) { // if Validate Make Error Return Message Error
@@ -117,7 +117,7 @@ class StoreController extends Controller
         ->where('id', $id)
         ->first();
         $store->update($storeRequest);
-        $store->branches()->sync($request->branches);
+        $store->branches()->sync($request->branches ?? []);
 
         return response()->json([
             'success' => 'You update data success'

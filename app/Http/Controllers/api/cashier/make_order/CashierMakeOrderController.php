@@ -532,30 +532,9 @@ class CashierMakeOrderController extends Controller
                 "due" => $user->due + $request->amount
             ]);
         }      
-        // Pull Pecipe
+        // Pull Recipe
         $order_details = $order['order']->order_details;
-        $products = [];
-        foreach ($order_details as $item) {
-            $product_item = $item->product[0]; 
-            $products[] = [
-                "id" => $product_item->product->id,
-                "count" => $product_item->count,
-            ]; 
-        }
-        if($request->bundles){
-            foreach ($request->bundles as $item) {
-                $products = Bundle::
-                where("id", $item['id'])
-                ->with("products")
-                ->first()?->products ?? [];
-                foreach ($products as $element) {
-                    $products[] = [
-                        "id" => $element->id,
-                        "count" => $item['count'],
-                    ]; 
-                }
-            }
-        }
+        $products = $this->formatOrderDetailsForRecipePull($order_details, $request->bundles);
         $errors = $this->pull_recipe($products, $request->branch_id);
         if(!$errors['success']){
             return response()->json([
@@ -876,30 +855,9 @@ class CashierMakeOrderController extends Controller
                 ]);
             }
         }
-      // Pull Pecipe
+      // Pull Recipe
         $order_details = $order["order"]->order_details;
-        $products = [];
-        foreach ($order_details as $item) { 
-            $product_item = $item->product[0]; 
-            $products[] = [
-                "id" => $product_item->product->id,
-                "count" => $product_item->count,
-            ];
-        }
-        if($request->bundles){
-            foreach ($request->bundles as $item) {
-                $products = Bundle::
-                where("id", $item['id'])
-                ->with("products")
-                ->first()?->products ?? [];
-                foreach ($products as $element) {
-                    $products[] = [
-                        "id" => $element->id,
-                        "count" => $item['count'],
-                    ]; 
-                }
-            }
-        }
+        $products = $this->formatOrderDetailsForRecipePull($order_details, $request->bundles);
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
             return response()->json([
@@ -1485,31 +1443,9 @@ class CashierMakeOrderController extends Controller
         } 
         $order['payment']['cart'] = $order['payment']['order_details'];
         $order_items = $this->order_format(($order['payment']), 0);
-        // Pull Pecipe
+        // Pull Recipe
         $order_details = $order['payment']['order_details'];
-        $products = [];
-         
-        foreach ($order_details as $item) { 
-            $product_item = $item->product[0]; 
-            $products[] = [
-                "id" => $product_item->product->id,
-                "count" => $product_item->count,
-            ];
-        }
-        if($request->bundles){
-            foreach ($request->bundles as $item) {
-                $products = Bundle::
-                where("id", $item['id'])
-                ->with("products")
-                ->first()?->products ?? [];
-                foreach ($products as $element) {
-                    $products[] = [
-                        "id" => $element->id,
-                        "count" => $item['count'],
-                    ]; 
-                }
-            }
-        }
+        $products = $this->formatOrderDetailsForRecipePull($order_details, $request->bundles);
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
             return response()->json([
@@ -1688,31 +1624,9 @@ class CashierMakeOrderController extends Controller
         $order_id = $order_number;
         $order['payment']['cart'] = $order['payment']['order_details'];
         // $order = $this->order_format(($order['payment']), 0);
-      // Pull Pecipe
+      // Pull Recipe
         $order_details = $order['payment']['order_details'];
-        $products = [];
-         
-        foreach ($order_details as $item) { 
-            $product_item = $item->product[0]; 
-            $products[] = [
-                "id" => $product_item->product->id,
-                "count" => $product_item->count,
-            ];
-        }
-        if($request->bundles){
-            foreach ($request->bundles as $item) {
-                $products = Bundle::
-                where("id", $item['id'])
-                ->with("products")
-                ->first()?->products ?? [];
-                foreach ($products as $element) {
-                    $products[] = [
-                        "id" => $element->id,
-                        "count" => $item['count'],
-                    ]; 
-                }
-            }
-        }
+        $products = $this->formatOrderDetailsForRecipePull($order_details, $request->bundles);
         $errors = $this->pull_recipe($products, $request->user()->branch_id); 
         if(!$errors['success']){
             return response()->json([
@@ -1861,29 +1775,7 @@ class CashierMakeOrderController extends Controller
         }
         if($request->take_away_status == 'preparing'){
             $order_details = $order->order_details;
-            $products = [];
-         
-            foreach ($order_details as $item) { 
-                $product_item = $item->product[0]; 
-                $products[] = [
-                    "id" => $product_item->product->id,
-                    "count" => $product_item->count,
-                ];
-            }
-            if($request->bundles){
-                foreach ($request->bundles as $item) {
-                    $products = Bundle::
-                    where("id", $item['id'])
-                    ->with("products")
-                    ->first()?->products ?? [];
-                    foreach ($products as $element) {
-                        $products[] = [
-                            "id" => $element->id,
-                            "count" => $item['count'],
-                        ]; 
-                    }
-                }
-            }
+            $products = $this->formatOrderDetailsForRecipePull($order_details, $request->bundles);
             $errors = $this->pull_recipe($products, $request->user()->branch_id); 
             if(!$errors['success']){
                 return response()->json([

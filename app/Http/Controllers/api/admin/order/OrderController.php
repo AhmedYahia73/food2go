@@ -1695,14 +1695,7 @@ class OrderController extends Controller
 
         if($old_status == "pending"){
             $order_details = $order->order_details;
-            $products = [];
-            foreach ($order_details as $item) { 
-                $product_item = $item->product[0]; 
-                $products[] = [
-                    "id" => $product_item->product->id,
-                    "count" => $product_item->count,
-                ];
-            }
+            $products = $this->formatOrderDetailsForRecipePull($order_details);
             $errors = $this->pull_recipe($products, $order->branch_id); 
             if(!$errors['success']){
                 return response()->json([
