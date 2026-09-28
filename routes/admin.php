@@ -388,10 +388,10 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::get('/view_recipes/{id}', 'view_recipes');
         Route::get('/lists', 'lists');
         Route::get('/recipe_item/{id}', 'recipe_item');
-        Route::put('/status/{id}', 'status');
+        Route::match(['put', 'post'], '/status/{id}', 'status');
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
-        Route::delete('/delete/{id}', 'delete');
+        Route::match(['delete', 'post'], '/delete/{id}', 'delete');
     });
 
     Route::controller(BundleController::class)

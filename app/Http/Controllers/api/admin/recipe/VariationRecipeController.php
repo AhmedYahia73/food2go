@@ -132,15 +132,6 @@ class VariationRecipeController extends Controller
     }
 
     public function status(Request $request, $id){
-        $validator = Validator::make($request->all(), [ 
-            'status' => ['required', 'boolean'],
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors(),
-            ], 400);
-        }
-
         $variation = VariationRecipe::where("id", $id)->first();
         if (!$variation) {
             return response()->json([
@@ -148,12 +139,20 @@ class VariationRecipeController extends Controller
             ], 404);
         }
 
+        $rawStatus = $request->input('status', $request->query('status'));
+        if ($rawStatus === null) {
+            $newStatus = $variation->status == 1 ? 0 : 1;
+        } else {
+            $newStatus = ($rawStatus === 1 || $rawStatus === '1' || $rawStatus === true || $rawStatus === 'true') ? 1 : 0;
+        }
+
         $variation->update([
-            "status" => $request->status
+            "status" => $newStatus
         ]);
 
         return response()->json([
             "success" => "You update status success",
+            "status" => $newStatus,
         ]);
     }
 
@@ -315,9 +314,16 @@ class VariationRecipeController extends Controller
     public function delete(Request $request, $id){
         $variation = VariationRecipe::where("id", $id)->first();
         if (empty($variation)) {
+            $byOption = VariationRecipe::where("option_id", $id)->get();
+            if ($byOption->isNotEmpty()) {
+                VariationRecipe::where("option_id", $id)->delete();
+                return response()->json([
+                    "success" => "You delete recipe success",
+                ]);
+            }
             return response()->json([
                 "errors" => "Recipe not found"
-            ], 400);
+            ], 404);
         }
         
         $variation->delete();
