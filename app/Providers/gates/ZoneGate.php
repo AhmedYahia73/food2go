@@ -53,5 +53,27 @@ class ZoneGate
             }
             return false;
         });
+        Gate::define('view_manufacturing', function (Admin $admin) {
+            if (
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('manufacturing') &&
+                $admin->user_positions->roles->where('role', 'manufacturing')->pluck('action')->intersect(['all', 'view'])->isNotEmpty())
+            ) {
+                return true;
+            }
+            return false;
+        });
+        Gate::define('add_manufacturing', function (Admin $admin) {
+            if (
+                $admin->admin_position == "super_admin" ||
+                ($admin->user_positions &&
+                $admin->user_positions->roles->pluck('role')->contains('manufacturing') &&
+                $admin->user_positions->roles->where('role', 'manufacturing')->pluck('action')->intersect(['all', 'add'])->isNotEmpty())
+            ) {
+                return true;
+            }
+            return false;
+        });
     }
 }

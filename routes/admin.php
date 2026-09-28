@@ -514,11 +514,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(ManufacturingController::class)
     ->prefix('manufacturing')->group(function(){
-        Route::get('/lists', 'lists'); 
-        Route::post('/product_recipe', 'product_recipe'); 
-        Route::post('/manufacturing', 'manufacturing'); 
-        Route::get('/manufacturing_history', 'manufacturing_history'); 
-        Route::get('/manufacturing_recipe/{id}', 'manufacturing_recipe'); 
+        Route::get('/lists', 'lists')->middleware('can:view_manufacturing'); 
+        Route::post('/product_recipe', 'product_recipe')->middleware('can:add_manufacturing'); 
+        Route::post('/manufacturing', 'manufacturing')->middleware('can:add_manufacturing'); 
+        Route::get('/manufacturing_history', 'manufacturing_history')->middleware('can:view_manufacturing'); 
+        Route::get('/manufacturing_recipe/{id}', 'manufacturing_recipe')->middleware('can:view_manufacturing'); 
     });
     
     Route::controller(WebsiteQrController::class)

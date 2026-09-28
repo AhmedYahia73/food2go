@@ -99,6 +99,7 @@ class AdminRolesController extends Controller
             'DeliveryTime' => [ 'view', 'edit'],
             'PreparingTime' => [ 'view', 'edit'],
             'NotificationSound' => [ 'view', 'edit'],
+            'manufacturing' => [ 'view', 'add'],
         ];
 
         return response()->json([
