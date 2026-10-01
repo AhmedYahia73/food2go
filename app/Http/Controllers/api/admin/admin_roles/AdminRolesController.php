@@ -100,6 +100,19 @@ class AdminRolesController extends Controller
             'PreparingTime' => [ 'view', 'edit'],
             'NotificationSound' => [ 'view', 'edit'],
             'manufacturing' => [ 'view', 'add'],
+            'Reports' => [
+                'Cashier Report',
+                'Orders Reports',
+                'Financial Reports',
+                'Real Time Sales Reports',
+                'Product Reports',
+                'Dine Reports',
+                'Invoices Reports',
+                'Products Movements',
+                'Hall Reports',
+                'Cashier Shortage',
+                'End Shifts',
+            ],
         ];
 
         return response()->json([

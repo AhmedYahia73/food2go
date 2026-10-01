@@ -304,8 +304,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         return $first_order - 1;
     });
     
-    Route::get("shifts/shifts", [ShiftPanelController::class, "shifts"]);
-    Route::get("shifts/end_shift/{id}", [ShiftPanelController::class, "end_shift"]);
+    Route::get("shifts/shifts", [ShiftPanelController::class, "shifts"])->middleware('can:end_shifts');
+    Route::get("shifts/end_shift/{id}", [ShiftPanelController::class, "end_shift"])->middleware('can:end_shifts');
 
     Route::get("product_offer/lists", [ProductOfferController::class, "lists"]);
     Route::resource("product_offer", ProductOfferController::class);
@@ -342,8 +342,8 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(CashierGapController::class)
     ->prefix('cashier_gap')->group(function(){
-        Route::get('/lists', 'lists');
-        Route::get('/', 'cashier_gap');
+        Route::get('/lists', 'lists')->middleware('can:cashier_shortage');
+        Route::get('/', 'cashier_gap')->middleware('can:cashier_shortage');
     });
 
     Route::controller(ProductPOSPricingController::class)
@@ -667,33 +667,32 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     
     Route::controller(ReportController::class)
     ->prefix('reports')->group(function(){
-        Route::get('/group_module_report', 'group_module_report');
-        Route::get('/branches_list', 'branches_list');
-        Route::get('/lists_report', 'lists_report');
-        Route::post('/invoices_filter', 'invoices_filter');
-        Route::post('/dine_in_report', 'dine_in_report');
-        Route::get('/instate_order_report', 'instate_order_report');
-        Route::get('/view_raise_product', 'view_raise_product');
-        Route::post('/filter_raise_product', 'filter_raise_product');
-        Route::get('/low_product', 'low_product');
-        Route::post('/filter_low_product', 'filter_low_product');
-        Route::get('/sales_product', 'sales_product');
-        Route::post('/sales_product_filter', 'sales_product_filter');
-        Route::get('/purchase_product', 'purchase_product');
-        Route::post('/filter_purchase_product', 'filter_purchase_product');
-        Route::get('/purchase_raise_product', 'purchase_raise_product');
-        Route::post('/filter_purchase_raise_product', 'filter_purchase_raise_product');
-        Route::get('/purchase_low_product', 'purchase_low_product');
-        Route::post('/filter_purchase_low_product', 'filter_purchase_low_product');
-        Route::get('/lists_report', 'lists_report');
-        Route::post('/orders_report', 'orders_report');
-        Route::post('/financial_report', 'financial_report');
-        Route::post('/financial_reports', 'financial_reports');
-        Route::get('/cashier_report/{id}', 'cashier_report');
-        Route::get('/product_report', 'product_report');
-        Route::get('/product_report_lists', 'product_report_lists');
-        Route::post('/hall_reports', 'hall_reports');
-        Route::post('/products_movement', 'products_movement');
+        Route::get('/group_module_report', 'group_module_report')->middleware('can:financial_reports');
+        Route::get('/branches_list', 'branches_list')->middleware('can:branches_list');
+        Route::get('/lists_report', 'lists_report')->middleware('can:lists_report');
+        Route::post('/invoices_filter', 'invoices_filter')->middleware('can:invoices_reports');
+        Route::post('/dine_in_report', 'dine_in_report')->middleware('can:dine_reports');
+        Route::get('/instate_order_report', 'instate_order_report')->middleware('can:real_time_sales_reports');
+        Route::get('/view_raise_product', 'view_raise_product')->middleware('can:product_reports');
+        Route::post('/filter_raise_product', 'filter_raise_product')->middleware('can:product_reports');
+        Route::get('/low_product', 'low_product')->middleware('can:product_reports');
+        Route::post('/filter_low_product', 'filter_low_product')->middleware('can:product_reports');
+        Route::get('/sales_product', 'sales_product')->middleware('can:product_reports');
+        Route::post('/sales_product_filter', 'sales_product_filter')->middleware('can:product_reports');
+        Route::get('/purchase_product', 'purchase_product')->middleware('can:product_reports');
+        Route::post('/filter_purchase_product', 'filter_purchase_product')->middleware('can:product_reports');
+        Route::get('/purchase_raise_product', 'purchase_raise_product')->middleware('can:product_reports');
+        Route::post('/filter_purchase_raise_product', 'filter_purchase_raise_product')->middleware('can:product_reports');
+        Route::get('/purchase_low_product', 'purchase_low_product')->middleware('can:product_reports');
+        Route::post('/filter_purchase_low_product', 'filter_purchase_low_product')->middleware('can:product_reports');
+        Route::post('/orders_report', 'orders_report')->middleware('can:orders_reports');
+        Route::post('/financial_report', 'financial_report')->middleware('can:financial_reports');
+        Route::post('/financial_reports', 'financial_reports')->middleware('can:financial_reports');
+        Route::get('/cashier_report/{id}', 'cashier_report')->middleware('can:cashier_report');
+        Route::get('/product_report', 'product_report')->middleware('can:product_reports');
+        Route::get('/product_report_lists', 'product_report_lists')->middleware('can:product_report_lists');
+        Route::post('/hall_reports', 'hall_reports')->middleware('can:hall_reports');
+        Route::post('/products_movement', 'products_movement')->middleware('can:products_movements');
     });
     
     Route::controller(TaxModuleController::class)
@@ -1400,9 +1399,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
 
     Route::controller(AdminCashierReportController::class)
     ->prefix('/reports')->group(function(){
-        Route::post('cashier_reports', 'cashier_reports');
-        Route::post('shifts_data', 'shifts_data');
-        Route::get('shift_details/{id}', 'shift_details');
+        Route::post('cashier_reports', 'cashier_reports')->middleware('can:cashier_report');
+        Route::post('shifts_data', 'shifts_data')->middleware('can:cashier_report');
+        Route::get('shift_details/{id}', 'shift_details')->middleware('can:cashier_report');
     }); 
 
     Route::controller(CashierReportsController::class)

@@ -64,6 +64,7 @@ use App\Providers\gates\RestoreGate;
 use App\Providers\gates\DueGroupGate;
 use App\Providers\gates\CRUDGate;
 use App\Providers\gates\PreparationManGate;
+use App\Providers\gates\ReportGate;
 
 use App\Providers\Cashier\CashierRoles;
 use Illuminate\Support\Facades\Schema;
@@ -177,5 +178,6 @@ class AppServiceProvider extends ServiceProvider
         DueGroupGate::defineGates();
         PreparationManGate::defineGates();
         CRUDGate::defineGates();
+        ReportGate::defineGates();
     }
 }
