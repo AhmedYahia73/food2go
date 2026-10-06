@@ -200,6 +200,16 @@ class ShiftPanelController extends Controller
             }
             $cashier_shifts->end_time = now();
             $cashier_shifts->save();
+            Cashier::
+            where("id", $cashier_shifts?->cashier_id ?? null)
+            ->update([
+                "cashier_id" => null,
+            ]);
+            CashierMan::
+            where("id", $cashier_shifts?->cashier_man_id ?? null)
+            ->update([
+                "cashier_id" => null,
+            ]);
             return response()->json($arr);
         }
         if($cashier_shifts?->cashier_man?->report ?? null != "unactive"){
@@ -609,6 +619,16 @@ class ShiftPanelController extends Controller
                 }
                 $cashier_shifts->end_time = now();
                 $cashier_shifts->save();
+                Cashier::
+                where("id", $cashier_shifts?->cashier_id ?? null)
+                ->update([
+                    "cashier_id" => null,
+                ]);
+                CashierMan::
+                where("id", $cashier_shifts?->cashier_man_id ?? null)
+                ->update([
+                    "cashier_id" => null,
+                ]);
                 return response()->json($arr);
             }
             elseif($cashier_shifts?->cashier_man?->report == "financial"){
