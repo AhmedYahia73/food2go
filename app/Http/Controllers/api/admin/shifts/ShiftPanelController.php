@@ -13,6 +13,8 @@ use App\Models\OrderFinancial;
 use App\Models\CashierShift;
 use App\Models\CashierGap;
 use App\Models\Expense;
+use App\Models\Cashier;
+use App\Models\CashierMan;
 
 class ShiftPanelController extends Controller
 {
@@ -709,6 +711,17 @@ class ShiftPanelController extends Controller
                 } 
                 $cashier_shifts->end_time = now();
                 $cashier_shifts->save();
+
+                Cashier::
+                where("id", $cashier_shifts?->cashier_id ?? null)
+                ->update([
+                    "cashier_id" => null,
+                ]);
+                CashierMan::
+                where("id", $cashier_shifts?->cashier_man_id ?? null)
+                ->update([
+                    "cashier_id" => null,
+                ]);
                 return response()->json($arr);
             }
         } 
