@@ -65,6 +65,7 @@ class DiscountModuleController extends Controller
         $modules = $discount?->module
         ->map(function($element){
             return [
+                "branch_id" => $element->branch_id,
                 "module" => $element->module,
                 "branch" => $element?->branch?->name,
                 "type" => $element->type,
