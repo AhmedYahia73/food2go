@@ -1043,6 +1043,7 @@ class CashierReportsController extends Controller
                 'cashier_id' => $request->user()->cashier_id,
                 'cashier_man_id' => $request->user()->id,
                 'amount' => $gap,
+                'cashier_amount' => $request->amount,
                 'shift' => $request->user()->shift_number,
             ]);  
         }   
@@ -1055,6 +1056,7 @@ class CashierReportsController extends Controller
                 "total_orders" => $total_orders, 
                 "actual_total" => $actual_total,
                 "gap" => $gap,
+                "cashier_amount" => $request->amount,
                 "net_cash_drawer" => $net_cash_drawer,
                 "net_cash_drawer2" => $net_cash_drawer2,
                 "orders_count" => $orders_count,
@@ -1520,6 +1522,7 @@ class CashierReportsController extends Controller
                 } 
                 if($request->user()->enter_amount){
                     $arr['gap'] = $gap;
+                    $arr['cashier_amount'] = $request->amount;
                 }
                 return response()->json($arr);
             }
@@ -1575,6 +1578,7 @@ class CashierReportsController extends Controller
                 }
                 if($request->user()->enter_amount){
                     $arr['gap'] = $gap;
+                    $arr['cashier_amount'] = $request->amount;
                 }
                 if($request->user()->service_fees){
                     $service_fees = Order::

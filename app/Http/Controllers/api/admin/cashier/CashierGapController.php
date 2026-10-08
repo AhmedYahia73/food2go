@@ -59,6 +59,7 @@ class CashierGapController extends Controller
             return [
                 "id" => $item->id,
                 "amount" => $item->amount,
+                "cashier_amount" => $item->cashier_amount,
                 "cashier_id" => $item->cashier_id,
                 "cashier_man_id" => $item->cashier_man_id,
                 "cashier" => $item?->cashier?->name,

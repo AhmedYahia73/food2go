@@ -183,6 +183,7 @@ class ShiftPanelController extends Controller
                 'cashier_id' => $cashier_shifts?->cashier_id ?? $cashier_shifts?->cashier_man?->cashier_id ?? null,
                 'cashier_man_id' => $cashier_shifts?->cashier_man?->id ?? null,
                 'amount' => $gap,
+                'cashier_amount' => $request->amount,
                 'shift' => $cashier_shifts?->cashier_man?->shift_number ?? null,
             ]);  
         }   
@@ -193,6 +194,7 @@ class ShiftPanelController extends Controller
                 "total_orders" => $total_orders, 
                 "actual_total" => $actual_total,
                 "gap" => $gap,
+                "cashier_amount" => $request->amount,
                 "net_cash_drawer" => $net_cash_drawer,
             ];
             if(isset($hall_orders)){
@@ -620,6 +622,7 @@ class ShiftPanelController extends Controller
                 } 
                 if($cashier_shifts?->cashier_man?->enter_amount ?? null){
                     $arr['gap'] = $gap;
+                    $arr['cashier_amount'] = $request->amount;
                 }
                 $cashier_shifts->end_time = now();
                 $cashier_shifts->save();
@@ -684,6 +687,7 @@ class ShiftPanelController extends Controller
                 }
                 if($cashier_shifts?->cashier_man?->enter_amount ?? null){
                     $arr['gap'] = $gap;
+                    $arr['cashier_amount'] = $request->amount;
                 }
                 if($cashier_shifts?->cashier_man?->service_fees ?? null){
                     $service_fees = Order::

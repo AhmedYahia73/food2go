@@ -14,6 +14,7 @@ class CashierGap extends Model
 
     protected $fillable = [
         'amount',
+        'cashier_amount',
         'cashier_id',
         'cashier_man_id',
         'shift',
