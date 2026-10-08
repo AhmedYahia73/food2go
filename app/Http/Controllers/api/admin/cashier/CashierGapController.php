@@ -69,7 +69,7 @@ class CashierGapController extends Controller
         });
 
         return response()->json([
-            "gaps" => $paginated,
+            "gaps" => $paginated->items(),
             "pagination" => [
                 "total" => $paginated->total(),
                 "per_page" => $paginated->perPage(),
