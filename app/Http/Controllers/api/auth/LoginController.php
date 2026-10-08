@@ -617,7 +617,7 @@ class LoginController extends Controller
 
     public function start_shift(Request $request){
         $validation = Validator::make($request->all(), [
-            "cashier_id" => "required|exists:cashiers,id",
+            "cashier_id" => "exists:cashiers,id",
             "amount" => 'required|numeric',
             "financial_id" => 'required|exists:finantiol_acountings,id',
             // 'fcm_token' => 'required',
@@ -639,6 +639,16 @@ class LoginController extends Controller
         ]);
         $request->user()->shift_number = $shift_number;
         $request->user()->save();
+        Cashier::
+        where("id", $request->cashier_id ?? null)
+        ->update([
+            "cashier_id" => $request->user()->id
+        ]);    
+        CashierMan::
+        where("id", $request->user()->id)
+        ->update([
+            "cashier_id" => $request->cashier_id ?? $request->user()->cashier_id
+        ]);
 
         return response()->json([
             'success' => 'You open shift success'
