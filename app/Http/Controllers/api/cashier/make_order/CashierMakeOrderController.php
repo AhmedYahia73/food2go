@@ -2567,7 +2567,7 @@ class CashierMakeOrderController extends Controller
         ]);
     }
 
-    public function logo(Request $request){
+    public function checkout_data_items(Request $request){
         $company_info = $this->company_info
         ->first();
         if(empty($company_info)){
