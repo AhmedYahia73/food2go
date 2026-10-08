@@ -26,7 +26,7 @@ class ShiftPanelController extends Controller
         ->get()
         ->map(function($item){
             return [
-                "id" => $item->id,
+                "id" => (string) $item->id,
                 "start_time" => $item->start_time,
                 "cashier_man" => $item?->cashier_man?->user_name,
                 "cashier" => $item?->cashier?->name
@@ -48,7 +48,7 @@ class ShiftPanelController extends Controller
         if(!$cashier_shifts){
             return response()->json([
                 "errors" => "id is wrong"
-            ]);
+            ], 400);
         }
         $gap = 0;
 

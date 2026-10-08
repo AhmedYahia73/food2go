@@ -22,7 +22,7 @@ class CashierShift extends Model
     ];
 
     public function getIdAttribute($value){
-        return (int) $value;
+        return (string) $value;
     }
 
     public function cashier_man(){
