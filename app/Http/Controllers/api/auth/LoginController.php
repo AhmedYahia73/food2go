@@ -617,7 +617,7 @@ class LoginController extends Controller
 
     public function start_shift(Request $request){
         $validation = Validator::make($request->all(), [
-            "cashier_id" => "exists:cashiers,id",
+            "cashier_id" => "required|exists:cashiers,id",
             "amount" => 'required|numeric',
             "financial_id" => 'required|exists:finantiol_acountings,id',
             // 'fcm_token' => 'required',
