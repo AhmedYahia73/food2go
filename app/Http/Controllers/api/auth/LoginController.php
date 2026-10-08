@@ -639,11 +639,7 @@ class LoginController extends Controller
         ]);
         $request->user()->shift_number = $shift_number;
         $request->user()->save();
-        Cashier::
-        where("id", $request->cashier_id ?? null)
-        ->update([
-            "cashier_id" => $request->user()->id
-        ]);    
+    
         CashierMan::
         where("id", $request->user()->id)
         ->update([
