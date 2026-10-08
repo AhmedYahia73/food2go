@@ -2566,10 +2566,19 @@ class CashierMakeOrderController extends Controller
             "cart_id" => $order['payment']
         ]);
     }
-}
 
+    public function logo(Request $request){
+        $company_info = $this->company_info
+        ->first();
+        if(empty($company_info)){
+            return response()->json([
+                "errors" => "company_info not found"
+            ], 400);
+        }
 
-
-
-
-
+        return response()->json([
+            "logo_link" => $company_info->logo_link,
+            "name" => $company_info->name,
+        ]);
+    }
+} 
