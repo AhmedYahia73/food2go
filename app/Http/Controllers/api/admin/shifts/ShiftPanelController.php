@@ -792,6 +792,23 @@ class ShiftPanelController extends Controller
                 return response()->json($arr);
             }
         } 
- 
+
+        $cashier_shifts->end_time = now();
+        $cashier_shifts->save();
+
+        if ($cashier_shifts?->cashier_id) {
+            Cashier::
+            where("id", $cashier_shifts->cashier_id)
+            ->update([
+                "cashier_active" => 0,
+            ]);
+        }
+        if ($cashier_shifts?->cashier_man_id) {
+            CashierMan::
+            where("id", $cashier_shifts->cashier_man_id)
+            ->update([
+                "cashier_id" => null,
+            ]);
+        }
     }
 }
