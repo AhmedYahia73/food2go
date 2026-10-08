@@ -115,6 +115,7 @@ class ShiftPanelController extends Controller
         ->where("branch_id", $cashier_shifts?->cashier_man?->branch_id)
         ->where("cahier_man_id", $cashier_shifts?->cashier_man?->id)
         ->sum('amount');
+        $cashier_shifts?->cashier_man?->tokens()?->delete();
         $net_cash_drawer = $order_financial + $start_amount - $expenses;
         $actual_total = $total_orders + $start_amount - $expenses; 
         if($cashier_shifts?->cashier_man?->hall_orders ?? null){
@@ -185,7 +186,37 @@ class ShiftPanelController extends Controller
                 'amount' => $gap,
                 'cashier_amount' => $request->amount,
                 'shift' => $cashier_shifts?->cashier_man?->shift_number ?? null,
-            ]);  
+            ]);          
+            $arr = [
+                "start_amount" => $start_amount,
+                "expenses" => $expenses, 
+                "total_orders" => $total_orders, 
+                "actual_total" => $actual_total,
+                "gap" => $gap,
+                "cashier_amount" => $request->amount,
+                "net_cash_drawer" => $net_cash_drawer,
+            ];
+            if(isset($hall_orders)){
+                $arr['hall_orders'] = $hall_orders;
+            }
+            $cashier_shifts->end_time = now();
+            $cashier_shifts->save();
+
+            if ($cashier_shifts?->cashier_id) {
+                Cashier::
+                where("id", $cashier_shifts->cashier_id)
+                ->update([
+                    "cashier_active" => 0,
+                ]);
+            }
+            if ($cashier_shifts?->cashier_man_id) {
+                CashierMan::
+                where("id", $cashier_shifts->cashier_man_id)
+                ->update([
+                    "cashier_id" => null,
+                ]);
+            }
+            return response()->json($arr);
         }   
         if ($cashier_shifts?->cashier_man?->report == "unactive") {
             $arr = [
