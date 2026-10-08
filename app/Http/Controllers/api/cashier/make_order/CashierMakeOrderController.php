@@ -2575,10 +2575,54 @@ class CashierMakeOrderController extends Controller
                 "errors" => "company_info not found"
             ], 400);
         }
+        $kitchen_lang = Setting::
+        where("name", "kitchen_lang")
+        ->first();
+        if (empty($kitchen_lang)) {
+            $kitchen_lang = Setting::
+            create([
+                'name' => 'kitchen_lang',
+                'setting' => 'ar',
+            ]);
+        }
+        $brista_lang = Setting::
+        where("name", "brista_lang")
+        ->first();
+        if (empty($brista_lang)) {
+            $brista_lang = Setting::
+            create([
+                'name' => 'brista_lang',
+                'setting' => 'ar',
+            ]);
+        }
+        $cashier_lang = Setting::
+        where("name", "cashier_lang")
+        ->first();
+        if (empty($cashier_lang)) {
+            $cashier_lang = Setting::
+            create([
+                'name' => 'cashier_lang',
+                'setting' => 'ar',
+            ]);
+        }
+        $preparation_lang = Setting::
+        where("name", "preparation_lang")
+        ->first();
+        if (empty($preparation_lang)) {
+            $preparation_lang = Setting::
+            create([
+                'name' => 'preparation_lang',
+                'setting' => 'ar',
+            ]);
+        } 
 
         return response()->json([
             "logo_link" => $company_info->logo_link,
             "name" => $company_info->name,
+            "kitchen_lang" => $kitchen_lang->setting,
+            "brista_lang" => $brista_lang->setting,
+            "cashier_lang" => $cashier_lang->setting,
+            "preparation_lang" => $preparation_lang->setting,
         ]);
     }
 } 
