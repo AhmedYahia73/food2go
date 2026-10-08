@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\CashierGap;
 use App\Models\Cashier;
 use App\Models\CashierMan;
+use Carbon\Carbon;
 
 class CashierGapController extends Controller
 {
@@ -37,7 +38,7 @@ class CashierGapController extends Controller
             ],400);
         }
         $gaps = CashierGap::
-        with("cashier", "cashier_man");
+        with("cashier", "cashier_man", "shift");
         if($request->cashier_id){
             $gaps = $gaps
             ->where("cashier_id", $request->cashier_id);
@@ -46,9 +47,14 @@ class CashierGapController extends Controller
             $gaps = $gaps
             ->where("cashier_man_id", $request->cashier_man_id);
         }
-        $gaps = $gaps
-        ->get()
-        ->map(function($item){
+
+        $perPage = $request->per_page ?? 20;
+
+        $paginated = $gaps
+        ->orderByDesc("created_at")
+        ->paginate($perPage);
+
+        $paginated->getCollection()->transform(function($item){
             $date = $item?->shift?->created_at ?? $item->created_at;
             return [
                 "id" => $item->id,
@@ -57,12 +63,18 @@ class CashierGapController extends Controller
                 "cashier_man_id" => $item->cashier_man_id,
                 "cashier" => $item?->cashier?->name,
                 "cashier_man" => $item?->cashier_man?->user_name,
-                "date" => $date->format("Y-m-d"),
+                "date" => $date ? (is_string($date) ? Carbon::parse($date)->format("Y-m-d") : $date->format("Y-m-d")) : null,
             ];
         });
 
         return response()->json([
-            "gaps" => $gaps
+            "gaps" => $paginated,
+            "pagination" => [
+                "total" => $paginated->total(),
+                "per_page" => $paginated->perPage(),
+                "current_page" => $paginated->currentPage(),
+                "last_page" => $paginated->lastPage(),
+            ]
         ]);
     }
 }

@@ -1042,7 +1042,7 @@ class CashierReportsController extends Controller
             CashierGap::create([
                 'cashier_id' => $request->user()->cashier_id,
                 'cashier_man_id' => $request->user()->id,
-                'amount' => $request->amount,
+                'amount' => $gap,
                 'shift' => $request->user()->shift_number,
             ]);  
         }   
