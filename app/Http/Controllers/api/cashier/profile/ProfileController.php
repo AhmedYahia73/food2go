@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\trait\image;
+use Carbon\Carbon;
 
 use App\Models\CashierMan;
 use App\Models\CashierShift;
@@ -20,20 +21,32 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'cashier_id' => 'required|exists:cashiers,id', 
         ]);
-        if ($validator->fails()) { // if Validate Make Error Return Message Error
+
+        if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
-            ],400);
+            ], 400);
         }
 
-        $is_open = CashierShift::
-        where('cashier_man_id', $request->user()->id)
-        ->where("cashier_id", $request->cashier_id)
-        ->whereNull('end_time')
-        ->first();
+        $is_open = CashierShift::where('cashier_man_id', $request->user()->id)
+            ->where('cashier_id', $request->cashier_id)
+            ->whereNull('end_time')
+            ->first();
+
+        $time = "00:00:00";
+
+        if ($is_open) {
+            // التأكد من تحويل start_time إلى Carbon في حال لم يكن معرّفاً في $casts
+            $startTime = Carbon::parse($is_open->start_time);
+            
+            // حساب الفرق وتنسيقه (H:I:S)
+            $time = $startTime->diff(now())->format('%H:%I:%S');
+        }
+
         return response()->json([
-            "is_open" => !empty($is_open),
-            "shift" => $is_open,
+            "is_open" => (bool) $is_open,
+            "shift"   => $is_open,
+            "time"    => $time,
         ]);
     }
 
