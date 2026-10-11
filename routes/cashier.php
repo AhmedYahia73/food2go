@@ -159,6 +159,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
     Route::controller(ProfileController::class)
     ->group(function(){
+        Route::post('/check_end_shift', 'check_end_shift');
         Route::get('/profile', 'view');
         Route::post('/profile/update', 'update');
         Route::get('/printer', 'printer');

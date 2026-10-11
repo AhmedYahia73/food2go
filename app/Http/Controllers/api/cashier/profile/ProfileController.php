@@ -8,12 +8,34 @@ use Illuminate\Support\Facades\Validator;
 use App\trait\image;
 
 use App\Models\CashierMan;
+use App\Models\CashierShift;
 use App\Models\Cashier;
 
 class ProfileController extends Controller
 {
     public function __construct(private CashierMan $cashier_man){}
     use image;
+
+    public function check_end_shift(Request $request){
+        $validator = Validator::make($request->all(), [
+            'cashier_id' => 'required|exists:cashiers,id', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $is_open = CashierShift::
+        where('cashier_man_id', $request->user()->id)
+        ->where("cashier_id", $request->cashier_id)
+        ->whereNull('end_time')
+        ->first();
+        return response()->json([
+            "is_open" => !empty($is_open),
+            "shift" => $is_open,
+        ]);
+    }
 
     public function view(Request $request){
         return response()->json([
