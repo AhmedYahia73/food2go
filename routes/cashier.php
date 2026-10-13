@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 use App\Http\Controllers\api\cashier\make_order\PendingOrderController;
+use App\Http\Controllers\api\cashier\make_order\CartOrderController;
 use App\Http\Controllers\api\cashier\address\AddressController;
 use App\Http\Controllers\api\cashier\user\AddressController as UserAddressController;
 use App\Http\Controllers\api\cashier\customer\CustomerController;
@@ -28,6 +29,25 @@ use App\Http\Controllers\api\auth\LoginController;
 
 Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     
+    Route::controller(CartOrderController::class)
+    ->prefix('cart')->group(function(){
+        Route::get('/lists', 'get_carts');
+        Route::get('/', 'get_carts');
+        Route::post('/add', 'add_to_cart');
+        Route::post('/', 'add_to_cart');
+        Route::post('/update/{id}', 'update_cart');
+        Route::delete('/delete/{id}', 'delete_cart');
+        Route::delete('/clear', 'clear_cart');
+    });
+
+    Route::controller(CartOrderController::class)->group(function(){
+        Route::get('/get_carts', 'get_carts');
+        Route::post('/add_cart', 'add_to_cart');
+        Route::post('/update_cart/{id}', 'update_cart');
+        Route::delete('/delete_cart/{id}', 'delete_cart');
+        Route::delete('/clear_cart', 'clear_cart');
+    });
+
     Route::controller(TableOrderController::class)
     ->group(function(){
         Route::post('/merge_table', 'merge_table');
