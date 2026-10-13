@@ -198,6 +198,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/', 'view');
         Route::get('/item/{id}', 'user');
         Route::post('/add', 'create');
+        Route::post('/add_only_user', 'create_only_user');
         Route::post('/update/{id}', 'modify');
     });
     Route::controller(CustomerController::class)

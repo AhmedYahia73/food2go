@@ -109,6 +109,31 @@ class UserController extends Controller
         ]);
     }
 
+    public function create_only_user(Request $request){
+        $validator = Validator::make($request->all(), [
+            'f_name' => 'required',
+            'l_name' => 'required',
+            'phone' => 'required|unique:users,phone',
+            'phone_2' => 'sometimes|unique:users,phone_2', 
+        ]);
+        if ($validator->fails()) { // if Validate Make Error Return Message Error
+            return response()->json([
+                'errors' => $validator->errors(),
+            ],400);
+        }
+
+        $userRequest = $validator->validated();
+        $userRequest['signup_pos'] = 1;
+        $userRequest['password'] = $request->phone;
+        $userRequest['email'] = $request->phone . '@gmail.com';
+        $user = $this->user
+        ->create($userRequest);  
+
+        return response()->json([
+            'success' => 'You add data success'
+        ]);
+    }
+
     public function modify(Request $request, $id){
         $validator = Validator::make($request->all(), [
             'f_name' => 'sometimes',
