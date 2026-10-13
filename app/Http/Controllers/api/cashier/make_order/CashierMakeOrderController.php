@@ -968,6 +968,7 @@ class CashierMakeOrderController extends Controller
             "cart_id" => $order['payment']->id
         ]);
     }
+
     public function end_time_session(Request $request) {
         $validator = Validator::make($request->all(), [
             'cart_id' => 'required|exists:order_carts,id',
@@ -2624,5 +2625,40 @@ class CashierMakeOrderController extends Controller
             "cashier_lang" => $cashier_lang->setting,
             "preparation_lang" => $preparation_lang->setting,
         ]);
+    }
+
+    public function users_list(Request $request){
+        $validator = Validator::make($request->all(), [
+            'search' => 'sometimes|nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $search = $request->input('search');
+
+        $users = User::select("f_name", "l_name", "phone", "phone_2")
+            ->where("status", 1)
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereRaw("CONCAT(f_name, ' ', l_name) LIKE ?", ["%{$search}%"])
+                    ->orWhere('phone', 'LIKE', "%{$search}%")
+                    ->orWhere('phone_2', 'LIKE', "%{$search}%");
+                });
+            })
+            ->paginate(10)
+            ->through(function ($item) {
+                return [
+                    "f_name"  => $item->f_name,
+                    "l_name"  => $item->l_name,
+                    "phone"   => $item->phone,
+                    "phone_2" => $item->phone_2,
+                ];
+            });
+
+        return response()->json($users);
     }
 } 
