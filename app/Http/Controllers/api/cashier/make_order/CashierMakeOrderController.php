@@ -2640,7 +2640,7 @@ class CashierMakeOrderController extends Controller
 
         $search = $request->input('search');
 
-        $users = User::select("f_name", "l_name", "phone", "phone_2")
+        $users = User::select("id", "f_name", "l_name", "phone", "phone_2")
             ->where("status", 1)
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
