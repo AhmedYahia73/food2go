@@ -2652,6 +2652,7 @@ class CashierMakeOrderController extends Controller
             ->paginate(10)
             ->through(function ($item) {
                 return [
+                    "id"      => $item->id,
                     "f_name"  => $item->f_name,
                     "l_name"  => $item->l_name,
                     "phone"   => $item->phone,
