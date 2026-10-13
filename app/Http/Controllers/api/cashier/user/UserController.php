@@ -18,6 +18,7 @@ class UserController extends Controller
         $users = $this->user
 		->select("id", "f_name", "l_name", "image", "phone", "phone_2")
         ->where('status', 1)
+        ->where("deleted_at", 0)
         ->with(['address' => function($query){
             return $query->select('addresses.*')->with(['zone:id,zone,price', 'city:id,name']);
         }])
@@ -160,4 +161,14 @@ class UserController extends Controller
             'success' => 'You update data success'
         ]);
     } 
+
+    public function delete(Request $request, $id){
+        $this->user
+        ->where('id', $id)
+        ->update(['deleted_at' => 1]);
+
+        return response()->json([
+            'success' => 'You delete data success'
+        ]);
+    }
 }
