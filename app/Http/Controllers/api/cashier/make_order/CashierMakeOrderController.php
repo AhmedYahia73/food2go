@@ -556,7 +556,7 @@ class CashierMakeOrderController extends Controller
         ->first()?->setting ?? 'en';
         $financials = $this->get_financial($request, $locale);
         $address = $order['order']->address;
-        $customer = $order['order']->user;
+        $customer = $order['order']?->user;
         $delivery_fees = $order['order']->load('address.zone');
         $delivery_fees = $delivery_fees?->address?->zone?->price ?? 0;
         $reaturant_name = $this->company_info
@@ -873,6 +873,7 @@ class CashierMakeOrderController extends Controller
          
         // _________________________________
 
+        $customer = $order['order']?->user;
         $order['order']->save();
         if($request->order_pending){
             return response()->json([
@@ -883,6 +884,7 @@ class CashierMakeOrderController extends Controller
                 'order_number' => $this->order_num_today($order['order']->id), 
                 'new' => app("first_order_today"), 
                 'type' => $type,
+                'customer' => $customer,
                 'caheir_name' => $caheir_name,
                 "subtotal" => $request->amount,
                 'address' => $address,
@@ -900,6 +902,7 @@ class CashierMakeOrderController extends Controller
         }
         $financials = $this->get_financial($request, $locale);  
 
+        $customer = $order['order']->user;
         $order['order']->save();
         return response()->json([ 
             "success" => $this->checkout_data($request),
@@ -910,6 +913,7 @@ class CashierMakeOrderController extends Controller
             'new' => app("first_order_today"), 
             'type' => $type,
             'caheir_name' => $caheir_name,
+            "customer" => $customer,
             "subtotal" => $request->amount,
             'address' => $address,
             'financials' => $financials,
@@ -967,7 +971,7 @@ class CashierMakeOrderController extends Controller
         return response()->json([ 
             "cart_id" => $order['payment']->id
         ]);
-    }
+    } 
 
     public function end_time_session(Request $request) {
         $validator = Validator::make($request->all(), [
@@ -1492,6 +1496,7 @@ class CashierMakeOrderController extends Controller
             "is_active" => false,
             "shift_number" => $request->user()->shift_number
         ]);
+        $customer = $order['payment']?->user;
         
         return response()->json([
             'success' => $this->checkout_data($request), 
@@ -1499,6 +1504,7 @@ class CashierMakeOrderController extends Controller
             'order_note' => $request->notes ?? null, 
             'order_number' => $this->order_num_today($order['payment']['id']), 
             'order_id' => $this->order_num_today($order['payment']['id']), 
+            "customer" => $customer,
             "financials" => $financials,
             "subtotal" => $request->amount,
             "reaturant_name" => $reaturant_name,
@@ -1661,6 +1667,7 @@ class CashierMakeOrderController extends Controller
         $preparation_num = $table_item?->preparation_num ?? null; 
         $reaturant_name = $this->company_info
         ->first()?->name; 
+        $customer = $order['payment']?->user;
 
         return response()->json([
             "success" => $this->checkout_data($request),
@@ -1668,6 +1675,7 @@ class CashierMakeOrderController extends Controller
             'order_note' => $request->notes ?? null,
             'order_number' => $order_number,
             'order_id' => $order_id, 
+            'customer' => $customer, 
             'order_id' => $this->order_num_today($order['payment']['id']), 
             "subtotal" => $request->amount,
             'financials' => $financials,
