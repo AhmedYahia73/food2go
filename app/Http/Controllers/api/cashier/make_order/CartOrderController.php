@@ -15,6 +15,7 @@ use App\Models\ExcludeProduct;
 use App\Models\VariationProduct;
 use App\Models\OptionProduct;
 use App\Models\TranslationTbl;
+use App\Http\Resources\ProductResource;
 
 class CartOrderController extends Controller
 {
