@@ -382,7 +382,6 @@ class CartOrderController extends Controller
         return response()->json([
             'success' => true,
             'carts' => $formattedCarts,
-            'data' => $formattedCarts,
             'count' => $formattedCarts->count(),
             'total' => (float)$formattedCarts->sum('total'),
         ], 200);
