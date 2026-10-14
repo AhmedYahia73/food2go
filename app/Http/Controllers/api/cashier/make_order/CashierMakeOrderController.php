@@ -1976,7 +1976,7 @@ class CashierMakeOrderController extends Controller
         ->where('my_id', $request->manager_id)
         ->first();
 
-        if(!empty($order_cart)){
+        if(!empty($order_cart) && !auth()->user()->void_order){ 
             $validator = Validator::make($request->all(), [  
                 'table_id' => 'required|exists:cafe_tables,id',
                 'manager_id' => 'required',
@@ -1996,7 +1996,7 @@ class CashierMakeOrderController extends Controller
                 return response()->json([
                     'errors' => "You don't have this premission"
                 ], 400);
-            }
+            } 
         }
  
         $order_cart = $this->order_cart

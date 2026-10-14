@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('cashier_men', function (Blueprint $table) {
-            
+            $table->boolean("can_avoid")->default(false);
         });
     }
 

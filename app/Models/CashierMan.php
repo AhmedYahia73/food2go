@@ -35,6 +35,7 @@ class CashierMan extends Model
         'enter_amount',
         'manger',
         "hall_orders",
+        'can_avoid',
     ];
     protected $appends = ['role', 'image_link'];
 

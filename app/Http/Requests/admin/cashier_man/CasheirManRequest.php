@@ -42,6 +42,7 @@ class CasheirManRequest extends FormRequest
             'total_tax'=> ['sometimes', "boolean"],
             'enter_amount'=> ['sometimes', "boolean"],
             'hall_orders'=> ['sometimes', "boolean"],
+            'can_avoid'=> ['sometimes', "boolean"],
         ];
     }
 
