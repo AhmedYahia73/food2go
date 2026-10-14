@@ -125,7 +125,7 @@ class CartOrderController extends Controller
     }
 
     
-    public function product_item(Request $request) {
+    public function product_item(Request $request, $id) {
         // 1. Validation
         $validator = Validator::make($request->all(), [
             'module' => 'in:take_away,dine_in,delivery'
