@@ -288,7 +288,7 @@ class CartOrderController extends Controller
                 $addonId = $addonItem['addon_id'] ?? null;
                 $addon = $addonId ? $addons->get($addonId) : null;
                 $addonName = $getTranslatedName($addon);
-                $total_final_price += (float)($addonItem['final_price'] ?? 0);
+                $total_final_price += (float)($addonItem['price'] ?? 0) + (float)($addonItem['tax'] ?? 0) - (float)($addonItem['discount'] ?? 0);
 
                 return [
                     'addon_id' => $addonId,
@@ -306,7 +306,7 @@ class CartOrderController extends Controller
                 $extraId = $extraItem['extra_id'] ?? null;
                 $extra = $extraId ? $extras->get($extraId) : null;
                 $extraName = $getTranslatedName($extra);
-                $total_final_price += (float)($extraItem['final_price'] ?? 0);
+                $total_final_price += (float)($extraItem['price'] ?? 0) + (float)($extraItem['tax'] ?? 0) - (float)($extraItem['discount'] ?? 0);
 
                 return [
                     'extra_id' => $extraId,
@@ -344,7 +344,7 @@ class CartOrderController extends Controller
                     $optId = $optItem['option_id'] ?? null;
                     $opt = $optId ? $options->get($optId) : null;
                     $optName = $getTranslatedName($opt);
-                    $total_final_price += (float)($optItem['final_price'] ?? 0);
+                    $total_final_price += (float)($optItem['price'] ?? 0) + (float)($optItem['tax'] ?? 0) - (float)($optItem['discount'] ?? 0);
 
                     return [
                         'option_id' => $optId,
