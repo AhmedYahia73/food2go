@@ -32,7 +32,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
     Route::controller(CartOrderController::class)
     ->prefix('cart')->group(function(){
         Route::get('/lists', 'get_carts');
-        Route::get('/product_item', 'product_item');
+        Route::get('/product_item/{id}', 'product_item');
         Route::get('/', 'get_carts');
         Route::post('/add', 'add_to_cart');
         Route::post('/', 'add_to_cart');
