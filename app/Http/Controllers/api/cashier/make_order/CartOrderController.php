@@ -196,6 +196,7 @@ class CartOrderController extends Controller
             }
         }
 
+        $total_final_price = 0;
         $addonIds = $addonIds->unique()->values();
         $extraIds = $extraIds->unique()->values();
         $excludeIds = $excludeIds->unique()->values();
@@ -277,15 +278,17 @@ class CartOrderController extends Controller
             $excludes,
             $variations,
             $options,
-            $getTranslatedName
+            $getTranslatedName,
+            $total_final_price,
         ) {
             $product = $products->get($cart->product_id);
             $productName = $getTranslatedName($product);
 
-            $formattedAddons = collect($cart->addons ?? [])->map(function ($addonItem) use ($addons, $getTranslatedName) {
+            $formattedAddons = collect($cart->addons ?? [])->map(function ($addonItem) use ($addons, $getTranslatedName, $total_final_price) {
                 $addonId = $addonItem['addon_id'] ?? null;
                 $addon = $addonId ? $addons->get($addonId) : null;
                 $addonName = $getTranslatedName($addon);
+                $total_final_price += (float)($addonItem['final_price'] ?? 0);
 
                 return [
                     'addon_id' => $addonId,
@@ -297,11 +300,13 @@ class CartOrderController extends Controller
                     'final_price' => isset($addonItem['final_price']) ? (float)$addonItem['final_price'] : 0,
                 ];
             })->values()->all();
+            $total_final_price += $cart->final_price ?? 0;
 
-            $formattedExtras = collect($cart->extras ?? [])->map(function ($extraItem) use ($extras, $getTranslatedName) {
+            $formattedExtras = collect($cart->extras ?? [])->map(function ($extraItem) use ($extras, $getTranslatedName, $total_final_price) {
                 $extraId = $extraItem['extra_id'] ?? null;
                 $extra = $extraId ? $extras->get($extraId) : null;
                 $extraName = $getTranslatedName($extra);
+                $total_final_price += (float)($extraItem['final_price'] ?? 0);
 
                 return [
                     'extra_id' => $extraId,
@@ -330,15 +335,16 @@ class CartOrderController extends Controller
                 ];
             })->values()->all();
 
-            $formattedVariation = collect($cart->variation ?? [])->map(function ($varItem) use ($variations, $options, $getTranslatedName) {
+            $formattedVariation = collect($cart->variation ?? [])->map(function ($varItem) use ($variations, $options, $getTranslatedName, $total_final_price) {
                 $varId = $varItem['variation_id'] ?? null;
                 $var = $varId ? $variations->get($varId) : null;
                 $varName = $getTranslatedName($var);
 
-                $formattedOptions = collect($varItem['options'] ?? [])->map(function ($optItem) use ($options, $getTranslatedName) {
+                $formattedOptions = collect($varItem['options'] ?? [])->map(function ($optItem) use ($options, $getTranslatedName, $total_final_price) {
                     $optId = $optItem['option_id'] ?? null;
                     $opt = $optId ? $options->get($optId) : null;
                     $optName = $getTranslatedName($opt);
+                    $total_final_price += (float)($optItem['final_price'] ?? 0);
 
                     return [
                         'option_id' => $optId,
@@ -376,6 +382,7 @@ class CartOrderController extends Controller
                 'extras' => $formattedExtras,
                 'exclude' => $formattedExclude,
                 'variation' => $formattedVariation,
+                "total_final_price" => $total_final_price,
             ];
         });
 
@@ -383,7 +390,7 @@ class CartOrderController extends Controller
             'success' => true,
             'carts' => $formattedCarts,
             'count' => $formattedCarts->count(),
-            'total' => (float)$formattedCarts->sum('final_price'),
+            'total' => (float)$formattedCarts->sum('total_final_price'),
         ], 200);
     }
 
