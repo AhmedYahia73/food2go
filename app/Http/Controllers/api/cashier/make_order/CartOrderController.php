@@ -122,6 +122,149 @@ class CartOrderController extends Controller
         ], 200);
     }
 
+    
+    public function product_item(Request $request) {
+        // 1. Validation
+        $validator = Validator::make($request->all(), [
+            'module' => 'in:take_away,dine_in,delivery'
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        } 
+
+        // 2. Initial Setup & Optimization Variables
+        $module = $request->module ?? null;
+        $locale = $request->locale ?? $request->query('locale', app()->getLocale());
+        $branch_id = $request->user()->branch_id;
+        $today = date('Y-m-d');
+        $current_time = date('H:i:s');
+        $current_day = date('l');
+
+        // Get exclusions in one query
+        $branch_off = $this->branch_off->where('branch_id', $branch_id)->get();
+        $product_off = $branch_off->pluck('product_id')->filter()->toArray();
+        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
+        $option_off = $branch_off->pluck('option_id')->filter()->toArray();
+
+        // 3. Fetch Categories
+        $categories = $this->category
+            ->with([
+                'sub_categories' => fn($q) => $q->withLocale($locale), 
+                'addons' => fn($q) => $q->withLocale($locale)
+            ])
+            ->withLocale($locale)
+            ->where(function($query){
+                $query->where("module", "pos")
+                ->orWhere("module", "all");
+            })
+            ->where('status', 1)
+            ->whereNull('category_id')
+            ->orderBy("priority") 
+            ->get()
+            ->each(function($item) use ($category_off) {
+                $item->setRelation('sub_categories', $item->sub_categories->reject(fn($sub) => in_array($sub->id, $category_off)));
+            })
+            ->reject(fn($item) => in_array($item->id, $category_off));
+
+        // 4. Shared Product Processor Method (Optimized to run everything in-memory)
+        $processProducts = function($productsQuery) use ($category_off, $product_off, $option_off, $branch_id, $module, $today) {
+            return $productsQuery->get()->map(function($product) use ($category_off, $product_off, $option_off, $branch_id, $module, $today) {
+                // Exclude early before heavy calculations
+                if (in_array($product->category_id, $category_off) || 
+                    in_array($product->sub_category_id, $category_off) || 
+                    in_array($product->id, $product_off)) {
+                    return null;
+                }
+
+                // Resolve Pricing
+                $new_price = $product->product_pricing->firstWhere('branch_id', $branch_id)?->price;
+                if (empty($new_price)) {
+                    $new_price = $product->pos_pricing->firstWhere('module', $module)?->price ?? $product->price;
+                }
+                $product->price = $new_price;
+                $product->favourite = false;
+
+                // Stock Calculation (Using in-memory collections instead of queries)
+                if ($product->stock_type == 'fixed') {
+                    $product->count = $product->sales_count->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                } elseif ($product->stock_type == 'daily') {
+                    $product->count = $product->sales_count->where('date', $today)->sum('count');
+                    $product->in_stock = $product->number > $product->count;
+                }
+
+                // Resolve Tax Module efficiently
+                $resolved_tax = $product->tax_module->first()?->tax ?? $product->tax ?? null;
+
+                // Map Variations & Options
+                $product->variations = $product->variations->map(function ($variation) use ($option_off, $branch_id, $resolved_tax) {
+                    $variation->options = $variation->options
+                        ->reject(fn($option) => in_array($option->id, $option_off))
+                        ->map(function($element) use ($branch_id, $resolved_tax) {
+                            $element->price = $element->option_pricing->firstWhere('branch_id', $branch_id)?->price ?? $element->price;
+                            $element->new_tax = $resolved_tax;
+                            return $element;
+                        });
+                    return $variation;
+                });
+
+                // Map Addons
+                $product->addons = $product->addons->map(function ($addon) use ($product) {
+                    $addon->discount = $product->discount;
+                    return $addon;
+                });
+
+                if (!empty($resolved_tax)) {
+                    $product->tax = $resolved_tax;
+                }
+
+                return $product;
+            })->filter();
+        };
+
+        // 5. Build Base Product Query with all Eager Loads to avoid N+1
+        $baseProductQuery = $this->products
+            ->orderBy('order')
+            ->with([
+                'addons' => fn($q) => $q->withLocale($locale),
+                'sub_category_addons' => fn($q) => $q->withLocale($locale), 
+                'category_addons' => fn($q) => $q->withLocale($locale), 
+                'excludes' => fn($q) => $q->withLocale($locale), 
+                'extra', 'sales_count', 'tax', 'product_pricing', 'pos_pricing',
+                'variations' => fn($q) => $q->withLocale($locale)->with([
+                    'options' => fn($qo) => $qo->where("status", 1)->withLocale($locale)->with([
+                        'extra' => fn($qe) => $qe->with('parent_extra')->withLocale($locale),
+                        'option_pricing'
+                    ])
+                ]),
+                'tax_module' => fn($q) => $q->whereHas('module', fn($qm) => $qm->where('branch_id', $branch_id)->whereIn('app_type', ['pos', 'all']))
+                                            ->with(['tax', 'module']),
+                "discount" => fn($q) => $q->where(fn($d) => $d->whereJsonContains("module", "pos")->orWhereJsonContains("module", "all"))
+            ])
+            ->withLocale($locale)
+            ->where("id", $id);
+
+        // Execute product pipelines
+        $allProcessedProducts = $processProducts(clone $baseProductQuery);
+
+        // 6. Partition Products by Weight Status (In-memory, avoids extra queries)
+        $products_count = $allProcessedProducts->values();
+         
+
+
+        $products = ProductResource::collection($products_count); 
+
+        // 10. Response
+        return response()->json([
+            'products' => $products
+        ]);
+    }
+
+    public function product_item(Request $request, $id){
+    
+    }
+
     /**
      * Fetch carts for current cashier with product/addon/extra/exclude/variation/option names translated by lang key.
      */
