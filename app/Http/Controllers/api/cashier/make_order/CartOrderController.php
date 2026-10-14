@@ -383,7 +383,7 @@ class CartOrderController extends Controller
             'success' => true,
             'carts' => $formattedCarts,
             'count' => $formattedCarts->count(),
-            'total' => (float)$formattedCarts->sum('total'),
+            'total' => (float)$formattedCarts->sum('final_price'),
         ], 200);
     }
 
