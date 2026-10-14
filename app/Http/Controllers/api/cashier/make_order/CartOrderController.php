@@ -273,6 +273,7 @@ class CartOrderController extends Controller
         $cashierManId = $user?->id ?? $request->cashier_man_id ?? $request->cahier_man_id;
         $cashierId = $user?->cashier_id ?? $request->cashier_id;
 
+        $total_price = 0;
         $query = Cart::query();
         if ($cashierManId) {
             $query->where('cashier_man_id', $cashierManId);
@@ -425,7 +426,9 @@ class CartOrderController extends Controller
             $productName = $getTranslatedName($product);
 
             $addonsFinalSum = 0;
-            $formattedAddons = collect($cart->addons ?? [])->map(function ($addonItem) use ($addons, $getTranslatedName, &$addonsFinalSum) {
+            $addonsSum;
+            $addonsSum = 0;
+            $formattedAddons = collect($cart->addons ?? [])->map(function ($addonItem) use ($addons, $getTranslatedName, &$addonsFinalSum, &$addonsSum) {
                 $addonId = $addonItem['addon_id'] ?? null;
                 $addon = $addonId ? $addons->get($addonId) : null;
                 $addonName = $getTranslatedName($addon);
@@ -436,6 +439,8 @@ class CartOrderController extends Controller
                 $finalPrice =  ($price + $tax - $discount);
 
                 $addonsFinalSum += $finalPrice;
+                $addonsSum += $price;
+
 
                 return [
                     'addon_id' => $addonId,
@@ -449,7 +454,8 @@ class CartOrderController extends Controller
             })->values()->all();
 
             $extrasFinalSum = 0;
-            $formattedExtras = collect($cart->extras ?? [])->map(function ($extraItem) use ($extras, $getTranslatedName, &$extrasFinalSum) {
+            $extrasSum = 0;
+            $formattedExtras = collect($cart->extras ?? [])->map(function ($extraItem) use ($extras, $getTranslatedName, &$extrasFinalSum, &$extrasSum) {
                 $extraId = $extraItem['extra_id'] ?? null;
                 $extra = $extraId ? $extras->get($extraId) : null;
                 $extraName = $getTranslatedName($extra);
@@ -460,6 +466,7 @@ class CartOrderController extends Controller
                 $finalPrice =  ($price + $tax - $discount);
 
                 $extrasFinalSum += $finalPrice;
+                $extrasSum += $price;
 
                 return [
                     'extra_id' => $extraId,
@@ -490,7 +497,8 @@ class CartOrderController extends Controller
             })->values()->all();
 
             $optionsFinalSum = 0;
-            $formattedVariation = collect($cart->variation ?? [])->map(function ($varItem) use ($variations, $options, $getTranslatedName, &$optionsFinalSum) {
+            $optionsSum = 0;
+            $formattedVariation = collect($cart->variation ?? [])->map(function ($varItem) use ($variations, $options, $getTranslatedName, &$optionsFinalSum, &$optionsSum) {
                 $varId = $varItem['variation_id'] ?? null;
                 $var = $varId ? $variations->get($varId) : null;
                 $varName = $getTranslatedName($var);
@@ -506,6 +514,7 @@ class CartOrderController extends Controller
                     $finalPrice = ($price + $tax - $discount);
 
                     $optionsFinalSum += $finalPrice;
+                    $optionsSum += $price;
 
                     return [
                         'option_id' => $optId,
@@ -528,6 +537,8 @@ class CartOrderController extends Controller
 
             // Product base final price
             $productFinalPrice = ((float)$cart->price + (float)$cart->tax - (float)$cart->discount);
+            $productSum = (float)$cart->price;
+            $total_price = $productSum  + $addonsSum + $extrasSum + $optionsSum;
 
             // Unit final price for this item (product + addons + extras + variation options)
             $unitFinalPrice = $productFinalPrice + $addonsFinalSum + $extrasFinalSum + $optionsFinalSum;
@@ -560,6 +571,7 @@ class CartOrderController extends Controller
                 'variation' => $formattedVariation,
                 'unit_final_price' => round($unitFinalPrice, 2),
                 'total_final_price' => round($totalFinalPrice, 2),
+                'total_price' => round($total_price, 2),
             ];
         });
 
@@ -568,6 +580,7 @@ class CartOrderController extends Controller
             'carts' => $formattedCarts, 
             'count' => $formattedCarts->count(),
             'total' => round((float)$formattedCarts->sum('total_final_price'), 2),
+            'total_price' => round((float)$formattedCarts->sum('total_price'), 2),
         ], 200);
     }
 
