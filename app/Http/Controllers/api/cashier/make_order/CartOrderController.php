@@ -291,9 +291,7 @@ class CartOrderController extends Controller
                 $price = isset($addonItem['price']) ? (float)$addonItem['price'] : 0;
                 $tax = isset($addonItem['tax']) ? (float)$addonItem['tax'] : 0;
                 $discount = isset($addonItem['discount']) ? (float)$addonItem['discount'] : 0;
-                $finalPrice = isset($addonItem['final_price']) && (float)$addonItem['final_price'] != 0
-                    ? (float)$addonItem['final_price']
-                    : ($price + $tax - $discount);
+                $finalPrice =  ($price + $tax - $discount);
 
                 $addonsFinalSum += $finalPrice;
 
@@ -317,9 +315,7 @@ class CartOrderController extends Controller
                 $price = isset($extraItem['price']) ? (float)$extraItem['price'] : 0;
                 $tax = isset($extraItem['tax']) ? (float)$extraItem['tax'] : 0;
                 $discount = isset($extraItem['discount']) ? (float)$extraItem['discount'] : 0;
-                $finalPrice = isset($extraItem['final_price']) && (float)$extraItem['final_price'] != 0
-                    ? (float)$extraItem['final_price']
-                    : ($price + $tax - $discount);
+                $finalPrice =  ($price + $tax - $discount);
 
                 $extrasFinalSum += $finalPrice;
 
@@ -338,11 +334,7 @@ class CartOrderController extends Controller
                 $excludeId = $excludeItem['exclude_id'] ?? null;
                 $exclude = $excludeId ? $excludes->get($excludeId) : null;
                 $excludeName = $getTranslatedName($exclude);
-
-                $price = isset($excludeItem['price']) ? (float)$excludeItem['price'] : 0;
-                $tax = isset($excludeItem['tax']) ? (float)$excludeItem['tax'] : 0;
-                $discount = isset($excludeItem['discount']) ? (float)$excludeItem['discount'] : 0;
-                $finalPrice = isset($excludeItem['final_price']) ? (float)$excludeItem['final_price'] : ($price + $tax - $discount);
+ 
 
                 return [
                     'exclude_id' => $excludeId,
@@ -369,9 +361,7 @@ class CartOrderController extends Controller
                     $price = isset($optItem['price']) ? (float)$optItem['price'] : 0;
                     $tax = isset($optItem['tax']) ? (float)$optItem['tax'] : 0;
                     $discount = isset($optItem['discount']) ? (float)$optItem['discount'] : 0;
-                    $finalPrice = isset($optItem['final_price']) && (float)$optItem['final_price'] != 0
-                        ? (float)$optItem['final_price']
-                        : ($price + $tax - $discount);
+                    $finalPrice = ($price + $tax - $discount);
 
                     $optionsFinalSum += $finalPrice;
 
@@ -395,9 +385,7 @@ class CartOrderController extends Controller
             })->values()->all();
 
             // Product base final price
-            $productFinalPrice = isset($cart->final_price) && (float)$cart->final_price != 0
-                ? (float)$cart->final_price
-                : ((float)$cart->price + (float)$cart->tax - (float)$cart->discount);
+            $productFinalPrice = ((float)$cart->price + (float)$cart->tax - (float)$cart->discount);
 
             // Unit final price for this item (product + addons + extras + variation options)
             $unitFinalPrice = $productFinalPrice + $addonsFinalSum + $extrasFinalSum + $optionsFinalSum;
