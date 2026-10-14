@@ -499,7 +499,7 @@ class CartOrderController extends Controller
                 $var = $varId ? $variations->get($varId) : null;
                 $varName = $getTranslatedName($var);
 
-                $formattedOptions = collect($varItem['options'] ?? [])->map(function ($optItem) use ($options, $getTranslatedName, &$optionsFinalSum) {
+                $formattedOptions = collect($varItem['options'] ?? [])->map(function ($optItem) use ($options, $getTranslatedName, &$optionsFinalSum, &$optionsSum) {
                     $optId = $optItem['option_id'] ?? null;
                     $opt = $optId ? $options->get($optId) : null;
                     $optName = $getTranslatedName($opt);
