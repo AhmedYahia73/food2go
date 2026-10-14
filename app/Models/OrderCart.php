@@ -31,6 +31,7 @@ class OrderCart extends Model
         'captain_id',
         'time_start',
         'time_end',
+        'cashier_man_id',
     ];
 
 
@@ -47,5 +48,9 @@ class OrderCart extends Model
 
     public function bundles(){
         return $this->hasMany(OrderCartBundle::class, 'order_cart_id');
+    }
+
+    public function cashier_man(){
+        return $this->belongsTo(CashierMan::class, 'cashier_man_id');
     }
 }

@@ -591,6 +591,9 @@ trait PlaceOrder
         if($request->order_pending){
             $orderRequest['order_active'] = 0;
         }
+        if(auth()?->user()?->role == "cashier"){
+            $orderRequest['cashier_man_id'] = auth()?->user()?->id;
+        }
         
         $orderRequest['points'] = $points;
         $order = $this->order_cart

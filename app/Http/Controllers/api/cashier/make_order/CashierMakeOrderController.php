@@ -575,6 +575,7 @@ class CashierMakeOrderController extends Controller
             "address" => $address,
             "delivery_fees" => $delivery_fees,
             "customer" => $customer,
+            'caheir_name' => auth()->user()->user_name ?? null,
             "subtotal" => $request->amount,
             "reaturant_name" => $reaturant_name,
             "module_order_number" => $request->module_order_number ?? null,
@@ -1463,6 +1464,10 @@ class CashierMakeOrderController extends Controller
         ->update([
             'current_status' => 'not_available_but_checkout'
         ]);
+        $f_cashier_name = $this->order_cart
+        ->whereIn('table_id', $tables_ids)
+        ->orderBy("created_at")
+        ->first()?->cashier_man?->user_name;
         $order_cart = $this->order_cart
         ->whereIn('table_id', $tables_ids)
         ->delete();
@@ -1508,6 +1513,9 @@ class CashierMakeOrderController extends Controller
             "financials" => $financials,
             "subtotal" => $request->amount,
             "reaturant_name" => $reaturant_name,
+            "f_cashier_name" => $f_cashier_name ?? auth()->user()->user_name,
+            'caheir_name' => auth()->user()->user_name ?? null,
+
             "service_fees" => $request->service_fees ?? null,
             "module_order_number" => $request->module_order_number ?? null,
             "preparation_num" => $preparation_num,
@@ -1676,6 +1684,7 @@ class CashierMakeOrderController extends Controller
             'order_number' => $order_number,
             'order_id' => $order_id, 
             'customer' => $customer, 
+            'caheir_name' => auth()->user()->user_name ?? null,
             'order_id' => $this->order_num_today($order['payment']['id']), 
             "subtotal" => $request->amount,
             'financials' => $financials,
