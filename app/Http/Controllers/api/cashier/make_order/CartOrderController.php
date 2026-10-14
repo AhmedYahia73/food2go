@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Cart;
+use App\Models\BranchOff;
 use App\Models\Product;
+use App\Models\Category;
 use App\Models\Addon;
 use App\Models\ExtraProduct;
 use App\Models\ExcludeProduct;
@@ -142,14 +144,14 @@ class CartOrderController extends Controller
         $current_day = date('l');
 
         // Get exclusions in one query
-        $branch_off = $this->branch_off->where('branch_id', $branch_id)->get();
-        $product_off = $branch_off->pluck('product_id')->filter()->toArray();
-        $category_off = $branch_off->pluck('category_id')->filter()->toArray();
-        $option_off = $branch_off->pluck('option_id')->filter()->toArray();
+        $branch_off = BranchOff::where('branch_id', $branch_id)->get();
+        $product_off = BranchOff::pluck('product_id')->filter()->toArray();
+        $category_off = BranchOff::pluck('category_id')->filter()->toArray();
+        $option_off = BranchOff::pluck('option_id')->filter()->toArray();
 
         // 3. Fetch Categories
-        $categories = $this->category
-            ->with([
+        $categories = Category::
+            with([
                 'sub_categories' => fn($q) => $q->withLocale($locale), 
                 'addons' => fn($q) => $q->withLocale($locale)
             ])
@@ -224,8 +226,8 @@ class CartOrderController extends Controller
         };
 
         // 5. Build Base Product Query with all Eager Loads to avoid N+1
-        $baseProductQuery = $this->products
-            ->orderBy('order')
+        $baseProductQuery = Product::
+            orderBy('order')
             ->with([
                 'addons' => fn($q) => $q->withLocale($locale),
                 'sub_category_addons' => fn($q) => $q->withLocale($locale), 
@@ -259,11 +261,7 @@ class CartOrderController extends Controller
         return response()->json([
             'products' => $products
         ]);
-    }
-
-    public function product_item(Request $request, $id){
-    
-    }
+    } 
 
     /**
      * Fetch carts for current cashier with product/addon/extra/exclude/variation/option names translated by lang key.
