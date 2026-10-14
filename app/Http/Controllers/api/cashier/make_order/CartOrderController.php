@@ -196,7 +196,6 @@ class CartOrderController extends Controller
             }
         }
 
-        $total_final_price = 0;
         $addonIds = $addonIds->unique()->values();
         $extraIds = $extraIds->unique()->values();
         $excludeIds = $excludeIds->unique()->values();
@@ -278,44 +277,60 @@ class CartOrderController extends Controller
             $excludes,
             $variations,
             $options,
-            $getTranslatedName,
-            $total_final_price,
+            $getTranslatedName
         ) {
             $product = $products->get($cart->product_id);
             $productName = $getTranslatedName($product);
 
-            $formattedAddons = collect($cart->addons ?? [])->map(function ($addonItem) use ($addons, $getTranslatedName, $total_final_price) {
+            $addonsFinalSum = 0;
+            $formattedAddons = collect($cart->addons ?? [])->map(function ($addonItem) use ($addons, $getTranslatedName, &$addonsFinalSum) {
                 $addonId = $addonItem['addon_id'] ?? null;
                 $addon = $addonId ? $addons->get($addonId) : null;
                 $addonName = $getTranslatedName($addon);
-                $total_final_price += (float)($addonItem['price'] ?? 0) + (float)($addonItem['tax'] ?? 0) - (float)($addonItem['discount'] ?? 0);
+
+                $price = isset($addonItem['price']) ? (float)$addonItem['price'] : 0;
+                $tax = isset($addonItem['tax']) ? (float)$addonItem['tax'] : 0;
+                $discount = isset($addonItem['discount']) ? (float)$addonItem['discount'] : 0;
+                $finalPrice = isset($addonItem['final_price']) && (float)$addonItem['final_price'] != 0
+                    ? (float)$addonItem['final_price']
+                    : ($price + $tax - $discount);
+
+                $addonsFinalSum += $finalPrice;
 
                 return [
                     'addon_id' => $addonId,
                     'addon_name' => $addonName,
                     'name' => $addonName,
-                    'price' => isset($addonItem['price']) ? (float)$addonItem['price'] : 0,
-                    'tax' => isset($addonItem['tax']) ? (float)$addonItem['tax'] : 0,
-                    'discount' => isset($addonItem['discount']) ? (float)$addonItem['discount'] : 0,
-                    'final_price' => isset($addonItem['final_price']) ? (float)$addonItem['final_price'] : 0,
+                    'price' => $price,
+                    'tax' => $tax,
+                    'discount' => $discount,
+                    'final_price' => $finalPrice,
                 ];
             })->values()->all();
-            $total_final_price += $cart->final_price ?? 0;
 
-            $formattedExtras = collect($cart->extras ?? [])->map(function ($extraItem) use ($extras, $getTranslatedName, $total_final_price) {
+            $extrasFinalSum = 0;
+            $formattedExtras = collect($cart->extras ?? [])->map(function ($extraItem) use ($extras, $getTranslatedName, &$extrasFinalSum) {
                 $extraId = $extraItem['extra_id'] ?? null;
                 $extra = $extraId ? $extras->get($extraId) : null;
                 $extraName = $getTranslatedName($extra);
-                $total_final_price += (float)($extraItem['price'] ?? 0) + (float)($extraItem['tax'] ?? 0) - (float)($extraItem['discount'] ?? 0);
+
+                $price = isset($extraItem['price']) ? (float)$extraItem['price'] : 0;
+                $tax = isset($extraItem['tax']) ? (float)$extraItem['tax'] : 0;
+                $discount = isset($extraItem['discount']) ? (float)$extraItem['discount'] : 0;
+                $finalPrice = isset($extraItem['final_price']) && (float)$extraItem['final_price'] != 0
+                    ? (float)$extraItem['final_price']
+                    : ($price + $tax - $discount);
+
+                $extrasFinalSum += $finalPrice;
 
                 return [
                     'extra_id' => $extraId,
                     'extra_name' => $extraName,
                     'name' => $extraName,
-                    'price' => isset($extraItem['price']) ? (float)$extraItem['price'] : 0,
-                    'tax' => isset($extraItem['tax']) ? (float)$extraItem['tax'] : 0,
-                    'discount' => isset($extraItem['discount']) ? (float)$extraItem['discount'] : 0,
-                    'final_price' => isset($extraItem['final_price']) ? (float)$extraItem['final_price'] : 0,
+                    'price' => $price,
+                    'tax' => $tax,
+                    'discount' => $discount,
+                    'final_price' => $finalPrice,
                 ];
             })->values()->all();
 
@@ -324,36 +339,50 @@ class CartOrderController extends Controller
                 $exclude = $excludeId ? $excludes->get($excludeId) : null;
                 $excludeName = $getTranslatedName($exclude);
 
+                $price = isset($excludeItem['price']) ? (float)$excludeItem['price'] : 0;
+                $tax = isset($excludeItem['tax']) ? (float)$excludeItem['tax'] : 0;
+                $discount = isset($excludeItem['discount']) ? (float)$excludeItem['discount'] : 0;
+                $finalPrice = isset($excludeItem['final_price']) ? (float)$excludeItem['final_price'] : ($price + $tax - $discount);
+
                 return [
                     'exclude_id' => $excludeId,
                     'exclude_name' => $excludeName,
                     'name' => $excludeName,
-                    'price' => isset($excludeItem['price']) ? (float)$excludeItem['price'] : 0,
-                    'tax' => isset($excludeItem['tax']) ? (float)$excludeItem['tax'] : 0,
-                    'discount' => isset($excludeItem['discount']) ? (float)$excludeItem['discount'] : 0,
-                    'final_price' => isset($excludeItem['final_price']) ? (float)$excludeItem['final_price'] : 0,
+                    'price' => $price,
+                    'tax' => $tax,
+                    'discount' => $discount,
+                    'final_price' => $finalPrice,
                 ];
             })->values()->all();
 
-            $formattedVariation = collect($cart->variation ?? [])->map(function ($varItem) use ($variations, $options, $getTranslatedName, $total_final_price) {
+            $optionsFinalSum = 0;
+            $formattedVariation = collect($cart->variation ?? [])->map(function ($varItem) use ($variations, $options, $getTranslatedName, &$optionsFinalSum) {
                 $varId = $varItem['variation_id'] ?? null;
                 $var = $varId ? $variations->get($varId) : null;
                 $varName = $getTranslatedName($var);
 
-                $formattedOptions = collect($varItem['options'] ?? [])->map(function ($optItem) use ($options, $getTranslatedName, $total_final_price) {
+                $formattedOptions = collect($varItem['options'] ?? [])->map(function ($optItem) use ($options, $getTranslatedName, &$optionsFinalSum) {
                     $optId = $optItem['option_id'] ?? null;
                     $opt = $optId ? $options->get($optId) : null;
                     $optName = $getTranslatedName($opt);
-                    $total_final_price += (float)($optItem['price'] ?? 0) + (float)($optItem['tax'] ?? 0) - (float)($optItem['discount'] ?? 0);
+
+                    $price = isset($optItem['price']) ? (float)$optItem['price'] : 0;
+                    $tax = isset($optItem['tax']) ? (float)$optItem['tax'] : 0;
+                    $discount = isset($optItem['discount']) ? (float)$optItem['discount'] : 0;
+                    $finalPrice = isset($optItem['final_price']) && (float)$optItem['final_price'] != 0
+                        ? (float)$optItem['final_price']
+                        : ($price + $tax - $discount);
+
+                    $optionsFinalSum += $finalPrice;
 
                     return [
                         'option_id' => $optId,
                         'option_name' => $optName,
                         'name' => $optName,
-                        'price' => isset($optItem['price']) ? (float)$optItem['price'] : 0,
-                        'tax' => isset($optItem['tax']) ? (float)$optItem['tax'] : 0,
-                        'discount' => isset($optItem['discount']) ? (float)$optItem['discount'] : 0,
-                        'final_price' => isset($optItem['final_price']) ? (float)$optItem['final_price'] : 0,
+                        'price' => $price,
+                        'tax' => $tax,
+                        'discount' => $discount,
+                        'final_price' => $finalPrice,
                     ];
                 })->values()->all();
 
@@ -364,6 +393,23 @@ class CartOrderController extends Controller
                     'options' => $formattedOptions,
                 ];
             })->values()->all();
+
+            // Product base final price
+            $productFinalPrice = isset($cart->final_price) && (float)$cart->final_price != 0
+                ? (float)$cart->final_price
+                : ((float)$cart->price + (float)$cart->tax - (float)$cart->discount);
+
+            // Unit final price for this item (product + addons + extras + variation options)
+            $unitFinalPrice = $productFinalPrice + $addonsFinalSum + $extrasFinalSum + $optionsFinalSum;
+
+            // Quantity
+            $quantity = (int)($cart->quantity ?? 1);
+            if ($quantity < 1) {
+                $quantity = 1;
+            }
+
+            // Total final price for this cart row (unit * quantity)
+            $totalFinalPrice = $unitFinalPrice * $quantity;
 
             return [
                 'id' => $cart->id,
@@ -376,21 +422,23 @@ class CartOrderController extends Controller
                 'discount' => (float)$cart->discount,
                 'final_price' => (float)$cart->final_price,
                 'total' => (float)$cart->total,
-                'quantity' => (int)($cart->quantity ?? 1),
+                'quantity' => $quantity,
                 'notes' => $cart->notes,
                 'addons' => $formattedAddons,
                 'extras' => $formattedExtras,
                 'exclude' => $formattedExclude,
                 'variation' => $formattedVariation,
-                "total_final_price" => $total_final_price,
+                'unit_final_price' => round($unitFinalPrice, 2),
+                'total_final_price' => round($totalFinalPrice, 2),
             ];
         });
 
         return response()->json([
             'success' => true,
             'carts' => $formattedCarts,
+            'data' => $formattedCarts,
             'count' => $formattedCarts->count(),
-            'total' => (float)$formattedCarts->sum('total_final_price'),
+            'total' => round((float)$formattedCarts->sum('total_final_price'), 2),
         ], 200);
     }
 
