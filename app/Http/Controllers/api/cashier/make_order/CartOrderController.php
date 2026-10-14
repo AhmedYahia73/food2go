@@ -488,11 +488,7 @@ class CartOrderController extends Controller
                 return [
                     'exclude_id' => $excludeId,
                     'exclude_name' => $excludeName,
-                    'name' => $excludeName,
-                    'price' => $price,
-                    'tax' => $tax,
-                    'discount' => $discount,
-                    'final_price' => $finalPrice,
+                    'name' => $excludeName,  
                 ];
             })->values()->all();
 
