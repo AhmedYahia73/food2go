@@ -1976,7 +1976,7 @@ class CashierMakeOrderController extends Controller
         ->where('my_id', $request->manager_id)
         ->first();
 
-        if(!empty($order_cart) && !auth()->user()->void_order){ 
+        if(!empty($order_cart) && !auth()->user()->can_avoid){ 
             $validator = Validator::make($request->all(), [  
                 'table_id' => 'required|exists:cafe_tables,id',
                 'manager_id' => 'required',
