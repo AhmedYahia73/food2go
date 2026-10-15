@@ -6,6 +6,7 @@ use App\Http\Controllers\api\cashier\make_order\CashierMakeOrderController;
 use App\Http\Controllers\api\cashier\make_order\PendingOrderController;
 use App\Http\Controllers\api\cashier\make_order\CartOrderController;
 use App\Http\Controllers\api\cashier\address\AddressController;
+use App\Http\Controllers\api\cashier\address\GeocodeController;
 use App\Http\Controllers\api\cashier\user\AddressController as UserAddressController;
 use App\Http\Controllers\api\cashier\customer\CustomerController;
 use App\Http\Controllers\api\admin\customer\CustomerController as CustomerAdminController;
@@ -250,6 +251,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::post('/add', 'create');
         Route::post('/update/{id}', 'modify');
     });
+    Route::get('/branch_address', [GeocodeController::class, 'getBranchAddress']);
+
     Route::controller(LoginController::class)
     ->prefix('/shift')->group(function(){
         Route::post('/open', 'start_shift');
