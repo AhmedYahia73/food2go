@@ -2682,7 +2682,7 @@ class CashierMakeOrderController extends Controller
 
     public function check_void_permission(Request $request){ 
         return response()->json([
-            "can_void" => $request->user()->void_order
+            "can_void" => $request->user()->can_avoid
         ]);
     }
 } 
