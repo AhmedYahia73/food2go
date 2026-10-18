@@ -604,13 +604,11 @@ class OrderController extends Controller
     public function pos_orders(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'password' => 'required',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
+            'password' => 'required', 
             'date_from' => 'nullable|date',
             'date_to' => 'nullable|date',
+            'status' => 'nullable|in:pending,confirmed,processing,out_for_delivery,delivered,returned,faild_to_deliver,canceled,scheduled,refund',
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
@@ -748,9 +746,22 @@ class OrderController extends Controller
             ->where('status', 1)
             ->select('id', 'name', 'logo')
             ->get();
+        $status = [
+            "pending",
+            "confirmed",
+            "processing",
+            "out_for_delivery",
+            "delivered",
+            "returned",
+            "faild_to_deliver",
+            "canceled",
+            "scheduled",
+            "refund",
+        ];
 
         return response()->json([
             "payment_methods" => $paymentMethods,
+            "status" => $status,
         ]);
     }
 
@@ -1834,8 +1845,8 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
             'financial_id' => 'required|exists:finantiol_acountings,id',
-            'manager_id' => 'required',
-            'manager_password' => 'required', 
+            'manager_id' => 'sometimes',
+            'manager_password' => 'sometimes', 
             'void_id' => 'required|exists:void_reasons,id', 
             'void_reason' => 'sometimes', 
         ]);
@@ -1845,18 +1856,26 @@ class OrderController extends Controller
             ],400);
         }
 
-        $cashier_man = $this->cashier_man
-        ->where('my_id', $request->manager_id)
-        ->first();
-        if(empty($cashier_man) || !password_verify($request->input('manager_password'), $cashier_man->password)){
+        if((empty($request->manager_id) || empty($request->manager_password)) && !$request->can_avoid){
             return response()->json([
-                'errors' => 'id or password is wrong'
+                'errors' => 'id or password is required'
             ], 400);
+
         }
-        if(!$cashier_man->void_order){
-            return response()->json([
-                'errors' => "You don't have this premission"
-            ], 400);
+        if(!$request->can_avoid){ 
+            $cashier_man = $this->cashier_man
+            ->where('my_id', $request->manager_id)
+            ->first();
+            if(empty($cashier_man) || !password_verify($request->input('manager_password'), $cashier_man->password)){
+                return response()->json([
+                    'errors' => 'id or password is wrong'
+                ], 400);
+            }
+            if(!$cashier_man->void_order){
+                return response()->json([
+                    'errors' => "You don't have this premission"
+                ], 400);
+            }
         }
 
         $order = $this->orders
