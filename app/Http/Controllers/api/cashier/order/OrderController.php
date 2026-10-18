@@ -667,6 +667,12 @@ class OrderController extends Controller
                     });
             });
         }
+        if ($request->filled('order_type')) {
+            $query->where('order_type', $request->order_type);
+        }
+        if ($request->filled('payment_method_id')) {
+            $query->where('payment_method_id', $request->payment_method_id);
+        }
 
         // Eager Loading للعلاقات المحددة فقط وتصحيح الترتيب التنازلي الحقيقي
         $query->with([
@@ -724,6 +730,18 @@ class OrderController extends Controller
             "orders" => $pagedOrders,
             "pagination" => $pagination,
             "order_type" => $orderTypeList,
+        ]);
+    }
+
+    public function payment_methods(Request $request)
+    {
+        $paymentMethods = $this->paymentMethods
+            ->where('status', 1)
+            ->select('id', 'name', 'logo')
+            ->get();
+
+        return response()->json([
+            "payment_methods" => $paymentMethods,
         ]);
     }
 

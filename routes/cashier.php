@@ -148,6 +148,7 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
 
     Route::controller(OrderController::class)
     ->prefix("orders")->group(function(){
+        Route::get('/payment_methods', 'payment_methods');
         Route::get('/branches', 'branches');
         Route::get('/desktop_notifications', 'desktop_notifications')->withOutMiddleware(['auth:sanctum', 'IsCashier']);
         Route::get('/notifications', 'notifications');

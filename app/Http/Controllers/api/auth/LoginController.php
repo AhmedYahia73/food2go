@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
 use Google_Client;
 
-use App\Models\MainData; 
+use App\Models\MainData;
 use App\Models\Admin;
 use App\Models\Delivery;
 use App\Models\CaptainOrder;
@@ -27,11 +27,11 @@ use App\Models\SmsBalance;
 use App\Models\Waiter;
 use App\Models\DeviceToken;
 use App\Models\StorageMan;
-use App\Models\FinantiolAcounting; 
+use App\Models\FinantiolAcounting;
 use App\Models\CompanyInfo;
 use App\Models\PreparationMan;
 use App\Models\ReceiptDesign;
-use App\Models\Order; 
+use App\Models\Order;
 
 class LoginController extends Controller
 {
