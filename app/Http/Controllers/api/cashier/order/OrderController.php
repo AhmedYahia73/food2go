@@ -25,6 +25,7 @@ use App\Models\TimeSittings;
 use App\Models\User;
 use App\Models\VariationProduct;
 use App\Models\VoidReason;
+use App\Models\PaymentMethod;
 use App\trait\OrderFormat;
 use App\trait\PlaceOrder;
 use App\trait\POS;
@@ -45,7 +46,8 @@ class OrderController extends Controller
     private ExcludeProduct $excludes, private Addon $addons,
     private ExtraProduct $extras, private VariationProduct $variation,
     private OptionProduct $options, private CashierMan $cashier_man,
-    private VoidReason $void_reasons, private LogOrder $log_order){}
+    private VoidReason $void_reasons, private LogOrder $log_order,
+    private PaymentMethod $paymentMethods){}
     use Recipe;
     use POS;
     use OrderFormat;
