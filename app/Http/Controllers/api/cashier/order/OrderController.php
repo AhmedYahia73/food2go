@@ -605,6 +605,10 @@ class OrderController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'password' => 'required',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -623,6 +627,11 @@ class OrderController extends Controller
         $startDate = null;
         $endDate = null;
 
+        $startDateParam = $request->start_date ?? $request->date_from;
+        $endDateParam = $request->end_date ?? $request->date_to;
+        $hasDateFilter = !empty($startDateParam) || !empty($endDateParam);
+        $branchId = $request->user()?->branch_id;
+
         // 1. تحديد الـ State والنطاق بناءً على الباسورد
         if ($request->password == $password) {
             $state = 1;
@@ -631,9 +640,15 @@ class OrderController extends Controller
             $state = 2;
         } elseif ($request->password == $fakeOrderPassword) {
             $state = 3;
-            [$startDate, $endDate] = $this->resolveTimeSettingsRange();
         } else {
             return response()->json(["errors" => "password is wrong"], 400);
+        }
+
+        // تحديد نطاق الوقت بناءً على التاريخ المرسل أو افتراضياً لحالة Fake Orders
+        if ($hasDateFilter) {
+            [$startDate, $endDate] = $this->resolveTimeSettingsRange($startDateParam, $endDateParam, $branchId);
+        } elseif ($state === 3) {
+            [$startDate, $endDate] = $this->resolveTimeSettingsRange(null, null, $branchId);
         }
 
         // 2. بناء الـ Eloquent Query (كل الفلترة والترتيب في الـ DB)
@@ -646,14 +661,6 @@ class OrderController extends Controller
 
         if ($startDate && $endDate) {
             $query->whereBetween("created_at", [$startDate, $endDate]);
-        }
-
-        // فلترة التاريخ بالـ DB
-        if ($request->date_from) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        if ($request->date_to) {
-            $query->whereDate('created_at', '<=', $request->date_to);
         }
 
         // فلترة البحث بـ LIKE والعلاقات بالـ DB
@@ -805,30 +812,61 @@ class OrderController extends Controller
     }
 
     /**
-     * حساب نطاق الوقت لـ Fake Orders
+     * حساب نطاق الوقت بناءً على إعدادات الوقت (TimeSittings)
      */
-    private function resolveTimeSettingsRange(): array
+    private function resolveTimeSettingsRange($startDate = null, $endDate = null, $branchId = null): array
     {
-        $timeSettings = $this->TimeSittings->get();
+        $timeSettings = collect();
+        if ($branchId) {
+            $timeSettings = $this->TimeSittings->where('branch_id', $branchId)->get();
+        }
+        if ($timeSettings->isEmpty()) {
+            $timeSettings = $this->TimeSittings->get();
+        }
+
+        try {
+            $fromDay = $startDate ? Carbon::parse($startDate)->format('Y-m-d') : date('Y-m-d');
+        } catch (\Exception $e) {
+            $fromDay = date('Y-m-d');
+        }
+
+        try {
+            $toDay = $endDate ? Carbon::parse($endDate)->format('Y-m-d') : ($startDate ? $fromDay : date('Y-m-d'));
+        } catch (\Exception $e) {
+            $toDay = $fromDay;
+        }
+
+        if ($fromDay > $toDay) {
+            $temp = $fromDay;
+            $fromDay = $toDay;
+            $toDay = $temp;
+        }
 
         if ($timeSettings->count() > 0) {
-            $from = date('Y-m-d') . ' ' . $timeSettings[0]->from;
-            $end = date('Y-m-d') . ' ' . $timeSettings[$timeSettings->count() - 1]->from;
-            $hours = $timeSettings[$timeSettings->count() - 1]->hours;
-            $minutes = $timeSettings[$timeSettings->count() - 1]->minutes;
+            $lastIndex = $timeSettings->count() - 1;
+            $hours = (int) $timeSettings[$lastIndex]->hours;
+            $minutes = (int) $timeSettings[$lastIndex]->minutes;
 
-            $start = Carbon::parse($from);
-            $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
+            $fromTime = $timeSettings[0]->from;
+            $toTime = $timeSettings[$lastIndex]->from;
 
-            if ($start >= $end) {
-                $end = $end->addDay();
+            $start = Carbon::parse($fromDay . ' ' . $fromTime);
+
+            $dayClosing = Carbon::parse($toDay . ' ' . $toTime)->addHours($hours)->addMinutes($minutes);
+            $dayOpeningForEnd = Carbon::parse($toDay . ' ' . $fromTime);
+
+            if ($dayOpeningForEnd >= $dayClosing) {
+                $dayClosing = $dayClosing->addDay();
             }
-            if ($start >= now()) {
+
+            $end = $dayClosing;
+
+            if (!$startDate && !$endDate && $start >= now()) {
                 $start = $start->subDay();
             }
         } else {
-            $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-            $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+            $start = Carbon::parse($fromDay . ' 00:00:00');
+            $end = Carbon::parse($toDay . ' 23:59:59');
         }
 
         return [$start, $end];
