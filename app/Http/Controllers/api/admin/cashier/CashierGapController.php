@@ -119,19 +119,77 @@ class CashierGapController extends Controller
         }
 
         $cashier_man_id = $gap->cashier_man_id;
-        $shift_number   = $gap->shift;           // shift number stored on cashier_gaps
-        $cashier_amount = $gap->cashier_amount;  // amount entered by cashier at end of shift
+        $cashier_amount = $gap->cashier_amount ?? 0;
 
-        // Load the CashierShift record for time boundaries
-        $shift = CashierShift::where('shift', $shift_number)
-            ->where('cashier_man_id', $cashier_man_id)
-            ->with('financial')
-            ->first();
+        // ── Resolve the shift and shift_number ───────────────────────────────────
+        $rawShift = $gap->getRawOriginal('shift');
+        $shiftRecord = null;
+
+        if ($rawShift) {
+            $shiftRecord = CashierShift::where('shift', $rawShift)
+                ->where('cashier_man_id', $cashier_man_id)
+                ->with('financial')
+                ->first();
+            if (!$shiftRecord) {
+                $shiftRecord = CashierShift::where('shift', $rawShift)->with('financial')->first();
+            }
+        }
+
+        // If not found by raw shift number, find the CashierShift active at gap creation
+        if (!$shiftRecord) {
+            $gapCreatedAt = $gap->created_at ?? now();
+
+            // 1. Shift created on or before gap created_at
+            $shiftRecord = CashierShift::where('cashier_man_id', $cashier_man_id)
+                ->when($gap->cashier_id, fn($q) => $q->where('cashier_id', $gap->cashier_id))
+                ->where('created_at', '<=', $gapCreatedAt)
+                ->orderByDesc('created_at')
+                ->with('financial')
+                ->first();
+
+            // 2. Or shift on the same date
+            if (!$shiftRecord) {
+                $gapDate = $gap->created_at ? $gap->created_at->format('Y-m-d') : ($request->date ?? date('Y-m-d'));
+                $shiftRecord = CashierShift::where('cashier_man_id', $cashier_man_id)
+                    ->whereDate('created_at', $gapDate)
+                    ->orderByDesc('created_at')
+                    ->with('financial')
+                    ->first();
+            }
+
+            // 3. Or most recent shift for this cashier_man
+            if (!$shiftRecord) {
+                $shiftRecord = CashierShift::where('cashier_man_id', $cashier_man_id)
+                    ->orderByDesc('created_at')
+                    ->with('financial')
+                    ->first();
+            }
+        }
+
+        $shift = $shiftRecord;
+        $shift_number = $shift?->shift ?? $rawShift;
+
+        // Fallback: If still no shift number, find shift from orders by this cashier_man around this time
+        if (!$shift_number) {
+            $gapDate = $gap->created_at ? $gap->created_at->format('Y-m-d') : ($request->date ?? date('Y-m-d'));
+            $shift_number = Order::where('cashier_man_id', $cashier_man_id)
+                ->whereNotNull('shift')
+                ->whereDate('created_at', $gapDate)
+                ->orderByDesc('created_at')
+                ->value('shift');
+
+            if ($shift_number && !$shift) {
+                $shift = CashierShift::where('shift', $shift_number)->with('financial')->first();
+            }
+        }
+
+        // Safety: If shift_number is STILL null, use an impossible ID so it NEVER matches shift IS NULL
+        $safeShiftNumber = $shift_number ?? -999999;
 
         // ── order totals ────────────────────────────────────────────────────────
-        $baseQuery = function () use ($cashier_man_id, $shift_number) {
+        $baseQuery = function () use ($cashier_man_id, $safeShiftNumber) {
             return Order::where('cashier_man_id', $cashier_man_id)
-                ->where('shift', $shift_number)
+                ->where('shift', $safeShiftNumber)
                 ->where('is_void', 0)
                 ->where('due', 0)
                 ->where('due_module', 0)
@@ -176,7 +234,7 @@ class CashierGapController extends Controller
         $order_financial = OrderFinancial::where('financial_id', $financial->id ?? 0)
             ->whereHas('order', function ($q) use ($cashier_man_id, $shift_number) {
                 $q->where('cashier_man_id', $cashier_man_id)
-                  ->where('shift', $shift_number)
+                  ->where('shift', $safeShiftNumber)
                   ->where('is_void', 0)
                   ->where('due', 0)
                   ->where('due_module', 0);
@@ -195,29 +253,29 @@ class CashierGapController extends Controller
 
         // ── order counts / amounts by type ──────────────────────────────────────
         $orders_count = [
-            'dine_in_orders_count'   => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'dine_in')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->count(),
-            'take_away_orders_count' => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'take_away')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->count(),
-            'delivery_orders_count'  => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'delivery')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->count(),
+            'dine_in_orders_count'   => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'dine_in')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->count(),
+            'take_away_orders_count' => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'take_away')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->count(),
+            'delivery_orders_count'  => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'delivery')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->count(),
         ];
         $orders_amount = [
-            'dine_in_amount'   => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'dine_in')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->sum('amount'),
-            'take_away_amount' => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'take_away')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->sum('amount'),
-            'delivery_amount'  => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'delivery')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->sum('amount'),
+            'dine_in_amount'   => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'dine_in')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->sum('amount'),
+            'take_away_amount' => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'take_away')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->sum('amount'),
+            'delivery_amount'  => Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'delivery')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where(function($q){$q->where('status',1)->orWhereNull('status');})->sum('amount'),
         ];
 
         // ── void orders ─────────────────────────────────────────────────────────
-        $order_count      = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->count();
-        $void_order_count = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('is_void', 1)->count();
-        $void_order_sum   = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('is_void', 1)->sum('amount');
+        $order_count      = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->count();
+        $void_order_count = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('is_void', 1)->count();
+        $void_order_sum   = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('is_void', 1)->sum('amount');
 
         // ── due ─────────────────────────────────────────────────────────────────
-        $due_module = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where('due_module', '>', 0)->sum('due_module');
-        $due_user   = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('is_void', 0)->where('due', 1)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->sum('amount');
+        $due_module = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->where('due_module', '>', 0)->sum('due_module');
+        $due_user   = Order::where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('is_void', 0)->where('due', 1)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->sum('amount');
 
         // ── order IDs by type ───────────────────────────────────────────────────
-        $take_away_orders = Order::select('id')->where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'take_away')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->pluck('id')->toArray();
-        $delivery_orders  = Order::select('id')->where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'delivery')->where('due_from_delivery', 0)->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->pluck('id')->toArray();
-        $dine_in_orders   = Order::select('id')->where('cashier_man_id', $cashier_man_id)->where('shift', $shift_number)->where('order_type', 'dine_in')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->pluck('id')->toArray();
+        $take_away_orders = Order::select('id')->where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'take_away')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->pluck('id')->toArray();
+        $delivery_orders  = Order::select('id')->where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'delivery')->where('due_from_delivery', 0)->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->pluck('id')->toArray();
+        $dine_in_orders   = Order::select('id')->where('cashier_man_id', $cashier_man_id)->where('shift', $safeShiftNumber)->where('order_type', 'dine_in')->where('is_void', 0)->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])->pluck('id')->toArray();
 
         // ── financial accounts breakdown ─────────────────────────────────────────
         $delivery_fa  = OrderFinancial::selectRaw('financial_id, SUM(amount) as total_amount')->whereIn('order_id', $delivery_orders)->with('financials')->groupBy('financial_id')->get();
@@ -317,7 +375,7 @@ class CashierGapController extends Controller
                 $q->where('payment_method_id', '!=', 2)->where(function ($q2) { $q2->where('status', 1)->orWhereNull('status'); })
                   ->orWhereHas('financial_accountigs');
             })
-            ->where('shift', $shift_number)
+            ->where('shift', $safeShiftNumber)
             ->with('payment_method')->groupBy('payment_method_id')->groupBy('order_type')->get()
             ->map(fn($i) => ['payment_method' => $i?->payment_method?->name, 'payment_method_id' => $i->payment_method_id, 'amount' => $i->amount]);
 
@@ -326,7 +384,7 @@ class CashierGapController extends Controller
             ->where(function ($q) { $q->where('status', 1)->orWhereNull('status'); })
             ->where('is_void', 0)
             ->whereIn('order_status', ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'scheduled'])
-            ->where('shift', $shift_number)
+            ->where('shift', $safeShiftNumber)
             ->with('payment_method')->groupBy('payment_method_id')->groupBy('order_type')->get()
             ->map(fn($i) => ['payment_method' => $i?->payment_method?->name, 'payment_method_id' => $i->payment_method_id, 'amount' => $i->amount]);
 
@@ -343,7 +401,7 @@ class CashierGapController extends Controller
         $online_order = ['paid' => array_values($paid_map), 'un_paid' => array_values($unpaid_map)];
 
         // ── table people ─────────────────────────────────────────────────────────
-        $people = TablePeople::where('is_active', 0)->where('shift_number', $shift_number)->sum('count') ?? 0;
+        $people = TablePeople::where('is_active', 0)->where('shift_number', $safeShiftNumber)->sum('count') ?? 0;
 
         $start_balance = [
             'amount'    => $shift->amount ?? 0,

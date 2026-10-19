@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api\cashier\Home;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cashier;
+use App\Models\CashierMan;
 use App\Models\CashierShift;
 use App\Models\Order;
 use App\Models\Product;
@@ -201,6 +202,8 @@ class HomeController extends Controller
             'from' => ['nullable', 'date'],
             'to' => ['nullable', 'date'],
             'sort' => ['nullable', 'in:desc,asc'],
+            'manger_id' => ['required'],
+            'password' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -209,6 +212,19 @@ class HomeController extends Controller
             ], 400);
         }
 
+        $cashier_man = CashierMan::
+        where("manger", $request->input('manger_id'))
+        ->first();
+        if(!$cashier_man){
+            return response()->json([
+                "errors" => "You are not manager",
+            ], 400);  
+        }
+        if(!password_verify($request->input('password'), $cashier_man->password)){
+            return response()->json([
+                "errors" => "password is wrong",
+            ], 400);  
+        }
         $cashierManId = auth()->user()?->id ?? $request->user()?->id;
         if (!$cashierManId) {
             return response()->json([
