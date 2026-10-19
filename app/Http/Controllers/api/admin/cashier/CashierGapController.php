@@ -232,7 +232,7 @@ class CashierGapController extends Controller
             })->first();
 
         $order_financial = OrderFinancial::where('financial_id', $financial->id ?? 0)
-            ->whereHas('order', function ($q) use ($cashier_man_id, $shift_number) {
+            ->whereHas('order', function ($q) use ($cashier_man_id, $safeShiftNumber) {
                 $q->where('cashier_man_id', $cashier_man_id)
                   ->where('shift', $safeShiftNumber)
                   ->where('is_void', 0)
