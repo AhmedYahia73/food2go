@@ -87,8 +87,32 @@ class CashierGapController extends Controller
 
     public function end_shift_report(Request $request, $gap_id)
     {
-        // Load the gap — all context comes from the gap itself
+        // Load the gap — try exact ID first
         $gap = CashierGap::with(['cashier_man', 'cashier', 'shift'])->find($gap_id);
+
+        // Fallback 1: If JS rounded the last digits of a 15+ digit snowflake ID (e.g. 17914503770368580)
+        if (!$gap && strlen((string)$gap_id) >= 14) {
+            $prefix = substr((string)$gap_id, 0, 14);
+            $query = CashierGap::with(['cashier_man', 'cashier', 'shift'])
+                ->where('id', 'LIKE', $prefix . '%');
+            if ($request->cashier_man_id) {
+                $query->where('cashier_man_id', $request->cashier_man_id);
+            }
+            if ($request->cashier_amount !== null) {
+                $query->where('cashier_amount', $request->cashier_amount);
+            }
+            $gap = $query->first();
+        }
+
+        // Fallback 2: Look up by cashier_man_id and gap parameters
+        if (!$gap && $request->cashier_man_id) {
+            $gap = CashierGap::with(['cashier_man', 'cashier', 'shift'])
+                ->where('cashier_man_id', $request->cashier_man_id)
+                ->when($request->cashier_amount !== null, fn($q) => $q->where('cashier_amount', $request->cashier_amount))
+                ->when($request->amount !== null, fn($q) => $q->where('amount', $request->amount))
+                ->latest()
+                ->first();
+        }
 
         if (!$gap) {
             return response()->json(['errors' => 'Gap not found'], 404);
