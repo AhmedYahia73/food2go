@@ -344,7 +344,9 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
     ->prefix('cashier_gap')->group(function(){
         Route::get('/lists', 'lists')->middleware('can:cashier_shortage');
         Route::get('/', 'cashier_gap')->middleware('can:cashier_shortage');
+        Route::get('/end_shift_report/{gap_id}', 'end_shift_report')->middleware('can:cashier_shortage');
     });
+
 
     Route::controller(ProductPOSPricingController::class)
     ->prefix('product_pos_pricing')->group(function(){
