@@ -216,6 +216,8 @@ Route::middleware(['auth:sanctum', 'IsCashier'])->group(function(){
         Route::get('/', 'view');
         Route::get('/cashier_data', 'cashier_data');
         Route::put('/active_cashier/{id}', 'active_cashier'); 
+        Route::match(['get', 'post'], '/product_report', 'product_report');
+        Route::get('/categories', 'categories');
     });
     Route::controller(UserController::class)
     ->prefix('/user')->group(function(){
