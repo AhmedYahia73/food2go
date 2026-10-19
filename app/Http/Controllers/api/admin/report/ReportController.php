@@ -2510,66 +2510,111 @@ class ReportController extends Controller
             "id", "order_details"
         ]);
         $products = [];
+        $loadedProducts = [];
         foreach ($orders as $item) {
             $details = $item->order_details_data;
-            if(!empty($details)){
+            if(!empty($details) && is_array($details)){
                 foreach ($details as $element) {
+                    if (!is_array($element)) {
+                        continue;
+                    }
                     $price = 0;
                     $principle_price = 0;
                     $price_after_discount = 0;
                     $price_after_tax = 0;
-                    if (isset($element['variations'])) {
+                    if (isset($element['variations']) && is_array($element['variations'])) {
                         foreach ($element['variations'] as $key => $value) {
-                            foreach ($value['options'] as $key => $option) {
-                                $price += $option['price_after_tax'] 
-                                - $option['price']
-                                + $option['after_disount'];
-                                $principle_price += $option['price'];
-                                $price_after_discount += $option['after_disount'];
-                                $price_after_tax += $option['price_after_tax'];
+                            if (isset($value['options']) && is_array($value['options'])) {
+                                foreach ($value['options'] as $key => $option) {
+                                    if (!is_array($option)) {
+                                        continue;
+                                    }
+                                    $opt_price = (float)($option['price'] ?? 0);
+                                    $opt_discount = isset($option['after_disount'])
+                                        ? (float)$option['after_disount']
+                                        : (isset($option['price_after_discount']) ? (float)$option['price_after_discount'] : $opt_price);
+                                    $opt_tax = isset($option['price_after_tax'])
+                                        ? (float)$option['price_after_tax']
+                                        : $opt_price;
+                                    $opt_final = isset($option['final_price'])
+                                        ? (float)$option['final_price']
+                                        : ($opt_tax - $opt_price + $opt_discount);
+
+                                    $price += $opt_final;
+                                    $principle_price += $opt_price;
+                                    $price_after_discount += $opt_discount;
+                                    $price_after_tax += $opt_tax;
+                                }
                             }
                         }
                     }
-                    if (isset($element['extras'])) {
+                    if (isset($element['extras']) && is_array($element['extras'])) {
                         foreach ($element['extras'] as $key => $extra) {
-                                $price += $extra['price_after_tax'] 
-                                - $extra['price']
-                                + $extra['price_after_discount'];
-                                $principle_price += $extra['price'];
-                                $price_after_tax += $extra['price_after_tax'];
-                                $price_after_discount += $extra['price_after_discount'];
+                            if (!is_array($extra)) {
+                                continue;
+                            }
+                            $extra_price = (float)($extra['price'] ?? 0);
+                            $extra_discount = isset($extra['price_after_discount'])
+                                ? (float)$extra['price_after_discount']
+                                : (isset($extra['after_disount']) ? (float)$extra['after_disount'] : $extra_price);
+                            $extra_tax = isset($extra['price_after_tax'])
+                                ? (float)$extra['price_after_tax']
+                                : $extra_price;
+                            $extra_final = isset($extra['final_price'])
+                                ? (float)$extra['final_price']
+                                : ($extra_tax - $extra_price + $extra_discount);
+
+                            $price += $extra_final;
+                            $principle_price += $extra_price;
+                            $price_after_tax += $extra_tax;
+                            $price_after_discount += $extra_discount;
                         }
                     }
-                    if(isset($element['product'][0]['product'])){
-                        $price += $element['product'][0]['product']['price_after_tax'] 
-                            - $element['product'][0]['product']['price']
-                            + $element['product'][0]['product']['price_after_discount'];
-                        $price_after_discount += $element['product'][0]['product']['price_after_discount'];
-                        $principle_price += $element['product'][0]['product']['price'];
-                        $count = $element['product'][0]['count'];
-                        $product_id = $element['product'][0]['product']['id'];
-                    
+                    if(isset($element['product'][0]['product']) && is_array($element['product'][0]['product'])){
+                        $prod = $element['product'][0]['product'];
+                        $prod_price = (float)($prod['price'] ?? 0);
+                        $prod_discount = isset($prod['price_after_discount']) && $prod['price_after_discount'] !== null
+                            ? (float)$prod['price_after_discount']
+                            : (isset($prod['after_disount']) ? (float)$prod['after_disount'] : $prod_price);
+                        $prod_tax = isset($prod['price_after_tax']) && $prod['price_after_tax'] !== null
+                            ? (float)$prod['price_after_tax']
+                            : $prod_price;
+                        $prod_final = isset($prod['final_price']) && $prod['final_price'] !== null
+                            ? (float)$prod['final_price']
+                            : ($prod_tax - $prod_price + $prod_discount);
+
+                        $price += $prod_final;
+                        $price_after_discount += $prod_discount;
+                        $principle_price += $prod_price;
+                        $count = (int)($element['product'][0]['count'] ?? 1);
+                        $count = $count > 0 ? $count : 1;
+                        $product_id = $prod['id'] ?? null;
+
+                        if (!$product_id) {
+                            continue;
+                        }
+
                         if(isset($products[$product_id])){
                             $products[$product_id]["price"] += $price * $count;
                             $products[$product_id]["count"] += $count;
                         }
                         else{ 
-                            $category_id = $element['product'][0]['product']['category_id'];
-                            $sub_category_id = $element['product'][0]['product']['sub_category_id'];
-                            // $category = Category::
-                            // where("id", $category_id)
-                            // ->first()?->name;
-                            // $sub_category = Category::
-                            // where("id", $sub_category_id)
-                            // ->first()?->name;
-                            
-                            $product_name_item = $element['product'][0]['product']['name'];
+                            $category_id = $prod['category_id'] ?? null;
+                            $sub_category_id = $prod['sub_category_id'] ?? null;
+                            $product_name_item = $prod['name'] ?? null;
+
+                            if(empty($category_id) || empty($product_name_item)){
+                                $productModel = $loadedProducts[$product_id] ??= Product::with("translations")->find($product_id);
+                                if($productModel){
+                                    $category_id = $category_id ?: $productModel->category_id;
+                                    $sub_category_id = $sub_category_id ?: $productModel->sub_category_id;
+                                    $product_name_item = $product_name_item ?: $productModel->name;
+                                }
+                            }
+
                             if($locale != "en"){ 
-                                $product_name = Product::
-                                where("id", $product_id)
-                                ->with("translations")
-                                ->first();
-                                $product_name = $product_name
+                                $productModel = $loadedProducts[$product_id] ??= Product::with("translations")->find($product_id);
+                                $product_name = $productModel
                                 ?->translations
                                 ?->where("locale", $locale)
                                 ?->where("key", $product_name_item)

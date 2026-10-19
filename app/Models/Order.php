@@ -260,8 +260,11 @@ class Order extends Model
                             'name' => $productRecord->name,
                             'image_link' => $productRecord->image_link ?? $productRecord->image ?? null,
                             'price' => $isIncluded ? round($productNet, 2) : $productGross,
-                            'price_after_discount' => null,
+                            'price_after_discount' => $productGross,
                             'price_after_tax' => $productGross,
+                            'final_price' => $productGross,
+                            'category_id' => $productRecord->category_id,
+                            'sub_category_id' => $productRecord->sub_category_id,
                         ],
                         'count' => $item['count'] ?? 1,
                         'notes' => $item['note'] ?? $item['notes'] ?? null,
@@ -293,6 +296,9 @@ class Order extends Model
                                 'id' => $extRecord->id,
                                 'name' => $extRecord->name,
                                 'price' => $isIncluded ? round($extNet, 2) : $extGross,
+                                'price_after_tax' => $extGross,
+                                'price_after_discount' => $extGross,
+                                'final_price' => $extGross,
                             ];
                         }
                     }
@@ -371,6 +377,10 @@ class Order extends Model
                                     'name' => $optRecord->name,
                                     'price' => $isIncluded ? round($optNet, 2) : $optGross,
                                     'total_option_price' => $optGross,
+                                    'after_disount' => $optGross,
+                                    'price_after_discount' => $optGross,
+                                    'price_after_tax' => $optGross,
+                                    'final_price' => $optGross,
                                 ];
                             }
                         }
