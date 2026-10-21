@@ -762,10 +762,10 @@ class ReportController extends Controller
             }
             if ($time_sittings->count() > 0) {
                 $from = $from->from;
-                $end = $request->to . ' ' . $to->from;
+                $end = ($request->to ?? date("Y-m-d")) . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
-                $from = $request->from . ' ' . $from;
+                $from = ($request->from ?? "1990-01-01") . ' ' . $from;
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes);
@@ -778,8 +778,8 @@ class ReportController extends Controller
                 }
     
             } else {
-                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+                $start = Carbon::parse(($request->from ?? '1990-01-01') . ' 00:00:00');
+                $end = Carbon::parse(($request->to ?? date('Y-m-d')) . ' 23:59:59');
             }  
 
             $orders = $orders
@@ -1290,10 +1290,10 @@ class ReportController extends Controller
             }
             if ($time_sittings->count() > 0) {
                 $from = $from->from;
-                $end = $request->to ?? date("Y-m-d") . ' ' . $to->from;
+                $end = ($request->to ?? date("Y-m-d")) . ' ' . $to->from;
                 $hours = $to->hours;
                 $minutes = $to->minutes;
-                $from = ($request->from ?? "199-05-05") . ' ' . $from; 
+                $from = ($request->from ?? "1990-01-01") . ' ' . $from; 
                 $start = Carbon::parse($from);
                 $end = Carbon::parse($end);
                 $end = Carbon::parse($end)->addHours($hours)->addMinutes($minutes); 
@@ -1301,8 +1301,8 @@ class ReportController extends Controller
                     $end = $end->addDay();
                 }
             } else {
-                $start = Carbon::parse(date('Y-m-d') . ' 00:00:00');
-                $end = Carbon::parse(date('Y-m-d') . ' 23:59:59');
+                $start = Carbon::parse(($request->from ?? '1990-01-01') . ' 00:00:00');
+                $end = Carbon::parse(($request->to ?? date('Y-m-d')) . ' 23:59:59');
             } 
   
             $due_module = $due_module
