@@ -592,6 +592,9 @@ class CartOrderController extends Controller
             ->when($cashierManId, fn($q) => $q->where('cashier_man_id', $cashierManId))
             ->first();
 
+        $request->merge([
+            "quantity" => $request->count ?? $request->quantity ?? 1,
+        ]);
         if (!$cart) {
             return response()->json([
                 'errors' => 'Cart item not found'
