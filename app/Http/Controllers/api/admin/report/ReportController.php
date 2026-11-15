@@ -2640,12 +2640,15 @@ class ReportController extends Controller
             }
         }
         $categories = Category::
-        with("translations");
+        with(["translations", "sub_categories"]);
         if($request->category_id){
             $categories = $categories
             ->where("id", $request->category_id);
+        } else {
+            $categories = $categories
+            ->whereNull("category_id");
         }
-        $categories = $categories->get()
+        $categories = $categories->orderBy("priority")->get()
         ->map(function($element) use($locale){
             $name = $element
             ->translations
@@ -2656,6 +2659,7 @@ class ReportController extends Controller
             return [
                 "id" => $element->id,
                 "name" => $name,
+                "sub_category_ids" => $element->sub_categories ? $element->sub_categories->pluck('id')->toArray() : [],
             ];
         });
         $products = collect($products);
@@ -2669,9 +2673,12 @@ class ReportController extends Controller
                 $products_item = $products
                 ->sortBy("price");
             }
+            $subCategoryIds = data_get($item, 'sub_category_ids', []);
             if($request->products){
-                $products_item = $products_item->filter(function ($product) use ($item, $request) {
+                $products_item = $products_item->filter(function ($product) use ($item, $subCategoryIds, $request) {
                     return ($product['category_id'] == data_get($item, 'id')
+                    || in_array($product['category_id'], $subCategoryIds)
+                    || in_array($product['sub_category_id'], $subCategoryIds)
                     || $product['sub_category_id'] ==  data_get($item, 'id'))
                     && in_array($product['id'], $request->products);
                 });
@@ -2680,8 +2687,10 @@ class ReportController extends Controller
                 }
             }
             else{
-                $products_item = $products_item->filter(function ($product) use ($item, $request) {
+                $products_item = $products_item->filter(function ($product) use ($item, $subCategoryIds) {
                     return $product['category_id'] ==  data_get($item, 'id')
+                        || in_array($product['category_id'], $subCategoryIds)
+                        || in_array($product['sub_category_id'], $subCategoryIds)
                         || $product['sub_category_id'] ==  data_get($item, 'id');
                 });
             }
