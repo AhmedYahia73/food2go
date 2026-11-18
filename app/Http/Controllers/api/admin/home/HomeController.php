@@ -128,6 +128,149 @@ class HomeController extends Controller
     }
 
     /**
+     * ✅ Matches product sales calculation from product_report exactly
+     */
+    private function getProductSalesFromOrders($start = null, $end = null, $branch_id = null, $only_online = false, $limit = 5)
+    {
+        $ordersQuery = Order::query()
+            ->where("is_void", 0)
+            ->whereIn("order_status", ['pending', "confirmed", "processing", "out_for_delivery", "delivered", "scheduled"])
+            ->where(function($query) {
+                $query->where('status', 1)->orWhereNull('status');
+            })
+            ->where(function($query) {
+                $query->where('order_active', 1)->orWhereNull('order_active');
+            });
+
+        if ($only_online) {
+            $ordersQuery->where('pos', 0);
+        }
+        if ($branch_id) {
+            $ordersQuery->where('branch_id', $branch_id);
+        }
+        if ($start) {
+            $ordersQuery->where('created_at', '>=', $start);
+        }
+        if ($end) {
+            $ordersQuery->where('created_at', '<=', $end);
+        }
+
+        $orders = $ordersQuery->get(["id", "order_details"]);
+
+        $products = [];
+        foreach ($orders as $orderItem) {
+            $details = $orderItem->order_details_data;
+            if (!empty($details) && is_array($details)) {
+                foreach ($details as $element) {
+                    if (!is_array($element)) continue;
+
+                    $price = 0;
+                    if (isset($element['variations']) && is_array($element['variations'])) {
+                        foreach ($element['variations'] as $val) {
+                            if (isset($val['options']) && is_array($val['options'])) {
+                                foreach ($val['options'] as $option) {
+                                    if (!is_array($option)) continue;
+                                    $opt_price = (float)($option['price'] ?? 0);
+                                    $opt_discount = isset($option['after_disount'])
+                                        ? (float)$option['after_disount']
+                                        : (isset($option['price_after_discount']) ? (float)$option['price_after_discount'] : $opt_price);
+                                    $opt_tax = isset($option['price_after_tax']) ? (float)$option['price_after_tax'] : $opt_price;
+                                    $opt_final = isset($option['final_price']) ? (float)$option['final_price'] : ($opt_tax - $opt_price + $opt_discount);
+                                    $price += $opt_final;
+                                }
+                            }
+                        }
+                    }
+
+                    if (isset($element['extras']) && is_array($element['extras'])) {
+                        foreach ($element['extras'] as $extra) {
+                            if (!is_array($extra)) continue;
+                            $extra_price = (float)($extra['price'] ?? 0);
+                            $extra_discount = isset($extra['price_after_discount'])
+                                ? (float)$extra['price_after_discount']
+                                : (isset($extra['after_disount']) ? (float)$extra['after_disount'] : $extra_price);
+                            $extra_tax = isset($extra['price_after_tax']) ? (float)$extra['price_after_tax'] : $extra_price;
+                            $extra_final = isset($extra['final_price']) ? (float)$extra['final_price'] : ($extra_tax - $extra_price + $extra_discount);
+                            $price += $extra_final;
+                        }
+                    }
+
+                    if (isset($element['product'][0]['product']) && is_array($element['product'][0]['product'])) {
+                        $prod = $element['product'][0]['product'];
+                        $product_id = $prod['id'] ?? null;
+                        if (!$product_id) continue;
+
+                        $prod_price = (float)($prod['price'] ?? 0);
+                        $prod_discount = isset($prod['price_after_discount']) && $prod['price_after_discount'] !== null
+                            ? (float)$prod['price_after_discount']
+                            : (isset($prod['after_disount']) ? (float)$prod['after_disount'] : $prod_price);
+                        $prod_tax = isset($prod['price_after_tax']) && $prod['price_after_tax'] !== null
+                            ? (float)$prod['price_after_tax']
+                            : $prod_price;
+                        $prod_final = isset($prod['final_price']) && $prod['final_price'] !== null
+                            ? (float)$prod['final_price']
+                            : ($prod_tax - $prod_price + $prod_discount);
+
+                        $price += $prod_final;
+                        $count = (int)($element['product'][0]['count'] ?? 1);
+                        if ($count <= 0) $count = 1;
+
+                        if (isset($products[$product_id])) {
+                            $products[$product_id]["total_amount"] += $price * $count;
+                            $products[$product_id]["total_sales"] += $count;
+                        } else {
+                            $products[$product_id] = [
+                                "product_id" => $product_id,
+                                "total_sales" => $count,
+                                "total_amount" => $price * $count,
+                                "product" => [
+                                    "id" => $product_id,
+                                    "name" => $prod['name'] ?? ("Product " . $product_id),
+                                ],
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Enrich with product model info (image_link, description, name, etc.)
+        $prod_ids = array_keys($products);
+        if (!empty($prod_ids)) {
+            $product_models = Product::whereIn('id', $prod_ids)->get()->keyBy('id');
+            foreach ($products as $pId => &$pData) {
+                if (isset($product_models[$pId])) {
+                    $m = $product_models[$pId];
+                    $pData["id"] = $m->id;
+                    $pData["name"] = $m->name;
+                    $pData["image_link"] = $m->image_link;
+                    $pData["description"] = $m->description ?? '';
+                    $pData["price"] = $m->price;
+                    $pData["order_count"] = $pData["total_sales"];
+                    $pData["product"] = [
+                        "id" => $m->id,
+                        "name" => $m->name,
+                        "image_link" => $m->image_link,
+                    ];
+                } else {
+                    $pData["id"] = $pId;
+                    $pData["image_link"] = null;
+                    $pData["description"] = "";
+                    $pData["price"] = $pData["total_amount"];
+                    $pData["order_count"] = $pData["total_sales"];
+                }
+            }
+            unset($pData);
+        }
+
+        $collection = collect(array_values($products))->sortByDesc("total_sales")->values();
+        if ($limit) {
+            $collection = $collection->take($limit);
+        }
+        return $collection;
+    }
+
+    /**
      * ✅ NEW UNIFIED OVERVIEW API:
      * GET /admin/home/overview
      * Returns consolidated, accurate dashboard overview metrics
@@ -299,31 +442,15 @@ class HomeController extends Controller
         if ($branch_id) $expenses_hourly_query->where('branch_id', $branch_id);
         $expenses_hourly = $expenses_hourly_query->get();
 
-        // 6. Top Products, Payment Methods, Branch Sales (filtered by period)
-        $top_product_query = OrderDetail::selectRaw("product_id, sum(count) as total_sales, sum(price * count) as total_amount")
-            ->whereNull("exclude_id")->whereNull("addon_id")->whereNull("offer_id")
-            ->whereNull("extra_id")->whereNull("variation_id")->whereNull("option_id")->whereNull("deal_id")
-            ->whereHas("order", function($query) use ($branch_id, $only_online, $start, $end){
-                if ($only_online) $query->where('pos', 0);
-                if ($branch_id) $query->where("branch_id", $branch_id);
-                $query->where("created_at", ">=", $start)->where("created_at", "<=", $end);
-                $query->where(function($q){
-                    $q->where("order_status", "!=", "returned")
-                      ->where("order_status", "!=", "refund")
-                      ->where("is_void", 0);
-                });
-            })
-            ->groupBy("product_id")
-            ->with("product:id,name")
-            ->orderByDesc("total_sales")
-            ->limit(5);
-        $top_product = $top_product_query->get();
+        // 6. Top Products, Payment Methods, Branch Sales
+        // ✅ Uses exact sales logic from product_report
+        $top_product = $this->getProductSalesFromOrders($start, $end, $branch_id, $only_online, 5);
 
         $top_financial_query = OrderFinancial::selectRaw("financial_id, sum(amount) as total_amount")
             ->whereHas("order", function($query) use ($branch_id, $only_online, $start, $end){
-                if ($only_online) $query->where('pos', 0);
-                if ($branch_id) $query->where("branch_id", $branch_id);
-                $query->where("created_at", ">=", $start)->where("created_at", "<=", $end);
+                if ($only_online) $query->where('orders.pos', 0);
+                if ($branch_id) $query->where("orders.branch_id", $branch_id);
+                $query->where("orders.created_at", ">=", $start)->where("orders.created_at", "<=", $end);
             })
             ->groupBy("financial_id")
             ->with("financials:id,name") 
@@ -400,16 +527,8 @@ class HomeController extends Controller
         if ($branch_id) $recent_orders_query->where('branch_id', $branch_id);
         $recent_orders = $recent_orders_query->get();
 
-        // 9. Top Selling Products & Customers & Deals
-        $top_selling = $this->products
-            ->withCount(['order' => function($query) use ($branch_id, $start, $end, $only_online) {
-                if ($only_online) $query->where('pos', 0);
-                if ($branch_id) $query->where("branch_id", $branch_id);
-                $query->where("created_at", ">=", $start)->where("created_at", "<=", $end);
-            }])
-            ->get()
-            ->sortByDesc("order_count")
-            ->values();
+        // 9. Top Selling Products (matches product_report) & Customers & Deals
+        $top_selling = $this->getProductSalesFromOrders($start, $end, $branch_id, $only_online, 20);
 
         $today = Carbon::now()->format('l');
         $deals = $this->deals
@@ -429,9 +548,9 @@ class HomeController extends Controller
 
         $top_customers = $this->users
             ->withCount(['order' => function($query) use ($branch_id, $start, $end, $only_online) {
-                if ($only_online) $query->where('pos', 0);
-                if ($branch_id) $query->where("branch_id", $branch_id);
-                $query->where("created_at", ">=", $start)->where("created_at", "<=", $end);
+                if ($only_online) $query->where('orders.pos', 0);
+                if ($branch_id) $query->where("orders.branch_id", $branch_id);
+                $query->where("orders.created_at", ">=", $start)->where("orders.created_at", "<=", $end);
             }])
             ->get()
             ->sortByDesc('order_count')
@@ -555,19 +674,8 @@ class HomeController extends Controller
         }
         $offline_cashiers = $offline_cashiers_query->count();
 
-        $top_product = OrderDetail::
-        selectRaw("product_id, sum(count) as total_sales, sum(price * count) as total_amount")
-        ->whereNull("exclude_id")
-        ->whereNull("addon_id")
-        ->whereNull("offer_id")
-        ->whereNull("extra_id")
-        ->whereNull("variation_id")
-        ->whereNull("option_id")
-        ->whereNull("deal_id")
-        ->groupBy("product_id")
-        ->with("product:id,name")
-        ->orderByDesc("total_sales")
-        ->limit(5);
+        // ✅ Uses exact sales logic from product_report
+        $top_product = $this->getProductSalesFromOrders($start, $end, $branch_id, $only_online, 5);
 
         $top_financial = OrderFinancial::
         selectRaw("financial_id, sum(amount) as total_amount")
@@ -675,11 +783,6 @@ class HomeController extends Controller
         }
 
         if($branch_id){ 
-            $top_product = $top_product
-            ->whereHas("order", function($query) use($branch_id, $only_online){
-                if ($only_online) $query->where('pos', 0);
-                $query->where("branch_id", $branch_id);
-            });
             $top_financial
             ->whereHas("order", function($query) use($branch_id, $only_online){
                 if ($only_online) $query->where('pos', 0);
@@ -695,21 +798,18 @@ class HomeController extends Controller
             $expenses_hourly->where("branch_id", $branch_id);
         }
 
-        // ✅ Correct date filters (>= from and <= to)
+        // Correct date filters (>= from and <= to)
         if($from){
-            $top_product->whereHas("order", function($q) use ($from) { $q->where("created_at", ">=", $from); });
             $top_financial->whereHas("order", function($q) use ($from) { $q->where("created_at", ">=", $from); });
             $top_payment_method->where("created_at", ">=", $from);
             $branch_sales->where("created_at", ">=", $from);
         }
         if($to){
-            $top_product->whereHas("order", function($q) use ($to) { $q->where("created_at", "<=", $to); });
             $top_financial->whereHas("order", function($q) use ($to) { $q->where("created_at", "<=", $to); });
             $top_payment_method->where("created_at", "<=", $to);
             $branch_sales->where("created_at", "<=", $to);
         }
 
-        $top_product = $top_product->get();
         $top_financial = $top_financial->get();
         $top_payment_method = $top_payment_method->get();
         $order_types = $order_types->get();
@@ -935,23 +1035,8 @@ class HomeController extends Controller
             $earning_statistics[$m_name] = floatval($m_items->sum('amount'));
         }
 
-        $top_selling = $this->products
-        ->withCount(['order' => function($query) use ($branch_id, $from, $to, $only_online) {
-            if ($only_online) {
-                $query->where('pos', 0);
-            }
-            if ($branch_id) {
-                $query->where("branch_id", $branch_id);
-            }
-            if ($from) {
-                $query->where("created_at", ">=", $from); 
-            }
-            if ($to) {
-                $query->where("created_at", "<=", $to);
-            }
-        }]) 
-        ->get();
-        $top_selling = $top_selling->sortByDesc("order_count")->values();
+        // ✅ Uses exact sales logic from product_report
+        $top_selling = $this->getProductSalesFromOrders($from ? $start : null, $to ? $end : null, $branch_id, $only_online, 20);
        
         $today = Carbon::now()->format('l');
         $deals = $this->deals
@@ -972,16 +1057,16 @@ class HomeController extends Controller
         $users = $this->users
         ->withCount(['order' => function($query) use ($branch_id, $from, $to, $only_online) {
             if ($only_online) {
-                $query->where('pos', 0);
+                $query->where('orders.pos', 0);
             }
             if ($branch_id) {
-                $query->where("branch_id", $branch_id);
+                $query->where("orders.branch_id", $branch_id);
             }
             if ($from) {
-                $query->where("created_at", ">=", $from); 
+                $query->where("orders.created_at", ">=", $from); 
             }
             if ($to) {
-                $query->where("created_at", "<=", $to);
+                $query->where("orders.created_at", "<=", $to);
             }
         }]) 
         ->get();
