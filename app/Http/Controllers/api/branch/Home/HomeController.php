@@ -357,71 +357,94 @@ class HomeController extends Controller
         ];
 
         // Hourly Series
-        $order_types_query = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, count(id) as order_count, order_type")
-            ->where('branch_id', $branch_id)
-            ->groupBy("hour")->groupBy("order_type")
-            ->where("created_at", ">=", $start)->where("created_at", "<=", $end)
-            ->where(function($query){
-                $query->where("order_status", "!=", "returned")
-                      ->where("order_status", "!=", "refund")
-                      ->where("is_void", 0);
-            });
-        if ($only_online) $order_types_query->where('pos', 0);
-        $order_types = $order_types_query->get();
+        // Hourly Series (Aligned to 24 hours of the operating period)
+        $orders_hourly_raw = Order::selectRaw("
+            HOUR(created_at) as hour_num,
+            order_type,
+            order_status,
+            payment_status,
+            payment_method_id,
+            is_void,
+            amount,
+            total_discount
+        ")
+        ->where('branch_id', $branch_id)
+        ->where("created_at", ">=", $start)->where("created_at", "<=", $end);
+        if ($only_online) $orders_hourly_raw->where('pos', 0);
+        $orders_period = $orders_hourly_raw->get();
 
-        $sales_hourly_query = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, sum(amount) as total_amount")
-            ->where('branch_id', $branch_id)
-            ->groupBy("hour")
-            ->where("created_at", ">=", $start)->where("created_at", "<=", $end)
-            ->where(function($query){
-                $query->where("order_status", "!=", "returned")
-                      ->where("order_status", "!=", "refund")
-                      ->where("is_void", 0);
-            });
-        if ($only_online) $sales_hourly_query->where('pos', 0);
-        $sales_hourly = $sales_hourly_query->get();
+        $hours_24 = [];
+        for ($h = 0; $h < 24; $h++) {
+            $formatted_label = Carbon::createFromTime($h, 0)->format('h:00 A');
+            $short_label = Carbon::createFromTime($h, 0)->format('h A');
+            $hours_24[$h] = [
+                'hour' => $h,
+                'label' => $formatted_label,
+                'short_label' => $short_label,
+                'orders_count' => 0,
+                'net_sales' => 0.0,
+                'net_payments' => 0.0,
+                'return_amount' => 0.0,
+                'discount_amount' => 0.0,
+                'dine_in' => 0,
+                'delivery' => 0,
+                'takeaway' => 0,
+                'drive_thru' => 0,
+            ];
+        }
 
-        $payments_hourly_query = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, sum(amount) as total_amount")
-            ->where('branch_id', $branch_id)
-            ->groupBy("hour")
-            ->where("created_at", ">=", $start)->where("created_at", "<=", $end)
-            ->where(function($query){
-                $query->where("order_status", "!=", "returned")
-                      ->where("order_status", "!=", "refund")
-                      ->where("is_void", 0);
-            })
-            ->where(function($query){
-                $query->where('payment_status', 'paid')
-                      ->orWhereNotNull('payment_method_id');
-            });
-        if ($only_online) $payments_hourly_query->where('pos', 0);
-        $payments_hourly = $payments_hourly_query->get();
+        foreach ($orders_period as $ord) {
+            $h = intval($ord->hour_num);
+            if (!isset($hours_24[$h])) continue;
 
-        $return_hourly_query = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, sum(amount) as total_amount")
-            ->where('branch_id', $branch_id)
-            ->groupBy("hour")
-            ->where("created_at", ">=", $start)->where("created_at", "<=", $end)
-            ->where(function($query){
-                $query->where("order_status", "returned")
-                      ->orWhere("order_status", "refund")
-                      ->orWhere("is_void", 1);
-            });
-        if ($only_online) $return_hourly_query->where('pos', 0);
-        $return_hourly = $return_hourly_query->get();
+            $amt = floatval($ord->amount ?? 0);
+            $disc = floatval($ord->total_discount ?? 0);
+            $isVoid = (int)($ord->is_void ?? 0) === 1;
+            $status = strtolower(trim($ord->order_status ?? ''));
+            $isReturn = $isVoid || in_array($status, ['returned', 'refund']);
+            $isCanceled = in_array($status, ['canceled', 'faild_to_deliver']);
 
-        $discount_hourly_query = Order::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, sum(total_discount) as total_discount")
-            ->where('branch_id', $branch_id)
-            ->groupBy("hour")
-            ->where("created_at", ">=", $start)->where("created_at", "<=", $end)
-            ->where(function($query){
-                $query->where("order_status", "!=", "returned")
-                      ->where("order_status", "!=", "refund")
-                      ->where("is_void", 0);
-            });
-        if ($only_online) $discount_hourly_query->where('pos', 0);
-        $discount_hourly = $discount_hourly_query->get();
+            if ($isReturn) {
+                $hours_24[$h]['return_amount'] += $amt;
+            } elseif (!$isCanceled) {
+                $hours_24[$h]['orders_count'] += 1;
+                $hours_24[$h]['net_sales'] += $amt;
+                $hours_24[$h]['discount_amount'] += $disc;
 
-        $expenses_hourly = Expense::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H %p') as hour, sum(amount) as total_amount")
+                if ($ord->payment_status === 'paid' || !empty($ord->payment_method_id)) {
+                    $hours_24[$h]['net_payments'] += $amt;
+                }
+
+                $type = strtolower(trim($ord->order_type ?? ''));
+                if ($type === 'dine_in') {
+                    $hours_24[$h]['dine_in'] += 1;
+                } elseif ($type === 'delivery') {
+                    $hours_24[$h]['delivery'] += 1;
+                } elseif (in_array($type, ['takeaway', 'take_away', 'pickup'])) {
+                    $hours_24[$h]['takeaway'] += 1;
+                } elseif (in_array($type, ['drive_thru', 'drive_through'])) {
+                    $hours_24[$h]['drive_thru'] += 1;
+                }
+            }
+        }
+
+        $sales_hourly = [];
+        $payments_hourly = [];
+        $return_hourly = [];
+        $discount_hourly = [];
+        $order_types = [];
+        foreach ($hours_24 as $hData) {
+            $sales_hourly[] = ['hour' => $hData['label'], 'total_amount' => $hData['net_sales']];
+            $payments_hourly[] = ['hour' => $hData['label'], 'total_amount' => $hData['net_payments']];
+            $return_hourly[] = ['hour' => $hData['label'], 'total_amount' => $hData['return_amount']];
+            $discount_hourly[] = ['hour' => $hData['label'], 'total_discount' => $hData['discount_amount']];
+            $order_types[] = ['hour' => $hData['label'], 'order_type' => 'dine_in', 'order_count' => $hData['dine_in']];
+            $order_types[] = ['hour' => $hData['label'], 'order_type' => 'delivery', 'order_count' => $hData['delivery']];
+            $order_types[] = ['hour' => $hData['label'], 'order_type' => 'take_away', 'order_count' => $hData['takeaway']];
+            $order_types[] = ['hour' => $hData['label'], 'order_type' => 'drive_thru', 'order_count' => $hData['drive_thru']];
+        }
+
+        $expenses_hourly = Expense::selectRaw("DATE_FORMAT(created_at, '%h:00 %p') as hour, sum(amount) as total_amount")
             ->where('branch_id', $branch_id)
             ->groupBy("hour")
             ->where("created_at", ">=", $start)->where("created_at", "<=", $end)
@@ -429,6 +452,18 @@ class HomeController extends Controller
 
         // Top Products (uses exact sales logic from product_report)
         $top_product = $this->getProductSalesFromOrders($start, $end, $branch_id, $only_online, 5);
+
+        $top_financial = OrderFinancial::selectRaw("financial_id, sum(amount) as total_amount")
+            ->whereHas("order", function($query) use ($branch_id, $only_online, $start, $end){
+                if ($only_online) $query->where('orders.pos', 0);
+                $query->where("orders.branch_id", $branch_id);
+                $query->where("orders.created_at", ">=", $start)->where("orders.created_at", "<=", $end);
+            })
+            ->groupBy("financial_id")
+            ->with("financials:id,name") 
+            ->orderByDesc("total_amount")
+            ->limit(5)
+            ->get();
 
         $top_payment_method_query = Order::selectRaw("payment_method_id, sum(amount) as total_amount")
             ->whereNotNull("payment_method_id")
@@ -538,7 +573,9 @@ class HomeController extends Controller
                 "earning_statistics" => $earning_statistics,
             ],
             "top_product" => $top_product,
+            "top_financial" => $top_financial,
             "top_payment_method" => $top_payment_method,
+            "hourly_timeline" => array_values($hours_24),
             "branch_sales" => [],
             "order_types" => $order_types,
             "sales_hourly" => $sales_hourly,
