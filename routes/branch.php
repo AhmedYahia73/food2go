@@ -107,7 +107,10 @@ Route::middleware(['auth:sanctum', 'IsBranch'])->group(function(){
     });
     //_______________________________________________________________________________
     Route::controller(HomeController::class)->prefix('home')->group(function(){
+        Route::get('/overview', 'overview');
+        Route::get('/home_data', 'home_data');
         Route::get('/orders_count', 'home_orders_count');
+        Route::get('/online_order', 'home_orders_count');
         Route::get('/', 'home');
     });
     // https://bcknd.food2go.online/branch/home
