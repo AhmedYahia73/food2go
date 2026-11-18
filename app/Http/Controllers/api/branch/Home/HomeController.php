@@ -452,6 +452,9 @@ class HomeController extends Controller
 
         // Top Products (uses exact sales logic from product_report)
         $top_product = $this->getProductSalesFromOrders($start, $end, $branch_id, $only_online, 5);
+        if ($top_product->isEmpty() && !$request->filled('from') && !$request->filled('to')) {
+            $top_product = $this->getProductSalesFromOrders(null, null, $branch_id, $only_online, 5);
+        }
 
         $top_financial = OrderFinancial::selectRaw("financial_id, sum(amount) as total_amount")
             ->whereHas("order", function($query) use ($branch_id, $only_online, $start, $end){
@@ -464,6 +467,18 @@ class HomeController extends Controller
             ->orderByDesc("total_amount")
             ->limit(5)
             ->get();
+        if ($top_financial->isEmpty() && !$request->filled('from') && !$request->filled('to')) {
+            $top_financial = OrderFinancial::selectRaw("financial_id, sum(amount) as total_amount")
+                ->whereHas("order", function($query) use ($branch_id, $only_online){
+                    if ($only_online) $query->where('orders.pos', 0);
+                    $query->where("orders.branch_id", $branch_id);
+                })
+                ->groupBy("financial_id")
+                ->with("financials:id,name") 
+                ->orderByDesc("total_amount")
+                ->limit(5)
+                ->get();
+        }
 
         $top_payment_method_query = Order::selectRaw("payment_method_id, sum(amount) as total_amount")
             ->whereNotNull("payment_method_id")
@@ -480,6 +495,22 @@ class HomeController extends Controller
             ->limit(5);
         if ($only_online) $top_payment_method_query->where('pos', 0);
         $top_payment_method = $top_payment_method_query->get();
+        if ($top_payment_method->isEmpty() && !$request->filled('from') && !$request->filled('to')) {
+            $fb_pm = Order::selectRaw("payment_method_id, sum(amount) as total_amount")
+                ->whereNotNull("payment_method_id")
+                ->where('branch_id', $branch_id)
+                ->where(function($query){
+                    $query->where("order_status", "!=", "returned")
+                          ->where("order_status", "!=", "refund")
+                          ->where("is_void", 0);
+                })
+                ->groupBy("payment_method_id")
+                ->with("payment_method:id,name")
+                ->orderByDesc("total_amount")
+                ->limit(5);
+            if ($only_online) $fb_pm->where('pos', 0);
+            $top_payment_method = $fb_pm->get();
+        }
 
         // Monthly Statistics
         $currentYear = Carbon::now()->year;
@@ -523,6 +554,9 @@ class HomeController extends Controller
 
         // Top Selling (matches product_report) & Customers & Deals
         $top_selling = $this->getProductSalesFromOrders($start, $end, $branch_id, $only_online, 20);
+        if ($top_selling->isEmpty() && !$request->filled('from') && !$request->filled('to')) {
+            $top_selling = $this->getProductSalesFromOrders(null, null, $branch_id, $only_online, 20);
+        }
 
         $today = Carbon::now()->format('l');
         $deals = $this->deals
@@ -540,15 +574,32 @@ class HomeController extends Controller
             })
             ->get();
 
-        $top_customers = $this->users
-            ->withCount(['order' => function($query) use ($branch_id, $start, $end, $only_online) {
+        $top_customers_query = $this->users->query()
+            ->withCount(['order as period_order_count' => function($query) use ($branch_id, $start, $end, $only_online) {
                 if ($only_online) $query->where('orders.pos', 0);
                 $query->where("orders.branch_id", $branch_id);
                 $query->where("orders.created_at", ">=", $start)->where("orders.created_at", "<=", $end);
             }])
-            ->get()
-            ->sortByDesc('order_count')
-            ->values();
+            ->withCount(['order as total_order_count' => function($query) use ($branch_id, $only_online) {
+                if ($only_online) $query->where('orders.pos', 0);
+                $query->where("orders.branch_id", $branch_id);
+            }]);
+
+        $users_list = $top_customers_query->get();
+        $hasPeriodOrders = $users_list->sum('period_order_count') > 0;
+
+        $top_customers = $users_list->map(function($u) use ($hasPeriodOrders) {
+            $count = $hasPeriodOrders ? (int)$u->period_order_count : (int)$u->total_order_count;
+            $u->orders_count = $count;
+            $u->order_count = $count;
+            return $u;
+        })
+        ->filter(function($u) {
+            return ($u->orders_count ?? 0) > 0;
+        })
+        ->sortByDesc('orders_count')
+        ->take(10)
+        ->values();
 
         return response()->json([
             "kpis" => [
