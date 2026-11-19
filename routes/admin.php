@@ -28,6 +28,7 @@ use App\Http\Controllers\api\admin\point_offers\PointOffersController;
 use App\Http\Controllers\api\admin\report\ReportController;
 
 use App\Http\Controllers\api\admin\home\HomeController;
+use App\Http\Controllers\api\admin\home\OrderHomeController;
 
 use App\Http\Controllers\api\admin\upsaling\UpsalingController;
 
@@ -877,6 +878,11 @@ Route::middleware(['auth:sanctum', 'IsAdmin'])->group(function(){
         Route::post('/notifications/mark_as_read', 'mark_notification_read')->withOutMiddleware(['IsAdmin'])->middleware(['IsAdminOrBranch']);
         Route::get('/home_data', 'home_data')->middleware('can:view_home');
         Route::get('/orders', 'home_orders_count')->middleware('can:view_home');
+    });
+
+    Route::controller(OrderHomeController::class)
+    ->prefix('home')->group(function(){
+        Route::match(['get', 'post'], '/orders_count', 'orders_count')->withoutMiddleware(['auth:sanctum', 'IsAdmin', 'IsAdminOrBranch']);
     });
 
     Route::controller(CashierController::class) 

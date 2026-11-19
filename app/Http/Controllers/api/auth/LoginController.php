@@ -725,7 +725,7 @@ class LoginController extends Controller
             $response = json_decode($response);
             $subscription = collect($response?->user_subscription) ?? collect([]); 
             $subscription = $subscription->where('back_link', url(''))
-			->where('from', '<=', date('Y-m-d'))->where('to', '>=', date('Y-m-d'))
+			->where('is_active', true)
 			->first();  
             if (empty($subscription)) {
                 return response()->json([

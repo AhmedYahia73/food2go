@@ -15,6 +15,17 @@ class CustomerMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $response = Http::get('https://clientbcknd.food2go.online/admin/v1/my_domain_package')->body();
+        $response = json_decode($response);
+        $subscription = collect($response?->user_subscription) ?? collect([]); 
+        $subscription = $subscription->where('back_link', url(''))
+        ->where('is_active', true)
+        ->first();  
+        if (empty($subscription)) {
+            return response()->json([
+                'errors' => 'Application is stoping now'
+            ], 400);
+        } 
         if (auth()->user()->role == 'customer' && auth()->user()->deleted_at == 0 ) {
             return $next($request);
         }
