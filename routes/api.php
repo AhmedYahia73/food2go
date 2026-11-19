@@ -69,7 +69,6 @@ Route::prefix('customer_login')->controller(BusinessSetupController::class)
     Route::get('/', 'customer_login');
 });
 
-
 Route::prefix('user/auth')->group(function(){
     Route::controller(LoginController::class)->group(function(){
         Route::get('users', 'index');
@@ -82,12 +81,9 @@ Route::prefix('user/auth')->group(function(){
     });
 });
 
-
-
 use App\Http\Controllers\api\SyncController;
 Route::post('/sync/push', [SyncController::class, 'push']);
 Route::get('/sync/pull', [SyncController::class, 'pull']);
 Route::get('/sync/bootstrap/{table}', [SyncController::class, 'bootstrap']);
-
 
 Route::get('/debug-product-149', function() { return \App\Models\Product::with('variations.options', 'tax_obj', 'taxes')->find(149); });

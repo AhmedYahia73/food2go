@@ -725,8 +725,8 @@ class OrderController extends Controller
     }
 
     public function orders_count(Request $request){
-    //     // https://bcknd.food2go.online/admin/order
-         // https://bcknd.food2go.online/admin/order
+        // https://bcknd.food2go.online/admin/order
+        // https://bcknd.food2go.online/admin/order
         $validator = Validator::make($request->all(), [ 
             "date" => "date",
             "date_to" => "date",

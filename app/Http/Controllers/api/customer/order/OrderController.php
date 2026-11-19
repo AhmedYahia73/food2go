@@ -14,6 +14,7 @@ use App\Models\NewNotification;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Models\Product;
+use App\Models\Addon;
 use App\Models\DeviceToken;
 use App\Models\ServiceFees;
 
@@ -68,32 +69,29 @@ class OrderController extends Controller
         ->with('delivery', 'payment_method', 'address.zone', 'branch:id,name')
         ->get()
         ->map(function($item){ 
-            $total_variation = collect($item->order_details);  
-            $addons = collect($total_variation->pluck('addons'))->flatten(1); 
-            $addons = collect($addons)->map(function ($item) {
-                $addon = $item->addon;
-                $addon->count = (int)$item->count;
-                return $addon;
-            });
+            $addons = $this->extractAddons($item->order_details);
+            $total_variation = collect($item->order_details ?? []);  
             $total_variation = collect($total_variation->pluck('variations'));
             if ($total_variation->count() > 0) {
                 $total_variation = collect($total_variation[0])->pluck('options')->flatten(1);
             } 
-            $total_product = collect($item->order_details);
+            $total_product = collect($item->order_details ?? []);
             $total_product = collect($total_product?->pluck('product')); 
             $total = 0;
             $products = [];
             if ($total_product->count() > 0) {
                 $total_product = collect($total_product);
                 foreach ($total_product as $value) {
+                    if (!is_iterable($value)) continue;
                     foreach ($value as $element) {  
-                        $product = $element->product; 
+                        if (!isset($element->product) || empty($element->product)) continue;
+                        $product = clone $element->product; 
                         unset($product->addons);
                         $total = ($product->price + $total_variation
                         ->where('product_id', $product->id)
-                        ->sum('price')) * $element->count;
+                        ->sum('price')) * ($element->count ?? 1);
                         $product->total_product = $total;
-                        $product->count = $value[0]->count;
+                        $product->count = $value[0]->count ?? 1;
                         $product->note = isset($element?->notes) ? $element?->notes :  null;
                         $products[] = $product;
                     }
@@ -143,32 +141,29 @@ class OrderController extends Controller
         ->where('deleted_at', 0)
         ->get()
         ->map(function($item){
-            $total_variation = collect($item->order_details);  
-            $addons = collect($total_variation->pluck('addons'))->flatten(1); 
-            $addons = collect($addons)->map(function ($item) {
-                $addon = $item->addon;
-                $addon->count = (int)$item->count;
-                return $addon;
-            });
+            $addons = $this->extractAddons($item->order_details);
+            $total_variation = collect($item->order_details ?? []);  
             $total_variation = collect($total_variation->pluck('variations'));
             if ($total_variation->count() > 0) {
                 $total_variation = collect($total_variation)->pluck('options')->flatten(1);
             } 
-            $total_product = collect($item->order_details);
+            $total_product = collect($item->order_details ?? []);
             $total_product = collect($total_product?->pluck('product')); 
             $total = 0;
             $products = [];
             if ($total_product->count() > 0) {
                 $total_product = collect($total_product);
                 foreach ($total_product as $value) {
+                    if (!is_iterable($value)) continue;
                     foreach ($value as $element) {  
-                        $product = $element->product; 
+                        if (!isset($element->product) || empty($element->product)) continue;
+                        $product = clone $element->product; 
                         unset($product->addons);
                         $total = ($product->price + $total_variation
                         ->where('product_id', $product->id)
-                        ->sum('price')) * $element->count;
+                        ->sum('price')) * ($element->count ?? 1);
                         $product->total_product = $total;
-                        $product->count = $value[0]->count;
+                        $product->count = $value[0]->count ?? 1;
                         $product->note = isset($element?->notes) ? $element?->notes :  null;
                         $products[] = $product;
                     }
@@ -217,29 +212,31 @@ class OrderController extends Controller
         ->with('delivery', 'payment_method', 'address.zone', 'branch:id,name')
         ->paginate(15)
         ->through(function($item){ 
-            $total_variation = collect($item->order_details);  
-            $addons = collect($total_variation->pluck('addons'))->flatten(1); 
-            $addons = collect($addons)->map(function ($item) {
-                $addon = $item->addon;
-                $addon->count = (int)$item->count;
-                return $addon;
-            });
+            $addons = $this->extractAddons($item->order_details);
             $products = [];
-            foreach ($item->order_details as $detail) {
+            foreach ($item->order_details ?? [] as $detail) {
                 $detail_variations = collect(isset($detail->variations) ? $detail->variations : []);
                 if ($detail_variations->count() > 0) {
                     $detail_variations = $detail_variations->pluck('options')->flatten(1);
+                } else {
+                    $detail_variations = collect([]);
                 }
                 
                 $detail_products = collect(isset($detail->product) ? $detail->product : []);
                 foreach ($detail_products as $element) {  
-                    $product = $element->product; 
+                    if (!isset($element->product) || empty($element->product)) {
+                        continue;
+                    }
+                    $product = clone $element->product; 
                     unset($product->addons);
-                    $total = ($product->price + $detail_variations
-                    ->where('product_id', $product->id)
-                    ->sum('price')) * $element->count;
+                    $productPrice = $product->final_price ?? $product->price ?? 0;
+                    $variationPrice = $detail_variations->where('product_id', $product->id)->sum(function($item) {
+                        return data_get($item, 'final_price', data_get($item, 'price', 0));
+                    });
+                    $count = (int)($element->count ?? 1);
+                    $total = ($productPrice + $variationPrice) * $count;
                     $product->total_product = $total;
-                    $product->count = $element->count;
+                    $product->count = $count;
                     $product->note = isset($element->notes) ? $element->notes : null;
                     $options = $detail_variations
                     ->where('product_id', $product->id)
@@ -292,16 +289,10 @@ class OrderController extends Controller
         ->where('deleted_at', 0)
         ->paginate(15)
         ->through(function($item){
-            $total_variation = collect($item->order_details);  
-            $addons = collect($total_variation->pluck('addons'))->flatten(1); 
-            $addons = collect($addons)->map(function ($item) {
-                $addon = $item->addon;
-                $addon->count = (int)$item->count;
-                return $addon;
-            });
+            $addons = $this->extractAddons($item->order_details);
             $total_variation = collect([]);
             $products = [];
-            foreach ($item->order_details as $detail) {
+            foreach ($item->order_details ?? [] as $detail) {
                 $detail_variations_raw = collect(isset($detail->variations) ? $detail->variations : []);
                 if ($detail_variations_raw->count() > 0) {
                     $total_variation = $total_variation->merge($detail_variations_raw);
@@ -312,15 +303,19 @@ class OrderController extends Controller
                 
                 $detail_products = collect(isset($detail->product) ? $detail->product : []);
                 foreach ($detail_products as $element) {  
-                    $product = $element->product; 
+                    if (!isset($element->product) || empty($element->product)) {
+                        continue;
+                    }
+                    $product = clone $element->product; 
                     unset($product->addons);
                     $productPrice = $product->final_price ?? $product->price ?? 0;
                     $variationPrice = $detail_variations->where('product_id', $product->id)->sum(function($item) {
                         return data_get($item, 'final_price', data_get($item, 'price', 0));
                     });
-                    $total = ($productPrice + $variationPrice) * $element->count;
+                    $count = (int)($element->count ?? 1);
+                    $total = ($productPrice + $variationPrice) * $count;
                     $product->total_product = $total;
-                    $product->count = $element->count;
+                    $product->count = $count;
                     $product->note = isset($element->notes) ? $element->notes : null;
                     $options = $detail_variations
                     ->where('product_id', $product->id)
@@ -358,6 +353,67 @@ class OrderController extends Controller
         return response()->json([
             'orders' => $orders
         ]);
+    }
+
+    private function extractAddons($orderDetails)
+    {
+        $total_variation = collect($orderDetails ?? []);
+        $addons = collect($total_variation->pluck('addons'))->filter()->flatten(1)->filter();
+
+        return $addons->map(function ($item) {
+            if (empty($item)) {
+                return null;
+            }
+
+            if (is_array($item)) {
+                if (isset($item['addon']) && !empty($item['addon'])) {
+                    $addon = is_array($item['addon']) ? (object)$item['addon'] : $item['addon'];
+                    if (is_object($addon)) {
+                        $addon->count = (int)($item['count'] ?? 1);
+                        return $addon;
+                    }
+                }
+                if (isset($item['addon_id']) && !isset($item['name']) && class_exists(Addon::class)) {
+                    $addonRecord = Addon::find($item['addon_id']);
+                    if ($addonRecord) {
+                        $addonRecord->count = (int)($item['count'] ?? 1);
+                        return $addonRecord;
+                    }
+                }
+                $addon = (object)$item;
+                if (!isset($addon->id) && !isset($addon->name) && !isset($addon->addon_id)) {
+                    return null;
+                }
+                $addon->count = (int)($item['count'] ?? 1);
+                return $addon;
+            }
+
+            if (is_object($item)) {
+                if (isset($item->addon) && !empty($item->addon)) {
+                    $addon = is_array($item->addon) ? (object)$item->addon : clone $item->addon;
+                    if (is_object($addon)) {
+                        $addon->count = (int)($item->count ?? 1);
+                        return $addon;
+                    }
+                }
+                if (isset($item->addon_id) && !isset($item->name) && class_exists(Addon::class)) {
+                    $addonRecord = Addon::find($item->addon_id);
+                    if ($addonRecord) {
+                        $addonRecord->count = (int)($item->count ?? 1);
+                        return $addonRecord;
+                    }
+                }
+                $addon = clone $item;
+                unset($addon->addon);
+                if (!isset($addon->id) && !isset($addon->name) && !isset($addon->addon_id)) {
+                    return null;
+                }
+                $addon->count = (int)($item->count ?? 1);
+                return $addon;
+            }
+
+            return null;
+        })->filter()->values();
     }
 
     public function evaulate_order(Request $request, $id){
