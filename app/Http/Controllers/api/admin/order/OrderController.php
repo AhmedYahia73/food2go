@@ -1974,7 +1974,10 @@ class OrderController extends Controller
             'schedule:id,name', 
             'delivery:id,f_name,l_name'
         ])
-        ->where("status", "!=", 2) 
+        ->where(function($query) {
+            $query->where('status', '!=', 2)
+                  ->orWhereNull('status');
+        }) 
         ->orderByDesc("created_at") // يفضل دائماً ترتيب الطلبات من الأحدث للأقدم
         ->get(); 
   
